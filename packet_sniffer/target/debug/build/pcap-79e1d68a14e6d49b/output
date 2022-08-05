@@ -1,0 +1,7 @@
+cargo:rerun-if-env-changed=LIBPCAP_LIBDIR
+cargo:rerun-if-env-changed=LIBPCAP_VER
+cargo:rustc-cfg=libpcap_1_2_1
+cargo:rustc-cfg=libpcap_1_5_0
+cargo:rustc-cfg=libpcap_1_7_2
+cargo:rustc-cfg=libpcap_1_9_0
+cargo:rustc-cfg=libpcap_1_9_1
