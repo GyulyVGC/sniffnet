@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::ops::Add;
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Device, Capture};
-use crate::address_port::AddressPortPair;
+use crate::address_port::{AddressPort};
 use crate::report_info::ReportInfo;
 
 fn main() {
@@ -20,7 +20,7 @@ fn main() {
         .promisc(true)
         .open().unwrap();
     
-    let mut map:HashMap<AddressPortPair,ReportInfo> = HashMap::new();
+    let mut map:HashMap<AddressPort,ReportInfo> = HashMap::new();
 
     while let Ok(packet) = cap.next() {
         match PacketHeaders::from_ethernet_slice(&packet) {
@@ -80,8 +80,8 @@ fn main() {
                 println!("ports: {:?} {:?}", port1, port2);
                 println!("ip payload length: {:?}", transmitted_bytes);
                 
-                let key1: AddressPortPair = AddressPortPair::new(address1,port1);
-                let key2: AddressPortPair = AddressPortPair::new(address2,port2);
+                let key1: AddressPort = AddressPort::new(address1,port1);
+                let key2: AddressPort = AddressPort::new(address2,port2);
                 
                 map.insert(key1,ReportInfo::new());
                 map.insert(key2,ReportInfo::new());
