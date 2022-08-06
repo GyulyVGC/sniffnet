@@ -2,8 +2,12 @@ mod address_port;
 mod report_info;
 
 use std::borrow::BorrowMut;
+use std::collections::HashMap;
+use std::ops::Add;
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Device, Capture};
+use crate::address_port::AddressPortPair;
+use crate::report_info::ReportInfo;
 
 fn main() {
 
@@ -15,6 +19,8 @@ fn main() {
     let mut cap = Capture::from_device(device).unwrap()
         .promisc(true)
         .open().unwrap();
+    
+    let mut map:HashMap<AddressPortPair,ReportInfo> = HashMap::new();
 
     while let Ok(packet) = cap.next() {
         match PacketHeaders::from_ethernet_slice(&packet) {
@@ -73,6 +79,13 @@ fn main() {
                 println!("addresses: {:?} {:?}", address1, address2);
                 println!("ports: {:?} {:?}", port1, port2);
                 println!("ip payload length: {:?}", transmitted_bytes);
+                
+                let key1: AddressPortPair = AddressPortPair::new(address1,port1);
+                let key2: AddressPortPair = AddressPortPair::new(address2,port2);
+                
+                map.insert(key1,ReportInfo::new());
+                map.insert(key2,ReportInfo::new());
+                println!("map: {:?}",map);
                 println!("----------------------------------");
 
             }
