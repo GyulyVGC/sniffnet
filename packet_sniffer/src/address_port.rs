@@ -14,6 +14,7 @@ impl AddressPort {
                 port1,
         }
     }
-
+    pub fn get_ip(&self) -> String { address1 }
+    pub fn get_port(&self) -> u16 { port1 }
 }
 
