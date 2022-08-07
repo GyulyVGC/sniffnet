@@ -8,13 +8,14 @@ use std::ops::Add;
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Device, Capture};
 use std::fs::File;
+use std::io::Write;
 use crate::address_port::{AddressPort};
 use crate::report_info::{ReportInfo, TransProtocol};
 
 fn main() {
 
     let device = Device::lookup().unwrap();
-    let output = File::create("report.txt")?;
+    let mut output = File::create("report.txt").unwrap();
     println!("{:?}", device);
 
     println!("Waiting for packets........");
@@ -34,7 +35,7 @@ fn main() {
                 let mut address2 = String::new();
                 let mut port1= 0;
                 let mut port2= 0;
-                let mut transmitted_bytes: u32;
+                let transmitted_bytes: u32;
                 let mut protocol = TransProtocol::Other;
 
                 match value.ip.unwrap() {
@@ -81,13 +82,13 @@ fn main() {
                     TransportHeader::Icmpv6(_) => {}
                 }
 
-                println!("----------------------------------");
+                //println!("----------------------------------");
                 //println!("addresses: {:?} {:?}", address1, address2);
                 //println!("ports: {:?} {:?}", port1, port2);
                 //println!("ip payload length: {:?}", transmitted_bytes);
                 
                 let key1: AddressPort = AddressPort::new(address1,port1);
-                //let key2: AddressPort = AddressPort::new(address2,port2);
+                let key2: AddressPort = AddressPort::new(address2,port2);
                 
                 map.entry(key1).and_modify(|info| { info.transmitted_bytes += transmitted_bytes; // TODO: Timestamp
                                                                     info.trans_protocols.insert(protocol); }
@@ -98,12 +99,11 @@ fn main() {
                     ).or_insert(ReportInfo {transmitted_bytes: 0, initial_timestamp: "".to_string(), final_timestamp: "".to_string(), trans_protocols: HashSet::from([protocol])});
 
                 for (key, val) in map.iter() {
-                    write!(output, "Address: {}:{}\n{}", key.get_ip(), key.get_port(), val).expect("File output error");
+                    write!(output, "Address: {}:{}\n{}\n", key.address1, key.port1, val).expect("File output error");
                 }
-                println!("----------------------------------");
+                write!(output, "----------------------------------\n").expect("File output error");
 
             }
         }
     }
-
 }

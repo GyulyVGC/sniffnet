@@ -27,18 +27,18 @@ impl fmt::Display for ReportInfo {
         let mut multiple = "".to_string();
         let mut n = self.transmitted_bytes as f32;
 
-        match transmitted_bytes {
-            0 .. 1000 => {},
-            1000 .. 1000000 => {n /= 1000; multiple.push('k'); },
-            1000000 .. 1000000000 => {n /= 1000000; multiple.push('M');},
-            _ => {n /= 1000000000; multiple.push('G'); }
+        match self.transmitted_bytes {
+            0..=1000 => {},
+            1001..=1000000 => {n /= 1000 as f32; multiple.push('k'); },
+            1000001..=1000000000 => {n /= 1000000 as f32; multiple.push('M');},
+            _ => {n /= 1000000000 as f32; multiple.push('G'); }
         }
         write!(f, "Transmitted: {:.2} {}B\n\
                     Initial Timestamp: {}\n\
                     Final Timestamp: {}\n\
-                    trans_protocols: {}\n", n, multiple, self.initial_timestamp, self.final_timestamp, self.trans_protocols)
+                    trans_protocols: \n", n, multiple, self.initial_timestamp, self.final_timestamp)
     }
 }
 
-#[derive(Display, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransProtocol { Other, TCP, UDP, }
