@@ -1,0 +1,381 @@
+Packets sniffed from adapter 'en0'
+
+Considering port numbers from 0 to 65535
+
+Address: 172.20.10.1:61755
+	Transmitted data
+		Transmitted Bytes: 20.00 B
+		Transmitted packets: 1
+	Received data
+		Received Bytes: 32.00 B
+		Received packets: 1
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 74.125.99.135:443
+	Transmitted data
+		Transmitted Bytes: 6.02 kB
+		Transmitted packets: 8
+	Received data
+		Received Bytes: 1.32 kB
+		Received packets: 9
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62723
+	Transmitted data
+		Transmitted Bytes: 1.32 kB
+		Transmitted packets: 9
+	Received data
+		Received Bytes: 6.02 kB
+		Received packets: 8
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 17.248.145.205:443
+	Transmitted data
+		Transmitted Bytes: 216.00 B
+		Transmitted packets: 6
+	Received data
+		Received Bytes: 228.00 B
+		Received packets: 6
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62711
+	Transmitted data
+		Transmitted Bytes: 201.00 B
+		Transmitted packets: 4
+	Received data
+		Received Bytes: 121.00 B
+		Received packets: 3
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:56805
+	Transmitted data
+		Transmitted Bytes: 118.00 B
+		Transmitted packets: 2
+	Received data
+		Received Bytes: 105.00 B
+		Received packets: 1
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:49152
+	Transmitted data
+		Transmitted Bytes: 32.00 B
+		Transmitted packets: 1
+	Received data
+		Received Bytes: 20.00 B
+		Received packets: 1
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 255.2.0.0.0.0.0.0.0.0.0.0.0.0.0.251:5353
+	Transmitted data
+		Transmitted Bytes: 0.00 B
+		Transmitted packets: 0
+	Received data
+		Received Bytes: 15.51 kB
+		Received packets: 59
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:62277
+	Transmitted data
+		Transmitted Bytes: 490.00 B
+		Transmitted packets: 10
+	Received data
+		Received Bytes: 364.00 B
+		Received packets: 8
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:62722
+	Transmitted data
+		Transmitted Bytes: 228.00 B
+		Transmitted packets: 6
+	Received data
+		Received Bytes: 216.00 B
+		Received packets: 6
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62525
+	Transmitted data
+		Transmitted Bytes: 589.00 B
+		Transmitted packets: 4
+	Received data
+		Received Bytes: 453.00 B
+		Received packets: 3
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62250
+	Transmitted data
+		Transmitted Bytes: 118.00 B
+		Transmitted packets: 2
+	Received data
+		Received Bytes: 146.00 B
+		Received packets: 1
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 254.128.0.0.0.0.0.0.228.154.220.255.254.156.159.100:5353
+	Transmitted data
+		Transmitted Bytes: 14.54 kB
+		Transmitted packets: 54
+	Received data
+		Received Bytes: 0.00 B
+		Received packets: 0
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.1:5353
+	Transmitted data
+		Transmitted Bytes: 14.73 kB
+		Transmitted packets: 55
+	Received data
+		Received Bytes: 1.35 kB
+		Received packets: 4
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 34.237.73.95:443
+	Transmitted data
+		Transmitted Bytes: 453.00 B
+		Transmitted packets: 3
+	Received data
+		Received Bytes: 589.00 B
+		Received packets: 4
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 142.250.184.78:443
+	Transmitted data
+		Transmitted Bytes: 392.00 B
+		Transmitted packets: 10
+	Received data
+		Received Bytes: 612.00 B
+		Received packets: 12
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 254.128.0.0.0.0.0.0.228.154.220.255.254.156.159.100:0
+	Transmitted data
+		Transmitted Bytes: 72.00 B
+		Transmitted packets: 2
+	Received data
+		Received Bytes: 0.00 B
+		Received packets: 0
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: Other
+
+
+Address: 140.82.112.26:443
+	Transmitted data
+		Transmitted Bytes: 121.00 B
+		Transmitted packets: 3
+	Received data
+		Received Bytes: 201.00 B
+		Received packets: 4
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:54393
+	Transmitted data
+		Transmitted Bytes: 57.00 B
+		Transmitted packets: 1
+	Received data
+		Received Bytes: 114.00 B
+		Received packets: 1
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:5353
+	Transmitted data
+		Transmitted Bytes: 2.32 kB
+		Transmitted packets: 9
+	Received data
+		Received Bytes: 0.00 B
+		Received packets: 0
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:62721
+	Transmitted data
+		Transmitted Bytes: 306.00 B
+		Transmitted packets: 6
+	Received data
+		Received Bytes: 196.00 B
+		Received packets: 5
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62713
+	Transmitted data
+		Transmitted Bytes: 20.58 kB
+		Transmitted packets: 44
+	Received data
+		Received Bytes: 39.83 kB
+		Received packets: 38
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:62720
+	Transmitted data
+		Transmitted Bytes: 306.00 B
+		Transmitted packets: 6
+	Received data
+		Received Bytes: 196.00 B
+		Received packets: 5
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 224.0.0.251:5353
+	Transmitted data
+		Transmitted Bytes: 0.00 B
+		Transmitted packets: 0
+	Received data
+		Received Bytes: 15.70 kB
+		Received packets: 60
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 254.128.0.0.0.0.0.0.16.193.229.86.100.125.178.4:5353
+	Transmitted data
+		Transmitted Bytes: 970.00 B
+		Transmitted packets: 5
+	Received data
+		Received Bytes: 0.00 B
+		Received packets: 0
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 142.250.180.174:443
+	Transmitted data
+		Transmitted Bytes: 39.83 kB
+		Transmitted packets: 38
+	Received data
+		Received Bytes: 20.58 kB
+		Received packets: 44
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: TCP
+
+
+Address: 255.2.0.0.0.0.0.0.0.0.0.0.0.0.0.22:0
+	Transmitted data
+		Transmitted Bytes: 0.00 B
+		Transmitted packets: 0
+	Received data
+		Received Bytes: 72.00 B
+		Received packets: 2
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: Other
+
+
+Address: 172.224.98.9:443
+	Transmitted data
+		Transmitted Bytes: 364.00 B
+		Transmitted packets: 8
+	Received data
+		Received Bytes: 490.00 B
+		Received packets: 10
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.1:53
+	Transmitted data
+		Transmitted Bytes: 365.00 B
+		Transmitted packets: 3
+	Received data
+		Received Bytes: 293.00 B
+		Received packets: 5
+	Timestamps
+		Initial Timestamp: 08/08/2022 12:19:40
+		Final Timestamp: 08/08/2022 12:19:40
+	Transport layer protocols: UDP
+
+

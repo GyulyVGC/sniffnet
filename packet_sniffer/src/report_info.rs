@@ -33,6 +33,7 @@ impl fmt::Display for ReportInfo {
         let mut multiple_received = "".to_string();
         let mut n = self.transmitted_bytes as f32;
         let mut m = self.received_bytes as f32;
+        let transport_level_protocols;
 
         match self.transmitted_bytes {
             0..=1000 => {},
@@ -48,6 +49,10 @@ impl fmt::Display for ReportInfo {
             _ => {m /= 1000000000 as f32; multiple_received.push('G'); }
         }
 
+        transport_level_protocols = format!("{:?}", self.trans_protocols)
+            .replace("{", "")
+            .replace("}", "");
+
         write!(f, "\tTransmitted data\n\
                     \t\tTransmitted Bytes: {:.2} {}B\n\
                     \t\tTransmitted packets: {}\n\
@@ -57,10 +62,12 @@ impl fmt::Display for ReportInfo {
                     \tTimestamps\n\
                     \t\tInitial Timestamp: {}\n\
                     \t\tFinal Timestamp: {}\n\
-                    \ttrans_protocols: \n",
+                    \tTransport layer protocols: {}\n",
                n, multiple_transmitted, self.transmitted_packets,
                m, multiple_received, self.received_packets,
-               self.initial_timestamp, self.final_timestamp)
+               self.initial_timestamp, self.final_timestamp,
+               transport_level_protocols
+        )
     }
 }
 
