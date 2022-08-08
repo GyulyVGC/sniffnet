@@ -15,7 +15,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 struct Args {
     /// Name of the network adapter to be inspected, if omitted a default adapter is chosen
-    #[clap(short, long, value_parser, forbid_empty_values = true, default_value = "en0")]
+    #[clap(short, long, value_parser, forbid_empty_values = true, default_value = "default")]
     adapter: String,
 
     /// Name of output file to contain the textual report, if omitted a default file is chosen
@@ -42,28 +42,34 @@ fn main() {
 
     let mut output = File::create(output_file.clone()).unwrap();
 
-    println!("Waiting for packets (sniffing adapter {})........", adapter.clone());
-    println!("Considering port numbers from {} to {}", lowest_port, highest_port);
     println!("Writing {} file........", output_file.clone());
 
-    write!(output, "Packets sniffed from adapter '{}'\n\n", adapter.clone());
-    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port);
-
-    let dev_list = Device::list().expect("Unable to retrieve network adapters list");
     let mut found_device = Device {
         name: "".to_string(),
         desc: None,
         addresses: vec![]
     };
-    for device in dev_list {
-        if device.name == adapter {
-            found_device = device;
-            break;
+    if adapter.eq("default") {
+        found_device = Device::lookup().expect("Error retrieving default network adapter\n");
+    }
+    else {
+        let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
+        for device in dev_list {
+            if device.name == adapter {
+                found_device = device;
+                break;
+            }
+        }
+        if found_device.name.len() == 0 {
+            panic!("Specified network adapter does not exist\n");
         }
     }
-    if found_device.name.len() == 0 {
-        panic!("Specified network adapter does not exist");
-    }
+
+    write!(output,"-----------------------------------------------\n\n");
+    write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
+    write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name);
+    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port);
+    write!(output,"-----------------------------------------------\n\n\n");
 
     let mut cap = Capture::from_device(found_device).unwrap()
         .promisc(true)
