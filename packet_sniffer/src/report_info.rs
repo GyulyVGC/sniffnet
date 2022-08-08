@@ -53,9 +53,9 @@ impl fmt::Display for ReportInfo {
             .replace("{", "")
             .replace("}", "");
 
-        write!(f, "\tTransmitted data\n\
-                    \t\tTransmitted Bytes: {:.2} {}B\n\
-                    \t\tTransmitted packets: {}\n\
+        write!(f, "\tSent data\n\
+                    \t\tSent Bytes: {:.2} {}B\n\
+                    \t\tSent packets: {}\n\
                     \tReceived data\n\
                     \t\tReceived Bytes: {:.2} {}B\n\
                     \t\tReceived packets: {}\n\

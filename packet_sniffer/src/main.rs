@@ -29,6 +29,10 @@ struct Args {
     /// Set the maximum port value to be considered, if omitted there is not ports higher bound
     #[clap(short, long, value_parser, default_value_t = u16::MAX)]
     highest_port: u16,
+
+    /// Set the minimum value of transited packets for an address:port to be printed in the report
+    #[clap(short, long, value_parser, default_value_t = u32::MIN)]
+    minimum_packets: u32,
 }
 
 
@@ -39,6 +43,7 @@ fn main() {
     let output_file: String = args.output_file;
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
+    let min_packets = args.minimum_packets;
 
     let mut output = File::create(output_file.clone()).unwrap();
 
@@ -69,6 +74,9 @@ fn main() {
     write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
     write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name);
     write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port);
+    if min_packets > 1 {
+        write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets);
+    }
     write!(output,"-----------------------------------------------\n\n\n");
 
     let mut cap = Capture::from_device(found_device).unwrap()
@@ -185,6 +193,8 @@ fn main() {
     }
 
     for (key, val) in map.iter() {
-        write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("File output error");
+        if val.transmitted_packets + val.received_packets >= min_packets {
+            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("File output error");
+        }
     }
 }
