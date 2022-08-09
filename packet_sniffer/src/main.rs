@@ -3,6 +3,8 @@ mod report_info;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fmt;
+use std::fmt::Formatter;
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Device, Capture};
 use std::fs::File;
@@ -35,6 +37,13 @@ struct Args {
     minimum_packets: u32,
 }
 
+// impl fmt::Display for Device {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+//         let mut device = String::from(format!("Device: {}\n", self.name));
+//
+//         write!(f, "Device: {}\n\tAddresses: ")
+//     }
+// }
 
 fn main() {
 
@@ -66,6 +75,7 @@ fn main() {
             }
         }
         if found_device.name.len() == 0 {
+            
             panic!("Specified network adapter does not exist\n");
         }
     }
@@ -82,7 +92,7 @@ fn main() {
     let mut cap = Capture::from_device(found_device).unwrap()
         .promisc(true)
         .open().unwrap();
-    
+
     let mut map:HashMap<AddressPort,ReportInfo> = HashMap::new();
 
     let mut num_packets = 0; //dopo 300 pacchetti interrompo la cattura e stampo
@@ -102,8 +112,8 @@ fn main() {
                 let exchanged_bytes: u32;
                 let mut protocol = TransProtocol::Other;
 
-                match value.ip.unwrap() {
-                    IpHeader::Version4(ipv4header, _) => {
+                match value.ip {
+                    Some(IpHeader::Version4(ipv4header, _)) => {
                         address1 = format!("{:?}", ipv4header.source)
                             .replace("[","")
                             .replace("]","")
@@ -116,7 +126,7 @@ fn main() {
                             .replace(" ","");
                         exchanged_bytes = ipv4header.payload_len as u32;
                     }
-                    IpHeader::Version6(ipv6header, _) => {
+                    Some(IpHeader::Version6(ipv6header, _)) => {
                         address1 = format!("{:?}", ipv6header.source)
                             .replace("[", "")
                             .replace("]", "")
@@ -129,6 +139,7 @@ fn main() {
                             .replace(" ", "");
                         exchanged_bytes = ipv6header.payload_length as u32;
                     }
+                    None => {continue;}
                 }
 
                 match value.transport.unwrap() {
@@ -142,10 +153,10 @@ fn main() {
                         protocol = TransProtocol::TCP;
                         port2 = tcpheader.destination_port
                     }
-                    TransportHeader::Icmpv4(_) => {}
-                    TransportHeader::Icmpv6(_) => {}
+                    TransportHeader::Icmpv4(_) => {continue;}
+                    TransportHeader::Icmpv6(_) => {continue;}
                 }
-                
+
                 let key1: AddressPort = AddressPort::new(address1,port1);
                 let key2: AddressPort = AddressPort::new(address2,port2);
 
