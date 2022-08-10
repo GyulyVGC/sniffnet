@@ -35,15 +35,11 @@ struct Args {
     /// Set the minimum value of transited packets for an address:port to be printed in the report
     #[clap(short, long, value_parser, default_value_t = u32::MIN)]
     minimum_packets: u32,
-}
 
-// impl fmt::Display for Device {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-//         let mut device = String::from(format!("Device: {}\n", self.name));
-//
-//         write!(f, "Device: {}\n\tAddresses: ")
-//     }
-// }
+    /// Print list of the available devices
+    #[clap(short, long)]
+    device_list: bool,
+}
 
 fn main() {
 
@@ -54,9 +50,16 @@ fn main() {
     let highest_port = args.highest_port;
     let min_packets = args.minimum_packets;
 
-    let mut output = File::create(output_file.clone()).unwrap();
-
-    println!("Writing {} file........", output_file.clone());
+    if args.device_list == true {
+        for dev in Device::list().unwrap() {
+            print!("Device: {}\n\tAddresses: ", dev.name);
+            for addr in dev.addresses {
+                print!("{:?}\n\t\t   ", addr.addr);
+            }
+            println!("\n");
+        }
+        return;
+    }
 
     let mut found_device = Device {
         name: "".to_string(),
@@ -75,10 +78,14 @@ fn main() {
             }
         }
         if found_device.name.len() == 0 {
-            
-            panic!("Specified network adapter does not exist\n");
+            eprint!("ERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n");
+            return;
         }
     }
+
+    let mut output = File::create(output_file.clone()).unwrap();
+
+    println!("Writing {} file........", output_file.clone());
 
     write!(output,"-----------------------------------------------\n\n");
     write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());

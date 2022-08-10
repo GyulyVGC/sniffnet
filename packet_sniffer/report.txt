@@ -1,83 +1,11 @@
-Address: 255.255.255.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
+-----------------------------------------------
 
-Address: 192.168.56.1:17500
-Transmitted: 226.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
+Report start time: '10/08/2022 17:45:19'
 
-----------------------------------
-Address: 255.255.255.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
+Packets sniffed from adapter '\Device\NPF_{3229A0D7-1903-44F5-80A2-A67E7F4F2620}'
 
-Address: 192.168.56.1:17500
-Transmitted: 452.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
+Considering port numbers from 0 to 65535
 
-----------------------------------
-Address: 255.255.255.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
+-----------------------------------------------
 
-Address: 192.168.56.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
 
-Address: 192.168.56.1:17500
-Transmitted: 678.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-----------------------------------
-Address: 255.255.255.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-Address: 192.168.56.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-Address: 192.168.56.1:17500
-Transmitted: 904.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-----------------------------------
-Address: 255.255.255.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-Address: 192.168.56.255:17500
-Transmitted: 0.00 B
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-Address: 192.168.56.1:17500
-Transmitted: 1.13 kB
-Initial Timestamp: 
-Final Timestamp: 
-trans_protocols: 
-
-----------------------------------
