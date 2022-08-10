@@ -210,9 +210,13 @@ fn main() {
         }
     }
 
-    for (key, val) in map.iter() {
+    let mut sorted_vec: Vec<((&AddressPort, &ReportInfo))> = map.iter().collect();
+    sorted_vec.sort_by(|&(_, a), &(_, b)|
+        (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+    for (key, val) in sorted_vec.iter() {
         if val.transmitted_packets + val.received_packets >= min_packets {
             write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("File output error");
         }
     }
+
 }

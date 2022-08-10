@@ -1,11 +1,130 @@
 -----------------------------------------------
 
-Report start time: '10/08/2022 17:45:19'
+Report start time: '10/08/2022 21:45:51'
 
-Packets sniffed from adapter '\Device\NPF_{3229A0D7-1903-44F5-80A2-A67E7F4F2620}'
+Packets sniffed from adapter 'en0'
 
 Considering port numbers from 0 to 65535
 
+Considering only addresses featured by more than 10 packets
+
 -----------------------------------------------
+
+
+Address: 192.230.83.63:443
+	Sent data
+		Sent Bytes: 127.80 kB
+		Sent packets: 90
+	Received data
+		Received Bytes: 7.70 kB
+		Received packets: 102
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:58030
+	Sent data
+		Sent Bytes: 7.70 kB
+		Sent packets: 102
+	Received data
+		Received Bytes: 127.80 kB
+		Received packets: 90
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:58026
+	Sent data
+		Sent Bytes: 1.41 kB
+		Sent packets: 21
+	Received data
+		Received Bytes: 23.47 kB
+		Received packets: 20
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 151.101.193.69:443
+	Sent data
+		Sent Bytes: 23.47 kB
+		Sent packets: 20
+	Received data
+		Received Bytes: 1.41 kB
+		Received packets: 21
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.1:53
+	Sent data
+		Sent Bytes: 1.16 kB
+		Sent packets: 8
+	Received data
+		Received Bytes: 630.00 B
+		Received packets: 13
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: UDP
+
+
+Address: 204.79.197.204:443
+	Sent data
+		Sent Bytes: 6.04 kB
+		Sent packets: 7
+	Received data
+		Received Bytes: 657.00 B
+		Received packets: 7
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 172.20.10.2:58047
+	Sent data
+		Sent Bytes: 657.00 B
+		Sent packets: 7
+	Received data
+		Received Bytes: 6.04 kB
+		Received packets: 7
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: TCP
+
+
+Address: 172.224.98.11:443
+	Sent data
+		Sent Bytes: 3.62 kB
+		Sent packets: 3
+	Received data
+		Received Bytes: 6.25 kB
+		Received packets: 9
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: UDP
+
+
+Address: 172.20.10.2:49526
+	Sent data
+		Sent Bytes: 6.25 kB
+		Sent packets: 9
+	Received data
+		Received Bytes: 3.62 kB
+		Received packets: 3
+	Timestamps
+		Initial Timestamp: 10/08/2022 21:46:11
+		Final Timestamp: 10/08/2022 21:46:11
+	Transport layer protocols: UDP
 
 
