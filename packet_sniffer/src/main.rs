@@ -85,14 +85,14 @@ fn main() {
 
     println!("Writing {} file........", output_file.clone());
 
-    write!(output,"-----------------------------------------------\n\n").expect("Error writing output error\n");
-    write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string()).expect("Error writing output error\n");
-    write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name).expect("Error writing output error\n");
-    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port).expect("Error writing output error\n");
+    write!(output,"-----------------------------------------------\n\n").expect("Error writing output file\n");
+    write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string()).expect("Error writing output file\n");
+    write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name).expect("Error writing output file\n");
+    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port).expect("Error writing output file\n");
     if min_packets > 1 {
-        write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets).expect("Error writing output error\n");
+        write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets).expect("Error writing output file\n");
     }
-    write!(output,"-----------------------------------------------\n\n\n").expect("Error writing output error\n");
+    write!(output,"-----------------------------------------------\n\n\n").expect("Error writing output file\n");
 
     let mut cap = Capture::from_device(found_device).unwrap()
         .promisc(true)
@@ -213,7 +213,7 @@ fn main() {
         (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
     for (key, val) in sorted_vec.iter() {
         if val.transmitted_packets + val.received_packets >= min_packets {
-            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output error\n");
+            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output file\n");
         }
     }
 
