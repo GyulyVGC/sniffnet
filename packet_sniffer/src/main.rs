@@ -3,8 +3,6 @@ mod report_info;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fmt;
-use std::fmt::Formatter;
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Device, Capture};
 use std::fs::File;
@@ -87,14 +85,14 @@ fn main() {
 
     println!("Writing {} file........", output_file.clone());
 
-    write!(output,"-----------------------------------------------\n\n");
-    write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
-    write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name);
-    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port);
+    write!(output,"-----------------------------------------------\n\n").expect("Error writing output error\n");
+    write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string()).expect("Error writing output error\n");
+    write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name).expect("Error writing output error\n");
+    write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port).expect("Error writing output error\n");
     if min_packets > 1 {
-        write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets);
+        write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets).expect("Error writing output error\n");
     }
-    write!(output,"-----------------------------------------------\n\n\n");
+    write!(output,"-----------------------------------------------\n\n\n").expect("Error writing output error\n");
 
     let mut cap = Capture::from_device(found_device).unwrap()
         .promisc(true)
@@ -114,10 +112,10 @@ fn main() {
 
                 let address1;
                 let address2;
-                let mut port1= 0;
-                let mut port2= 0;
+                let port1;
+                let port2;
                 let exchanged_bytes: u32;
-                let mut protocol = TransProtocol::Other;
+                let protocol;
 
                 match value.ip {
                     Some(IpHeader::Version4(ipv4header, _)) => {
@@ -210,12 +208,12 @@ fn main() {
         }
     }
 
-    let mut sorted_vec: Vec<((&AddressPort, &ReportInfo))> = map.iter().collect();
+    let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
     sorted_vec.sort_by(|&(_, a), &(_, b)|
         (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
     for (key, val) in sorted_vec.iter() {
         if val.transmitted_packets + val.received_packets >= min_packets {
-            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("File output error");
+            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output error\n");
         }
     }
 
