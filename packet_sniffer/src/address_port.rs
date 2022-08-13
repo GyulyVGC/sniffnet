@@ -12,7 +12,5 @@ impl AddressPort {
             port1,
         }
     }
-    //pub fn get_ip(&self) -> &String { &self.address1 }
-    //pub fn get_port(&self) -> u16 { self.port1 }
 }
 

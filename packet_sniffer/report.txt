@@ -4,17 +4,227 @@
 <><>		Packets are sniffed from adapter 'en0'
 <><>
 <><>		Report updates info
-<><>			Report start time: 13/08/2022 15:21:20
-<><>			Report last update: 13/08/2022 15:21:35
-<><>			Report update frequency: every 15 seconds
-<><>			Number of times report was updated: 1
+<><>			Report start time: 13/08/2022 17:36:21
+<><>			Report last update: 13/08/2022 17:37:52
+<><>			Report update frequency: every 7 seconds
+<><>			Number of times report was updated: 13
 <><>
 <><>		Filters
-<><>			Considering only addresses featured by more than 5 packets
-<><>			Considering only port numbers from 1023 to 22
+<><>			Considering only addresses featured by more than 500 packets
+<><>			Considering all port numbers (from 0 to 65535)
 <><>
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
+
+
+Address: 185.126.207.169:8080
+	Sent data
+		Sent Bytes: 297.30 kB
+		Sent packets: 5179
+	Received data
+		Received Bytes: 12.67 MB
+		Received packets: 9428
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:36
+		Final Timestamp: 13/08/2022 17:36:57
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: unable to identify any level 7 protocol
+
+
+Address: 151.99.54.108:443
+	Sent data
+		Sent Bytes: 8.73 MB
+		Sent packets: 5965
+	Received data
+		Received Bytes: 101.85 kB
+		Received packets: 2475
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:22
+		Final Timestamp: 13/08/2022 17:37:01
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:60486
+	Sent data
+		Sent Bytes: 6.46 MB
+		Sent packets: 4400
+	Received data
+		Received Bytes: 80.66 kB
+		Received packets: 1641
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:36
+		Final Timestamp: 13/08/2022 17:36:57
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: unable to identify any level 7 protocol
+
+
+Address: 192.168.1.233:60485
+	Sent data
+		Sent Bytes: 3.65 MB
+		Sent packets: 3084
+	Received data
+		Received Bytes: 114.22 kB
+		Received packets: 2105
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:36
+		Final Timestamp: 13/08/2022 17:36:53
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: unable to identify any level 7 protocol
+
+
+Address: 192.168.1.233:60478
+	Sent data
+		Sent Bytes: 54.55 kB
+		Sent packets: 1349
+	Received data
+		Received Bytes: 4.60 MB
+		Received packets: 3135
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:22
+		Final Timestamp: 13/08/2022 17:36:46
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:49518
+	Sent data
+		Sent Bytes: 371.86 kB
+		Sent packets: 1908
+	Received data
+		Received Bytes: 1.74 MB
+		Received packets: 2294
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:29
+		Final Timestamp: 13/08/2022 17:37:17
+	Protocols
+		Transport layer protocols: UDP
+		Application layer protocols: HTTPS
+
+
+Address: 172.224.58.14:443
+	Sent data
+		Sent Bytes: 1.74 MB
+		Sent packets: 2294
+	Received data
+		Received Bytes: 371.86 kB
+		Received packets: 1908
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:29
+		Final Timestamp: 13/08/2022 17:37:17
+	Protocols
+		Transport layer protocols: UDP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:60479
+	Sent data
+		Sent Bytes: 46.94 kB
+		Sent packets: 1117
+	Received data
+		Received Bytes: 4.14 MB
+		Received packets: 2821
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:53
+		Final Timestamp: 13/08/2022 17:37:01
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: HTTPS
+
+
+Address: 74.125.99.60:443
+	Sent data
+		Sent Bytes: 2.37 MB
+		Sent packets: 2005
+	Received data
+		Received Bytes: 56.84 kB
+		Received packets: 942
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:42
+		Final Timestamp: 13/08/2022 17:36:54
+	Protocols
+		Transport layer protocols: UDP, TCP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:58853
+	Sent data
+		Sent Bytes: 56.75 kB
+		Sent packets: 939
+	Received data
+		Received Bytes: 2.37 MB
+		Received packets: 2003
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:42
+		Final Timestamp: 13/08/2022 17:36:54
+	Protocols
+		Transport layer protocols: UDP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:60487
+	Sent data
+		Sent Bytes: 1.26 MB
+		Sent packets: 877
+	Received data
+		Received Bytes: 36.05 kB
+		Received packets: 690
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:36
+		Final Timestamp: 13/08/2022 17:36:54
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: unable to identify any level 7 protocol
+
+
+Address: 192.168.1.233:60488
+	Sent data
+		Sent Bytes: 1.29 MB
+		Sent packets: 890
+	Received data
+		Received Bytes: 33.62 kB
+		Received packets: 593
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:36:36
+		Final Timestamp: 13/08/2022 17:36:54
+	Protocols
+		Transport layer protocols: TCP
+		Application layer protocols: unable to identify any level 7 protocol
+
+
+Address: 188.114.96.7:443
+	Sent data
+		Sent Bytes: 853.09 kB
+		Sent packets: 901
+	Received data
+		Received Bytes: 121.52 kB
+		Received packets: 446
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:37:02
+		Final Timestamp: 13/08/2022 17:37:17
+	Protocols
+		Transport layer protocols: UDP
+		Application layer protocols: HTTPS
+
+
+Address: 192.168.1.233:55560
+	Sent data
+		Sent Bytes: 70.95 kB
+		Sent packets: 242
+	Received data
+		Received Bytes: 494.17 kB
+		Received packets: 512
+	Timestamps
+		Initial Timestamp: 13/08/2022 17:37:02
+		Final Timestamp: 13/08/2022 17:37:15
+	Protocols
+		Transport layer protocols: UDP
+		Application layer protocols: HTTPS
 
 

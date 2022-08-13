@@ -9,23 +9,8 @@ pub struct ReportInfo {
     pub initial_timestamp: String,
     pub final_timestamp: String,
     pub trans_protocols: HashSet<TransProtocol>,
+    pub app_protocols: HashSet<AppProtocol>,
 }
-
-// impl ReportInfo {
-//
-//     pub fn new () -> Self {
-//         ReportInfo {
-//             transmitted_bytes: 0,
-//             transmitted_packets: 0,
-//             received_bytes: 0,
-//             received_packets: 0,
-//             initial_timestamp: "".to_string(),
-//             final_timestamp: "".to_string(),
-//             trans_protocols: HashSet::new(),
-//         }
-//     }
-//
-// }
 
 impl fmt::Display for ReportInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -34,6 +19,7 @@ impl fmt::Display for ReportInfo {
         let mut n = self.transmitted_bytes as f32;
         let mut m = self.received_bytes as f32;
         let transport_level_protocols;
+        let application_level_protocols;
 
         match self.transmitted_bytes {
             0..=1000 => {},
@@ -53,6 +39,17 @@ impl fmt::Display for ReportInfo {
             .replace("{", "")
             .replace("}", "");
 
+        application_level_protocols = match self.app_protocols.len() {
+            0 => {
+                "unable to identify any level 7 protocol".to_string()
+            }
+            _ => {
+                format!("{:?}", self.app_protocols)
+                    .replace("{", "")
+                    .replace("}", "")
+            }
+        };
+
         write!(f, "\tSent data\n\
                     \t\tSent Bytes: {:.2} {}B\n\
                     \t\tSent packets: {}\n\
@@ -62,14 +59,19 @@ impl fmt::Display for ReportInfo {
                     \tTimestamps\n\
                     \t\tInitial Timestamp: {}\n\
                     \t\tFinal Timestamp: {}\n\
-                    \tTransport layer protocols: {}\n",
+                    \tProtocols\n\
+                    \t\tTransport layer protocols: {}\n\
+                    \t\tApplication layer protocols: {}\n",
                n, multiple_transmitted, self.transmitted_packets,
                m, multiple_received, self.received_packets,
                self.initial_timestamp, self.final_timestamp,
-               transport_level_protocols
+               transport_level_protocols, application_level_protocols
         )
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TransProtocol { TCP, UDP }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AppProtocol { FTP, SSH, Telnet, SMTP, DNS, DHCP, TFTP, HTTP, POP, NTP, NetBIOS, IMAP, SNMP, BGP, LDAP, HTTPS, LDAPS, FTPS }
