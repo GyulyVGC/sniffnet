@@ -72,4 +72,4 @@ impl fmt::Display for ReportInfo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TransProtocol { Other, TCP, UDP, ICMP}
+pub enum TransProtocol { TCP, UDP }
