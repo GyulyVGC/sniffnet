@@ -11,6 +11,9 @@ use crate::address_port::{AddressPort};
 use crate::report_info::{ReportInfo, TransProtocol};
 use chrono::prelude::*;
 use clap::Parser;
+use std::thread;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -34,9 +37,14 @@ struct Args {
     #[clap(short, long, value_parser, default_value_t = u32::MIN)]
     minimum_packets: u32,
 
+    /// Set the interval of time between report updates (seconds)
+    #[clap(short, long, value_parser, default_value_t = 5)]
+    interval: u64,
+
     /// Print list of the available devices
     #[clap(short, long)]
     device_list: bool,
+
 }
 
 fn main() {
@@ -47,17 +55,9 @@ fn main() {
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
     let min_packets = args.minimum_packets;
+    let interval = args.interval;
 
-    if args.device_list == true {
-        for dev in Device::list().unwrap() {
-            print!("Device: {}\n\tAddresses: ", dev.name);
-            for addr in dev.addresses {
-                print!("{:?}\n\t\t   ", addr.addr);
-            }
-            println!("\n");
-        }
-        return;
-    }
+    let mut output = File::create(output_file.clone()).unwrap();
 
     let mut found_device = Device {
         name: "".to_string(),
@@ -70,14 +70,14 @@ fn main() {
     else {
         let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
         for device in dev_list {
-            if device.name == adapter {
+            if device.name == "\\Device\\NPF_{CAECFA4B-21CF-46B8-8394-CA445B227400}" {
                 found_device = device;
                 break;
             }
         }
         if found_device.name.len() == 0 {
-            eprint!("ERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n");
-            return;
+
+            panic!("Specified network adapter does not exist\n");
         }
     }
 
@@ -89,19 +89,39 @@ fn main() {
     write!(output, "Report start time: '{}'\n\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string()).expect("Error writing output file\n");
     write!(output, "Packets sniffed from adapter '{}'\n\n", found_device.name).expect("Error writing output file\n");
     write!(output, "Considering port numbers from {} to {}\n\n", lowest_port, highest_port).expect("Error writing output file\n");
+
     if min_packets > 1 {
         write!(output, "Considering only addresses featured by more than {} packets\n\n", min_packets).expect("Error writing output file\n");
     }
-    write!(output,"-----------------------------------------------\n\n\n").expect("Error writing output file\n");
+
 
     let mut cap = Capture::from_device(found_device).unwrap()
         .promisc(true)
         .open().unwrap();
 
-    let mut map:HashMap<AddressPort,ReportInfo> = HashMap::new();
+    //let mut map:HashMap<AddressPort,ReportInfo> = HashMap::new();
+    let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
+    let mutex_map2 = mutex_map1.clone();
 
-    let mut num_packets = 0; //dopo 300 pacchetti interrompo la cattura e stampo
-    while let Ok(packet) = cap.next() {
+    thread::spawn(move || {
+        while true {
+            thread::sleep(Duration::from_secs(interval));
+            let map = mutex_map2.lock().unwrap();
+            let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
+            sorted_vec.sort_by(|&(_, a), &(_, b)|
+                (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+
+            write!(output,"-----------------------------------------------\n\n\n").expect("Error writing output file\n");
+            for (key, val) in sorted_vec.iter() {
+                if val.transmitted_packets + val.received_packets >= min_packets {
+                    write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output file\n");
+                }
+            }
+            println!("Report updated");
+        }
+    });
+
+    while let packet = cap.next().unwrap() {
 
         let utc: DateTime<Local> = Local::now();
         let now = utc.format("%d/%m/%Y %H:%M:%S").to_string();
@@ -147,26 +167,25 @@ fn main() {
                     None => {continue;}
                 }
 
-                match value.transport.unwrap() {
-                    TransportHeader::Udp(udpheader) => {
+                match value.transport {
+                    Some(TransportHeader::Udp(udpheader)) => {
                         port1 = udpheader.source_port;
                         protocol = TransProtocol::UDP;
                         port2 = udpheader.destination_port
                     }
-                    TransportHeader::Tcp(tcpheader) => {
+                    Some(TransportHeader::Tcp(tcpheader)) => {
                         port1 = tcpheader.source_port;
                         protocol = TransProtocol::TCP;
                         port2 = tcpheader.destination_port
                     }
-                    TransportHeader::Icmpv4(_) => {continue;}
-                    TransportHeader::Icmpv6(_) => {continue;}
+                    _ => {continue;}
                 }
 
                 let key1: AddressPort = AddressPort::new(address1,port1);
                 let key2: AddressPort = AddressPort::new(address2,port2);
 
                 if port1 >= lowest_port && port1 <= highest_port {
-                    map.entry(key1).and_modify(|info| {
+                    mutex_map1.lock().unwrap().entry(key1).and_modify(|info| {
                         info.transmitted_bytes += exchanged_bytes;
                         info.transmitted_packets += 1;
                         info.final_timestamp = now.clone();
@@ -183,7 +202,7 @@ fn main() {
                 }
 
                 if port2 >= lowest_port && port2 <= highest_port {
-                    map.entry(key2).and_modify(|info| {
+                    mutex_map1.lock().unwrap().entry(key2).and_modify(|info| {
                         info.received_bytes += exchanged_bytes;
                         info.received_packets += 1;
                         info.final_timestamp = now.clone();
@@ -201,20 +220,5 @@ fn main() {
 
             }
         }
-
-        num_packets+=1;
-        if num_packets >= 300 {
-            break;
-        }
     }
-
-    let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
-    sorted_vec.sort_by(|&(_, a), &(_, b)|
-        (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
-    for (key, val) in sorted_vec.iter() {
-        if val.transmitted_packets + val.received_packets >= min_packets {
-            write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output file\n");
-        }
-    }
-
 }
