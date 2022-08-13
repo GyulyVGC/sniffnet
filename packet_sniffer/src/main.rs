@@ -57,7 +57,16 @@ fn main() {
     let min_packets = args.minimum_packets;
     let interval = args.interval;
 
-    let mut output = File::create(output_file.clone()).unwrap();
+    if args.device_list == true {
+        for dev in Device::list().unwrap() {
+            print!("Device: {}\n\tAddresses: ", dev.name);
+            for addr in dev.addresses {
+                print!("{:?}\n\t\t   ", addr.addr);
+            }
+            println!("\n");
+        }
+        return;
+    }
 
     let mut found_device = Device {
         name: "".to_string(),
@@ -70,14 +79,14 @@ fn main() {
     else {
         let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
         for device in dev_list {
-            if device.name == "\\Device\\NPF_{CAECFA4B-21CF-46B8-8394-CA445B227400}" {
+            if device.name == adapter {
                 found_device = device;
                 break;
             }
         }
         if found_device.name.len() == 0 {
-
-            panic!("Specified network adapter does not exist\n");
+            eprint!("ERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n");
+            return;
         }
     }
 
