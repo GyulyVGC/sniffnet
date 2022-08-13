@@ -56,29 +56,40 @@ fn main() {
     let min_packets = args.minimum_packets;
     let interval = args.interval;
 
-    if lowest_port > highest_port {
-        eprint!("ERROR: Specified lowest port is greater than specified highest port.\n");
+    if args.device_list == true {
+        print_device_list();
         return;
     }
 
-    if args.device_list == true {
-        print_device_list();
+    if lowest_port > highest_port {
+        eprint!("\n\tERROR: Specified lowest port is greater than specified highest port.\n\n");
+        return;
+    }
+
+    if interval == 0 {
+        eprint!("\n\tERROR: Specified time interval is null.\n\n");
         return;
     }
 
     let found_device = retrieve_device(adapter);
 
     if found_device.name.len() == 0 {
-        eprint!("ERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n");
+        eprint!("\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n\n");
         return;
     }
 
-    let cap = Capture::from_device(found_device.clone()).unwrap()
+    let cap = Capture::from_device(found_device.clone())
+        .expect("Capture initialization error\n")
         .promisc(true)
-        .open().unwrap();
+        .buffer_size(10_000_000)
+        .open()
+        .expect("Capture initialization error\n");
 
     let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
     let mutex_map2 = mutex_map1.clone();
+
+    println!("\n\tParsing packets...");
+    println!("\tUpdating the file '{}' every {} seconds\n", output_file, interval);
 
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets, found_device.name, output_file, mutex_map2);
@@ -137,6 +148,7 @@ fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u6
         write!(output,"{}\n\n\n", cornice_string).expect("Error writing output file\n");
 
         let map = mutex_map.lock().expect("Error acquiring mutex\n");
+
         let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
         sorted_vec.sort_by(|&(_, a), &(_, b)|
             (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
@@ -146,7 +158,7 @@ fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u6
                 write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output file\n");
             }
         }
-        println!("Report updated ({})",times_report_updated);
+        println!("\tReport updated ({})",times_report_updated);
     }
 }
 
@@ -160,7 +172,7 @@ fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: 
                 let now = utc.format("%d/%m/%Y %H:%M:%S").to_string();
 
                 match PacketHeaders::from_ethernet_slice(&packet) {
-                    Err(value) => println!("Err {:?}", value),
+                    Err(_) => {continue;},
                     Ok(value) => {
 
                         let address1;
@@ -200,13 +212,13 @@ fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: 
                                     .replace(" ", "");
                                 exchanged_bytes = ipv6header.payload_length as u32;
                             }
-                            None => {continue;}
+                            _ => {continue;}
                         }
 
                         match value.transport {
-                            Some(TransportHeader::Udp(udpheader)) => {
-                                port1 = udpheader.source_port;
-                                port2 = udpheader.destination_port;
+                            Some(TransportHeader::Udp(udp_header)) => {
+                                port1 = udp_header.source_port;
+                                port2 = udp_header.destination_port;
                                 transport_protocol = TransProtocol::UDP;
                                 application_protocol_1 = from_port_to_application_protocol(port1);
                                 if application_protocol_1.is_some() {
@@ -217,9 +229,9 @@ fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: 
                                     application_protocols.insert(application_protocol_2.unwrap());
                                 }
                             }
-                            Some(TransportHeader::Tcp(tcpheader)) => {
-                                port1 = tcpheader.source_port;
-                                port2 = tcpheader.destination_port;
+                            Some(TransportHeader::Tcp(tcp_header)) => {
+                                port1 = tcp_header.source_port;
+                                port2 = tcp_header.destination_port;
                                 transport_protocol = TransProtocol::TCP;
                                 application_protocol_1 = from_port_to_application_protocol(port1);
                                 if application_protocol_1.is_some() {
@@ -289,7 +301,6 @@ fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: 
                 }
             }
             Err(_) => {
-                println!("Err occurred while parsing .next() packet\n");
                 continue;
             }
         }
@@ -299,13 +310,18 @@ fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: 
 
 
 fn print_device_list() {
+    println!();
     for dev in Device::list().expect("Error retrieving device list\n") {
-        print!("Device: {}\n\tAddresses: ", dev.name);
-        for addr in dev.addresses {
-            print!("{:?}\n\t\t   ", addr.addr);
+        print!("\tDevice: {}\n\t\tAddresses: ", dev.name);
+        if dev.addresses.len() == 0 {
+            println!();
         }
-        println!("\n");
+        for addr in dev.addresses {
+            print!("{:?}\n\t\t\t   ", addr.addr);
+        }
+        println!();
     }
+    println!();
 }
 
 
