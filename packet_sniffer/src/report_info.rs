@@ -71,7 +71,7 @@ impl fmt::Display for ReportInfo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TransProtocol { TCP, UDP }
+pub enum TransProtocol { TCP, UDP, Other }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AppProtocol { FTP, SSH, Telnet, SMTP, DNS, DHCP, TFTP, HTTP, POP,
