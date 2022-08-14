@@ -18,6 +18,10 @@ Authors:
   + [Wrong command line option specification](#wrong-command-line-options-specification)
   + [Permissions errors](#permissions-errors)
   + [Other errors](#other-errors)
+
+- [Concurrency implementation](#concurrency-implementation)
+
+- [External libraries](#external-libraries)
   
  
 ## Introduction
@@ -266,6 +270,9 @@ This may happen in one of the following situations: activation of a pcap ```Capt
 All those exceptional scenarios are managed through calls to the ```expect()``` method, providing textual feedback to the user on the cause of the panic.
   
 The ```unwrap()``` method is used only on ```Option<T>``` values when it's sure they contain ```Some``` value.
+
+
+## Concurrency implementation
 
 
 ## External libraries
