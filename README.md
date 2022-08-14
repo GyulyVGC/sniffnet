@@ -99,6 +99,8 @@ Below you can find the available command line options, the structure of the repo
 
 The first section of the textual report contains an header summarizing different useful informations.
 
+![Screenshot](./img/report_part_1.png)
+
 First of all, it specifies the name of the network adapter analyzed during the sniffing process.
 
 Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, the frequency of updates and the number of times the report was updated (re-written from scratch with updated data).
@@ -112,6 +114,8 @@ Note that an application layer protocol filter is not provided since the user ca
 The second section of the textual report is dedicated to the packets stream analysis for each address:port pair.
 
 This analysis results in a list in which each element represents an address:port pair with the relative statistics.
+
+![Screenshot](./img/report_part_2.png)
 
 For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the address:port is the destination) measured in number of packets and in number of bytes.
 
