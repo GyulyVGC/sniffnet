@@ -125,7 +125,28 @@ Level 4 and level 7 carried protocols are also described (respectively transport
 
 Both the transport layer protocols and application layer protocols fields could report a single or multiple protocols for each address:port pair, based on the traffic type.
 
-Specifically, the transport layer protocols field is based on an Enum with only two values (TCP and UDP), while the application layer protocols field is based on an Enum with some of the most common level 7 protocols (listed in the table below).
+Specifically, the transport layer protocols field is based on an Enum with only two values (TCP and UDP), while the application layer protocols field is based on an Enum with some of the most common level 7 protocols (listed in the table below); please note that application level protocols are just inferred from the transport port numbers.
+
+|Port number(s)|Application protocol  |  Description |
+|--|--|--|
+| 20, 21 | FTP |File Transfer Protocol |
+|22|SSH |Secure Shell |
+|23|Telnet |Telnet |
+|25|SMTP |Simple Mail Transfer Protocol |
+|53|DNS |Domain Name System |
+|67, 68|DHCP |Dynamic Host Configuration Protocol |
+|69|TFTP |Trivial File Transfer Protocol |
+|80|HTTP |Hypertext Transfer Protocol |
+|110|POP |Post Office Protocol |
+|123|NTP |Network Time Protocol |
+|137, 138, 139|NetBIOS |NetBIOS |
+|143|IMAP |Internet Message Access Protocol |
+|161,162|SNMP |Simple Network Management Protocol |
+|179|BGP |Border Gateway Protocol |
+|389|LDAP |Lightweight Directory Access Protocol |
+|443|HTTPS |Hypertext Transfer Protocol over SSL/TLS |
+|636|LDAPS |Lightweight Directory Access Protocol over TLS/SSL |
+|989, 990|FTPS |File Transfer Protocol over TLS/SSL |
 
 
 ## Error conditions
