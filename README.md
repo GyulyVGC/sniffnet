@@ -17,6 +17,7 @@ Authors:
 - [Error conditions](#error-conditions)
   + [Wrong command line option specification](#wrong-command-line-options-specification)
   + [Permissions errors](#permissions-errors)
+  + [Other errors](#other-errors)
   
  
 ## Introduction
@@ -252,3 +253,29 @@ In this section are reported the errors that may occur while the application is 
 &emsp;&emsp;&emsp; Where \<username\> can be retrieved with the command ```whoami```.
 
 &emsp;&emsp;&emsp; You will be requested to insert your system password.
+
+
+### Other errors
+
+Other errors, not previously listed, may occurr seldomly.
+
+Most of such errors are due to the unwrapping of ```Result<T>```, which may exceptionally contain the ```Err``` value.
+  
+This may happen in one of the following situations: activation of a pcap ```Capture``` handle, retrieval of network adapters list through pcap, selection of the default device through pcap, creation of the output file, clonation of the output file handle, acquisition of a ```Mutex``` lock, writing of the output file.
+  
+All those exceptional scenarios are managed through calls to the ```expect()``` method, providing textual feedback to the user on the cause of the panic.
+  
+The ```unwrap()``` method is used only on ```Option<T>``` values when it's sure they contain ```Some``` value.
+
+
+## External libraries
+
+The application has been developed using the following external libraries.
+
+- [pcap](https://docs.rs/pcap/0.9.2/pcap/)
+
+- [etherparse](https://docs.rs/etherparse/0.12.0/etherparse/)
+
+- [clap](https://docs.rs/clap/3.2.17/clap/)
+
+- [chrono](https://docs.rs/chrono/0.4.22/chrono/)
