@@ -174,9 +174,66 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 
 ## Error conditions
 
-In this section are reported the errors that may occur due to command line options wrong specification or while the program is running.
+In this section are reported the errors that may occur while the application is running.
 
 ### Wrong command line options specification
+
+
+- **Not existing adapter name**
+
+&emsp;&emsp;&emsp; If a non-existing adapter name is provided, the application raises an error and terminates.
+
+&emsp;&emsp;&emsp; In this case the application will suggest to use the ```-d``` option to print on the standard output a list of the available devices.
+
+&emsp;&emsp;&emsp; ```packet_sniffer -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
+
+&emsp;&emsp;&emsp; ![Screenshot](./img/device_list.png)
+
+
+- **Invalid highest port number**
+
+&emsp;&emsp;&emsp; If the provided highest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
+
+&emsp;&emsp;&emsp; If also the lowest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
+
+
+- **Invalid interval value**
+
+&emsp;&emsp;&emsp; If the provided interval value is not an integer in the range ```1..=u64::MAX``` the program raises an error and terminates.
+
+
+- **Invalid lowest port number**
+
+&emsp;&emsp;&emsp; If the provided lowest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
+
+&emsp;&emsp;&emsp; If also the highest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
+
+
+- **Invalid minimum packets value**
+
+&emsp;&emsp;&emsp; If the provided minimum packets value is not an integer in the range ```0..=u32::MAX``` the program raises an error and terminates.
+
+
+- **Invalid network layer protocol filter**
+
+&emsp;&emsp;&emsp; If a string different from "IPv4", "IPv6" or "no filter" is provided (not case sensitive), the application raises an error and terminates.
+
+&emsp;&emsp;&emsp; Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
+
+
+- **Invalid ouput file extension**
+
+&emsp;&emsp;&emsp; There is no particular limitation on the output file name.
+
+&emsp;&emsp;&emsp; However, if an invalid file extension is provided the file may result unreadable if the extension is not subsequently removed.
+
+
+- **Invalid transport layer protocol filter**
+
+&emsp;&emsp;&emsp; If a string different from "TCP", "UDP" or "no filter" is provided (not case sensitive), the application raises an error and terminates.
+
+&emsp;&emsp;&emsp; Note that not including the ```-t``` option is equal to provide ```-t "no filter"```.
+
 
 ### Permissions errors
 
