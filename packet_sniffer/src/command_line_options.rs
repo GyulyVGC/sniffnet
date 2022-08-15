@@ -27,6 +27,8 @@ pub struct Args {
 
     /// `-h, --highest-port`
     ///
+    /// ```default: 65535```
+    ///
     /// Sets the maximum port value to be considered, if omitted there is not ports higher bound.
     ///
     /// If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
@@ -37,6 +39,8 @@ pub struct Args {
 
     /// `-i, --interval`
     ///
+    /// ```default: 5```
+    ///
     /// Sets the interval of time between report updates (value in seconds).
     ///
     /// This option must be followed by a positive integer value.
@@ -44,6 +48,8 @@ pub struct Args {
     pub interval: u64,
 
     /// `-l, --lowest-port`
+    ///
+    /// ```default: 0```
     ///
     /// Sets the lowest port value to be considered, if omitted there is not ports lower bound.
     ///
@@ -55,6 +61,8 @@ pub struct Args {
 
     /// `-m, --minimum-packets`
     ///
+    /// ```default: 0```
+    ///
     /// Sets the minimum value of transited packets for an address:port to be printed in the report.
     ///
     /// This option must be followed by a positive integer value.
@@ -62,6 +70,8 @@ pub struct Args {
     pub minimum_packets: u32,
 
     /// `-n, --network-layer-filter`
+    ///
+    /// ```default: "no filter"```
     ///
     /// Filters packets on the basis of the IP version address (IPv4 or IPv6).
     ///
@@ -71,6 +81,8 @@ pub struct Args {
 
     /// `-o, --output-file`
     ///
+    /// ```default: report.txt```
+    ///
     /// Name of output file to contain the textual report, if omitted a default file is chosen.
     ///
     /// This option must be followed by a textual value.
@@ -78,6 +90,8 @@ pub struct Args {
     pub output_file: String,
 
     /// `-t, --transport-layer-filter`
+    ///
+    /// ```default: "no filter"```
     ///
     /// Filters packets on the basis of the transport layer protocol (TCP or UDP).
     ///

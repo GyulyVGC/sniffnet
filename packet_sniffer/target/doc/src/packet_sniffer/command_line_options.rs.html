@@ -87,6 +87,8 @@
 <span id="85">85</span>
 <span id="86">86</span>
 <span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module defining the `Args` struct used for command line options.</span>
 
 <span class="kw">use</span> <span class="ident">clap::Parser</span>;
@@ -115,6 +117,8 @@
     <span class="kw">pub</span> <span class="ident">device_list</span>: <span class="ident">bool</span>,
 
     <span class="doccomment">/// `-h, --highest-port`</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```default: 65535```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Sets the maximum port value to be considered, if omitted there is not ports higher bound.</span>
     <span class="doccomment">///</span>

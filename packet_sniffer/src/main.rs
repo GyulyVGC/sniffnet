@@ -92,6 +92,8 @@ fn main() {
 
 
 /// Prints the list of available network adapters' names and addresses.
+///
+/// This function is called if the user specifies the ```-d``` command line option.
 fn print_device_list() {
     println!();
     for dev in Device::list().expect("Error retrieving device list\n") {
