@@ -10,17 +10,22 @@ Authors:
 
 - [Command line options](#command-line-options)
 
+- [User interactions during application execution](#user-interactions-during-application-execution)
+  + [Pause the sniffing process](#pause-the-sniffing-process)
+  + [Resume the sniffing process](#resume-the-sniffing-process)
+  + [Stop the application execution](#stop-the-application-execution)
+
 - [Textual report structure](#textual-report-structure)
   + [Report header](#report-header)
   + [Report address:port list](#report-addresses-list)
   
+- [Implementation details](#implementation-details)
+  
 - [Error conditions](#error-conditions)
-  + [Wrong command line option specification](#wrong-command-line-options-specification)
+  + [Wrong command line options specification](#wrong-command-line-options-specification)
   + [Permissions errors](#permissions-errors)
   + [Windows configuration problems](#windows-configuration-problems)
   + [Other errors](#other-errors)
-
-- [Concurrency implementation](#concurrency-implementation)
 
 - [External libraries](#external-libraries)
   
@@ -117,6 +122,15 @@ The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
           This option must be followed by a textual value.
 
           ```default: "no filter"```
+          
+          
+## User interactions during application execution
+
+### Pause the sniffing process
+
+### Resume the sniffing process
+
+### Stop the application execution
 
 
 
@@ -176,6 +190,9 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |443|HTTPS |Hypertext Transfer Protocol over SSL/TLS |
 |636|LDAPS |Lightweight Directory Access Protocol over TLS/SSL |
 |989, 990|FTPS |File Transfer Protocol over TLS/SSL |
+
+
+## Implementation details
 
 
 ## Error conditions
@@ -277,8 +294,6 @@ All those exceptional scenarios are managed through calls to the ```expect()``` 
   
 The ```unwrap()``` method is used only on ```Option<T>``` values when it's sure they contain ```Some``` value.
 
-
-## Concurrency implementation
 
 
 ## External libraries
