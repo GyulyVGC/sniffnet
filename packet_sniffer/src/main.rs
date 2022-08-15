@@ -170,7 +170,7 @@ fn is_valid_network_layer(network_layer: String) -> bool {
 /// assert_eq!(y, true)
 /// ```
 fn is_valid_transport_layer(transport_layer: String) -> bool {
-    transport_layer.cmp(&"tcp".to_string()) != Equal
-        && transport_layer.cmp(&"udp".to_string()) != Equal
-        && transport_layer.cmp(&"no filter".to_string()) != Equal
+    transport_layer.cmp(&"tcp".to_string()) == Equal
+        || transport_layer.cmp(&"udp".to_string()) == Equal
+        || transport_layer.cmp(&"no filter".to_string()) == Equal
 }
