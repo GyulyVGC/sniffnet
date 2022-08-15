@@ -17,6 +17,7 @@ Authors:
 - [Error conditions](#error-conditions)
   + [Wrong command line option specification](#wrong-command-line-options-specification)
   + [Permissions errors](#permissions-errors)
+  + [Windows configuration problems](#windows-configuration-problems)
   + [Other errors](#other-errors)
 
 - [Concurrency implementation](#concurrency-implementation)
@@ -257,6 +258,11 @@ In this section are reported the errors that may occur while the application is 
 &emsp;&emsp;&emsp; Where \<username\> can be retrieved with the command ```whoami```.
 
 &emsp;&emsp;&emsp; You will be requested to insert your system password.
+
+
+### Windows configuration problems
+
+In order to make pcap work properly on Windows systems, it is needed to download the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
 
 
 ### Other errors
