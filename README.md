@@ -47,7 +47,7 @@ For further documentation of the code modules and functions, consult the file ``
 
 The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
 
-A detailed documentation of the command line options is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a browser, then selecting the module ```command_line_options``` and then the struct ```Args```.
+A detailed documentation of the command line options is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a browser, then selecting the module ```args``` and then the struct ```Args```.
           
           
 ## User interactions during application execution
