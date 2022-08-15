@@ -4,6 +4,8 @@ Authors:
 - [Bellini Giuliano](https://github.com/GyulyVGC) (s294739)
 - [Canepari Cristiano Marco](https://github.com/Crirock) (s304808)
 
+***A detailed documentation of the application code is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a browser.***
+  
 ## Contents
 
 - [Introduction](#introduction)
@@ -19,7 +21,7 @@ Authors:
   + [Report header](#report-header)
   + [Report address:port list](#report-addresses-list)
   
-- [Code structure and implementation details](#code-structure-and-implementation-details)
+- [Implementation details](#implementation-details)
   
 - [Error conditions](#error-conditions)
   + [Wrong command line options specification](#wrong-command-line-options-specification)
@@ -43,85 +45,7 @@ Below you can find the available command line options, the structure of the repo
 
 The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
 
- - ```-a, --adapter```
- 
-          Name of the network adapter to be inspected, if omitted the default adapter is chosen.
-          
-          If a non-existing adapter is provided, the application raises an error and terminates.
-          
-          This option must be followed by a textual value.
- 
- - ```-d, --device-list```
- 
-           Prints list of the available network interfaces.
-           
-           Immediately terminates the program.
-           
-           This option does not need to be followed by a value.
- 
- - ```-h, --highest-port```
- 
-          Sets the maximum port value to be considered, if omitted there is not ports higher bound.
-
-          If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
-          
-          This option must be followed by an integer value between 0 and 65535. 
-          
-           ```default: 65535```
- 
- -  ```-i, --interval```
- 
-           Sets the interval of time between report updates (value in seconds).
-           
-           This option must be followed by a positive integer value.
- 
-           ```default: 5```
- 
- - ```-l, --lowest-port```
- 
-          Sets the minimum port value to be considered, if omitted there is not ports lower bound.
-
-          If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
-
-          This option must be followed by an integer value between 0 and 65535. 
-
-          ```default: 0```
- 
- - ```-m, --minimum-packets```
- 
-          Sets the minimum value of transited packets for an address:port to be printed in the report.
-
-          This option must be followed by a positive integer value.
-
-          ```default: 0```
-
-- ```-n, --network-layer-filter```
-
-          Filters packets on the basis of the IP version address (IPv4 or IPv6).
-
-          If a string different from "IPv4" or "IPv6" is provided (not case sensitive), the application raises an error and terminates.
-
-          This option must be followed by a textual value.
-            
-          ```default: "no filter"```
- 
- - ```-o, --output-file```
- 
-          Name of output file to contain the textual report, if omitted a default file is chosen.
-
-          This option must be followed by a textual value.
-
-          ```default: report.txt```
-
-- ```-t, --transport-layer-filter```
-
-          Filters packets on the basis of the transport layer protocol (TCP or UDP).
-
-          If a string different from "TCP" or "UDP" is provided (not case sensitive), the application raises an error and terminates.
-
-          This option must be followed by a textual value.
-
-          ```default: "no filter"```
+A detailed documentation of the command line options is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a browser, then selecting the module ```command_line_options``` and then the struct ```Args```.
           
           
 ## User interactions during application execution
@@ -192,7 +116,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |989, 990|FTPS |File Transfer Protocol over TLS/SSL |
 
 
-## Code structure and implementation details
+## Implementation details
 
 
 ## Error conditions
