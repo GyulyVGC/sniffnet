@@ -1,8 +1,8 @@
 # Network analyzer (packet sniffer)
 
 Authors: 
-- Bellini Giuliano (s294739)
-- Canepari Cristiano Marco (s304808)
+- [Bellini Giuliano](https://github.com/GyulyVGC) (s294739)
+- [Canepari Cristiano Marco](https://github.com/Crirock) (s304808)
 
 ## Contents
 
