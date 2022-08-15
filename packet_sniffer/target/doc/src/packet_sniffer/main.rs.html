@@ -178,6 +178,8 @@
 <span id="176">176</span>
 <span id="177">177</span>
 <span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">address_port</span>;
 <span class="kw">mod</span> <span class="ident">report_info</span>;
 <span class="kw">mod</span> <span class="ident">command_line_options</span>;
@@ -272,6 +274,8 @@
 
 
 <span class="doccomment">/// Prints the list of available network adapters&#39; names and addresses.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function is called if the user specifies the ```-d``` command line option.</span>
 <span class="kw">fn</span> <span class="ident">print_device_list</span>() {
     <span class="macro">println!</span>();
     <span class="kw">for</span> <span class="ident">dev</span> <span class="kw">in</span> <span class="ident">Device::list</span>().<span class="ident">expect</span>(<span class="string">&quot;Error retrieving device list\n&quot;</span>) {
