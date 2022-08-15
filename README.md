@@ -19,7 +19,7 @@ Authors:
   + [Report header](#report-header)
   + [Report address:port list](#report-addresses-list)
   
-- [Implementation details](#implementation-details)
+- [Code structure and implementation details](#code-structure-and-implementation-details)
   
 - [Error conditions](#error-conditions)
   + [Wrong command line options specification](#wrong-command-line-options-specification)
@@ -156,7 +156,7 @@ Note that an application layer protocol filter is not provided since the user ca
 
 The second section of the textual report is dedicated to the packets stream analysis for each address:port pair.
 
-This analysis results in a list in which each element represents an address:port pair with the relative statistics.
+This analysis results in a list in which each element represents an address:port pair with the relative statistics; note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
 
 ![Screenshot](./img/report_part_2.png)
 
@@ -192,7 +192,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |989, 990|FTPS |File Transfer Protocol over TLS/SSL |
 
 
-## Implementation details
+## Code structure and implementation details
 
 
 ## Error conditions
