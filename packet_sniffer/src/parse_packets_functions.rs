@@ -1,3 +1,6 @@
+//! Module containing functions executed by the thread in charge of parsing sniffed packets and
+//! inserting them in the shared map.
+
 use std::cmp::Ordering::Equal;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
@@ -6,6 +9,27 @@ use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Active, Capture};
 use crate::{AddressPort, AppProtocol, ReportInfo, TransProtocol};
 
+
+/// The calling thread enters in a loop in which it waits for network packets, parses them according
+/// to the user specified filters, and inserts them into the shared map variable.
+///
+/// # Arguments
+///
+/// * `cap` - Initialized `Capture` handle to interface with the network traffic
+
+/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
+/// through the ```-l``` option.
+///
+/// * `highest_port` - The highest port number to be considered in the report. Specified by the user
+/// through the ```-h``` option.
+///
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
+///
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
+///
+/// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
 pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
                           mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>) {

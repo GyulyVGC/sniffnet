@@ -1,3 +1,9 @@
+//! Module containing functions executed by the thread in charge of updating the output report
+//! every ```interval``` seconds, with ```interval``` specified by the user through the
+//! ```-i``` command line option.
+//!
+//! If the ```-i``` option is not specified, the report is updated every 5 seconds.
+
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use std::fs::File;
@@ -8,6 +14,37 @@ use chrono::Local;
 use std::io::Write;
 use crate::{AddressPort, ReportInfo};
 
+
+/// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
+/// from scratch the output report file, with updated values.
+///
+/// # Arguments
+///
+/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
+/// through the ```-l``` option.
+///
+/// * `highest_port` - The highest port number to be considered in the report. Specified by the user
+/// through the ```-h``` option.
+///
+/// * `interval` - Frequency of report updates (value in seconds). Specified by the user through the
+/// ```-i``` option.
+///
+/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
+/// Specified by the user through the ```-m``` option.
+///
+/// * `device_name` - A String representing the name of th network adapter to be sniffed. Specified by the user through the
+/// ```-a``` option.
+///
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
+///
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
+///
+/// * `output_file` - A String representing the output report file name. Specified by the user through the
+/// ```-o``` option.
+///
+/// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u32,
                                    device_name: String, network_layer: String, transport_layer: String,
                                    output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>) {
@@ -33,7 +70,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         for (key, val) in sorted_vec.iter() {
             if val.transmitted_packets + val.received_packets >= min_packets {
-                write!(output, "Address: {}:{}\n{}\n\n", key.address1, key.port1, val).expect("Error writing output file\n");
+                write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
             }
         }
         println!("\tReport updated ({})",times_report_updated);
@@ -41,7 +78,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 }
 
 
-
+/// Given the lowest and highest port numbers, the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
+/// through the ```-l``` option.
+///
+/// * `highest_port` - The highest port number to be considered in the report. Specified by the user
+/// through the ```-h``` option.
 fn get_ports_string(lowest_port: u16, highest_port: u16) -> String {
     if lowest_port == highest_port {
         format!("<><>\t\t\tConsidering only port number {}\n", lowest_port)
@@ -55,7 +101,13 @@ fn get_ports_string(lowest_port: u16, highest_port: u16) -> String {
 }
 
 
-
+/// Given the minimum packets number, the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
+/// Specified by the user through the ```-m``` option.
 fn get_min_packets_string(min_packets: u32) -> String {
     if min_packets > 1 {
         format!("<><>\t\t\tConsidering only address:port pairs featured by more than {} packets\n", min_packets)
@@ -66,7 +118,13 @@ fn get_min_packets_string(min_packets: u32) -> String {
 }
 
 
-
+/// Given the network layer textual filter, the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
 fn get_network_layer_string (network_layer: String) -> String {
     if network_layer.cmp(&"ipv4".to_string()) == Equal {
         format!("<><>\t\t\tConsidering only IPv4 packets\n")
@@ -80,7 +138,13 @@ fn get_network_layer_string (network_layer: String) -> String {
 }
 
 
-
+/// Given the transport layer textual filter, the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
 fn get_transport_layer_string(transport_layer: String) -> String {
     if transport_layer.cmp(&"tcp".to_string()) == Equal {
         format!("<><>\t\t\tConsidering only packets exchanged with TCP\n")
@@ -94,7 +158,62 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 }
 
 
-
+/// Writes the output report file header, which contains useful info about the sniffing process.
+///
+/// # Arguments
+///
+/// * `output_file` - A String representing the output report file name. Specified by the user through the
+/// ```-o``` option.
+///
+/// * `device_name` - A String representing the name of th network adapter to be sniffed. Specified by the user through the
+/// ```-a``` option.
+///
+/// * `first_timestamp` - A not formatted String representing the initial timestamp of the sniffing process.
+///
+/// * `times_report_updated` - An integer representing the amount of times the report has been updated.
+///
+/// * `interval` - Frequency of report updates (value in seconds). Specified by the user through the
+/// ```-i``` option.
+///
+/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
+/// through the ```-l``` option.
+///
+/// * `highest_port` - The highest port number to be considered in the report. Specified by the user
+/// through the ```-h``` option.
+///
+/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
+/// Specified by the user through the ```-m``` option.
+///
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
+///
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
+///
+/// # Examples
+/// An example of output report file header is reported below.
+///
+/// ```
+/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+/// <><>
+/// <><>		Packets are sniffed from adapter 'en0'
+/// <><>
+/// <><>		Report updates info
+/// <><>			Report start time: 15/08/2022 15:39:07
+/// <><>			Report last update: 15/08/2022 15:39:52
+/// <><>			Report update frequency: every 5 seconds
+/// <><>			Number of times report was updated: 9
+/// <><>
+/// <><>		Filters
+/// <><>			Considering only address:port pairs featured by more than 500 packets
+/// <><>			Considering both IPv4 and IPv6 packets
+/// <><>			Considering only packets exchanged with TCP
+/// <><>			Considering only port number 443
+/// <><>
+/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+/// ```
 fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
                             times_report_updated: i32, interval: u64, lowest_port: u16, highest_port: u16,
                             min_packets: u32, network_layer: String, transport_layer: String) {

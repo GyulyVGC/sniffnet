@@ -1,14 +1,28 @@
+//! Module defining the ReportInfo struct, useful to format the output report file and
+//! to keep track of statistics about the sniffed traffic.
+
 use std::collections::HashSet;
 use std::fmt;
 
+/// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
+///
+/// Each ReportInfo struct is associated to a single address:port pair.
 pub struct ReportInfo {
+    /// Amount of bytes relative to the associate address:port pair when it is a source.
     pub transmitted_bytes: u32,
+    /// Amount of packets relative to the associate address:port pair when it is a source.
     pub transmitted_packets: u32,
+    /// Amount of bytes relative to the associate address:port pair when it is a destination.
     pub received_bytes: u32,
+    /// Amount of packets relative to the associate address:port pair when it is a destination.
     pub received_packets: u32,
+    /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: String,
+    /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: String,
+    /// Set of transport layer protocols carried through the associate address:port pair.
     pub trans_protocols: HashSet<TransProtocol>,
+    /// Set of application layer protocols carried through the associate address:port pair.
     pub app_protocols: HashSet<AppProtocol>,
 }
 
@@ -70,9 +84,54 @@ impl fmt::Display for ReportInfo {
     }
 }
 
+/// Enum representing the possible observed values of transport layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TransProtocol { TCP, UDP, Other }
+pub enum TransProtocol {
+    /// Transmission Control Protocol
+    TCP,
+    /// User Datagram Protocol
+    UDP,
+    /// Not identified
+    Other
+}
 
+/// Enum representing the possible observed values of application layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum AppProtocol { FTP, SSH, Telnet, SMTP, DNS, DHCP, TFTP, HTTP, POP,
-                        NTP, NetBIOS, IMAP, SNMP, BGP, LDAP, HTTPS, LDAPS, FTPS }
+pub enum AppProtocol {
+    /// File Transfer Protocol
+    FTP,
+    /// Secure Shell
+    SSH,
+    /// Telnet
+    Telnet,
+    /// Simple Mail Transfer Protocol
+    SMTP,
+    /// Domain Name System
+    DNS,
+    /// Dynamic Host Configuration Protocol
+    DHCP,
+    /// Trivial File Transfer Protocol
+    TFTP,
+    /// Hypertext Transfer Protocol
+    HTTP,
+    /// Post Office Protocol
+    POP,
+    /// Network Time Protocol
+    NTP,
+    /// NetBIOS
+    NetBIOS,
+    /// Internet Message Access Protocol
+    IMAP,
+    /// Simple Network Management Protocol
+    SNMP,
+    /// Border Gateway Protocol
+    BGP,
+    /// Lightweight Directory Access Protocol
+    LDAP,
+    ///Hypertext Transfer Protocol over SSL/TLS
+    HTTPS,
+    /// Lightweight Directory Access Protocol over TLS/SSL
+    LDAPS,
+    /// File Transfer Protocol over TLS/SSL
+    FTPS
+}

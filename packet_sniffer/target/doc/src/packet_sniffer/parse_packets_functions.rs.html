@@ -257,7 +257,34 @@
 <span id="255">255</span>
 <span id="256">256</span>
 <span id="257">257</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of parsing sniffed packets and</span>
+<span class="doccomment">//! inserting them in the shared map.</span>
+
+<span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>};
 <span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Local</span>};
@@ -265,6 +292,27 @@
 <span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Active</span>, <span class="ident">Capture</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AddressPort</span>, <span class="ident">AppProtocol</span>, <span class="ident">ReportInfo</span>, <span class="ident">TransProtocol</span>};
 
+
+<span class="doccomment">/// The calling thread enters in a loop in which it waits for network packets, parses them according</span>
+<span class="doccomment">/// to the user specified filters, and inserts them into the shared map variable.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `cap` - Initialized `Capture` handle to interface with the network traffic</span>
+
+<span class="doccomment">/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user</span>
+<span class="doccomment">/// through the ```-l``` option.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `highest_port` - The highest port number to be considered in the report. Specified by the user</span>
+<span class="doccomment">/// through the ```-h``` option.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-n``` option.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-t``` option.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_packets_loop</span>(<span class="kw-2">mut</span> <span class="ident">cap</span>: <span class="ident">Capture</span><span class="op">&lt;</span><span class="ident">Active</span><span class="op">&gt;</span>, <span class="ident">lowest_port</span>: <span class="ident">u16</span>, <span class="ident">highest_port</span>: <span class="ident">u16</span>,
                           <span class="ident">network_layer_filter</span>: <span class="ident">String</span>, <span class="ident">transport_layer_filter</span>: <span class="ident">String</span>,
                           <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>) {

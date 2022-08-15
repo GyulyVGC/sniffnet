@@ -1,94 +1,167 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src&#x2F;report_info.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>report_info.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
     <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../packet_sniffer/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../packet_sniffer/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
-<span id="10">10</span>
-<span id="11">11</span>
-<span id="12">12</span>
-<span id="13">13</span>
-<span id="14">14</span>
-<span id="15">15</span>
-<span id="16">16</span>
-<span id="17">17</span>
-<span id="18">18</span>
-<span id="19">19</span>
-<span id="20">20</span>
-<span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-<span id="35">35</span>
-<span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
-<span id="63">63</span>
-<span id="64">64</span>
-<span id="65">65</span>
-<span id="66">66</span>
-<span id="67">67</span>
-<span id="68">68</span>
-<span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../packet_sniffer/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module defining the ReportInfo struct, useful to format the output report file and</span>
+<span class="doccomment">//! to keep track of statistics about the sniffed traffic.</span>
+
+<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 
+<span class="doccomment">/// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Each ReportInfo struct is associated to a single address:port pair.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ReportInfo</span> {
+    <span class="doccomment">/// Amount of bytes relative to the associate address:port pair when it is a source.</span>
     <span class="kw">pub</span> <span class="ident">transmitted_bytes</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// Amount of packets relative to the associate address:port pair when it is a source.</span>
     <span class="kw">pub</span> <span class="ident">transmitted_packets</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// Amount of bytes relative to the associate address:port pair when it is a destination.</span>
     <span class="kw">pub</span> <span class="ident">received_bytes</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// Amount of packets relative to the associate address:port pair when it is a destination.</span>
     <span class="kw">pub</span> <span class="ident">received_packets</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// First occurrence of information exchange featuring the associate address:port pair as a source or destination.</span>
     <span class="kw">pub</span> <span class="ident">initial_timestamp</span>: <span class="ident">String</span>,
+    <span class="doccomment">/// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.</span>
     <span class="kw">pub</span> <span class="ident">final_timestamp</span>: <span class="ident">String</span>,
+    <span class="doccomment">/// Set of transport layer protocols carried through the associate address:port pair.</span>
     <span class="kw">pub</span> <span class="ident">trans_protocols</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">TransProtocol</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Set of application layer protocols carried through the associate address:port pair.</span>
     <span class="kw">pub</span> <span class="ident">app_protocols</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">AppProtocol</span><span class="op">&gt;</span>,
 }
 
@@ -150,11 +223,56 @@
     }
 }
 
+<span class="doccomment">/// Enum representing the possible observed values of transport layer protocol.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TransProtocol</span> { <span class="ident">TCP</span>, <span class="ident">UDP</span>, <span class="ident">Other</span> }
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TransProtocol</span> {
+    <span class="doccomment">/// Transmission Control Protocol</span>
+    <span class="ident">TCP</span>,
+    <span class="doccomment">/// User Datagram Protocol</span>
+    <span class="ident">UDP</span>,
+    <span class="doccomment">/// Not identified</span>
+    <span class="ident">Other</span>
+}
 
+<span class="doccomment">/// Enum representing the possible observed values of application layer protocol.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AppProtocol</span> { <span class="ident">FTP</span>, <span class="ident">SSH</span>, <span class="ident">Telnet</span>, <span class="ident">SMTP</span>, <span class="ident">DNS</span>, <span class="ident">DHCP</span>, <span class="ident">TFTP</span>, <span class="ident">HTTP</span>, <span class="ident">POP</span>,
-                        <span class="ident">NTP</span>, <span class="ident">NetBIOS</span>, <span class="ident">IMAP</span>, <span class="ident">SNMP</span>, <span class="ident">BGP</span>, <span class="ident">LDAP</span>, <span class="ident">HTTPS</span>, <span class="ident">LDAPS</span>, <span class="ident">FTPS</span> }</code></pre></div>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AppProtocol</span> {
+    <span class="doccomment">/// File Transfer Protocol</span>
+    <span class="ident">FTP</span>,
+    <span class="doccomment">/// Secure Shell</span>
+    <span class="ident">SSH</span>,
+    <span class="doccomment">/// Telnet</span>
+    <span class="ident">Telnet</span>,
+    <span class="doccomment">/// Simple Mail Transfer Protocol</span>
+    <span class="ident">SMTP</span>,
+    <span class="doccomment">/// Domain Name System</span>
+    <span class="ident">DNS</span>,
+    <span class="doccomment">/// Dynamic Host Configuration Protocol</span>
+    <span class="ident">DHCP</span>,
+    <span class="doccomment">/// Trivial File Transfer Protocol</span>
+    <span class="ident">TFTP</span>,
+    <span class="doccomment">/// Hypertext Transfer Protocol</span>
+    <span class="ident">HTTP</span>,
+    <span class="doccomment">/// Post Office Protocol</span>
+    <span class="ident">POP</span>,
+    <span class="doccomment">/// Network Time Protocol</span>
+    <span class="ident">NTP</span>,
+    <span class="doccomment">/// NetBIOS</span>
+    <span class="ident">NetBIOS</span>,
+    <span class="doccomment">/// Internet Message Access Protocol</span>
+    <span class="ident">IMAP</span>,
+    <span class="doccomment">/// Simple Network Management Protocol</span>
+    <span class="ident">SNMP</span>,
+    <span class="doccomment">/// Border Gateway Protocol</span>
+    <span class="ident">BGP</span>,
+    <span class="doccomment">/// Lightweight Directory Access Protocol</span>
+    <span class="ident">LDAP</span>,
+    <span class="doccomment">///Hypertext Transfer Protocol over SSL/TLS</span>
+    <span class="ident">HTTPS</span>,
+    <span class="doccomment">/// Lightweight Directory Access Protocol over TLS/SSL</span>
+    <span class="ident">LDAPS</span>,
+    <span class="doccomment">/// File Transfer Protocol over TLS/SSL</span>
+    <span class="ident">FTPS</span>
+}</code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="packet_sniffer" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

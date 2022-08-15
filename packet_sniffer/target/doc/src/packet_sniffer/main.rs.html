@@ -176,6 +176,8 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">address_port</span>;
 <span class="kw">mod</span> <span class="ident">report_info</span>;
 <span class="kw">mod</span> <span class="ident">command_line_options</span>;
@@ -295,7 +297,7 @@
 <span class="doccomment">/// * `adapter` - A String representing the name of the network adapter to be sniffed.</span>
 <span class="kw">fn</span> <span class="ident">retrieve_device</span>(<span class="ident">adapter</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Device</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_device</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-    <span class="kw">if</span> <span class="ident">adapter</span>.<span class="ident">eq</span>(<span class="string">&quot;default&quot;</span>) {
+    <span class="kw">if</span> <span class="ident">adapter</span>.<span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="string">&quot;default&quot;</span>.<span class="ident">to_string</span>()) {
         <span class="ident">found_device</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Device::lookup</span>().<span class="ident">expect</span>(<span class="string">&quot;Error retrieving default network adapter\n&quot;</span>));
     } <span class="kw">else</span> {
         <span class="kw">let</span> <span class="ident">dev_list</span> <span class="op">=</span> <span class="ident">Device::list</span>().<span class="ident">expect</span>(<span class="string">&quot;Unable to retrieve network adapters list\n&quot;</span>);
@@ -314,7 +316,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Arguments</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// * `network_layer` - A String representing the IP version to be filtered.</span>
+<span class="doccomment">/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-n``` option.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -336,7 +339,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Arguments</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// * `network_layer` - A String representing the transport protocol to be filtered.</span>
+<span class="doccomment">/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-t``` option.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -348,9 +352,9 @@
 <span class="doccomment">/// assert_eq!(y, true)</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">fn</span> <span class="ident">is_valid_transport_layer</span>(<span class="ident">transport_layer</span>: <span class="ident">String</span>) -&gt; <span class="ident">bool</span> {
-    <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;tcp&quot;</span>.<span class="ident">to_string</span>()) <span class="op">!</span><span class="op">=</span> <span class="ident">Equal</span>
-        <span class="op">&amp;&amp;</span> <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;udp&quot;</span>.<span class="ident">to_string</span>()) <span class="op">!</span><span class="op">=</span> <span class="ident">Equal</span>
-        <span class="op">&amp;&amp;</span> <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;no filter&quot;</span>.<span class="ident">to_string</span>()) <span class="op">!</span><span class="op">=</span> <span class="ident">Equal</span>
+    <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;tcp&quot;</span>.<span class="ident">to_string</span>()) <span class="op">==</span> <span class="ident">Equal</span>
+        <span class="op">|</span><span class="op">|</span> <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;udp&quot;</span>.<span class="ident">to_string</span>()) <span class="op">==</span> <span class="ident">Equal</span>
+        <span class="op">|</span><span class="op">|</span> <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;no filter&quot;</span>.<span class="ident">to_string</span>()) <span class="op">==</span> <span class="ident">Equal</span>
 }</code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="packet_sniffer" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

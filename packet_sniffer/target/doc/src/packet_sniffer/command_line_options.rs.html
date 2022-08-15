@@ -41,44 +41,136 @@
 <span id="39">39</span>
 <span id="40">40</span>
 <span id="41">41</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">clap::Parser</span>;
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module defining the `Args` struct used for command line options.</span>
+
+<span class="kw">use</span> <span class="ident">clap::Parser</span>;
 
 <span class="doccomment">/// Struct for command line arguments, to be parsed using clap.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Parser</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Args</span> {
+    <span class="doccomment">/// `-a, --adapter`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Name of the network adapter to be inspected, if omitted the default adapter is chosen.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If a non-existing adapter is provided, the application raises an error and terminates.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a textual value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">forbid_empty_values</span> <span class="op">=</span> <span class="bool-val">true</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;default&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">adapter</span>: <span class="ident">String</span>,
 
-    <span class="doccomment">/// Prints the list of available devices. Immediately terminates the program.</span>
+    <span class="doccomment">/// `-d, --device-list`</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Prints list of the available network interfaces.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Immediately terminates the program.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option does not need to be followed by a value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
     <span class="kw">pub</span> <span class="ident">device_list</span>: <span class="ident">bool</span>,
 
+    <span class="doccomment">/// `-h, --highest-port`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Sets the maximum port value to be considered, if omitted there is not ports higher bound.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by an integer value between 0 and 65535.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value_t</span> <span class="op">=</span> <span class="ident">u16::MAX</span>)]</span>
     <span class="kw">pub</span> <span class="ident">highest_port</span>: <span class="ident">u16</span>,
 
+    <span class="doccomment">/// `-i, --interval`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Sets the interval of time between report updates (value in seconds).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a positive integer value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value_t</span> <span class="op">=</span> <span class="number">5</span>)]</span>
     <span class="kw">pub</span> <span class="ident">interval</span>: <span class="ident">u64</span>,
 
-    <span class="doccomment">/// Sets the minimum port value to be considered, if omitted there is not ports lower bound.</span>
+    <span class="doccomment">/// `-l, --lowest-port`</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Sets the lowest port value to be considered, if omitted there is not ports lower bound.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the lowest-port provided value is lower than the highest-port provided value, the application raises an error and terminates.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by an integer value between 0 and 65535.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value_t</span> <span class="op">=</span> <span class="ident">u16::MIN</span>)]</span>
     <span class="kw">pub</span> <span class="ident">lowest_port</span>: <span class="ident">u16</span>,
 
+    <span class="doccomment">/// `-m, --minimum-packets`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Sets the minimum value of transited packets for an address:port to be printed in the report.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a positive integer value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value_t</span> <span class="op">=</span> <span class="ident">u32::MIN</span>)]</span>
     <span class="kw">pub</span> <span class="ident">minimum_packets</span>: <span class="ident">u32</span>,
 
+    <span class="doccomment">/// `-n, --network-layer-filter`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Filters packets on the basis of the IP version address (IPv4 or IPv6).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a textual value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;no filter&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">network_layer_filter</span>: <span class="ident">String</span>,
 
+    <span class="doccomment">/// `-o, --output-file`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Name of output file to contain the textual report, if omitted a default file is chosen.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a textual value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">forbid_empty_values</span> <span class="op">=</span> <span class="bool-val">true</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;report.txt&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">output_file</span>: <span class="ident">String</span>,
 
+    <span class="doccomment">/// `-t, --transport-layer-filter`</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Filters packets on the basis of the transport layer protocol (TCP or UDP).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option must be followed by a textual value.</span>
     <span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>, <span class="ident">value_parser</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;no filter&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">transport_layer_filter</span>: <span class="ident">String</span>,
 }

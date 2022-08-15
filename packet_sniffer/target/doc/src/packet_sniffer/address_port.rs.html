@@ -16,18 +16,42 @@
 <span id="14">14</span>
 <span id="15">15</span>
 <span id="16">16</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Module defining the AddressPort struct, which represents a network address:port pair.</span>
+
+<span class="doccomment">/// Struct representing a network address:port pair.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AddressPort</span> {
-    <span class="kw">pub</span> <span class="ident">address1</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">port1</span>: <span class="ident">u16</span>,
+    <span class="doccomment">/// Network layer IPv4 or IPv6 address.</span>
+    <span class="kw">pub</span> <span class="ident">address</span>: <span class="ident">String</span>,
+    <span class="doccomment">/// Transport layer port number (in the range 0..=65535).</span>
+    <span class="kw">pub</span> <span class="ident">port</span>: <span class="ident">u16</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">AddressPort</span> {
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span> (<span class="ident">address1</span>: <span class="ident">String</span>, <span class="ident">port1</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
+    <span class="doccomment">/// Returns a new AddressPort element.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// * `address` - A string representing the network layer IPv4 or IPv6 address.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// * `port` - An integer representing the transport layer port number (in the range 0..=65535).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span> (<span class="ident">address</span>: <span class="ident">String</span>, <span class="ident">port</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">AddressPort</span> {
-            <span class="ident">address1</span>,
-            <span class="ident">port1</span>,
+            <span class="ident">address</span>,
+            <span class="ident">port</span>,
         }
     }
 }

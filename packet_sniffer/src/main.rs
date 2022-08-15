@@ -136,7 +136,8 @@ fn retrieve_device(adapter: String) -> Option<Device> {
 ///
 /// # Arguments
 ///
-/// * `network_layer` - A String representing the IP version to be filtered.
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
 ///
 /// # Examples
 ///
@@ -158,7 +159,8 @@ fn is_valid_network_layer(network_layer: String) -> bool {
 ///
 /// # Arguments
 ///
-/// * `network_layer` - A String representing the transport protocol to be filtered.
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
 ///
 /// # Examples
 ///
