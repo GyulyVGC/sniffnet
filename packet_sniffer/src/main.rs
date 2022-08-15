@@ -117,7 +117,7 @@ fn print_device_list() {
 /// * `adapter` - A String representing the name of the network adapter to be sniffed.
 fn retrieve_device(adapter: String) -> Option<Device> {
     let mut found_device = None;
-    if adapter.eq("default") {
+    if adapter.eq(&"default".to_string()) {
         found_device = Some(Device::lookup().expect("Error retrieving default network adapter\n"));
     } else {
         let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
