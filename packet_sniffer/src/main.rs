@@ -1,17 +1,17 @@
 mod address_port;
 mod report_info;
-mod command_line_options;
-mod parse_packets_functions;
-mod write_report_functions;
+mod args;
+mod thread_parse_packets_functions;
+mod thread_write_report_functions;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use pcap::{Device, Capture};
 use crate::address_port::{AddressPort};
 use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
-use crate::command_line_options::Args;
-use crate::parse_packets_functions::parse_packets_loop;
-use crate::write_report_functions::sleep_and_write_report_loop;
+use crate::args::Args;
+use crate::thread_parse_packets_functions::parse_packets_loop;
+use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
 use std::thread;
 use std::sync::{Arc, Mutex};

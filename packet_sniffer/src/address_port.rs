@@ -1,4 +1,4 @@
-//! Module defining the AddressPort struct, which represents a network address:port pair.
+//! Module defining the `AddressPort` struct, which represents a network address:port pair.
 
 /// Struct representing a network address:port pair.
 #[derive(PartialEq, Eq, Hash, Debug)]

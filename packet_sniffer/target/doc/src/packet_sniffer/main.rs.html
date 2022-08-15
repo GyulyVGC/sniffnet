@@ -182,18 +182,18 @@
 <span id="180">180</span>
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">address_port</span>;
 <span class="kw">mod</span> <span class="ident">report_info</span>;
-<span class="kw">mod</span> <span class="ident">command_line_options</span>;
-<span class="kw">mod</span> <span class="ident">parse_packets_functions</span>;
-<span class="kw">mod</span> <span class="ident">write_report_functions</span>;
+<span class="kw">mod</span> <span class="ident">args</span>;
+<span class="kw">mod</span> <span class="ident">thread_parse_packets_functions</span>;
+<span class="kw">mod</span> <span class="ident">thread_write_report_functions</span>;
 
 <span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Device</span>, <span class="ident">Capture</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::address_port</span>::{<span class="ident">AddressPort</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::report_info</span>::{<span class="ident">AppProtocol</span>, <span class="ident">ReportInfo</span>, <span class="ident">TransProtocol</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::command_line_options::Args</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parse_packets_functions::parse_packets_loop</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::write_report_functions::sleep_and_write_report_loop</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::args::Args</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::thread_parse_packets_functions::parse_packets_loop</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::thread_write_report_functions::sleep_and_write_report_loop</span>;
 <span class="kw">use</span> <span class="ident">clap::Parser</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>};

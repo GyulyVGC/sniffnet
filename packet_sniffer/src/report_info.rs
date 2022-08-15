@@ -1,4 +1,4 @@
-//! Module defining the ReportInfo struct, useful to format the output report file and
+//! Module defining the `ReportInfo` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
 use std::collections::HashSet;
