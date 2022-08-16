@@ -281,6 +281,114 @@
 <span id="279">279</span>
 <span id="280">280</span>
 <span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of parsing sniffed packets and</span>
 <span class="doccomment">//! inserting them in the shared map.</span>
 
@@ -389,7 +497,28 @@
 }
 
 
-
+<span class="doccomment">/// This function analyzes the network layer header passed as parameter and updates variables</span>
+<span class="doccomment">/// passed by reference on the basis of the packet header content.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `network_header` - An `Option` containing the `IpHeader` enum obtained through etherparse.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `exchanged_bytes` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and it will be overwritten with the IP payload dimension.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `network_layer` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and it will be overwritten with a String representing the IP version (&quot;ipv4&quot; or &quot;ipv6&quot;).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `address1` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the source IP address of the packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `address2` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the destination IP address of the packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `skip_packet` - Boolean flag initialized with a `false` value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten to `true` if the `network_header` is invalid; in this case the</span>
+<span class="doccomment">/// packet will not be considered.</span>
 <span class="kw">fn</span> <span class="ident">analyze_network_header</span>(<span class="ident">network_header</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpHeader</span><span class="op">&gt;</span>, <span class="ident">exchanged_bytes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">u32</span>,
                           <span class="ident">network_layer</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>, <span class="ident">address1</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>,
                           <span class="ident">address2</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>, <span class="ident">skip_packet</span>: <span class="kw-2">&amp;mut</span> <span class="ident">bool</span>) {
@@ -429,7 +558,39 @@
 }
 
 
-
+<span class="doccomment">/// This function analyzes the transport layer header passed as parameter and updates variables</span>
+<span class="doccomment">/// passed by reference on the basis of the packet header content.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_header` - An `Option` containing the `TransportHeader` enum obtained through etherparse.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_layer` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and it will be overwritten with a String representing the transport layer</span>
+<span class="doccomment">/// protocol (&quot;tcp&quot; or &quot;udp&quot;).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `port1` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the source port of the packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `port2` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the destination port of the packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_1` - Parameter initialized with a `None` value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the application layer protocol obtained from the source port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_2` - Parameter initialized with a `None` value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the application layer protocol obtained from the destination port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocols` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with a set containing the application layer protocols</span>
+<span class="doccomment">/// obtained from the source and destination ports.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_protocol` - Parameter initialized with a default value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten with the observed transport layer protocol.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `skip_packet` - Boolean flag initialized with a `false` value; it is passed by reference</span>
+<span class="doccomment">/// and will be overwritten to `true` if the `transport_header` is invalid; in this case the</span>
+<span class="doccomment">/// packet will not be considered.</span>
 <span class="kw">fn</span> <span class="ident">analyze_transport_header</span>(<span class="ident">transport_header</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TransportHeader</span><span class="op">&gt;</span>,
                             <span class="ident">transport_layer</span>: <span class="kw-2">&amp;mut</span> <span class="ident">String</span>, <span class="ident">port1</span>: <span class="kw-2">&amp;mut</span> <span class="ident">u16</span>, <span class="ident">port2</span>: <span class="kw-2">&amp;mut</span> <span class="ident">u16</span>,
                             <span class="ident">application_protocol_1</span>: <span class="kw-2">&amp;mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AppProtocol</span><span class="op">&gt;</span>,
@@ -472,7 +633,24 @@
 }
 
 
-
+<span class="doccomment">/// Function to insert the source of a packet into the shared map containing the analyzed traffic.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `key` - An `AddressPort` element representing the source of the packet. It corresponds to the map key part.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `exchanged_bytes` - IP payload dimension of the observed packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_protocol` - Transport layer protocol carried by the observed packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_1` - Application layer protocol obtained from the source port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_2` - Application layer protocol obtained from the destination port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocols` - Set containing the application layer protocols</span>
+<span class="doccomment">/// obtained from the source and destination ports.</span>
 <span class="kw">fn</span> <span class="ident">modify_or_insert_source_in_map</span>(<span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">key</span>: <span class="ident">AddressPort</span>,
                                   <span class="ident">exchanged_bytes</span>: <span class="ident">u32</span>, <span class="ident">transport_protocol</span>: <span class="ident">TransProtocol</span>,
                                   <span class="ident">application_protocol_1</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AppProtocol</span><span class="op">&gt;</span>,
@@ -505,7 +683,25 @@
 }
 
 
-
+<span class="doccomment">/// Function to insert the destination of a packet into the shared map containing the analyzed traffic.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `key` - An `AddressPort` element representing the destination of the packet.</span>
+<span class="doccomment">/// It corresponds to the map key part.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `exchanged_bytes` - IP payload dimension of the observed packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `transport_protocol` - Transport layer protocol carried by the observed packet.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_1` - Application layer protocol obtained from the source port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocol_2` - Application layer protocol obtained from the destination port.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `application_protocols` - Set containing the application layer protocols</span>
+<span class="doccomment">/// obtained from the source and destination ports.</span>
 <span class="kw">fn</span> <span class="ident">modify_or_insert_destination_in_map</span>(<span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">key</span>: <span class="ident">AddressPort</span>,
                                        <span class="ident">exchanged_bytes</span>: <span class="ident">u32</span>, <span class="ident">transport_protocol</span>: <span class="ident">TransProtocol</span>,
                                        <span class="ident">application_protocol_1</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AppProtocol</span><span class="op">&gt;</span>,
@@ -538,7 +734,27 @@
 }
 
 
-
+<span class="doccomment">/// Given an integer in the range `0..=65535`, this function returns an `Option&lt;AppProtocol&gt;` containing</span>
+<span class="doccomment">/// the respective application protocol represented by a value of the `AppProtocol` enum.</span>
+<span class="doccomment">/// Only the most common application layer protocols are considered; if a unknown port number</span>
+<span class="doccomment">/// is provided, this function returns `None`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `port` - An integer representing the transport layer port to be mapped to</span>
+<span class="doccomment">/// an application layer protocol.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// let x = from_port_to_application_protocol(25);</span>
+<span class="doccomment">/// //Simple Mail Transfer Protocol</span>
+<span class="doccomment">/// assert_eq!(x, Option::Some(AppProtocol::SMTP));</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let y = from_port_to_application_protocol(1999);</span>
+<span class="doccomment">/// //Unknown port-to-protocol mapping</span>
+<span class="doccomment">/// assert_eq!(y, Option::None);</span>
+<span class="doccomment">/// ```</span>
 <span class="kw">fn</span> <span class="ident">from_port_to_application_protocol</span>(<span class="ident">port</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AppProtocol</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">port</span> {
         <span class="number">20</span>..<span class="op">=</span><span class="number">21</span> =&gt; {<span class="ident">Option::Some</span>(<span class="ident">AppProtocol::FTP</span>)},
