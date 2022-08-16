@@ -1,84 +1,92 @@
 use std::cmp::Ordering::Equal;
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
+use std::time::Duration;
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Active, Capture};
-use crate::{AddressPort, AppProtocol, ReportInfo, TransProtocol};
+use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 
 pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
-                          mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>) {
+                          mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, status_pair: Arc<(Mutex<Status>, Condvar)>) {
+    let cvar = &status_pair.1;
     loop {
-        match cap.next() {
-            Err(_) => {
-                continue;
-            }
-            Ok(packet) => {
+        let mut status = status_pair.0.lock().unwrap();
+        status = cvar.wait_while(status, |s| *s == Status::Pause).unwrap();
 
-                match PacketHeaders::from_ethernet_slice(&packet) {
-                    Err(_) => {
-                        continue;
-                    }
-                    Ok(value) => {
-
-                        let mut address1 = "".to_string();
-                        let mut address2 = "".to_string();
-                        let mut network_layer = "".to_string();
-                        let mut port1 = 0;
-                        let mut port2 = 0;
-                        let mut transport_layer = "".to_string();
-                        let mut exchanged_bytes: u32 = 0;
-                        let mut transport_protocol = TransProtocol::Other;
-                        let mut application_protocol_1: Option<AppProtocol> = None;
-                        let mut application_protocol_2: Option<AppProtocol> = None;
-                        let mut application_protocols: HashSet<AppProtocol> = HashSet::new();
-                        let mut skip_packet = false;
-
-                        analyze_network_header(value.ip, &mut exchanged_bytes,
-                                               &mut network_layer, &mut address1, &mut address2,
-                                               &mut skip_packet);
-                        if skip_packet {
+        if *status == Status::Running {
+            drop(status);
+            match cap.next() {
+                Err(_) => {
+                    continue;
+                }
+                Ok(packet) => {
+                    match PacketHeaders::from_ethernet_slice(&packet) {
+                        Err(_) => {
                             continue;
                         }
+                        Ok(value) => {
+                            let mut address1 = "".to_string();
+                            let mut address2 = "".to_string();
+                            let mut network_layer = "".to_string();
+                            let mut port1 = 0;
+                            let mut port2 = 0;
+                            let mut transport_layer = "".to_string();
+                            let mut exchanged_bytes: u32 = 0;
+                            let mut transport_protocol = TransProtocol::Other;
+                            let mut application_protocol_1: Option<AppProtocol> = None;
+                            let mut application_protocol_2: Option<AppProtocol> = None;
+                            let mut application_protocols: HashSet<AppProtocol> = HashSet::new();
+                            let mut skip_packet = false;
 
-                        analyze_transport_header(value.transport,
-                                                 &mut transport_layer, &mut port1, &mut port2,
-                                                 &mut application_protocol_1,
-                                                 &mut application_protocol_2,
-                                                 &mut application_protocols,
-                                                 &mut transport_protocol, &mut skip_packet);
-                        if skip_packet {
-                            continue;
-                        }
+                            analyze_network_header(value.ip, &mut exchanged_bytes,
+                                                   &mut network_layer, &mut address1, &mut address2,
+                                                   &mut skip_packet);
+                            if skip_packet {
+                                continue;
+                            }
 
-                        let key1: AddressPort = AddressPort::new(address1,port1);
-                        let key2: AddressPort = AddressPort::new(address2,port2);
+                            analyze_transport_header(value.transport,
+                                                     &mut transport_layer, &mut port1, &mut port2,
+                                                     &mut application_protocol_1,
+                                                     &mut application_protocol_2,
+                                                     &mut application_protocols,
+                                                     &mut transport_protocol, &mut skip_packet);
+                            if skip_packet {
+                                continue;
+                            }
 
-                        if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
-                            if transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal {
+                            let key1: AddressPort = AddressPort::new(address1, port1);
+                            let key2: AddressPort = AddressPort::new(address2, port2);
 
-                                if port1 >= lowest_port && port1 <= highest_port {
-                                    modify_or_insert_source_in_map(mutex_map.clone(), key1,
-                                                                   exchanged_bytes, transport_protocol,
-                                                                   application_protocol_1, application_protocol_2,
-                                                                   application_protocols.clone());
+                            if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
+                                if transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal {
+                                    if port1 >= lowest_port && port1 <= highest_port {
+                                        modify_or_insert_source_in_map(mutex_map.clone(), key1,
+                                                                       exchanged_bytes, transport_protocol,
+                                                                       application_protocol_1, application_protocol_2,
+                                                                       application_protocols.clone());
+                                    }
+
+                                    if port2 >= lowest_port && port2 <= highest_port {
+                                        modify_or_insert_destination_in_map(mutex_map.clone(), key2,
+                                                                            exchanged_bytes, transport_protocol,
+                                                                            application_protocol_1, application_protocol_2,
+                                                                            application_protocols);
+                                    }
                                 }
-
-                                if port2 >= lowest_port && port2 <= highest_port {
-                                    modify_or_insert_destination_in_map(mutex_map.clone(), key2,
-                                                                        exchanged_bytes, transport_protocol,
-                                                                        application_protocol_1, application_protocol_2,
-                                                                        application_protocols);
-                                }
-
                             }
                         }
                     }
                 }
             }
         }
+        else if *status == Status::Stop { break; }
+
     }
+
 }
 
 
