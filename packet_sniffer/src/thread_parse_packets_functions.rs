@@ -30,6 +30,8 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// ```-t``` option.
 ///
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
+///
+/// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
                           mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,

@@ -523,7 +523,7 @@
                 <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;s&#39;</span>)) =&gt; {
                     <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Stop</span>;
                     <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
-                    <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture stopped\r&quot;</span>.<span class="ident">red</span>());
+                    <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture stopped\n\r&quot;</span>.<span class="ident">red</span>());
                     <span class="kw">return</span>;
                 }
                 <span class="kw">_</span> =&gt; { <span class="comment">/* Other events */</span> }

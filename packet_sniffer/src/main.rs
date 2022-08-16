@@ -255,7 +255,7 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
                     *status = Status::Stop;
                     cvar.notify_all();
-                    println!("\n\t{}", "Capture stopped\r".red());
+                    println!("\n\t{}", "Capture stopped\n\r".red());
                     return;
                 }
                 _ => { /* Other events */ }

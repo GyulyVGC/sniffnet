@@ -259,6 +259,8 @@
 <span id="257">257</span>
 <span id="258">258</span>
 <span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of updating the output report</span>
 <span class="doccomment">//! every ```interval``` seconds, with ```interval``` specified by the user through the</span>
 <span class="doccomment">//! ```-i``` command line option.</span>
@@ -307,6 +309,8 @@
 <span class="doccomment">/// ```-o``` option.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `status_pair` - Shared variable to check the application current status.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sleep_and_write_report_loop</span>(<span class="ident">lowest_port</span>: <span class="ident">u16</span>, <span class="ident">highest_port</span>: <span class="ident">u16</span>, <span class="ident">interval</span>: <span class="ident">u64</span>, <span class="ident">min_packets</span>: <span class="ident">u32</span>,
                                    <span class="ident">device_name</span>: <span class="ident">String</span>, <span class="ident">network_layer</span>: <span class="ident">String</span>, <span class="ident">transport_layer</span>: <span class="ident">String</span>,
                                    <span class="ident">output_file</span>: <span class="ident">String</span>, <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,

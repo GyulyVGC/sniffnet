@@ -46,6 +46,8 @@ use crate::{AddressPort, ReportInfo, Status};
 /// ```-o``` option.
 ///
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.
+///
+/// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u32,
                                    device_name: String, network_layer: String, transport_layer: String,
                                    output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
