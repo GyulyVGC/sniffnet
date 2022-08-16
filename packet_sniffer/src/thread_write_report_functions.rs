@@ -84,9 +84,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             }
             println!("{} ({})\r", "\tReport updated".bright_blue(),times_report_updated);
         }
-        else if *status == Status::Stop {
-            return;
-        }
     }
 }
 

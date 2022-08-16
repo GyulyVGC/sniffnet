@@ -108,10 +108,6 @@ pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_po
                 }
             }
         }
-        else if *status == Status::Stop {
-            return;
-        }
-
     }
 
 }

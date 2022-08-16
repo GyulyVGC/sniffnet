@@ -35,9 +35,8 @@ pub enum Status {
     /// The sniffing process is running: the application parses packets and periodically update the output report.
     Running,
     /// The sniffing process is pause by the user and waiting to be later resumed.
-    Pause,
-    /// The application is stopped. Main thread terminates its execution.
-    Stop}
+    Pause
+}
 
 /// Entry point of application execution.
 ///
@@ -112,19 +111,21 @@ fn main() {
     println!("\tUpdating the file '{}' every {} seconds", output_file, interval);
     println!("\n\tPress {}, {}  the application\n", "'p' to pause".yellow(), "'s' to stop".red());
 
+    // Thread 1: updates textual report
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
                                     found_device.name, network_layer,
                                     transport_layer, output_file,
                                     mutex_map2, status_pair3);
     });
-    //let (m_stat, cvar) = &*status_pair1;
 
+    // Thread 2: parses packets
     thread::spawn(move || {
         parse_packets_loop(cap, lowest_port, highest_port, network_layer_2,
                            transport_layer_2, mutex_map1, status_pair1);
     });
 
+    // Main thread: updates application status
     set_status_by_key(status_pair2);
 
 }
@@ -253,14 +254,11 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    *status = Status::Stop;
-                    cvar.notify_all();
                     println!("\n\t{}", "Capture stopped\n\r".red());
                     return;
                 }
                 _ => { /* Other events */ }
             }
         }
-        //thread::sleep(Duration::from_millis(50));
     }
 }
