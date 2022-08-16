@@ -179,20 +179,24 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
 </pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">address_port</span>;
 <span class="kw">mod</span> <span class="ident">report_info</span>;
-<span class="kw">mod</span> <span class="ident">command_line_options</span>;
-<span class="kw">mod</span> <span class="ident">parse_packets_functions</span>;
-<span class="kw">mod</span> <span class="ident">write_report_functions</span>;
+<span class="kw">mod</span> <span class="ident">args</span>;
+<span class="kw">mod</span> <span class="ident">thread_parse_packets_functions</span>;
+<span class="kw">mod</span> <span class="ident">thread_write_report_functions</span>;
 
 <span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Device</span>, <span class="ident">Capture</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::address_port</span>::{<span class="ident">AddressPort</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::report_info</span>::{<span class="ident">AppProtocol</span>, <span class="ident">ReportInfo</span>, <span class="ident">TransProtocol</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::command_line_options::Args</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parse_packets_functions::parse_packets_loop</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::write_report_functions::sleep_and_write_report_loop</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::args::Args</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::thread_parse_packets_functions::parse_packets_loop</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::thread_write_report_functions::sleep_and_write_report_loop</span>;
 <span class="kw">use</span> <span class="ident">clap::Parser</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>};
@@ -273,6 +277,8 @@
 
 
 <span class="doccomment">/// Prints the list of available network adapters&#39; names and addresses.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function is called if the user specifies the ```-d``` command line option.</span>
 <span class="kw">fn</span> <span class="ident">print_device_list</span>() {
     <span class="macro">println!</span>();
     <span class="kw">for</span> <span class="ident">dev</span> <span class="kw">in</span> <span class="ident">Device::list</span>().<span class="ident">expect</span>(<span class="string">&quot;Error retrieving device list\n&quot;</span>) {
@@ -317,7 +323,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Arguments</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// * `network_layer` - A String representing the IP version to be filtered.</span>
+<span class="doccomment">/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-n``` option.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -339,7 +346,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Arguments</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// * `network_layer` - A String representing the transport protocol to be filtered.</span>
+<span class="doccomment">/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the</span>
+<span class="doccomment">/// ```-t``` option.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>

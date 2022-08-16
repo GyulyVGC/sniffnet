@@ -1,3 +1,6 @@
+//! Module containing functions executed by the thread in charge of parsing sniffed packets and
+//! inserting them in the shared map.
+
 use std::cmp::Ordering::Equal;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Condvar, Mutex};
@@ -8,6 +11,27 @@ use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Active, Capture};
 use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 
+
+/// The calling thread enters in a loop in which it waits for network packets, parses them according
+/// to the user specified filters, and inserts them into the shared map variable.
+///
+/// # Arguments
+///
+/// * `cap` - Initialized `Capture` handle to interface with the network traffic
+
+/// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
+/// through the ```-l``` option.
+///
+/// * `highest_port` - The highest port number to be considered in the report. Specified by the user
+/// through the ```-h``` option.
+///
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
+///
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
+///
+/// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
 pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
                           mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, status_pair: Arc<(Mutex<Status>, Condvar)>) {
@@ -90,7 +114,28 @@ pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_po
 }
 
 
-
+/// This function analyzes the network layer header passed as parameter and updates variables
+/// passed by reference on the basis of the packet header content.
+///
+/// # Arguments
+///
+/// * `network_header` - An `Option` containing the `IpHeader` enum obtained through etherparse.
+///
+/// * `exchanged_bytes` - Parameter initialized with a default value; it is passed by reference
+/// and it will be overwritten with the IP payload dimension.
+///
+/// * `network_layer` - Parameter initialized with a default value; it is passed by reference
+/// and it will be overwritten with a String representing the IP version ("ipv4" or "ipv6").
+///
+/// * `address1` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with the source IP address of the packet.
+///
+/// * `address2` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with the destination IP address of the packet.
+///
+/// * `skip_packet` - Boolean flag initialized with a `false` value; it is passed by reference
+/// and will be overwritten to `true` if the `network_header` is invalid; in this case the
+/// packet will not be considered.
 fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mut u32,
                           network_layer: &mut String, address1: &mut String,
                           address2: &mut String, skip_packet: &mut bool) {
@@ -130,7 +175,39 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
 }
 
 
-
+/// This function analyzes the transport layer header passed as parameter and updates variables
+/// passed by reference on the basis of the packet header content.
+///
+/// # Arguments
+///
+/// * `transport_header` - An `Option` containing the `TransportHeader` enum obtained through etherparse.
+///
+/// * `transport_layer` - Parameter initialized with a default value; it is passed by reference
+/// and it will be overwritten with a String representing the transport layer
+/// protocol ("tcp" or "udp").
+///
+/// * `port1` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with the source port of the packet.
+///
+/// * `port2` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with the destination port of the packet.
+///
+/// * `application_protocol_1` - Parameter initialized with a `None` value; it is passed by reference
+/// and will be overwritten with the application layer protocol obtained from the source port.
+///
+/// * `application_protocol_2` - Parameter initialized with a `None` value; it is passed by reference
+/// and will be overwritten with the application layer protocol obtained from the destination port.
+///
+/// * `application_protocols` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with a set containing the application layer protocols
+/// obtained from the source and destination ports.
+///
+/// * `transport_protocol` - Parameter initialized with a default value; it is passed by reference
+/// and will be overwritten with the observed transport layer protocol.
+///
+/// * `skip_packet` - Boolean flag initialized with a `false` value; it is passed by reference
+/// and will be overwritten to `true` if the `transport_header` is invalid; in this case the
+/// packet will not be considered.
 fn analyze_transport_header(transport_header: Option<TransportHeader>,
                             transport_layer: &mut String, port1: &mut u16, port2: &mut u16,
                             application_protocol_1: &mut Option<AppProtocol>,
@@ -173,7 +250,24 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 }
 
 
-
+/// Function to insert the source of a packet into the shared map containing the analyzed traffic.
+///
+/// # Arguments
+///
+/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.
+///
+/// * `key` - An `AddressPort` element representing the source of the packet. It corresponds to the map key part.
+///
+/// * `exchanged_bytes` - IP payload dimension of the observed packet.
+///
+/// * `transport_protocol` - Transport layer protocol carried by the observed packet.
+///
+/// * `application_protocol_1` - Application layer protocol obtained from the source port.
+///
+/// * `application_protocol_2` - Application layer protocol obtained from the destination port.
+///
+/// * `application_protocols` - Set containing the application layer protocols
+/// obtained from the source and destination ports.
 fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
                                   exchanged_bytes: u32, transport_protocol: TransProtocol,
                                   application_protocol_1: Option<AppProtocol>,
@@ -206,7 +300,25 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
 }
 
 
-
+/// Function to insert the destination of a packet into the shared map containing the analyzed traffic.
+///
+/// # Arguments
+///
+/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.
+///
+/// * `key` - An `AddressPort` element representing the destination of the packet.
+/// It corresponds to the map key part.
+///
+/// * `exchanged_bytes` - IP payload dimension of the observed packet.
+///
+/// * `transport_protocol` - Transport layer protocol carried by the observed packet.
+///
+/// * `application_protocol_1` - Application layer protocol obtained from the source port.
+///
+/// * `application_protocol_2` - Application layer protocol obtained from the destination port.
+///
+/// * `application_protocols` - Set containing the application layer protocols
+/// obtained from the source and destination ports.
 fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
                                        exchanged_bytes: u32, transport_protocol: TransProtocol,
                                        application_protocol_1: Option<AppProtocol>,
@@ -239,7 +351,27 @@ fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,
 }
 
 
-
+/// Given an integer in the range `0..=65535`, this function returns an `Option<AppProtocol>` containing
+/// the respective application protocol represented by a value of the `AppProtocol` enum.
+/// Only the most common application layer protocols are considered; if a unknown port number
+/// is provided, this function returns `None`.
+///
+/// # Arguments
+///
+/// * `port` - An integer representing the transport layer port to be mapped to
+/// an application layer protocol.
+///
+/// # Examples
+///
+/// ```
+/// let x = from_port_to_application_protocol(25);
+/// //Simple Mail Transfer Protocol
+/// assert_eq!(x, Option::Some(AppProtocol::SMTP));
+///
+/// let y = from_port_to_application_protocol(1999);
+/// //Unknown port-to-protocol mapping
+/// assert_eq!(y, Option::None);
+/// ```
 fn from_port_to_application_protocol(port: u16) -> Option<AppProtocol> {
     match port {
         20..=21 => {Option::Some(AppProtocol::FTP)},

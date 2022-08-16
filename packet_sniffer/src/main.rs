@@ -1,17 +1,17 @@
 mod address_port;
 mod report_info;
-mod command_line_options;
-mod parse_packets_functions;
-mod write_report_functions;
+mod args;
+mod thread_parse_packets_functions;
+mod thread_write_report_functions;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use pcap::{Device, Capture, Stat};
 use crate::address_port::{AddressPort};
 use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
-use crate::command_line_options::Args;
-use crate::parse_packets_functions::parse_packets_loop;
-use crate::write_report_functions::sleep_and_write_report_loop;
+use crate::args::Args;
+use crate::thread_parse_packets_functions::parse_packets_loop;
+use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
 use std::thread;
 use std::time::Duration;
@@ -101,6 +101,8 @@ fn main() {
 
 
 /// Prints the list of available network adapters' names and addresses.
+///
+/// This function is called if the user specifies the ```-d``` command line option.
 fn print_device_list() {
     println!();
     for dev in Device::list().expect("Error retrieving device list\n") {
@@ -145,7 +147,8 @@ fn retrieve_device(adapter: String) -> Option<Device> {
 ///
 /// # Arguments
 ///
-/// * `network_layer` - A String representing the IP version to be filtered.
+/// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
+/// ```-n``` option.
 ///
 /// # Examples
 ///
@@ -167,7 +170,8 @@ fn is_valid_network_layer(network_layer: String) -> bool {
 ///
 /// # Arguments
 ///
-/// * `network_layer` - A String representing the transport protocol to be filtered.
+/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// ```-t``` option.
 ///
 /// # Examples
 ///

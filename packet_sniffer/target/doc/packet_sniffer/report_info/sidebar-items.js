@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["AppProtocol",""],["TransProtocol",""]],"struct":[["ReportInfo",""]]});
+initSidebarItems({"enum":[["AppProtocol","Enum representing the possible observed values of application layer protocol."],["TransProtocol","Enum representing the possible observed values of transport layer protocol."]],"struct":[["ReportInfo","Struct useful to format the output report file and to keep track of statistics about the sniffed traffic."]]});

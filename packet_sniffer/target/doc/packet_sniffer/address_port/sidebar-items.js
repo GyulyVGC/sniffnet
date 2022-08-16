@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["AddressPort",""]]});
+initSidebarItems({"struct":[["AddressPort","Struct representing a network address:port pair."]]});
