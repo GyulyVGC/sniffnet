@@ -258,9 +258,6 @@
 <span id="256">256</span>
 <span id="257">257</span>
 <span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of updating the output report</span>
 <span class="doccomment">//! every ```interval``` seconds, with ```interval``` specified by the user through the</span>
 <span class="doccomment">//! ```-i``` command line option.</span>
@@ -346,9 +343,6 @@
                 }
             }
             <span class="macro">println!</span>(<span class="string">&quot;{} ({})\r&quot;</span>, <span class="string">&quot;\tReport updated&quot;</span>.<span class="ident">bright_blue</span>(),<span class="ident">times_report_updated</span>);
-        }
-        <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Stop</span> {
-            <span class="kw">return</span>;
         }
     }
 }

@@ -264,8 +264,6 @@
 <span id="262">262</span>
 <span id="263">263</span>
 <span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Multithreading library to intercept incoming and outgoing traffic through a user specified network interface of a computer.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The application will periodically generate a human readable textual report,</span>
@@ -303,9 +301,8 @@
     <span class="doccomment">/// The sniffing process is running: the application parses packets and periodically update the output report.</span>
     <span class="ident">Running</span>,
     <span class="doccomment">/// The sniffing process is pause by the user and waiting to be later resumed.</span>
-    <span class="ident">Pause</span>,
-    <span class="doccomment">/// The application is stopped. Main thread terminates its execution.</span>
-    <span class="ident">Stop</span>}
+    <span class="ident">Pause</span>
+}
 
 <span class="doccomment">/// Entry point of application execution.</span>
 <span class="doccomment">///</span>
@@ -380,19 +377,21 @@
     <span class="macro">println!</span>(<span class="string">&quot;\tUpdating the file &#39;{}&#39; every {} seconds&quot;</span>, <span class="ident">output_file</span>, <span class="ident">interval</span>);
     <span class="macro">println!</span>(<span class="string">&quot;\n\tPress {}, {}  the application\n&quot;</span>, <span class="string">&quot;&#39;p&#39; to pause&quot;</span>.<span class="ident">yellow</span>(), <span class="string">&quot;&#39;s&#39; to stop&quot;</span>.<span class="ident">red</span>());
 
+    <span class="comment">// Thread 1: updates textual report</span>
     <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
         <span class="ident">sleep_and_write_report_loop</span>(<span class="ident">lowest_port</span>, <span class="ident">highest_port</span>, <span class="ident">interval</span>, <span class="ident">min_packets</span>,
                                     <span class="ident">found_device</span>.<span class="ident">name</span>, <span class="ident">network_layer</span>,
                                     <span class="ident">transport_layer</span>, <span class="ident">output_file</span>,
                                     <span class="ident">mutex_map2</span>, <span class="ident">status_pair3</span>);
     });
-    <span class="comment">//let (m_stat, cvar) = &amp;*status_pair1;</span>
 
+    <span class="comment">// Thread 2: parses packets</span>
     <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
         <span class="ident">parse_packets_loop</span>(<span class="ident">cap</span>, <span class="ident">lowest_port</span>, <span class="ident">highest_port</span>, <span class="ident">network_layer_2</span>,
                            <span class="ident">transport_layer_2</span>, <span class="ident">mutex_map1</span>, <span class="ident">status_pair1</span>);
     });
 
+    <span class="comment">// Main thread: updates application status</span>
     <span class="ident">set_status_by_key</span>(<span class="ident">status_pair2</span>);
 
 }
@@ -521,15 +520,12 @@
                     }
                 }
                 <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;s&#39;</span>)) =&gt; {
-                    <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Stop</span>;
-                    <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
                     <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture stopped\n\r&quot;</span>.<span class="ident">red</span>());
                     <span class="kw">return</span>;
                 }
                 <span class="kw">_</span> =&gt; { <span class="comment">/* Other events */</span> }
             }
         }
-        <span class="comment">//thread::sleep(Duration::from_millis(50));</span>
     }
 }</code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="packet_sniffer" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
