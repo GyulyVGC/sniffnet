@@ -74,7 +74,7 @@ First of all, it specifies the name of the network adapter analyzed during the s
 
 Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, the frequency of updates and the number of times the report was updated (re-written from scratch with updated data).
 
-Finally, it describes the status of the possible filters applicable by the user through the command line: minimum number of packets for and address:port pair to be printed in the report, IP address version, transport layer protocol and port minimum and maximum number.
+Finally, it describes the status of the possible filters applicable by the user through the command line: minimum number of packets for an address:port pair to be printed in the report, IP address version, transport layer protocol and port minimum and maximum number.
 
 Note that an application layer protocol filter is not provided since the user can use the lowest and highest port options to this purpose (e.g., to filter DNS traffic a user can specify ```packet_sniffer -l 53 -h 53```, to filter HTTPS traffic a user can specify ```packet_sniffer -l 443 -h 443``` and so on).
 
