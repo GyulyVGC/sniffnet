@@ -83,7 +83,7 @@ fn main() {
     let status_pair3 = status_pair1.clone();
 
     println!("\n\tParsing packets...");
-    println!("\tUpdating the file '{}' every {} seconds\n", output_file, interval);
+    println!("\tUpdating the file '{}' every {} seconds\nPress 'p' to pause, ESC to exit.\n", output_file, interval);
 
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
