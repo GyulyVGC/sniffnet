@@ -255,6 +255,10 @@
 <span id="253">253</span>
 <span id="254">254</span>
 <span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of updating the output report</span>
 <span class="doccomment">//! every ```interval``` seconds, with ```interval``` specified by the user through the</span>
 <span class="doccomment">//! ```-i``` command line option.</span>
@@ -305,7 +309,8 @@
 <span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sleep_and_write_report_loop</span>(<span class="ident">lowest_port</span>: <span class="ident">u16</span>, <span class="ident">highest_port</span>: <span class="ident">u16</span>, <span class="ident">interval</span>: <span class="ident">u64</span>, <span class="ident">min_packets</span>: <span class="ident">u32</span>,
                                    <span class="ident">device_name</span>: <span class="ident">String</span>, <span class="ident">network_layer</span>: <span class="ident">String</span>, <span class="ident">transport_layer</span>: <span class="ident">String</span>,
-                                   <span class="ident">output_file</span>: <span class="ident">String</span>, <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
+                                   <span class="ident">output_file</span>: <span class="ident">String</span>, <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                                   <span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">times_report_updated</span> <span class="op">=</span> <span class="number">0</span>;
     <span class="kw">let</span> <span class="ident">cvar</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">status_pair</span>.<span class="number">1</span>;
@@ -316,6 +321,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">status_pair</span>.<span class="number">0</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="ident">status</span> <span class="op">=</span> <span class="ident">cvar</span>.<span class="ident">wait_while</span>(<span class="ident">status</span>, <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">s</span> <span class="op">==</span> <span class="ident">Status::Pause</span>).<span class="ident">unwrap</span>();
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Running</span> {
+            <span class="ident">drop</span>(<span class="ident">status</span>);
             <span class="ident">times_report_updated</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">File::create</span>(<span class="ident">output_file</span>.<span class="ident">clone</span>()).<span class="ident">expect</span>(<span class="string">&quot;Error creating output file\n&quot;</span>);
 
@@ -335,9 +341,11 @@
                     <span class="macro">write!</span>(<span class="ident">output</span>, <span class="string">&quot;Address: {}:{}\n{}\n\n&quot;</span>, <span class="ident">key</span>.<span class="ident">address</span>, <span class="ident">key</span>.<span class="ident">port</span>, <span class="ident">val</span>).<span class="ident">expect</span>(<span class="string">&quot;Error writing output file\n&quot;</span>);
                 }
             }
-            <span class="macro">println!</span>(<span class="string">&quot;{} ({})\r&quot;</span>, <span class="string">&quot;\tReport updated&quot;</span>.<span class="ident">green</span>(),<span class="ident">times_report_updated</span>);
+            <span class="macro">println!</span>(<span class="string">&quot;{} ({})\r&quot;</span>, <span class="string">&quot;\tReport updated&quot;</span>.<span class="ident">bright_blue</span>(),<span class="ident">times_report_updated</span>);
         }
-        <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Stop</span> {<span class="kw">break</span>;}
+        <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Stop</span> {
+            <span class="kw">return</span>;
+        }
     }
 }
 

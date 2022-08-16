@@ -397,14 +397,13 @@
 <span id="395">395</span>
 <span id="396">396</span>
 <span id="397">397</span>
+<span id="398">398</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Module containing functions executed by the thread in charge of parsing sniffed packets and</span>
 <span class="doccomment">//! inserting them in the shared map.</span>
 
 <span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
-<span class="kw">use</span> <span class="ident">std::thread</span>;
-<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 <span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Local</span>};
 <span class="kw">use</span> <span class="ident">etherparse</span>::{<span class="ident">IpHeader</span>, <span class="ident">PacketHeaders</span>, <span class="ident">TransportHeader</span>};
 <span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Active</span>, <span class="ident">Capture</span>};
@@ -433,7 +432,8 @@
 <span class="doccomment">/// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_packets_loop</span>(<span class="kw-2">mut</span> <span class="ident">cap</span>: <span class="ident">Capture</span><span class="op">&lt;</span><span class="ident">Active</span><span class="op">&gt;</span>, <span class="ident">lowest_port</span>: <span class="ident">u16</span>, <span class="ident">highest_port</span>: <span class="ident">u16</span>,
                           <span class="ident">network_layer_filter</span>: <span class="ident">String</span>, <span class="ident">transport_layer_filter</span>: <span class="ident">String</span>,
-                          <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
+                          <span class="ident">mutex_map</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AddressPort</span>,<span class="ident">ReportInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                          <span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">cvar</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">status_pair</span>.<span class="number">1</span>;
     <span class="kw">loop</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">status_pair</span>.<span class="number">0</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
@@ -506,7 +506,9 @@
                 }
             }
         }
-        <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Stop</span> { <span class="kw">break</span>; }
+        <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Stop</span> {
+            <span class="kw">return</span>;
+        }
 
     }
 

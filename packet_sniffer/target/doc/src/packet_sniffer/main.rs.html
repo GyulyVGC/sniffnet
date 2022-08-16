@@ -232,7 +232,51 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
-</pre><pre class="rust"><code><span class="kw">mod</span> <span class="ident">address_port</span>;
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Multithreading library to intercept incoming and outgoing traffic through a user specified network interface of a computer.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The application will periodically generate a human readable textual report,</span>
+<span class="doccomment">//! providing statistics about the observed network packets divided by address:port pairs.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The user can in any moment pause and resume the sniffing process.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Packets can be filtered specifying command line options.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Packets analysis is based on network and transport layers.</span>
+<span class="kw">mod</span> <span class="ident">address_port</span>;
 <span class="kw">mod</span> <span class="ident">report_info</span>;
 <span class="kw">mod</span> <span class="ident">args</span>;
 <span class="kw">mod</span> <span class="ident">thread_parse_packets_functions</span>;
@@ -240,7 +284,7 @@
 
 <span class="kw">use</span> <span class="ident">std::cmp::Ordering::Equal</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
-<span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Device</span>, <span class="ident">Capture</span>, <span class="ident">Stat</span>};
+<span class="kw">use</span> <span class="ident">pcap</span>::{<span class="ident">Device</span>, <span class="ident">Capture</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::address_port</span>::{<span class="ident">AddressPort</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::report_info</span>::{<span class="ident">AppProtocol</span>, <span class="ident">ReportInfo</span>, <span class="ident">TransProtocol</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::args::Args</span>;
@@ -248,16 +292,27 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::thread_write_report_functions::sleep_and_write_report_loop</span>;
 <span class="kw">use</span> <span class="ident">clap::Parser</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
-<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>, <span class="ident">Condvar</span>};
 <span class="kw">use</span> <span class="ident">crossterm</span>::{<span class="ident">screen::RawScreen</span>,  <span class="ident">input</span>::{<span class="ident">input</span>, <span class="ident">InputEvent</span>, <span class="ident">KeyEvent</span>}};
 <span class="kw">use</span> <span class="ident">colored</span>;
 <span class="kw">use</span> <span class="ident">colored::Colorize</span>;
 
+<span class="doccomment">/// This enum represents the sniffing process status.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Status</span> {<span class="ident">Running</span>, <span class="ident">Pause</span>, <span class="ident">Stop</span>}
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Status</span> {
+    <span class="doccomment">/// The sniffing process is running: the application parses packets and periodically update the output report.</span>
+    <span class="ident">Running</span>,
+    <span class="doccomment">/// The sniffing process is pause by the user and waiting to be later resumed.</span>
+    <span class="ident">Pause</span>,
+    <span class="doccomment">/// The application is stopped. Main thread terminates its execution.</span>
+    <span class="ident">Stop</span>}
 
 <span class="doccomment">/// Entry point of application execution.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It parses command line options using clap and generates two threads:</span>
+<span class="doccomment">/// one to periodically update the report file and one to parse network packets.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The main thread will wait for user commands to pause, stop and resume the sniffing process.</span>
 <span class="kw">fn</span> <span class="ident">main</span>() {
     <span class="comment">// enables cli colors</span>
     <span class="ident">colored::control::set_override</span>(<span class="bool-val">true</span>);
@@ -323,7 +378,7 @@
 
     <span class="macro">println!</span>(<span class="string">&quot;\n\tParsing packets...&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;\tUpdating the file &#39;{}&#39; every {} seconds&quot;</span>, <span class="ident">output_file</span>, <span class="ident">interval</span>);
-    <span class="macro">println!</span>(<span class="string">&quot;\tPress {}, {}  the application\n&quot;</span>, <span class="string">&quot;&#39;p&#39; to pause&quot;</span>.<span class="ident">yellow</span>(), <span class="string">&quot;&#39;s&#39; to stop&quot;</span>.<span class="ident">red</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;\n\tPress {}, {}  the application\n&quot;</span>, <span class="string">&quot;&#39;p&#39; to pause&quot;</span>.<span class="ident">yellow</span>(), <span class="string">&quot;&#39;s&#39; to stop&quot;</span>.<span class="ident">red</span>());
 
     <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
         <span class="ident">sleep_and_write_report_loop</span>(<span class="ident">lowest_port</span>, <span class="ident">highest_port</span>, <span class="ident">interval</span>, <span class="ident">min_packets</span>,
@@ -333,10 +388,13 @@
     });
     <span class="comment">//let (m_stat, cvar) = &amp;*status_pair1;</span>
 
+    <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+        <span class="ident">parse_packets_loop</span>(<span class="ident">cap</span>, <span class="ident">lowest_port</span>, <span class="ident">highest_port</span>, <span class="ident">network_layer_2</span>,
+                           <span class="ident">transport_layer_2</span>, <span class="ident">mutex_map1</span>, <span class="ident">status_pair1</span>);
+    });
+
     <span class="ident">set_status_by_key</span>(<span class="ident">status_pair2</span>);
 
-    <span class="ident">parse_packets_loop</span>(<span class="ident">cap</span>, <span class="ident">lowest_port</span>, <span class="ident">highest_port</span>, <span class="ident">network_layer_2</span>,
-                       <span class="ident">transport_layer_2</span>, <span class="ident">mutex_map1</span>, <span class="ident">status_pair1</span>);
 }
 
 
@@ -428,41 +486,51 @@
         <span class="op">|</span><span class="op">|</span> <span class="ident">transport_layer</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="string">&quot;no filter&quot;</span>.<span class="ident">to_string</span>()) <span class="op">==</span> <span class="ident">Equal</span>
 }
 
-<span class="kw">fn</span> <span class="ident">set_status_by_key</span>(<span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
-    <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">_raw</span> <span class="op">=</span> <span class="ident">RawScreen::into_raw_mode</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">input</span>().<span class="ident">read_sync</span>();
-        <span class="kw">let</span> <span class="ident">cvar</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">status_pair</span>.<span class="number">1</span>;
-        <span class="kw">loop</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event</span>) <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next</span>() { <span class="comment">// Blocking call</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">status_pair</span>.<span class="number">0</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
-                <span class="kw">match</span> <span class="ident">event</span> {
-                    <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;p&#39;</span>)) =&gt; {
-                        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Running</span> {
-                            <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture paused... Press &#39;r&#39; to resume\r&quot;</span>.<span class="ident">yellow</span>());
-                            <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Pause</span>;
-                        }
-                    }
-                    <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;r&#39;</span>)) =&gt; {
-                        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Pause</span> {
-                            <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture resumed\r\n&quot;</span>.<span class="ident">green</span>());
-                            <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Running</span>;
-                            <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
-                        }
-                    }
-                    <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;s&#39;</span>)) =&gt; {
-                        <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Stop</span>;
-                        <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
-                        <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture stopped\r&quot;</span>.<span class="ident">red</span>());
-                        <span class="kw">break</span>;
-                    }
-                    <span class="kw">_</span> =&gt; { <span class="comment">/* Other events */</span> }
-                }
-            }
-            <span class="ident">thread::sleep</span>(<span class="ident">Duration::from_millis</span>(<span class="number">50</span>));
-        }
-    });
 
+<span class="doccomment">/// Loop waiting for command line inputs by the user. Used to pause, resume and stop the sniffing process.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If the &#39;p&#39; character is received, the sniffing process is paused.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If the &#39;r&#39; character is received, the sniffing process is resumed.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If the &#39;s&#39; character is received, the sniffing process is stopped.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `status_pair` - Shared variable to change the application current status.</span>
+<span class="kw">fn</span> <span class="ident">set_status_by_key</span>(<span class="ident">status_pair</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
+
+    <span class="kw">let</span> <span class="ident">_raw</span> <span class="op">=</span> <span class="ident">RawScreen::into_raw_mode</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">input</span>().<span class="ident">read_sync</span>();
+    <span class="kw">let</span> <span class="ident">cvar</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">status_pair</span>.<span class="number">1</span>;
+    <span class="kw">loop</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event</span>) <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">next</span>() { <span class="comment">// Blocking call</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">status_pair</span>.<span class="number">0</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+            <span class="kw">match</span> <span class="ident">event</span> {
+                <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;p&#39;</span>)) =&gt; {
+                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Running</span> {
+                        <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture paused... Press &#39;r&#39; to resume\r&quot;</span>.<span class="ident">yellow</span>());
+                        <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Pause</span>;
+                    }
+                }
+                <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;r&#39;</span>)) =&gt; {
+                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">status</span> <span class="op">==</span> <span class="ident">Status::Pause</span> {
+                        <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture resumed\r\n&quot;</span>.<span class="ident">green</span>());
+                        <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Running</span>;
+                        <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
+                    }
+                }
+                <span class="ident">InputEvent::Keyboard</span>(<span class="ident">KeyEvent::Char</span>(<span class="string">&#39;s&#39;</span>)) =&gt; {
+                    <span class="kw-2">*</span><span class="ident">status</span> <span class="op">=</span> <span class="ident">Status::Stop</span>;
+                    <span class="ident">cvar</span>.<span class="ident">notify_all</span>();
+                    <span class="macro">println!</span>(<span class="string">&quot;\n\t{}&quot;</span>, <span class="string">&quot;Capture stopped\r&quot;</span>.<span class="ident">red</span>());
+                    <span class="kw">return</span>;
+                }
+                <span class="kw">_</span> =&gt; { <span class="comment">/* Other events */</span> }
+            }
+        }
+        <span class="comment">//thread::sleep(Duration::from_millis(50));</span>
+    }
 }</code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="packet_sniffer" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

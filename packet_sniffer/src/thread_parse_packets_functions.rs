@@ -4,8 +4,6 @@
 use std::cmp::Ordering::Equal;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Condvar, Mutex};
-use std::thread;
-use std::time::Duration;
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Active, Capture};
@@ -34,7 +32,8 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
 pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
-                          mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, status_pair: Arc<(Mutex<Status>, Condvar)>) {
+                          mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
+                          status_pair: Arc<(Mutex<Status>, Condvar)>) {
     let cvar = &status_pair.1;
     loop {
         let mut status = status_pair.0.lock().unwrap();
@@ -107,7 +106,9 @@ pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_po
                 }
             }
         }
-        else if *status == Status::Stop { break; }
+        else if *status == Status::Stop {
+            return;
+        }
 
     }
 

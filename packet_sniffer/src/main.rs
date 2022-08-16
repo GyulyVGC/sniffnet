@@ -1,3 +1,13 @@
+//! Multithreading library to intercept incoming and outgoing traffic through a user specified network interface of a computer.
+//!
+//! The application will periodically generate a human readable textual report,
+//! providing statistics about the observed network packets divided by address:port pairs.
+//!
+//! The user can in any moment pause and resume the sniffing process.
+//!
+//! Packets can be filtered specifying command line options.
+//!
+//! Packets analysis is based on network and transport layers.
 mod address_port;
 mod report_info;
 mod args;
@@ -6,7 +16,7 @@ mod thread_write_report_functions;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
-use pcap::{Device, Capture, Stat};
+use pcap::{Device, Capture};
 use crate::address_port::{AddressPort};
 use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
 use crate::args::Args;
@@ -14,16 +24,27 @@ use crate::thread_parse_packets_functions::parse_packets_loop;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
 use std::thread;
-use std::time::Duration;
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
 use colored::Colorize;
 
+/// This enum represents the sniffing process status.
 #[derive(PartialEq, Eq)]
-pub enum Status {Running, Pause, Stop}
+pub enum Status {
+    /// The sniffing process is running: the application parses packets and periodically update the output report.
+    Running,
+    /// The sniffing process is pause by the user and waiting to be later resumed.
+    Pause,
+    /// The application is stopped. Main thread terminates its execution.
+    Stop}
 
 /// Entry point of application execution.
+///
+/// It parses command line options using clap and generates two threads:
+/// one to periodically update the report file and one to parse network packets.
+///
+/// The main thread will wait for user commands to pause, stop and resume the sniffing process.
 fn main() {
     // enables cli colors
     colored::control::set_override(true);
@@ -89,7 +110,7 @@ fn main() {
 
     println!("\n\tParsing packets...");
     println!("\tUpdating the file '{}' every {} seconds", output_file, interval);
-    println!("\tPress {}, {}  the application\n", "'p' to pause".yellow(), "'s' to stop".red());
+    println!("\n\tPress {}, {}  the application\n", "'p' to pause".yellow(), "'s' to stop".red());
 
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
@@ -99,10 +120,13 @@ fn main() {
     });
     //let (m_stat, cvar) = &*status_pair1;
 
+    thread::spawn(move || {
+        parse_packets_loop(cap, lowest_port, highest_port, network_layer_2,
+                           transport_layer_2, mutex_map1, status_pair1);
+    });
+
     set_status_by_key(status_pair2);
 
-    parse_packets_loop(cap, lowest_port, highest_port, network_layer_2,
-                       transport_layer_2, mutex_map1, status_pair1);
 }
 
 
@@ -194,39 +218,49 @@ fn is_valid_transport_layer(transport_layer: String) -> bool {
         || transport_layer.cmp(&"no filter".to_string()) == Equal
 }
 
-fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
-    thread::spawn(move || {
-        let _raw = RawScreen::into_raw_mode();
-        let mut reader = input().read_sync();
-        let cvar = &status_pair.1;
-        loop {
-            if let Some(event) = reader.next() { // Blocking call
-                let mut status = status_pair.0.lock().unwrap();
-                match event {
-                    InputEvent::Keyboard(KeyEvent::Char('p')) => {
-                        if *status == Status::Running {
-                            println!("\n\t{}", "Capture paused... Press 'r' to resume\r".yellow());
-                            *status = Status::Pause;
-                        }
-                    }
-                    InputEvent::Keyboard(KeyEvent::Char('r')) => {
-                        if *status == Status::Pause {
-                            println!("\n\t{}", "Capture resumed\r\n".green());
-                            *status = Status::Running;
-                            cvar.notify_all();
-                        }
-                    }
-                    InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                        *status = Status::Stop;
-                        cvar.notify_all();
-                        println!("\n\t{}", "Capture stopped\r".red());
-                        break;
-                    }
-                    _ => { /* Other events */ }
-                }
-            }
-            thread::sleep(Duration::from_millis(50));
-        }
-    });
 
+/// Loop waiting for command line inputs by the user. Used to pause, resume and stop the sniffing process.
+///
+/// If the 'p' character is received, the sniffing process is paused.
+///
+/// If the 'r' character is received, the sniffing process is resumed.
+///
+/// If the 's' character is received, the sniffing process is stopped.
+///
+/// # Arguments
+///
+/// * `status_pair` - Shared variable to change the application current status.
+fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
+
+    let _raw = RawScreen::into_raw_mode();
+    let mut reader = input().read_sync();
+    let cvar = &status_pair.1;
+    loop {
+        if let Some(event) = reader.next() { // Blocking call
+            let mut status = status_pair.0.lock().unwrap();
+            match event {
+                InputEvent::Keyboard(KeyEvent::Char('p')) => {
+                    if *status == Status::Running {
+                        println!("\n\t{}", "Capture paused... Press 'r' to resume\r".yellow());
+                        *status = Status::Pause;
+                    }
+                }
+                InputEvent::Keyboard(KeyEvent::Char('r')) => {
+                    if *status == Status::Pause {
+                        println!("\n\t{}", "Capture resumed\r\n".green());
+                        *status = Status::Running;
+                        cvar.notify_all();
+                    }
+                }
+                InputEvent::Keyboard(KeyEvent::Char('s')) => {
+                    *status = Status::Stop;
+                    cvar.notify_all();
+                    println!("\n\t{}", "Capture stopped\r".red());
+                    return;
+                }
+                _ => { /* Other events */ }
+            }
+        }
+        //thread::sleep(Duration::from_millis(50));
+    }
 }

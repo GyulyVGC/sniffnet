@@ -48,7 +48,8 @@ use crate::{AddressPort, ReportInfo, Status};
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u32,
                                    device_name: String, network_layer: String, transport_layer: String,
-                                   output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, status_pair: Arc<(Mutex<Status>, Condvar)>) {
+                                   output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
+                                   status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let mut times_report_updated = 0;
     let cvar = &status_pair.1;
@@ -59,6 +60,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let mut status = status_pair.0.lock().unwrap();
         status = cvar.wait_while(status, |s| *s == Status::Pause).unwrap();
         if *status == Status::Running {
+            drop(status);
             times_report_updated += 1;
             let mut output = File::create(output_file.clone()).expect("Error creating output file\n");
 
@@ -78,9 +80,11 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                     write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
                 }
             }
-            println!("{} ({})\r", "\tReport updated".green(),times_report_updated);
+            println!("{} ({})\r", "\tReport updated".bright_blue(),times_report_updated);
         }
-        else if *status == Status::Stop {break;}
+        else if *status == Status::Stop {
+            return;
+        }
     }
 }
 
