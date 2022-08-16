@@ -13,9 +13,6 @@ Authors:
 - [Command line options](#command-line-options)
 
 - [User interactions during application execution](#user-interactions-during-application-execution)
-  + [Pause the sniffing process](#pause-the-sniffing-process)
-  + [Resume the sniffing process](#resume-the-sniffing-process)
-  + [Stop the application execution](#stop-the-application-execution)
 
 - [Textual report structure](#textual-report-structure)
   + [Report header](#report-header)
@@ -52,11 +49,13 @@ A detailed documentation of the command line options is available opening the fi
           
 ## User interactions during application execution
 
-### Pause the sniffing process
+The user can interact with the sniffing process through the terminal window. This is made possible by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously (blocking).
 
-### Resume the sniffing process
+- **Pause**: to temporarily pause the sniffing process, the user can type a 'p' character in the terminal window.
 
-### Stop the application execution
+- **Resume**: to resume the sniffing process, the user can type a 'r' character in the terminal window.
+
+- **Stop**: to stop the application, the user can type a 's' character in the terminal window.
 
 
 
@@ -119,6 +118,20 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 
 
 ## Implementation details
+
+The application consists in three different execution flows.
+
+The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (pause, resume and stop the sniffing process); in doing so it signals to the secondary threads when to pause or resume their work.
+The signaling is made possible by setting an application status, shared with the secondary threads and associated to a mutex and a condition variable.
+
+The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual report every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
+
+The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPort``` struct and the value part is represented by a ```ReportInfo``` struct.
+Before parsing each packet it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds parsing the packet.
+This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next()``` function.
+
+The thread in charge of updating the textual report sleeps for ```interval``` seconds and re-writes the report with updated traffic statistics.
+Before updating the report it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds writing the report.
 
 
 ## Error conditions
@@ -233,3 +246,7 @@ The application has been developed using the following external libraries.
 - [clap](https://docs.rs/clap/3.2.17/clap/)
 
 - [chrono](https://docs.rs/chrono/0.4.22/chrono/)
+
+- [crossterm](https://docs.rs/crossterm/0.13.3/crossterm/)
+
+- [colored](https://docs.rs/colored/2.0.0/colored/)
