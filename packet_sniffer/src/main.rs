@@ -15,10 +15,14 @@ use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
 use std::thread;
 use std::sync::{Arc, Mutex};
+use colored;
+use colored::Colorize;
 
 
 /// Entry point of application execution.
 fn main() {
+    //enables command line colors
+    colored::control::set_override(true);
 
     let args = Args::parse();
     let adapter: String = args.adapter;
@@ -76,7 +80,7 @@ fn main() {
     let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
     let mutex_map2 = mutex_map1.clone();
 
-    println!("\n\tParsing packets...");
+    println!("{}","\n\tParsing packets...".red());
     println!("\tUpdating the file '{}' every {} seconds\n", output_file, interval);
 
     thread::spawn(move || {
