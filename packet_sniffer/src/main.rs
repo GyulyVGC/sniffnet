@@ -6,7 +6,7 @@ mod thread_write_report_functions;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
-use pcap::{Device, Capture};
+use pcap::{Device, Capture, Stat};
 use crate::address_port::{AddressPort};
 use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
 use crate::args::Args;
@@ -14,14 +14,18 @@ use crate::thread_parse_packets_functions::parse_packets_loop;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
 use std::thread;
-use std::sync::{Arc, Mutex};
+use std::time::Duration;
+use std::sync::{Arc, Mutex, Condvar};
+use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
 use colored::Colorize;
 
+#[derive(PartialEq, Eq)]
+pub enum Status {Running, Pause, Stop}
 
 /// Entry point of application execution.
 fn main() {
-    //enables command line colors
+    // enables cli colors
     colored::control::set_override(true);
 
     let args = Args::parse();
@@ -79,19 +83,26 @@ fn main() {
 
     let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
     let mutex_map2 = mutex_map1.clone();
+    let status_pair1 = Arc::new((Mutex::new(Status::Running), Condvar::new()));
+    let status_pair2 = status_pair1.clone();
+    let status_pair3 = status_pair1.clone();
 
-    println!("{}","\n\tParsing packets...".red());
-    println!("\tUpdating the file '{}' every {} seconds\n", output_file, interval);
+    println!("\n\tParsing packets...");
+    println!("\tUpdating the file '{}' every {} seconds", output_file, interval);
+    println!("\tPress {}, {}  the application\n", "'p' to pause".yellow(), "'s' to stop".red());
 
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
                                     found_device.name, network_layer,
                                     transport_layer, output_file,
-                                    mutex_map2);
+                                    mutex_map2, status_pair3);
     });
+    //let (m_stat, cvar) = &*status_pair1;
+
+    set_status_by_key(status_pair2);
 
     parse_packets_loop(cap, lowest_port, highest_port, network_layer_2,
-                       transport_layer_2, mutex_map1);
+                       transport_layer_2, mutex_map1, status_pair1);
 }
 
 
@@ -181,4 +192,41 @@ fn is_valid_transport_layer(transport_layer: String) -> bool {
     transport_layer.cmp(&"tcp".to_string()) == Equal
         || transport_layer.cmp(&"udp".to_string()) == Equal
         || transport_layer.cmp(&"no filter".to_string()) == Equal
+}
+
+fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
+    thread::spawn(move || {
+        let _raw = RawScreen::into_raw_mode();
+        let mut reader = input().read_sync();
+        let cvar = &status_pair.1;
+        loop {
+            if let Some(event) = reader.next() { // Blocking call
+                let mut status = status_pair.0.lock().unwrap();
+                match event {
+                    InputEvent::Keyboard(KeyEvent::Char('p')) => {
+                        if *status == Status::Running {
+                            println!("\n\t{}", "Capture paused... Press 'r' to resume\r".yellow());
+                            *status = Status::Pause;
+                        }
+                    }
+                    InputEvent::Keyboard(KeyEvent::Char('r')) => {
+                        if *status == Status::Pause {
+                            println!("\n\t{}", "Capture resumed\r\n".green());
+                            *status = Status::Running;
+                            cvar.notify_all();
+                        }
+                    }
+                    InputEvent::Keyboard(KeyEvent::Char('s')) => {
+                        *status = Status::Stop;
+                        cvar.notify_all();
+                        println!("\n\t{}", "Capture stopped\r".red());
+                        break;
+                    }
+                    _ => { /* Other events */ }
+                }
+            }
+            thread::sleep(Duration::from_millis(50));
+        }
+    });
+
 }

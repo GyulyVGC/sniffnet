@@ -7,12 +7,13 @@
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use std::fs::File;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
 use chrono::Local;
 use std::io::Write;
-use crate::{AddressPort, ReportInfo};
+use colored::Colorize;
+use crate::{AddressPort, ReportInfo, Status};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -47,33 +48,39 @@ use crate::{AddressPort, ReportInfo};
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable containing the parsed packets.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u32,
                                    device_name: String, network_layer: String, transport_layer: String,
-                                   output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>) {
+                                   output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let mut times_report_updated = 0;
+    let cvar = &status_pair.1;
     let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
 
     loop {
         thread::sleep(Duration::from_secs(interval));
-        times_report_updated += 1;
-        let mut output = File::create(output_file.clone()).expect("Error creating output file\n");
+        let mut status = status_pair.0.lock().unwrap();
+        status = cvar.wait_while(status, |s| *s == Status::Pause).unwrap();
+        if *status == Status::Running {
+            times_report_updated += 1;
+            let mut output = File::create(output_file.clone()).expect("Error creating output file\n");
 
-        write_report_file_header(output.try_clone().expect("Error cloning file handler\n"),
-                                 device_name.clone(), first_timestamp.clone(),
-                                 times_report_updated, interval, lowest_port, highest_port, min_packets,
-                                 network_layer.clone(), transport_layer.clone());
+            write_report_file_header(output.try_clone().expect("Error cloning file handler\n"),
+                                     device_name.clone(), first_timestamp.clone(),
+                                     times_report_updated, interval, lowest_port, highest_port, min_packets,
+                                     network_layer.clone(), transport_layer.clone());
 
-        let map = mutex_map.lock().expect("Error acquiring mutex\n");
+            let map = mutex_map.lock().expect("Error acquiring mutex\n");
 
-        let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
-        sorted_vec.sort_by(|&(_, a), &(_, b)|
-            (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+            let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
+            sorted_vec.sort_by(|&(_, a), &(_, b)|
+                (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
 
-        for (key, val) in sorted_vec.iter() {
-            if val.transmitted_packets + val.received_packets >= min_packets {
-                write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
+            for (key, val) in sorted_vec.iter() {
+                if val.transmitted_packets + val.received_packets >= min_packets {
+                    write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
+                }
             }
+            println!("{} ({})\r", "\tReport updated".green(),times_report_updated);
         }
-        println!("\tReport updated ({})",times_report_updated);
+        else if *status == Status::Stop {break;}
     }
 }
 
