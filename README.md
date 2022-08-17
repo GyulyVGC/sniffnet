@@ -1,10 +1,7 @@
-# Network analyzer (packet sniffer)
+# Sniffnet (network packets sniffer)
 
-Authors: 
-- [Bellini Giuliano](https://github.com/GyulyVGC) (s294739)
-- [Canepari Cristiano Marco](https://github.com/Crirock) (s304808)
-  
-## Contents
+<details>
+  <summary>Table of contents</summary>
 
 - [Introduction](#introduction)
 
@@ -22,7 +19,9 @@ Authors:
   + [Windows configuration problems](#windows-configuration-problems)
   + [Other errors](#other-errors)
 
-- [External libraries](#external-libraries)
+- [Authors](#authors)
+  
+</details>
   
  
 ## Introduction
@@ -31,18 +30,22 @@ Aim of the application is to intercept incoming and outgoing traffic through a u
 
 The application will periodically generate and update a human-readable textual report, providing statistics about the observed network packets.
 
+There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic. You can find a list of the available options in the code documentation.
+
+The application can be run using ```cargo run``` or ```cargo run -- [OPTIONS]```.
+
 In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
 
           
 ## User interactions during application execution
 
-The user can interact with the sniffing process through the terminal window. This is made possible by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously (blocking).
+The user can interact with the sniffing process through the terminal window.
 
 - **Pause**: to temporarily pause the sniffing process, the user can type a 'p' character in the terminal window.
 
-- **Resume**: to resume the sniffing process, the user can type a 'r' character in the terminal window.
+- **Resume**: to later resume the sniffing process, the user can type a 'r' character in the terminal window.
 
-- **Stop**: to stop the application, the user can type a 's' character in the terminal window.
+- **Stop**: to stop the application execution, the user can type a 's' character in the terminal window.
 
 
 
@@ -108,7 +111,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 
 The application consists in three different execution flows.
 
-The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (pause, resume and stop the sniffing process); in doing so it signals to the secondary threads when to pause or resume their work.
+The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously); in doing so it signals to the secondary threads when to pause or resume their work.
 The signaling is made possible by setting an application status, shared with the secondary threads and associated to a mutex and a condition variable.
 
 The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual report every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
@@ -221,19 +224,7 @@ All those exceptional scenarios are managed through calls to the ```expect()``` 
 The ```unwrap()``` method is used only on ```Option<T>``` values when it's certain they contain ```Some``` value.
 
 
+# Authors
 
-## External libraries
-
-The application has been developed using the following external libraries.
-
-- [pcap](https://docs.rs/pcap/0.9.2/pcap/)
-
-- [etherparse](https://docs.rs/etherparse/0.12.0/etherparse/)
-
-- [clap](https://docs.rs/clap/3.2.17/clap/)
-
-- [chrono](https://docs.rs/chrono/0.4.22/chrono/)
-
-- [crossterm](https://docs.rs/crossterm/0.13.3/crossterm/)
-
-- [colored](https://docs.rs/colored/2.0.0/colored/)
+- [Bellini Giuliano](https://github.com/GyulyVGC)
+- [Canepari Cristiano Marco](https://github.com/Crirock)
