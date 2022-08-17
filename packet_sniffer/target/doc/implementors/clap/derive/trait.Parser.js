@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["packet_sniffer"] = [{"text":"impl Parser for <a class=\"struct\" href=\"packet_sniffer/args/struct.Args.html\" title=\"struct packet_sniffer::args::Args\">Args</a>","synthetic":false,"types":["packet_sniffer::args::Args"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
