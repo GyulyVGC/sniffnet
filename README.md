@@ -222,7 +222,7 @@ On Debian based Linux: ```install libpcap-dev```.
 
 On Fedora Linux: ```install libpcap-devel```.
 
-Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin``.
+Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
 
 
 ### Other errors
