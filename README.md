@@ -213,7 +213,7 @@ In this section are reported the errors that may occur while the application is 
 In order to make pcap work properly on Windows systems, it is needed to download [WinCap](https://www.winpcap.org/install/) and the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
 
 
-## Linux configuration problems
+### Linux configuration problems
 
 To correctly use pcap on Linux systems, install the libraries and header files for the libpcap library. For example:
 
