@@ -34,7 +34,7 @@ https://user-images.githubusercontent.com/100347457/185255629-ce1133bc-ca8d-4a3e
  
 ## Introduction
 
-The application binary can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet -- [OPTIONS]```.
+The application binary can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet [OPTIONS]```.
 
 Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
