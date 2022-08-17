@@ -17,8 +17,9 @@
   + [Wrong command line options specification](#wrong-command-line-options-specification)
   + [Permissions errors](#permissions-errors)
   + [Windows configuration problems](#windows-configuration-problems)
+  + [Linux configuration problems](#linux-configuration-problems)  
   + [Other errors](#other-errors)
-
+  
 - [Authors](#authors)
   
 </details>
