@@ -3,14 +3,10 @@
 Authors: 
 - [Bellini Giuliano](https://github.com/GyulyVGC) (s294739)
 - [Canepari Cristiano Marco](https://github.com/Crirock) (s304808)
-
-***A detailed documentation of the application code is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a web browser.***
   
 ## Contents
 
 - [Introduction](#introduction)
-
-- [Command line options](#command-line-options)
 
 - [User interactions during application execution](#user-interactions-during-application-execution)
 
@@ -31,21 +27,12 @@ Authors:
  
 ## Introduction
 
-Aim of the project is to intercept incoming and outgoing traffic through a user specified network interface of his computer.
+Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
-The application will generate a textual report, providing statistics about the observed network packets.
+The application will periodically generate and update a human-readable textual report, providing statistics about the observed network packets.
 
-In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementational details from an algorithmic point of view, an explanation of the possible error conditions that may occurr, and other useful informations.
+In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
 
-For further documentation of the code modules and functions, consult the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` from a web browser.
-
-
-## Command line options
-
-The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
-
-A detailed documentation of the command line options is available opening the file ```packet_sniffer/target/doc/packet_sniffer/index.html``` with a browser, then selecting the module ```args``` and then the struct ```Args```.
-          
           
 ## User interactions during application execution
 
@@ -65,11 +52,11 @@ In this section is reported the structure of the output report file generated, t
 
 ### Report header
 
-The first section of the textual report contains an header summarizing different useful informations.
+The first section of the textual report contains a header summarizing different useful information.
 
 ![Screenshot](./img/report_part_1.png)
 
-First of all, it specifies the name of the network adapter analyzed during the sniffing process.
+First, it specifies the name of the network adapter analyzed during the sniffing process.
 
 Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, the frequency of updates and the number of times the report was updated (re-written from scratch with updated data).
 
@@ -145,7 +132,7 @@ In this section are reported the errors that may occur while the application is 
 
 &emsp;&emsp;&emsp; If a non-existing adapter name is provided, the application raises an error and terminates.
 
-&emsp;&emsp;&emsp; In this case the application will suggest to use the ```-d``` option to print on the standard output a list of the available devices.
+&emsp;&emsp;&emsp; In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
 
 &emsp;&emsp;&emsp; ```packet_sniffer -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
 
@@ -178,12 +165,12 @@ In this section are reported the errors that may occur while the application is 
 
 - **Invalid network layer protocol filter**
 
-&emsp;&emsp;&emsp; If a string different from "IPv4", "IPv6" or "no filter" is provided (not case sensitive), the application raises an error and terminates.
+&emsp;&emsp;&emsp; If a string different from "IPv4", "IPv6" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
 
 &emsp;&emsp;&emsp; Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
 
 
-- **Invalid ouput file extension**
+- **Invalid output file extension**
 
 &emsp;&emsp;&emsp; There is no particular limitation on the output file name.
 
@@ -192,7 +179,7 @@ In this section are reported the errors that may occur while the application is 
 
 - **Invalid transport layer protocol filter**
 
-&emsp;&emsp;&emsp; If a string different from "TCP", "UDP" or "no filter" is provided (not case sensitive), the application raises an error and terminates.
+&emsp;&emsp;&emsp; If a string different from "TCP", "UDP" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
 
 &emsp;&emsp;&emsp; Note that not including the ```-t``` option is equal to provide ```-t "no filter"```.
 
@@ -223,15 +210,15 @@ In order to make pcap work properly on Windows systems, it is needed to download
 
 ### Other errors
 
-Other errors, not previously listed, may occurr seldomly.
+Other errors, not previously listed, may occur seldom.
 
 Most of such errors are due to the unwrapping of ```Result<T>```, which may exceptionally contain the ```Err``` value.
   
-This may happen in one of the following situations: activation of a pcap ```Capture``` handle, retrieval of network adapters list through pcap, selection of the default device through pcap, creation of the output file, clonation of the output file handle, acquisition of a ```Mutex``` lock, writing of the output file.
+This may happen in one of the following situations: activation of a pcap ```Capture``` handle, retrieval of network adapters list through pcap, selection of the default device through pcap, creation of the output file, cloning of the output file handle, acquisition of a ```Mutex``` lock, writing of the output file.
   
 All those exceptional scenarios are managed through calls to the ```expect()``` method, providing textual feedback to the user on the cause of the panic.
   
-The ```unwrap()``` method is used only on ```Option<T>``` values when it's sure they contain ```Some``` value.
+The ```unwrap()``` method is used only on ```Option<T>``` values when it's certain they contain ```Some``` value.
 
 
 
