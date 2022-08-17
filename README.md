@@ -32,6 +32,8 @@ The application will periodically generate and update a [human-readable textual 
 
 There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic. You can find a list of the available options in the code documentation.
 
+The application binaries can be installed with ```cargo install sniffnet```.
+
 The application can be run using ```cargo run``` or ```cargo run -- [OPTIONS]```.
 
 In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
