@@ -26,15 +26,13 @@
  
 ## Introduction
 
+The application binaries can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet -- [OPTIONS]```.
+
 Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
 The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
 
 There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic. You can find a list of the available options in the code documentation.
-
-The application binaries can be installed with ```cargo install sniffnet```.
-
-The application can be run using ```cargo run``` or ```cargo run -- [OPTIONS]```.
 
 In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
 
@@ -212,7 +210,7 @@ In this section are reported the errors that may occur while the application is 
 
 ### Windows configuration problems
 
-In order to make pcap work properly on Windows systems, it is needed to download the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
+In order to make pcap work properly on Windows systems, it is needed to download [WinCap](https://www.winpcap.org/install/) and the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
 
 
 ### Other errors
