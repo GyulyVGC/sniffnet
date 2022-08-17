@@ -213,6 +213,17 @@ In this section are reported the errors that may occur while the application is 
 In order to make pcap work properly on Windows systems, it is needed to download [WinCap](https://www.winpcap.org/install/) and the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
 
 
+## Linux configuration problems
+
+To correctly use pcap on Linux systems, install the libraries and header files for the libpcap library. For example:
+
+On Debian based Linux: ```install libpcap-dev```.
+
+On Fedora Linux: ```install libpcap-devel```.
+
+Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin``.
+
+
 ### Other errors
 
 Other errors, not previously listed, may occur seldom.
