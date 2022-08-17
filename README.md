@@ -42,7 +42,6 @@ In this document you can find the list of the available command line options, a 
 
 ## Command line options
 
-The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
 
  - ```-a, --adapter```
  
