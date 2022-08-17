@@ -28,7 +28,7 @@
 
 Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
-The application will periodically generate and update a human-readable textual report, providing statistics about the observed network packets.
+The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
 
 There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic. You can find a list of the available options in the code documentation.
 
@@ -71,7 +71,9 @@ Note that an application layer protocol filter is not provided since the user ca
 
 The second section of the textual report is dedicated to the packets stream analysis for each address:port pair.
 
-This analysis results in a list in which each element represents an address:port pair with the relative statistics; note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
+This analysis results in a list in which each element represents an address:port pair with the relative statistics.
+
+Note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
 
 ![Screenshot](./img/report_part_2.png)
 
