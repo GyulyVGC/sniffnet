@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Application to sniff and filter network traffic. Generates a human-readable report of the observed packets."
 repository = "https://github.com/Crirock/pdsproject"

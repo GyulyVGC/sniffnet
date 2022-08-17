@@ -66,7 +66,7 @@ In this document you can find the list of the available command line options, a 
  
  - ```-h, --highest-port```
  
-&emsp;&emsp;&emsp;Sets the maximum port value to be considered, if omitted there is not ports higher bound.
+&emsp;&emsp;&emsp;Sets the maximum port value to be considered, if omitted there is no ports higher bound.
 
 &emsp;&emsp;&emsp;If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
           
@@ -84,7 +84,7 @@ In this document you can find the list of the available command line options, a 
  
  - ```-l, --lowest-port```
  
-&emsp;&emsp;&emsp;Sets the minimum port value to be considered, if omitted there is not ports lower bound.
+&emsp;&emsp;&emsp;Sets the minimum port value to be considered, if omitted there is no ports lower bound.
 
 &emsp;&emsp;&emsp;If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
 
@@ -104,7 +104,7 @@ In this document you can find the list of the available command line options, a 
 
 &emsp;&emsp;&emsp;Filters packets on the basis of the IP version address (IPv4 or IPv6).
 
-&emsp;&emsp;&emsp;If a string different from "IPv4" or "IPv6" is provided (not case sensitive), the application raises an error and terminates.
+&emsp;&emsp;&emsp;If a string different from "IPv4" or "IPv6" is provided (not case-sensitive), the application raises an error and terminates.
 
 &emsp;&emsp;&emsp;This option must be followed by a textual value.
             
@@ -122,7 +122,7 @@ In this document you can find the list of the available command line options, a 
 
 &emsp;&emsp;&emsp;Filters packets on the basis of the transport layer protocol (TCP or UDP).
 
-&emsp;&emsp;&emsp;If a string different from "TCP" or "UDP" is provided (not case sensitive), the application raises an error and terminates.
+&emsp;&emsp;&emsp;If a string different from "TCP" or "UDP" is provided (not case-sensitive), the application raises an error and terminates.
 
 &emsp;&emsp;&emsp;This option must be followed by a textual value.
 

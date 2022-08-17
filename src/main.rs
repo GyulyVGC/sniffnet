@@ -1,4 +1,4 @@
-//! Multithreading library to intercept incoming and outgoing traffic through a user specified network interface of a computer.
+//! Multithreading application to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 //!
 //! The application will periodically generate a human readable textual report,
 //! providing statistics about the observed network packets divided by address:port pairs.
