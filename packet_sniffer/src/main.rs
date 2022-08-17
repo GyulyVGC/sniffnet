@@ -16,7 +16,7 @@ mod thread_write_report_functions;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
-use pcap::{Device, Capture};
+use pcap::{Device};
 use crate::address_port::{AddressPort};
 use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
 use crate::args::Args;
@@ -48,6 +48,7 @@ fn main() {
     // enables cli colors
     colored::control::set_override(true);
 
+    // parse arguments
     let args = Args::parse();
     let adapter: String = args.adapter;
     let output_file: String = args.output_file;
@@ -65,41 +66,35 @@ fn main() {
         return;
     }
 
-    if  !is_valid_network_layer(network_layer.clone()) {
-        eprint!("\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\n\n");
+    if !is_valid_network_layer(network_layer.clone()) {
+        eprint!("{}","\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\n\n".red());
         return;
     }
 
     if !is_valid_transport_layer(transport_layer.clone()) {
-        eprint!("\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\n\n");
+        eprint!("{}","\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\n\n".red());
         return;
     }
 
     if lowest_port > highest_port {
-        eprint!("\n\tERROR: Specified lowest port is greater than specified highest port.\n\n");
+        eprint!("{}", "\n\tERROR: Specified lowest port is greater than specified highest port.\n\n".red());
         return;
     }
 
     if interval == 0 {
-        eprint!("\n\tERROR: Specified time interval is null.\n\n");
+        eprint!("{}", "\n\tERROR: Specified time interval is null.\n\n".red());
         return;
     }
 
     let found_device_option = retrieve_device(adapter);
 
     if found_device_option.is_none() {
-        eprint!("\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n\n");
+        eprint!("{}", "\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n\n".red());
         return;
     }
 
     let found_device = found_device_option.unwrap();
-
-    let cap = Capture::from_device(found_device.clone())
-        .expect("Capture initialization error\n")
-        .promisc(true)
-        .buffer_size(10_000_000)
-        .open()
-        .expect("Capture initialization error\n");
+    let device_name = found_device.clone().name;
 
     let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
     let mutex_map2 = mutex_map1.clone();
@@ -114,14 +109,14 @@ fn main() {
     // Thread 1: updates textual report
     thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
-                                    found_device.name, network_layer,
+                                    device_name, network_layer,
                                     transport_layer, output_file,
                                     mutex_map2, status_pair3);
     });
 
     // Thread 2: parses packets
     thread::spawn(move || {
-        parse_packets_loop(cap, lowest_port, highest_port, network_layer_2,
+        parse_packets_loop(found_device, lowest_port, highest_port, network_layer_2,
                            transport_layer_2, mutex_map1, status_pair1);
     });
 
@@ -238,7 +233,7 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
     let cvar = &status_pair.1;
     loop {
         if let Some(event) = reader.next() { // Blocking call
-            let mut status = status_pair.0.lock().unwrap();
+            let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {

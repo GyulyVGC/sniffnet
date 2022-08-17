@@ -59,8 +59,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
     loop {
         thread::sleep(Duration::from_secs(interval));
-        let mut status = status_pair.0.lock().unwrap();
-        status = cvar.wait_while(status, |s| *s == Status::Pause).unwrap();
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
+        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n");
         if *status == Status::Running {
             drop(status);
             times_report_updated += 1;

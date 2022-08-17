@@ -4,10 +4,10 @@
 <><>		Packets are sniffed from adapter 'en0'
 <><>
 <><>		Report updates info
-<><>			Report start time: 16/08/2022 21:39:57
-<><>			Report last update: 16/08/2022 21:40:30
+<><>			Report start time: 17/08/2022 08:12:18
+<><>			Report last update: 17/08/2022 08:12:55
 <><>			Report update frequency: every 2 seconds
-<><>			Number of times report was updated: 15
+<><>			Number of times report was updated: 5
 <><>
 <><>		Filters
 <><>			Considering address:port pairs featured by any number of packets

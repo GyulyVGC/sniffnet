@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Condvar, Mutex};
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
-use pcap::{Active, Capture};
+use pcap::{Capture, Device};
 use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 
 
@@ -15,7 +15,7 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 ///
 /// # Arguments
 ///
-/// * `cap` - Initialized `Capture` handle to interface with the network traffic
+/// * `device` - Network adapter to be sniffed
 
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
 /// through the ```-l``` option.
@@ -32,14 +32,19 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn parse_packets_loop(mut cap: Capture<Active>, lowest_port: u16, highest_port: u16,
+pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String,
                           mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
     let cvar = &status_pair.1;
+    let mut cap = Capture::from_device(device)
+        .expect("Capture initialization error\n")
+        .promisc(true)
+        .open()
+        .expect("Capture initialization error\n");
     loop {
-        let mut status = status_pair.0.lock().unwrap();
-        status = cvar.wait_while(status, |s| *s == Status::Pause).unwrap();
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
+        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n");
 
         if *status == Status::Running {
             drop(status);
