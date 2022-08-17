@@ -82,7 +82,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                     write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
                 }
             }
-            println!("{} ({})\r", "\tReport updated".bright_blue(),times_report_updated);
+            println!("{}{}{}\r", "\tReport updated (".bright_blue(),
+                     times_report_updated.to_string().bright_blue(), ")".bright_blue());
         }
     }
 }

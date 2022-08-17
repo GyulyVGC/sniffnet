@@ -102,9 +102,11 @@ fn main() {
     let status_pair2 = status_pair1.clone();
     let status_pair3 = status_pair1.clone();
 
-    println!("\n\tParsing packets...");
-    println!("\tUpdating the file '{}' every {} seconds", output_file, interval);
-    println!("\n\tPress {}, {}  the application\n", "'p' to pause".yellow(), "'s' to stop".red());
+    println!("{}{}{}", "\n\tSniffing network adapter '".bright_blue(), device_name.bright_blue(), "'".bright_blue());
+    println!("{}{}{}{}{}", "\tUpdating the file '".bright_blue(), output_file.bright_blue(),
+              "' every ".bright_blue(), interval.to_string().bright_blue(), " seconds".bright_blue());
+    println!("{}{}{}{}", "\n\tPress the key".bright_blue(),  "\n\t\t- 'p' to pause".yellow(),
+             "\n\t\t- 's' to stop".red(), "\n\tthe application\n".bright_blue());
 
     // Thread 1: updates textual report
     thread::spawn(move || {
@@ -132,12 +134,14 @@ fn main() {
 fn print_device_list() {
     println!();
     for dev in Device::list().expect("Error retrieving device list\n") {
-        print!("\tDevice: {}\n\t\tAddresses: ", dev.name);
+        print!("{}{}{}", "\tDevice: ".bright_blue(), dev.name.bright_blue(),
+            "\n\t\tAddresses: ".bright_blue());
         if dev.addresses.len() == 0 {
             println!();
         }
         for addr in dev.addresses {
-            print!("{:?}\n\t\t\t   ", addr.addr);
+            let address_string = addr.addr.to_string();
+            print!("{}\n\t\t\t   ", address_string.bright_blue());
         }
         println!();
     }
@@ -237,19 +241,19 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
-                        println!("\n\t{}", "Capture paused... Press 'r' to resume\r".yellow());
+                        println!("\t{}", "Sniffnet paused... Press 'r' to resume\r".yellow());
                         *status = Status::Pause;
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('r')) => {
                     if *status == Status::Pause {
-                        println!("\n\t{}", "Capture resumed\r\n".green());
+                        println!("\t{}", "Sniffnet resumed\r".green());
                         *status = Status::Running;
                         cvar.notify_all();
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    println!("\n\t{}", "Capture stopped\n\r".red());
+                    println!("\n\t{}", "Sniffnet stopped\n\r".red());
                     return;
                 }
                 _ => { /* Other events */ }
