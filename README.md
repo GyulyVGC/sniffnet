@@ -5,6 +5,8 @@
 
 - [Introduction](#introduction)
 
+- [Command line options](#command-line-options)
+
 - [User interactions during application execution](#user-interactions-during-application-execution)
 
 - [Textual report structure](#textual-report-structure)
@@ -27,15 +29,100 @@
  
 ## Introduction
 
-The application binaries can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet -- [OPTIONS]```.
+The application binary can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet -- [OPTIONS]```.
 
 Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
 The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
 
-There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic. You can find a list of the available options in the code documentation.
+There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic.
 
-In this document you can find a description of the available user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
+In this document you can find the list of the available command line options, a description of the possible user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
+
+
+## Command line options
+
+The executable file path is ```packet_sniffer/target/debug/packet_sniffer```.
+
+ - ```-a, --adapter```
+ 
+&emsp;&emsp;&emsp;Name of the network adapter to be inspected, if omitted the default adapter is chosen.
+          
+&emsp;&emsp;&emsp;If a non-existing adapter is provided, the application raises an error and terminates.
+          
+&emsp;&emsp;&emsp;This option must be followed by a textual value.
+ 
+ - ```-d, --device-list```
+ 
+&emsp;&emsp;&emsp;Prints list of the available network interfaces.
+           
+&emsp;&emsp;&emsp;Immediately terminates the program.
+           
+&emsp;&emsp;&emsp;This option does not need to be followed by a value.
+ 
+ - ```-h, --highest-port```
+ 
+&emsp;&emsp;&emsp;Sets the maximum port value to be considered, if omitted there is not ports higher bound.
+
+&emsp;&emsp;&emsp;If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
+          
+&emsp;&emsp;&emsp;This option must be followed by an integer value between 0 and 65535. 
+          
+&emsp;&emsp;&emsp;```default: 65535```
+ 
+ -  ```-i, --interval```
+ 
+&emsp;&emsp;&emsp;Sets the interval of time between report updates (value in seconds).
+           
+&emsp;&emsp;&emsp;This option must be followed by a positive integer value.
+ 
+&emsp;&emsp;&emsp;```default: 5```
+ 
+ - ```-l, --lowest-port```
+ 
+&emsp;&emsp;&emsp;Sets the minimum port value to be considered, if omitted there is not ports lower bound.
+
+&emsp;&emsp;&emsp;If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
+
+&emsp;&emsp;&emsp;This option must be followed by an integer value between 0 and 65535. 
+
+&emsp;&emsp;&emsp;```default: 0```
+ 
+ - ```-m, --minimum-packets```
+ 
+&emsp;&emsp;&emsp;Sets the minimum value of transited packets for an address:port to be printed in the report.
+
+&emsp;&emsp;&emsp;This option must be followed by a positive integer value.
+
+&emsp;&emsp;&emsp;```default: 0```
+
+- ```-n, --network-layer-filter```
+
+&emsp;&emsp;&emsp;Filters packets on the basis of the IP version address (IPv4 or IPv6).
+
+&emsp;&emsp;&emsp;If a string different from "IPv4" or "IPv6" is provided (not case sensitive), the application raises an error and terminates.
+
+&emsp;&emsp;&emsp;This option must be followed by a textual value.
+            
+&emsp;&emsp;&emsp;```default: "no filter"```
+ 
+ - ```-o, --output-file```
+ 
+&emsp;&emsp;&emsp;Name of output file to contain the textual report, if omitted a default file is chosen.
+
+&emsp;&emsp;&emsp;This option must be followed by a textual value.
+
+&emsp;&emsp;&emsp;```default: report.txt```
+
+- ```-t, --transport-layer-filter```
+
+&emsp;&emsp;&emsp;Filters packets on the basis of the transport layer protocol (TCP or UDP).
+
+&emsp;&emsp;&emsp;If a string different from "TCP" or "UDP" is provided (not case sensitive), the application raises an error and terminates.
+
+&emsp;&emsp;&emsp;This option must be followed by a textual value.
+
+&emsp;&emsp;&emsp;```default: "no filter"```
 
           
 ## User interactions during application execution
