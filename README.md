@@ -1,7 +1,7 @@
 # Sniffnet (network packets sniffer)
 
 
-https://user-images.githubusercontent.com/100347457/185255629-ce1133bc-ca8d-4a3e-8e7d-167866a92cd6.mp4
+<img alt="" src="./img/sniffnet.gif" width="80%"/>
 
 
 <details>
@@ -25,6 +25,7 @@ https://user-images.githubusercontent.com/100347457/185255629-ce1133bc-ca8d-4a3e
   + [Permissions errors](#permissions-errors)
   + [Windows configuration problems](#windows-configuration-problems)
   + [Linux configuration problems](#linux-configuration-problems)  
+  + [Textual report contains just the header](#textual-report-contains-just-the-header)
   + [Other errors](#other-errors)
   
 - [Authors](#authors)
@@ -314,6 +315,17 @@ On Debian based Linux: ```install libpcap-dev```.
 On Fedora Linux: ```install libpcap-devel```.
 
 Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
+
+
+### Textual report contains just the header
+
+If the textual report is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
+option to see the full list of your network adapters' names and addresses).
+
+Note that to see report updates while sniffnet is running you may have to close and re-open the report file.
+
+If you are still not able to see any packet statistic, then it probably means that you are just not receiving packets from the network: 
+surf the web to receive some packets. 
 
 
 ### Other errors
