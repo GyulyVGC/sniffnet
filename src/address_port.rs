@@ -43,8 +43,15 @@ impl fmt::Display for AddressPort {
                 "".to_string()
             };
 
-        write!(f, "{}:{}{}", self.address, self.port, my_interface_string)
+        let display_string;
+        if self.address.contains(":") { // IPv6 address is enclosed in [brackets]
+            display_string = write!(f, "[{}]:{}{}", self.address, self.port, my_interface_string);
+        }
+        else {
+            display_string = write!(f, "{}:{}{}", self.address, self.port, my_interface_string);
+        }
 
+        return display_string;
     }
 }
 
