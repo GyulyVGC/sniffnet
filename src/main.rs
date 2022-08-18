@@ -50,7 +50,7 @@ fn main() {
 
     // parse arguments
     let args = Args::parse();
-    let adapter: String = args.adapter;
+    let mut adapter: String = args.adapter;
     let output_file: String = args.output_file;
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
@@ -86,7 +86,7 @@ fn main() {
         return;
     }
 
-    let found_device_option = retrieve_device(adapter);
+    let found_device_option = retrieve_device(&mut adapter);
 
     if found_device_option.is_none() {
         eprint!("{}", "\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n\n".red());
@@ -156,17 +156,16 @@ fn print_device_list() {
 /// # Arguments
 ///
 /// * `adapter` - A String representing the name of the network adapter to be sniffed.
-fn retrieve_device(adapter: String) -> Option<Device> {
+fn retrieve_device(adapter: &mut String) -> Option<Device> {
     let mut found_device = None;
-    if adapter.eq(&"default".to_string()) {
-        found_device = Some(Device::lookup().expect("Error retrieving default network adapter\n"));
-    } else {
-        let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
-        for device in dev_list {
-            if device.name == adapter {
-                found_device = Some(device);
-                break;
-            }
+    if (*adapter).eq(&"default".to_string()) {
+        *adapter = Device::lookup().expect("Error retrieving default network adapter\n").name;
+    }
+    let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
+    for device in dev_list {
+        if device.name == *adapter {
+            found_device = Some(device);
+            break;
         }
     }
     return found_device;

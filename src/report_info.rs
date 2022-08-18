@@ -133,5 +133,10 @@ pub enum AppProtocol {
     /// Lightweight Directory Access Protocol over TLS/SSL
     LDAPS,
     /// File Transfer Protocol over TLS/SSL
-    FTPS
+    FTPS,
+    /// Multicast DNS
+    #[allow(non_camel_case_types)]
+    mDNS,
+    /// Simple Service Discovery Protocol
+    SSDP,
 }

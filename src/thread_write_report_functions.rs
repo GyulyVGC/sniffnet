@@ -79,7 +79,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets + val.received_packets >= min_packets {
-                    write!(output, "Address: {}:{}\n{}\n\n", key.address, key.port, val).expect("Error writing output file\n");
+                    write!(output, "Address: {}\n{}\n\n", key, val).expect("Error writing output file\n");
                 }
             }
             println!("{}{}{}\r", "\tReport updated (".bright_blue(),

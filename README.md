@@ -1,8 +1,14 @@
 # Sniffnet (network packets sniffer)
 
+<hr/>
 
 <img alt="" src="./img/sniffnet.gif" width="100%"/>
 
+The application binary can be installed with ```cargo install sniffnet```
+
+The application can then be run using ```sniffnet [OPTIONS]```
+
+<hr/>
 
 <details>
 
@@ -35,7 +41,6 @@
  
 ## Introduction
 
-The application binary can be installed with ```cargo install sniffnet```; the application can then be run using ```sniffnet``` or ```sniffnet [OPTIONS]```.
 
 Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
@@ -191,7 +196,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |53|DNS |Domain Name System |
 |67, 68|DHCP |Dynamic Host Configuration Protocol |
 |69|TFTP |Trivial File Transfer Protocol |
-|80|HTTP |Hypertext Transfer Protocol |
+|80, 8080|HTTP |Hypertext Transfer Protocol |
 |110|POP |Post Office Protocol |
 |123|NTP |Network Time Protocol |
 |137, 138, 139|NetBIOS |NetBIOS |
@@ -202,6 +207,8 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |443|HTTPS |Hypertext Transfer Protocol over SSL/TLS |
 |636|LDAPS |Lightweight Directory Access Protocol over TLS/SSL |
 |989, 990|FTPS |File Transfer Protocol over TLS/SSL |
+|1900|SSDP |Simple Service Discovery Protocol |
+|5353|mDNS |Multicast DNS |
 
 
 ## Implementation details
@@ -324,7 +331,7 @@ Note that if you are not running as root, you need to set capabilities like so: 
 If the textual output is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
 option to see the full list of your network adapters' names and addresses). 
 To inspect a network adapter of your choice, remember to specify the ```-a``` option followed by the name of the adapter to be analyzed. 
-If you don't include ```-a```, a default adapter is chosen by the application but it may not be the one you expected to sniff.
+If you don't include such option a default adapter is chosen by the application, but it may not be the one you expected to sniff.
 
 Note that to see report updates while sniffnet is running you may have to close and re-open the report file.
 
