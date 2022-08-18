@@ -1,7 +1,7 @@
 # Sniffnet (network packets sniffer)
 
 
-<img alt="" src="./img/sniffnet.gif" width="80%"/>
+<img alt="" src="./img/sniffnet.gif" width="100%"/>
 
 
 <details>
