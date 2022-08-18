@@ -168,6 +168,8 @@ This analysis results in a list in which each element represents an address:port
 
 Note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
 
+If you don't see this section in your report file, check [here](#textual-report-contains-just-the-header).
+
 ![Screenshot](./img/report_part_2.png)
 
 For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the address:port is the destination) measured in number of packets and in number of bytes.
@@ -319,8 +321,10 @@ Note that if you are not running as root, you need to set capabilities like so: 
 
 ### Textual report contains just the header
 
-If the textual report is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
-option to see the full list of your network adapters' names and addresses).
+If the textual output is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
+option to see the full list of your network adapters' names and addresses). 
+To inspect a network adapter of your choice, remember to specify the ```-a``` option followed by the name of the adapter to be analyzed. 
+If you don't include ```-a```, a default adapter is chosen by the application but it may not be the one you expected to sniff.
 
 Note that to see report updates while sniffnet is running you may have to close and re-open the report file.
 
