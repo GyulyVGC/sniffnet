@@ -122,10 +122,10 @@ fn main() {
                            transport_layer_2, mutex_map1, status_pair1);
     });
 
-    // to kill main thread even if a secondary thread panics
+    // to kill the main thread even if a secondary thread panics
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
-        // disable raw mode (brute force exit seems to not drop _raw of set_status_by_key())
+        // disable raw mode (brute force exit seems to not drop _raw of set_status_by_key() function)
         let _raw = RawScreen::disable_raw_mode();
         // invoke the default handler and exit the process
         orig_hook(panic_info);

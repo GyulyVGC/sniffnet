@@ -1,5 +1,8 @@
 # Sniffnet (network packets sniffer)
 
+[![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
+[![License](https://img.shields.io/github/license/Crirock/pdsproject.svg)](https://github.com/Crirock/pdsproject/blob/main/LICENSE)
+
 <hr/>
 
 <img alt="" src="./img/sniffnet.gif" width="100%"/>
