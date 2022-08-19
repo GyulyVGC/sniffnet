@@ -23,7 +23,7 @@ use crate::args::Args;
 use crate::thread_parse_packets_functions::parse_packets_loop;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
-use std::thread;
+use std::{panic, process, thread};
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
@@ -67,29 +67,29 @@ fn main() {
     }
 
     if !is_valid_network_layer(network_layer.clone()) {
-        eprint!("{}","\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\n\n".red());
+        eprint!("{}","\r\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\r\n\n".red());
         return;
     }
 
     if !is_valid_transport_layer(transport_layer.clone()) {
-        eprint!("{}","\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\n\n".red());
+        eprint!("{}","\r\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\r\n\n".red());
         return;
     }
 
     if lowest_port > highest_port {
-        eprint!("{}", "\n\tERROR: Specified lowest port is greater than specified highest port.\n\n".red());
+        eprint!("{}", "\r\n\tERROR: Specified lowest port is greater than specified highest port.\r\n\n".red());
         return;
     }
 
     if interval == 0 {
-        eprint!("{}", "\n\tERROR: Specified time interval is null.\n\n".red());
+        eprint!("{}", "\r\n\tERROR: Specified time interval is null.\r\n\n".red());
         return;
     }
 
     let found_device_option = retrieve_device(&mut adapter);
 
     if found_device_option.is_none() {
-        eprint!("{}", "\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\n\n".red());
+        eprint!("{}", "\r\n\tERROR: Specified network adapter does not exist. Use option '-d' to list all the available devices.\r\n\n".red());
         return;
     }
 
@@ -102,11 +102,11 @@ fn main() {
     let status_pair2 = status_pair1.clone();
     let status_pair3 = status_pair1.clone();
 
-    println!("{}{}{}", "\n\tSniffing network adapter '".bright_blue(), device_name.bright_blue(), "'".bright_blue());
+    println!("{}{}{}", "\r\n\tSniffing network adapter '".bright_blue(), device_name.bright_blue(), "'\r".bright_blue());
     println!("{}{}{}{}{}", "\tUpdating the file '".bright_blue(), output_file.bright_blue(),
-              "' every ".bright_blue(), interval.to_string().bright_blue(), " seconds".bright_blue());
-    println!("{}{}{}{}", "\n\tPress the key".bright_blue(),  "\n\t\t- 'p' to pause".yellow(),
-             "\n\t\t- 's' to stop".red(), "\n\tthe application\n".bright_blue());
+              "' every ".bright_blue(), interval.to_string().bright_blue(), " seconds\r".bright_blue());
+    println!("{}{}{}{}", "\r\n\tPress the key\r".bright_blue(),  "\r\n\t\t- 'p' to pause\r".yellow(),
+             "\r\n\t\t- 's' to stop\r".red(), "\r\n\tthe application\n\r".bright_blue());
 
     // Thread 1: updates textual report
     thread::spawn(move || {
@@ -122,6 +122,16 @@ fn main() {
                            transport_layer_2, mutex_map1, status_pair1);
     });
 
+    // to kill main thread even if a secondary thread panics
+    let orig_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        // disable raw mode (brute force exit seems to not drop _raw of set_status_by_key())
+        let _raw = RawScreen::disable_raw_mode();
+        // invoke the default handler and exit the process
+        orig_hook(panic_info);
+        process::exit(1);
+    }));
+
     // Main thread: updates application status
     set_status_by_key(status_pair2);
 
@@ -132,20 +142,20 @@ fn main() {
 ///
 /// This function is called if the user specifies the ```-d``` command line option.
 fn print_device_list() {
-    println!();
-    for dev in Device::list().expect("Error retrieving device list\n") {
-        print!("{}{}{}", "\tDevice: ".bright_blue(), dev.name.bright_blue(),
-            "\n\t\tAddresses: ".bright_blue());
+    println!("\r");
+    for dev in Device::list().expect("Error retrieving device list\r\n") {
+        print!("{}{}{}", "\r\tDevice: ".bright_blue(), dev.name.bright_blue(),
+            "\r\n\t\tAddresses: ".bright_blue());
         if dev.addresses.len() == 0 {
-            println!();
+            println!("\r");
         }
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            print!("{}\n\t\t\t   ", address_string.bright_blue());
+            print!("{}\r\n\t\t\t   ", address_string.bright_blue());
         }
-        println!();
+        println!("\r");
     }
-    println!();
+    println!("\r");
 }
 
 
@@ -159,9 +169,9 @@ fn print_device_list() {
 fn retrieve_device(adapter: &mut String) -> Option<Device> {
     let mut found_device = None;
     if (*adapter).eq(&"default".to_string()) {
-        *adapter = Device::lookup().expect("Error retrieving default network adapter\n").name;
+        *adapter = Device::lookup().expect("Error retrieving default network adapter\r\n").name;
     }
-    let dev_list = Device::list().expect("Unable to retrieve network adapters list\n");
+    let dev_list = Device::list().expect("Unable to retrieve network adapters list\r\n");
     for device in dev_list {
         if device.name == *adapter {
             found_device = Some(device);
@@ -236,7 +246,7 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
     let cvar = &status_pair.1;
     loop {
         if let Some(event) = reader.next() { // Blocking call
-            let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
+            let mut status = status_pair.0.lock().expect("Error acquiring mutex\r\n");
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
@@ -252,7 +262,7 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    println!("\n\t{}", "Sniffnet stopped\n\r".red());
+                    println!("\r\n\t{}", "Sniffnet stopped\n\r".red());
                     return;
                 }
                 _ => { /* Other events */ }

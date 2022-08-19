@@ -122,7 +122,7 @@ In this document you can find the list of the available command line options, a 
 
 &emsp;&emsp;&emsp;This option must be followed by a textual value.
 
-&emsp;&emsp;&emsp;```default: report.txt```
+&emsp;&emsp;&emsp;```default: sniffnet_report.txt```
 
 - ```-t, --transport-layer-filter```
 

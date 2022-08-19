@@ -40,10 +40,10 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
     let cvar = &status_pair.1;
 
     let mut cap = Capture::from_device(device.clone())
-        .expect("Capture initialization error\n")
+        .expect("Capture initialization error\n\r")
         .promisc(true)
         .open()
-        .expect("Capture initialization error\n");
+        .expect("Capture initialization error\n\r");
 
     let mut my_interface_addresses = Vec::new();
     for address in device.addresses {
@@ -51,8 +51,8 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
     }
 
     loop {
-        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
-        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n");
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
 
         if *status == Status::Running {
             drop(status);
@@ -251,7 +251,7 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
                                   application_protocol: Option<AppProtocol>,) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-    mutex_map.lock().expect("Error acquiring mutex\n").entry(key).and_modify(|info| {
+    mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
@@ -298,7 +298,7 @@ fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,
                                        application_protocol: Option<AppProtocol>,) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-    mutex_map.lock().expect("Error acquiring mutex\n").entry(key).and_modify(|info| {
+    mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
         info.received_bytes += exchanged_bytes;
         info.received_packets += 1;
         info.final_timestamp = now.clone();
@@ -442,7 +442,6 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
             longest_zero_sequence = current_zero_sequence;
             longest_zero_sequence_start = current_zero_sequence_start;
         }
-        current_zero_sequence = 0;
     }
     if longest_zero_sequence < 2 { // no compression needed
         return ipv6_hex;
@@ -476,6 +475,7 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
 
 #[cfg(test)]
 mod ipv6_format_tests {
+
     use crate::thread_parse_packets_functions::ipv6_from_long_dec_to_short_hex;
 
     #[test]
@@ -561,4 +561,5 @@ mod ipv6_format_tests {
         let result = ipv6_from_long_dec_to_short_hex([0,16, 16,0, 0,1, 7,0, 0,2, 216,0, 1,0, 0,1]);
         assert_eq!(result, "10:1000:1:700:2:d800:100:1".to_string());
     }
+
 }

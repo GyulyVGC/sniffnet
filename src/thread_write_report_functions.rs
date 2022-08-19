@@ -59,19 +59,20 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
     loop {
         thread::sleep(Duration::from_secs(interval));
-        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n");
-        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n");
+
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
         if *status == Status::Running {
             drop(status);
             times_report_updated += 1;
-            let mut output = File::create(output_file.clone()).expect("Error creating output file\n");
+            let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
 
-            write_report_file_header(output.try_clone().expect("Error cloning file handler\n"),
+            write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      times_report_updated, interval, lowest_port, highest_port, min_packets,
                                      network_layer.clone(), transport_layer.clone());
 
-            let map = mutex_map.lock().expect("Error acquiring mutex\n");
+            let map = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
             let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
             sorted_vec.sort_by(|&(_, a), &(_, b)|
@@ -79,7 +80,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets + val.received_packets >= min_packets {
-                    write!(output, "Address: {}\n{}\n\n", key, val).expect("Error writing output file\n");
+                    write!(output, "Address: {}\n{}\n\n", key, val).expect("Error writing output file\n\r");
                 }
             }
             println!("{}{}{}\r", "\tReport updated (".bright_blue(),
