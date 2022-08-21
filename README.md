@@ -1,5 +1,6 @@
 # Sniffnet (network packets sniffer)
 
+[![Build](https://img.shields.io/github/workflow/status/Crirock/pdsproject/Rust.svg)](https://github.com/Crirock/pdsproject/actions/workflows/rust.yml)
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 [![License](https://img.shields.io/github/license/Crirock/pdsproject.svg)](https://github.com/Crirock/pdsproject/blob/main/LICENSE)
 
