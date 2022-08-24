@@ -257,7 +257,8 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
-                        print!("\t{}", "Sniffnet paused... Press 'r' to resume\r".yellow().blink().bold());
+                        println!("\t{}", "Sniffnet paused...\r".yellow().bold());
+                        print!("\t{}", "Press 'r' to resume\r".yellow().blink().bold());
                         io::stdout().flush().unwrap();
                         *status = Status::Pause;
                     }
@@ -272,7 +273,9 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    println!("\r\n\t{}", "Sniffnet stopped\n\n\r".red().bold());
+                    print!("                                                         \r");
+                    io::stdout().flush().unwrap();
+                    println!("\r\t{}", "Sniffnet stopped\n\n\r".red().bold());
                     return;
                 }
                 _ => { /* Other events */ }
