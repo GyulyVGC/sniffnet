@@ -5,9 +5,9 @@ edition = "2021"
 description = "Application to sniff and filter network traffic. Generates a human-readable report of the observed packets."
 repository = "https://github.com/Crirock/pdsproject"
 readme = "README.md"
-keywords = ["cli", "network", "sniffer", "packet", "parser"]
+keywords = ["cli", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

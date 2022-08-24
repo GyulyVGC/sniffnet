@@ -64,18 +64,18 @@ impl fmt::Display for ReportInfo {
             }
         };
 
-        write!(f, "\tSent data\n\
-                    \t\tSent Bytes: {:.2} {}B\n\
-                    \t\tSent packets: {}\n\
-                    \tReceived data\n\
-                    \t\tReceived Bytes: {:.2} {}B\n\
-                    \t\tReceived packets: {}\n\
-                    \tTimestamps\n\
-                    \t\tInitial Timestamp: {}\n\
-                    \t\tFinal Timestamp: {}\n\
-                    \tProtocols\n\
-                    \t\tTransport layer protocols: {}\n\
-                    \t\tApplication layer protocols: {}\n",
+        write!(f, "\t\t\t\tSent data\n\
+                    \t\t\t\t\tSent Bytes: {:.2} {}B\n\
+                    \t\t\t\t\tSent packets: {}\n\
+                    \t\t\t\tReceived data\n\
+                    \t\t\t\t\tReceived Bytes: {:.2} {}B\n\
+                    \t\t\t\t\tReceived packets: {}\n\
+                    \t\t\t\tTimestamps\n\
+                    \t\t\t\t\tInitial Timestamp: {}\n\
+                    \t\t\t\t\tFinal Timestamp: {}\n\
+                    \t\t\t\tProtocols\n\
+                    \t\t\t\t\tTransport layer protocols: {}\n\
+                    \t\t\t\t\tApplication layer protocols: {}\n\n",
                n, multiple_transmitted, self.transmitted_packets,
                m, multiple_received, self.received_packets,
                self.initial_timestamp, self.final_timestamp,
@@ -139,4 +139,6 @@ pub enum AppProtocol {
     mDNS,
     /// Simple Service Discovery Protocol
     SSDP,
+    /// not identified
+    Other
 }

@@ -65,6 +65,16 @@ In this document you can find the list of the available command line options, a 
 &emsp;&emsp;&emsp;If a non-existing adapter is provided, the application raises an error and terminates.
           
 &emsp;&emsp;&emsp;This option must be followed by a textual value.
+
+- ```--app```
+
+&emsp;&emsp;&emsp;Filters packets on the basis of the application layer protocol.
+
+&emsp;&emsp;&emsp;If an invalid string is provided (not case-sensitive), the application raises an error and terminates.
+
+&emsp;&emsp;&emsp;This option must be followed by a textual value corresponding to one of the supported level 7 protocols.
+
+&emsp;&emsp;&emsp;```default: "no filter"```
  
  - ```-d, --device-list```
  
@@ -110,7 +120,7 @@ In this document you can find the list of the available command line options, a 
 
 &emsp;&emsp;&emsp;```default: 0```
 
-- ```-n, --network-layer-filter```
+- ```-n, --net```
 
 &emsp;&emsp;&emsp;Filters packets on the basis of the IP version address (IPv4 or IPv6).
 
@@ -128,7 +138,7 @@ In this document you can find the list of the available command line options, a 
 
 &emsp;&emsp;&emsp;```default: sniffnet_report.txt```
 
-- ```-t, --transport-layer-filter```
+- ```-t, --trans```
 
 &emsp;&emsp;&emsp;Filters packets on the basis of the transport layer protocol (TCP or UDP).
 
@@ -167,7 +177,6 @@ Then there is a detail about the initial timestamp of the sniffing process, the 
 
 Finally, it describes the status of the possible filters applicable by the user through the command line: minimum number of packets for an address:port pair to be printed in the report, IP address version, transport layer protocol and port minimum and maximum number.
 
-Note that an application layer protocol filter is not provided since the user can use the lowest and highest port options to this purpose (e.g., to filter DNS traffic a user can specify ```sniffnet -l 53 -h 53```, to filter HTTPS traffic a user can specify ```sniffnet -l 443 -h 443``` and so on).
 
 ### Report addresses list
 
@@ -248,6 +257,15 @@ In this section are reported the errors that may occur while the application is 
 &emsp;&emsp;&emsp; ```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
 
 &emsp;&emsp;&emsp; ![Screenshot](./img/device_list.png)
+
+
+- **Invalid application layer protocol filter**
+
+&emsp;&emsp;&emsp; If an invalid string is provided the application raises an error and terminates.
+
+&emsp;&emsp;&emsp; The list of the supported application layer protocols is available in [this](#report-addresses-list) section. 
+
+&emsp;&emsp;&emsp; Note that not including the ```--app``` option is equal to provide ```--app "no filter"```.
 
 
 - **Invalid highest port number**

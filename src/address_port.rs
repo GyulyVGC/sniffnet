@@ -43,15 +43,16 @@ impl fmt::Display for AddressPort {
                 "".to_string()
             };
 
-        let display_string;
-        if self.address.contains(":") { // IPv6 address is enclosed in [brackets]
-            display_string = write!(f, "[{}]:{}{}", self.address, self.port, my_interface_string);
+        let addr_string = if self.address.contains(":") { // IPv6 address is enclosed in [brackets]
+            format!("|  Address: [{}]:{}{}  |", self.address, self.port, my_interface_string)
         }
         else {
-            display_string = write!(f, "{}:{}{}", self.address, self.port, my_interface_string);
-        }
+            format!("|  Address: {}:{}{}  |", self.address, self.port, my_interface_string)
+        };
+        let cornice_len = addr_string.len() - 4;
+        let cornice_string = "-".to_string().repeat(cornice_len);
 
-        return display_string;
+        write!(f,"\t /{}\\\n\t{}\n\t \\{}/", cornice_string, addr_string, cornice_string)
     }
 }
 

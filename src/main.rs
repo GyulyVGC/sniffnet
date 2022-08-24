@@ -23,7 +23,8 @@ use crate::args::Args;
 use crate::thread_parse_packets_functions::parse_packets_loop;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use clap::Parser;
-use std::{panic, process, thread};
+use std::{io, panic, process, thread};
+use std::io::Write;
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
@@ -60,6 +61,7 @@ fn main() {
     let network_layer_2: String = network_layer.clone();
     let transport_layer: String = args.transport_layer_filter.to_ascii_lowercase();
     let transport_layer_2: String = transport_layer.clone();
+    let app_layer = from_name_to_application_protocol(args.application_layer_filter.to_ascii_lowercase());
 
     if args.device_list == true {
         print_device_list();
@@ -67,22 +69,27 @@ fn main() {
     }
 
     if !is_valid_network_layer(network_layer.clone()) {
-        eprint!("{}","\r\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\r\n\n".red());
+        eprint!("{}","\r\n\tERROR: Specified network layer filter must be equal to 'IPv4' or 'IPv6' (not case sensitive).\r\n\n".red().bold());
         return;
     }
 
     if !is_valid_transport_layer(transport_layer.clone()) {
-        eprint!("{}","\r\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\r\n\n".red());
+        eprint!("{}","\r\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\r\n\n".red().bold());
+        return;
+    }
+
+    if app_layer.is_none() {
+        eprint!("{}","\r\n\tERROR: Specified application layer protocol is unknown.\r\n\n".red().bold());
         return;
     }
 
     if lowest_port > highest_port {
-        eprint!("{}", "\r\n\tERROR: Specified lowest port is greater than specified highest port.\r\n\n".red());
+        eprint!("{}", "\r\n\tERROR: Specified lowest port is greater than specified highest port.\r\n\n".red().bold());
         return;
     }
 
     if interval == 0 {
-        eprint!("{}", "\r\n\tERROR: Specified time interval is null.\r\n\n".red());
+        eprint!("{}", "\r\n\tERROR: Specified time interval is null.\r\n\n".red().bold());
         return;
     }
 
@@ -102,25 +109,11 @@ fn main() {
     let status_pair2 = status_pair1.clone();
     let status_pair3 = status_pair1.clone();
 
-    println!("{}{}{}", "\r\n\tSniffing network adapter '".bright_blue(), device_name.bright_blue(), "'\r".bright_blue());
-    println!("{}{}{}{}{}", "\tUpdating the file '".bright_blue(), output_file.bright_blue(),
-              "' every ".bright_blue(), interval.to_string().bright_blue(), " seconds\r".bright_blue());
-    println!("{}{}{}{}", "\r\n\tPress the key\r".bright_blue(),  "\r\n\t\t- 'p' to pause\r".yellow(),
-             "\r\n\t\t- 's' to stop\r".red(), "\r\n\tthe application\n\r".bright_blue());
-
-    // Thread 1: updates textual report
-    thread::spawn(move || {
-        sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
-                                    device_name, network_layer,
-                                    transport_layer, output_file,
-                                    mutex_map2, status_pair3);
-    });
-
-    // Thread 2: parses packets
-    thread::spawn(move || {
-        parse_packets_loop(found_device, lowest_port, highest_port, network_layer_2,
-                           transport_layer_2, mutex_map1, status_pair1);
-    });
+    println!("{}{}{}", "\r\n\n\tSniffing network adapter '".cyan().italic(), device_name.cyan().italic(), "'\r".cyan().italic());
+    println!("{}{}{}", "\tThe file '".cyan().italic(), output_file.cyan().italic(),
+              "' will be periodically updated\r".cyan().italic());
+    println!("{}{}{}{}", "\r\n\tPress the key\r".cyan().bold(),  "\r\n\t\t- 'p' to pause\r".yellow().bold(),
+             "\r\n\t\t- 's' to stop\r".red().bold(), "\r\n\tthe application\n\n\r".cyan().bold());
 
     // to kill the main thread even if a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -131,6 +124,20 @@ fn main() {
         orig_hook(panic_info);
         process::exit(1);
     }));
+
+    // Thread 1: updates textual report
+    thread::spawn(move || {
+        sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
+                                    device_name, network_layer,
+                                    transport_layer, app_layer.unwrap(), output_file,
+                                    mutex_map2, status_pair3);
+    });
+
+    // Thread 2: parses packets
+    thread::spawn(move || {
+        parse_packets_loop(found_device, lowest_port, highest_port, network_layer_2,
+                           transport_layer_2, mutex_map1, status_pair1);
+    });
 
     // Main thread: updates application status
     set_status_by_key(status_pair2);
@@ -144,14 +151,14 @@ fn main() {
 fn print_device_list() {
     println!("\r");
     for dev in Device::list().expect("Error retrieving device list\r\n") {
-        print!("{}{}{}", "\r\tDevice: ".bright_blue(), dev.name.bright_blue(),
-            "\r\n\t\tAddresses: ".bright_blue());
+        print!("{}{}{}", "\r\tDevice: ".cyan(), dev.name.cyan(),
+            "\r\n\t\tAddresses: ".cyan());
         if dev.addresses.len() == 0 {
             println!("\r");
         }
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            print!("{}\r\n\t\t\t   ", address_string.bright_blue());
+            print!("{}\r\n\t\t\t   ", address_string.cyan());
         }
         println!("\r");
     }
@@ -250,23 +257,74 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
-                        println!("\t{}", "Sniffnet paused... Press 'r' to resume\r".yellow());
+                        print!("\t{}", "Sniffnet paused... Press 'r' to resume\r".yellow().blink().bold());
+                        io::stdout().flush().unwrap();
                         *status = Status::Pause;
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('r')) => {
                     if *status == Status::Pause {
-                        println!("\t{}", "Sniffnet resumed\r".green());
+                        print!("                                                         \r");
+                        io::stdout().flush().unwrap();
+                        println!("\t{}", "Sniffnet resumed\r".green().bold());
                         *status = Status::Running;
                         cvar.notify_all();
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    println!("\r\n\t{}", "Sniffnet stopped\n\r".red());
+                    println!("\r\n\t{}", "Sniffnet stopped\n\n\r".red().bold());
                     return;
                 }
                 _ => { /* Other events */ }
             }
         }
+    }
+}
+
+
+/// Given a String representing an application layer protocol, this function returns an `Option<AppProtocol>` containing
+/// the respective application protocol represented by a value of the `AppProtocol` enum.
+/// Only the most common application layer protocols are considered; if a unknown protocol
+/// is provided, this function returns `None`.
+///
+/// # Arguments
+///
+/// * `name` - A String representing an application layer protocol
+///
+/// # Examples
+///
+/// ```
+/// let x = from_name_to_application_protocol("smtp".to_string());
+/// //Simple Mail Transfer Protocol
+/// assert_eq!(x, Option::Some(AppProtocol::SMTP));
+///
+/// let y = from_name_to_application_protocol("not a known app protocol".to_string());
+/// //Unknown port-to-protocol mapping
+/// assert_eq!(y, Option::None);
+/// ```
+fn from_name_to_application_protocol(name: String) -> Option<AppProtocol> {
+    match name.as_str() {
+        "ftp" => {Option::Some(AppProtocol::FTP)},
+        "ssh" => {Option::Some(AppProtocol::SSH)},
+        "telnet" => {Option::Some(AppProtocol::Telnet)},
+        "smtp" => {Option::Some(AppProtocol::SMTP)},
+        "dns" => {Option::Some(AppProtocol::DNS)},
+        "dhcp" => {Option::Some(AppProtocol::DHCP)},
+        "tftp" => {Option::Some(AppProtocol::TFTP)},
+        "http" => {Option::Some(AppProtocol::HTTP)},
+        "pop" => {Option::Some(AppProtocol::POP)},
+        "ntp" => {Option::Some(AppProtocol::NTP)},
+        "netbios" => {Option::Some(AppProtocol::NetBIOS)},
+        "imap" => {Option::Some(AppProtocol::IMAP)},
+        "snmp" => {Option::Some(AppProtocol::SNMP)},
+        "bgp" => {Option::Some(AppProtocol::BGP)},
+        "ldap" => {Option::Some(AppProtocol::LDAP)},
+        "https" => {Option::Some(AppProtocol::HTTPS)},
+        "ldaps" => {Option::Some(AppProtocol::LDAPS)},
+        "ftps" => {Option::Some(AppProtocol::FTPS)},
+        "ssdp" => {Option::Some(AppProtocol::SSDP)},
+        "mdns" => {Option::Some(AppProtocol::mDNS)},
+        "no filter" => {Option::Some(AppProtocol::Other)},
+         _ => {None}
     }
 }

@@ -13,7 +13,7 @@ use std::time::Duration;
 use chrono::Local;
 use std::io::Write;
 use colored::Colorize;
-use crate::{AddressPort, ReportInfo, Status};
+use crate::{AddressPort, AppProtocol, ReportInfo, Status};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -42,6 +42,9 @@ use crate::{AddressPort, ReportInfo, Status};
 /// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
+/// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
+/// ```--app``` option.
+///
 /// * `output_file` - A String representing the output report file name. Specified by the user through the
 /// ```-o``` option.
 ///
@@ -49,7 +52,7 @@ use crate::{AddressPort, ReportInfo, Status};
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u32,
-                                   device_name: String, network_layer: String, transport_layer: String,
+                                   device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
                                    output_file: String, mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
@@ -60,17 +63,17 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     loop {
         thread::sleep(Duration::from_secs(interval));
 
-        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
-        if *status == Status::Running {
-            drop(status);
+        let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+
+        if *_status == Status::Running {
+            drop(_status);
             times_report_updated += 1;
             let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
 
             write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
-                                     times_report_updated, interval, lowest_port, highest_port, min_packets,
-                                     network_layer.clone(), transport_layer.clone());
+                                     times_report_updated, lowest_port, highest_port, min_packets,
+                                     network_layer.clone(), transport_layer.clone(), app_layer.clone());
 
             let map = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
@@ -79,12 +82,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
 
             for (key, val) in sorted_vec.iter() {
-                if val.transmitted_packets + val.received_packets >= min_packets {
-                    write!(output, "Address: {}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+                if val.transmitted_packets + val.received_packets >= min_packets
+                    && (val.app_protocols.contains(&app_layer) || app_layer.eq(&AppProtocol::Other)){
+                    write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
                 }
             }
-            println!("{}{}{}\r", "\tReport updated (".bright_blue(),
-                     times_report_updated.to_string().bright_blue(), ")".bright_blue());
+            println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
+                     times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
+        }
+        else {
+            _status = cvar.wait_while(_status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
         }
     }
 }
@@ -170,6 +177,23 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 }
 
 
+/// Given the application layer filter, the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `app_layer` - A String representing the application layer protocol to be filtered. Specified by the user through the
+/// ```--app``` option.
+fn get_app_layer_string(app_layer: AppProtocol) -> String {
+    if app_layer.eq(&AppProtocol::Other) {
+        format!("<><>\t\t\tConsidering all application layer protocols\n")
+    }
+    else {
+        format!("<><>\t\t\tConsidering only {:?} packets\n", app_layer)
+    }
+}
+
+
 /// Writes the output report file header, which contains useful info about the sniffing process.
 ///
 /// # Arguments
@@ -183,9 +207,6 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 /// * `first_timestamp` - A not formatted String representing the initial timestamp of the sniffing process.
 ///
 /// * `times_report_updated` - An integer representing the amount of times the report has been updated.
-///
-/// * `interval` - Frequency of report updates (value in seconds). Specified by the user through the
-/// ```-i``` option.
 ///
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
 /// through the ```-l``` option.
@@ -201,6 +222,9 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 ///
 /// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
+///
+/// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
+/// ```--app``` option.
 ///
 /// # Examples
 /// An example of output report file header generated by this function is reported below.
@@ -226,18 +250,18 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 /// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// ```
 fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
-                            times_report_updated: i32, interval: u64, lowest_port: u16, highest_port: u16,
-                            min_packets: u32, network_layer: String, transport_layer: String) {
+                            times_report_updated: i32, lowest_port: u16, highest_port: u16,
+                            min_packets: u32, network_layer: String, transport_layer: String, app_layer: AppProtocol) {
     let cornice_string = "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n".to_string();
     let adapter_string = format!("<><>\t\tPackets are sniffed from adapter '{}'\n", device_name);
     let first_timestamp_string = format!("<><>\t\t\tReport start time: {}\n", first_timestamp);
     let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
     let number_updates_string = format!("<><>\t\t\tNumber of times report was updated: {}\n", times_report_updated);
-    let frequency_string = format!("<><>\t\t\tReport update frequency: every {} seconds\n", interval);
     let ports_string = get_ports_string(lowest_port,highest_port);
     let min_packets_string = get_min_packets_string(min_packets);
     let network_layer_string = get_network_layer_string(network_layer);
     let transport_layer_string = get_transport_layer_string(transport_layer);
+    let app_layer_string = get_app_layer_string(app_layer);
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");
@@ -246,7 +270,6 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     write!(output, "<><>\t\tReport updates info\n").expect("Error writing output file\n");
     write!(output, "{}", first_timestamp_string).expect("Error writing output file\n");
     write!(output, "{}", last_timestamp_string).expect("Error writing output file\n");
-    write!(output, "{}", frequency_string).expect("Error writing output file\n");
     write!(output, "{}", number_updates_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");
     write!(output, "<><>\t\tFilters\n").expect("Error writing output file\n");
@@ -254,6 +277,7 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     write!(output, "{}", network_layer_string).expect("Error writing output file\n");
     write!(output, "{}", transport_layer_string).expect("Error writing output file\n");
     write!(output, "{}", ports_string).expect("Error writing output file\n");
+    write!(output, "{}", app_layer_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");
     write!(output,"{}", cornice_string).expect("Error writing output file\n");
     write!(output,"{}\n\n\n", cornice_string).expect("Error writing output file\n");

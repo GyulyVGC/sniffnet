@@ -13,6 +13,12 @@ pub struct Args {
     #[clap(short, long, value_parser, forbid_empty_values = true, default_value = "default")]
     pub adapter: String,
 
+    /// Filters packets on the basis of the application layer protocol.
+    ///
+    /// This option must be followed by a textual value.
+    #[clap(long="app", value_parser, default_value = "no filter")]
+    pub application_layer_filter: String,
+
     /// Prints list of the available network interfaces.
     ///
     /// Immediately terminates the program.
@@ -52,7 +58,7 @@ pub struct Args {
     /// Filters packets on the basis of the IP version address (IPv4 or IPv6).
     ///
     /// This option must be followed by a textual value.
-    #[clap(short, long, value_parser, default_value = "no filter")]
+    #[clap(short, long="net", value_parser, default_value = "no filter")]
     pub network_layer_filter: String,
 
     /// Name of output file to contain the textual report, if omitted a default file is chosen.
@@ -64,6 +70,6 @@ pub struct Args {
     /// Filters packets on the basis of the transport layer protocol (TCP or UDP).
     ///
     /// This option must be followed by a textual value.
-    #[clap(short, long, value_parser, default_value = "no filter")]
+    #[clap(short, long="trans", value_parser, default_value = "no filter")]
     pub transport_layer_filter: String,
 }
