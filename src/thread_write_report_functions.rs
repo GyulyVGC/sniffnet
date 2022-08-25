@@ -63,10 +63,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     loop {
         thread::sleep(Duration::from_secs(interval));
 
-        let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-
-        if *_status == Status::Running {
-            drop(_status);
             times_report_updated += 1;
             let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
 
@@ -89,10 +85,9 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             }
             println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
                      times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
-        }
-        else {
+
+            let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
             _status = cvar.wait_while(_status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
-        }
     }
 }
 
