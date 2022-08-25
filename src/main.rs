@@ -29,7 +29,6 @@ use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
 use colored::Colorize;
-use std::time::Duration;
 
 /// This enum represents the sniffing process status.
 #[derive(PartialEq, Eq)]
@@ -259,8 +258,8 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
                         println!("\t{}", "Sniffnet paused...\r".yellow().bold());
-                        print!("\t{}", "Press 'r' to resume\r\n".yellow().blink().bold());
-                        //io::stdout().flush().unwrap();
+                        print!("\t{}", "Press 'r' to resume\r".yellow().blink().bold());
+                        io::stdout().flush().unwrap();
                         *status = Status::Pause;
                     }
                 }

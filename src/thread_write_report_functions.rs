@@ -57,37 +57,49 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let mut times_report_updated = 0;
+    let mut last_report_updated_console = 0;
     let cvar = &status_pair.1;
     let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
 
     loop {
         thread::sleep(Duration::from_secs(interval));
 
-            times_report_updated += 1;
-            let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
+        times_report_updated += 1;
+        let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
 
-            write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
+        write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      times_report_updated, lowest_port, highest_port, min_packets,
                                      network_layer.clone(), transport_layer.clone(), app_layer.clone());
 
-            let map = mutex_map.lock().expect("Error acquiring mutex\n\r");
+        let map = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
-            let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
-            sorted_vec.sort_by(|&(_, a), &(_, b)|
-                (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+        let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map.iter().collect();
+        sorted_vec.sort_by(|&(_, a), &(_, b)|
+            (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
 
-            for (key, val) in sorted_vec.iter() {
-                if val.transmitted_packets + val.received_packets >= min_packets
-                    && (val.app_protocols.contains(&app_layer) || app_layer.eq(&AppProtocol::Other)){
-                    write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
-                }
+        for (key, val) in sorted_vec.iter() {
+            if val.transmitted_packets + val.received_packets >= min_packets
+                && (val.app_protocols.contains(&app_layer) || app_layer.eq(&AppProtocol::Other)){
+                write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
             }
-            println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
-                     times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
+        }
 
-            let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-            _status = cvar.wait_while(_status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
+        let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+        if *_status == Status::Running {
+            if times_report_updated - last_report_updated_console != 1 {
+                println!("{}{}{}{}\r", "\tReport updated (".cyan().italic(),
+                         times_report_updated.to_string().cyan().italic(), ")".cyan().italic(),
+                         " - report has also been updated during pause".cyan().italic());
+            }
+            else {
+                println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
+                         times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
+            }
+            last_report_updated_console = times_report_updated;
+        }
+
+        _status = cvar.wait_while(_status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
     }
 }
 
