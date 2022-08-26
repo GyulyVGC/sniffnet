@@ -6,7 +6,7 @@
 
 <hr/>
 
-<img alt="" src="./img/sniffnet.gif" width="100%"/>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/186924608-aa6c7990-97b7-492e-b02a-98c01b39f44d.gif" width="100%"/>
 
 The application binary can be installed with ```cargo install sniffnet```
 
@@ -169,7 +169,7 @@ In this section is reported the structure of the output report file generated, t
 
 The first section of the textual report contains a header summarizing different useful information.
 
-![Screenshot](./img/report_part_1.png)
+![report_part_1](https://user-images.githubusercontent.com/100347457/186925346-042937a9-dae3-4f70-abfc-f7d16c878ed9.png)
 
 First, it specifies the name of the network adapter analyzed during the sniffing process.
 
@@ -180,6 +180,7 @@ Finally, it describes the status of the possible filters applicable by the user 
 
 ### Report addresses list
 
+
 The second section of the textual report is dedicated to the packets stream analysis for each address:port pair.
 
 This analysis results in a list in which each element represents an address:port pair with the relative statistics.
@@ -188,7 +189,8 @@ Note that such list of elements is sorted in descending order of ```sent_packets
 
 If you don't see this section in your report file, check [here](#textual-report-contains-just-the-header).
 
-![Screenshot](./img/report_part_2.png)
+![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
+
 
 For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the address:port is the destination) measured in number of packets and in number of bytes.
 
@@ -256,7 +258,7 @@ In this section are reported the errors that may occur while the application is 
 
 &emsp;&emsp;&emsp; ```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
 
-&emsp;&emsp;&emsp; ![Screenshot](./img/device_list.png)
+&emsp;&emsp;&emsp; ![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
 
 
 - **Invalid application layer protocol filter**
@@ -319,7 +321,7 @@ In this section are reported the errors that may occur while the application is 
 
 &emsp;&emsp;&emsp; You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
 
-&emsp;&emsp;&emsp; ![Screenshot](./img/error_permissions.png)
+&emsp;&emsp;&emsp; ![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
 
 &emsp;&emsp;&emsp; To solve this error you can execute the following commands:
 
