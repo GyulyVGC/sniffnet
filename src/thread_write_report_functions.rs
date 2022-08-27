@@ -5,7 +5,7 @@
 //! If the ```-i``` option is not specified, the report is updated every 5 seconds.
 
 use std::cmp::Ordering::Equal;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -61,11 +61,15 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let cvar = &status_pair.1;
     let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
 
+    //let mut set_unknown = HashSet::new();
+
     loop {
         thread::sleep(Duration::from_secs(interval));
 
         times_report_updated += 1;
         let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
+
+        //let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
 
         write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
@@ -79,9 +83,14 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
 
         for (key, val) in sorted_vec.iter() {
-            if val.transmitted_packets + val.received_packets >= min_packets
-                && (val.app_protocols.contains(&app_layer) || app_layer.eq(&AppProtocol::Other)){
+            if val.transmitted_packets + val.received_packets >= min_packets {
                 write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+                // if val.app_protocols.len() == 0 && key.port < 49152{
+                //     set_unknown.insert(key.port);
+                //     let mut sorted_set: Vec<&u16> = set_unknown.iter().collect();
+                //     sorted_set.sort();
+                //     write!(output2, "{:?}\n",sorted_set).unwrap();
+                // }
             }
         }
 

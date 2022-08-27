@@ -29,11 +29,14 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
+/// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
+/// ```--app``` option.
+///
 /// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
-                          network_layer_filter: String, transport_layer_filter: String,
+                          network_layer_filter: String, transport_layer_filter: String, app_layer: AppProtocol,
                           mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
@@ -74,7 +77,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             let mut transport_layer = "".to_string();
                             let mut exchanged_bytes: u32 = 0;
                             let mut transport_protocol = TransProtocol::Other;
-                            let mut application_protocol: Option<AppProtocol> = None;
+                            let mut application_protocol = AppProtocol::Other;
                             let mut skip_packet = false;
 
                             analyze_network_header(value.ip, &mut exchanged_bytes,
@@ -99,16 +102,20 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
                             if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
                                 if transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal {
-                                    if port1 >= lowest_port && port1 <= highest_port {
-                                        modify_or_insert_source_in_map(mutex_map.clone(), key1,
-                                                                       exchanged_bytes, transport_protocol,
-                                                                       application_protocol);
-                                    }
+                                    if application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other) {
 
-                                    if port2 >= lowest_port && port2 <= highest_port {
-                                        modify_or_insert_destination_in_map(mutex_map.clone(), key2,
-                                                                            exchanged_bytes, transport_protocol,
-                                                                            application_protocol);
+                                        if port1 >= lowest_port && port1 <= highest_port {
+                                            modify_or_insert_source_in_map(mutex_map.clone(), key1,
+                                                                           exchanged_bytes, transport_protocol,
+                                                                           application_protocol);
+                                        }
+
+                                        if port2 >= lowest_port && port2 <= highest_port {
+                                            modify_or_insert_destination_in_map(mutex_map.clone(), key2,
+                                                                                exchanged_bytes, transport_protocol,
+                                                                                application_protocol);
+                                        }
+
                                     }
                                 }
                             }
@@ -203,7 +210,7 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
 /// packet will not be considered.
 fn analyze_transport_header(transport_header: Option<TransportHeader>,
                             transport_layer: &mut String, port1: &mut u16, port2: &mut u16,
-                            application_protocol: &mut Option<AppProtocol>,
+                            application_protocol: &mut AppProtocol,
                             transport_protocol: &mut TransProtocol, skip_packet: &mut bool) {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
@@ -212,7 +219,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
             *port2 = udp_header.destination_port;
             *transport_protocol = TransProtocol::UDP;
             *application_protocol = from_port_to_application_protocol(*port1);
-            if application_protocol.is_none() {
+            if (*application_protocol).eq(&AppProtocol::Other) {
                 *application_protocol = from_port_to_application_protocol(*port2);
             }
         }
@@ -222,7 +229,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
             *port2 = tcp_header.destination_port;
             *transport_protocol = TransProtocol::TCP;
             *application_protocol = from_port_to_application_protocol(*port1);
-            if application_protocol.is_none() {
+            if (*application_protocol).eq(&AppProtocol::Other) {
                 *application_protocol = from_port_to_application_protocol(*port2);
             }
         }
@@ -248,7 +255,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
 fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
                                   exchanged_bytes: u32, transport_protocol: TransProtocol,
-                                  application_protocol: Option<AppProtocol>,) {
+                                  application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
     mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
@@ -256,8 +263,8 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
         info.trans_protocols.insert(transport_protocol);
-        if application_protocol.is_some() {
-            info.app_protocols.insert(application_protocol.unwrap());
+        if application_protocol.ne(&AppProtocol::Other) {
+            info.app_protocols.insert(application_protocol);
         }
     })
         .or_insert(ReportInfo {
@@ -268,8 +275,8 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
             initial_timestamp: now.clone(),
             final_timestamp: now.clone(),
             trans_protocols: HashSet::from([transport_protocol]),
-            app_protocols: if application_protocol.is_some() {
-                                HashSet::from([application_protocol.unwrap()])
+            app_protocols: if application_protocol.ne(&AppProtocol::Other) {
+                                HashSet::from([application_protocol])
                             }
                             else {
                                 HashSet::new()
@@ -295,7 +302,7 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
 fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
                                        exchanged_bytes: u32, transport_protocol: TransProtocol,
-                                       application_protocol: Option<AppProtocol>,) {
+                                       application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
     mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
@@ -303,8 +310,8 @@ fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,
         info.received_packets += 1;
         info.final_timestamp = now.clone();
         info.trans_protocols.insert(transport_protocol);
-        if application_protocol.is_some() {
-            info.app_protocols.insert(application_protocol.unwrap());
+        if application_protocol.ne(&AppProtocol::Other) {
+            info.app_protocols.insert(application_protocol);
         }
     })
         .or_insert(ReportInfo {
@@ -315,8 +322,8 @@ fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,
             initial_timestamp: now.clone(),
             final_timestamp: now.clone(),
             trans_protocols: HashSet::from([transport_protocol]),
-            app_protocols: if application_protocol.is_some() {
-                                HashSet::from([application_protocol.unwrap()])
+            app_protocols: if application_protocol.ne(&AppProtocol::Other) {
+                                HashSet::from([application_protocol])
                             }
                             else {
                                 HashSet::new()
@@ -346,29 +353,30 @@ fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,
 /// //Unknown port-to-protocol mapping
 /// assert_eq!(y, Option::None);
 /// ```
-fn from_port_to_application_protocol(port: u16) -> Option<AppProtocol> {
+fn from_port_to_application_protocol(port: u16) -> AppProtocol {
     match port {
-        20..=21 => {Option::Some(AppProtocol::FTP)},
-        22 => {Option::Some(AppProtocol::SSH)},
-        23 => {Option::Some(AppProtocol::Telnet)},
-        25 => {Option::Some(AppProtocol::SMTP)},
-        53 => {Option::Some(AppProtocol::DNS)},
-        67..=68 => {Option::Some(AppProtocol::DHCP)},
-        69 => {Option::Some(AppProtocol::TFTP)},
-        80 | 8080 => {Option::Some(AppProtocol::HTTP)},
-        110 => {Option::Some(AppProtocol::POP)},
-        123 => {Option::Some(AppProtocol::NTP)},
-        137..=139 => {Option::Some(AppProtocol::NetBIOS)},
-        143 => {Option::Some(AppProtocol::IMAP)},
-        161..=162 => {Option::Some(AppProtocol::SNMP)},
-        179 => {Option::Some(AppProtocol::BGP)},
-        389 => {Option::Some(AppProtocol::LDAP)},
-        443 => {Option::Some(AppProtocol::HTTPS)},
-        636 => {Option::Some(AppProtocol::LDAPS)},
-        989..=990 => {Option::Some(AppProtocol::FTPS)},
-        1900 => {Option::Some(AppProtocol::SSDP)},
-        5353 => {Option::Some(AppProtocol::mDNS)},
-        _ => {None}
+        20..=21 => AppProtocol::FTP,
+        22 => AppProtocol::SSH,
+        23 => AppProtocol::Telnet,
+        25 => AppProtocol::SMTP,
+        53 => AppProtocol::DNS,
+        67..=68 => AppProtocol::DHCP,
+        69 => AppProtocol::TFTP,
+        80 | 8080 => AppProtocol::HTTP,
+        110 => AppProtocol::POP,
+        123 => AppProtocol::NTP,
+        137..=139 => AppProtocol::NetBIOS,
+        143 => AppProtocol::IMAP,
+        161..=162 => AppProtocol::SNMP,
+        179 => AppProtocol::BGP,
+        389 => AppProtocol::LDAP,
+        443 => AppProtocol::HTTPS,
+        636 => AppProtocol::LDAPS,
+        989..=990 => AppProtocol::FTPS,
+        1900 => AppProtocol::SSDP,
+        5222 => AppProtocol::XMPP,
+        5353 => AppProtocol::mDNS,
+        _ => {AppProtocol::Other}
     }
 }
 

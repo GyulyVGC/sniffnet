@@ -136,7 +136,7 @@ fn main() {
     // Thread 2: parses packets
     thread::spawn(move || {
         parse_packets_loop(found_device, lowest_port, highest_port, network_layer_2,
-                           transport_layer_2, mutex_map1, status_pair1);
+                           transport_layer_2, app_layer.unwrap(), mutex_map1, status_pair1);
     });
 
     // Main thread: updates application status
@@ -326,6 +326,7 @@ fn from_name_to_application_protocol(name: String) -> Option<AppProtocol> {
         "ldaps" => {Option::Some(AppProtocol::LDAPS)},
         "ftps" => {Option::Some(AppProtocol::FTPS)},
         "ssdp" => {Option::Some(AppProtocol::SSDP)},
+        "xmpp" => {Option::Some(AppProtocol::XMPP)},
         "mdns" => {Option::Some(AppProtocol::mDNS)},
         "no filter" => {Option::Some(AppProtocol::Other)},
          _ => {None}

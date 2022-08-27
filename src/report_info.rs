@@ -139,6 +139,8 @@ pub enum AppProtocol {
     mDNS,
     /// Simple Service Discovery Protocol
     SSDP,
+    /// Extensible Messaging and Presence Protocol |
+    XMPP,
     /// not identified
     Other
 }
