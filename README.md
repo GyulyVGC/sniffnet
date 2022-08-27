@@ -324,15 +324,15 @@ In this section are reported the errors that may occur while the application is 
 
 &emsp;&emsp;&emsp; ![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
 
-&emsp;&emsp;&emsp; To solve this error you can execute the following commands:
+&emsp;&emsp;&emsp; To solve this error you can execute the following command:
 
-&emsp;&emsp;&emsp; ```cd /dev```
+&emsp;&emsp;&emsp; ```sudo chown <username> /dev/bp*```
 
-&emsp;&emsp;&emsp; ```sudo chown <username>:admin bp*```
+&emsp;&emsp;&emsp; Where \<username\> can be retrieved with the command ```whoami```
 
-&emsp;&emsp;&emsp; Where \<username\> can be retrieved with the command ```whoami```.
+&emsp;&emsp;&emsp; Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
 
-&emsp;&emsp;&emsp; You will be requested to insert your system password.
+&emsp;&emsp;&emsp; In both cases you will be requested to insert your system password.
 
 
 ### Windows configuration problems
