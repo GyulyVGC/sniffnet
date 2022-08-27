@@ -103,7 +103,7 @@ fn main() {
     let found_device = found_device_option.unwrap();
     let device_name = found_device.clone().name;
 
-    let mutex_map1 = Arc::new(Mutex::new(HashMap::new()));
+    let mutex_map1 = Arc::new(Mutex::new((HashMap::new(), 0, 0)));
     let mutex_map2 = mutex_map1.clone();
     let status_pair1 = Arc::new((Mutex::new(Status::Running), Condvar::new()));
     let status_pair2 = status_pair1.clone();

@@ -32,12 +32,13 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
 /// ```--app``` option.
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared variable in which the parsed packets are inserted.
+/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
+/// the total number of sniffed packets and the number of filtered packets.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String, app_layer: AppProtocol,
-                          mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>,
+                          mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
@@ -79,6 +80,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             let mut transport_protocol = TransProtocol::Other;
                             let mut application_protocol = AppProtocol::Other;
                             let mut skip_packet = false;
+                            let mut reported_packet = false;
 
                             analyze_network_header(value.ip, &mut exchanged_bytes,
                                                    &mut network_layer, &mut address1, &mut address2,
@@ -95,6 +97,11 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                 continue;
                             }
 
+                            let mut map_sniffed_filtered = mutex_map.lock().expect("Error acquiring mutex\n\r");
+                            //increment number of sniffed packets
+                            map_sniffed_filtered.1 += 1;
+                            drop(map_sniffed_filtered);
+
                             let key1: AddressPort = AddressPort::new(address1.clone(), port1,
                                                                      my_interface_addresses.contains(&address1));
                             let key2: AddressPort = AddressPort::new(address2.clone(), port2,
@@ -108,12 +115,19 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                             modify_or_insert_source_in_map(mutex_map.clone(), key1,
                                                                            exchanged_bytes, transport_protocol,
                                                                            application_protocol);
+                                            reported_packet = true;
                                         }
 
                                         if port2 >= lowest_port && port2 <= highest_port {
                                             modify_or_insert_destination_in_map(mutex_map.clone(), key2,
                                                                                 exchanged_bytes, transport_protocol,
                                                                                 application_protocol);
+                                            reported_packet = true;
+                                        }
+
+                                        if reported_packet {
+                                            //increment number of reported packets
+                                            mutex_map.lock().expect("Error acquiring mutex\n\r").2 += 1;
                                         }
 
                                     }
@@ -244,7 +258,8 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 ///
 /// # Arguments
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.
+/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
+/// the total number of sniffed packets and the number of filtered packets.
 ///
 /// * `key` - An `AddressPort` element representing the source of the packet. It corresponds to the map key part.
 ///
@@ -253,12 +268,12 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 /// * `transport_protocol` - Transport layer protocol carried by the observed packet.
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
-fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
-                                  exchanged_bytes: u32, transport_protocol: TransProtocol,
+fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
+                                  key: AddressPort, exchanged_bytes: u32, transport_protocol: TransProtocol,
                                   application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-    mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
+    mutex_map.lock().expect("Error acquiring mutex\n\r").0.entry(key).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
@@ -290,7 +305,8 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
 ///
 /// # Arguments
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared map containing the parsed packets.
+/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
+/// the total number of sniffed packets and the number of filtered packets.
 ///
 /// * `key` - An `AddressPort` element representing the destination of the packet.
 /// It corresponds to the map key part.
@@ -300,12 +316,12 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,Repor
 /// * `transport_protocol` - Transport layer protocol carried by the observed packet.
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
-fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<HashMap<AddressPort,ReportInfo>>>, key: AddressPort,
-                                       exchanged_bytes: u32, transport_protocol: TransProtocol,
+fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
+                                       key: AddressPort, exchanged_bytes: u32, transport_protocol: TransProtocol,
                                        application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-    mutex_map.lock().expect("Error acquiring mutex\n\r").entry(key).and_modify(|info| {
+    mutex_map.lock().expect("Error acquiring mutex\n\r").0.entry(key).and_modify(|info| {
         info.received_bytes += exchanged_bytes;
         info.received_packets += 1;
         info.final_timestamp = now.clone();

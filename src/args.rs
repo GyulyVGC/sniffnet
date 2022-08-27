@@ -2,7 +2,6 @@
 
 use clap::Parser;
 
-/// Struct for command line arguments, to be parsed using clap.
 #[derive(Parser, Debug)]
 pub struct Args {
     /// Name of the network adapter to be inspected, if omitted the default adapter is chosen.
