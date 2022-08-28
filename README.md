@@ -32,7 +32,7 @@ The application can then be run using ```sniffnet [OPTIONS]```
   
 - [Error conditions](#error-conditions)
   + [Wrong command line options specification](#wrong-command-line-options-specification)
-  + [Permissions errors](#permissions-errors)
+  + [Pcap permission denied error](#pcap-permission-denied-error)
   + [Windows configuration problems](#windows-configuration-problems)
   + [Linux configuration problems](#linux-configuration-problems)  
   + [Textual report contains just the header](#textual-report-contains-just-the-header)
@@ -146,6 +146,7 @@ In this section is reported the structure of the output report file generated, t
 
 The first section of the textual report contains a header summarizing different useful information.
 
+![report_part_1](https://user-images.githubusercontent.com/100347457/187074015-be93930b-91cf-4c31-9bae-964d6269bb4a.png)
 
 
 First, it specifies the name of the network adapter analyzed during the sniffing process.
@@ -235,7 +236,8 @@ In this section are reported the errors that may occur while the application is 
 if a non-existing adapter name is provided, the application raises an error and terminates.
 In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
 ```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
-![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
+
+&emsp;&emsp; ![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
 
 
 - **Invalid application layer protocol filter**:
@@ -278,16 +280,16 @@ Note that not including the ```-t``` option is equal to provide ```-t "no filter
 
 
 
-### Pcap permissions error
+### Pcap permission denied error
 
 You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
 
 ![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
 
 To solve this error you can execute the following command:
-```sudo chown <username> /dev/bp*```
+```sudo chown username /dev/bp*```
 
-Where \<username\> can be retrieved with the command ```whoami```
+Where ```username``` can be retrieved with the command ```whoami```
 
 Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
 
