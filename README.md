@@ -58,95 +58,70 @@ In this document you can find the list of the available command line options, a 
 ## Command line options
 
 
- - ```-a, --adapter```
+ - **-a, --adapter**: 
+name of the network adapter to be inspected, if omitted the default adapter is chosen.
+If a non-existing adapter is provided, the application raises an error and terminates.
+This option must be followed by a textual value.
+
+
+ - **--app**:
+filters packets on the basis of the application layer protocol. 
+If an invalid string is provided (not case-sensitive), the application raises an error and terminates.
+This option must be followed by a textual value corresponding to one of the supported level 7 protocols.
+```default: "no filter"```
  
-&emsp;&emsp;&emsp;Name of the network adapter to be inspected, if omitted the default adapter is chosen.
-          
-&emsp;&emsp;&emsp;If a non-existing adapter is provided, the application raises an error and terminates.
-          
-&emsp;&emsp;&emsp;This option must be followed by a textual value.
 
-- ```--app```
-
-&emsp;&emsp;&emsp;Filters packets on the basis of the application layer protocol.
-
-&emsp;&emsp;&emsp;If an invalid string is provided (not case-sensitive), the application raises an error and terminates.
-
-&emsp;&emsp;&emsp;This option must be followed by a textual value corresponding to one of the supported level 7 protocols.
-
-&emsp;&emsp;&emsp;```default: "no filter"```
+ - **-d, --device-list**:
+prints list of the available network interfaces.
+Immediately terminates the program.
+This option does not need to be followed by a value.
  
- - ```-d, --device-list```
+
+ - **-h, --highest-port**:
+sets the maximum port value to be considered, if omitted there is no ports higher bound.
+If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
+This option must be followed by an integer value between 0 and 65535. 
+```default: 65535```
  
-&emsp;&emsp;&emsp;Prints list of the available network interfaces.
-           
-&emsp;&emsp;&emsp;Immediately terminates the program.
-           
-&emsp;&emsp;&emsp;This option does not need to be followed by a value.
+
+ -  **-i, --interval**:
+sets the interval of time between report updates (value in seconds).
+This option must be followed by a positive integer value.
+```default: 5```
  
- - ```-h, --highest-port```
+
+ - **-l, --lowest-port**:
+sets the minimum port value to be considered, if omitted there is no ports lower bound.
+If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
+This option must be followed by an integer value between 0 and 65535. 
+```default: 0```
  
-&emsp;&emsp;&emsp;Sets the maximum port value to be considered, if omitted there is no ports higher bound.
 
-&emsp;&emsp;&emsp;If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
-          
-&emsp;&emsp;&emsp;This option must be followed by an integer value between 0 and 65535. 
-          
-&emsp;&emsp;&emsp;```default: 65535```
+ - **-m, --minimum-packets**:
+sets the minimum value of transited packets for an address:port to be printed in the report.
+This option must be followed by a positive integer value.
+```default: 0```
+
+
+- **-n, --net**:
+filters packets on the basis of the IP version address (IPv4 or IPv6).
+If a string different from "IPv4" or "IPv6" is provided (not case-sensitive), the application raises an error and terminates.
+This option must be followed by a textual value.
+```default: "no filter"```
  
- -  ```-i, --interval```
- 
-&emsp;&emsp;&emsp;Sets the interval of time between report updates (value in seconds).
-           
-&emsp;&emsp;&emsp;This option must be followed by a positive integer value.
- 
-&emsp;&emsp;&emsp;```default: 5```
- 
- - ```-l, --lowest-port```
- 
-&emsp;&emsp;&emsp;Sets the minimum port value to be considered, if omitted there is no ports lower bound.
 
-&emsp;&emsp;&emsp;If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
+ - **-o, --output-file**:
+name of output file to contain the textual report, if omitted a default file is chosen.
+This option must be followed by a textual value.
+```default: sniffnet_report.txt```
 
-&emsp;&emsp;&emsp;This option must be followed by an integer value between 0 and 65535. 
 
-&emsp;&emsp;&emsp;```default: 0```
- 
- - ```-m, --minimum-packets```
- 
-&emsp;&emsp;&emsp;Sets the minimum value of transited packets for an address:port to be printed in the report.
+- **-t, --trans**:
+filters packets on the basis of the transport layer protocol (TCP or UDP).
+If a string different from "TCP" or "UDP" is provided (not case-sensitive), the application raises an error and terminates.
+This option must be followed by a textual value.
+```default: "no filter"```
 
-&emsp;&emsp;&emsp;This option must be followed by a positive integer value.
-
-&emsp;&emsp;&emsp;```default: 0```
-
-- ```-n, --net```
-
-&emsp;&emsp;&emsp;Filters packets on the basis of the IP version address (IPv4 or IPv6).
-
-&emsp;&emsp;&emsp;If a string different from "IPv4" or "IPv6" is provided (not case-sensitive), the application raises an error and terminates.
-
-&emsp;&emsp;&emsp;This option must be followed by a textual value.
-            
-&emsp;&emsp;&emsp;```default: "no filter"```
- 
- - ```-o, --output-file```
- 
-&emsp;&emsp;&emsp;Name of output file to contain the textual report, if omitted a default file is chosen.
-
-&emsp;&emsp;&emsp;This option must be followed by a textual value.
-
-&emsp;&emsp;&emsp;```default: sniffnet_report.txt```
-
-- ```-t, --trans```
-
-&emsp;&emsp;&emsp;Filters packets on the basis of the transport layer protocol (TCP or UDP).
-
-&emsp;&emsp;&emsp;If a string different from "TCP" or "UDP" is provided (not case-sensitive), the application raises an error and terminates.
-
-&emsp;&emsp;&emsp;This option must be followed by a textual value.
-
-&emsp;&emsp;&emsp;```default: "no filter"```
 
           
 ## User interactions during application execution
@@ -155,7 +130,9 @@ The user can interact with the sniffing process through the terminal window.
 
 - **Pause**: to temporarily pause the sniffing process, the user can type a 'p' character in the terminal window.
 
+
 - **Resume**: to later resume the sniffing process, the user can type a 'r' character in the terminal window.
+
 
 - **Stop**: to stop the application execution, the user can type a 's' character in the terminal window.
 
@@ -169,13 +146,16 @@ In this section is reported the structure of the output report file generated, t
 
 The first section of the textual report contains a header summarizing different useful information.
 
-![report_part_1](https://user-images.githubusercontent.com/100347457/186925346-042937a9-dae3-4f70-abfc-f7d16c878ed9.png)
+
 
 First, it specifies the name of the network adapter analyzed during the sniffing process.
 
-Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, the frequency of updates and the number of times the report was updated (re-written from scratch with updated data).
+Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, and the number of times the report was updated (re-written from scratch with updated data).
 
-Finally, it describes the status of the possible filters applicable by the user through the command line: minimum number of packets for an address:port pair to be printed in the report, IP address version, transport layer protocol and port minimum and maximum number.
+It also describes the status of the possible filters applicable by the user through the command line: IP address version, transport layer protocol, port minimum and maximum number, and application layer protocol.
+
+Finally, it reports overall statistics about the observed traffic: the number of address:port pairs considered, the total number
+of sniffed packets and the number (and percentage) of packets selected according to the active filters.
 
 
 ### Report addresses list
@@ -251,88 +231,67 @@ In this section are reported the errors that may occur while the application is 
 ### Wrong command line options specification
 
 
-- **Not existing adapter name**
-
-&emsp;&emsp;&emsp; If a non-existing adapter name is provided, the application raises an error and terminates.
-
-&emsp;&emsp;&emsp; In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
-
-&emsp;&emsp;&emsp; ```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
-
-&emsp;&emsp;&emsp; ![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
+- **Not existing adapter name**:
+if a non-existing adapter name is provided, the application raises an error and terminates.
+In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
+```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
+![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
 
 
-- **Invalid application layer protocol filter**
-
-&emsp;&emsp;&emsp; If an invalid string is provided the application raises an error and terminates.
-
-&emsp;&emsp;&emsp; The list of the supported application layer protocols is available in [this](#report-addresses-list) section. 
-
-&emsp;&emsp;&emsp; Note that not including the ```--app``` option is equal to provide ```--app "no filter"```.
+- **Invalid application layer protocol filter**:
+if an invalid string is provided the application raises an error and terminates.
+The list of the supported application layer protocols is available in [this](#report-addresses-list) section. 
+Note that not including the ```--app``` option is equal to provide ```--app "no filter"```.
 
 
-- **Invalid highest port number**
-
-&emsp;&emsp;&emsp; If the provided highest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
-
-&emsp;&emsp;&emsp; If also the lowest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
+- **Invalid highest port number**:
+if the provided highest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
+If also the lowest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
 
 
-- **Invalid interval value**
-
-&emsp;&emsp;&emsp; If the provided interval value is not an integer in the range ```1..=u64::MAX``` the program raises an error and terminates.
-
-
-- **Invalid lowest port number**
-
-&emsp;&emsp;&emsp; If the provided lowest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
-
-&emsp;&emsp;&emsp; If also the highest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
+- **Invalid interval value**:
+if the provided interval value is not an integer in the range ```1..=u64::MAX``` the program raises an error and terminates.
 
 
-- **Invalid minimum packets value**
-
-&emsp;&emsp;&emsp; If the provided minimum packets value is not an integer in the range ```0..=u32::MAX``` the program raises an error and terminates.
-
-
-- **Invalid network layer protocol filter**
-
-&emsp;&emsp;&emsp; If a string different from "IPv4", "IPv6" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
-
-&emsp;&emsp;&emsp; Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
+- **Invalid lowest port number**:
+if the provided lowest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
+If also the highest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
 
 
-- **Invalid output file extension**
-
-&emsp;&emsp;&emsp; There is no particular limitation on the output file name.
-
-&emsp;&emsp;&emsp; However, if an invalid file extension is provided the file may result unreadable if the extension is not subsequently removed.
+- **Invalid minimum packets value**:
+if the provided minimum packets value is not an integer in the range ```0..=u128::MAX``` the program raises an error and terminates.
 
 
-- **Invalid transport layer protocol filter**
-
-&emsp;&emsp;&emsp; If a string different from "TCP", "UDP" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
-
-&emsp;&emsp;&emsp; Note that not including the ```-t``` option is equal to provide ```-t "no filter"```.
+- **Invalid network layer protocol filter**:
+if a string different from "IPv4", "IPv6" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
+Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
 
 
-### Permissions errors
+- **Invalid output file extension**:
+there is no particular limitation on the output file name.
+However, if an invalid file extension is provided the file may result unreadable if the extension is not subsequently removed.
 
-- **PcapError: Permission denied**
 
-&emsp;&emsp;&emsp; You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
+- **Invalid transport layer protocol filter**:
+if a string different from "TCP", "UDP" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
+Note that not including the ```-t``` option is equal to provide ```-t "no filter"```.
 
-&emsp;&emsp;&emsp; ![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
 
-&emsp;&emsp;&emsp; To solve this error you can execute the following command:
 
-&emsp;&emsp;&emsp; ```sudo chown <username> /dev/bp*```
+### Pcap permissions error
 
-&emsp;&emsp;&emsp; Where \<username\> can be retrieved with the command ```whoami```
+You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
 
-&emsp;&emsp;&emsp; Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
+![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
 
-&emsp;&emsp;&emsp; In both cases you will be requested to insert your system password.
+To solve this error you can execute the following command:
+```sudo chown <username> /dev/bp*```
+
+Where \<username\> can be retrieved with the command ```whoami```
+
+Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
+
+In both cases you will be requested to insert your system password.
 
 
 ### Windows configuration problems

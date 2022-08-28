@@ -76,7 +76,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             let mut port1 = 0;
                             let mut port2 = 0;
                             let mut transport_layer = "".to_string();
-                            let mut exchanged_bytes: u32 = 0;
+                            let mut exchanged_bytes: u128 = 0;
                             let mut transport_protocol = TransProtocol::Other;
                             let mut application_protocol = AppProtocol::Other;
                             let mut skip_packet = false;
@@ -165,7 +165,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 /// * `skip_packet` - Boolean flag initialized with a `false` value; it is passed by reference
 /// and will be overwritten to `true` if the `network_header` is invalid; in this case the
 /// packet will not be considered.
-fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mut u32,
+fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mut u128,
                           network_layer: &mut String, address1: &mut String,
                           address2: &mut String, skip_packet: &mut bool) {
     match network_header {
@@ -181,13 +181,13 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
                 .replace("]","")
                 .replace(",",".")
                 .replace(" ","");
-            *exchanged_bytes = ipv4header.payload_len as u32;
+            *exchanged_bytes = ipv4header.payload_len as u128;
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
             *network_layer = "ipv6".to_string();
             *address1 = ipv6_from_long_dec_to_short_hex(ipv6header.source);
             *address2 = ipv6_from_long_dec_to_short_hex(ipv6header.destination);
-            *exchanged_bytes = ipv6header.payload_length as u32;
+            *exchanged_bytes = ipv6header.payload_length as u128;
         }
         _ => {
             *skip_packet = true;
@@ -269,7 +269,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
 fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
-                                  key: AddressPort, exchanged_bytes: u32, transport_protocol: TransProtocol,
+                                  key: AddressPort, exchanged_bytes: u128, transport_protocol: TransProtocol,
                                   application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
@@ -317,7 +317,7 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, Rep
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
 fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
-                                       key: AddressPort, exchanged_bytes: u32, transport_protocol: TransProtocol,
+                                       key: AddressPort, exchanged_bytes: u128, transport_protocol: TransProtocol,
                                        application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();

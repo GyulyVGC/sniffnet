@@ -18,3 +18,4 @@ clap = { version = "3.2.6", features = ["derive"] }
 chrono = "0.4.20"
 crossterm = "0.13.3"
 colored = "2.0.0"
+thousands = "0.2.0"

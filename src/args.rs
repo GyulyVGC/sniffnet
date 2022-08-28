@@ -51,8 +51,8 @@ pub struct Args {
     /// Sets the minimum value of transited packets for an address:port to be printed in the report.
     ///
     /// This option must be followed by a positive integer value.
-    #[clap(short, long, value_parser, default_value_t = u32::MIN)]
-    pub minimum_packets: u32,
+    #[clap(short, long, value_parser, default_value_t = 0)]
+    pub minimum_packets: u128,
 
     /// Filters packets on the basis of the IP version address (IPv4 or IPv6).
     ///

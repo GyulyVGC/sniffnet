@@ -9,13 +9,13 @@ use std::fmt;
 /// Each ReportInfo struct is associated to a single address:port pair.
 pub struct ReportInfo {
     /// Amount of bytes relative to the associate address:port pair when it is a source.
-    pub transmitted_bytes: u32,
+    pub transmitted_bytes: u128,
     /// Amount of packets relative to the associate address:port pair when it is a source.
-    pub transmitted_packets: u32,
+    pub transmitted_packets: u128,
     /// Amount of bytes relative to the associate address:port pair when it is a destination.
-    pub received_bytes: u32,
+    pub received_bytes: u128,
     /// Amount of packets relative to the associate address:port pair when it is a destination.
-    pub received_packets: u32,
+    pub received_packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: String,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
