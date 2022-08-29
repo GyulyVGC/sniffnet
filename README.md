@@ -155,8 +155,9 @@ Then there is a detail about the initial timestamp of the sniffing process, the 
 
 It also describes the status of the possible filters applicable by the user through the command line: IP address version, transport layer protocol, port minimum and maximum number, and application layer protocol.
 
-Finally, it reports overall statistics about the observed traffic: the number of address:port pairs considered, the total number
-of sniffed packets and the number (and percentage) of packets selected according to the active filters.
+Finally, it reports some statistics about the observed traffic: the number of address:port pairs considered, the total number
+of sniffed packets, the number (and percentage) of packets selected according to the active filters and a list of the 
+observed application layer protocols with the respective packets count.
 
 
 ### Report addresses list

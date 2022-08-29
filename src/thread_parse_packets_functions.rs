@@ -38,7 +38,7 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String, app_layer: AppProtocol,
-                          mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
+                          mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
@@ -97,10 +97,16 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                 continue;
                             }
 
-                            let mut map_sniffed_filtered = mutex_map.lock().expect("Error acquiring mutex\n\r");
+                            let mut map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
                             //increment number of sniffed packets
-                            map_sniffed_filtered.1 += 1;
-                            drop(map_sniffed_filtered);
+                            map_sniffed_filtered_app.1 += 1;
+                            //increment the packet count for the sniffed app protocol
+                            map_sniffed_filtered_app.3
+                                .entry(application_protocol)
+                                .and_modify(|n| {*n+=1})
+                                .or_insert(1);
+
+                            drop(map_sniffed_filtered_app);
 
                             let key1: AddressPort = AddressPort::new(address1.clone(), port1,
                                                                      my_interface_addresses.contains(&address1));
@@ -268,7 +274,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 /// * `transport_protocol` - Transport layer protocol carried by the observed packet.
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
-fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
+fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
                                   key: AddressPort, exchanged_bytes: u128, transport_protocol: TransProtocol,
                                   application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
@@ -316,7 +322,7 @@ fn modify_or_insert_source_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, Rep
 /// * `transport_protocol` - Transport layer protocol carried by the observed packet.
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
-fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128)>>,
+fn modify_or_insert_destination_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
                                        key: AddressPort, exchanged_bytes: u128, transport_protocol: TransProtocol,
                                        application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();

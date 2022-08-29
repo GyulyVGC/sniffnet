@@ -107,7 +107,8 @@ fn main() {
     // - the map of the address:ports pairs with the relative info
     // - the total number of sniffed packets
     // - the number of filtered packets
-    let mutex_map1 = Arc::new(Mutex::new((HashMap::new(), 0, 0)));
+    // - the map of the observed app protocols with the relative packet count
+    let mutex_map1 = Arc::new(Mutex::new((HashMap::new(), 0, 0, HashMap::new())));
     let mutex_map2 = mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable

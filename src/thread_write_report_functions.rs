@@ -55,7 +55,8 @@ use crate::{AddressPort, AppProtocol, ReportInfo, Status};
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
                                    device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
-                                   output_file: String, mutex_map: Arc<Mutex<(HashMap<AddressPort,ReportInfo>, u128, u128)>>,
+                                   output_file: String,
+                                   mutex_map: Arc<Mutex<(HashMap<AddressPort,ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let mut times_report_updated: u128 = 0;
@@ -73,16 +74,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
 
-        let map_sniffed_filtered = mutex_map.lock().expect("Error acquiring mutex\n\r");
+        let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
         write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
                                  device_name.clone(), first_timestamp.clone(),
                                  times_report_updated, lowest_port, highest_port, min_packets,
                                  network_layer.clone(), transport_layer.clone(), app_layer.clone(),
-                                 map_sniffed_filtered.0.len(), map_sniffed_filtered.1,
-                                 map_sniffed_filtered.2);
+                                 map_sniffed_filtered_app.0.len(), map_sniffed_filtered_app.1,
+                                 map_sniffed_filtered_app.2, map_sniffed_filtered_app.3.clone());
 
-        let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map_sniffed_filtered.0.iter().collect();
+        let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map_sniffed_filtered_app.0.iter().collect();
         sorted_vec.sort_by(|&(_, a), &(_, b)|
             (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
 
@@ -98,7 +99,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             }
         }
 
-        drop(map_sniffed_filtered);
+        drop(map_sniffed_filtered_app);
 
         let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *_status == Status::Running {
@@ -231,6 +232,55 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
 }
 
 
+/// Given the map of app layer protocols with the relative sniffed packets count,
+/// the function generates the corresponding String
+/// to be used in the output report file header.
+///
+/// # Arguments
+///
+/// * `app_count` - Map of app layer protocols with the relative sniffed packets count
+///
+/// * `tot_packets` - Total number of sniffed packets
+fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
+
+    let mut ret_val = "".to_string();
+    let mut other_num = 0;
+    let mut sorted_app_count: Vec<(&AppProtocol, &u128)> = app_count.iter().collect();
+    sorted_app_count.sort_by(|&(_, a), &(_, b)|
+        b.cmp(a));
+
+    for entry in sorted_app_count {
+        if entry.0.eq(&AppProtocol::Other) {
+            other_num = *entry.1;
+            continue;
+        }
+        let percentage_string =
+            if format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.00") {
+                "less than 0.01".to_string()
+            }
+            else {
+                format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32)
+            };
+        ret_val.push_str(&format!("<><>\t\t\t- {:?}: {} ({}%)\n",
+                                  entry.0, entry.1.separate_with_underscores(), percentage_string));
+    }
+
+    if other_num > 0 {
+        let percentage_string: String =
+            if format!("{:.2}", 100.0*other_num as f32/tot_packets as f32).eq("0.00") {
+                "less than 0.01".to_string()
+            }
+            else {
+                format!("{:.2}", 100.0*other_num as f32/tot_packets as f32)
+            };
+        ret_val.push_str(&format!("<><>\t\t\t- Not identified: {} ({}%)\n",
+                                  other_num.separate_with_underscores(), percentage_string));
+    }
+
+    ret_val
+}
+
+
 /// Writes the output report file header, which contains useful info about the sniffing process.
 ///
 /// # Arguments
@@ -265,7 +315,7 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
 ///
 /// * `num_pairs` - Total numbers of address:port pairs considered in the report.
 ///
-/// /// * `num_sniffed_packets` - Total numbers of sniffed packets.
+/// * `num_sniffed_packets` - Total numbers of sniffed packets.
 /// # Examples
 /// An example of output report file header generated by this function is reported below.
 ///
@@ -292,7 +342,9 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
 fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
                             times_report_updated: u128, lowest_port: u16, highest_port: u16,
                             min_packets: u128, network_layer: String, transport_layer: String, app_layer: AppProtocol,
-                            num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128) {
+                            num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128,
+                            app_count: HashMap<AppProtocol, u128>) {
+
     let cornice_string = "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n".to_string();
     let adapter_string = format!("<><>\t\tPackets are sniffed from adapter '{}'\n", device_name);
     let first_timestamp_string = format!("<><>\t\t\tReport start time: {}\n", first_timestamp);
@@ -304,6 +356,7 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let transport_layer_string = get_transport_layer_string(transport_layer);
     let app_layer_string = get_app_layer_string(app_layer);
     let filtered_packets_string = get_filtered_packets_string(num_sniffed_packets, num_filtered_packets);
+    let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
 
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
@@ -329,6 +382,13 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     write!(output, "<><>\t\t\tTotal packets: {}\n", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
     write!(output, "{}", filtered_packets_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");
+
+    if num_sniffed_packets > 0 {
+        write!(output, "<><>\t\tTotal packets divided by app layer protocol\n").expect("Error writing output file\n");
+        write!(output, "{}", app_count_string).expect("Error writing output file\n");
+        write!(output, "<><>\n").expect("Error writing output file\n");
+    }
+
     if min_packets > 1 {
         write!(output, "{}", min_packets_string).expect("Error writing output file\n");
         write!(output, "<><>\n").expect("Error writing output file\n");
