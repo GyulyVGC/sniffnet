@@ -48,6 +48,8 @@ pub enum Status {
 fn main() {
     // enables cli colors
     colored::control::set_override(true);
+    #[cfg(target_os = "windows")]
+    colored::control::set_virtual_terminal(true).unwrap();
 
     // parse arguments
     let args = Args::parse();
