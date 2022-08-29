@@ -105,7 +105,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             if times_report_updated - last_report_updated_console != 1 {
                 println!("{}{}{}{}\r", "\tReport updated (".cyan().italic(),
                          times_report_updated.to_string().cyan().italic(), ")".cyan().italic(),
-                         " - report has also been updated during pause".cyan().italic());
+                         " - report has also been updated once during pause".cyan().italic());
             }
             else {
                 println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
@@ -304,6 +304,7 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let transport_layer_string = get_transport_layer_string(transport_layer);
     let app_layer_string = get_app_layer_string(app_layer);
     let filtered_packets_string = get_filtered_packets_string(num_sniffed_packets, num_filtered_packets);
+
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");

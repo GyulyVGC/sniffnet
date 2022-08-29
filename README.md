@@ -203,6 +203,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |443|HTTPS |Hypertext Transfer Protocol over SSL/TLS |
 |636|LDAPS |Lightweight Directory Access Protocol over TLS/SSL |
 |989, 990|FTPS |File Transfer Protocol over TLS/SSL |
+|993|IMAPS |Internet Message Access Protocol over TLS/SSL |
 |1900|SSDP |Simple Service Discovery Protocol |
 |5222|XMPP |Extensible Messaging and Presence Protocol |
 |5353|mDNS |Multicast DNS |

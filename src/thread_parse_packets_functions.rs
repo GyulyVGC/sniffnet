@@ -389,6 +389,7 @@ fn from_port_to_application_protocol(port: u16) -> AppProtocol {
         443 => AppProtocol::HTTPS,
         636 => AppProtocol::LDAPS,
         989..=990 => AppProtocol::FTPS,
+        993 => AppProtocol::IMAPS,
         1900 => AppProtocol::SSDP,
         5222 => AppProtocol::XMPP,
         5353 => AppProtocol::mDNS,

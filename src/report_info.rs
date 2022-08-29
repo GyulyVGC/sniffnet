@@ -137,6 +137,8 @@ pub enum AppProtocol {
     /// Multicast DNS
     #[allow(non_camel_case_types)]
     mDNS,
+    ///Internet Message Access Protocol over TLS/SSL
+    IMAPS,
     /// Simple Service Discovery Protocol
     SSDP,
     /// Extensible Messaging and Presence Protocol |

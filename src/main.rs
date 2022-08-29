@@ -103,8 +103,14 @@ fn main() {
     let found_device = found_device_option.unwrap();
     let device_name = found_device.clone().name;
 
+    //shared tuple containing:
+    // - the map of the address:ports pairs with the relative info
+    // - the total number of sniffed packets
+    // - the number of filtered packets
     let mutex_map1 = Arc::new(Mutex::new((HashMap::new(), 0, 0)));
     let mutex_map2 = mutex_map1.clone();
+
+    //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Running), Condvar::new()));
     let status_pair2 = status_pair1.clone();
     let status_pair3 = status_pair1.clone();
@@ -325,6 +331,7 @@ fn from_name_to_application_protocol(name: String) -> Option<AppProtocol> {
         "https" => {Option::Some(AppProtocol::HTTPS)},
         "ldaps" => {Option::Some(AppProtocol::LDAPS)},
         "ftps" => {Option::Some(AppProtocol::FTPS)},
+        "imaps" => {Option::Some(AppProtocol::IMAPS)},
         "ssdp" => {Option::Some(AppProtocol::SSDP)},
         "xmpp" => {Option::Some(AppProtocol::XMPP)},
         "mdns" => {Option::Some(AppProtocol::mDNS)},
