@@ -26,7 +26,7 @@ The application can then be run using ```sniffnet [OPTIONS]```
 
 - [Textual report structure](#textual-report-structure)
   + [Report header](#report-header)
-  + [Report address:port list](#report-addresses-list)
+  + [Report [address:port] list](#report-addresses-list)
   
 - [Implementation details](#implementation-details)
   
@@ -98,7 +98,7 @@ This option must be followed by an integer value between 0 and 65535.
  
 
  - **-m, --minimum-packets**:
-sets the minimum value of transited packets for an address:port to be printed in the report.
+sets the minimum value of transited packets for an [address:port] to be printed in the report.
 This option must be followed by a positive integer value.
 ```default: 0```
 
@@ -146,7 +146,8 @@ In this section is reported the structure of the output report file generated, t
 
 The first section of the textual report contains a header summarizing different useful information.
 
-![report_part_1](https://user-images.githubusercontent.com/100347457/187074015-be93930b-91cf-4c31-9bae-964d6269bb4a.png)
+![report_part_1](https://user-images.githubusercontent.com/100347457/187227230-b7984a13-d9df-4852-9b8d-e295cd7cfa35.png)
+
 
 
 First, it specifies the name of the network adapter analyzed during the sniffing process.
@@ -155,7 +156,7 @@ Then there is a detail about the initial timestamp of the sniffing process, the 
 
 It also describes the status of the possible filters applicable by the user through the command line: IP address version, transport layer protocol, port minimum and maximum number, and application layer protocol.
 
-Finally, it reports some statistics about the observed traffic: the number of address:port pairs considered, the total number
+Finally, it reports some statistics about the observed traffic: the number of [address:port] pairs considered, the total number
 of sniffed packets, the number (and percentage) of packets selected according to the active filters and a list of the 
 observed application layer protocols with the respective packets count.
 
@@ -163,9 +164,9 @@ observed application layer protocols with the respective packets count.
 ### Report addresses list
 
 
-The second section of the textual report is dedicated to the packets stream analysis for each address:port pair.
+The second section of the textual report is dedicated to the packets stream analysis for each [address:port] pair.
 
-This analysis results in a list in which each element represents an address:port pair with the relative statistics.
+This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
 
 Note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
 
@@ -174,13 +175,13 @@ If you don't see this section in your report file, check [here](#textual-report-
 ![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
 
 
-For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the address:port is the destination) measured in number of packets and in number of bytes.
+For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the [address:port] is the destination) measured in number of packets and in number of bytes.
 
-For each address:port pair are reported the first and the last timestamp in which a packet was transmitted from/to that address:port.
+For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted from/to that [address:port].
 
 Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols).
 
-Both the transport layer protocols and application layer protocols fields could report a single or multiple protocols for each address:port pair, based on the traffic type.
+Both the transport layer protocols and application layer protocols fields could report a single or multiple protocols for each [address:port] pair, based on the traffic type.
 
 Specifically, the transport layer protocols field is based on an Enum with only two values (TCP and UDP), while the application layer protocols field is based on an Enum with some of the most common level 7 protocols (listed in the table below); please note that application level protocols are just inferred from the transport port numbers.
 
