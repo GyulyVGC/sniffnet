@@ -7,7 +7,6 @@
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
-//use std::collections::HashSet;
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -17,6 +16,9 @@ use std::io::Write;
 use colored::Colorize;
 use thousands::Separable;
 use crate::{AddressPort, AppProtocol, ReportInfo, Status};
+
+#[cfg(feature = "unknown_ports")]
+use std::collections::HashSet;
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -66,7 +68,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let cvar = &status_pair.1;
     let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
 
-    //let mut set_unknown = HashSet::new();
+    #[cfg(feature = "unknown_ports")]
+    let mut set_unknown = HashSet::new();
 
     loop {
         thread::sleep(Duration::from_secs(interval));
@@ -74,7 +77,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         times_report_updated += 1;
         let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
 
-        //let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
+        #[cfg(feature = "unknown_ports")]
+        let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
 
         let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
@@ -92,16 +96,21 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         for (key, val) in sorted_vec.iter() {
             if val.transmitted_packets + val.received_packets >= min_packets {
                 write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
-                // if val.app_protocols.len() == 0 && key.port < 49152{
-                //     set_unknown.insert(key.port);
-                //     let mut sorted_set: Vec<&u16> = set_unknown.iter().collect();
-                //     sorted_set.sort();
-                //     write!(output2, "{:?}\n",sorted_set).unwrap();
-                // }
+                #[cfg(feature = "unknown_ports")]
+                if val.app_protocols.len() == 0 && key.port < 49152{
+                    set_unknown.insert(key.port);
+                }
             }
         }
 
-        drop(map_sniffed_filtered_app);
+        #[cfg(feature = "unknown_ports")]
+        {
+            let mut sorted_set: Vec<&u16> = set_unknown.iter().collect();
+            sorted_set.sort();
+            write!(output2, "{:?}\n",sorted_set).unwrap();
+
+            drop(map_sniffed_filtered_app);
+        }
 
         let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *_status == Status::Running {

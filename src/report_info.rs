@@ -106,6 +106,8 @@ pub enum AppProtocol {
     Telnet,
     /// Simple Mail Transfer Protocol
     SMTP,
+    /// Terminal Access Controller Access-Control System
+    TACACS,
     /// Domain Name System
     DNS,
     /// Dynamic Host Configuration Protocol
@@ -120,6 +122,8 @@ pub enum AppProtocol {
     NTP,
     /// NetBIOS
     NetBIOS,
+    /// Post Office Protocol 3 over TLS/SSL
+    POP3S,
     /// Internet Message Access Protocol
     IMAP,
     /// Simple Network Management Protocol
@@ -128,7 +132,7 @@ pub enum AppProtocol {
     BGP,
     /// Lightweight Directory Access Protocol
     LDAP,
-    ///Hypertext Transfer Protocol over SSL/TLS
+    ///Hypertext Transfer Protocol over TLS/SSL
     HTTPS,
     /// Lightweight Directory Access Protocol over TLS/SSL
     LDAPS,

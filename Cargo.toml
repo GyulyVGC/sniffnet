@@ -19,3 +19,8 @@ chrono = "0.4.20"
 crossterm = "0.13.3"
 colored = "2.0.0"
 thousands = "0.2.0"
+
+#used for debug purposes to discover ports not yet assigned to application layer protocols
+#[features]
+#default = ["unknown_ports"]
+#unknown_ports = []
