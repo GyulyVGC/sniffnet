@@ -160,8 +160,8 @@ fn main() {
 fn print_device_list() {
     println!("\r");
     for dev in Device::list().expect("Error retrieving device list\r\n") {
-        print!("{}{}{}", "\r\tDevice: ".cyan(), dev.name.cyan(),
-            "\r\n\t\tAddresses: ".cyan());
+        print!("{}{} ({}){}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(), dev.desc.unwrap().cyan(),
+            "\r\n\t\tAddresses: "/*.cyan()*/);
         if dev.addresses.len() == 0 {
             println!("\r");
         }
@@ -185,7 +185,7 @@ fn print_device_list() {
 fn retrieve_device(adapter: &mut String) -> Option<Device> {
     let mut found_device = None;
     if (*adapter).eq(&"default".to_string()) {
-        *adapter = Device::lookup().expect("Error retrieving default network adapter\r\n").name;
+        *adapter = Device::lookup().expect("Error retrieving default network adapter\r\n").expect("Error: no suitable devices\r\n").name;
     }
     let dev_list = Device::list().expect("Unable to retrieve network adapters list\r\n");
     for device in dev_list {
