@@ -160,8 +160,16 @@ fn main() {
 fn print_device_list() {
     println!("\r");
     for dev in Device::list().expect("Error retrieving device list\r\n") {
-        print!("{}{} ({}){}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(), dev.desc.unwrap().cyan(),
-            "\r\n\t\tAddresses: "/*.cyan()*/);
+        match dev.desc {
+            None => {
+                print!("{}{} {}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(),
+                       "\r\n\t\tAddresses: "/*.cyan()*/);
+            }
+            Some(description) => {
+                print!("{}{} ({}){}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(), description.cyan(),
+                       "\r\n\t\tAddresses: "/*.cyan()*/);
+            }
+        }
         if dev.addresses.len() == 0 {
             println!("\r");
         }

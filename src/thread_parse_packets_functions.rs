@@ -61,8 +61,8 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
         if *status == Status::Running {
             drop(status);
             match cap.next_packet() {
-                Err(e) => {
-                    println!("ERROR: {:?}", e); // Debug
+                Err(/*e*/_) => {
+                    //println!("ERROR: {:?}", e); // Debug
                     continue;
                 }
                 Ok(packet) => {
