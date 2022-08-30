@@ -4,6 +4,7 @@
 //!
 //! If the ```-i``` option is not specified, the report is updated every 5 seconds.
 
+use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 //use std::collections::HashSet;
@@ -245,37 +246,59 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
 fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
 
     let mut ret_val = "".to_string();
-    let mut other_num = 0;
-    let mut sorted_app_count: Vec<(&AppProtocol, &u128)> = app_count.iter().collect();
-    sorted_app_count.sort_by(|&(_, a), &(_, b)|
-        b.cmp(a));
 
-    for entry in sorted_app_count {
-        if entry.0.eq(&AppProtocol::Other) {
-            other_num = *entry.1;
-            continue;
+    let mut sorted_app_count: Vec<(&AppProtocol, &u128)> = app_count.iter().collect();
+    sorted_app_count.sort_by(|&(p1, a), &(p2, b)| {
+        if p1.eq(&AppProtocol::Other) {
+            Ordering::Greater
         }
-        let percentage_string =
-            if format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.00") {
-                "less than 0.01".to_string()
+        else if p2.eq(&AppProtocol::Other) {
+            Ordering::Less
+        }
+        else {
+            b.cmp(a)
+        }
+    });
+
+    //compute the length of the longest packet count string, used to align text
+    let mut longest_num;
+    longest_num = sorted_app_count.get(0).unwrap().1.separate_with_underscores().len();
+    match app_count.get(&AppProtocol::Other) {
+        None => {}
+        Some(x) => {
+            if x.separate_with_underscores().len() > longest_num {
+                longest_num = x.separate_with_underscores().len();
             }
-            else {
-                format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32)
-            };
-        ret_val.push_str(&format!("<><>\t\t\t- {:?}: {} ({}%)\n",
-                                  entry.0, entry.1.separate_with_underscores(), percentage_string));
+        }
     }
 
-    if other_num > 0 {
-        let percentage_string: String =
-            if format!("{:.2}", 100.0*other_num as f32/tot_packets as f32).eq("0.00") {
-                "less than 0.01".to_string()
+    for entry in sorted_app_count {
+
+        let app_proto_string = format!("{:?}", entry.0);
+
+        let num_string = format!("{}", entry.1.separate_with_underscores());
+
+        let percentage_string =
+            if format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.00") {
+                "(<0.01%)".to_string()
             }
             else {
-                format!("{:.2}", 100.0*other_num as f32/tot_packets as f32)
+                format!("({:.2}%)", 100.0*(*entry.1) as f32/tot_packets as f32)
             };
-        ret_val.push_str(&format!("<><>\t\t\t- Not identified: {} ({}%)\n",
-                                  other_num.separate_with_underscores(), percentage_string));
+
+        //to align digits
+        let spaces_string_1 = " ".to_string()
+            .repeat(9+longest_num-num_string.len()-app_proto_string.len());
+        let spaces_string_2 = " ".to_string()
+            .repeat(11-percentage_string.len());
+
+        ret_val.push_str(&format!("<><>\t\t\t-{}:{}{}{}{}\n",
+                                  app_proto_string,
+                                  spaces_string_1,
+                                  num_string,
+                                  spaces_string_2,
+                                  percentage_string));
+
     }
 
     ret_val
@@ -352,12 +375,10 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
     let number_updates_string = format!("<><>\t\t\tNumber of times report was updated: {}\n", times_report_updated.separate_with_underscores());
     let ports_string = get_ports_string(lowest_port,highest_port);
-    let min_packets_string = get_min_packets_string(min_packets);
     let network_layer_string = get_network_layer_string(network_layer);
     let transport_layer_string = get_transport_layer_string(transport_layer);
     let app_layer_string = get_app_layer_string(app_layer);
     let filtered_packets_string = get_filtered_packets_string(num_sniffed_packets, num_filtered_packets);
-    let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
 
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
@@ -385,12 +406,14 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     write!(output, "<><>\n").expect("Error writing output file\n");
 
     if num_sniffed_packets > 0 {
+        let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
         write!(output, "<><>\t\tTotal packets divided by app layer protocol\n").expect("Error writing output file\n");
         write!(output, "{}", app_count_string).expect("Error writing output file\n");
         write!(output, "<><>\n").expect("Error writing output file\n");
     }
 
     if min_packets > 1 {
+        let min_packets_string = get_min_packets_string(min_packets);
         write!(output, "{}", min_packets_string).expect("Error writing output file\n");
         write!(output, "<><>\n").expect("Error writing output file\n");
     }
