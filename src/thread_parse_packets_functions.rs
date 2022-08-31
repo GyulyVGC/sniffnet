@@ -145,6 +145,9 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                 }
             }
         }
+        else if *status == Status::Stop {
+            return;
+        }
     }
 
 }

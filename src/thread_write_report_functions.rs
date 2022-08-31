@@ -153,8 +153,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         output.flush().expect("Error writing output file\n\r");
 
-        let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        if *_status == Status::Running {
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+        if *status == Status::Running {
             if times_report_updated - last_report_updated_console != 1 {
                 println!("{}{}{}{}\r", "\tReport updated (".cyan().italic(),
                          times_report_updated.to_string().cyan().italic(), ")".cyan().italic(),
@@ -167,7 +167,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             last_report_updated_console = times_report_updated;
         }
 
-        _status = cvar.wait_while(_status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
+        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
+        if *status == Status::Stop {
+            println!("{}{}{}\r", "\tThe final report is available in the file '".cyan().italic(),
+                     output_file.clone().cyan().bold(), "'\n\n\r".cyan().italic());
+            return;
+        }
     }
 }
 

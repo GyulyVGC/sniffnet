@@ -36,7 +36,9 @@ pub enum Status {
     /// The sniffing process is running: the application parses packets and periodically update the output report.
     Running,
     /// The sniffing process is pause by the user and waiting to be later resumed.
-    Pause
+    Pause,
+    /// The sniffing process is killed.
+    Stop
 }
 
 /// Entry point of application execution.
@@ -135,7 +137,7 @@ fn main() {
     }));
 
     // Thread 1: updates textual report
-    thread::spawn(move || {
+    let thread_write_report = thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
                                     device_name, network_layer,
                                     transport_layer, app_layer.unwrap(), output_file,
@@ -150,6 +152,9 @@ fn main() {
 
     // Main thread: updates application status
     set_status_by_key(status_pair2);
+
+    // Wait for the final report update, to not kill the application while the report is being written
+    thread_write_report.join().expect("Thread in charge of writing report panicked!\r\n");
 
 }
 
@@ -292,7 +297,9 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
                     print!("                                                         \r");
                     io::stdout().flush().unwrap();
-                    println!("\r\t{}", "Sniffnet stopped\n\n\r".red().bold());
+                    println!("\r\t{}", "Sniffnet stopped... waiting for the last report update\n\n\r".red().bold());
+                    *status = Status::Stop;
+                    cvar.notify_all();
                     return;
                 }
                 _ => { /* Other events */ }
