@@ -9,16 +9,19 @@ use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
+use std::time::{Duration};
 use std::thread;
-use std::time::Duration;
 use chrono::Local;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use colored::Colorize;
 use thousands::Separable;
 use crate::{AddressPort, AppProtocol, ReportInfo, Status};
 
 #[cfg(feature = "unknown_ports")]
 use std::collections::HashSet;
+
+#[cfg(feature = "elapsed_time")]
+use std::time::{Instant};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -71,27 +74,39 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     #[cfg(feature = "unknown_ports")]
     let mut set_unknown = HashSet::new();
 
+    #[cfg(feature = "elapsed_time")]
+    let mut last_10_write_times = vec![];
+
     loop {
         thread::sleep(Duration::from_secs(interval));
 
         times_report_updated += 1;
-        let mut output = File::create(output_file.clone()).expect("Error creating output file\n\r");
+        let mut output = BufWriter::new(File::create(output_file.clone()).expect("Error creating output file\n\r"));
 
         #[cfg(feature = "unknown_ports")]
         let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
 
         let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
-        write_report_file_header(output.try_clone().expect("Error cloning file handler\n\r"),
+        #[cfg(feature = "elapsed_time")]
+        let start = Instant::now();
+
+        write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                  device_name.clone(), first_timestamp.clone(),
                                  times_report_updated, lowest_port, highest_port, min_packets,
                                  network_layer.clone(), transport_layer.clone(), app_layer.clone(),
                                  map_sniffed_filtered_app.0.len(), map_sniffed_filtered_app.1,
                                  map_sniffed_filtered_app.2, map_sniffed_filtered_app.3.clone());
 
+        #[cfg(feature = "elapsed_time")]
+        let time_header = start.elapsed().as_millis();
+
         let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map_sniffed_filtered_app.0.iter().collect();
         sorted_vec.sort_by(|&(_, a), &(_, b)|
             (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+
+        #[cfg(feature = "elapsed_time")]
+        let time_header_sort = start.elapsed().as_millis();
 
         for (key, val) in sorted_vec.iter() {
             if val.transmitted_packets + val.received_packets >= min_packets {
@@ -108,9 +123,35 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             let mut sorted_set: Vec<&u16> = set_unknown.iter().collect();
             sorted_set.sort();
             write!(output2, "{:?}\n",sorted_set).unwrap();
-
-            drop(map_sniffed_filtered_app);
         }
+
+        drop(map_sniffed_filtered_app);
+
+        #[cfg(feature = "elapsed_time")]
+        {
+            let time_header_sort_print = start.elapsed().as_millis();
+            last_10_write_times.push(time_header_sort_print);
+
+            write!(output, "---------------------------------------------------------\n\n\
+            \t\tTimings (last report write):\n\
+            \t\t\tPrint header: {}ms\n\
+            \t\t\tSort map: {}ms\n\
+            \t\t\tPrint map: {}ms\n\
+            \t\t\tTot time mutex held: {}ms\n\n",
+                   time_header, time_header_sort-time_header,
+                   time_header_sort_print-time_header_sort,
+                   time_header_sort_print).expect("Error writing output file\n\r");
+
+            if times_report_updated >= 10 {
+                write!(output, "\t\tTimings (average on the last 10 report writes):\n\
+            \t\t\tTot time mutex held: {}ms\n",
+                       last_10_write_times.iter().sum::<u128>()/10).expect("Error writing output file\n\r");
+                last_10_write_times.remove(0);
+            }
+
+        }
+
+        output.flush().expect("Error writing output file\n\r");
 
         let mut _status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *_status == Status::Running {
