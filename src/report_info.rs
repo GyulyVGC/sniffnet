@@ -37,16 +37,16 @@ impl fmt::Display for ReportInfo {
         let application_level_protocols;
 
         match self.transmitted_bytes {
-            0..=1000 => {},
-            1001..=1000000 => {n /= 1000 as f32; multiple_transmitted.push('k'); },
-            1000001..=1000000000 => {n /= 1000000 as f32; multiple_transmitted.push('M');},
+            0..=999 => {},
+            1000..=999999 => {n /= 1000 as f32; multiple_transmitted.push('k'); },
+            1000000..=999999999 => {n /= 1000000 as f32; multiple_transmitted.push('M');},
             _ => {n /= 1000000000 as f32; multiple_transmitted.push('G'); }
         }
 
         match self.received_bytes {
-            0..=1000 => {},
-            1001..=1000000 => {m /= 1000 as f32; multiple_received.push('k'); },
-            1000001..=1000000000 => {m /= 1000000 as f32; multiple_received.push('M');},
+            0..=999 => {},
+            1000..=999999 => {m /= 1000 as f32; multiple_received.push('k'); },
+            1000000..=999999999 => {m /= 1000000 as f32; multiple_received.push('M');},
             _ => {m /= 1000000000 as f32; multiple_received.push('G'); }
         }
 
@@ -65,11 +65,25 @@ impl fmt::Display for ReportInfo {
             }
         };
 
+        let precision1: usize = if !multiple_transmitted.is_empty() // no multiple
+                            {
+                                if n < 10.0 {2}
+                                else if n < 100.0 {1}
+                                else {0}
+                            } else {0};
+
+        let precision2: usize = if !multiple_received.is_empty()
+                            {
+                                if m < 10.0 {2}
+                                else if m < 100.0 {1}
+                                else {0}
+                            } else {0};
+
         write!(f, "\t\t\t\tSent data\n\
-                    \t\t\t\t\tSent Bytes: {:.2} {}B\n\
+                    \t\t\t\t\tSent Bytes: {:.*} {}B\n\
                     \t\t\t\t\tSent packets: {}\n\
                     \t\t\t\tReceived data\n\
-                    \t\t\t\t\tReceived Bytes: {:.2} {}B\n\
+                    \t\t\t\t\tReceived Bytes: {:.*} {}B\n\
                     \t\t\t\t\tReceived packets: {}\n\
                     \t\t\t\tTimestamps\n\
                     \t\t\t\t\tInitial Timestamp: {}\n\
@@ -77,8 +91,8 @@ impl fmt::Display for ReportInfo {
                     \t\t\t\tProtocols\n\
                     \t\t\t\t\tTransport layer protocols: {}\n\
                     \t\t\t\t\tApplication layer protocols: {}\n\n",
-               n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
-               m, multiple_received, self.received_packets.separate_with_underscores(),
+               precision1, n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
+               precision2, m, multiple_received, self.received_packets.separate_with_underscores(),
                self.initial_timestamp, self.final_timestamp,
                transport_level_protocols, application_level_protocols
         )
