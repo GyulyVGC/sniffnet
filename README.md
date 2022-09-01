@@ -57,7 +57,6 @@ In this document you can find the list of the available command line options, a 
 
 ## Command line options
 
-
  - **-a, --adapter**: 
 name of the network adapter to be inspected, if omitted the default adapter is chosen.
 If a non-existing adapter is provided, the application raises an error and terminates.
@@ -121,7 +120,6 @@ filters packets on the basis of the transport layer protocol (TCP or UDP).
 If a string different from "TCP" or "UDP" is provided (not case-sensitive), the application raises an error and terminates.
 This option must be followed by a textual value.
 ```default: "no filter"```
-
 
           
 ## User interactions during application execution
@@ -215,6 +213,11 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 
 ## Implementation details
 
+
+<details>
+
+  <summary>See details</summary>
+
 The application consists in three different execution flows.
 
 The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously); in doing so it signals to the secondary threads when to pause or resume their work.
@@ -229,13 +232,15 @@ This thread waits for packets without consuming CPU resources through the ```pca
 The thread in charge of updating the textual report sleeps for ```interval``` seconds and re-writes the report with updated traffic statistics.
 Before updating the report it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds writing the report.
 
+</details>
 
 ## Error conditions
 
-In this section are reported the errors that may occur while the application is running.
+<details>
+
+  <summary>See details</summary>
 
 ### Wrong command line options specification
-
 
 - **Not existing adapter name**:
 if a non-existing adapter name is provided, the application raises an error and terminates.
@@ -342,6 +347,7 @@ All those exceptional scenarios are managed through calls to the ```expect()``` 
   
 The ```unwrap()``` method is used only on ```Option<T>``` values when it's certain they contain ```Some``` value.
 
+</details>
 
 # Authors
 

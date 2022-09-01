@@ -3,6 +3,7 @@
 
 use std::collections::HashSet;
 use std::fmt;
+use thousands::Separable;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -76,8 +77,8 @@ impl fmt::Display for ReportInfo {
                     \t\t\t\tProtocols\n\
                     \t\t\t\t\tTransport layer protocols: {}\n\
                     \t\t\t\t\tApplication layer protocols: {}\n\n",
-               n, multiple_transmitted, self.transmitted_packets,
-               m, multiple_received, self.received_packets,
+               n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
+               m, multiple_received, self.received_packets.separate_with_underscores(),
                self.initial_timestamp, self.final_timestamp,
                transport_level_protocols, application_level_protocols
         )
