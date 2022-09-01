@@ -31,12 +31,12 @@ The application can then be run using ```sniffnet [OPTIONS]```
 - [Implementation details](#implementation-details)
   
 - [Error conditions](#error-conditions)
-  + [Wrong command line options specification](#wrong-command-line-options-specification)
-  + [Pcap permission denied error](#pcap-permission-denied-error)
-  + [Windows configuration problems](#windows-configuration-problems)
-  + [Linux configuration problems](#linux-configuration-problems)  
-  + [Textual report contains just the header](#textual-report-contains-just-the-header)
-  + [Other errors](#other-errors)
+  + Wrong command line options specification
+  + Pcap permission denied error
+  + Windows configuration problems
+  + Linux configuration problems
+  + Textual report contains just the header
+  + Other errors
   
 - [Authors](#authors)
   
@@ -167,8 +167,6 @@ The second section of the textual report is dedicated to the packets stream anal
 This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
 
 Note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
-
-If you don't see this section in your report file, check [here](#textual-report-contains-just-the-header).
 
 ![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
 
