@@ -65,19 +65,18 @@ impl fmt::Display for ReportInfo {
             }
         };
 
-        let precision1: usize = if !multiple_transmitted.is_empty() // no multiple
-                            {
-                                if n < 10.0 {2}
-                                else if n < 100.0 {1}
-                                else {0}
-                            } else {0};
+        let set_multiple = |prefix: &String, &n| {
+            if !prefix.is_empty() // no multiple
+            {
+                if n < 10.0 {2}
+                else if n < 100.0 {1}
+                else {0}
+            } else {0}
+        };
 
-        let precision2: usize = if !multiple_received.is_empty()
-                            {
-                                if m < 10.0 {2}
-                                else if m < 100.0 {1}
-                                else {0}
-                            } else {0};
+        let precision1: usize = set_multiple(&multiple_transmitted, &n);
+
+        let precision2: usize = set_multiple(&multiple_received, &m);
 
         write!(f, "\t\t\t\tSent data\n\
                     \t\t\t\t\tSent Bytes: {:.*} {}B\n\
