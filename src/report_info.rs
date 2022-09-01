@@ -65,7 +65,7 @@ impl fmt::Display for ReportInfo {
             }
         };
 
-        let set_multiple = |prefix: &String, &n| {
+        let set_precision = |prefix: &String, &n| {
             if !prefix.is_empty() // no multiple
             {
                 if n < 10.0 {2}
@@ -74,9 +74,9 @@ impl fmt::Display for ReportInfo {
             } else {0}
         };
 
-        let precision1: usize = set_multiple(&multiple_transmitted, &n);
+        let precision1: usize = set_precision(&multiple_transmitted, &n);
 
-        let precision2: usize = set_multiple(&multiple_received, &m);
+        let precision2: usize = set_precision(&multiple_received, &m);
 
         write!(f, "\t\t\t\tSent data\n\
                     \t\t\t\t\tSent Bytes: {:.*} {}B\n\
