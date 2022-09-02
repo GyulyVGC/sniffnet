@@ -223,4 +223,7 @@ $RECYCLE.BIN/
 #folder with gif and images
 /img
 
+#graphs
+*.svg
+
 .idea

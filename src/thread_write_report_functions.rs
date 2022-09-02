@@ -23,6 +23,9 @@ use std::collections::HashSet;
 #[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
 
+#[cfg(feature = "draw_graph")]
+use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView};
+
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
 /// from scratch the output report file, with updated values.
@@ -77,6 +80,11 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     #[cfg(feature = "elapsed_time")]
     let mut last_10_write_times = vec![];
 
+    #[cfg(feature = "draw_graph")]
+    let mut tot_packets_graph = vec![(0.0,0.0)];
+    #[cfg(feature = "draw_graph")]
+    let mut filtered_packets_graph = vec![(0.0,0.0)];
+
     loop {
         thread::sleep(Duration::from_secs(interval));
 
@@ -88,6 +96,15 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
+        let tot_packets = map_sniffed_filtered_app.1;
+        let filtered_packets = map_sniffed_filtered_app.2;
+
+        #[cfg(feature = "draw_graph")]
+        {
+            tot_packets_graph.push((interval as f32 *times_report_updated as f32,tot_packets as f32));
+            filtered_packets_graph.push((interval as f32 *times_report_updated as f32,filtered_packets as f32));
+        }
+
         #[cfg(feature = "elapsed_time")]
         let start = Instant::now();
 
@@ -95,8 +112,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                                  device_name.clone(), first_timestamp.clone(),
                                  times_report_updated, lowest_port, highest_port, min_packets,
                                  network_layer.clone(), transport_layer.clone(), app_layer.clone(),
-                                 map_sniffed_filtered_app.0.len(), map_sniffed_filtered_app.1,
-                                 map_sniffed_filtered_app.2, map_sniffed_filtered_app.3.clone());
+                                 map_sniffed_filtered_app.0.len(), tot_packets,
+                                 filtered_packets, map_sniffed_filtered_app.3.clone());
 
         #[cfg(feature = "elapsed_time")]
         let time_header = start.elapsed().as_millis();
@@ -152,6 +169,55 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         }
 
         output.flush().expect("Error writing output file\n\r");
+
+
+        //experimental: plot received packets in a line series chart
+        #[cfg(feature = "draw_graph")]
+        {
+            let width = 1120;
+            let height = 700;
+            let (top, right, bottom, left) = (90, 40, 50, 60);
+
+            let x = ScaleLinear::new()
+                .set_domain(vec![0_f32, interval as f32 * times_report_updated as f32])
+                .set_range(vec![0, width - left - right]);
+
+            let y = ScaleLinear::new()
+                .set_domain(vec![0_f32, 1.5*tot_packets as f32])
+                .set_range(vec![height - top - bottom, 0]);
+
+            let tot_packets_view = LineSeriesView::new()
+                .set_x_scale(&x)
+                .set_y_scale(&y)
+                .set_marker_type(MarkerType::Square)
+                .set_label_visibility(false)
+                .load_data(&tot_packets_graph).unwrap();
+
+            let filtered_packets_view = LineSeriesView::new()
+                .set_x_scale(&x)
+                .set_y_scale(&y)
+                .set_marker_type(MarkerType::Circle)
+                .set_label_visibility(false)
+                .load_data(&filtered_packets_graph).unwrap();
+
+                Chart::new()
+                .set_width(width)
+                .set_height(height)
+                .set_margins(top, right, bottom, left)
+                .add_title(String::from("Total number of sniffed packets"))
+                .add_view(&tot_packets_view)
+                .add_view(&filtered_packets_view)
+                .add_axis_bottom(&x)
+                .add_axis_left(&y)
+                .add_bottom_axis_label("Time (s)")
+                .save("sniffnet_graph.svg")
+                .unwrap();
+
+            // if tot_packets > filtered_packets {
+            //     chart.add_view(&filtered_packets_view);
+            // }
+
+        }
 
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *status == Status::Running {

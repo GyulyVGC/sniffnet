@@ -19,6 +19,7 @@ chrono = "0.4.20"
 crossterm = "0.13.3"
 colored = "2.0.0"
 thousands = "0.2.0"
+#charts = "0.3.0"
 
 
 #used for debug purposes to discover ports not yet assigned to a known application layer protocols
@@ -30,3 +31,8 @@ thousands = "0.2.0"
 #[features]
 #default = ["elapsed_time"]
 #elapsed_time = []
+
+#experimental: plot received packets in a line series chart
+#[features]
+#default = ["draw_graph"]
+#draw_graph = []
