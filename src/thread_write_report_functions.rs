@@ -24,7 +24,7 @@ use std::collections::HashSet;
 use std::time::{Instant};
 
 #[cfg(feature = "draw_graph")]
-use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView};
+use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, AxisPosition, Color};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -81,9 +81,20 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let mut last_10_write_times = vec![];
 
     #[cfg(feature = "draw_graph")]
-    let mut tot_packets_graph = vec![(0.0,0.0)];
+    let mut tot_packets_graph_cumul = vec![(0.0,0.0)];
     #[cfg(feature = "draw_graph")]
-    let mut filtered_packets_graph = vec![(0.0,0.0)];
+    let mut filtered_packets_graph_cumul = vec![(0.0,0.0)];
+
+    #[cfg(feature = "draw_graph")]
+    let mut tot_packets_graph_interval = vec![(0.0,0.0)];
+    #[cfg(feature = "draw_graph")]
+    let mut tot_packets_prev = 0;
+    #[cfg(feature = "draw_graph")]
+    let mut max_packets_interval = 0;
+    #[cfg(feature = "draw_graph")]
+    let mut filtered_packets_graph_interval = vec![(0.0,0.0)];
+    #[cfg(feature = "draw_graph")]
+    let mut filtered_packets_prev = 0;
 
     loop {
         thread::sleep(Duration::from_secs(interval));
@@ -101,8 +112,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         #[cfg(feature = "draw_graph")]
         {
-            tot_packets_graph.push((interval as f32 *times_report_updated as f32,tot_packets as f32));
-            filtered_packets_graph.push((interval as f32 *times_report_updated as f32,filtered_packets as f32));
+            tot_packets_graph_cumul.push((interval as f32 *times_report_updated as f32,tot_packets as f32));
+            filtered_packets_graph_cumul.push((interval as f32 *times_report_updated as f32,filtered_packets as f32));
+
+            tot_packets_graph_interval.push((interval as f32 *times_report_updated as f32,tot_packets as f32 - tot_packets_prev as f32));
+            if tot_packets - tot_packets_prev > max_packets_interval {
+                max_packets_interval = tot_packets - tot_packets_prev;
+            }
+            tot_packets_prev = tot_packets;
+            filtered_packets_graph_interval.push((interval as f32 *times_report_updated as f32,filtered_packets as f32 - filtered_packets_prev as f32));
+            filtered_packets_prev = filtered_packets;
         }
 
         #[cfg(feature = "elapsed_time")]
@@ -183,39 +202,75 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 .set_range(vec![0, width - left - right]);
 
             let y = ScaleLinear::new()
-                .set_domain(vec![0_f32, 1.5*tot_packets as f32])
+                .set_domain(vec![0_f32, 1.2*tot_packets as f32])
                 .set_range(vec![height - top - bottom, 0]);
 
-            let tot_packets_view = LineSeriesView::new()
+            let tot_packets_cumul_view = LineSeriesView::new()
                 .set_x_scale(&x)
                 .set_y_scale(&y)
                 .set_marker_type(MarkerType::Square)
                 .set_label_visibility(false)
-                .load_data(&tot_packets_graph).unwrap();
+                .set_custom_data_label("Total".to_string())
+                .load_data(&tot_packets_graph_cumul).unwrap();
 
-            let filtered_packets_view = LineSeriesView::new()
+            let filtered_packets_cumul_view = AreaSeriesView::new()
                 .set_x_scale(&x)
                 .set_y_scale(&y)
                 .set_marker_type(MarkerType::Circle)
                 .set_label_visibility(false)
-                .load_data(&filtered_packets_graph).unwrap();
+                .set_custom_data_label("Filtered".to_string())
+                .set_colors(Color::from_vec_of_hex_strings(vec!["#18B502"]))
+                .load_data(&filtered_packets_graph_cumul).unwrap();
 
-                Chart::new()
+            Chart::new()
                 .set_width(width)
                 .set_height(height)
                 .set_margins(top, right, bottom, left)
-                .add_title(String::from("Total number of sniffed packets"))
-                .add_view(&tot_packets_view)
-                .add_view(&filtered_packets_view)
+                .add_title(String::from("Cumulative number of sniffed packets"))
+                .add_view(&filtered_packets_cumul_view)
+                .add_view(&tot_packets_cumul_view)
                 .add_axis_bottom(&x)
                 .add_axis_left(&y)
                 .add_bottom_axis_label("Time (s)")
+                .add_legend_at(AxisPosition::Top)
                 .save("sniffnet_graph.svg")
                 .unwrap();
 
-            // if tot_packets > filtered_packets {
-            //     chart.add_view(&filtered_packets_view);
-            // }
+
+            let y_2 = ScaleLinear::new()
+                .set_domain(vec![0_f32, 1.2*max_packets_interval as f32])
+                .set_range(vec![height - top - bottom, 0]);
+
+            let tot_packets_interval_view = LineSeriesView::new()
+                .set_x_scale(&x)
+                .set_y_scale(&y_2)
+                .set_marker_type(MarkerType::Square)
+                .set_label_visibility(false)
+                .set_custom_data_label("Total".to_string())
+                .load_data(&tot_packets_graph_interval).unwrap();
+
+            let filtered_packets_interval_view = AreaSeriesView::new()
+                .set_x_scale(&x)
+                .set_y_scale(&y_2)
+                .set_marker_type(MarkerType::Circle)
+                .set_label_visibility(false)
+                .set_custom_data_label("Filtered".to_string())
+                .set_colors(Color::from_vec_of_hex_strings(vec!["#18B502"]))
+                .load_data(&filtered_packets_graph_interval).unwrap();
+
+            Chart::new()
+                .set_width(width)
+                .set_height(height)
+                .set_margins(top, right, bottom, left)
+                .add_title(String::from("Number of sniffed packets per time interval"))
+                .add_view(&filtered_packets_interval_view)
+                .add_view(&tot_packets_interval_view)
+                .add_axis_bottom(&x)
+                .add_axis_left(&y_2)
+                .add_bottom_axis_label("Time (s)")
+                .add_legend_at(AxisPosition::Top)
+                .save("sniffnet_graph_2.svg")
+                .unwrap();
 
         }
 
