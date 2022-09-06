@@ -9,14 +9,10 @@ use thousands::Separable;
 ///
 /// Each ReportInfo struct is associated to a single address:port pair.
 pub struct ReportInfo {
-    /// Amount of bytes relative to the associate address:port pair when it is a source.
+    /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
-    /// Amount of packets relative to the associate address:port pair when it is a source.
+    /// Amount of packets transmitted between the pair.
     pub transmitted_packets: u128,
-    /// Amount of bytes relative to the associate address:port pair when it is a destination.
-    pub received_bytes: u128,
-    /// Amount of packets relative to the associate address:port pair when it is a destination.
-    pub received_packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: String,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
@@ -30,9 +26,7 @@ pub struct ReportInfo {
 impl fmt::Display for ReportInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
-        let mut multiple_received = "".to_string();
         let mut n = self.transmitted_bytes as f32;
-        let mut m = self.received_bytes as f32;
         let transport_level_protocols;
         let application_level_protocols;
 
@@ -41,13 +35,6 @@ impl fmt::Display for ReportInfo {
             1000..=999999 => {n /= 1000 as f32; multiple_transmitted.push('k'); },
             1000000..=999999999 => {n /= 1000000 as f32; multiple_transmitted.push('M');},
             _ => {n /= 1000000000 as f32; multiple_transmitted.push('G'); }
-        }
-
-        match self.received_bytes {
-            0..=999 => {},
-            1000..=999999 => {m /= 1000 as f32; multiple_received.push('k'); },
-            1000000..=999999999 => {m /= 1000000 as f32; multiple_received.push('M');},
-            _ => {m /= 1000000000 as f32; multiple_received.push('G'); }
         }
 
         transport_level_protocols = format!("{:?}", self.trans_protocols)
@@ -74,24 +61,15 @@ impl fmt::Display for ReportInfo {
             } else {0}
         };
 
-        let precision1: usize = set_precision(&multiple_transmitted, &n);
+        let precision: usize = set_precision(&multiple_transmitted, &n);
 
-        let precision2: usize = set_precision(&multiple_received, &m);
-
-        write!(f, "\t\t\t\tSent data\n\
-                    \t\t\t\t\tSent Bytes: {:.*} {}B\n\
-                    \t\t\t\t\tSent packets: {}\n\
-                    \t\t\t\tReceived data\n\
-                    \t\t\t\t\tReceived Bytes: {:.*} {}B\n\
-                    \t\t\t\t\tReceived packets: {}\n\
-                    \t\t\t\tTimestamps\n\
-                    \t\t\t\t\tInitial Timestamp: {}\n\
-                    \t\t\t\t\tFinal Timestamp: {}\n\
-                    \t\t\t\tProtocols\n\
-                    \t\t\t\t\tTransport layer protocols: {}\n\
-                    \t\t\t\t\tApplication layer protocols: {}\n\n",
-               precision1, n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
-               precision2, m, multiple_received, self.received_packets.separate_with_underscores(),
+        write!(f, " \t\tExchanged Bytes: {:.*} {}B\n\
+                    \t\tExchanged packets: {}\n\
+                    \t\tInitial Timestamp: {}\n\
+                    \t\tFinal Timestamp: {}\n\
+                    \t\tTransport layer protocols: {}\n\
+                    \t\tApplication layer protocols: {}\n\n",
+               precision, n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
                self.initial_timestamp, self.final_timestamp,
                transport_level_protocols, application_level_protocols
         )

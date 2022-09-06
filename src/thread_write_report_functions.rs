@@ -139,13 +139,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map_sniffed_filtered_app.0.iter().collect();
         sorted_vec.sort_by(|&(_, a), &(_, b)|
-            (b.received_packets + b.transmitted_packets).cmp(&(a.received_packets + a.transmitted_packets)));
+            b.transmitted_packets.cmp(&a.transmitted_packets));
 
         #[cfg(feature = "elapsed_time")]
         let time_header_sort = start.elapsed().as_millis();
 
         for (key, val) in sorted_vec.iter() {
-            if val.transmitted_packets + val.received_packets >= min_packets {
+            if val.transmitted_packets >= min_packets {
                 write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
                 #[cfg(feature = "unknown_ports")]
                 if val.app_protocols.len() == 0 && key.port < 49152{

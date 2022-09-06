@@ -166,14 +166,14 @@ The second section of the textual report is dedicated to the packets stream anal
 
 This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
 
-Note that such list of elements is sorted in descending order of ```sent_packets + received_packets```.
+Note that such list of elements is sorted in descending order of exchanged packets.
 
 ![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
 
 
-For each element it is reported the amount of sent data (relatively to packets in which the address:pair is the source) and received data (relatively to packets in which the [address:port] is the destination) measured in number of packets and in number of bytes.
+For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes.
 
-For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted from/to that [address:port].
+For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
 
 Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols).
 
