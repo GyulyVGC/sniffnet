@@ -168,8 +168,7 @@ This analysis results in a list in which each element represents an [address:por
 
 Note that such list of elements is sorted in descending order of exchanged packets.
 
-![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
-
+![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
 
 For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes.
 
