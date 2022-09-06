@@ -288,9 +288,6 @@ fn modify_or_insert_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
         info.trans_protocols.insert(transport_protocol);
-        if application_protocol.ne(&AppProtocol::Other) {
-            info.app_protocols.insert(application_protocol);
-        }
     })
         .or_insert(ReportInfo {
             transmitted_bytes: exchanged_bytes,
@@ -298,12 +295,7 @@ fn modify_or_insert_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo
             initial_timestamp: now.clone(),
             final_timestamp: now.clone(),
             trans_protocols: HashSet::from([transport_protocol]),
-            app_protocols: if application_protocol.ne(&AppProtocol::Other) {
-                                HashSet::from([application_protocol])
-                            }
-                            else {
-                                HashSet::new()
-                            }
+            app_protocol: application_protocol
             });
 }
 

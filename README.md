@@ -1,24 +1,22 @@
-# Sniffnet (network packets sniffer)
+# sniffnet (network packets sniffer/filter)
 
 [![Build](https://img.shields.io/github/workflow/status/Crirock/pdsproject/Rust.svg)](https://github.com/Crirock/pdsproject/actions/workflows/rust.yml)
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
 
-<hr/>
+Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 
-<img alt="" src="https://user-images.githubusercontent.com/100347457/186924608-aa6c7990-97b7-492e-b02a-98c01b39f44d.gif" width="100%"/>
+The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
 
-The application binary can be installed with ```cargo install sniffnet```
+There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic.
 
-The application can then be run using ```sniffnet [OPTIONS]```
-
-<hr/>
+<hr>
 
 <details>
 
   <summary>Table of contents</summary>
 
-- [Introduction](#introduction)
+- [Install](#install)
 
 - [Command line options](#command-line-options)
 
@@ -27,6 +25,8 @@ The application can then be run using ```sniffnet [OPTIONS]```
 - [Textual report structure](#textual-report-structure)
   + [Report header](#report-header)
   + [Report [address:port] list](#report-addresses-list)
+
+- [Supported application layer protocols](#supported-application-layer-protocols)
   
 - [Implementation details](#implementation-details)
   
@@ -42,84 +42,55 @@ The application can then be run using ```sniffnet [OPTIONS]```
   
 </details>
 
- 
-## Introduction
+<hr>
 
+## Install
 
-Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
+The application binary can be installed with ```cargo install sniffnet```
 
-The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
-
-There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic.
-
-In this document you can find the list of the available command line options, a description of the possible user actions during program execution, the interpretation of the report file structure, some implementation details from an algorithmic point of view, an explanation of the possible error conditions that may occur, and other useful information.
+The application can then be run using ```sniffnet [OPTIONS]```
 
 
 ## Command line options
 
  - **-a, --adapter**: 
-name of the network adapter to be inspected, if omitted the default adapter is chosen.
-If a non-existing adapter is provided, the application raises an error and terminates.
-This option must be followed by a textual value.
+specifies the name of the network adapter to be inspected; if omitted the default adapter is chosen.
 
-
+   
  - **--app**:
-filters packets on the basis of the application layer protocol. 
-If an invalid string is provided (not case-sensitive), the application raises an error and terminates.
-This option must be followed by a textual value corresponding to one of the supported level 7 protocols.
-```default: "no filter"```
- 
+filters packets on the basis of the provided application layer protocol.
+
 
  - **-d, --device-list**:
-prints list of the available network interfaces.
-Immediately terminates the program.
-This option does not need to be followed by a value.
+prints list of the available network interfaces. Immediately terminates the program.
  
 
  - **-h, --highest-port**:
-sets the maximum port value to be considered, if omitted there is no ports higher bound.
-If the highest-port provided value is lower than the lowest-port provided value, the application raises an error and terminates.
-This option must be followed by an integer value between 0 and 65535. 
-```default: 65535```
+specifies the maximum port value to be considered; if omitted there is no ports higher bound.
  
 
  -  **-i, --interval**:
 sets the interval of time between report updates (value in seconds).
-This option must be followed by a positive integer value.
-```default: 5```
  
 
  - **-l, --lowest-port**:
-sets the minimum port value to be considered, if omitted there is no ports lower bound.
-If the lowest-port provided value is higher than the highest-port provided value, the application raises an error and terminates.
-This option must be followed by an integer value between 0 and 65535. 
-```default: 0```
+specifies the minimum port value to be considered; if omitted there is no ports lower bound.
  
 
  - **-m, --minimum-packets**:
 sets the minimum value of transited packets for an [address:port] to be printed in the report.
-This option must be followed by a positive integer value.
-```default: 0```
 
 
 - **-n, --net**:
-filters packets on the basis of the IP version address (IPv4 or IPv6).
-If a string different from "IPv4" or "IPv6" is provided (not case-sensitive), the application raises an error and terminates.
-This option must be followed by a textual value.
-```default: "no filter"```
+filters packets on the basis of the provided IP address version (IPv4 or IPv6).
  
 
  - **-o, --output-file**:
-name of output file to contain the textual report, if omitted a default file is chosen.
-This option must be followed by a textual value.
-```default: sniffnet_report.txt```
-
+specifies the name of output file containing the textual report; if omitted the file name is ````sniffnet_report.txt```
+ 
 
 - **-t, --trans**:
-filters packets on the basis of the transport layer protocol (TCP or UDP).
-If a string different from "TCP" or "UDP" is provided (not case-sensitive), the application raises an error and terminates.
-This option must be followed by a textual value.
-```default: "no filter"```
+filters packets on the basis of the provided transport layer protocol (TCP or UDP).
 
           
 ## User interactions during application execution
@@ -168,18 +139,22 @@ This analysis results in a list in which each element represents an [address:por
 
 Note that such list of elements is sorted in descending order of exchanged packets.
 
-![report_part_2](https://user-images.githubusercontent.com/100347457/186925944-f7a1dbc5-27ad-4b78-935c-7648553c2cef.png)
+![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
 
 
 For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes.
 
 For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
 
-Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols).
+Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols); 
+please note that application level protocols are just inferred from the transport port numbers.
 
-Both the transport layer protocols and application layer protocols fields could report a single or multiple protocols for each [address:port] pair, based on the traffic type.
 
-Specifically, the transport layer protocols field is based on an Enum with only two values (TCP and UDP), while the application layer protocols field is based on an Enum with some of the most common level 7 protocols (listed in the table below); please note that application level protocols are just inferred from the transport port numbers.
+## Supported application layer protocols
+
+<details>
+
+  <summary>See details</summary>
 
 |Port number(s)|Application protocol  |  Description |
 |--|--|--|
@@ -208,6 +183,7 @@ Specifically, the transport layer protocols field is based on an Enum with only 
 |5222|XMPP |Extensible Messaging and Presence Protocol |
 |5353|mDNS |Multicast DNS |
 
+</details>
 
 ## Implementation details
 

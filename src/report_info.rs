@@ -20,7 +20,7 @@ pub struct ReportInfo {
     /// Set of transport layer protocols carried through the associate address:port pair.
     pub trans_protocols: HashSet<TransProtocol>,
     /// Set of application layer protocols carried through the associate address:port pair.
-    pub app_protocols: HashSet<AppProtocol>,
+    pub app_protocol: AppProtocol,
 }
 
 impl fmt::Display for ReportInfo {
@@ -28,7 +28,7 @@ impl fmt::Display for ReportInfo {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;
         let transport_level_protocols;
-        let application_level_protocols;
+        let application_level_protocol;
 
         match self.transmitted_bytes {
             0..=999 => {},
@@ -41,14 +41,12 @@ impl fmt::Display for ReportInfo {
             .replace("{", "")
             .replace("}", "");
 
-        application_level_protocols = match self.app_protocols.len() {
-            0 => {
+        application_level_protocol = match self.app_protocol {
+            AppProtocol::Other => {
                 "unable to identify any level 7 protocol".to_string()
             }
             _ => {
-                format!("{:?}", self.app_protocols)
-                    .replace("{", "")
-                    .replace("}", "")
+                format!("{:?}", self.app_protocol)
             }
         };
 
@@ -63,15 +61,15 @@ impl fmt::Display for ReportInfo {
 
         let precision: usize = set_precision(&multiple_transmitted, &n);
 
-        write!(f, " \t\tExchanged Bytes: {:.*} {}B\n\
-                    \t\tExchanged packets: {}\n\
+        write!(f, "\t\tExchanged packets: {}\n\
+                    \t\tExchanged Bytes: {:.*} {}B\n\
                     \t\tInitial Timestamp: {}\n\
                     \t\tFinal Timestamp: {}\n\
                     \t\tTransport layer protocols: {}\n\
-                    \t\tApplication layer protocols: {}\n\n",
-               precision, n, multiple_transmitted, self.transmitted_packets.separate_with_underscores(),
+                    \t\tApplication layer protocol: {}\n\n",
+               self.transmitted_packets.separate_with_underscores(), precision, n, multiple_transmitted,
                self.initial_timestamp, self.final_timestamp,
-               transport_level_protocols, application_level_protocols
+               transport_level_protocols, application_level_protocol
         )
     }
 }
