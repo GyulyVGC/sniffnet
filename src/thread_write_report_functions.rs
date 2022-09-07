@@ -17,9 +17,6 @@ use colored::Colorize;
 use thousands::Separable;
 use crate::{AddressPort, AppProtocol, ReportInfo, Status};
 
-#[cfg(feature = "unknown_ports")]
-use std::collections::HashSet;
-
 #[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
 
@@ -74,9 +71,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let cvar = &status_pair.1;
     let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
 
-    #[cfg(feature = "unknown_ports")]
-    let mut set_unknown = HashSet::new();
-
     #[cfg(feature = "elapsed_time")]
     let mut last_10_write_times = vec![];
 
@@ -101,9 +95,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         times_report_updated += 1;
         let mut output = BufWriter::new(File::create(output_file.clone()).expect("Error creating output file\n\r"));
-
-        #[cfg(feature = "unknown_ports")]
-        let mut output2 = File::create("unknown_ports.txt").expect("Error creating output file\n\r");
 
         let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
 
@@ -147,18 +138,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         for (key, val) in sorted_vec.iter() {
             if val.transmitted_packets >= min_packets {
                 write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
-                #[cfg(feature = "unknown_ports")]
-                if val.app_protocols.len() == 0 && key.port < 49152{
-                    set_unknown.insert(key.port);
-                }
             }
-        }
-
-        #[cfg(feature = "unknown_ports")]
-        {
-            let mut sorted_set: Vec<&u16> = set_unknown.iter().collect();
-            sorted_set.sort();
-            write!(output2, "{:?}\n",sorted_set).unwrap();
         }
 
         drop(map_sniffed_filtered_app);

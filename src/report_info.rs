@@ -43,7 +43,7 @@ impl fmt::Display for ReportInfo {
 
         application_level_protocol = match self.app_protocol {
             AppProtocol::Other => {
-                "unable to identify any level 7 protocol".to_string()
+                "not identified".to_string()
             }
             _ => {
                 format!("{:?}", self.app_protocol)
@@ -73,6 +73,7 @@ impl fmt::Display for ReportInfo {
         )
     }
 }
+
 
 /// Enum representing the possible observed values of transport layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

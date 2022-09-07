@@ -43,6 +43,8 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
     let cvar = &status_pair.1;
 
+    let mut has_been_paused = false;
+
     let mut cap = Capture::from_device(device.clone())
         .expect("Capture initialization error\n\r")
         .promisc(true)
@@ -50,16 +52,28 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
         .expect("Capture initialization error\n\r");
 
     let mut my_interface_addresses = Vec::new();
-    for address in device.addresses {
+    for address in device.clone().addresses {
         my_interface_addresses.push(address.addr.to_string());
     }
 
     loop {
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
+        while *status == Status::Pause {
+            status = cvar.wait(status).expect("Error acquiring mutex\n\r");
+            has_been_paused = true; //to reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
+        }
 
         if *status == Status::Running {
             drop(status);
+            //reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
+            if has_been_paused {
+                cap = Capture::from_device(device.clone())
+                    .expect("Capture initialization error\n\r")
+                    .promisc(true)
+                    .open()
+                    .expect("Capture initialization error\n\r");
+                has_been_paused = false;
+            }
             match cap.next_packet() {
                 Err(/*e*/_) => {
                     //println!("ERROR: {:?}", e); // Debug

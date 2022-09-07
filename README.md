@@ -4,11 +4,11 @@
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
 
-Aim of the application is to intercept incoming and outgoing traffic through a user specified network interface of a computer.
+Aim of the application is to intercept and filter network traffic through a user specified interface of a computer.
 
 The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
 
-There are several command line options that can be specified to select the network adapter to inspect, to set a desired textual report update frequency and to specify filters on the observed network traffic.
+Several command line options are available to select the network adapter to inspect, to set a desired report update frequency and to specify filters on the observed traffic.
 
 <hr>
 
@@ -86,7 +86,7 @@ filters packets on the basis of the provided IP address version (IPv4 or IPv6).
  
 
  - **-o, --output-file**:
-specifies the name of output file containing the textual report; if omitted the file name is ````sniffnet_report.txt```
+specifies the name of output file containing the textual report; if omitted the file name is ```sniffnet_report.txt```
  
 
 - **-t, --trans**:
@@ -142,7 +142,8 @@ Note that such list of elements is sorted in descending order of exchanged packe
 ![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
 
 
-For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes.
+For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source
+(on the left) and the destination (on the right).
 
 For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
 
@@ -226,7 +227,7 @@ In this case the application will suggest using the ```-d``` option to print on 
 
 - **Invalid application layer protocol filter**:
 if an invalid string is provided the application raises an error and terminates.
-The list of the supported application layer protocols is available in [this](#report-addresses-list) section. 
+The list of the supported application layer protocols is available in [this](#supported-application-layer-protocols) section. 
 Note that not including the ```--app``` option is equal to provide ```--app "no filter"```.
 
 

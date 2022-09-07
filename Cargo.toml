@@ -22,11 +22,6 @@ thousands = "0.2.0"
 #charts = "0.3.0"
 
 
-#used for debug purposes to discover ports not yet assigned to a known application layer protocols
-#[features]
-#default = ["unknown_ports"]
-#unknown_ports = []
-
 #used for debug purposes to measure time needed to write output file report
 #[features]
 #default = ["elapsed_time"]
