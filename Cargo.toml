@@ -1,11 +1,11 @@
 [package]
 name = "sniffnet"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "Application to sniff and filter network traffic. Generates a human-readable report of the observed packets."
 repository = "https://github.com/Crirock/pdsproject"
 readme = "README.md"
-keywords = ["cli", "network", "packet", "sniffer", "parser"]
+keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
 license = "MIT OR Apache-2.0"
 

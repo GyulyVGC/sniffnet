@@ -379,9 +379,16 @@ fn get_app_layer_string(app_layer: AppProtocol) -> String {
 ///
 /// * `filtered` - Number of filtered packets
 fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
-    if sniffed != 0 {
-        format!("<><>\t\t\tConsidered packets: {} ({:.1}%)\n",
-                filtered.separate_with_underscores(), 100.0*filtered as f32/sniffed as f32)
+    if sniffed != 0 && filtered != 0 {
+        let percentage_string =
+            if format!("{:.2}", 100.0*filtered as f32/sniffed as f32).eq("0.00") {
+                "(<0.01%)".to_string()
+            }
+            else {
+                format!("({:.2}%)", 100.0*filtered as f32/sniffed as f32)
+            };
+        format!("<><>\t\t\tConsidered packets: {} {}\n",
+                filtered.separate_with_underscores(), percentage_string)
     }
     else {
         format!("<><>\t\t\tConsidered packets: {}\n",
