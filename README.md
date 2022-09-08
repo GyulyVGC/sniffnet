@@ -283,12 +283,17 @@ In both cases you will be requested to insert your system password.
 
 ### Windows configuration problems
 
-In order to make pcap work properly on Windows systems, it is needed to download [WinCap](https://www.winpcap.org/install/) and the [WinPcap Developer's Pack](https://www.winpcap.org/devel.htm) and to add the ```/Lib``` or ```/Lib/x64``` folder to the ```LIB``` environment variable.
+In order to build and run Sniffnet you need to:
 
+- Install [Npcap](https://npcap.com/#download).
+
+- Download the [Npcap SDK](https://npcap.com/#download).
+
+- Add the SDK's /Lib or /Lib/x64 folder to your LIB environment variable.
 
 ### Linux configuration problems
 
-To correctly use pcap on Linux systems, install the libraries and header files for the libpcap library. For example:
+In order to build and run Sniffnet, install the libraries and header files for the libpcap library. For example:
 
 On Debian based Linux: ```install libpcap-dev```.
 
