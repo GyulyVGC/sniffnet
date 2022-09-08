@@ -289,7 +289,7 @@ In order to build and run Sniffnet you need to:
 
 - Download the [Npcap SDK](https://npcap.com/#download).
 
-- Add the SDK's /Lib or /Lib/x64 folder to your LIB environment variable.
+- Add the SDK's ```/Lib``` or ```/Lib/x64``` folder to your ```LIB``` environment variable.
 
 ### Linux configuration problems
 
