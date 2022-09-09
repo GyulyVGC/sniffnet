@@ -1,4 +1,4 @@
-//! Module defining the `ReportInfo` struct, useful to format the output report file and
+//! Module defining the `IndoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
 use std::collections::HashSet;
@@ -7,8 +7,8 @@ use thousands::Separable;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
-/// Each ReportInfo struct is associated to a single address:port pair.
-pub struct ReportInfo {
+/// Each InfoAddressPortPair struct is associated to a single address:port pair.
+pub struct InfoAddressPortPair {
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.
@@ -23,7 +23,7 @@ pub struct ReportInfo {
     pub app_protocol: AppProtocol,
 }
 
-impl fmt::Display for ReportInfo {
+impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;

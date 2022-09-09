@@ -1,10 +1,10 @@
-//! Module defining the `AddressPort` struct, which represents a network address:port pair.
+//! Module defining the `AddressPortPair` struct, which represents a network address:port pair.
 
 use std::fmt;
 
 /// Struct representing a network address:port pair.
 #[derive(PartialEq, Eq, Hash, Debug)]
-pub struct AddressPort {
+pub struct AddressPortPair {
     /// Network layer IPv4 or IPv6 source address.
     pub address1: String,
     /// Transport layer source port number (in the range 0..=65535).
@@ -17,7 +17,7 @@ pub struct AddressPort {
     pub traffic_type: TrafficType,
 }
 
-impl AddressPort {
+impl AddressPortPair {
 
     /// Returns a new AddressPort element.
     ///
@@ -27,7 +27,7 @@ impl AddressPort {
     ///
     /// * `port` - An integer representing the transport layer port number (in the range 0..=65535).
     pub fn new (address1: String, port1: u16, address2: String, port2: u16, traffic_type: TrafficType) -> Self {
-        AddressPort {
+        AddressPortPair {
             address1,
             port1,
             address2,
@@ -38,7 +38,7 @@ impl AddressPort {
 }
 
 
-impl fmt::Display for AddressPort {
+impl fmt::Display for AddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 
         let addr_string_1 = if self.address1.contains(":") { // IPv6 address is enclosed in [brackets]

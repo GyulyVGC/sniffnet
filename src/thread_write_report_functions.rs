@@ -15,7 +15,7 @@ use chrono::Local;
 use std::io::{BufWriter, Write};
 use colored::Colorize;
 use thousands::Separable;
-use crate::{AddressPort, AppProtocol, ReportInfo, Status};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status};
 
 #[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
@@ -56,14 +56,12 @@ use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, Axi
 /// * `output_file` - A String representing the output report file name. Specified by the user through the
 /// ```-o``` option.
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
-/// the total number of sniffed packets and the number of filtered packets.
+/// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
                                    device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
-                                   output_file: String,
-                                   mutex_map: Arc<Mutex<(HashMap<AddressPort,ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
+                                   output_file: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let mut times_report_updated: u128 = 0;
@@ -96,10 +94,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         times_report_updated += 1;
         let mut output = BufWriter::new(File::create(output_file.clone()).expect("Error creating output file\n\r"));
 
-        let map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
+        let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
-        let tot_packets = map_sniffed_filtered_app.1;
-        let filtered_packets = map_sniffed_filtered_app.2;
+        let tot_sent_packets = info_traffic.tot_sent_packets;
+        let tot_received_packets = info_traffic.tot_received_packets;
+        let all_packets = info_traffic.all_packets;
+        let tot_sent_bytes = info_traffic.tot_sent_bytes;
+        let tot_received_bytes = info_traffic.tot_received_bytes;
 
         #[cfg(feature = "draw_graph")]
         {
@@ -122,13 +123,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                                  device_name.clone(), first_timestamp.clone(),
                                  times_report_updated, lowest_port, highest_port, min_packets,
                                  network_layer.clone(), transport_layer.clone(), app_layer.clone(),
-                                 map_sniffed_filtered_app.0.len(), tot_packets,
-                                 filtered_packets, map_sniffed_filtered_app.3.clone());
+                                 info_traffic.map.len(), all_packets,
+                                 tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
         #[cfg(feature = "elapsed_time")]
         let time_header = start.elapsed().as_millis();
 
-        let mut sorted_vec: Vec<(&AddressPort, &ReportInfo)> = map_sniffed_filtered_app.0.iter().collect();
+        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic.map.iter().collect();
         sorted_vec.sort_by(|&(_, a), &(_, b)|
             b.transmitted_packets.cmp(&a.transmitted_packets));
 
@@ -141,7 +142,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             }
         }
 
-        drop(map_sniffed_filtered_app);
+        drop(info_traffic);
 
         #[cfg(feature = "elapsed_time")]
         {

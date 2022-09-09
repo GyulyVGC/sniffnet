@@ -7,8 +7,8 @@ use std::sync::{Arc, Condvar, Mutex};
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
-use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
-use crate::address_port::TrafficType;
+use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
+use crate::address_port_pair::TrafficType;
 
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
@@ -33,13 +33,12 @@ use crate::address_port::TrafficType;
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
 /// ```--app``` option.
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
-/// the total number of sniffed packets and the number of filtered packets.
+/// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer_filter: String, app_layer: AppProtocol,
-                          mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
+                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
@@ -115,16 +114,16 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                 continue;
                             }
 
-                            let mut map_sniffed_filtered_app = mutex_map.lock().expect("Error acquiring mutex\n\r");
+                            let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
                             //increment number of sniffed packets
-                            map_sniffed_filtered_app.1 += 1;
+                            info_traffic.all_packets += 1;
                             //increment the packet count for the sniffed app protocol
-                            map_sniffed_filtered_app.3
+                            info_traffic.app_protocols
                                 .entry(application_protocol)
                                 .and_modify(|n| {*n+=1})
                                 .or_insert(1);
 
-                            drop(map_sniffed_filtered_app);
+                            drop(info_traffic);
 
                             let mut traffic_type: TrafficType = TrafficType::Other;
                             if my_interface_addresses.contains(&address1) {
@@ -137,7 +136,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                 traffic_type = TrafficType::Multicast;
                             }
 
-                            let key: AddressPort = AddressPort::new(address1.clone(), port1, address2.clone(), port2,
+                            let key: AddressPortPair = AddressPortPair::new(address1.clone(), port1, address2.clone(), port2,
                                                                      traffic_type);
 
                             if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
@@ -146,15 +145,28 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
                                         if (port1 >= lowest_port && port1 <= highest_port)
                                             || (port2 >= lowest_port && port2 <= highest_port)  {
-                                            modify_or_insert_in_map(mutex_map.clone(), key,
+                                            modify_or_insert_in_map(info_traffic_mutex.clone(), key,
                                                                            exchanged_bytes, transport_protocol,
                                                                            application_protocol);
                                             reported_packet = true;
                                         }
 
                                         if reported_packet {
-                                            //increment number of reported packets
-                                            mutex_map.lock().expect("Error acquiring mutex\n\r").2 += 1;
+                                            if traffic_type == TrafficType::Incoming
+                                                || traffic_type == TrafficType::Multicast {
+                                                //increment number of received packets and bytes
+                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                                    .tot_received_packets += 1;
+                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                                    .tot_received_bytes += exchanged_bytes;
+                                            }
+                                            else {
+                                                //increment number of sent packets and bytes
+                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                                    .tot_sent_packets += 1;
+                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                                    .tot_sent_bytes += exchanged_bytes;
+                                            }
                                         }
 
                                     }
@@ -288,8 +300,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 ///
 /// # Arguments
 ///
-/// * `mutex_map` - Mutex to permit exclusive access to the shared tuple containing the parsed packets,
-/// the total number of sniffed packets and the number of filtered packets.
+/// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `key` - An `AddressPort` element representing the source and destination of the packet. It corresponds to the map key part.
 ///
@@ -298,18 +309,18 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 /// * `transport_protocol` - Transport layer protocol carried by the observed packet.
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
-fn modify_or_insert_in_map(mutex_map: Arc<Mutex<(HashMap<AddressPort, ReportInfo>, u128, u128, HashMap<AppProtocol, u128>)>>,
-                                  key: AddressPort, exchanged_bytes: u128, transport_protocol: TransProtocol,
-                                  application_protocol: AppProtocol) {
+fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+                           key: AddressPortPair, exchanged_bytes: u128, transport_protocol: TransProtocol,
+                           application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-    mutex_map.lock().expect("Error acquiring mutex\n\r").0.entry(key).and_modify(|info| {
+    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r").map.entry(key).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
         info.trans_protocols.insert(transport_protocol);
     })
-        .or_insert(ReportInfo {
+        .or_insert(InfoAddressPortPair {
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: now.clone(),

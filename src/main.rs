@@ -8,17 +8,17 @@
 //! Packets can be filtered specifying command line options.
 //!
 //! Packets analysis is based on network and transport layers.
-mod address_port;
-mod report_info;
+mod address_port_pair;
+mod info_address_port_pair;
 mod args;
 mod thread_parse_packets_functions;
 mod thread_write_report_functions;
+mod info_traffic;
 
 use std::cmp::Ordering::Equal;
 use std::collections::HashMap;
 use pcap::{Device};
-use crate::address_port::{AddressPort};
-use crate::report_info::{AppProtocol, ReportInfo, TransProtocol};
+use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::args::Args;
 use crate::thread_parse_packets_functions::parse_packets_loop;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
@@ -29,6 +29,7 @@ use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored;
 use colored::Colorize;
+use crate::info_traffic::InfoTraffic;
 
 /// This enum represents the sniffing process status.
 #[derive(PartialEq, Eq)]
@@ -112,7 +113,7 @@ fn main() {
     // - the total number of sniffed packets
     // - the number of filtered packets
     // - the map of the observed app protocols with the relative packet count
-    let mutex_map1 = Arc::new(Mutex::new((HashMap::new(), 0, 0, HashMap::new())));
+    let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable
