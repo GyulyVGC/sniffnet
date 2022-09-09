@@ -8,6 +8,7 @@ use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
 use crate::{AddressPort, AppProtocol, ReportInfo, Status, TransProtocol};
+use crate::address_port::TrafficType;
 
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
@@ -48,6 +49,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
     let mut cap = Capture::from_device(device.clone())
         .expect("Capture initialization error\n\r")
         .promisc(true)
+        .snaplen(256)
         .open()
         .expect("Capture initialization error\n\r");
 
@@ -70,6 +72,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                 cap = Capture::from_device(device.clone())
                     .expect("Capture initialization error\n\r")
                     .promisc(true)
+                    .snaplen(256)
                     .open()
                     .expect("Capture initialization error\n\r");
                 has_been_paused = false;
@@ -123,16 +126,19 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
                             drop(map_sniffed_filtered_app);
 
-                            let mut local_interface: u8 = 0;
+                            let mut traffic_type: TrafficType = TrafficType::Other;
                             if my_interface_addresses.contains(&address1) {
-                                local_interface = 1;
+                                traffic_type = TrafficType::Outgoing;
                             }
                             else if my_interface_addresses.contains(&address2) {
-                                local_interface = 2;
+                                traffic_type = TrafficType::Incoming;
+                            }
+                            else if is_multicast_address(&address2) {
+                                traffic_type = TrafficType::Multicast;
                             }
 
                             let key: AddressPort = AddressPort::new(address1.clone(), port1, address2.clone(), port2,
-                                                                     local_interface);
+                                                                     traffic_type);
 
                             if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
                                 if transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal {
@@ -366,6 +372,28 @@ fn from_port_to_application_protocol(port: u16) -> AppProtocol {
 }
 
 
+/// Determines if the input address is a multicast address or not.
+///
+/// # Arguments
+///
+/// * `address` - string representing an IPv4 or IPv6 network address.
+fn is_multicast_address(address: &str) -> bool {
+    let mut ret_val = false;
+    if address.contains(":") { //IPv6 address
+        if address.starts_with("ff") {
+            ret_val = true;
+        }
+    }
+    else { //IPv4 address
+        let first_group = address.split(".").next().unwrap().to_string().parse::<u8>().unwrap();
+        if first_group >= 224 && first_group <= 239 {
+            ret_val = true;
+        }
+    }
+    ret_val
+}
+
+
 // Test for this function at the end of this file (run with cargo test)
 /// Function to convert a long decimal ipv6 address to a
 /// shorter compressed ipv6 address
@@ -380,7 +408,7 @@ fn from_port_to_application_protocol(port: u16) -> AppProtocol {
 /// let result = ipv6_from_long_dec_to_short_hex([255,10,10,255,0,0,0,0,28,4,4,28,255,1,0,0]);
 /// assert_eq!(result, "ff0a:aff::1c04:41c:ff01:0".to_string());
 /// ```
-pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
+fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
 
     //from hex to dec, paying attention to the correct number of digits
     let mut ipv6_hex = "".to_string();

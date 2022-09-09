@@ -14,7 +14,7 @@ pub struct AddressPort {
     /// Transport layer destination port number (in the range 0..=65535).
     pub port2: u16,
     /// Flag to determine which of the address is that of the sniffed adapter or remote
-    pub my_interface: u8,
+    pub traffic_type: TrafficType,
 }
 
 impl AddressPort {
@@ -26,13 +26,13 @@ impl AddressPort {
     /// * `address` - A string representing the network layer IPv4 or IPv6 address.
     ///
     /// * `port` - An integer representing the transport layer port number (in the range 0..=65535).
-    pub fn new (address1: String, port1: u16, address2: String, port2: u16, my_interface: u8) -> Self {
+    pub fn new (address1: String, port1: u16, address2: String, port2: u16, traffic_type: TrafficType) -> Self {
         AddressPort {
             address1,
             port1,
             address2,
             port2,
-            my_interface,
+            traffic_type,
         }
     }
 }
@@ -58,16 +58,12 @@ impl fmt::Display for AddressPort {
         let addresses_string = format!("{}  --->  {}", addr_string_1, addr_string_2);
 
         let spaces = " ".to_string().repeat(addr_string_1.len()-6);
-        let my_interface_string =
-            if self.my_interface == 1 {
-                format!("   Your interface{}Remote Address", spaces)
-            }
-            else if self.my_interface ==2 {
-                format!("   Remote address{}Your interface", spaces)
-            }
-            else {
-                format!("   Remote address{}Remote address", spaces)
-            };
+        let my_interface_string = match self.traffic_type {
+            TrafficType::Incoming => {format!("   Remote address{}Your interface", spaces)}
+            TrafficType::Outgoing => {format!("   Your interface{}Remote Address", spaces)}
+            TrafficType::Multicast => {format!("   Remote address{}Multicast address", spaces)}
+            TrafficType::Other => {format!("   Remote address{}Remote address", spaces)}
+        };
 
         let cornice_up_string = format!(" /{}\\          /{}\\", "-".to_string().repeat(addr_string_1.len() - 4),
                                                                 "-".to_string().repeat(addr_string_2.len() - 4));
@@ -80,3 +76,15 @@ impl fmt::Display for AddressPort {
 }
 
 
+/// Enum representing the possible traffic type (incoming, outgoing or multicast).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TrafficType {
+    /// Incoming traffic (from remote address to local interface)
+    Incoming,
+    /// Outgoing traffic (from local interface to remote address)
+    Outgoing,
+    /// Multicast traffic (from remote address to multicast address)
+    Multicast,
+    /// Not identified
+    Other
+}

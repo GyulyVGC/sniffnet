@@ -19,7 +19,7 @@ chrono = "0.4.20"
 crossterm = "0.13.3"
 colored = "2.0.0"
 thousands = "0.2.0"
-#charts = "0.3.0"
+plotters = "0.3.4"
 
 
 #used for debug purposes to measure time needed to write output file report
