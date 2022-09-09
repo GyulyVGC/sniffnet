@@ -202,7 +202,7 @@ The ```main()``` function, entry point of program execution, generates two secon
 
 The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPort``` struct and the value part is represented by a ```ReportInfo``` struct.
 Before parsing each packet it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds parsing the packet.
-This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next()``` function.
+This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next_packet()``` method.
 
 The thread in charge of updating the textual report sleeps for ```interval``` seconds and re-writes the report with updated traffic statistics.
 Before updating the report it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds writing the report.
