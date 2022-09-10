@@ -45,7 +45,6 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
   + Windows configuration problems
   + Linux configuration problems
   + Textual report contains just the header
-  + Other errors
   
 </details>
 
@@ -339,17 +338,6 @@ Note that to see report updates while sniffnet is running you may have to close 
 
 If you are still not able to see any packet statistic, then it probably means that you are just not receiving packets from the network: 
 surf the web to receive some packets. 
-
-
-### Other errors
-
-Other errors, not previously listed, may occur seldom.
-
-Most of such errors are due to the unwrapping of ```Result<T>```, which may exceptionally contain the ```Err``` value.
-  
-This may happen in one of the following situations: activation of a pcap ```Capture``` handle, retrieval of network adapters list through pcap, selection of the default device through pcap, creation of the output file, cloning of the output file handle, acquisition of a ```Mutex``` lock, writing of the output file.
-  
-All those exceptional scenarios are managed through calls to the ```expect()``` method, providing textual feedback to the user on the cause of the panic.
 
 
 </details>
