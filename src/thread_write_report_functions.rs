@@ -22,9 +22,6 @@ use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_p
 use std::time::{Instant};
 use plotters::style::full_palette::{GREEN_600, GREY};
 
-#[cfg(feature = "draw_graph")]
-use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, AxisPosition, Color};
-
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
 /// from scratch the output report file, with updated values.
@@ -73,8 +70,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
     let path_graph = &*format!("{}/bandwidth.svg", output_folder);
 
-    let mut times_report_updated: u128 = 0;
-    let mut last_report_updated_console: u128 = 0;
+    let mut tot_intervals: u128 = 0;
     let time_origin = Local::now();
     let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
     #[cfg(feature = "elapsed_time")]
@@ -97,10 +93,10 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let mut max_received_packets_second: i128 = 0;
 
     loop {
+        // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
 
-        times_report_updated += 1;
-        let mut output = BufWriter::new(File::create(format!("{}/report.txt", output_folder.clone())).expect("Error creating output file\n\r"));
+        tot_intervals += 1;
 
         let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
@@ -113,33 +109,46 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         #[cfg(feature = "elapsed_time")]
         let start = Instant::now();
 
-        write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
-                                 device_name.clone(), first_timestamp.clone(),
-                                 times_report_updated, lowest_port, highest_port, min_packets,
-                                 network_layer.clone(), transport_layer.clone(), app_layer.clone(),
-                                 info_traffic.map.len(), all_packets,
-                                 tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // write textual report
 
-        #[cfg(feature = "elapsed_time")]
-        let time_header = start.elapsed().as_millis();
+            let mut output = BufWriter::new(File::create(format!("{}/report.txt", output_folder.clone())).expect("Error creating output file\n\r"));
 
-        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic.map.iter().collect();
-        sorted_vec.sort_by(|&(_, a), &(_, b)|
-            b.transmitted_packets.cmp(&a.transmitted_packets));
+            write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+                                     device_name.clone(), first_timestamp.clone(),
+                                     lowest_port, highest_port, min_packets,
+                                     network_layer.clone(), transport_layer.clone(), app_layer.clone(),
+                                     info_traffic.map.len(), all_packets,
+                                     tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
-        #[cfg(feature = "elapsed_time")]
-        let time_header_sort = start.elapsed().as_millis();
+            #[cfg(feature = "elapsed_time")]
+                let time_header = start.elapsed().as_millis();
 
-        for (key, val) in sorted_vec.iter() {
-            if val.transmitted_packets >= min_packets {
-                write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+            let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic.map.iter().collect();
+            sorted_vec.sort_by(|&(_, a), &(_, b)|
+                b.transmitted_packets.cmp(&a.transmitted_packets));
+
+            #[cfg(feature = "elapsed_time")]
+                let time_header_sort = start.elapsed().as_millis();
+
+            for (key, val) in sorted_vec.iter() {
+                if val.transmitted_packets >= min_packets {
+                    write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+                }
             }
+
+            output.flush().expect("Error writing output file\n\r");
+
+            #[cfg(feature = "elapsed_time")]
+                let time_header_sort_print = start.elapsed().as_millis();
+
         }
 
         drop(info_traffic);
 
 
         // graphs
+        #[cfg(feature = "elapsed_time")]
+        let start_drawing = Instant::now();
 
         let root_area = SVGBackend::new(path_graph, (1250, 700)).into_drawing_area();
         root_area.fill(&GREY).expect("Error drawing graph");
@@ -153,12 +162,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         // bits graph
 
-        sent_bits_graph.push((interval as u128 * times_report_updated,(-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
+        sent_bits_graph.push((interval as u128 * tot_intervals,(-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
         if -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev < min_sent_bits_second {
             min_sent_bits_second = -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev;
         }
         tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-        received_bits_graph.push((interval as u128 * times_report_updated, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
+        received_bits_graph.push((interval as u128 * tot_intervals, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
         if tot_received_bytes as i128 * 8 - tot_received_bits_prev  > max_received_bits_second {
             max_received_bits_second = tot_received_bytes as i128 * 8 - tot_received_bits_prev ;
         }
@@ -167,7 +176,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 60)
             .caption("Bit traffic per second", ("sans-serif", 30))
-            .build_cartesian_2d(0..interval as u128 * times_report_updated, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
+            .build_cartesian_2d(0..interval as u128 * tot_intervals, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
             .expect("Error drawing graph");
         chart_bits.configure_mesh()
             .y_desc("bit/s")
@@ -205,12 +214,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         // packets graph
 
-        sent_packets_graph.push((interval as u128 * times_report_updated, (-1*(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
+        sent_packets_graph.push((interval as u128 * tot_intervals, (-1*(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
         if -1*(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
             min_sent_packets_second = -1*(tot_sent_packets as i128) + tot_sent_packets_prev;
         }
         tot_sent_packets_prev = tot_sent_packets as i128;
-        received_packets_graph.push((interval as u128 * times_report_updated, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
+        received_packets_graph.push((interval as u128 * tot_intervals, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
         if tot_received_packets as i128 - tot_received_packets_prev > max_received_packets_second {
             max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
         }
@@ -219,7 +228,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 60)
             .caption("Packet traffic per second", ("sans-serif", 30))
-            .build_cartesian_2d(0..interval as u128*times_report_updated, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
+            .build_cartesian_2d(0..interval as u128*tot_intervals, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
             .expect("Error drawing graph");
         chart_packets.configure_mesh()
             .y_desc("packet/s")
@@ -250,6 +259,11 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         root_area.present().expect("Error drawing graph");
 
         #[cfg(feature = "elapsed_time")]
+        let time_drawing = start_drawing.elapsed().as_millis();
+        #[cfg(feature = "elapsed_time")]
+        println!("Drawing time: {} ms", time_drawing);
+
+        #[cfg(feature = "elapsed_time")]
         {
             let time_header_sort_print = start.elapsed().as_millis();
             last_10_write_times.push(time_header_sort_print);
@@ -264,33 +278,17 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                    time_header_sort_print-time_header_sort,
                    time_header_sort_print).expect("Error writing output file\n\r");
 
-            if times_report_updated >= 10 {
+            if tot_intervals >= 10 {
                 write!(output, "\t\tTimings (average on the last 10 report writes):\n\
             \t\t\tTot time mutex held: {}ms\n",
                        last_10_write_times.iter().sum::<u128>()/10).expect("Error writing output file\n\r");
                 last_10_write_times.remove(0);
             }
-
+            output.flush().expect("Error writing output file\n\r");
         }
 
-        output.flush().expect("Error writing output file\n\r");
-
-
-        let status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        if *status == Status::Running {
-            if times_report_updated - last_report_updated_console != 1 {
-                println!("{}{}{}{}\r", "\tReport updated (".cyan().italic(),
-                         times_report_updated.to_string().cyan().italic(), ")".cyan().italic(),
-                         " - reports have also been updated during pause".cyan().italic());
-            }
-            else {
-                println!("{}{}{}\r", "\tReports updated (".cyan().italic(),
-                         times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
-            }
-            last_report_updated_console = times_report_updated;
-        }
-        else if *status == Status::Stop {
-            println!("{}{}{}\r", "\tThe final report is available in the file '".cyan().italic(),
+        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Stop {
+            println!("{}{}{}\r", "\tThe final reports are available in the folder '".cyan().italic(),
                      output_folder.clone().cyan().bold(), "'\n\n\r".cyan().italic());
             return;
         }
@@ -500,8 +498,6 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 ///
 /// * `first_timestamp` - A not formatted String representing the initial timestamp of the sniffing process.
 ///
-/// * `times_report_updated` - An integer representing the amount of times the report has been updated.
-///
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
 /// through the ```-l``` option.
 ///
@@ -547,7 +543,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// ```
 fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
-                            times_report_updated: u128, lowest_port: u16, highest_port: u16,
+                            lowest_port: u16, highest_port: u16,
                             min_packets: u128, network_layer: String, transport_layer: String, app_layer: AppProtocol,
                             num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128,
                             app_count: HashMap<AppProtocol, u128>) {
@@ -556,7 +552,6 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let adapter_string = format!("<><>\t\tPackets are sniffed from adapter '{}'\n", device_name);
     let first_timestamp_string = format!("<><>\t\t\tReport start time: {}\n", first_timestamp);
     let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
-    let number_updates_string = format!("<><>\t\t\tNumber of times report was updated: {}\n", times_report_updated.separate_with_underscores());
     let ports_string = get_ports_string(lowest_port,highest_port);
     let network_layer_string = get_network_layer_string(network_layer);
     let transport_layer_string = get_transport_layer_string(transport_layer);
@@ -572,7 +567,6 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     write!(output, "<><>\t\tReport updates info\n").expect("Error writing output file\n");
     write!(output, "{}", first_timestamp_string).expect("Error writing output file\n");
     write!(output, "{}", last_timestamp_string).expect("Error writing output file\n");
-    write!(output, "{}", number_updates_string).expect("Error writing output file\n");
     write!(output, "<><>\n").expect("Error writing output file\n");
 
     write!(output, "<><>\t\tFilters\n").expect("Error writing output file\n");

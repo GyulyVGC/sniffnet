@@ -4,7 +4,7 @@
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
 
-Application to analyze and filter network traffic. 
+Multithreaded application to analyze and filter network traffic. 
 
 Several command line options are available to select the network adapter to inspect, to set a desired reports update frequency and to specify filters on the observed traffic.
 

@@ -60,7 +60,7 @@ fn main() {
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
     let min_packets = args.minimum_packets;
-    let interval = args.interval;
+    let interval: u64 = args.interval;
     let network_layer: String = args.network_layer_filter.to_ascii_lowercase();
     let network_layer_2: String = network_layer.clone();
     let transport_layer: String = args.transport_layer_filter.to_ascii_lowercase();
@@ -124,7 +124,11 @@ fn main() {
     println!("{}{}{}", "\tThe folder '".cyan().italic(), output_folder.cyan().italic(),
               "' will be periodically updated\r".cyan().italic());
     println!("{}{}{}{}", "\r\n\tPress the key\r".cyan().bold(),  "\r\n\t\t- 'p' to pause\r".yellow().bold(),
-             "\r\n\t\t- 's' to stop\r".red().bold(), "\r\n\tthe application\n\n\r".cyan().bold());
+             "\r\n\t\t- 's' to stop\r".red().bold(), "\r\n\tthe application\n\r".cyan().bold());
+    print!("\t{}{}{}\r", "Updating reports every ".cyan().blink().italic(),
+           interval.to_string().cyan().blink().italic(),
+           " seconds...".cyan().blink().italic());
+    io::stdout().flush().unwrap();
 
     // to kill the main thread even if a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -151,7 +155,7 @@ fn main() {
     });
 
     // Main thread: updates application status
-    set_status_by_key(status_pair2);
+    set_status_by_key(status_pair2, interval);
 
     // Wait for the final report update, to not kill the application while the report is being written
     thread_write_report.join().expect("Thread in charge of writing report panicked!\r\n");
@@ -268,7 +272,7 @@ fn is_valid_transport_layer(transport_layer: String) -> bool {
 /// # Arguments
 ///
 /// * `status_pair` - Shared variable to change the application current status.
-fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
+fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>, interval: u64) {
 
     let _raw = RawScreen::into_raw_mode();
     let mut reader = input().read_sync();
@@ -279,6 +283,8 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
             match event {
                 InputEvent::Keyboard(KeyEvent::Char('p')) => {
                     if *status == Status::Running {
+                        print!("                                                              \r");
+                        io::stdout().flush().unwrap();
                         println!("\t{}", "Sniffnet paused...\r".yellow().bold());
                         print!("\t{}", "Press 'r' to resume\r".yellow().blink().bold());
                         io::stdout().flush().unwrap();
@@ -287,17 +293,21 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>) {
                 }
                 InputEvent::Keyboard(KeyEvent::Char('r')) => {
                     if *status == Status::Pause {
-                        print!("                                                         \r");
+                        print!("                                                              \r");
                         io::stdout().flush().unwrap();
                         println!("\t{}", "Sniffnet resumed\r".green().bold());
+                        print!("\t{}{}{}\r", "Updating reports every ".cyan().blink().italic(),
+                               interval.to_string().cyan().blink().italic(),
+                               " seconds...".cyan().blink().italic());
+                        io::stdout().flush().unwrap();
                         *status = Status::Running;
                         cvar.notify_all();
                     }
                 }
                 InputEvent::Keyboard(KeyEvent::Char('s')) => {
-                    print!("                                                         \r");
+                    print!("                                                              \r");
                     io::stdout().flush().unwrap();
-                    println!("\r\t{}", "Sniffnet stopped... waiting for the last report update\n\n\r".red().bold());
+                    println!("\r\t{}", "Sniffnet stopped... waiting for the last reports update\n\n\r".red().bold());
                     *status = Status::Stop;
                     cvar.notify_all();
                     return;
