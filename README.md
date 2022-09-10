@@ -4,12 +4,19 @@
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
 
+Application to analyze and filter network traffic. 
 
-Aim of the application is to intercept and filter network traffic through a user specified interface of a computer.
+Sniffnet generates a graphical representation of the filtered traffic's intensity and a detailed textual report about the observed packets.
 
-The application will periodically generate and update a [human-readable textual report](#textual-report-structure), providing statistics about the observed network packets.
+Several command line options are available to select the network adapter to inspect, to set a desired reports update frequency and to specify filters on the observed traffic.
 
-Several command line options are available to select the network adapter to inspect, to set a desired report update frequency and to specify filters on the observed traffic.
+<img alt="" src="https://user-images.githubusercontent.com/100347457/189486010-a9ecb5bc-e35f-4375-82ef-6a26b9eff74d.svg" width="100%"/>
+
+
+<p float="left">
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/189486982-cf232d40-b38a-45ff-9d91-ef175ec9980e.png" width="49%"/>
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/189487192-ad533fc4-9132-4100-bfc6-a42acd2a30c9.png" width="49%"/>
+</p>
 
 <hr>
 
