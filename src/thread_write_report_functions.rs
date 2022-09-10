@@ -20,7 +20,7 @@ use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_p
 
 #[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
-use plotters::style::full_palette::GREY;
+use plotters::style::full_palette::{GREEN_600, GREY};
 
 #[cfg(feature = "draw_graph")]
 use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, AxisPosition, Color};
@@ -68,9 +68,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
     let mut times_report_updated: u128 = 0;
     let mut last_report_updated_console: u128 = 0;
-    let cvar = &status_pair.1;
-    let first_timestamp = Local::now().format("%d/%m/%Y %H:%M:%S").to_string();
-
+    let time_origin = Local::now();
+    let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
     #[cfg(feature = "elapsed_time")]
     let mut last_10_write_times = vec![];
 
@@ -138,6 +137,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let root_area = SVGBackend::new("bandwidth.svg", (1250, 700)).into_drawing_area();
         root_area.fill(&GREY).expect("Error drawing graph");
         let (bits_area, packets_area) = root_area.split_vertically(350);
+        let (_, footer) = root_area.split_vertically(680);
+
+        footer.titled(
+            &*format!("Graphs are updated every {} seconds", interval),
+            ("sans-serif", 15).into_font().color(&BLACK.mix(0.5)),
+        ).expect("Error drawing graph");
 
         // bits graph
 
@@ -154,17 +159,41 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let mut chart_bits = ChartBuilder::on(&bits_area)
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 60)
-            .caption("Bit traffic per second", ("sans-serif", 40))
+            .caption("Bit traffic per second", ("sans-serif", 30))
             .build_cartesian_2d(0..interval as u128 * times_report_updated, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
             .expect("Error drawing graph");
-        chart_bits.configure_mesh().draw().unwrap();
+        chart_bits.configure_mesh()
+            .y_desc("bit/s")
+            .axis_desc_style(("sans-serif", 15))
+            .x_label_formatter(&|seconds| {
+                (time_origin+chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
+                    .format("%H:%M:%S").to_string()
+            })
+            .y_label_formatter(&|bits| {
+                match bits {
+                    0..=999 | -999..=-1 => { format!("{}",bits) },
+                    1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}",*bits as f64/1_000 as f64, "k") },
+                    1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}",*bits as f64/1_000_000 as f64, "M") },
+                    _ => { format!("{:.1} {}",*bits as f64/1_000_000_000 as f64, "G") }
+                }
+            })
+            .draw().unwrap();
+        chart_bits.draw_series(
+            AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN_600.mix(0.2))
+                .border_style(&GREEN_600))
+            .expect("Error drawing graph")
+            .label("Incoming bits")
+            .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_600.filled()));
         chart_bits.draw_series(
             AreaSeries::new(sent_bits_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
                 .border_style(&BLUE))
-            .expect("Error drawing graph");
-        chart_bits.draw_series(
-            AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN.mix(0.2))
-                .border_style(&GREEN))
+            .expect("Error drawing graph")
+            .label("Outgoing bits")
+            .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], BLUE.filled()));
+
+        chart_bits.configure_series_labels()
+            .label_font(("sans-serif", 14))
+            .border_style(&BLACK).draw()
             .expect("Error drawing graph");
 
         // packets graph
@@ -182,17 +211,33 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let mut chart_packets = ChartBuilder::on(&packets_area)
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 60)
-            .caption("Packet traffic per second", ("sans-serif", 40))
+            .caption("Packet traffic per second", ("sans-serif", 30))
             .build_cartesian_2d(0..interval as u128*times_report_updated, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
             .expect("Error drawing graph");
-        chart_packets.configure_mesh().draw().unwrap();
+        chart_packets.configure_mesh()
+            .y_desc("packet/s")
+            .axis_desc_style(("sans-serif", 15))
+            .x_label_formatter(&|seconds| {
+                (time_origin+chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
+                    .format("%H:%M:%S").to_string()
+            })
+            .draw().unwrap();
+        chart_packets.draw_series(
+            AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN_600.mix(0.2))
+                .border_style(&GREEN_600))
+            .expect("Error drawing graph")
+            .label("Incoming packets")
+            .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_600.filled()));
         chart_packets.draw_series(
             AreaSeries::new(sent_packets_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
                 .border_style(&BLUE))
-            .expect("Error drawing graph");
-        chart_packets.draw_series(
-            AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN.mix(0.2))
-                .border_style(&GREEN))
+            .expect("Error drawing graph")
+            .label("Outgoing packets")
+            .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], BLUE.filled()));
+
+        chart_packets.configure_series_labels()
+            .label_font(("sans-serif", 14))
+            .border_style(&BLACK).draw()
             .expect("Error drawing graph");
 
         root_area.present().expect("Error drawing graph");
@@ -224,22 +269,20 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         output.flush().expect("Error writing output file\n\r");
 
 
-        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+        let status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *status == Status::Running {
             if times_report_updated - last_report_updated_console != 1 {
                 println!("{}{}{}{}\r", "\tReport updated (".cyan().italic(),
                          times_report_updated.to_string().cyan().italic(), ")".cyan().italic(),
-                         " - report has also been updated once during pause".cyan().italic());
+                         " - reports have also been updated during pause".cyan().italic());
             }
             else {
-                println!("{}{}{}\r", "\tReport updated (".cyan().italic(),
+                println!("{}{}{}\r", "\tReports updated (".cyan().italic(),
                          times_report_updated.to_string().cyan().italic(), ")".cyan().italic());
             }
             last_report_updated_console = times_report_updated;
         }
-
-        status = cvar.wait_while(status, |s| *s == Status::Pause).expect("Error acquiring mutex\n\r");
-        if *status == Status::Stop {
+        else if *status == Status::Stop {
             println!("{}{}{}\r", "\tThe final report is available in the file '".cyan().italic(),
                      output_file.clone().cyan().bold(), "'\n\n\r".cyan().italic());
             return;
