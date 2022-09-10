@@ -56,7 +56,7 @@ fn main() {
     // parse arguments
     let args = Args::parse();
     let mut adapter: String = args.adapter;
-    let output_file: String = args.output_file;
+    let output_folder: String = args.output_folder;
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
     let min_packets = args.minimum_packets;
@@ -121,7 +121,7 @@ fn main() {
     let status_pair3 = status_pair1.clone();
 
     println!("{}{}{}", "\r\n\n\tSniffing network adapter '".cyan().italic(), device_name.cyan().italic(), "'\r".cyan().italic());
-    println!("{}{}{}", "\tThe file '".cyan().italic(), output_file.cyan().italic(),
+    println!("{}{}{}", "\tThe folder '".cyan().italic(), output_folder.cyan().italic(),
               "' will be periodically updated\r".cyan().italic());
     println!("{}{}{}{}", "\r\n\tPress the key\r".cyan().bold(),  "\r\n\t\t- 'p' to pause\r".yellow().bold(),
              "\r\n\t\t- 's' to stop\r".red().bold(), "\r\n\tthe application\n\n\r".cyan().bold());
@@ -140,7 +140,7 @@ fn main() {
     let thread_write_report = thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
                                     device_name, network_layer,
-                                    transport_layer, app_layer.unwrap(), output_file,
+                                    transport_layer, app_layer.unwrap(), output_folder,
                                     mutex_map2, status_pair3);
     });
 

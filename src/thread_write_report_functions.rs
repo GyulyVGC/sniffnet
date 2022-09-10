@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration};
-use std::thread;
+use std::{fs, thread};
 use chrono::{Local};
 use std::io::{BufWriter, Write};
 use colored::Colorize;
@@ -55,7 +55,7 @@ use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, Axi
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
 /// ```--app``` option.
 ///
-/// * `output_file` - A String representing the output report file name. Specified by the user through the
+/// * `output_folder` - A String representing the folder to contain the reports. Specified by the user through the
 /// ```-o``` option.
 ///
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
@@ -63,8 +63,15 @@ use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, Axi
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
                                    device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
-                                   output_file: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+                                   output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
+
+    if fs::create_dir(output_folder.clone()).is_err() {
+        fs::remove_dir_all(output_folder.clone()).unwrap();
+        fs::create_dir(output_folder.clone()).unwrap();
+    }
+
+    let path_graph = &*format!("{}/bandwidth.svg", output_folder);
 
     let mut times_report_updated: u128 = 0;
     let mut last_report_updated_console: u128 = 0;
@@ -93,7 +100,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         thread::sleep(Duration::from_secs(interval));
 
         times_report_updated += 1;
-        let mut output = BufWriter::new(File::create(output_file.clone()).expect("Error creating output file\n\r"));
+        let mut output = BufWriter::new(File::create(format!("{}/report.txt", output_folder.clone())).expect("Error creating output file\n\r"));
 
         let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
@@ -134,7 +141,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         // graphs
 
-        let root_area = SVGBackend::new("bandwidth.svg", (1250, 700)).into_drawing_area();
+        let root_area = SVGBackend::new(path_graph, (1250, 700)).into_drawing_area();
         root_area.fill(&GREY).expect("Error drawing graph");
         let (bits_area, packets_area) = root_area.split_vertically(350);
         let (_, footer) = root_area.split_vertically(680);
@@ -284,7 +291,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         }
         else if *status == Status::Stop {
             println!("{}{}{}\r", "\tThe final report is available in the file '".cyan().italic(),
-                     output_file.clone().cyan().bold(), "'\n\n\r".cyan().italic());
+                     output_folder.clone().cyan().bold(), "'\n\n\r".cyan().italic());
             return;
         }
     }
@@ -485,7 +492,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 ///
 /// # Arguments
 ///
-/// * `output_file` - A String representing the output report file name. Specified by the user through the
+/// * `output` - A String representing the output report file name. Specified by the user through the
 /// ```-o``` option.
 ///
 /// * `device_name` - A String representing the name of th network adapter to be sniffed. Specified by the user through the

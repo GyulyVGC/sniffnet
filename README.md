@@ -11,7 +11,7 @@ Several command line options are available to select the network adapter to insp
 Sniffnet generates a graphical representation of the filtered traffic's intensity and a detailed textual report about the observed packets.
 
 
-<img alt="" src="https://user-images.githubusercontent.com/100347457/189486010-a9ecb5bc-e35f-4375-82ef-6a26b9eff74d.svg" width="100%"/>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/189486010-a9ecb5bc-e35f-4375-82ef-6a26b9eff74d.svg" width="98%"/>
 
 
 <p float="left">
@@ -112,15 +112,30 @@ The user can interact with the sniffing process through the terminal window.
 
 - **Stop**: to stop the application execution, the user can type a 's' character in the terminal window.
 
+## Graphical report structure
 
+<details>
+
+  <summary>See details</summary>
+
+The graphical report consists of a svg file, constantly updated while sniffnet is running.
+It is suggested to open this file with a web browser, in order to be able to comfortably refresh it.
+
+It reports the amount of sent (outgoing) and received (incoming) bits and packets per second.
+
+Note that the number of bits and packets in the graph refers to one single second even if the update frequency is different.
+
+The default update frequency is set to 5 seconds, but you can change it launching the application with the ```-i``` option.
+Note that the default interval of 5 seconds is more suitable if the network traffic is constant and steady (e.g., large file download);
+in case of intermittent traffic, you can consider using a lower time interval.
+
+</details>
 
 ## Textual report structure
 
 <details>
 
   <summary>See details</summary>
-
-In this section is reported the structure of the output report file generated, to help the users better understand and interpret it.
 
 ### Report header
 
@@ -267,7 +282,7 @@ Note that not including the ```-n``` option is equal to provide ```-n "no filter
 
 - **Already existing output folder**:
 there is no particular limitation on the output folder name.
-However if the provided name corresponds to an already existing directory of your PC, keep in mind that the directory will be deleted and overwritten.
+However, if the provided name corresponds to an already existing directory of your PC, keep in mind that the directory will be deleted and overwritten.
 
 
 - **Invalid transport layer protocol filter**:

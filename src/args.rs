@@ -60,11 +60,11 @@ pub struct Args {
     #[clap(short, long="net", value_parser, default_value = "no filter")]
     pub network_layer_filter: String,
 
-    /// Name of output file to contain the textual report, if omitted a default file is chosen.
+    /// Name of the output folder to contain reports, if omitted a default name is chosen.
     ///
     /// This option must be followed by a textual value.
-    #[clap(short, long, value_parser, forbid_empty_values = true, default_value = "sniffnet_report.txt")]
-    pub output_file: String,
+    #[clap(short, long, value_parser, forbid_empty_values = true, default_value = "sniffnet_report")]
+    pub output_folder: String,
 
     /// Filters packets on the basis of the transport layer protocol (TCP or UDP).
     ///

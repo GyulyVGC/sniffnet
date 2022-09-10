@@ -226,4 +226,7 @@ $RECYCLE.BIN/
 #graphs
 *.svg
 
+#folder with reports
+/sniffnet_*
+
 .idea
