@@ -19,15 +19,10 @@ chrono = "0.4.20"
 crossterm = "0.13.3"
 colored = "2.0.0"
 thousands = "0.2.0"
-plotters = "0.3.4"
+plotters = { version = "0.3.4" }
 
 
 #used for debug purposes to measure time needed to write output file report
 #[features]
 #default = ["elapsed_time"]
 #elapsed_time = []
-
-#experimental: plot received packets in a line series chart
-#[features]
-#default = ["draw_graph"]
-#draw_graph = []

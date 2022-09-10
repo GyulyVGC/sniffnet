@@ -11,14 +11,16 @@ use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration};
 use std::thread;
-use chrono::Local;
+use chrono::{Local};
 use std::io::{BufWriter, Write};
 use colored::Colorize;
 use thousands::Separable;
+use plotters::prelude::*;
 use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status};
 
 #[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
+use plotters::style::full_palette::GREY;
 
 #[cfg(feature = "draw_graph")]
 use charts::{Chart, ScaleLinear, MarkerType, LineSeriesView, AreaSeriesView, AxisPosition, Color};
@@ -72,21 +74,21 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     #[cfg(feature = "elapsed_time")]
     let mut last_10_write_times = vec![];
 
-    #[cfg(feature = "draw_graph")]
-    let mut tot_packets_graph_cumul = vec![(0.0,0.0)];
-    #[cfg(feature = "draw_graph")]
-    let mut filtered_packets_graph_cumul = vec![(0.0,0.0)];
+    let mut sent_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    let mut tot_sent_bits_prev: i128 = 0;
+    let mut min_sent_bits_second: i128 = 0;
 
-    #[cfg(feature = "draw_graph")]
-    let mut tot_packets_graph_interval = vec![(0.0,0.0)];
-    #[cfg(feature = "draw_graph")]
-    let mut tot_packets_prev = 0;
-    #[cfg(feature = "draw_graph")]
-    let mut max_packets_interval = 0;
-    #[cfg(feature = "draw_graph")]
-    let mut filtered_packets_graph_interval = vec![(0.0,0.0)];
-    #[cfg(feature = "draw_graph")]
-    let mut filtered_packets_prev = 0;
+    let mut received_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    let mut tot_received_bits_prev: i128 = 0;
+    let mut max_received_bits_second: i128 = 0;
+
+    let mut sent_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    let mut tot_sent_packets_prev: i128 = 0;
+    let mut min_sent_packets_second: i128 = 0;
+
+    let mut received_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    let mut tot_received_packets_prev: i128 = 0;
+    let mut max_received_packets_second: i128 = 0;
 
     loop {
         thread::sleep(Duration::from_secs(interval));
@@ -101,20 +103,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let all_packets = info_traffic.all_packets;
         let tot_sent_bytes = info_traffic.tot_sent_bytes;
         let tot_received_bytes = info_traffic.tot_received_bytes;
-
-        #[cfg(feature = "draw_graph")]
-        {
-            tot_packets_graph_cumul.push((interval as f32 *times_report_updated as f32,tot_packets as f32));
-            filtered_packets_graph_cumul.push((interval as f32 *times_report_updated as f32,filtered_packets as f32));
-
-            tot_packets_graph_interval.push((interval as f32 *times_report_updated as f32,tot_packets as f32 - tot_packets_prev as f32));
-            if tot_packets - tot_packets_prev > max_packets_interval {
-                max_packets_interval = tot_packets - tot_packets_prev;
-            }
-            tot_packets_prev = tot_packets;
-            filtered_packets_graph_interval.push((interval as f32 *times_report_updated as f32,filtered_packets as f32 - filtered_packets_prev as f32));
-            filtered_packets_prev = filtered_packets;
-        }
 
         #[cfg(feature = "elapsed_time")]
         let start = Instant::now();
@@ -144,6 +132,71 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         drop(info_traffic);
 
+
+        // graphs
+
+        let root_area = SVGBackend::new("bandwidth.svg", (1250, 700)).into_drawing_area();
+        root_area.fill(&GREY).expect("Error drawing graph");
+        let (bits_area, packets_area) = root_area.split_vertically(350);
+
+        // bits graph
+
+        sent_bits_graph.push((interval as u128 * times_report_updated,(-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
+        if -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev < min_sent_bits_second {
+            min_sent_bits_second = -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev;
+        }
+        tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
+        received_bits_graph.push((interval as u128 * times_report_updated, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
+        if tot_received_bytes as i128 * 8 - tot_received_bits_prev  > max_received_bits_second {
+            max_received_bits_second = tot_received_bytes as i128 * 8 - tot_received_bits_prev ;
+        }
+        tot_received_bits_prev = (tot_received_bytes * 8) as i128;
+        let mut chart_bits = ChartBuilder::on(&bits_area)
+            .set_label_area_size(LabelAreaPosition::Left, 60)
+            .set_label_area_size(LabelAreaPosition::Bottom, 60)
+            .caption("Bit traffic per second", ("sans-serif", 40))
+            .build_cartesian_2d(0..interval as u128 * times_report_updated, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
+            .expect("Error drawing graph");
+        chart_bits.configure_mesh().draw().unwrap();
+        chart_bits.draw_series(
+            AreaSeries::new(sent_bits_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
+                .border_style(&BLUE))
+            .expect("Error drawing graph");
+        chart_bits.draw_series(
+            AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN.mix(0.2))
+                .border_style(&GREEN))
+            .expect("Error drawing graph");
+
+        // packets graph
+
+        sent_packets_graph.push((interval as u128 * times_report_updated, (-1*(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
+        if -1*(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
+            min_sent_packets_second = -1*(tot_sent_packets as i128) + tot_sent_packets_prev;
+        }
+        tot_sent_packets_prev = tot_sent_packets as i128;
+        received_packets_graph.push((interval as u128 * times_report_updated, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
+        if tot_received_packets as i128 - tot_received_packets_prev > max_received_packets_second {
+            max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
+        }
+        tot_received_packets_prev = tot_received_packets as i128;
+        let mut chart_packets = ChartBuilder::on(&packets_area)
+            .set_label_area_size(LabelAreaPosition::Left, 60)
+            .set_label_area_size(LabelAreaPosition::Bottom, 60)
+            .caption("Packet traffic per second", ("sans-serif", 40))
+            .build_cartesian_2d(0..interval as u128*times_report_updated, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
+            .expect("Error drawing graph");
+        chart_packets.configure_mesh().draw().unwrap();
+        chart_packets.draw_series(
+            AreaSeries::new(sent_packets_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
+                .border_style(&BLUE))
+            .expect("Error drawing graph");
+        chart_packets.draw_series(
+            AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN.mix(0.2))
+                .border_style(&GREEN))
+            .expect("Error drawing graph");
+
+        root_area.present().expect("Error drawing graph");
+
         #[cfg(feature = "elapsed_time")]
         {
             let time_header_sort_print = start.elapsed().as_millis();
@@ -170,90 +223,6 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         output.flush().expect("Error writing output file\n\r");
 
-
-        //experimental: plot received packets in a line series chart
-        #[cfg(feature = "draw_graph")]
-        {
-            let width = 1120;
-            let height = 700;
-            let (top, right, bottom, left) = (90, 40, 50, 60);
-
-            let x = ScaleLinear::new()
-                .set_domain(vec![0_f32, interval as f32 * times_report_updated as f32])
-                .set_range(vec![0, width - left - right]);
-
-            let y = ScaleLinear::new()
-                .set_domain(vec![0_f32, 1.2*tot_packets as f32])
-                .set_range(vec![height - top - bottom, 0]);
-
-            let tot_packets_cumul_view = LineSeriesView::new()
-                .set_x_scale(&x)
-                .set_y_scale(&y)
-                .set_marker_type(MarkerType::Square)
-                .set_label_visibility(false)
-                .set_custom_data_label("Total".to_string())
-                .load_data(&tot_packets_graph_cumul).unwrap();
-
-            let filtered_packets_cumul_view = AreaSeriesView::new()
-                .set_x_scale(&x)
-                .set_y_scale(&y)
-                .set_marker_type(MarkerType::Circle)
-                .set_label_visibility(false)
-                .set_custom_data_label("Filtered".to_string())
-                .set_colors(Color::from_vec_of_hex_strings(vec!["#18B502"]))
-                .load_data(&filtered_packets_graph_cumul).unwrap();
-
-            Chart::new()
-                .set_width(width)
-                .set_height(height)
-                .set_margins(top, right, bottom, left)
-                .add_title(String::from("Cumulative number of sniffed packets"))
-                .add_view(&filtered_packets_cumul_view)
-                .add_view(&tot_packets_cumul_view)
-                .add_axis_bottom(&x)
-                .add_axis_left(&y)
-                .add_bottom_axis_label("Time (s)")
-                .add_legend_at(AxisPosition::Top)
-                .save("sniffnet_graph.svg")
-                .unwrap();
-
-
-            let y_2 = ScaleLinear::new()
-                .set_domain(vec![0_f32, 1.2*max_packets_interval as f32])
-                .set_range(vec![height - top - bottom, 0]);
-
-            let tot_packets_interval_view = LineSeriesView::new()
-                .set_x_scale(&x)
-                .set_y_scale(&y_2)
-                .set_marker_type(MarkerType::Square)
-                .set_label_visibility(false)
-                .set_custom_data_label("Total".to_string())
-                .load_data(&tot_packets_graph_interval).unwrap();
-
-            let filtered_packets_interval_view = AreaSeriesView::new()
-                .set_x_scale(&x)
-                .set_y_scale(&y_2)
-                .set_marker_type(MarkerType::Circle)
-                .set_label_visibility(false)
-                .set_custom_data_label("Filtered".to_string())
-                .set_colors(Color::from_vec_of_hex_strings(vec!["#18B502"]))
-                .load_data(&filtered_packets_graph_interval).unwrap();
-
-            Chart::new()
-                .set_width(width)
-                .set_height(height)
-                .set_margins(top, right, bottom, left)
-                .add_title(String::from("Number of sniffed packets per time interval"))
-                .add_view(&filtered_packets_interval_view)
-                .add_view(&tot_packets_interval_view)
-                .add_axis_bottom(&x)
-                .add_axis_left(&y_2)
-                .add_bottom_axis_label("Time (s)")
-                .add_legend_at(AxisPosition::Top)
-                .save("sniffnet_graph_2.svg")
-                .unwrap();
-
-        }
 
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         if *status == Status::Running {

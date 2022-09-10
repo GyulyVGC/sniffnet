@@ -16,7 +16,6 @@ mod thread_write_report_functions;
 mod info_traffic;
 
 use std::cmp::Ordering::Equal;
-use std::collections::HashMap;
 use pcap::{Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::args::Args;

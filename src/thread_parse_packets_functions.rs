@@ -2,7 +2,7 @@
 //! inserting them in the shared map.
 
 use std::cmp::Ordering::Equal;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 use std::sync::{Arc, Condvar, Mutex};
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
