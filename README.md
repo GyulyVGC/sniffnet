@@ -31,6 +31,8 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 
 - [User interactions during application execution](#user-interactions-during-application-execution)
 
+- [Graphical report structure](#graphical-report-structure)
+
 - [Textual report structure](#textual-report-structure)
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
@@ -44,8 +46,6 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
   + Linux configuration problems
   + Textual report contains just the header
   + Other errors
-  
-- [Authors](#authors)
   
 </details>
 
@@ -353,8 +353,3 @@ All those exceptional scenarios are managed through calls to the ```expect()``` 
 
 
 </details>
-
-# Authors
-
-- [Bellini Giuliano](https://github.com/GyulyVGC)
-- [Canepari Cristiano Marco](https://github.com/Crirock)
