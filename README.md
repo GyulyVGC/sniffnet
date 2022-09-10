@@ -84,7 +84,7 @@ specifies the minimum port value to be considered; if omitted there is no ports 
  
 
  - **-m, --minimum-packets**:
-sets the minimum value of transited packets for an [address:port] to be printed in the textual report.
+sets the minimum value of exchanged packets between an [address:port] pair to be printed in the textual report.
 
 
 - **-n, --net**:
