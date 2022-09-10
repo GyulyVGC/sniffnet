@@ -6,9 +6,10 @@
 
 Application to analyze and filter network traffic. 
 
+Several command line options are available to select the network adapter to inspect, to set a desired reports update frequency and to specify filters on the observed traffic.
+
 Sniffnet generates a graphical representation of the filtered traffic's intensity and a detailed textual report about the observed packets.
 
-Several command line options are available to select the network adapter to inspect, to set a desired reports update frequency and to specify filters on the observed traffic.
 
 <img alt="" src="https://user-images.githubusercontent.com/100347457/189486010-a9ecb5bc-e35f-4375-82ef-6a26b9eff74d.svg" width="100%"/>
 
@@ -31,8 +32,6 @@ Several command line options are available to select the network adapter to insp
 - [User interactions during application execution](#user-interactions-during-application-execution)
 
 - [Textual report structure](#textual-report-structure)
-  + [Report header](#report-header)
-  + [Report [address:port] list](#report-addresses-list)
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
   
@@ -86,15 +85,15 @@ specifies the minimum port value to be considered; if omitted there is no ports 
  
 
  - **-m, --minimum-packets**:
-sets the minimum value of transited packets for an [address:port] to be printed in the report.
+sets the minimum value of transited packets for an [address:port] to be printed in the textual report.
 
 
 - **-n, --net**:
 filters packets on the basis of the provided IP address version (IPv4 or IPv6).
  
 
- - **-o, --output-file**:
-specifies the name of output file containing the textual report; if omitted the file name is ```sniffnet_report.txt```
+ - **-o, --output-folder**:
+specifies the name of the output folder to contain textual and graphical reports; if omitted the folder name is ```sniffnet_report```
  
 
 - **-t, --trans**:
@@ -116,6 +115,10 @@ The user can interact with the sniffing process through the terminal window.
 
 
 ## Textual report structure
+
+<details>
+
+  <summary>See details</summary>
 
 In this section is reported the structure of the output report file generated, to help the users better understand and interpret it.
 
@@ -158,6 +161,7 @@ For each [address:port] pair are reported the first and the last timestamp in wh
 Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols); 
 please note that application level protocols are just inferred from the transport port numbers.
 
+</details>
 
 ## Supported application layer protocols
 
@@ -206,14 +210,13 @@ The application consists in three different execution flows.
 The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously); in doing so it signals to the secondary threads when to pause or resume their work.
 The signaling is made possible by setting an application status, shared with the secondary threads and associated to a mutex and a condition variable.
 
-The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual report every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
+The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual and graphical reports every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
 
 The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPort``` struct and the value part is represented by a ```ReportInfo``` struct.
 Before parsing each packet it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds parsing the packet.
 This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next_packet()``` method.
 
-The thread in charge of updating the textual report sleeps for ```interval``` seconds and re-writes the report with updated traffic statistics.
-Before updating the report it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds writing the report.
+The thread in charge of updating the textual and graphical reports sleeps for ```interval``` seconds and re-writes the reports with updated traffic statistics.
 
 </details>
 
@@ -262,9 +265,9 @@ if a string different from "IPv4", "IPv6" or "no filter" is provided (not case-s
 Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
 
 
-- **Invalid output file extension**:
-there is no particular limitation on the output file name.
-However, if an invalid file extension is provided the file may result unreadable if the extension is not subsequently removed.
+- **Already existing output folder**:
+there is no particular limitation on the output folder name.
+However if the provided name corresponds to an already existing directory of your PC, keep in mind that the directory will be deleted and overwritten.
 
 
 - **Invalid transport layer protocol filter**:
@@ -332,8 +335,7 @@ Most of such errors are due to the unwrapping of ```Result<T>```, which may exce
 This may happen in one of the following situations: activation of a pcap ```Capture``` handle, retrieval of network adapters list through pcap, selection of the default device through pcap, creation of the output file, cloning of the output file handle, acquisition of a ```Mutex``` lock, writing of the output file.
   
 All those exceptional scenarios are managed through calls to the ```expect()``` method, providing textual feedback to the user on the cause of the panic.
-  
-The ```unwrap()``` method is used only on ```Option<T>``` values when it's certain they contain ```Some``` value.
+
 
 </details>
 
