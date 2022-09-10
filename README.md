@@ -1,6 +1,7 @@
 <img alt="sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
 
 [![Build](https://img.shields.io/github/workflow/status/Crirock/pdsproject/Rust.svg)](https://github.com/Crirock/pdsproject/actions/workflows/rust.yml)
+[![Code Grade](https://api.codiga.io/project/34559/score/svg)](https://www.codiga.io)
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
 
@@ -45,6 +46,8 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
   + Windows configuration problems
   + Linux configuration problems
   + Textual report contains just the header
+  
+- [Contribute](#contribute)
   
 </details>
 
