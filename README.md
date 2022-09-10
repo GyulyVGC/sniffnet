@@ -226,11 +226,12 @@ The signaling is made possible by setting an application status, shared with the
 
 The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual and graphical reports every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
 
-The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPort``` struct and the value part is represented by a ```ReportInfo``` struct.
+The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPortPair``` struct and the value part is represented by a ```InfoAddressPortPair``` struct.
 Before parsing each packet it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds parsing the packet.
 This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next_packet()``` method.
 
 The thread in charge of updating the textual and graphical reports sleeps for ```interval``` seconds and re-writes the reports with updated traffic statistics.
+
 
 </details>
 
