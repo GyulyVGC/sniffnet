@@ -1,8 +1,9 @@
-# sniffnet (network packets sniffer/filter)
+<img alt="sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
 
 [![Build](https://img.shields.io/github/workflow/status/Crirock/pdsproject/Rust.svg)](https://github.com/Crirock/pdsproject/actions/workflows/rust.yml)
 [![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
 ![License](https://img.shields.io/crates/l/sniffnet.svg)
+
 
 Aim of the application is to intercept and filter network traffic through a user specified interface of a computer.
 
