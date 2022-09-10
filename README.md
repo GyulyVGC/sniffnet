@@ -342,3 +342,8 @@ surf the web to receive some packets.
 
 
 </details>
+
+
+## Contribute
+
+Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) 
