@@ -1,9 +1,9 @@
 [package]
 name = "sniffnet"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 description = "Framework to explore network traffic through graphical and textual reports"
-repository = "https://github.com/Crirock/pdsproject"
+repository = "https://github.com/GyulyVGC/sniffnet"
 readme = "README.md"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
