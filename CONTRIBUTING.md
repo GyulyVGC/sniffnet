@@ -25,6 +25,6 @@ All proposals to enlarge or improve Sniffnet are warmly welcomed, join the discu
 
 ## None of the above?
 
-In case you whish to contribute in a different way, you can consider helping me writing a ```lib.rs``` file with some tests on the application. 
+In case you whish to contribute in a different way, you can consider helping me writing a ```lib.rs``` file or some tests on the application. 
 
 That'd be amazing! 
