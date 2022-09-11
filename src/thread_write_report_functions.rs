@@ -18,7 +18,6 @@ use thousands::Separable;
 use plotters::prelude::*;
 use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status};
 
-#[cfg(feature = "elapsed_time")]
 use std::time::{Instant};
 use plotters::style::full_palette::{GREEN_600, GREY};
 
@@ -73,8 +72,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let mut tot_intervals: u128 = 0;
     let time_origin = Local::now();
     let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
-    #[cfg(feature = "elapsed_time")]
-    let mut last_10_write_times = vec![];
+
+
+    let mut start;
+    let mut _time_header = 0;
+    let mut _time_header_sort = 0;
+    let mut _time_header_sort_print = 0;
+    let mut _start_drawing;
 
     let mut sent_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
     let mut tot_sent_bits_prev: i128 = 0;
@@ -106,8 +110,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         let tot_sent_bytes = info_traffic.tot_sent_bytes;
         let tot_received_bytes = info_traffic.tot_received_bytes;
 
-        #[cfg(feature = "elapsed_time")]
-        let start = Instant::now();
+        start = Instant::now();
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // write textual report
 
@@ -120,15 +123,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                                      info_traffic.map.len(), all_packets,
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
-            #[cfg(feature = "elapsed_time")]
-                let time_header = start.elapsed().as_millis();
+            _time_header = start.elapsed().as_millis();
 
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic.map.iter().collect();
             sorted_vec.sort_by(|&(_, a), &(_, b)|
                 b.transmitted_packets.cmp(&a.transmitted_packets));
 
-            #[cfg(feature = "elapsed_time")]
-                let time_header_sort = start.elapsed().as_millis();
+            _time_header_sort = start.elapsed().as_millis();
 
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
@@ -138,16 +139,14 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             output.flush().expect("Error writing output file\n\r");
 
-            #[cfg(feature = "elapsed_time")]
-                let time_header_sort_print = start.elapsed().as_millis();
+            _time_header_sort_print = start.elapsed().as_millis();
 
         }
 
         drop(info_traffic);
 
         // graphs
-        #[cfg(feature = "elapsed_time")]
-        let start_drawing = Instant::now();
+        _start_drawing = Instant::now();
 
         // update bits traffic data
         sent_bits_graph.push((interval as u128 * tot_intervals,(-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
@@ -172,6 +171,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
         }
         tot_received_packets_prev = tot_received_packets as i128;
+
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // update graph file
 
@@ -268,33 +268,19 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         }
 
-        #[cfg(feature = "elapsed_time")]
-        let time_drawing = start_drawing.elapsed().as_millis();
-        #[cfg(feature = "elapsed_time")]
-        println!("Drawing time: {} ms", time_drawing);
 
         #[cfg(feature = "elapsed_time")]
         {
-            let time_header_sort_print = start.elapsed().as_millis();
-            last_10_write_times.push(time_header_sort_print);
-
-            write!(output, "---------------------------------------------------------\n\n\
-            \t\tTimings (last report write):\n\
-            \t\t\tPrint header: {}ms\n\
-            \t\t\tSort map: {}ms\n\
-            \t\t\tPrint map: {}ms\n\
-            \t\t\tTot time mutex held: {}ms\n\n",
-                   time_header, time_header_sort-time_header,
-                   time_header_sort_print-time_header_sort,
-                   time_header_sort_print).expect("Error writing output file\n\r");
-
-            if tot_intervals >= 10 {
-                write!(output, "\t\tTimings (average on the last 10 report writes):\n\
-            \t\t\tTot time mutex held: {}ms\n",
-                       last_10_write_times.iter().sum::<u128>()/10).expect("Error writing output file\n\r");
-                last_10_write_times.remove(0);
-            }
-            output.flush().expect("Error writing output file\n\r");
+            println!("---------------------------------------------------------\r\n\
+            \t\tTimings:\r\n\
+            \t\t\tPrint header: {} ms\r\n\
+            \t\t\tSort map: {} ms\r\n\
+            \t\t\tPrint map: {} ms\r\n\
+            \t\t\tTot time mutex held: {} ms\r\n\
+            \t\t\tDraw graphical report: {} ms\r\n",
+                   _time_header, _time_header_sort-_time_header,
+                   _time_header_sort_print-_time_header_sort,
+                   _time_header_sort_print, _start_drawing.elapsed().as_millis());
         }
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Stop {
