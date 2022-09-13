@@ -6,7 +6,7 @@
 
 If you have found a bug in the application, it'd be awesome if you could open an issue describing the problem. 
 
-You should include a title, a decription, and possibly a screenshot demonstrating the problem.
+You should include a title, a description, and possibly a screenshot demonstrating the problem.
 
 Before opening an issue, please make sure the bug was not already reported.
 
@@ -25,6 +25,6 @@ All proposals to enlarge or improve Sniffnet are warmly welcomed, join the discu
 
 ## None of the above?
 
-In case you whish to contribute in a different way, you can consider helping me writing a ```lib.rs``` file or some tests on the application. 
+In case you wish to contribute in a different way, you can consider help me by writing a ```lib.rs``` file or some tests on the application. 
 
 That'd be amazing! 

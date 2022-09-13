@@ -19,7 +19,7 @@ use plotters::prelude::*;
 use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status};
 
 use std::time::{Instant};
-use plotters::style::full_palette::{GREEN_600, GREY};
+use plotters::style::full_palette::{GREEN_800, GREY};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -211,11 +211,11 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 })
                 .draw().unwrap();
             chart_bits.draw_series(
-                AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN_600.mix(0.2))
-                    .border_style(&GREEN_600))
+                AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN_800.mix(0.2))
+                    .border_style(&GREEN_800))
                 .expect("Error drawing graph")
                 .label("Incoming bits")
-                .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_600.filled()));
+                .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_800.filled()));
             chart_bits.draw_series(
                 AreaSeries::new(sent_bits_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
                     .border_style(&BLUE))
@@ -246,11 +246,11 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 })
                 .draw().unwrap();
             chart_packets.draw_series(
-                AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN_600.mix(0.2))
-                    .border_style(&GREEN_600))
+                AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN_800.mix(0.2))
+                    .border_style(&GREEN_800))
                 .expect("Error drawing graph")
                 .label("Incoming packets")
-                .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_600.filled()));
+                .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_800.filled()));
             chart_packets.draw_series(
                 AreaSeries::new(sent_packets_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
                     .border_style(&BLUE))
