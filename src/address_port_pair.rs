@@ -41,14 +41,14 @@ impl AddressPortPair {
 impl fmt::Display for AddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 
-        let addr_string_1 = if self.address1.contains(":") { // IPv6 address is enclosed in [brackets]
+        let addr_string_1 = if self.address1.contains(':') { // IPv6 address is enclosed in [brackets]
             format!("|  [{}]:{}  |", self.address1, self.port1)
         }
         else {
             format!("|  {}:{}  |", self.address1, self.port1)
         };
 
-        let addr_string_2 = if self.address2.contains(":") { // IPv6 address is enclosed in [brackets]
+        let addr_string_2 = if self.address2.contains(':') { // IPv6 address is enclosed in [brackets]
             format!("|  [{}]:{}  |", self.address2, self.port2)
         }
         else {

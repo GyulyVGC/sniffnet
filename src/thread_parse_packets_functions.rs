@@ -139,9 +139,9 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             let key: AddressPortPair = AddressPortPair::new(address1.clone(), port1, address2.clone(), port2,
                                                                      traffic_type);
 
-                            if network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal {
-                                if transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal {
-                                    if application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other) {
+                            if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
+                                && (transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal)
+                                    && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
 
                                         if (port1 >= lowest_port && port1 <= highest_port)
                                             || (port2 >= lowest_port && port2 <= highest_port)  {
@@ -169,8 +169,6 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                             }
                                         }
 
-                                    }
-                                }
                             }
                         }
                     }
@@ -214,15 +212,15 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
         Some(IpHeader::Version4(ipv4header, _)) => {
             *network_layer = "ipv4".to_string();
             *address1 = format!("{:?}", ipv4header.source)
-                .replace("[","")
-                .replace("]","")
-                .replace(",",".")
-                .replace(" ","");
+                .replace('[',"")
+                .replace(']',"")
+                .replace(',',".")
+                .replace(' ',"");
             *address2 = format!("{:?}", ipv4header.destination)
-                .replace("[","")
-                .replace("]","")
-                .replace(",",".")
-                .replace(" ","");
+                .replace('[',"")
+                .replace(']',"")
+                .replace(',',".")
+                .replace(' ',"");
             *exchanged_bytes = ipv4header.payload_len as u128;
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
@@ -390,14 +388,14 @@ fn from_port_to_application_protocol(port: u16) -> AppProtocol {
 /// * `address` - string representing an IPv4 or IPv6 network address.
 fn is_multicast_address(address: &str) -> bool {
     let mut ret_val = false;
-    if address.contains(":") { //IPv6 address
+    if address.contains(':') { //IPv6 address
         if address.starts_with("ff") {
             ret_val = true;
         }
     }
     else { //IPv4 address
-        let first_group = address.split(".").next().unwrap().to_string().parse::<u8>().unwrap();
-        if first_group >= 224 && first_group <= 239 {
+        let first_group = address.split('.').next().unwrap().to_string().parse::<u8>().unwrap();
+        if (224..=239).contains(&first_group) {
             ret_val = true;
         }
     }
@@ -433,14 +431,12 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
         }
 
         //dispari: secondo byte del gruppo
-        else {
-            if *ipv6_long.get(i-1).unwrap() == 0 {
+        else if *ipv6_long.get(i-1).unwrap() == 0 {
                 ipv6_hex.push_str(&format!("{:x}:", ipv6_long.get(i).unwrap()));
             }
             else {
                 ipv6_hex.push_str(&format!("{:02x}:", ipv6_long.get(i).unwrap()));
             }
-        }
     }
     ipv6_hex.pop();
 
@@ -458,15 +454,13 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
             }
             current_zero_sequence += 1;
         }
-        else {
-            if current_zero_sequence != 0 {
+        else if current_zero_sequence != 0 {
                 if current_zero_sequence > longest_zero_sequence {
                     longest_zero_sequence = current_zero_sequence;
                     longest_zero_sequence_start = current_zero_sequence_start;
                 }
                 current_zero_sequence = 0;
             }
-        }
         i += 1;
     }
     if current_zero_sequence != 0 { // to catch consecutive zeros at the end

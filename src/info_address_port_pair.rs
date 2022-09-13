@@ -27,21 +27,11 @@ impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;
-        let transport_level_protocols;
-        let application_level_protocol;
-
-        match self.transmitted_bytes {
-            0..=999 => {},
-            1000..=999999 => {n /= 1000 as f32; multiple_transmitted.push('k'); },
-            1000000..=999999999 => {n /= 1000000 as f32; multiple_transmitted.push('M');},
-            _ => {n /= 1000000000 as f32; multiple_transmitted.push('G'); }
-        }
-
-        transport_level_protocols = format!("{:?}", self.trans_protocols)
-            .replace("{", "")
-            .replace("}", "");
-
-        application_level_protocol = match self.app_protocol {
+        let transport_level_protocols =
+            format!("{:?}", self.trans_protocols)
+            .replace('{', "")
+            .replace('}', "");
+        let application_level_protocol = match self.app_protocol {
             AppProtocol::Other => {
                 "not identified".to_string()
             }
@@ -49,6 +39,13 @@ impl fmt::Display for InfoAddressPortPair {
                 format!("{:?}", self.app_protocol)
             }
         };
+
+        match self.transmitted_bytes {
+            0..=999 => {},
+            1000..=999999 => {n /= 1000_f32; multiple_transmitted.push('k'); },
+            1000000..=999999999 => {n /= 1000000_f32; multiple_transmitted.push('M');},
+            _ => {n /= 1000000000 as f32; multiple_transmitted.push('G'); }
+        }
 
         let set_precision = |prefix: &String, &n| {
             if !prefix.is_empty() // no multiple

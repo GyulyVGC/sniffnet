@@ -119,7 +119,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      lowest_port, highest_port, min_packets,
-                                     network_layer.clone(), transport_layer.clone(), app_layer.clone(),
+                                     network_layer.clone(), transport_layer.clone(), app_layer,
                                      info_traffic.map.len(), all_packets,
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
@@ -161,9 +161,9 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         tot_received_bits_prev = (tot_received_bytes * 8) as i128;
 
         // update packets traffic data
-        sent_packets_graph.push((interval as u128 * tot_intervals, (-1*(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
-        if -1*(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
-            min_sent_packets_second = -1*(tot_sent_packets as i128) + tot_sent_packets_prev;
+        sent_packets_graph.push((interval as u128 * tot_intervals, (-(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
+        if -(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
+            min_sent_packets_second = -(tot_sent_packets as i128) + tot_sent_packets_prev;
         }
         tot_sent_packets_prev = tot_sent_packets as i128;
         received_packets_graph.push((interval as u128 * tot_intervals, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
@@ -204,20 +204,20 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 .y_label_formatter(&|bits| {
                     match bits {
                         0..=999 | -999..=-1 => { format!("{}",bits) },
-                        1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}",*bits as f64/1_000 as f64, "k") },
-                        1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}",*bits as f64/1_000_000 as f64, "M") },
-                        _ => { format!("{:.1} {}",*bits as f64/1_000_000_000 as f64, "G") }
+                        1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}",*bits as f64/1_000_f64, "k") },
+                        1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}",*bits as f64/1_000_000_f64, "M") },
+                        _ => { format!("{:.1} {}",*bits as f64/1_000_000_000_f64, "G") }
                     }
                 })
                 .draw().unwrap();
             chart_bits.draw_series(
-                AreaSeries::new(received_bits_graph.iter().map(|x| *x), 0, GREEN_800.mix(0.2))
+                AreaSeries::new(received_bits_graph.iter().copied(), 0, GREEN_800.mix(0.2))
                     .border_style(&GREEN_800))
                 .expect("Error drawing graph")
                 .label("Incoming bits")
                 .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_800.filled()));
             chart_bits.draw_series(
-                AreaSeries::new(sent_bits_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
+                AreaSeries::new(sent_bits_graph.iter().copied(), 0, BLUE.mix(0.2))
                     .border_style(&BLUE))
                 .expect("Error drawing graph")
                 .label("Outgoing bits")
@@ -246,13 +246,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
                 })
                 .draw().unwrap();
             chart_packets.draw_series(
-                AreaSeries::new(received_packets_graph.iter().map(|x| *x), 0, GREEN_800.mix(0.2))
+                AreaSeries::new(received_packets_graph.iter().copied(), 0, GREEN_800.mix(0.2))
                     .border_style(&GREEN_800))
                 .expect("Error drawing graph")
                 .label("Incoming packets")
                 .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], GREEN_800.filled()));
             chart_packets.draw_series(
-                AreaSeries::new(sent_packets_graph.iter().map(|x| *x), 0, BLUE.mix(0.2))
+                AreaSeries::new(sent_packets_graph.iter().copied(), 0, BLUE.mix(0.2))
                     .border_style(&BLUE))
                 .expect("Error drawing graph")
                 .label("Outgoing packets")
@@ -285,7 +285,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Stop {
             println!("{}{}{}\r", "\tThe final reports are available in the folder '".cyan().italic(),
-                     output_folder.clone().cyan().bold(), "'\n\n\r".cyan().italic());
+                     output_folder.cyan().bold(), "'\n\n\r".cyan().italic());
             return;
         }
     }
@@ -336,13 +336,13 @@ fn get_min_packets_string(min_packets: u128) -> String {
 /// ```-n``` option.
 fn get_network_layer_string (network_layer: String) -> String {
     if network_layer.cmp(&"ipv4".to_string()) == Equal {
-        format!("<><>\t\t\t[x] Considering only IPv4 packets\n")
+        "<><>\t\t\t[x] Considering only IPv4 packets\n".to_string()
     }
     else if network_layer.cmp(&"ipv6".to_string()) == Equal {
-        format!("<><>\t\t\t[x] Considering only IPv6 packets\n")
+        "<><>\t\t\t[x] Considering only IPv6 packets\n".to_string()
     }
     else {
-        format!("<><>\t\t\t[ ] Considering both IPv4 and IPv6 packets\n")
+        "<><>\t\t\t[ ] Considering both IPv4 and IPv6 packets\n".to_string()
     }
 }
 
@@ -356,13 +356,13 @@ fn get_network_layer_string (network_layer: String) -> String {
 /// ```-t``` option.
 fn get_transport_layer_string(transport_layer: String) -> String {
     if transport_layer.cmp(&"tcp".to_string()) == Equal {
-        format!("<><>\t\t\t[x] Considering only packets exchanged with TCP\n")
+        "<><>\t\t\t[x] Considering only packets exchanged with TCP\n".to_string()
     }
     else if transport_layer.cmp(&"udp".to_string()) == Equal {
-        format!("<><>\t\t\t[x] Considering only packets exchanged with UDP\n")
+        "<><>\t\t\t[x] Considering only packets exchanged with UDP\n".to_string()
     }
     else {
-        format!("<><>\t\t\t[ ] Considering packets exchanged both with TCP and/or UDP\n")
+        "<><>\t\t\t[ ] Considering packets exchanged both with TCP and/or UDP\n".to_string()
     }
 }
 
@@ -376,7 +376,7 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 /// ```--app``` option.
 fn get_app_layer_string(app_layer: AppProtocol) -> String {
     if app_layer.eq(&AppProtocol::Other) {
-        format!("<><>\t\t\t[ ] Considering all application layer protocols\n")
+        "<><>\t\t\t[ ] Considering all application layer protocols\n".to_string()
     }
     else {
         format!("<><>\t\t\t[x] Considering only {:?} packets\n", app_layer)
@@ -453,7 +453,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 
         let app_proto_string = format!("{:?}", entry.0);
 
-        let num_string = format!("{}", entry.1.separate_with_underscores());
+        let num_string = entry.1.separate_with_underscores().to_string();
 
         let percentage_string =
             if format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.00") {
@@ -521,19 +521,19 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// ```<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// <><>
-/// <><>		Packets are sniffed from adapter 'en0'
+/// <><>        Packets are sniffed from adapter 'en0'
 /// <><>
-/// <><>		Report updates info
-/// <><>			Report start time: 15/08/2022 15:39:07
-/// <><>			Report last update: 15/08/2022 15:39:52
-/// <><>			Report update frequency: every 5 seconds
-/// <><>			Number of times report was updated: 9
+/// <><>        Report updates info
+/// <><>            Report start time: 15/08/2022 15:39:07
+/// <><>            Report last update: 15/08/2022 15:39:52
+/// <><>            Report update frequency: every 5 seconds
+/// <><>            Number of times report was updated: 9
 /// <><>
-/// <><>		Filters
-/// <><>			Considering only address:port pairs featured by more than 500 packets
-/// <><>			Considering both IPv4 and IPv6 packets
-/// <><>			Considering only packets exchanged with TCP
-/// <><>			Considering only port number 443
+/// <><>        Filters
+/// <><>            Considering only address:port pairs featured by more than 500 packets
+/// <><>            Considering both IPv4 and IPv6 packets
+/// <><>            Considering only packets exchanged with TCP
+/// <><>            Considering only port number 443
 /// <><>
 /// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -547,7 +547,7 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let cornice_string = "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n".to_string();
     let adapter_string = format!("<><>\t\tPackets are sniffed from adapter '{}'\n", device_name);
     let first_timestamp_string = format!("<><>\t\t\tReport start time: {}\n", first_timestamp);
-    let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S").to_string());
+    let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S"));
     let ports_string = get_ports_string(lowest_port,highest_port);
     let network_layer_string = get_network_layer_string(network_layer);
     let transport_layer_string = get_transport_layer_string(transport_layer);
@@ -555,40 +555,33 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
     let filtered_packets_string = get_filtered_packets_string(num_sniffed_packets, num_filtered_packets);
 
     write!(output, "{}", cornice_string).expect("Error writing output file\n");
-    write!(output, "{}", cornice_string).expect("Error writing output file\n");
-    write!(output, "<><>\n").expect("Error writing output file\n");
-    write!(output, "{}", adapter_string).expect("Error writing output file\n");
-    write!(output, "<><>\n").expect("Error writing output file\n");
+    writeln!(output, "{}<><>", cornice_string).expect("Error writing output file\n");
+    writeln!(output, "{}<><>", adapter_string).expect("Error writing output file\n");
 
-    write!(output, "<><>\t\tReport updates info\n").expect("Error writing output file\n");
+    writeln!(output, "<><>\t\tReport updates info").expect("Error writing output file\n");
     write!(output, "{}", first_timestamp_string).expect("Error writing output file\n");
-    write!(output, "{}", last_timestamp_string).expect("Error writing output file\n");
-    write!(output, "<><>\n").expect("Error writing output file\n");
+    writeln!(output, "{}<><>", last_timestamp_string).expect("Error writing output file\n");
 
-    write!(output, "<><>\t\tFilters\n").expect("Error writing output file\n");
+    writeln!(output, "<><>\t\tFilters").expect("Error writing output file\n");
     write!(output, "{}", network_layer_string).expect("Error writing output file\n");
     write!(output, "{}", transport_layer_string).expect("Error writing output file\n");
     write!(output, "{}", ports_string).expect("Error writing output file\n");
-    write!(output, "{}", app_layer_string).expect("Error writing output file\n");
-    write!(output, "<><>\n").expect("Error writing output file\n");
+    writeln!(output, "{}<><>", app_layer_string).expect("Error writing output file\n");
 
-    write!(output, "<><>\t\tOverall statistics\n").expect("Error writing output file\n");
-    write!(output, "<><>\t\t\tConsidered [address:port] pairs: {}\n", num_pairs.separate_with_underscores()).expect("Error writing output file\n");
-    write!(output, "<><>\t\t\tTotal packets: {}\n", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
-    write!(output, "{}", filtered_packets_string).expect("Error writing output file\n");
-    write!(output, "<><>\n").expect("Error writing output file\n");
+    writeln!(output, "<><>\t\tOverall statistics").expect("Error writing output file\n");
+    writeln!(output, "<><>\t\t\tConsidered [address:port] pairs: {}", num_pairs.separate_with_underscores()).expect("Error writing output file\n");
+    writeln!(output, "<><>\t\t\tTotal packets: {}", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
+    writeln!(output, "{}<><>", filtered_packets_string).expect("Error writing output file\n");
 
     if num_sniffed_packets > 0 {
         let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
-        write!(output, "<><>\t\tTotal packets divided by app layer protocol\n").expect("Error writing output file\n");
-        write!(output, "{}", app_count_string).expect("Error writing output file\n");
-        write!(output, "<><>\n").expect("Error writing output file\n");
+        writeln!(output, "<><>\t\tTotal packets divided by app layer protocol").expect("Error writing output file\n");
+        writeln!(output, "{}<><>", app_count_string).expect("Error writing output file\n");
     }
 
     if min_packets > 1 {
         let min_packets_string = get_min_packets_string(min_packets);
-        write!(output, "{}", min_packets_string).expect("Error writing output file\n");
-        write!(output, "<><>\n").expect("Error writing output file\n");
+        writeln!(output, "{}<><>", min_packets_string).expect("Error writing output file\n");
     }
     write!(output,"{}", cornice_string).expect("Error writing output file\n");
     write!(output,"{}\n\n\n", cornice_string).expect("Error writing output file\n");

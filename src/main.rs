@@ -26,7 +26,6 @@ use std::{io, panic, process, thread};
 use std::io::Write;
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
-use colored;
 use colored::Colorize;
 use crate::info_traffic::InfoTraffic;
 
@@ -67,7 +66,7 @@ fn main() {
     let transport_layer_2: String = transport_layer.clone();
     let app_layer = from_name_to_application_protocol(args.application_layer_filter.to_ascii_lowercase());
 
-    if args.device_list == true {
+    if args.device_list {
         print_device_list();
         return;
     }
@@ -171,15 +170,13 @@ fn print_device_list() {
     for dev in Device::list().expect("Error retrieving device list\r\n") {
         match dev.desc {
             None => {
-                print!("{}{} {}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(),
-                       "\r\n\t\tAddresses: "/*.cyan()*/);
+                print!("\r\tDevice: {}\r\n\t\tAddresses: ", dev.name.cyan());
             }
             Some(description) => {
-                print!("{}{} ({}){}", "\r\tDevice: "/*.cyan()*/, dev.name.cyan(), description.cyan(),
-                       "\r\n\t\tAddresses: "/*.cyan()*/);
+                print!("\r\tDevice: {} ({})\r\n\t\tAddresses: ",  dev.name.cyan(), description.cyan());
             }
         }
-        if dev.addresses.len() == 0 {
+        if dev.addresses.is_empty() {
             println!("\r");
         }
         for addr in dev.addresses {
@@ -211,7 +208,7 @@ fn retrieve_device(adapter: &mut String) -> Option<Device> {
             break;
         }
     }
-    return found_device;
+    found_device
 }
 
 
