@@ -1,3 +1,5 @@
+//#![feature(test)]
+
 //! Multithreading application to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 //!
 //! The application will periodically generate a human readable textual report,

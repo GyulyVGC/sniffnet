@@ -44,7 +44,7 @@ impl fmt::Display for InfoAddressPortPair {
             0..=999 => {},
             1000..=999999 => {n /= 1000_f32; multiple_transmitted.push('k'); },
             1000000..=999999999 => {n /= 1000000_f32; multiple_transmitted.push('M');},
-            _ => {n /= 1000000000 as f32; multiple_transmitted.push('G'); }
+            _ => {n /= 1000000000_f32; multiple_transmitted.push('G'); }
         }
 
         let set_precision = |prefix: &String, &n| {

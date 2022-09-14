@@ -96,6 +96,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let mut tot_received_packets_prev: i128 = 0;
     let mut max_received_packets_second: i128 = 0;
 
+    let text_path = format!("{}/report.txt", output_folder.clone());
+
     loop {
         // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
@@ -114,7 +116,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // write textual report
 
-            let mut output = BufWriter::new(File::create(format!("{}/report.txt", output_folder.clone())).expect("Error creating output file\n\r"));
+            let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
 
             write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
@@ -290,6 +292,55 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
         }
     }
 }
+
+
+// #[cfg(test)]
+// mod print_report_entry_benchmark {
+//     extern crate test;
+//
+//     use std::collections::HashSet;
+//     use std::fs::File;
+//     use std::io::BufWriter;
+//     use std::io::Write;
+//     use test::Bencher;
+//     use chrono::{DateTime, Local};
+//     use crate::address_port_pair::{AddressPortPair, TrafficType};
+//     use crate::info_address_port_pair::InfoAddressPortPair;
+//     use crate::{AppProtocol, TransProtocol};
+//
+//     #[bench]
+//     fn bench_print_one_report_entry(b: &mut Bencher) {
+//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
+//         let key = AddressPortPair::new
+//             ("255.255.255.255".to_string(),
+//              443,
+//             "245.78.32.123".to_string(),
+//             40900,
+//             TrafficType::Outgoing
+//             );
+//         let now_ugly: DateTime<Local> = Local::now();
+//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+//         let val = InfoAddressPortPair {
+//             transmitted_bytes: 5002222896,
+//             transmitted_packets: 89394742,
+//             initial_timestamp: now.clone(),
+//             final_timestamp: now.clone(),
+//             trans_protocols: HashSet::from([TransProtocol::TCP]),
+//             app_protocol: AppProtocol::HTTPS
+//         };
+//         for _ in 0..3500 {
+//             bench_vec.push((&key, &val));
+//         }
+//         let mut bench_output = BufWriter::new(File::create("bench.txt").expect("Error creating output file\n\r"));
+//         b.iter(|| {
+//             for (key, val) in bench_vec.iter() {
+//                 write!(bench_output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r")
+//             }
+//             bench_output.flush().unwrap();
+//         });
+//     }
+// }
+
 
 
 /// Given the lowest and highest port numbers, the function generates the corresponding String
