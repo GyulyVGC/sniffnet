@@ -32,11 +32,11 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 
 - [User interactions during application execution](#user-interactions-during-application-execution)
 
-- [Graphical report structure](#graphical-report-structure)
+- [Graphical report](#graphical-report)
 
-- [Textual report structure (concise mode)](#textual-report-structure-(concise-mode))
+- [Textual report (concise mode)](#textual-report-concise-mode)
 
-- [Textual report structure (verbose mode)](#textual-report-structure-(verbose-mode))
+- [Textual report (verbose mode)](#textual-report-verbose-mode)
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
   
@@ -119,7 +119,7 @@ The user can interact with the sniffing process through the terminal window.
 
 - **Stop**: to stop the application execution, the user can type a 's' character in the terminal window.
 
-## Graphical report structure
+## Graphical report
 
 <details>
 
@@ -138,7 +138,7 @@ in case of intermittent traffic, you can consider using a lower time interval.
 
 </details>
 
-## Textual report structure (concise mode)
+## Textual report concise mode
 
 <details>
 
@@ -148,13 +148,13 @@ By default, the report is represented in the form of a textual csv file containi
 
 Each line of the report is relative to one single [address:port] pair.
 
-
+![Screenshot 2022-09-15 at 19 13 48](https://user-images.githubusercontent.com/100347457/190468586-bd858334-9df9-410d-b9d5-92ff395a5a28.png)
 
 If you would like to see a more formatted and aesthetically pleasing textual report, use the option `-v` (see next section). 
 
 </details>
 
-## Textual report structure (verbose mode)
+## Textual report verbose mode
 
 <details>
 
