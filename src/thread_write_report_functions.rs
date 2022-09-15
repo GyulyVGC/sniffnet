@@ -27,6 +27,9 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 ///
 /// # Arguments
 ///
+/// /// * `verbose` - Flag: if true textual report is verbose.
+/// Specified by the user through the ```-v``` option.
+///
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
 /// through the ```-l``` option.
 ///
@@ -57,7 +60,7 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
+pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
                                    device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
@@ -118,12 +121,18 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
 
-            write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
-                                     device_name.clone(), first_timestamp.clone(),
-                                     lowest_port, highest_port, min_packets,
-                                     network_layer.clone(), transport_layer.clone(), app_layer,
-                                     info_traffic.map.len(), all_packets,
-                                     tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+            if !verbose {
+                write!(output, "To see a better formatted textual report, launch sniffnet with the '-v' option\n\n").expect("Error writing output file\n\r");
+                writeln!(output,"IP_src, port_src, IP_dest, port_dest, packets, bytes, layer4, layer7, first_timestamp, last_timestamp").expect("Error writing output file\n\r");
+            }
+            else {
+                write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+                                         device_name.clone(), first_timestamp.clone(),
+                                         lowest_port, highest_port, min_packets,
+                                         network_layer.clone(), transport_layer.clone(), app_layer,
+                                         info_traffic.map.len(), all_packets,
+                                         tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+            }
 
             _time_header = start.elapsed().as_millis();
 
@@ -135,7 +144,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
-                    write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+                    if !verbose { // concise
+                        write!(output, "{}, {}, {}, {}, {}, {}, {:?}, {:?}, {}, {}\n",
+                            key.address1, key.port1, key.address2, key.port2,
+                            val.transmitted_packets, val.transmitted_bytes,
+                            val.trans_protocols, val.app_protocol,
+                            val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
+                    }
+                    else { // verbose
+                        write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
+                    }
                 }
             }
 
@@ -309,7 +327,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 //     use crate::{AppProtocol, TransProtocol};
 //
 //     #[bench]
-//     fn bench_print_one_report_entry(b: &mut Bencher) {
+//     fn bench_print_verbose(b: &mut Bencher) {
 //         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
 //         let key = AddressPortPair::new
 //             ("255.255.255.255".to_string(),
@@ -335,6 +353,42 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 //         b.iter(|| {
 //             for (key, val) in bench_vec.iter() {
 //                 write!(bench_output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r")
+//             }
+//             bench_output.flush().unwrap();
+//         });
+//     }
+//
+//     #[bench]
+//     fn bench_print_concise(b: &mut Bencher) {
+//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
+//         let key = AddressPortPair::new
+//             ("255.255.255.255".to_string(),
+//              443,
+//              "245.78.32.123".to_string(),
+//              40900,
+//              TrafficType::Outgoing
+//             );
+//         let now_ugly: DateTime<Local> = Local::now();
+//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+//         let val = InfoAddressPortPair {
+//             transmitted_bytes: 5002222896,
+//             transmitted_packets: 89394742,
+//             initial_timestamp: now.clone(),
+//             final_timestamp: now.clone(),
+//             trans_protocols: HashSet::from([TransProtocol::TCP]),
+//             app_protocol: AppProtocol::HTTPS
+//         };
+//         for _ in 0..3500 {
+//             bench_vec.push((&key, &val));
+//         }
+//         let mut bench_output = BufWriter::new(File::create("bench.txt").expect("Error creating output file\n\r"));
+//         b.iter(|| {
+//             for (key, val) in bench_vec.iter() {
+//                 write!(bench_output, "{}, {}, {}, {}, {}, {}, {:?}, {:?}, {}, {}\n",
+//                        key.address1, key.port1, key.address2, key.port2,
+//                        val.transmitted_packets, val.transmitted_bytes,
+//                        val.trans_protocols, val.app_protocol,
+//                        val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
 //             }
 //             bench_output.flush().unwrap();
 //         });

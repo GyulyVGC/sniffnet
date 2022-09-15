@@ -34,7 +34,9 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 
 - [Graphical report structure](#graphical-report-structure)
 
-- [Textual report structure](#textual-report-structure)
+- [Textual report structure (concise mode)](#textual-report-structure-(concise-mode))
+
+- [Textual report structure (verbose mode)](#textual-report-structure-(verbose-mode))
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
   
@@ -101,6 +103,9 @@ specifies the name of the output folder to contain textual and graphical reports
 - **-t, --trans**:
 filters packets on the basis of the provided transport layer protocol (TCP or UDP).
 
+- **-v, --verbose**:
+generates a more self-explainable textual report, as the one shown in the pictures above.
+
           
 ## User interactions during application execution
 
@@ -133,15 +138,33 @@ in case of intermittent traffic, you can consider using a lower time interval.
 
 </details>
 
-## Textual report structure
+## Textual report structure (concise mode)
 
 <details>
 
   <summary>See details</summary>
 
+By default, the report is represented in the form of a textual csv file containing the traffic statistics.
+
+Each line of the report is relative to one single [address:port] pair.
+
+
+
+If you would like to see a more formatted and aesthetically pleasing textual report, use the option `-v` (see next section). 
+
+</details>
+
+## Textual report structure (verbose mode)
+
+<details>
+
+  <summary>See details</summary>
+
+This textual representation can be activated launching the application with the `-v` option.
+
 ### Report header
 
-The first section of the textual report contains a header summarizing different useful information.
+The first section of the verbose textual report contains a header summarizing different useful information.
 
 ![report_part_1](https://user-images.githubusercontent.com/100347457/187227230-b7984a13-d9df-4852-9b8d-e295cd7cfa35.png)
 
@@ -161,7 +184,7 @@ observed application layer protocols with the respective packets count.
 ### Report addresses list
 
 
-The second section of the textual report is dedicated to the packets stream analysis for each [address:port] pair.
+The second section of the verbose textual report is dedicated to the packets stream analysis for each [address:port] pair.
 
 This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
 

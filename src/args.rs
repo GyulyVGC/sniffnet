@@ -18,6 +18,12 @@ pub struct Args {
     #[clap(long="app", value_parser, default_value = "no filter")]
     pub application_layer_filter: String,
 
+    /// Prints textual report with a verbose format.
+    ///
+    /// This option does not need to be followed by a value.
+    #[clap(short, long)]
+    pub verbose: bool,
+
     /// Prints list of the available network interfaces.
     ///
     /// Immediately terminates the program.

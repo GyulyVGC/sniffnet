@@ -57,6 +57,7 @@ fn main() {
     // parse arguments
     let args = Args::parse();
     let mut adapter: String = args.adapter;
+    let verbose: bool = args.verbose;
     let output_folder: String = args.output_folder;
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
@@ -143,7 +144,7 @@ fn main() {
 
     // Thread 1: updates textual report
     let thread_write_report = thread::spawn(move || {
-        sleep_and_write_report_loop(lowest_port, highest_port, interval, min_packets,
+        sleep_and_write_report_loop(verbose,lowest_port, highest_port, interval, min_packets,
                                     device_name, network_layer,
                                     transport_layer, app_layer.unwrap(), output_folder,
                                     mutex_map2, status_pair3);
