@@ -27,7 +27,7 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 ///
 /// # Arguments
 ///
-/// /// * `verbose` - Flag: if true textual report is verbose.
+/// * `verbose` - Flag: if true textual report is verbose.
 /// Specified by the user through the ```-v``` option.
 ///
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
@@ -121,17 +121,15 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
             let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
 
+            write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+                                     device_name.clone(), first_timestamp.clone(),
+                                     lowest_port, highest_port, min_packets,
+                                     network_layer.clone(), transport_layer.clone(), app_layer,
+                                     info_traffic.map.len(), all_packets,
+                                     tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+
             if !verbose {
-                write!(output, "To see a better formatted textual report, launch sniffnet with the '-v' option\n\n").expect("Error writing output file\n\r");
-                writeln!(output,"IP_src, port_src, IP_dest, port_dest, packets, bytes, layer4, layer7, first_timestamp, last_timestamp").expect("Error writing output file\n\r");
-            }
-            else {
-                write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
-                                         device_name.clone(), first_timestamp.clone(),
-                                         lowest_port, highest_port, min_packets,
-                                         network_layer.clone(), transport_layer.clone(), app_layer,
-                                         info_traffic.map.len(), all_packets,
-                                         tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+                write!(output,"IP_src, port_src, IP_dest, port_dest, packets, bytes, layer4, layer7, first_timestamp, last_timestamp\n\n").expect("Error writing output file\n\r");
             }
 
             _time_header = start.elapsed().as_millis();
@@ -148,7 +146,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                         write!(output, "{}, {}, {}, {}, {}, {}, {:?}, {:?}, {}, {}\n",
                             key.address1, key.port1, key.address2, key.port2,
                             val.transmitted_packets, val.transmitted_bytes,
-                            val.trans_protocols, val.app_protocol,
+                            val.trans_protocol, val.app_protocol,
                             val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
                     }
                     else { // verbose

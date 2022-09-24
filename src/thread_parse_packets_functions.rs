@@ -2,7 +2,6 @@
 //! inserting them in the shared map.
 
 use std::cmp::Ordering::Equal;
-use std::collections::{HashSet};
 use std::sync::{Arc, Condvar, Mutex};
 use chrono::{DateTime, Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
@@ -137,7 +136,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             }
 
                             let key: AddressPortPair = AddressPortPair::new(address1.clone(), port1, address2.clone(), port2,
-                                                                     traffic_type);
+                                                                            transport_protocol, traffic_type);
 
                             if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
                                 && (transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal)
@@ -316,14 +315,13 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
-        info.trans_protocols.insert(transport_protocol);
     })
         .or_insert(InfoAddressPortPair {
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: now.clone(),
             final_timestamp: now.clone(),
-            trans_protocols: HashSet::from([transport_protocol]),
+            trans_protocol: transport_protocol,
             app_protocol: application_protocol
             });
 }

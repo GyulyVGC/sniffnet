@@ -1,7 +1,6 @@
 //! Module defining the `IndoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use std::collections::HashSet;
 use std::fmt;
 use thousands::Separable;
 
@@ -17,8 +16,8 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: String,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: String,
-    /// Set of transport layer protocols carried through the associate address:port pair.
-    pub trans_protocols: HashSet<TransProtocol>,
+    ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
+    pub trans_protocol: TransProtocol,
     /// Set of application layer protocols carried through the associate address:port pair.
     pub app_protocol: AppProtocol,
 }
@@ -28,7 +27,7 @@ impl fmt::Display for InfoAddressPortPair {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;
         let transport_level_protocols =
-            format!("{:?}", self.trans_protocols)
+            format!("{:?}", self.trans_protocol)
             .replace('{', "")
             .replace('}', "");
         let application_level_protocol = match self.app_protocol {
@@ -62,7 +61,7 @@ impl fmt::Display for InfoAddressPortPair {
                     \t\tExchanged Bytes: {:.*} {}B\n\
                     \t\tInitial Timestamp: {}\n\
                     \t\tFinal Timestamp: {}\n\
-                    \t\tTransport layer protocols: {}\n\
+                    \t\tTransport layer protocol: {}\n\
                     \t\tApplication layer protocol: {}\n\n",
                self.transmitted_packets.separate_with_underscores(), precision, n, multiple_transmitted,
                self.initial_timestamp, self.final_timestamp,
