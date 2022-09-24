@@ -34,9 +34,7 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 
 - [Graphical report](#graphical-report)
 
-- [Textual report (concise mode)](#textual-report-concise-mode)
-
-- [Textual report (verbose mode)](#textual-report-verbose-mode)
+- [Textual report](#textual-report)
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
   
@@ -138,37 +136,17 @@ in case of intermittent traffic, you can consider using a lower time interval.
 
 </details>
 
-## Textual report concise mode
+## Textual report
 
 <details>
 
   <summary>See details</summary>
-
-By default, the report is represented in the form of a textual csv file containing the traffic statistics.
-
-Each line of the report is relative to one single [address:port] pair.
-
-![Screenshot 2022-09-15 at 19 13 48](https://user-images.githubusercontent.com/100347457/190468586-bd858334-9df9-410d-b9d5-92ff395a5a28.png)
-
-If you would like to see a more formatted and aesthetically pleasing textual report, use the option `-v` (see next section). 
-
-</details>
-
-## Textual report verbose mode
-
-<details>
-
-  <summary>See details</summary>
-
-This textual representation can be activated launching the application with the `-v` option.
-
+  
 ### Report header
 
-The first section of the verbose textual report contains a header summarizing different useful information.
+The first section of the textual report contains a header summarizing different useful information.
 
 ![report_part_1](https://user-images.githubusercontent.com/100347457/187227230-b7984a13-d9df-4852-9b8d-e295cd7cfa35.png)
-
-
 
 First, it specifies the name of the network adapter analyzed during the sniffing process.
 
@@ -184,14 +162,25 @@ observed application layer protocols with the respective packets count.
 ### Report addresses list
 
 
-The second section of the verbose textual report is dedicated to the packets stream analysis for each [address:port] pair.
+The second section of the textual report is dedicated to the packets stream analysis for each [address:port] pair.
 
 This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
 
 Note that such list of elements is sorted in descending order of exchanged packets.
 
+
+By default, the report is represented in the form of a textual csv file containing the traffic statistics.
+
+Each line of the report is relative to one single [address:port] pair.
+
+![Screenshot 2022-09-15 at 19 13 48](https://user-images.githubusercontent.com/100347457/190468586-bd858334-9df9-410d-b9d5-92ff395a5a28.png)
+
+If you would like to see a more formatted and aesthetically pleasing textual report, use the option `-v` (see below). 
+
+
 ![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
 
+This textual representation can be activated launching the application with the `-v` option.
 
 For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source
 (on the left) and the destination (on the right).
