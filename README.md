@@ -12,8 +12,7 @@ Several command line options are available to select the network adapter to insp
 Sniffnet generates a graphical representation of the filtered traffic's intensity and a detailed textual report about the observed packets.
 
 
-<img alt="" src="https://user-images.githubusercontent.com/100347457/189486010-a9ecb5bc-e35f-4375-82ef-6a26b9eff74d.svg" width="98%"/>
-
+<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="98%"/>
 
 <p float="left">
     <img alt="" src="https://user-images.githubusercontent.com/100347457/189486982-cf232d40-b38a-45ff-9d91-ef175ec9980e.png" width="49%"/>
@@ -127,6 +126,8 @@ The graphical report consists of a svg file, constantly updated while sniffnet i
 It is suggested to open this file with a web browser, in order to be able to comfortably refresh it.
 
 It reports the amount of sent (outgoing) and received (incoming) bits and packets per second.
+
+<img alt="" src="https://user-images.githubusercontent.com/100347457/192573923-b4dc0d03-21c3-44b3-924a-ced1d0f4c8f0.svg" width="98%"/>
 
 Note that the number of bits and packets in the graph refers to one single second even if the update frequency is different.
 
