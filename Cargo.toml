@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 description = "Framework to explore network traffic through graphical and textual reports"
 repository = "https://github.com/GyulyVGC/sniffnet"
