@@ -26,10 +26,8 @@ impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;
-        let transport_level_protocols =
-            format!("{:?}", self.trans_protocol)
-            .replace('{', "")
-            .replace('}', "");
+        let transport_level_protocol =
+            format!("{:?}", self.trans_protocol);
         let application_level_protocol = match self.app_protocol {
             AppProtocol::Other => {
                 "not identified".to_string()
@@ -65,7 +63,7 @@ impl fmt::Display for InfoAddressPortPair {
                     \t\tApplication layer protocol: {}\n\n",
                self.transmitted_packets.separate_with_underscores(), precision, n, multiple_transmitted,
                self.initial_timestamp, self.final_timestamp,
-               transport_level_protocols, application_level_protocol
+               transport_level_protocol, application_level_protocol
         )
     }
 }
