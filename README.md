@@ -101,7 +101,7 @@ specifies the name of the output folder to contain textual and graphical reports
 filters packets on the basis of the provided transport layer protocol (TCP or UDP).
 
 - **-v, --verbose**:
-generates a more self-explainable textual report, as the one shown in the pictures above.
+generates a more self-explainable textual report.
 
           
 ## User interactions during application execution
@@ -170,20 +170,17 @@ This analysis results in a list in which each element represents an [address:por
 Note that such list of elements is sorted in descending order of exchanged packets.
 
 
-By default, the report is represented in the form of a textual csv file containing the traffic statistics.
+Default representation:
 
-Each line of the report is relative to one single [address:port] pair.
+![Screenshot 2022-09-27 at 19 03 16](https://user-images.githubusercontent.com/100347457/192590512-efd3e7ba-cf8f-4cee-a169-e6ede9657f0d.png)
 
-![Screenshot 2022-09-15 at 19 13 48](https://user-images.githubusercontent.com/100347457/190468586-bd858334-9df9-410d-b9d5-92ff395a5a28.png)
-
-If you would like to see a more formatted and aesthetically pleasing textual report, use the option `-v` (see below). 
-
+Verbose representation:
 
 ![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
 
-This textual representation can be activated launching the application with the `-v` option.
+The last textual representation can be activated launching the application with the `-v` option.
 
-For each element it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source
+In both cases, for each element it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source
 (on the left) and the destination (on the right).
 
 For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
