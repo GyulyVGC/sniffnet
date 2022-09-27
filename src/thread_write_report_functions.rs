@@ -129,7 +129,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
             if !verbose {
-                write!(output,"IP_src, port_src, IP_dest, port_dest, layer4, layer7, packets, bytes, first_timestamp, last_timestamp\n\n").expect("Error writing output file\n\r");
+                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+                writeln!(output, "|      Src IP address      | Src port |      Dst IP address      | Dst port | Layer 4 | Layer 7 |    Packets    |     Bytes     |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
             }
 
             _time_header = start.elapsed().as_millis();
@@ -143,9 +145,11 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
-                        write!(output, "{}, {}, {}, {}, {:?}, {:?}, {}, {}, {}, {}\n",
+                        let l4_string = format!("{:?}",val.trans_protocol);
+                        let l7_string = format!("{:?}",val.app_protocol);
+                        writeln!(output, "|{:^26}|{:^10}|{:^26}|{:^10}|{:^9}|{:^9}|{:^15}|{:^15}|{:^21}|{:^21}|",
                             key.address1, key.port1, key.address2, key.port2,
-                               val.trans_protocol, val.app_protocol,
+                            l4_string, l7_string,
                             val.transmitted_packets, val.transmitted_bytes,
                             val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
                     }
