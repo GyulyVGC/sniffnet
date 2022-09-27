@@ -56,3 +56,10 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added feature to produce a graphical report with the number of packets per second and the number of bits per seconds, incoming and outgoing
 - Added multicast addresses recognition
 - Reports are not updated if the application is paused
+
+
+## [0.4.1] - 2022-09-27
+
+- Changed the default textual report representation
+- Added command line option `-v` to set the textual report representation to the former one (verbose mode)
+- Sniffnet now also considers the transport layer protocol to define textual report elements (now defined by the network 5-tuple)
