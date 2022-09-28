@@ -145,7 +145,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
-                        writeln!(bench_output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
+                        writeln!(output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
                                  key.address1, key.port1, key.address2, key.port2,
                                  val.trans_protocol.to_string(), val.app_protocol.to_string(),
                                  val.transmitted_packets, val.transmitted_bytes,
@@ -310,89 +310,89 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 }
 
 
-#[cfg(test)]
-mod print_report_entry_benchmark {
-    extern crate test;
-
-    use std::fs::File;
-    use std::io::BufWriter;
-    use std::io::Write;
-    use test::Bencher;
-    use chrono::{DateTime, Local};
-    use crate::address_port_pair::{AddressPortPair, TrafficType};
-    use crate::info_address_port_pair::InfoAddressPortPair;
-    use crate::{AppProtocol, TransProtocol};
-
-    #[bench]
-    fn bench_print_verbose(b: &mut Bencher) {
-        let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
-        let key = AddressPortPair::new
-            ("255.255.255.255".to_string(),
-             443,
-            "245.78.32.123".to_string(),
-            40900,
-            TransProtocol::TCP,
-            TrafficType::Outgoing
-            );
-        let now_ugly: DateTime<Local> = Local::now();
-        let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-        let val = InfoAddressPortPair {
-            transmitted_bytes: 5002222896,
-            transmitted_packets: 89394742,
-            initial_timestamp: now.clone(),
-            final_timestamp: now.clone(),
-            trans_protocol: TransProtocol::TCP,
-            app_protocol: AppProtocol::HTTPS
-        };
-        for _ in 0..3500 {
-            bench_vec.push((&key, &val));
-        }
-        let mut bench_output = BufWriter::new(File::create("bench_verbose.txt").expect("Error creating output file\n\r"));
-        b.iter(|| {
-            for (key, val) in bench_vec.iter() {
-                write!(bench_output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r")
-            }
-            bench_output.flush().unwrap();
-        });
-    }
-
-    #[bench]
-    fn bench_print_concise(b: &mut Bencher) {
-        let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
-        let key = AddressPortPair::new
-            ("255.255.255.255".to_string(),
-             443,
-             "245.78.32.123".to_string(),
-             40900,
-             TransProtocol::TCP,
-             TrafficType::Outgoing
-            );
-        let now_ugly: DateTime<Local> = Local::now();
-        let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-        let val = InfoAddressPortPair {
-            transmitted_bytes: 5002222896,
-            transmitted_packets: 89394742,
-            initial_timestamp: now.clone(),
-            final_timestamp: now.clone(),
-            trans_protocol: TransProtocol::TCP,
-            app_protocol: AppProtocol::HTTPS
-        };
-        for _ in 0..3500 {
-            bench_vec.push((&key, &val));
-        }
-        let mut bench_output = BufWriter::new(File::create("bench_concise.txt").expect("Error creating output file\n\r"));
-        b.iter(|| {
-            for (key, val) in bench_vec.iter() {
-                writeln!(bench_output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
-                         key.address1, key.port1, key.address2, key.port2,
-                         val.trans_protocol.to_string(), val.app_protocol.to_string(),
-                         val.transmitted_packets, val.transmitted_bytes,
-                         val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
-            }
-            bench_output.flush().unwrap();
-        });
-    }
-}
+// #[cfg(test)]
+// mod print_report_entry_benchmark {
+//     extern crate test;
+//
+//     use std::fs::File;
+//     use std::io::BufWriter;
+//     use std::io::Write;
+//     use test::Bencher;
+//     use chrono::{DateTime, Local};
+//     use crate::address_port_pair::{AddressPortPair, TrafficType};
+//     use crate::info_address_port_pair::InfoAddressPortPair;
+//     use crate::{AppProtocol, TransProtocol};
+//
+//     #[bench]
+//     fn bench_print_verbose(b: &mut Bencher) {
+//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
+//         let key = AddressPortPair::new
+//             ("255.255.255.255".to_string(),
+//              443,
+//             "245.78.32.123".to_string(),
+//             40900,
+//             TransProtocol::TCP,
+//             TrafficType::Outgoing
+//             );
+//         let now_ugly: DateTime<Local> = Local::now();
+//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+//         let val = InfoAddressPortPair {
+//             transmitted_bytes: 5002222896,
+//             transmitted_packets: 89394742,
+//             initial_timestamp: now.clone(),
+//             final_timestamp: now.clone(),
+//             trans_protocol: TransProtocol::TCP,
+//             app_protocol: AppProtocol::HTTPS
+//         };
+//         for _ in 0..3500 {
+//             bench_vec.push((&key, &val));
+//         }
+//         let mut bench_output = BufWriter::new(File::create("bench_verbose.txt").expect("Error creating output file\n\r"));
+//         b.iter(|| {
+//             for (key, val) in bench_vec.iter() {
+//                 write!(bench_output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r")
+//             }
+//             bench_output.flush().unwrap();
+//         });
+//     }
+//
+//     #[bench]
+//     fn bench_print_concise(b: &mut Bencher) {
+//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
+//         let key = AddressPortPair::new
+//             ("255.255.255.255".to_string(),
+//              443,
+//              "245.78.32.123".to_string(),
+//              40900,
+//              TransProtocol::TCP,
+//              TrafficType::Outgoing
+//             );
+//         let now_ugly: DateTime<Local> = Local::now();
+//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+//         let val = InfoAddressPortPair {
+//             transmitted_bytes: 5002222896,
+//             transmitted_packets: 89394742,
+//             initial_timestamp: now.clone(),
+//             final_timestamp: now.clone(),
+//             trans_protocol: TransProtocol::TCP,
+//             app_protocol: AppProtocol::HTTPS
+//         };
+//         for _ in 0..3500 {
+//             bench_vec.push((&key, &val));
+//         }
+//         let mut bench_output = BufWriter::new(File::create("bench_concise.txt").expect("Error creating output file\n\r"));
+//         b.iter(|| {
+//             for (key, val) in bench_vec.iter() {
+//                 writeln!(bench_output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
+//                          key.address1, key.port1, key.address2, key.port2,
+//                          val.trans_protocol.to_string(), val.app_protocol.to_string(),
+//                          val.transmitted_packets, val.transmitted_bytes,
+//                          val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
+//             }
+//             bench_output.flush().unwrap();
+//         });
+//     }
+// }
 
 
 
