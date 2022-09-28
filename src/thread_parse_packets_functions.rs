@@ -310,7 +310,7 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                            key: AddressPortPair, exchanged_bytes: u128, transport_protocol: TransProtocol,
                            application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
-    let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+    let now = now_ugly.format("%Y/%m/%d %H:%M:%S").to_string();
     info_traffic_mutex.lock().expect("Error acquiring mutex\n\r").map.entry(key).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;

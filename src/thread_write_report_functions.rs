@@ -72,10 +72,8 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
     let path_graph = &*format!("{}/bandwidth.svg", output_folder);
 
-    let mut tot_intervals: u128 = 0;
     let time_origin = Local::now();
     let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
-
 
     let mut start;
     let mut _time_header = 0;
@@ -105,19 +103,19 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
         // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
 
-        tot_intervals += 1;
+        let tot_seconds = (Local::now() - time_origin).num_seconds();
 
-        let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause {
 
-        let tot_sent_packets = info_traffic.tot_sent_packets;
-        let tot_received_packets = info_traffic.tot_received_packets;
-        let all_packets = info_traffic.all_packets;
-        let tot_sent_bytes = info_traffic.tot_sent_bytes;
-        let tot_received_bytes = info_traffic.tot_received_bytes;
+            let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
-        start = Instant::now();
+            let tot_sent_packets = info_traffic.tot_sent_packets;
+            let tot_received_packets = info_traffic.tot_received_packets;
+            let all_packets = info_traffic.all_packets;
+            let tot_sent_bytes = info_traffic.tot_sent_bytes;
+            let tot_received_bytes = info_traffic.tot_received_bytes;
 
-        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // write textual report
+            start = Instant::now();
 
             let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
 
@@ -129,9 +127,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
             if !verbose {
-                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-                writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |  Packets   |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
-                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+                writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |     Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
             }
 
             _time_header = start.elapsed().as_millis();
@@ -145,7 +143,8 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
-                        writeln!(output, "|{:^25}|{:^10}|{:^25}|{:^10}|{:^9}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
+
+                        writeln!(output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |{:^9}|{:^9}|{:>10}  |{:>12}  |{:^21}|{:^21}|",
                                  key.address1, key.port1, key.address2, key.port2,
                                  val.trans_protocol.to_string(), val.app_protocol.to_string(),
                                  val.transmitted_packets, val.transmitted_bytes,
@@ -161,39 +160,36 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
             _time_header_sort_print = start.elapsed().as_millis();
 
-        }
 
-        drop(info_traffic);
+            drop(info_traffic);
 
-        // graphs
-        _start_drawing = Instant::now();
+            // graphs
+            _start_drawing = Instant::now();
 
-        // update bits traffic data
-        sent_bits_graph.push((interval as u128 * tot_intervals,(-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
-        if -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev < min_sent_bits_second {
-            min_sent_bits_second = -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev;
-        }
-        tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-        received_bits_graph.push((interval as u128 * tot_intervals, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
-        if tot_received_bytes as i128 * 8 - tot_received_bits_prev  > max_received_bits_second {
-            max_received_bits_second = tot_received_bytes as i128 * 8 - tot_received_bits_prev ;
-        }
-        tot_received_bits_prev = (tot_received_bytes * 8) as i128;
+            // update bits traffic data
+            sent_bits_graph.push((tot_seconds as u128, (-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
+            if -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev < min_sent_bits_second {
+                min_sent_bits_second = -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev;
+            }
+            tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
+            received_bits_graph.push((tot_seconds as u128, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
+            if tot_received_bytes as i128 * 8 - tot_received_bits_prev  > max_received_bits_second {
+                max_received_bits_second = tot_received_bytes as i128 * 8 - tot_received_bits_prev ;
+            }
+            tot_received_bits_prev = (tot_received_bytes * 8) as i128;
 
-        // update packets traffic data
-        sent_packets_graph.push((interval as u128 * tot_intervals, (-(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
-        if -(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
-            min_sent_packets_second = -(tot_sent_packets as i128) + tot_sent_packets_prev;
-        }
-        tot_sent_packets_prev = tot_sent_packets as i128;
-        received_packets_graph.push((interval as u128 * tot_intervals, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
-        if tot_received_packets as i128 - tot_received_packets_prev > max_received_packets_second {
-            max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
-        }
-        tot_received_packets_prev = tot_received_packets as i128;
+            // update packets traffic data
+            sent_packets_graph.push((tot_seconds as u128, (-(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
+            if -(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
+                min_sent_packets_second = -(tot_sent_packets as i128) + tot_sent_packets_prev;
+            }
+            tot_sent_packets_prev = tot_sent_packets as i128;
+            received_packets_graph.push((tot_seconds as u128, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
+            if tot_received_packets as i128 - tot_received_packets_prev > max_received_packets_second {
+                max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
+            }
+            tot_received_packets_prev = tot_received_packets as i128;
 
-
-        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause { // update graph file
 
             // declare drawing area
             let root_area = SVGBackend::new(path_graph, (1280, 720)).into_drawing_area();
@@ -213,7 +209,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                 .set_label_area_size(LabelAreaPosition::Left, 60)
                 .set_label_area_size(LabelAreaPosition::Bottom, 50)
                 .caption("Bit traffic per second", ("helvetica", 30))
-                .build_cartesian_2d(0..interval as u128 * tot_intervals, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
+                .build_cartesian_2d(0..tot_seconds as u128, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
                 .expect("Error drawing graph");
             chart_bits.configure_mesh()
                 .y_desc("bit/s")
@@ -255,7 +251,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                 .set_label_area_size(LabelAreaPosition::Left, 60)
                 .set_label_area_size(LabelAreaPosition::Bottom, 50)
                 .caption("Packet traffic per second", ("helvetica", 30))
-                .build_cartesian_2d(0..interval as u128*tot_intervals, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
+                .build_cartesian_2d(0..tot_seconds as u128, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
                 .expect("Error drawing graph");
             chart_packets.configure_mesh()
                 .y_desc("packet/s")
@@ -284,6 +280,12 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             // draw graphs on file
             root_area.present().expect("Error drawing graph");
 
+        }
+        else {
+            sent_bits_graph.push((tot_seconds as u128,0));
+            received_bits_graph.push((tot_seconds as u128,0));
+            sent_packets_graph.push((tot_seconds as u128,0));
+            received_packets_graph.push((tot_seconds as u128,0));
         }
 
 
@@ -383,7 +385,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 //         let mut bench_output = BufWriter::new(File::create("bench_concise.txt").expect("Error creating output file\n\r"));
 //         b.iter(|| {
 //             for (key, val) in bench_vec.iter() {
-//                 writeln!(bench_output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
+//                 writeln!(bench_output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |{:^9}|{:^9}|{:>10}  |{:>12}  |{:^21}|{:^21}|",
 //                          key.address1, key.port1, key.address2, key.port2,
 //                          val.trans_protocol.to_string(), val.app_protocol.to_string(),
 //                          val.transmitted_packets, val.transmitted_bytes,
