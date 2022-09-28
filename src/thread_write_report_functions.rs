@@ -129,9 +129,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
 
             if !verbose {
-                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-                writeln!(output, "|      Src IP address      | Src port |      Dst IP address      | Dst port | Layer 4 | Layer 7 |    Packets    |     Bytes     |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
-                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+                writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |  Packets   |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
             }
 
             _time_header = start.elapsed().as_millis();
@@ -145,7 +145,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             for (key, val) in sorted_vec.iter() {
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
-                        writeln!(output, "|{:^26}|{:^9}|{:^26}|{:^9}|{:^7}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
+                        writeln!(output, "|{:^25}|{:^10}|{:^25}|{:^10}|{:^9}|{:^9}|{:^12}|{:^12}|{:^21}|{:^21}|",
                                  key.address1, key.port1, key.address2, key.port2,
                                  val.trans_protocol.to_string(), val.app_protocol.to_string(),
                                  val.transmitted_packets, val.transmitted_bytes,
