@@ -26,16 +26,6 @@ impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
         let mut n = self.transmitted_bytes as f32;
-        let transport_level_protocol =
-            format!("{:?}", self.trans_protocol);
-        let application_level_protocol = match self.app_protocol {
-            AppProtocol::Other => {
-                "not identified".to_string()
-            }
-            _ => {
-                format!("{:?}", self.app_protocol)
-            }
-        };
 
         match self.transmitted_bytes {
             0..=999 => {},
@@ -63,7 +53,7 @@ impl fmt::Display for InfoAddressPortPair {
                     \t\tApplication layer protocol: {}\n\n",
                self.transmitted_packets.separate_with_underscores(), precision, n, multiple_transmitted,
                self.initial_timestamp, self.final_timestamp,
-               transport_level_protocol, application_level_protocol
+               self.trans_protocol, self.app_protocol
         )
     }
 }
@@ -79,6 +69,14 @@ pub enum TransProtocol {
     /// Not identified
     Other
 }
+
+
+impl fmt::Display for TransProtocol {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 
 /// Enum representing the possible observed values of application layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -134,4 +132,11 @@ pub enum AppProtocol {
     XMPP,
     /// not identified
     Other
+}
+
+
+impl fmt::Display for AppProtocol {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
