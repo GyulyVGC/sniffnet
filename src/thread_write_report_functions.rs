@@ -144,9 +144,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
 
-                        writeln!(output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |{:^9}|{:^9}|{:>10}  |{:>12}  |{:^21}|{:^21}|",
+                        writeln!(output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |{:^9}|{:>10}  |{:>12}  | {} | {} |",
                                  key.address1, key.port1, key.address2, key.port2,
-                                 val.trans_protocol.to_string(), val.app_protocol.to_string(),
+                                 val.trans_protocol, val.app_protocol.to_string(),
                                  val.transmitted_packets, val.transmitted_bytes,
                                  val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
                     }
@@ -280,27 +280,25 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
             // draw graphs on file
             root_area.present().expect("Error drawing graph");
 
-        }
-        else {
-            sent_bits_graph.push((tot_seconds as u128,0));
-            received_bits_graph.push((tot_seconds as u128,0));
-            sent_packets_graph.push((tot_seconds as u128,0));
-            received_packets_graph.push((tot_seconds as u128,0));
-        }
-
-
-        #[cfg(feature = "elapsed_time")]
-        {
-            println!("---------------------------------------------------------\r\n\
+            #[cfg(feature = "elapsed_time")]
+            {
+                println!("---------------------------------------------------------\r\n\
             \t\tTimings:\r\n\
             \t\t\tPrint header: {} ms\r\n\
             \t\t\tSort map: {} ms\r\n\
             \t\t\tPrint map: {} ms\r\n\
             \t\t\tTot time mutex held: {} ms\r\n\
             \t\t\tDraw graphical report: {} ms\r\n",
-                   _time_header, _time_header_sort-_time_header,
-                   _time_header_sort_print-_time_header_sort,
-                   _time_header_sort_print, _start_drawing.elapsed().as_millis());
+                         _time_header, _time_header_sort-_time_header,
+                         _time_header_sort_print-_time_header_sort,
+                         _time_header_sort_print, _start_drawing.elapsed().as_millis());
+            }
+        }
+        else {
+            sent_bits_graph.push((tot_seconds as u128,0));
+            received_bits_graph.push((tot_seconds as u128,0));
+            sent_packets_graph.push((tot_seconds as u128,0));
+            received_packets_graph.push((tot_seconds as u128,0));
         }
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Stop {
@@ -370,7 +368,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 //              TrafficType::Outgoing
 //             );
 //         let now_ugly: DateTime<Local> = Local::now();
-//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
+//         let now = now_ugly.format("%Y/%m/%d %H:%M:%S").to_string();
 //         let val = InfoAddressPortPair {
 //             transmitted_bytes: 5002222896,
 //             transmitted_packets: 89394742,
@@ -385,9 +383,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 //         let mut bench_output = BufWriter::new(File::create("bench_concise.txt").expect("Error creating output file\n\r"));
 //         b.iter(|| {
 //             for (key, val) in bench_vec.iter() {
-//                 writeln!(bench_output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |{:^9}|{:^9}|{:>10}  |{:>12}  |{:^21}|{:^21}|",
+//                 writeln!(bench_output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |{:^9}|{:>10}  |{:>12}  | {} | {} |",
 //                          key.address1, key.port1, key.address2, key.port2,
-//                          val.trans_protocol.to_string(), val.app_protocol.to_string(),
+//                          val.trans_protocol, val.app_protocol.to_string(),
 //                          val.transmitted_packets, val.transmitted_bytes,
 //                          val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
 //             }
