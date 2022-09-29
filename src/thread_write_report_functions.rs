@@ -6,17 +6,17 @@
 
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration};
 use std::{fs, thread};
 use chrono::{Local};
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Seek, SeekFrom, Write};
 use colored::Colorize;
 use thousands::Separable;
 use plotters::prelude::*;
-use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status};
+use crate::{AppProtocol, InfoTraffic, Status};
 
 use std::time::{Instant};
 use plotters::style::full_palette::{GREEN_800, GREY};
@@ -98,6 +98,13 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
     let mut max_received_packets_second: i128 = 0;
 
     let text_path = format!("{}/report.txt", output_folder.clone());
+    let header_path = format!("{}/statistics.txt", output_folder.clone());
+    let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
+    if !verbose {
+        writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+        writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |     Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+        writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+    }
 
     loop {
         // sleep interval seconds
@@ -107,7 +114,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause {
 
-            let info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+            let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
             let tot_sent_packets = info_traffic.tot_sent_packets;
             let tot_received_packets = info_traffic.tot_received_packets;
@@ -117,33 +124,26 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
             start = Instant::now();
 
-            let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
+            let mut output_header = BufWriter::new(File::create(header_path.clone()).expect("Error creating output file\n\r"));
 
-            write_report_file_header(output.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+            write_report_file_header(output_header.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      lowest_port, highest_port, min_packets,
                                      network_layer.clone(), transport_layer.clone(), app_layer,
                                      info_traffic.map.len(), all_packets,
                                      tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
-
-            if !verbose {
-                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-                writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |     Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
-                writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-            }
+            output_header.flush().expect("Error writing output file\n\r");
 
             _time_header = start.elapsed().as_millis();
 
-            let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic.map.iter().collect();
-            sorted_vec.sort_by(|&(_, a), &(_, b)|
-                b.transmitted_packets.cmp(&a.transmitted_packets));
 
-            _time_header_sort = start.elapsed().as_millis();
-
-            for (key, val) in sorted_vec.iter() {
+            for key in info_traffic.addresses_last_interval.iter() {
+                let val = info_traffic.map.get(key).unwrap();
                 if val.transmitted_packets >= min_packets {
                     if !verbose { // concise
-
+                        let index = info_traffic.map.get_index_of(key).unwrap();
+                        let seek_pos = 504 + 168*index as u64;
+                        output.seek(SeekFrom::Start(seek_pos)).unwrap();
                         writeln!(output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |{:^9}|{:>10}  |{:>12}  | {} | {} |",
                                  key.address1, key.port1, key.address2, key.port2,
                                  val.trans_protocol, val.app_protocol.to_string(),
@@ -155,6 +155,7 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                     }
                 }
             }
+            info_traffic.addresses_last_interval = HashSet::new(); // empty set
 
             output.flush().expect("Error writing output file\n\r");
 
@@ -285,11 +286,10 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
                 println!("---------------------------------------------------------\r\n\
             \t\tTimings:\r\n\
             \t\t\tPrint header: {} ms\r\n\
-            \t\t\tSort map: {} ms\r\n\
             \t\t\tPrint map: {} ms\r\n\
             \t\t\tTot time mutex held: {} ms\r\n\
             \t\t\tDraw graphical report: {} ms\r\n",
-                         _time_header, _time_header_sort-_time_header,
+                         _time_header,
                          _time_header_sort_print-_time_header_sort,
                          _time_header_sort_print, _start_drawing.elapsed().as_millis());
             }

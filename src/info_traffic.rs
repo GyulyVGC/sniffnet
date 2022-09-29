@@ -3,7 +3,8 @@
 
 
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use indexmap::IndexMap;
 use crate::address_port_pair::AddressPortPair;
 use crate::AppProtocol;
 use crate::info_address_port_pair::InfoAddressPortPair;
@@ -21,7 +22,9 @@ pub struct InfoTraffic {
     /// Total packets including those not filtered
     pub all_packets: u128,
     /// Map of the filtered traffic
-    pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
+    pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
+    /// Set with the addresses of the last time interval
+    pub addresses_last_interval: HashSet<AddressPortPair>,
     /// Map of the application layer protocols with their packet count
     pub app_protocols: HashMap<AppProtocol, u128>
 }
@@ -36,9 +39,10 @@ impl InfoTraffic {
             tot_sent_bytes: 0,
             tot_received_packets: 0,
             tot_sent_packets: 0,
-            map: HashMap::new(),
             all_packets: 0,
-            app_protocols: HashMap::new()
+            map: IndexMap::new(),
+            addresses_last_interval: HashSet::new(),
+            app_protocols: HashMap::new(),
         }
     }
 }

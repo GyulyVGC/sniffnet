@@ -135,7 +135,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                 traffic_type = TrafficType::Multicast;
                             }
 
-                            let key: AddressPortPair = AddressPortPair::new(address1.clone(), port1, address2.clone(), port2,
+                            let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
                                                                             transport_protocol, traffic_type);
 
                             if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
@@ -311,19 +311,20 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                            application_protocol: AppProtocol) {
     let now_ugly: DateTime<Local> = Local::now();
     let now = now_ugly.format("%Y/%m/%d %H:%M:%S").to_string();
-    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r").map.entry(key).and_modify(|info| {
+    let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+    info_traffic.map.entry(key.clone()).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
-        info.final_timestamp = now.clone();
-    })
+        info.final_timestamp = now.clone();})
         .or_insert(InfoAddressPortPair {
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: now.clone(),
-            final_timestamp: now.clone(),
+            final_timestamp: now,
             trans_protocol: transport_protocol,
             app_protocol: application_protocol
             });
+    info_traffic.addresses_last_interval.insert(key);
 }
 
 

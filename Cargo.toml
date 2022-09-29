@@ -20,6 +20,7 @@ crossterm = "0.13.3"
 colored = "2.0.0"
 thousands = "0.2.0"
 plotters = "0.3.4"
+indexmap = "1.9.1"
 
 
 #used for debug purposes to measure time needed to write output reports

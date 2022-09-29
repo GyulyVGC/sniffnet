@@ -80,6 +80,20 @@ impl fmt::Display for AddressPortPair {
 }
 
 
+impl Clone for AddressPortPair {
+    fn clone(&self) -> Self {
+        AddressPortPair {
+            address1: self.address1.clone(),
+            port1: self.port1,
+            address2: self.address2.clone(),
+            port2: self.port2,
+            trans_protocol: self.trans_protocol,
+            traffic_type: self.traffic_type
+        }
+    }
+}
+
+
 /// Enum representing the possible traffic type (incoming, outgoing or multicast).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TrafficType {
