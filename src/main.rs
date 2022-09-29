@@ -1,5 +1,3 @@
-// #![feature(test)]
-
 //! Multithreading application to intercept incoming and outgoing traffic through a user specified network interface of a computer.
 //!
 //! The application will periodically generate a human readable textual report,
@@ -57,11 +55,9 @@ fn main() {
     // parse arguments
     let args = Args::parse();
     let mut adapter: String = args.adapter;
-    let verbose: bool = args.verbose;
     let output_folder: String = args.output_folder;
     let lowest_port = args.lowest_port;
     let highest_port = args.highest_port;
-    let min_packets = args.minimum_packets;
     let interval: u64 = args.interval;
     let network_layer: String = args.network_layer_filter.to_ascii_lowercase();
     let network_layer_2: String = network_layer.clone();
@@ -144,7 +140,7 @@ fn main() {
 
     // Thread 1: updates textual report
     let thread_write_report = thread::spawn(move || {
-        sleep_and_write_report_loop(verbose,lowest_port, highest_port, interval, min_packets,
+        sleep_and_write_report_loop(lowest_port, highest_port, interval,
                                     device_name, network_layer,
                                     transport_layer, app_layer.unwrap(), output_folder,
                                     mutex_map2, status_pair3);

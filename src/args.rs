@@ -18,12 +18,6 @@ pub struct Args {
     #[clap(long="app", value_parser, default_value = "no filter")]
     pub application_layer_filter: String,
 
-    /// Prints textual report with a verbose format.
-    ///
-    /// This option does not need to be followed by a value.
-    #[clap(short, long)]
-    pub verbose: bool,
-
     /// Prints list of the available network interfaces.
     ///
     /// Immediately terminates the program.
@@ -53,12 +47,6 @@ pub struct Args {
     /// This option must be followed by an integer value between 0 and 65535.
     #[clap(short, long, value_parser, default_value_t = u16::MIN)]
     pub lowest_port: u16,
-
-    /// Sets the minimum value of transited packets for an address:port to be printed in the report.
-    ///
-    /// This option must be followed by a positive integer value.
-    #[clap(short, long, value_parser, default_value_t = 0)]
-    pub minimum_packets: u128,
 
     /// Filters packets on the basis of the IP version address (IPv4 or IPv6).
     ///

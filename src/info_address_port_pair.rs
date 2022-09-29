@@ -2,7 +2,6 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
-use thousands::Separable;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -29,32 +28,23 @@ impl fmt::Display for InfoAddressPortPair {
 
         match self.transmitted_bytes {
             0..=999 => {},
-            1000..=999999 => {n /= 1000_f32; multiple_transmitted.push('k'); },
-            1000000..=999999999 => {n /= 1000000_f32; multiple_transmitted.push('M');},
-            _ => {n /= 1000000000_f32; multiple_transmitted.push('G'); }
+            1_000..=999_999 => {n /= 1000_f32; multiple_transmitted.push('k'); }, // kilo
+            1_000_000..=999_999_999 => {n /= 1_000_000_f32; multiple_transmitted.push('M');}, // mega
+            1_000_000_000..=999_999_999_999 => {n /= 1_000_000_000_f32; multiple_transmitted.push('G');}, // giga
+            _ => {n /= 1_000_000_000_000_f32; multiple_transmitted.push('T');} // tera
         }
 
-        let set_precision = |prefix: &String, &n| {
-            if !prefix.is_empty() // no multiple
-            {
-                if n < 10.0 {2}
-                else if n < 100.0 {1}
-                else {0}
-            } else {0}
-        };
+        let bytes_string = if !multiple_transmitted.is_empty() { // with multiple
+                format!("{:.1} {}B", n, multiple_transmitted)
+            } else { // no multiple
+                format!("{}  B", n)
+            };
 
-        let precision: usize = set_precision(&multiple_transmitted, &n);
+        write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
+               self.trans_protocol, self.app_protocol.to_string(),
+               self.transmitted_packets, bytes_string,
+               self.initial_timestamp, self.final_timestamp)
 
-        write!(f, "\t\tExchanged packets: {}\n\
-                    \t\tExchanged Bytes: {:.*} {}B\n\
-                    \t\tInitial Timestamp: {}\n\
-                    \t\tFinal Timestamp: {}\n\
-                    \t\tTransport layer protocol: {}\n\
-                    \t\tApplication layer protocol: {}\n\n",
-               self.transmitted_packets.separate_with_underscores(), precision, n, multiple_transmitted,
-               self.initial_timestamp, self.final_timestamp,
-               self.trans_protocol, self.app_protocol
-        )
     }
 }
 

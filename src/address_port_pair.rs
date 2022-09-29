@@ -44,38 +44,8 @@ impl AddressPortPair {
 
 impl fmt::Display for AddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-
-        let addr_string_1 = if self.address1.contains(':') { // IPv6 address is enclosed in [brackets]
-            format!("|  [{}]:{}  |", self.address1, self.port1)
-        }
-        else {
-            format!("|  {}:{}  |", self.address1, self.port1)
-        };
-
-        let addr_string_2 = if self.address2.contains(':') { // IPv6 address is enclosed in [brackets]
-            format!("|  [{}]:{}  |", self.address2, self.port2)
-        }
-        else {
-            format!("|  {}:{}  |", self.address2, self.port2)
-        };
-
-        let addresses_string = format!("{}  --->  {}", addr_string_1, addr_string_2);
-
-        let spaces = " ".to_string().repeat(addr_string_1.len()-6);
-        let my_interface_string = match self.traffic_type {
-            TrafficType::Incoming => {format!("   Remote address{}Your interface", spaces)}
-            TrafficType::Outgoing => {format!("   Your interface{}Remote Address", spaces)}
-            TrafficType::Multicast => {format!("   Remote address{}Multicast address", spaces)}
-            TrafficType::Other => {format!("   Remote address{}Remote address", spaces)}
-        };
-
-        let cornice_up_string = format!(" /{}\\          /{}\\", "-".to_string().repeat(addr_string_1.len() - 4),
-                                                                "-".to_string().repeat(addr_string_2.len() - 4));
-
-        let cornice_down_string = format!(" \\{}/          \\{}/", "-".to_string().repeat(addr_string_1.len() - 4),
-                                        "-".to_string().repeat(addr_string_2.len() - 4));
-
-        write!(f,"{}\n{}\n{}\n{}", my_interface_string, cornice_up_string, addresses_string, cornice_down_string)
+        write!(f,"|{:^25}|{:>8}  |{:^25}|{:>8}  |",
+               self.address1, self.port1, self.address2, self.port2)
     }
 }
 

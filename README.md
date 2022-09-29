@@ -85,10 +85,6 @@ sets the interval of time between report updates (value in seconds).
 specifies the minimum port value to be considered; if omitted there is no ports lower bound.
  
 
- - **-m, --minimum-packets**:
-sets the minimum value of exchanged packets between an [address:port] pair to be printed in the textual report.
-
-
 - **-n, --net**:
 filters packets on the basis of the provided IP address version (IPv4 or IPv6).
  
@@ -99,9 +95,6 @@ specifies the name of the output folder to contain textual and graphical reports
 
 - **-t, --trans**:
 filters packets on the basis of the provided transport layer protocol (TCP or UDP).
-
-- **-v, --verbose**:
-generates a more self-explainable textual report.
 
           
 ## User interactions during application execution
@@ -282,10 +275,6 @@ if the provided interval value is not an integer in the range ```1..=u64::MAX```
 - **Invalid lowest port number**:
 if the provided lowest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
 If also the highest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
-
-
-- **Invalid minimum packets value**:
-if the provided minimum packets value is not an integer in the range ```0..=u128::MAX``` the program raises an error and terminates.
 
 
 - **Invalid network layer protocol filter**:

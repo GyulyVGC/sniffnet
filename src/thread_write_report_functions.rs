@@ -27,9 +27,6 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 ///
 /// # Arguments
 ///
-/// * `verbose` - Flag: if true textual report is verbose.
-/// Specified by the user through the ```-v``` option.
-///
 /// * `lowest_port` - The lowest port number to be considered in the report. Specified by the user
 /// through the ```-l``` option.
 ///
@@ -38,9 +35,6 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 ///
 /// * `interval` - Frequency of report updates (value in seconds). Specified by the user through the
 /// ```-i``` option.
-///
-/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
-/// Specified by the user through the ```-m``` option.
 ///
 /// * `device_name` - A String representing the name of th network adapter to be sniffed. Specified by the user through the
 /// ```-a``` option.
@@ -60,8 +54,8 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port: u16, interval: u64, min_packets: u128,
-                                   device_name: String, network_layer: String, transport_layer: String, app_layer: AppProtocol,
+pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, device_name: String,
+                                   network_layer: String, transport_layer: String, app_layer: AppProtocol,
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
@@ -100,11 +94,9 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
     let text_path = format!("{}/report.txt", output_folder.clone());
     let header_path = format!("{}/statistics.txt", output_folder.clone());
     let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
-    if !verbose {
-        writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-        writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |     Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
-        writeln!(output, "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-    }
+    writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+    writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+    writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
 
     loop {
         // sleep interval seconds
@@ -128,10 +120,11 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
             write_report_file_header(output_header.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
-                                     lowest_port, highest_port, min_packets,
-                                     network_layer.clone(), transport_layer.clone(), app_layer,
+                                     lowest_port, highest_port, network_layer.clone(),
+                                     transport_layer.clone(), app_layer,
                                      info_traffic.map.len(), all_packets,
-                                     tot_received_packets+tot_sent_packets, info_traffic.app_protocols.clone());
+                                     tot_received_packets+tot_sent_packets,
+                                     info_traffic.app_protocols.clone());
             output_header.flush().expect("Error writing output file\n\r");
 
             _time_header = start.elapsed().as_millis();
@@ -139,21 +132,10 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 
             for key in info_traffic.addresses_last_interval.iter() {
                 let val = info_traffic.map.get(key).unwrap();
-                if val.transmitted_packets >= min_packets {
-                    if !verbose { // concise
-                        let index = info_traffic.map.get_index_of(key).unwrap();
-                        let seek_pos = 504 + 168*index as u64;
-                        output.seek(SeekFrom::Start(seek_pos)).unwrap();
-                        writeln!(output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |{:^9}|{:>10}  |{:>12}  | {} | {} |",
-                                 key.address1, key.port1, key.address2, key.port2,
-                                 val.trans_protocol, val.app_protocol.to_string(),
-                                 val.transmitted_packets, val.transmitted_bytes,
-                                 val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
-                    }
-                    else { // verbose
-                        write!(output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r");
-                    }
-                }
+                let index = info_traffic.map.get_index_of(key).unwrap();
+                let seek_pos = 166*(3 + index as u64);
+                output.seek(SeekFrom::Start(seek_pos)).unwrap();
+                writeln!(output, "{}{}", key, val).expect("Error writing output file\n\r");
             }
             info_traffic.addresses_last_interval = HashSet::new(); // empty set
 
@@ -310,92 +292,6 @@ pub fn sleep_and_write_report_loop(verbose: bool, lowest_port: u16, highest_port
 }
 
 
-// #[cfg(test)]
-// mod print_report_entry_benchmark {
-//     extern crate test;
-//
-//     use std::fs::File;
-//     use std::io::BufWriter;
-//     use std::io::Write;
-//     use test::Bencher;
-//     use chrono::{DateTime, Local};
-//     use crate::address_port_pair::{AddressPortPair, TrafficType};
-//     use crate::info_address_port_pair::InfoAddressPortPair;
-//     use crate::{AppProtocol, TransProtocol};
-//
-//     #[bench]
-//     fn bench_print_verbose(b: &mut Bencher) {
-//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
-//         let key = AddressPortPair::new
-//             ("255.255.255.255".to_string(),
-//              443,
-//             "245.78.32.123".to_string(),
-//             40900,
-//             TransProtocol::TCP,
-//             TrafficType::Outgoing
-//             );
-//         let now_ugly: DateTime<Local> = Local::now();
-//         let now = now_ugly.format("%d/%m/%Y %H:%M:%S").to_string();
-//         let val = InfoAddressPortPair {
-//             transmitted_bytes: 5002222896,
-//             transmitted_packets: 89394742,
-//             initial_timestamp: now.clone(),
-//             final_timestamp: now.clone(),
-//             trans_protocol: TransProtocol::TCP,
-//             app_protocol: AppProtocol::HTTPS
-//         };
-//         for _ in 0..3500 {
-//             bench_vec.push((&key, &val));
-//         }
-//         let mut bench_output = BufWriter::new(File::create("bench_verbose.txt").expect("Error creating output file\n\r"));
-//         b.iter(|| {
-//             for (key, val) in bench_vec.iter() {
-//                 write!(bench_output, "{}\n{}\n\n", key, val).expect("Error writing output file\n\r")
-//             }
-//             bench_output.flush().unwrap();
-//         });
-//     }
-//
-//     #[bench]
-//     fn bench_print_concise(b: &mut Bencher) {
-//         let mut bench_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = vec![];
-//         let key = AddressPortPair::new
-//             ("255.255.255.255".to_string(),
-//              443,
-//              "245.78.32.123".to_string(),
-//              40900,
-//              TransProtocol::TCP,
-//              TrafficType::Outgoing
-//             );
-//         let now_ugly: DateTime<Local> = Local::now();
-//         let now = now_ugly.format("%Y/%m/%d %H:%M:%S").to_string();
-//         let val = InfoAddressPortPair {
-//             transmitted_bytes: 5002222896,
-//             transmitted_packets: 89394742,
-//             initial_timestamp: now.clone(),
-//             final_timestamp: now.clone(),
-//             trans_protocol: TransProtocol::TCP,
-//             app_protocol: AppProtocol::HTTPS
-//         };
-//         for _ in 0..3500 {
-//             bench_vec.push((&key, &val));
-//         }
-//         let mut bench_output = BufWriter::new(File::create("bench_concise.txt").expect("Error creating output file\n\r"));
-//         b.iter(|| {
-//             for (key, val) in bench_vec.iter() {
-//                 writeln!(bench_output, "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |{:^9}|{:>10}  |{:>12}  | {} | {} |",
-//                          key.address1, key.port1, key.address2, key.port2,
-//                          val.trans_protocol, val.app_protocol.to_string(),
-//                          val.transmitted_packets, val.transmitted_bytes,
-//                          val.initial_timestamp, val.final_timestamp).expect("Error writing output file\n\r");
-//             }
-//             bench_output.flush().unwrap();
-//         });
-//     }
-// }
-
-
-
 /// Given the lowest and highest port numbers, the function generates the corresponding String
 /// to be used in the output report file header.
 ///
@@ -416,18 +312,6 @@ fn get_ports_string(lowest_port: u16, highest_port: u16) -> String {
     else {
         format!("<><>\t\t\t[ ] Considering all port numbers (from {} to {})\n", lowest_port, highest_port)
     }
-}
-
-
-/// Given the minimum packets number, the function generates the corresponding String
-/// to be used in the output report file header.
-///
-/// # Arguments
-///
-/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
-/// Specified by the user through the ```-m``` option.
-fn get_min_packets_string(min_packets: u128) -> String {
-    format!("<><>\t\tShowing only [address:port] pairs featured by more than {} packets\n", min_packets)
 }
 
 
@@ -604,9 +488,6 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// * `highest_port` - The highest port number to be considered in the report. Specified by the user
 /// through the ```-h``` option.
 ///
-/// * `min_packets` - Minimum number of packets for an address:port pair to be considered in the report.
-/// Specified by the user through the ```-m``` option.
-///
 /// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
 /// ```-n``` option.
 ///
@@ -644,7 +525,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// ```
 fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
                             lowest_port: u16, highest_port: u16,
-                            min_packets: u128, network_layer: String, transport_layer: String, app_layer: AppProtocol,
+                            network_layer: String, transport_layer: String, app_layer: AppProtocol,
                             num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128,
                             app_count: HashMap<AppProtocol, u128>) {
 
@@ -683,10 +564,6 @@ fn write_report_file_header(mut output: File, device_name: String, first_timesta
         writeln!(output, "{}<><>", app_count_string).expect("Error writing output file\n");
     }
 
-    if min_packets > 1 {
-        let min_packets_string = get_min_packets_string(min_packets);
-        writeln!(output, "{}<><>", min_packets_string).expect("Error writing output file\n");
-    }
     write!(output,"{}", cornice_string).expect("Error writing output file\n");
     write!(output,"{}\n\n\n", cornice_string).expect("Error writing output file\n");
 }

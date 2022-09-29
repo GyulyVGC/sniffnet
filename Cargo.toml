@@ -24,6 +24,6 @@ indexmap = "1.9.1"
 
 
 #used for debug purposes to measure time needed to write output reports
-#[features]
-#default = ["elapsed_time"]
-#elapsed_time = []
+[features]
+default = ["elapsed_time"]
+elapsed_time = []
