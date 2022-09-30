@@ -322,8 +322,9 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
             initial_timestamp: now.clone(),
             final_timestamp: now,
             trans_protocol: transport_protocol,
-            app_protocol: application_protocol
-            });
+            app_protocol: application_protocol,
+            very_long_address: key.address1.len() > 25 || key.address2.len() > 25
+        });
     info_traffic.addresses_last_interval.insert(key);
 }
 

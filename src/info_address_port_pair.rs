@@ -19,6 +19,8 @@ pub struct InfoAddressPortPair {
     pub trans_protocol: TransProtocol,
     /// Set of application layer protocols carried through the associate address:port pair.
     pub app_protocol: AppProtocol,
+    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
+    pub very_long_address: bool
 }
 
 impl fmt::Display for InfoAddressPortPair {
@@ -40,10 +42,18 @@ impl fmt::Display for InfoAddressPortPair {
                 format!("{}  B", n)
             };
 
-        write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
-               self.trans_protocol, self.app_protocol.to_string(),
-               self.transmitted_packets, bytes_string,
-               self.initial_timestamp, self.final_timestamp)
+        if self.very_long_address {
+            write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
+                   self.trans_protocol, self.app_protocol.to_string(),
+                   self.transmitted_packets, bytes_string,
+                   self.initial_timestamp, self.final_timestamp)
+        }
+        else {
+            write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
+                   self.trans_protocol, self.app_protocol.to_string(),
+                   self.transmitted_packets, bytes_string,
+                   self.initial_timestamp, self.final_timestamp, " ".repeat(40))
+        }
 
     }
 }

@@ -118,7 +118,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             let mut output_header = BufWriter::new(File::create(header_path.clone()).expect("Error creating output file\n\r"));
 
-            write_report_file_header(output_header.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+            write_statistics(output_header.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      lowest_port, highest_port, network_layer.clone(),
                                      transport_layer.clone(), app_layer,
@@ -130,10 +130,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             _time_header = start.elapsed().as_millis();
 
 
+            let _num_written_tuples_interval = info_traffic.addresses_last_interval.len();
+
             for key in info_traffic.addresses_last_interval.iter() {
                 let val = info_traffic.map.get(key).unwrap();
                 let index = info_traffic.map.get_index_of(key).unwrap();
-                let seek_pos = 166*(3 + index as u64);
+                let seek_pos = 166*3 + 206*index as u64;
                 output.seek(SeekFrom::Start(seek_pos)).unwrap();
                 writeln!(output, "{}{}", key, val).expect("Error writing output file\n\r");
             }
@@ -266,12 +268,12 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             #[cfg(feature = "elapsed_time")]
             {
                 println!("---------------------------------------------------------\r\n\
-            \t\tTimings:\r\n\
+            \t\tTimings (written tuples = {})\r\n\
             \t\t\tPrint header: {} ms\r\n\
             \t\t\tPrint map: {} ms\r\n\
             \t\t\tTot time mutex held: {} ms\r\n\
             \t\t\tDraw graphical report: {} ms\r\n",
-                         _time_header,
+                         _num_written_tuples_interval, _time_header,
                          _time_header_sort_print-_time_header_sort,
                          _time_header_sort_print, _start_drawing.elapsed().as_millis());
             }
@@ -304,13 +306,13 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 /// through the ```-h``` option.
 fn get_ports_string(lowest_port: u16, highest_port: u16) -> String {
     if lowest_port == highest_port {
-        format!("<><>\t\t\t[x] Considering only port number {}\n", lowest_port)
+        format!("\t[x] Considering only port number {}\n", lowest_port)
     }
     else if lowest_port != u16::MIN || highest_port != u16::MAX {
-        format!("<><>\t\t\t[x] Considering only port numbers from {} to {}\n", lowest_port, highest_port)
+        format!("\t[x] Considering only port numbers from {} to {}\n", lowest_port, highest_port)
     }
     else {
-        format!("<><>\t\t\t[ ] Considering all port numbers (from {} to {})\n", lowest_port, highest_port)
+        format!("\t[ ] Considering all port numbers (from {} to {})\n", lowest_port, highest_port)
     }
 }
 
@@ -324,13 +326,13 @@ fn get_ports_string(lowest_port: u16, highest_port: u16) -> String {
 /// ```-n``` option.
 fn get_network_layer_string (network_layer: String) -> String {
     if network_layer.cmp(&"ipv4".to_string()) == Equal {
-        "<><>\t\t\t[x] Considering only IPv4 packets\n".to_string()
+        "\t[x] Considering only IPv4 packets\n".to_string()
     }
     else if network_layer.cmp(&"ipv6".to_string()) == Equal {
-        "<><>\t\t\t[x] Considering only IPv6 packets\n".to_string()
+        "\t[x] Considering only IPv6 packets\n".to_string()
     }
     else {
-        "<><>\t\t\t[ ] Considering both IPv4 and IPv6 packets\n".to_string()
+        "\t[ ] Considering both IPv4 and IPv6 packets\n".to_string()
     }
 }
 
@@ -344,13 +346,13 @@ fn get_network_layer_string (network_layer: String) -> String {
 /// ```-t``` option.
 fn get_transport_layer_string(transport_layer: String) -> String {
     if transport_layer.cmp(&"tcp".to_string()) == Equal {
-        "<><>\t\t\t[x] Considering only packets exchanged with TCP\n".to_string()
+        "\t[x] Considering only packets exchanged with TCP\n".to_string()
     }
     else if transport_layer.cmp(&"udp".to_string()) == Equal {
-        "<><>\t\t\t[x] Considering only packets exchanged with UDP\n".to_string()
+        "\t[x] Considering only packets exchanged with UDP\n".to_string()
     }
     else {
-        "<><>\t\t\t[ ] Considering packets exchanged both with TCP and/or UDP\n".to_string()
+        "\t[ ] Considering packets exchanged both with TCP and/or UDP\n".to_string()
     }
 }
 
@@ -364,10 +366,10 @@ fn get_transport_layer_string(transport_layer: String) -> String {
 /// ```--app``` option.
 fn get_app_layer_string(app_layer: AppProtocol) -> String {
     if app_layer.eq(&AppProtocol::Other) {
-        "<><>\t\t\t[ ] Considering all application layer protocols\n".to_string()
+        "\t[ ] Considering all application layer protocols\n".to_string()
     }
     else {
-        format!("<><>\t\t\t[x] Considering only {:?} packets\n", app_layer)
+        format!("\t[x] Considering only {:?} packets\n", app_layer)
     }
 }
 
@@ -389,11 +391,11 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
             else {
                 format!("({:.2}%)", 100.0*filtered as f32/sniffed as f32)
             };
-        format!("<><>\t\t\tConsidered packets: {} {}\n",
+        format!("\tConsidered packets: {} {}\n",
                 filtered.separate_with_underscores(), percentage_string)
     }
     else {
-        format!("<><>\t\t\tConsidered packets: {}\n",
+        format!("\tConsidered packets: {}\n",
                 filtered.separate_with_underscores())
     }
 }
@@ -457,7 +459,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
         let spaces_string_2 = " ".to_string()
             .repeat(11-percentage_string.len());
 
-        ret_val.push_str(&format!("<><>\t\t\t-{}:{}{}{}{}\n",
+        ret_val.push_str(&format!("\t-{}:{}{}{}{}\n",
                                   app_proto_string,
                                   spaces_string_1,
                                   num_string,
@@ -500,70 +502,43 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// * `num_pairs` - Total numbers of address:port pairs considered in the report.
 ///
 /// * `num_sniffed_packets` - Total numbers of sniffed packets.
-/// # Examples
-/// An example of output report file header generated by this function is reported below.
-///
-/// ```<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-/// <><>
-/// <><>        Packets are sniffed from adapter 'en0'
-/// <><>
-/// <><>        Report updates info
-/// <><>            Report start time: 15/08/2022 15:39:07
-/// <><>            Report last update: 15/08/2022 15:39:52
-/// <><>            Report update frequency: every 5 seconds
-/// <><>            Number of times report was updated: 9
-/// <><>
-/// <><>        Filters
-/// <><>            Considering only address:port pairs featured by more than 500 packets
-/// <><>            Considering both IPv4 and IPv6 packets
-/// <><>            Considering only packets exchanged with TCP
-/// <><>            Considering only port number 443
-/// <><>
-/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-/// <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 /// ```
-fn write_report_file_header(mut output: File, device_name: String, first_timestamp: String,
+fn write_statistics(mut output: File, device_name: String, first_timestamp: String,
                             lowest_port: u16, highest_port: u16,
                             network_layer: String, transport_layer: String, app_layer: AppProtocol,
                             num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128,
                             app_count: HashMap<AppProtocol, u128>) {
 
-    let cornice_string = "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>\n".to_string();
-    let adapter_string = format!("<><>\t\tPackets are sniffed from adapter '{}'\n", device_name);
-    let first_timestamp_string = format!("<><>\t\t\tReport start time: {}\n", first_timestamp);
-    let last_timestamp_string = format!("<><>\t\t\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S"));
+    let adapter_string = format!("Packets are sniffed from adapter '{}'\n", device_name);
+    let first_timestamp_string = format!("\tReport start time: {}\n", first_timestamp);
+    let last_timestamp_string = format!("\tReport last update: {}\n", Local::now().format("%d/%m/%Y %H:%M:%S"));
     let ports_string = get_ports_string(lowest_port,highest_port);
     let network_layer_string = get_network_layer_string(network_layer);
     let transport_layer_string = get_transport_layer_string(transport_layer);
     let app_layer_string = get_app_layer_string(app_layer);
     let filtered_packets_string = get_filtered_packets_string(num_sniffed_packets, num_filtered_packets);
 
-    write!(output, "{}", cornice_string).expect("Error writing output file\n");
-    writeln!(output, "{}<><>", cornice_string).expect("Error writing output file\n");
-    writeln!(output, "{}<><>", adapter_string).expect("Error writing output file\n");
+    writeln!(output, "{}", adapter_string).expect("Error writing output file\n");
 
-    writeln!(output, "<><>\t\tReport updates info").expect("Error writing output file\n");
+    writeln!(output, "Report updates info").expect("Error writing output file\n");
     write!(output, "{}", first_timestamp_string).expect("Error writing output file\n");
-    writeln!(output, "{}<><>", last_timestamp_string).expect("Error writing output file\n");
+    writeln!(output, "{}", last_timestamp_string).expect("Error writing output file\n");
 
-    writeln!(output, "<><>\t\tFilters").expect("Error writing output file\n");
+    writeln!(output, "Filters").expect("Error writing output file\n");
     write!(output, "{}", network_layer_string).expect("Error writing output file\n");
     write!(output, "{}", transport_layer_string).expect("Error writing output file\n");
     write!(output, "{}", ports_string).expect("Error writing output file\n");
-    writeln!(output, "{}<><>", app_layer_string).expect("Error writing output file\n");
+    writeln!(output, "{}", app_layer_string).expect("Error writing output file\n");
 
-    writeln!(output, "<><>\t\tOverall statistics").expect("Error writing output file\n");
-    writeln!(output, "<><>\t\t\tConsidered [address:port] pairs: {}", num_pairs.separate_with_underscores()).expect("Error writing output file\n");
-    writeln!(output, "<><>\t\t\tTotal packets: {}", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
-    writeln!(output, "{}<><>", filtered_packets_string).expect("Error writing output file\n");
+    writeln!(output, "Overall statistics").expect("Error writing output file\n");
+    writeln!(output, "\tConsidered [address:port] pairs: {}", num_pairs.separate_with_underscores()).expect("Error writing output file\n");
+    writeln!(output, "\tTotal packets: {}", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
+    writeln!(output, "{}", filtered_packets_string).expect("Error writing output file\n");
 
     if num_sniffed_packets > 0 {
         let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
-        writeln!(output, "<><>\t\tTotal packets divided by app layer protocol").expect("Error writing output file\n");
-        writeln!(output, "{}<><>", app_count_string).expect("Error writing output file\n");
+        writeln!(output, "Total packets divided by app layer protocol").expect("Error writing output file\n");
+        writeln!(output, "{}", app_count_string).expect("Error writing output file\n");
     }
 
-    write!(output,"{}", cornice_string).expect("Error writing output file\n");
-    write!(output,"{}\n\n\n", cornice_string).expect("Error writing output file\n");
 }

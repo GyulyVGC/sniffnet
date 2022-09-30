@@ -44,8 +44,14 @@ impl AddressPortPair {
 
 impl fmt::Display for AddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"|{:^25}|{:>8}  |{:^25}|{:>8}  |",
-               self.address1, self.port1, self.address2, self.port2)
+        if self.address1.len() > 25 || self.address2.len() > 25 {
+            write!(f,"|{:^45}|{:>8}  |{:^45}|{:>8}  |",
+                   self.address1, self.port1, self.address2, self.port2)
+        }
+        else {
+            write!(f,"|{:^25}|{:>8}  |{:^25}|{:>8}  |",
+                   self.address1, self.port1, self.address2, self.port2)
+        }
     }
 }
 
