@@ -42,8 +42,6 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 - [Error conditions](#error-conditions)
   + Wrong command line options specification
   + Pcap permission denied error
-  + Windows configuration problems
-  + Linux configuration problems
   + Textual report contains just the header
   
 - [Contribute](#contribute)
@@ -57,6 +55,35 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 The application binary can be installed with ```cargo install sniffnet```
 
 The application can then be run using ```sniffnet [OPTIONS]```
+
+<details>
+
+  <summary>Build on Windows</summary>
+    
+  In order to build and run Sniffnet on Windows systems you need to:
+
+  - Install [Npcap](https://npcap.com/#download).
+
+  - Download the [Npcap SDK](https://npcap.com/#download).
+
+  - Add the SDK's ```/Lib``` or ```/Lib/x64``` folder to your ```LIB``` environment variable.
+    
+</details>
+
+
+<details>
+
+  <summary>Build on Linux</summary>
+    
+  In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library. For example:
+
+  - On Debian based Linux: ```install libpcap-dev```.
+
+  - On Fedora Linux: ```install libpcap-devel```.
+
+  - Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
+    
+</details>
 
 
 ## Command line options
@@ -307,27 +334,6 @@ Where ```username``` can be retrieved with the command ```whoami```
 Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
 
 In both cases you will be requested to insert your system password.
-
-
-### Windows configuration problems
-
-In order to build and run Sniffnet you need to:
-
-- Install [Npcap](https://npcap.com/#download).
-
-- Download the [Npcap SDK](https://npcap.com/#download).
-
-- Add the SDK's ```/Lib``` or ```/Lib/x64``` folder to your ```LIB``` environment variable.
-
-### Linux configuration problems
-
-In order to build and run Sniffnet, install the libraries and header files for the libpcap library. For example:
-
-On Debian based Linux: ```install libpcap-dev```.
-
-On Fedora Linux: ```install libpcap-devel```.
-
-Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
 
 
 ### Textual report contains just the header
