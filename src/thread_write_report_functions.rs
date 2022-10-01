@@ -65,6 +65,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     }
 
     let path_graph = &*format!("{}/bandwidth.svg", output_folder);
+    let path_report = format!("{}/report.txt", output_folder.clone());
+    let path_statistics = format!("{}/statistics.txt", output_folder.clone());
 
     let time_origin = Local::now();
     let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
@@ -91,9 +93,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     let mut tot_received_packets_prev: i128 = 0;
     let mut max_received_packets_second: i128 = 0;
 
-    let text_path = format!("{}/report.txt", output_folder.clone());
-    let header_path = format!("{}/statistics.txt", output_folder.clone());
-    let mut output = BufWriter::new(File::create(text_path.clone()).expect("Error creating output file\n\r"));
+    let mut output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
     writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
@@ -116,16 +116,16 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
             start = Instant::now();
 
-            let mut output_header = BufWriter::new(File::create(header_path.clone()).expect("Error creating output file\n\r"));
+            let mut output2 = BufWriter::new(File::create(path_statistics.clone()).expect("Error creating output file\n\r"));
 
-            write_statistics(output_header.get_mut().try_clone().expect("Error cloning file handler\n\r"),
+            write_statistics(output2.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device_name.clone(), first_timestamp.clone(),
                                      lowest_port, highest_port, network_layer.clone(),
                                      transport_layer.clone(), app_layer,
                                      info_traffic.map.len(), all_packets,
                                      tot_received_packets+tot_sent_packets,
                                      info_traffic.app_protocols.clone());
-            output_header.flush().expect("Error writing output file\n\r");
+            output2.flush().expect("Error writing output file\n\r");
 
             _time_header = start.elapsed().as_millis();
 
