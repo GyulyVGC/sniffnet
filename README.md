@@ -33,7 +33,7 @@ Sniffnet generates a graphical representation of the filtered traffic's intensit
 
 - [Graphical report](#graphical-report)
 
-- [Textual report](#textual-report)
+- [Textual reports](#textual-reports)
 
 - [Supported application layer protocols](#supported-application-layer-protocols)
   
@@ -166,21 +166,21 @@ in case of intermittent traffic, you can consider using a lower time interval.
 
 </details>
 
-## Textual report
+## Textual reports
 
 <details>
 
   <summary>See details</summary>
   
-### Report header
+### statistics.txt
 
-The first section of the textual report contains a header summarizing different useful information.
+This file contains informations and statistics about the sniffing process.
 
 ![report_part_1](https://user-images.githubusercontent.com/100347457/187227230-b7984a13-d9df-4852-9b8d-e295cd7cfa35.png)
 
-First, it specifies the name of the network adapter analyzed during the sniffing process.
+First, it specifies the name of the network adapter analyzed.
 
-Then there is a detail about the initial timestamp of the sniffing process, the last timestamp in which the report was updated, and the number of times the report was updated (re-written from scratch with updated data).
+Then there is a detail about the initial timestamp of the sniffing process and the last timestamp in which the report was updated.
 
 It also describes the status of the possible filters applicable by the user through the command line: IP address version, transport layer protocol, port minimum and maximum number, and application layer protocol.
 
@@ -189,28 +189,15 @@ of sniffed packets, the number (and percentage) of packets selected according to
 observed application layer protocols with the respective packets count.
 
 
-### Report addresses list
+### report.txt
 
+This file contains a detailed analysis of the packets stream for each [address:port] pair.
 
-The second section of the textual report is dedicated to the packets stream analysis for each [address:port] pair.
-
-This analysis results in a list in which each element represents an [address:port] pair with the relative statistics.
-
-Note that such list of elements is sorted in descending order of exchanged packets.
-
-
-Default representation:
+This analysis results in a table in which each row represents an [address:port] pair with the relative statistics.
 
 ![Screenshot 2022-09-27 at 19 03 16](https://user-images.githubusercontent.com/100347457/192590512-efd3e7ba-cf8f-4cee-a169-e6ede9657f0d.png)
 
-Verbose representation:
-
-![report_part_2](https://user-images.githubusercontent.com/100347457/188622122-1dab5e41-f877-4442-b242-30d16601ede6.png)
-
-The last textual representation can be activated launching the application with the `-v` option.
-
-In both cases, for each element it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source
-(on the left) and the destination (on the right).
+For each [address:port] pair it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source and the destination.
 
 For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
 
