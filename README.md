@@ -1,4 +1,4 @@
-<img alt="sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
+<img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
 
 [![Build](https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg)](https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml)
 [![Code Grade](https://api.codiga.io/project/34559/score/svg)](https://www.codiga.io/code-analysis/)
@@ -86,6 +86,15 @@ The application can then be run using ```sniffnet [OPTIONS]```
 </details>
 
 
+<details>
+
+  <summary>Build on MacOS</summary>
+    
+  MacOS natively has all the dependencies you need to build and run Sniffnet!
+    
+</details>
+
+
 ## Command line options
 
  - **-a, --adapter**: 
@@ -142,7 +151,7 @@ The user can interact with the sniffing process through the terminal window.
 
   <summary>See details</summary>
 
-The graphical report consists of a svg file, constantly updated while sniffnet is running.
+The graphical report consists of a svg file, constantly updated while Sniffnet is running.
 It is suggested to open this file with a web browser, in order to be able to comfortably refresh it.
 
 It reports the amount of sent (outgoing) and received (incoming) bits and packets per second.
@@ -343,7 +352,7 @@ option to see the full list of your network adapters' names and addresses).
 To inspect a network adapter of your choice, remember to specify the ```-a``` option followed by the name of the adapter to be analyzed. 
 If you don't include such option a default adapter is chosen by the application, but it may not be the one you expected to sniff.
 
-Note that to see report updates while sniffnet is running you may have to close and re-open the report file.
+Note that to see report updates while Sniffnet is running you may have to close and re-open the report file.
 
 If you are still not able to see any packet statistic, then it probably means that you are just not receiving packets from the network: 
 surf the web to receive some packets. 
