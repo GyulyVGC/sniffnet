@@ -3,7 +3,7 @@
 
 use std::cmp::Ordering::Equal;
 use std::sync::{Arc, Condvar, Mutex};
-use chrono::{DateTime, Local};
+use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
 use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
@@ -26,7 +26,7 @@ use crate::address_port_pair::TrafficType;
 /// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
 /// ```-n``` option.
 ///
-/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// * `transport_layer` - A TransProtocl representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
@@ -36,7 +36,7 @@ use crate::address_port_pair::TrafficType;
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
-                          network_layer_filter: String, transport_layer_filter: String, app_layer: AppProtocol,
+                          network_layer_filter: String, transport_layer: TransProtocol, app_layer: AppProtocol,
                           info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
@@ -55,6 +55,16 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
     for address in device.clone().addresses {
         my_interface_addresses.push(address.addr.to_string());
     }
+
+    let mut network_layer = "".to_string();
+    let mut port1 = 0;
+    let mut port2 = 0;
+    let mut exchanged_bytes: u128 = 0;
+    let mut transport_protocol;
+    let mut application_protocol;
+    let mut traffic_type;
+    let mut skip_packet;
+    let mut reported_packet;
 
     loop {
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
@@ -76,8 +86,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                 has_been_paused = false;
             }
             match cap.next_packet() {
-                Err(/*e*/_) => {
-                    //println!("ERROR: {:?}", e); // Debug
+                Err(_) => {
                     continue;
                 }
                 Ok(packet) => {
@@ -88,15 +97,11 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                         Ok(value) => {
                             let mut address1 = "".to_string();
                             let mut address2 = "".to_string();
-                            let mut network_layer = "".to_string();
-                            let mut port1 = 0;
-                            let mut port2 = 0;
-                            let mut transport_layer = "".to_string();
-                            let mut exchanged_bytes: u128 = 0;
-                            let mut transport_protocol = TransProtocol::Other;
-                            let mut application_protocol = AppProtocol::Other;
-                            let mut skip_packet = false;
-                            let mut reported_packet = false;
+                            transport_protocol = TransProtocol::Other;
+                            application_protocol = AppProtocol::Other;
+                            traffic_type = TrafficType::Other;
+                            skip_packet = false;
+                            reported_packet = false;
 
                             analyze_network_header(value.ip, &mut exchanged_bytes,
                                                    &mut network_layer, &mut address1, &mut address2,
@@ -106,7 +111,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                             }
 
                             analyze_transport_header(value.transport,
-                                                     &mut transport_layer, &mut port1, &mut port2,
+                                                     &mut port1, &mut port2,
                                                      &mut application_protocol,
                                                      &mut transport_protocol, &mut skip_packet);
                             if skip_packet {
@@ -124,7 +129,6 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
                             drop(info_traffic);
 
-                            let mut traffic_type: TrafficType = TrafficType::Other;
                             if my_interface_addresses.contains(&address1) {
                                 traffic_type = TrafficType::Outgoing;
                             }
@@ -139,7 +143,7 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
                                                                             transport_protocol, traffic_type);
 
                             if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
-                                && (transport_layer_filter.cmp(&transport_layer) == Equal || transport_layer_filter.cmp(&"no filter".to_string()) == Equal)
+                                && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
                                     && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
 
                                         if (port1 >= lowest_port && port1 <= highest_port)
@@ -262,12 +266,11 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
 /// and will be overwritten to `true` if the `transport_header` is invalid; in this case the
 /// packet will not be considered.
 fn analyze_transport_header(transport_header: Option<TransportHeader>,
-                            transport_layer: &mut String, port1: &mut u16, port2: &mut u16,
+                            port1: &mut u16, port2: &mut u16,
                             application_protocol: &mut AppProtocol,
                             transport_protocol: &mut TransProtocol, skip_packet: &mut bool) {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
-            *transport_layer = "udp".to_string();
             *port1 = udp_header.source_port;
             *port2 = udp_header.destination_port;
             *transport_protocol = TransProtocol::UDP;
@@ -277,7 +280,6 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
             }
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
-            *transport_layer = "tcp".to_string();
             *port1 = tcp_header.source_port;
             *port2 = tcp_header.destination_port;
             *transport_protocol = TransProtocol::TCP;
@@ -309,8 +311,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                            key: AddressPortPair, exchanged_bytes: u128, transport_protocol: TransProtocol,
                            application_protocol: AppProtocol) {
-    let now_ugly: DateTime<Local> = Local::now();
-    let now = now_ugly.format("%Y/%m/%d %H:%M:%S").to_string();
+    let now = Local::now().format("%Y/%m/%d %H:%M:%S").to_string();
     let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
     info_traffic.map.entry(key.clone()).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;

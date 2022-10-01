@@ -16,7 +16,7 @@ use std::io::{BufWriter, Seek, SeekFrom, Write};
 use colored::Colorize;
 use thousands::Separable;
 use plotters::prelude::*;
-use crate::{AppProtocol, InfoTraffic, Status};
+use crate::{AppProtocol, InfoTraffic, Status, TransProtocol};
 
 use std::time::{Instant};
 use plotters::style::full_palette::{GREEN_800, GREY};
@@ -42,7 +42,7 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 /// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
 /// ```-n``` option.
 ///
-/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// * `transport_layer` - A TransProtocol representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
@@ -55,7 +55,7 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64, device_name: String,
-                                   network_layer: String, transport_layer: String, app_layer: AppProtocol,
+                                   network_layer: String, transport_layer: TransProtocol, app_layer: AppProtocol,
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
@@ -342,13 +342,13 @@ fn get_network_layer_string (network_layer: String) -> String {
 ///
 /// # Arguments
 ///
-/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// * `transport_layer` - A TransProtocol representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
-fn get_transport_layer_string(transport_layer: String) -> String {
-    if transport_layer.cmp(&"tcp".to_string()) == Equal {
+fn get_transport_layer_string(transport_layer: TransProtocol) -> String {
+    if transport_layer.eq(&TransProtocol::TCP) {
         "\t[x] Considering only packets exchanged with TCP\n".to_string()
     }
-    else if transport_layer.cmp(&"udp".to_string()) == Equal {
+    else if transport_layer.eq(&TransProtocol::UDP) {
         "\t[x] Considering only packets exchanged with UDP\n".to_string()
     }
     else {
@@ -493,7 +493,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
 /// ```-n``` option.
 ///
-/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
+/// * `transport_layer` - A TransProtocol representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
@@ -505,7 +505,7 @@ fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128
 /// ```
 fn write_statistics(mut output: File, device_name: String, first_timestamp: String,
                             lowest_port: u16, highest_port: u16,
-                            network_layer: String, transport_layer: String, app_layer: AppProtocol,
+                            network_layer: String, transport_layer: TransProtocol, app_layer: AppProtocol,
                             num_pairs: usize, num_sniffed_packets: u128, num_filtered_packets: u128,
                             app_count: HashMap<AppProtocol, u128>) {
 

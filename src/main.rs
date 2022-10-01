@@ -61,8 +61,7 @@ fn main() {
     let interval: u64 = args.interval;
     let network_layer: String = args.network_layer_filter.to_ascii_lowercase();
     let network_layer_2: String = network_layer.clone();
-    let transport_layer: String = args.transport_layer_filter.to_ascii_lowercase();
-    let transport_layer_2: String = transport_layer.clone();
+    let transport_layer = from_name_to_transport_protocol(args.transport_layer_filter.to_ascii_lowercase());
     let app_layer = from_name_to_application_protocol(args.application_layer_filter.to_ascii_lowercase());
 
     if args.device_list {
@@ -75,7 +74,7 @@ fn main() {
         return;
     }
 
-    if !is_valid_transport_layer(transport_layer.clone()) {
+    if transport_layer.is_none() {
         eprint!("{}","\r\n\tERROR: Specified transport layer filter must be equal to 'TCP' or 'UDP' (not case sensitive).\r\n\n".red().bold());
         return;
     }
@@ -142,14 +141,15 @@ fn main() {
     let thread_write_report = thread::spawn(move || {
         sleep_and_write_report_loop(lowest_port, highest_port, interval,
                                     device_name, network_layer,
-                                    transport_layer, app_layer.unwrap(), output_folder,
-                                    mutex_map2, status_pair3);
+                                    transport_layer.unwrap(), app_layer.unwrap(),
+                                    output_folder, mutex_map2, status_pair3);
     });
 
     // Thread 2: parses packets
     thread::spawn(move || {
         parse_packets_loop(found_device, lowest_port, highest_port, network_layer_2,
-                           transport_layer_2, app_layer.unwrap(), mutex_map1, status_pair1);
+                           transport_layer.unwrap(), app_layer.unwrap(),
+                           mutex_map1, status_pair1);
     });
 
     // Main thread: updates application status
@@ -234,29 +234,6 @@ fn is_valid_network_layer(network_layer: String) -> bool {
 }
 
 
-/// Checks if the provided ```transport_layer``` equals "tcp" or "udp" or "no filter".
-///
-/// # Arguments
-///
-/// * `transport_layer` - A String representing the transport protocol to be filtered. Specified by the user through the
-/// ```-t``` option.
-///
-/// # Examples
-///
-/// ```
-/// let x = is_valid_transport_layer("http");
-/// assert_eq!(x, false);
-///
-/// let y = is_valid_transport_layer("tcp");
-/// assert_eq!(y, true)
-/// ```
-fn is_valid_transport_layer(transport_layer: String) -> bool {
-    transport_layer.cmp(&"tcp".to_string()) == Equal
-        || transport_layer.cmp(&"udp".to_string()) == Equal
-        || transport_layer.cmp(&"no filter".to_string()) == Equal
-}
-
-
 /// Loop waiting for command line inputs by the user. Used to pause, resume and stop the sniffing process.
 ///
 /// If the 'p' character is received, the sniffing process is paused.
@@ -311,6 +288,33 @@ fn set_status_by_key(status_pair: Arc<(Mutex<Status>, Condvar)>, interval: u64) 
                 _ => { /* Other events */ }
             }
         }
+    }
+}
+
+
+/// Given a String representing a transport layer protocol, this function returns an `Option<TransProtocol>` containing
+/// the respective transport protocol represented by a value of the `TransProtocol` enum.
+/// If a unknown protocol is provided, this function returns `None`.
+///
+/// # Arguments
+///
+/// * `name` - A String representing a transport layer protocol (TCP or UDP)
+///
+/// # Examples
+///
+/// ```
+/// let x = from_name_to_transport_protocol("tcp".to_string());
+/// assert_eq!(x, Option::Some(TransProtocol::TCP));
+///
+/// let y = from_name_to_transport_protocol("not a known app protocol".to_string());
+/// assert_eq!(y, Option::None);
+/// ```
+fn from_name_to_transport_protocol(name: String) -> Option<TransProtocol> {
+    match name.as_str() {
+        "tcp" => {Option::Some(TransProtocol::TCP)},
+        "udp" => {Option::Some(TransProtocol::UDP)},
+        "no filter" => {Option::Some(TransProtocol::Other)},
+        _ => {None}
     }
 }
 
