@@ -21,12 +21,11 @@
 <hr>
 
 <p align="center">
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="98%"/>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="100%"/>
 </p>
 
-<p align="center" float="left">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/189486982-cf232d40-b38a-45ff-9d91-ef175ec9980e.png" width="49%"/>
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/189487192-ad533fc4-9132-4100-bfc6-a42acd2a30c9.png" width="49%"/>
+<p align="center">
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475329-a3338a8f-620e-4b70-954c-f6b0bf6ab4f7.png" width="100%"/>
 </p>
 
 
@@ -40,7 +39,8 @@ The application can then be run using ```sniffnet [OPTIONS]```
 <details>
 
   <summary>Build on Windows&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
-    
+  
+  <br>
   In order to build and run Sniffnet on Windows systems you need to:
 
   - Install [Npcap](https://npcap.com/#download).
@@ -55,7 +55,8 @@ The application can then be run using ```sniffnet [OPTIONS]```
 <details>
 
   <summary>Build on Linux&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
-    
+  
+  <br>
   In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library. For example:
 
   - On Debian based Linux: ```install libpcap-dev```.
@@ -70,7 +71,8 @@ The application can then be run using ```sniffnet [OPTIONS]```
 <details>
 
   <summary>Build on MacOS&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
-    
+  
+  <br>
   MacOS natively has all the dependencies you need to build and run Sniffnet!
     
 </details>
@@ -119,13 +121,15 @@ filters packets on the basis of the provided transport layer protocol (TCP or UD
 <details>
 
   <summary>See details</summary>
+  
+  <br>
 
 The graphical report consists of a svg file, constantly updated while Sniffnet is running.
 It is suggested to open this file with a web browser, in order to be able to comfortably refresh it.
 
 It reports the amount of sent (outgoing) and received (incoming) bits and packets per second.
 
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192573923-b4dc0d03-21c3-44b3-924a-ced1d0f4c8f0.svg" width="98%"/>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/192573923-b4dc0d03-21c3-44b3-924a-ced1d0f4c8f0.svg" width="100%"/>
 
 Note that the number of bits and packets in the graph refers to one single second even if the update frequency is different.
 
@@ -145,7 +149,9 @@ in case of intermittent traffic, you can consider using a lower time interval.
 
 This file contains informations and statistics about the sniffing process.
 
-![report_part_1](https://user-images.githubusercontent.com/100347457/187227230-b7984a13-d9df-4852-9b8d-e295cd7cfa35.png)
+<p align="center">
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475549-d4368750-e449-4c31-b69d-7d284f242866.png" width="50%"/>
+</p>
 
 First, it specifies the name of the network adapter analyzed.
 
@@ -164,7 +170,9 @@ This file contains a detailed analysis of the packets stream for each [address:p
 
 This analysis results in a table in which each row represents an [address:port] pair with the relative statistics.
 
-![Screenshot 2022-09-27 at 19 03 16](https://user-images.githubusercontent.com/100347457/192590512-efd3e7ba-cf8f-4cee-a169-e6ede9657f0d.png)
+<p align="center">
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475329-a3338a8f-620e-4b70-954c-f6b0bf6ab4f7.png" width="100%"/>
+</p>
 
 For each [address:port] pair it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source and the destination.
 
@@ -180,6 +188,10 @@ please note that application level protocols are just inferred from the transpor
 <details>
 
   <summary>See details</summary>
+  
+  <br>
+  
+<div align="center">
 
 |Port number(s)|Application protocol  |  Description |
 |--|--|--|
@@ -208,6 +220,8 @@ please note that application level protocols are just inferred from the transpor
 |5222|XMPP |Extensible Messaging and Presence Protocol |
 |5353|mDNS |Multicast DNS |
 
+</div>
+
 </details>
 
 
@@ -224,7 +238,7 @@ if a non-existing adapter name is provided, the application raises an error and 
 In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
 ```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
 
-&emsp;&emsp; ![device_list](https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png)
+<p align="center"> <img alt="" src="https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png" width="50%"/> </p>
 
 
 - **Invalid application layer protocol filter**:
@@ -267,7 +281,7 @@ Note that not including the ```-t``` option is equal to provide ```-t "no filter
 
 You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
 
-![error_permissions](https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png)
+<p align="center"> <img alt="" src="https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png" width="100%"/> </p>
 
 To solve this error you can execute the following command:
 ```sudo chown username /dev/bp*```
@@ -298,3 +312,8 @@ surf the web to receive some packets.
 ## Contribute
 
 Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) 
+
+
+## Stargazers
+
+<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://reporoster.com/stars/dark/GyulyVGC/sniffnet"/></a>
