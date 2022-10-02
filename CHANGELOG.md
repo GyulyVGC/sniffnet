@@ -2,6 +2,15 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [0.5.0] - 2022-10-02
+
+- Optimized textual report updates: only changed entries are rewritten (file `report.txt`)
+- Textual report elements are now ordered by timestamp instead of number of packets
+- Report header with statistics is now written on a separate textual file (file `statistics.txt`)
+- Removed command line option `--verbose` because considered redundant
+- Removed command line option `--minimum-packets` because not meaningful anymore
+
+
 ## [0.4.1] - 2022-09-27
 
 - Changed the default textual report representation

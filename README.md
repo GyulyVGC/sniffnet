@@ -8,9 +8,8 @@
 <p align="center">
 <a href="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml"><img alt="" src="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg"/></a>
 &nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/>
+<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/></a>
 </p>
-</a>
 
 <p align="center">
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
@@ -147,7 +146,7 @@ in case of intermittent traffic, you can consider using a lower time interval.
   
 ### statistics.txt
 
-This file contains informations and statistics about the sniffing process.
+This file contains details and statistics about the sniffing process.
 
 <p align="center">
     <img alt="" src="https://user-images.githubusercontent.com/100347457/193475549-d4368750-e449-4c31-b69d-7d284f242866.png" width="50%"/>
