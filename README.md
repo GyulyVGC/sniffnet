@@ -1,54 +1,34 @@
-<img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/></a></p>
 
-[![Build](https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg)](https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml)
-[![Code Grade](https://api.codiga.io/project/34559/score/svg)](https://www.codiga.io/code-analysis/)
-[![Version](https://img.shields.io/crates/v/sniffnet.svg)](https://crates.io/crates/sniffnet)
-![License](https://img.shields.io/crates/l/sniffnet.svg)
+<hr>
 
-Multithreaded application to analyze and filter network traffic. 
+<p align="center"> Application to analyze and filter your network traffic. </p>
+<p align="center"> Multithreaded, cross-platform, reliable. </p>
 
-Several command line options are available to select the network adapter to inspect, to set a desired reports update frequency and to specify filters on the observed traffic.
+<p align="center">
+<a href="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml"><img alt="" src="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg"/></a>
+&nbsp;
+<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/>
+</p>
+</a>
 
-Sniffnet generates a graphical representation of the filtered traffic's intensity and a detailed textual report about the observed packets.
-
-
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="98%"/>
-
-<p float="left">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/189486982-cf232d40-b38a-45ff-9d91-ef175ec9980e.png" width="49%"/>
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/189487192-ad533fc4-9132-4100-bfc6-a42acd2a30c9.png" width="49%"/>
+<p align="center">
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
+&nbsp;
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet"/></a>
 </p>
 
 <hr>
 
-<details>
+<p align="center">
+<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="98%"/>
+</p>
 
-  <summary>Table of contents</summary>
+<p align="center" float="left">
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/189486982-cf232d40-b38a-45ff-9d91-ef175ec9980e.png" width="49%"/>
+    <img alt="" src="https://user-images.githubusercontent.com/100347457/189487192-ad533fc4-9132-4100-bfc6-a42acd2a30c9.png" width="49%"/>
+</p>
 
-- [Install](#install)
-
-- [Command line options](#command-line-options)
-
-- [User interactions during application execution](#user-interactions-during-application-execution)
-
-- [Graphical report](#graphical-report)
-
-- [Textual reports](#textual-reports)
-
-- [Supported application layer protocols](#supported-application-layer-protocols)
-  
-- [Implementation details](#implementation-details)
-  
-- [Error conditions](#error-conditions)
-  + Wrong command line options specification
-  + Pcap permission denied error
-  + Textual report contains just the header
-  
-- [Contribute](#contribute)
-  
-</details>
-
-<hr>
 
 ## Install
 
@@ -56,9 +36,10 @@ The application binary can be installed with ```cargo install sniffnet```
 
 The application can then be run using ```sniffnet [OPTIONS]```
 
+
 <details>
 
-  <summary>Build on Windows</summary>
+  <summary>Build on Windows&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
     
   In order to build and run Sniffnet on Windows systems you need to:
 
@@ -73,7 +54,7 @@ The application can then be run using ```sniffnet [OPTIONS]```
 
 <details>
 
-  <summary>Build on Linux</summary>
+  <summary>Build on Linux&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
     
   In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library. For example:
 
@@ -88,7 +69,7 @@ The application can then be run using ```sniffnet [OPTIONS]```
 
 <details>
 
-  <summary>Build on MacOS</summary>
+  <summary>Build on MacOS&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
     
   MacOS natively has all the dependencies you need to build and run Sniffnet!
     
@@ -132,18 +113,6 @@ specifies the name of the output folder to contain textual and graphical reports
 - **-t, --trans**:
 filters packets on the basis of the provided transport layer protocol (TCP or UDP).
 
-          
-## User interactions during application execution
-
-The user can interact with the sniffing process through the terminal window.
-
-- **Pause**: to temporarily pause the sniffing process, the user can type a 'p' character in the terminal window.
-
-
-- **Resume**: to later resume the sniffing process, the user can type a 'r' character in the terminal window.
-
-
-- **Stop**: to stop the application execution, the user can type a 's' character in the terminal window.
 
 ## Graphical report
 
@@ -241,28 +210,6 @@ please note that application level protocols are just inferred from the transpor
 
 </details>
 
-## Implementation details
-
-
-<details>
-
-  <summary>See details</summary>
-
-The application consists in three different execution flows.
-
-The main thread waits for eventual [user actions](#user-interactions-during-application-execution) (by putting the terminal in raw mode through the ```crossterm::screen::raw::into_raw_mode()``` function and creating a ```crossterm::SyncReader``` which allows to read the input synchronously); in doing so it signals to the secondary threads when to pause or resume their work.
-The signaling is made possible by setting an application status, shared with the secondary threads and associated to a mutex and a condition variable.
-
-The ```main()``` function, entry point of program execution, generates two secondary threads: one is in charge of waiting for network packets and parsing them, while the other is in charge of updating the textual and graphical reports every ```interval``` seconds (with ```interval``` defined by the user through the ```-i``` option; if omitted it's equal to 5 seconds).
-
-The thread in charge of parsing packets also insert them into a shared map, where the key part is represented by an ```AddressPortPair``` struct and the value part is represented by a ```InfoAddressPortPair``` struct.
-Before parsing each packet it checks the application status: if it is ```Status::Pause``` it waits, otherwise it proceeds parsing the packet.
-This thread waits for packets without consuming CPU resources through the ```pcap::Capture::next_packet()``` method.
-
-The thread in charge of updating the textual and graphical reports sleeps for ```interval``` seconds and re-writes the reports with updated traffic statistics.
-
-
-</details>
 
 ## Error conditions
 
