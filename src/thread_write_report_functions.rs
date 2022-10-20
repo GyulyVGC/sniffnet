@@ -410,7 +410,7 @@ fn get_filtered_packets_string(sniffed: u128, filtered: u128) -> String {
 /// * `app_count` - Map of app layer protocols with the relative sniffed packets count
 ///
 /// * `tot_packets` - Total number of sniffed packets
-fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
+pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
 
     let mut ret_val = "".to_string();
 

@@ -6,7 +6,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
-use crate::{address_port_pair::AddressPortPair, AppProtocol, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Message, Status, TransProtocol};
 use crate::address_port_pair::TrafficType;
 
 
