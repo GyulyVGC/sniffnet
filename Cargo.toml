@@ -11,6 +11,13 @@ license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
+[package.metadata.bundle]
+name = "Sniffnet"
+identifier = "gyulyvgc.sniffnet"
+icon = ["./img/logo.png"]
+
+
 [dependencies]
 pcap = "0.10.1"
 etherparse = "0.12.0"
@@ -21,6 +28,7 @@ colored = "2.0.0"
 thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
+iced = {version = "0.4.2", features = ["smol"] }
 
 
 #used for debug purposes to measure time needed to write output reports
