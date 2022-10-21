@@ -6,7 +6,7 @@ mod thread_write_report_functions;
 mod info_traffic;
 
 use std::time::Duration;
-use iced::{alignment, button, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color};
+use iced::{Svg, alignment, button, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color, Radio};
 use pcap::{Capture, Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::thread_parse_packets_functions::parse_packets_loop;
@@ -78,7 +78,7 @@ pub fn main() -> iced::Result {
 #[derive(Debug, Clone)]
 enum Message {
     Tick,
-    Reset
+    AdapterSelection(String)
 }
 
 impl Application for Sniffer {
@@ -100,8 +100,8 @@ impl Application for Sniffer {
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::Tick => {}
-            Message::Reset => {
-                *self.device.lock().unwrap() = Device::from("en2");
+            Message::AdapterSelection(name) => {
+                *self.device.lock().unwrap() = Device::from(&*name);
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 &self.status_pair.1.notify_all();
             }
@@ -120,51 +120,62 @@ impl Application for Sniffer {
 
     fn view(&mut self) -> Element<Message> {
 
-        let button = |state, label, style| {
-            Button::new(
-                state,
-                Text::new(label)
-                    .horizontal_alignment(alignment::Horizontal::Center),
-            )
-                .padding(10)
-                .width(Length::Units(80))
-                .style(style)
-        };
+        // let button = |state, label, style| {
+        //     Button::new(
+        //         state,
+        //         Text::new(label)
+        //             .horizontal_alignment(alignment::Horizontal::Center),
+        //     )
+        //         .padding(10)
+        //         .width(Length::Units(80))
+        //         .style(style)
+        // };
 
-        let reset_button =
-            button(&mut self.reset, "en2", style::Button::Secondary)
-                .on_press(Message::Reset);
+        let svg = Svg::from_path("./img/sniffnet_logo.svg", )
+            .width(Length::FillPortion(2))
+            .height(Length::FillPortion(3));
 
-        // for dev in Device::list().expect("Error retrieving device list\r\n") {
-        //     match dev.desc {
-        //         None => {
-        //             print!("\r\tDevice: {}\r\n\t\tAddresses: ", dev.name.cyan());
-        //         }
-        //         Some(description) => {
-        //             print!("\r\tDevice: {} ({})\r\n\t\tAddresses: ", dev.name.cyan(), description.cyan());
-        //         }
-        //     }
-        //     if dev.addresses.is_empty() {
-        //         println!("\r");
-        //     }
-        //     for addr in dev.addresses {
-        //         let address_string = addr.addr.to_string();
-        //         print!("{}\r\n\t\t\t   ", address_string.cyan());
-        //     }
-        // }
+        let mut dev_str_list = vec![];
+        for dev in Device::list().expect("Error retrieving device list\r\n") {
+            let mut dev_str = String::new();
+            match dev.desc {
+                None => {
+                    dev_str.push_str(&format!("Device: {}\nAddresses: ", dev.name));
+                }
+                Some(description) => {
+                    dev_str.push_str(&format!("Device: {} ({})\nAddresses: ", dev.name.cyan(), description));
+                }
+            }
+            // if dev.addresses.is_empty() {
+            //     dev_str.push_str("\r");
+            // }
+            for addr in dev.addresses {
+                let address_string = addr.addr.to_string();
+                dev_str.push_str(&format!("{}\n                ", address_string));
+            }
+            dev_str_list.push((dev.name, dev_str));
+        }
+
+        let adapter_col = Column::new()
+            .padding(20)
+            .spacing(10)
+            .push(Text::new("Select network adapter to inspect").size(24))
+            .push(dev_str_list.iter().fold(
+                Column::new().padding(10).spacing(20),
+                |choices, adapter| {
+                    choices.push(Radio::new(
+                        &adapter.0,
+                        &adapter.1,
+                        Some(&self.device.clone().lock().unwrap().name),
+                        |name| Message::AdapterSelection(name.to_string()),
+                    ))
+                },
+            ));
 
         let sniffer = self.info_traffic.lock().unwrap();
 
-        let mut row = Row::new();
-
-        let column1 = Column::new()
-            .width(Length::FillPortion(2))
-            .align_items(Alignment::Center)
-            .spacing(20)
-            .push(iced::Text::new("Choose adapter"))
-            .push(reset_button);
-
-        row = row.push(column1);
+        let mut row = Row::new().height(Length::FillPortion(9))
+            .push(adapter_col);
 
         if sniffer.all_packets > 0 {
             let column2 = Column::new()
@@ -178,7 +189,7 @@ impl Application for Sniffer {
             row = row.push(column2);
         }
 
-        Container::new(row)
+        Container::new(Column::new().push(svg).push(row))
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
@@ -187,22 +198,7 @@ impl Application for Sniffer {
             .into()
     }
 
-    // fn background_color(&self) -> Color {
-    //     Color::BLACK
-    // }
 }
-
-// struct Sniffer {
-//     packets: u64
-// }
-
-// impl Sniffer {
-//
-//     fn view(&mut self) -> Element<Message> {
-//         Row::new().push(iced::Text::new(format!("{}", self.packets))).into()
-//     }
-//
-// }
 
 mod style {
     use iced::{container, Background, Color, Vector, Container, Element, Row, Application, button};
@@ -237,7 +233,7 @@ mod style {
                 })),
                 border_radius: 12.0,
                 shadow_offset: Vector::new(1.0, 1.0),
-                text_color: Color::WHITE,
+                text_color: Color::BLACK,
                 ..button::Style::default()
             }
         }
