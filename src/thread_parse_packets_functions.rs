@@ -35,7 +35,7 @@ use crate::address_port_pair::TrafficType;
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
+pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
                           network_layer_filter: String, transport_layer: TransProtocol, app_layer: AppProtocol,
                           info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
@@ -44,15 +44,8 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
 
     let mut has_been_paused = false;
 
-    let mut cap = Capture::from_device(device.clone())
-        .expect("Capture initialization error\n\r")
-        .promisc(true)
-        .snaplen(256)
-        .open()
-        .expect("Capture initialization error\n\r");
-
     let mut my_interface_addresses = Vec::new();
-    for address in device.clone().addresses {
+    for address in device.lock().unwrap().clone().addresses {
         my_interface_addresses.push(address.addr.to_string());
     }
 
@@ -66,23 +59,35 @@ pub fn parse_packets_loop(device: Device, lowest_port: u16, highest_port: u16,
     let mut skip_packet;
     let mut reported_packet;
 
+    let mut cap = Capture::from_device(&*device.clone().lock().unwrap().name)
+        .expect("Capture initialization error\n\r")
+        .promisc(true)
+        .snaplen(256)
+        .open()
+        .expect("Capture initialization error\n\r");
+    has_been_paused = false;
+
     loop {
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
         while *status == Status::Pause {
             status = cvar.wait(status).expect("Error acquiring mutex\n\r");
-            has_been_paused = true; //to reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
+            has_been_paused = true; //to reinitialize the capture handle
         }
 
         if *status == Status::Running {
             drop(status);
             //reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
             if has_been_paused {
-                cap = Capture::from_device(device.clone())
+                cap = Capture::from_device(&*device.clone().lock().unwrap().name)
                     .expect("Capture initialization error\n\r")
                     .promisc(true)
                     .snaplen(256)
                     .open()
                     .expect("Capture initialization error\n\r");
+                my_interface_addresses = Vec::new();
+                for address in device.lock().unwrap().clone().addresses {
+                    my_interface_addresses.push(address.addr.to_string());
+                }
                 has_been_paused = false;
             }
             match cap.next_packet() {
