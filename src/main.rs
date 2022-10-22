@@ -244,7 +244,7 @@ impl Application for Sniffer {
                         &adapter.1,
                         Some(&self.device.clone().lock().unwrap().name),
                         |name| Message::AdapterSelection(name.to_string()),
-                    ))
+                    ).size(15).style(self.style))
                 },
             ))
             .push(button_start);
@@ -260,19 +260,19 @@ impl Application for Sniffer {
                 "IPv4",
                 Some(ip_active),
                 |version| Message::IpVersionSelection(version.to_string())
-            ))
+            ).size(15).style(self.style))
             .push(Radio::new(
                 "ipv6",
                 "IPv6",
                 Some(ip_active),
                 |version| Message::IpVersionSelection(version.to_string())
-            ))
+            ).size(15).style(self.style))
             .push(Radio::new(
                 "no filter",
                 "both",
                 Some(ip_active),
                 |version| Message::IpVersionSelection(version.to_string())
-            ));
+            ).size(15).style(self.style));
 
         let transport_active = filtri.transport;
         let col_transport = Column::new()
@@ -284,19 +284,19 @@ impl Application for Sniffer {
                 "TCP",
                 Some(transport_active),
                 |protocol| Message::TransportProtocolSelection(protocol)
-            ))
+            ).size(15).style(self.style))
             .push(Radio::new(
                 TransProtocol::UDP,
                 "UDP",
                 Some(transport_active),
                 |protocol| Message::TransportProtocolSelection(protocol)
-            ))
+            ).size(15).style(self.style))
             .push(Radio::new(
                 TransProtocol::Other,
                 "both",
                 Some(transport_active),
                 |protocol| Message::TransportProtocolSelection(protocol)
-            ));
+            ).size(15).style(self.style));
 
         let app_active = filtri.application;
         let picklist_app = PickList::new(
@@ -498,6 +498,40 @@ mod style {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
                 }
+            }
+        }
+    }
+
+    impl iced_style::radio::StyleSheet for Mode {
+        fn active(&self) -> iced_style::radio::Style {
+            iced_style::radio::Style {
+                background: Background::Color(match self {
+                    Mode::Day => Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0,},
+                    Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
+                }),
+                dot_color: match self {
+                    Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
+                    Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
+                },
+                border_width: 0.0,
+                border_color: Default::default(),
+                text_color: None
+            }
+        }
+
+        fn hovered(&self) -> iced_style::radio::Style {
+            iced_style::radio::Style {
+                background: Background::Color(match self {
+                    Mode::Day => Color{r: 1.0, g: 1.0, b: 1.0, a: 1.0,},
+                    Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
+                }),
+                dot_color: match self {
+                    Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
+                    Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
+                },
+                border_width: 0.0,
+                border_color: Default::default(),
+                text_color: None
             }
         }
     }
