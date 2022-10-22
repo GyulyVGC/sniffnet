@@ -6,7 +6,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
-use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Message, Status, TransProtocol};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Message, Status, TransProtocol};
 use crate::address_port_pair::TrafficType;
 
 
@@ -36,18 +36,19 @@ use crate::address_port_pair::TrafficType;
 ///
 /// * `status_pair` - Shared variable to check the application current status.
 pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
-                          network_layer_filter: String, transport_layer: TransProtocol, app_layer: AppProtocol,
+                          filters: Arc<Mutex<Filters>>,
                           info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                           status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
 
-    let mut has_been_paused = false;
+    let mut has_been_paused = true;
 
     let mut my_interface_addresses = Vec::new();
-    for address in device.lock().unwrap().clone().addresses {
-        my_interface_addresses.push(address.addr.to_string());
-    }
+
+    let mut network_layer_filter = "no filter".to_string();
+    let mut transport_layer= TransProtocol::Other;
+    let mut app_layer= AppProtocol::Other;
 
     let mut network_layer = "".to_string();
     let mut port1 = 0;
@@ -59,13 +60,12 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
     let mut skip_packet;
     let mut reported_packet;
 
-    let mut cap = Capture::from_device(&*device.clone().lock().unwrap().name)
+    let mut cap = Capture::from_device(Device::lookup().unwrap().unwrap())
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256)
         .open()
         .expect("Capture initialization error\n\r");
-    has_been_paused = false;
 
     loop {
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
@@ -84,10 +84,17 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                     .snaplen(256)
                     .open()
                     .expect("Capture initialization error\n\r");
+
                 my_interface_addresses = Vec::new();
                 for address in device.lock().unwrap().clone().addresses {
                     my_interface_addresses.push(address.addr.to_string());
                 }
+
+                let filtri = filters.lock().unwrap();
+                network_layer_filter = filtri.ip.clone();
+                transport_layer = filtri.transport;
+                app_layer = filtri.application;
+
                 has_been_paused = false;
             }
 
@@ -127,11 +134,6 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                             let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
                             //increment number of sniffed packets
                             info_traffic.all_packets += 1;
-                            //increment the packet count for the sniffed app protocol
-                            info_traffic.app_protocols
-                                .entry(application_protocol)
-                                .and_modify(|n| {*n+=1})
-                                .or_insert(1);
 
                             drop(info_traffic);
 
@@ -148,6 +150,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                             let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
                                                                             transport_protocol, traffic_type);
 
+
                             if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
                                 && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
                                     && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
@@ -161,6 +164,12 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                                         }
 
                                         if reported_packet {
+                                            //increment the packet count for the sniffed app protocol
+                                            info_traffic_mutex.lock().unwrap().app_protocols
+                                                .entry(application_protocol)
+                                                .and_modify(|n| {*n+=1})
+                                                .or_insert(1);
+
                                             if traffic_type == TrafficType::Incoming
                                                 || traffic_type == TrafficType::Multicast {
                                                 //increment number of received packets and bytes
