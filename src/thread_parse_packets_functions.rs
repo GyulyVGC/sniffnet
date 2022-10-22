@@ -69,7 +69,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
 
     loop {
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        while *status == Status::Pause {
+        while *status == Status::Pause || *status == Status::Init {
             status = cvar.wait(status).expect("Error acquiring mutex\n\r");
             has_been_paused = true; //to reinitialize the capture handle
         }
@@ -90,6 +90,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                 }
                 has_been_paused = false;
             }
+
             match cap.next_packet() {
                 Err(_) => {
                     continue;
