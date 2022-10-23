@@ -5,6 +5,9 @@ mod args;
 mod thread_write_report_functions;
 mod info_traffic;
 
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 use std::time::Duration;
 use font_awesome;
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
@@ -19,7 +22,7 @@ use crate::thread_write_report_functions::get_app_count_string;
 use clap::Parser;
 use std::{io, panic, process, thread};
 use std::borrow::BorrowMut;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::Write;
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
@@ -27,6 +30,7 @@ use colored::Colorize;
 use iced::canvas::LineDash;
 use iced::futures::FutureExt;
 use iced_style::pane_grid::Line;
+use indexmap::IndexMap;
 use crate::info_traffic::InfoTraffic;
 use crate::style::Mode;
 
@@ -46,6 +50,7 @@ struct Sniffer {
     start: button::State,
     reset: button::State,
     mode: button::State,
+    report: button::State,
     app: pick_list::State<AppProtocol>,
     scroll: scrollable::State,
     style: Mode
@@ -65,7 +70,7 @@ pub enum Status {
     Stop
 }
 
-pub fn main() -> iced::Result {
+pub fn main() {
 
     //shared tuple containing:
     // - the map of the address:ports pairs with the relative info
@@ -74,13 +79,16 @@ pub fn main() -> iced::Result {
     // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2= mutex_map1.clone();
+    let mutex_map3= mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 =  status_pair1.clone();
+    let status_pair3 =  status_pair1.clone();
 
     let found_device1 = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
     let found_device2 = found_device1.clone();
+    let found_device3 = found_device1.clone();
 
     let filters1 = Arc::new(Mutex::new(Filters {
         ip: "no filter".to_string(),
@@ -88,6 +96,13 @@ pub fn main() -> iced::Result {
         application: AppProtocol::Other
     }));
     let filters2 = filters1.clone();
+    let filters3 = filters1.clone();
+
+    thread::spawn(move || {
+        sleep_and_write_report_loop(0, 65535, 1,
+                                    found_device2, filters2, "sniffnet_report".to_string(),
+                                    mutex_map2, status_pair2);
+    });
 
     thread::spawn(move || {
         parse_packets_loop(found_device1, 0, 65535,
@@ -96,17 +111,18 @@ pub fn main() -> iced::Result {
     });
 
     Sniffer::run(Settings::with_flags(Sniffer {
-        info_traffic: mutex_map2,
-        device: found_device2,
-        filters: filters2,
-        status_pair: status_pair2,
+        info_traffic: mutex_map3,
+        device: found_device3,
+        filters: filters3,
+        status_pair: status_pair3,
         start: button::State::new(),
         reset: button::State::new(),
         mode: button::State::new(),
+        report: button::State::new(),
         app: pick_list::State::new(),
         scroll: scrollable::State::new(),
         style: Mode::Night
-    }))
+    }));
 
 }
 
@@ -117,6 +133,7 @@ enum Message {
     IpVersionSelection(String),
     TransportProtocolSelection(TransProtocol),
     AppProtocolSelection(AppProtocol),
+    OpenReport,
     Start,
     Reset,
     Style
@@ -153,16 +170,26 @@ impl Application for Sniffer {
             Message::AppProtocolSelection(protocol) => {
                 self.filters.lock().unwrap().application = protocol;
             }
+            Message::OpenReport => {
+                #[cfg(target_os = "windows")]
+                let command = "explorer";
+                #[cfg(target_os = "macos")]
+                let command = "open";
+                #[cfg(target_os = "linux")]
+                let command = "explorer";
+                std::process::Command::new( command )
+                    .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
+            }
             Message::Start => {
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 &self.status_pair.1.notify_all();
             }
             Message::Reset => {
                 let mut info_traffic = self.info_traffic.lock().unwrap();
-                info_traffic.all_packets = 0;
-                info_traffic.tot_received_packets = 0;
-                info_traffic.tot_sent_packets = 0;
-                info_traffic.app_protocols = HashMap::new();
+                *info_traffic = InfoTraffic::new();
+                info_traffic.reset();
             }
             Message::Style => {
                 self.style = if self.style == Mode::Day {
@@ -170,7 +197,7 @@ impl Application for Sniffer {
                 }
                 else {
                     Mode::Day
-                }
+                };
             }
         }
 
@@ -216,6 +243,16 @@ impl Application for Sniffer {
             .width(Length::Units(40))
             .style(self.style)
             .on_press(Message::Style);
+
+        let button_report = Button::new(
+            &mut self.report,
+            Text::new("Open network traffic report").horizontal_alignment(alignment::Horizontal::Center),
+        )
+            .padding(10)
+            .height(Length::Units(40))
+            .width(Length::Units(270))
+            .style(self.style)
+            .on_press(Message::OpenReport);
 
         let svg = Svg::from_path("./img/sniffnet_logo.svg", );
 
@@ -351,7 +388,7 @@ impl Application for Sniffer {
         let sniffer = self.info_traffic.lock().unwrap();
 
         let mut col_packets = Column::new()
-            .width(Length::FillPortion(2))
+            .width(Length::FillPortion(1))
             .align_items(Alignment::Center)
             .spacing(20)
             .push(iced::Text::new("Packets count"))
@@ -361,21 +398,22 @@ impl Application for Sniffer {
                 .push(iced::Text::new("Packets count per application protocol"))
                 .push(iced::Text::new(get_app_count_string(sniffer.app_protocols.clone(), sniffer.all_packets)));
         }
-        col_packets = col_packets.push(button_reset);
+        col_packets = col_packets.push(button_reset).push(button_report);
 
-        let mut row = Row::new().height(Length::FillPortion(9));
+        let mut body = Row::new().height(Length::FillPortion(9));
 
         match *self.status_pair.0.lock().unwrap() {
-            Status::Init => {row = row
+            Status::Init => {body = body
                 .push(col_adapter)
                 .push(col_space)
                 .push(filters);}
-            Status::Running => {row = row.push(col_packets);}
+            Status::Running => {body = body
+                .push(col_packets);}
             Status::Pause => {}
             Status::Stop => {}
         }
 
-        Container::new(Column::new().push(header).push(row))
+        Container::new(Column::new().push(header).push(body))
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()

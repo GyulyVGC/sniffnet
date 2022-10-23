@@ -26,7 +26,9 @@ pub struct InfoTraffic {
     /// Set with the addresses of the last time interval
     pub addresses_last_interval: HashSet<AddressPortPair>,
     /// Map of the application layer protocols with their packet count
-    pub app_protocols: HashMap<AppProtocol, u128>
+    pub app_protocols: HashMap<AppProtocol, u128>,
+    /// Traffic has been reset?
+    pub reset: bool
 }
 
 
@@ -43,6 +45,12 @@ impl InfoTraffic {
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
             app_protocols: HashMap::new(),
+            reset: false
         }
     }
+
+    pub fn reset(&mut self) {
+        self.reset = true;
+    }
+
 }

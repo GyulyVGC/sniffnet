@@ -43,15 +43,20 @@ impl fmt::Display for InfoAddressPortPair {
                 format!("{}  B", n)
             };
 
+        let app_string = match self.app_protocol {
+            AppProtocol::Other => {"Other".to_string()}
+            _ => {self.app_protocol.to_string()}
+        };
+
         if self.very_long_address {
             write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
-                   self.trans_protocol, self.app_protocol.to_string(),
+                   self.trans_protocol, app_string,
                    self.transmitted_packets, bytes_string,
                    self.initial_timestamp, self.final_timestamp)
         }
         else {
             write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
-                   self.trans_protocol, self.app_protocol.to_string(),
+                   self.trans_protocol, app_string,
                    self.transmitted_packets, bytes_string,
                    self.initial_timestamp, self.final_timestamp, " ".repeat(40))
         }
