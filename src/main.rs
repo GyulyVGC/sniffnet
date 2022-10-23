@@ -24,6 +24,9 @@ use std::io::Write;
 use std::sync::{Arc, Mutex, Condvar};
 use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
 use colored::Colorize;
+use iced::canvas::LineDash;
+use iced::futures::FutureExt;
+use iced_style::pane_grid::Line;
 use crate::info_traffic::InfoTraffic;
 use crate::style::Mode;
 
@@ -184,54 +187,65 @@ impl Application for Sniffer {
 
     fn view(&mut self) -> Element<Message> {
 
-        let button = |state, content: Text, style| {
-            Button::new(
-                state,
-                content.horizontal_alignment(alignment::Horizontal::Center),
+        let button_start = Button::new(
+            &mut self.start,
+            Text::new("Run!").vertical_alignment(alignment::Vertical::Center).horizontal_alignment(alignment::Horizontal::Center),
             )
-                .padding(10)
-                .height(Length::Units(40))
-                .width(Length::Units(80))
-                .style(style)
-        };
+            .padding(10)
+            .height(Length::Units(80))
+            .width(Length::Units(160))
+            .style(self.style)
+            .on_press(Message::Start);
 
-        let button_start =
-            button(&mut self.start, Text::new("Start"), self.style)
-                .on_press(Message::Start);
+        let button_reset = Button::new(
+            &mut self.reset,
+            Text::new("Reset").horizontal_alignment(alignment::Horizontal::Center),
+            )
+            .padding(10)
+            .height(Length::Units(40))
+            .width(Length::Units(80))
+            .style(self.style)
+            .on_press(Message::Reset);
 
-        let button_reset =
-            button(&mut self.reset, Text::new("Reset"), self.style)
-                .on_press(Message::Reset);
+        let button_style = Button::new(
+            &mut self.mode,
+            icon(font_awesome::ADJUST).horizontal_alignment(alignment::Horizontal::Center),
+            )
+            .padding(10)
+            .height(Length::Units(40))
+            .width(Length::Units(40))
+            .style(self.style)
+            .on_press(Message::Style);
 
-        let button_style =
-            button(&mut self.mode, icon(
-                match self.style {
-                    Mode::Day => font_awesome::MOON,
-                    Mode::Night => font_awesome::LIGHTBULB
-                }), self.style)
-                .on_press(Message::Style);
+        let svg = Svg::from_path("./img/sniffnet_logo.svg", );
 
-        let svg = Svg::from_path("./img/sniffnet_logo.svg", )
-            .width(Length::Fill)
-            .height(Length::FillPortion(3));
+        let header = Row::new()
+            .padding(20).spacing(50)
+            .height(Length::FillPortion(3))
+            .align_items(Alignment::Center)
+            .push(svg)
+            .push(button_style);
 
         let mut dev_str_list = vec![];
         for dev in Device::list().expect("Error retrieving device list\r\n") {
             let mut dev_str = String::new();
             match dev.desc {
                 None => {
-                    dev_str.push_str(&format!("Device: {}\nAddresses: ", dev.name));
+                    dev_str.push_str(&format!("Device:  {}", dev.name));
                 }
                 Some(description) => {
-                    dev_str.push_str(&format!("Device: {} ({})\nAddresses: ", dev.name.cyan(), description));
+                    dev_str.push_str(&format!("Device:  {} ({})", dev.name.cyan(), description));
                 }
             }
-            // if dev.addresses.is_empty() {
-            //     dev_str.push_str("\r");
-            // }
+            match dev.addresses.len() {
+                0 => {},
+                1 => {dev_str.push_str("\nAddress:  ");},
+                _ => {dev_str.push_str("\nAddresses:  ");}
+            }
+
             for addr in dev.addresses {
                 let address_string = addr.addr.to_string();
-                dev_str.push_str(&format!("{}\n                ", address_string));
+                dev_str.push_str(&format!("{}\n                           ", address_string));
             }
             dev_str_list.push((dev.name, dev_str));
         }
@@ -239,25 +253,31 @@ impl Application for Sniffer {
         let col_adapter = Column::new()
             .padding(20)
             .spacing(10)
-            .push(Text::new("Select network adapter to inspect").size(24))
+            .height(Length::Fill)
+            .width(Length::FillPortion(5))
+            .push(Text::new("Select network adapter to inspect").size(32))
             .push(dev_str_list.iter().fold(
                 Scrollable::new(&mut self.scroll).padding(10).spacing(20).height(Length::FillPortion(8)),
-                |choices, adapter| {
-                    choices.push(Radio::new(
+                |scroll, adapter| {
+                    scroll.push(Radio::new(
                         &adapter.0,
                         &adapter.1,
                         Some(&self.device.clone().lock().unwrap().name),
                         |name| Message::AdapterSelection(name.to_string()),
                     ).size(15).style(self.style))
                 },
-            ))
-            .push(button_start);
+            ));
+
+        let col_space = Column::new()
+            .padding(20)
+            .spacing(10)
+            .width(Length::FillPortion(1));
 
         let filtri = self.filters.lock().unwrap();
         let ip_active = &*filtri.ip;
         let col_ip = Column::new()
-            .padding(20)
             .spacing(10)
+            .width(Length::FillPortion(2))
             .push(Text::new("IP version").size(24))
             .push(Radio::new(
                 "ipv4",
@@ -280,8 +300,8 @@ impl Application for Sniffer {
 
         let transport_active = filtri.transport;
         let col_transport = Column::new()
-            .padding(20)
             .spacing(10)
+            .width(Length::FillPortion(2))
             .push(Text::new("Transport protocol").size(24))
             .push(Radio::new(
                 TransProtocol::TCP,
@@ -309,15 +329,24 @@ impl Application for Sniffer {
             Some(app_active),
             |protocol| Message::AppProtocolSelection(protocol),
         )
+            .width(Length::FillPortion(3))
             .placeholder("Select application protocol")
             .style(self.style);
         let mut col_app = Column::new()
             .width(Length::FillPortion(2))
             .align_items(Alignment::Center)
-            .padding(20)
             .spacing(10)
-            .push(iced::Text::new("App protocol").size(24))
+            .push(iced::Text::new("Application protocol").size(24))
             .push(picklist_app);
+
+        let filters = Column::new().width(Length::FillPortion(6)).padding(20).spacing(20)
+            .push(Row::new().push(Text::new("Select network traffic filters").size(32)))
+            .align_items(Alignment::Center)
+            .push(Row::new().height(Length::FillPortion(3)).push(col_ip).push(col_transport).push(col_app))
+            .push(Row::new().height(Length::FillPortion(1)))
+            .push(button_start)
+            .push(Row::new().height(Length::FillPortion(1)));
+
 
         let sniffer = self.info_traffic.lock().unwrap();
 
@@ -339,15 +368,14 @@ impl Application for Sniffer {
         match *self.status_pair.0.lock().unwrap() {
             Status::Init => {row = row
                 .push(col_adapter)
-                .push(col_ip)
-                .push(col_transport)
-                .push(col_app);}
+                .push(col_space)
+                .push(filters);}
             Status::Running => {row = row.push(col_packets);}
             Status::Pause => {}
             Status::Stop => {}
         }
 
-        Container::new(Column::new().push(svg).push(button_style).push(row))
+        Container::new(Column::new().push(header).push(row))
             .width(Length::Fill)
             .height(Length::Fill)
             .center_x()
@@ -404,7 +432,7 @@ mod style {
                 Mode::Day => Color{r: 0.9, g: 0.9, b: 0.9, a: 1.0,},
                 Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
                 }),
-                border_width: 3.0,
+                border_width: 2.0,
                 border_color: match self {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
@@ -414,7 +442,7 @@ mod style {
                     Mode::Night => Color::WHITE,
                 },
                 selected_background: Background::Color(match self {
-                    Mode::Day => Color{r: 0.4, g: 0.4, b: 0.4, a: 1.0,},
+                    Mode::Day => Color{r: 0.8, g: 0.8, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.2, g: 0.2, b: 0.2, a: 1.0,},
                 })
             }
@@ -431,8 +459,8 @@ mod style {
                     Mode::Day => Color{r: 0.9, g: 0.9, b: 0.9, a: 1.0,},
                     Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
                 }),
-                border_radius: 12.0,
-                border_width: 3.0,
+                border_radius: 0.0,
+                border_width: 2.0,
                 border_color: match self {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
@@ -452,8 +480,8 @@ mod style {
                     Mode::Day => Color{r: 0.8, g: 0.8, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.2, g: 0.2, b: 0.2, a: 1.0,},
                 }),
-                border_radius: 12.0,
-                border_width: 3.0,
+                border_radius: 0.0,
+                border_width: 2.0,
                 border_color: match self {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.5, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.5, b: 0.5, a: 1.0,},
@@ -473,7 +501,7 @@ mod style {
                     Mode::Night => Color{r: 0.2, g: 0.2, b: 0.2, a: 1.0,},
                 })),
                 border_radius: 12.0,
-                border_width: 3.0,
+                border_width: 2.0,
                 border_color: match self {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.5, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.5, b: 0.5, a: 1.0,},
@@ -492,7 +520,7 @@ mod style {
                     Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
                 })),
                 border_radius: 12.0,
-                border_width: 3.0,
+                border_width: 2.0,
                 shadow_offset: Vector::new(0.0, 0.0),
                 text_color:  match self {
                     Mode::Day => Color::BLACK,
@@ -533,8 +561,11 @@ mod style {
                     Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
                     Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
                 },
-                border_width: 0.0,
-                border_color: Default::default(),
+                border_width: 2.0,
+                border_color: match self {
+                    Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
+                    Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
+                },
                 text_color: None
             }
         }
