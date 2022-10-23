@@ -6,8 +6,9 @@ mod thread_write_report_functions;
 mod info_traffic;
 
 use std::time::Duration;
+use font_awesome;
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
-use iced::{Svg, alignment, button, scrollable, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color, Radio, Scrollable, PickList, pick_list};
+use iced::{ Svg, alignment, button, scrollable, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color, Radio, Scrollable, PickList, pick_list, Font, widget};
 use pcap::{Capture, Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::thread_parse_packets_functions::parse_packets_loop;
@@ -183,11 +184,10 @@ impl Application for Sniffer {
 
     fn view(&mut self) -> Element<Message> {
 
-        let button = |state, label, style| {
+        let button = |state, content: Text, style| {
             Button::new(
                 state,
-                Text::new(label)
-                    .horizontal_alignment(alignment::Horizontal::Center),
+                content.horizontal_alignment(alignment::Horizontal::Center),
             )
                 .padding(10)
                 .height(Length::Units(40))
@@ -196,15 +196,19 @@ impl Application for Sniffer {
         };
 
         let button_start =
-            button(&mut self.start, "Start", self.style)
+            button(&mut self.start, Text::new("Start"), self.style)
                 .on_press(Message::Start);
 
         let button_reset =
-            button(&mut self.reset, "Reset", self.style)
+            button(&mut self.reset, Text::new("Reset"), self.style)
                 .on_press(Message::Reset);
 
         let button_style =
-            button(&mut self.mode, "Style", self.style)
+            button(&mut self.mode, icon(
+                match self.style {
+                    Mode::Day => font_awesome::MOON,
+                    Mode::Night => font_awesome::LIGHTBULB
+                }), self.style)
                 .on_press(Message::Style);
 
         let svg = Svg::from_path("./img/sniffnet_logo.svg", )
@@ -535,4 +539,17 @@ mod style {
             }
         }
     }
+}
+
+const ICONS: Font = Font::External {
+    name: "Icons",
+    bytes: include_bytes!("../fonts/icons.ttf"),
+};
+
+fn icon(unicode: char) -> Text {
+    Text::new(unicode.to_string())
+        .font(ICONS)
+        .width(Length::Units(20))
+        .horizontal_alignment(alignment::Horizontal::Center)
+        .size(20)
 }

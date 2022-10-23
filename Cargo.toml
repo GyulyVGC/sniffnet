@@ -31,6 +31,7 @@ indexmap = "1.9.1"
 plotters-iced = "0.3"
 iced = {version = "0.4.2", features = ["smol", "svg", "canvas", "tokio"] }
 iced_style = "0.4.0"
+font-awesome = "0.2.0"
 
 
 #used for debug purposes to measure time needed to write output reports
