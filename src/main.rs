@@ -100,7 +100,7 @@ pub fn main() {
 
     thread::spawn(move || {
         sleep_and_write_report_loop(0, 65535, 1,
-                                    found_device2, filters2, "sniffnet_report".to_string(),
+                                    found_device2, filters2, "./sniffnet_report".to_string(),
                                     mutex_map2, status_pair2);
     });
 
@@ -254,13 +254,13 @@ impl Application for Sniffer {
             .style(self.style)
             .on_press(Message::OpenReport);
 
-        let svg = Svg::from_path("./img/sniffnet_logo.svg", );
+        let logo = Svg::from_path("./img/sniffnet_logo.svg", );
 
         let header = Row::new()
             .padding(20).spacing(50)
             .height(Length::FillPortion(3))
             .align_items(Alignment::Center)
-            .push(svg)
+            .push(logo)
             .push(button_style);
 
         let mut dev_str_list = vec![];
@@ -391,7 +391,7 @@ impl Application for Sniffer {
             .width(Length::FillPortion(1))
             .align_items(Alignment::Center)
             .spacing(20)
-            .push(iced::Text::new("Packets count"))
+            .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()))
             .push(iced::Text::new(sniffer.all_packets.to_string()));
         if sniffer.tot_received_packets + sniffer.tot_sent_packets > 0 {
             col_packets = col_packets
