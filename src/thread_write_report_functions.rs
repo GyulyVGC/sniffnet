@@ -109,7 +109,7 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
 
         let tot_seconds = (Local::now() - time_origin).num_seconds();
 
-        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") != Status::Pause {
+        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Running {
 
             let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
@@ -553,7 +553,7 @@ fn write_statistics(mut output: File, device_name: String, first_timestamp: Stri
     writeln!(output, "\tTotal packets: {}", num_sniffed_packets.separate_with_underscores()).expect("Error writing output file\n");
     writeln!(output, "{}", filtered_packets_string).expect("Error writing output file\n");
 
-    if num_sniffed_packets > 0 {
+    if num_filtered_packets > 0 {
         let app_count_string = get_app_count_string(app_count, num_sniffed_packets);
         writeln!(output, "Total packets divided by app layer protocol").expect("Error writing output file\n");
         writeln!(output, "{}", app_count_string).expect("Error writing output file\n");

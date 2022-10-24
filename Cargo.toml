@@ -15,7 +15,8 @@ license = "MIT OR Apache-2.0"
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
-icon = ["./img/logo.ico"]
+icon = ["./resources/logo.ico"]
+resources = ["./resources/sniffnet_logo.svg"]
 
 
 [dependencies]

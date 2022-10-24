@@ -190,6 +190,7 @@ impl Application for Sniffer {
                 let mut info_traffic = self.info_traffic.lock().unwrap();
                 *info_traffic = InfoTraffic::new();
                 info_traffic.reset();
+                *self.status_pair.0.lock().unwrap() = Status::Init;
             }
             Message::Style => {
                 self.style = if self.style == Mode::Day {
@@ -236,11 +237,15 @@ impl Application for Sniffer {
 
         let button_style = Button::new(
             &mut self.mode,
-            icon(font_awesome::ADJUST).horizontal_alignment(alignment::Horizontal::Center),
+            // icon(match self.style {
+            //     Mode::Night => {font_awesome::SUN}
+            //     Mode::Day => {font_awesome::MOON}
+                icon_sun_moon(self.style)
+            .horizontal_alignment(alignment::Horizontal::Center),
             )
             .padding(10)
             .height(Length::Units(40))
-            .width(Length::Units(40))
+            .width(Length::Units(100))
             .style(self.style)
             .on_press(Message::Style);
 
@@ -254,14 +259,14 @@ impl Application for Sniffer {
             .style(self.style)
             .on_press(Message::OpenReport);
 
-        let logo = Svg::from_path("./img/sniffnet_logo.svg", );
+        let logo = Svg::from_path("./resources/sniffnet_logo.svg", );
 
         let header = Row::new()
-            .padding(20).spacing(50)
             .height(Length::FillPortion(3))
             .align_items(Alignment::Center)
-            .push(logo)
-            .push(button_style);
+            .push(Column::new().width(Length::FillPortion(1)))
+            .push(Column::new().width(Length::FillPortion(6)).push(logo))
+            .push(Row::new().width(Length::FillPortion(1)).align_items(Alignment::Center).push(button_style));
 
         let mut dev_str_list = vec![];
         for dev in Device::list().expect("Error retrieving device list\r\n") {
@@ -271,18 +276,26 @@ impl Application for Sniffer {
                     dev_str.push_str(&format!("Device:  {}", dev.name));
                 }
                 Some(description) => {
-                    dev_str.push_str(&format!("Device:  {} ({})", dev.name.cyan(), description));
+                    dev_str.push_str(&format!("Device:  {}\nDescription:  {}", dev.name.cyan(), description));
                 }
             }
-            match dev.addresses.len() {
+            let num_addresses = dev.addresses.len();
+            match num_addresses {
                 0 => {},
                 1 => {dev_str.push_str("\nAddress:  ");},
                 _ => {dev_str.push_str("\nAddresses:  ");}
             }
 
+            let mut x = 0;
             for addr in dev.addresses {
+                x += 1;
                 let address_string = addr.addr.to_string();
-                dev_str.push_str(&format!("{}\n                           ", address_string));
+                if x == num_addresses {
+                    dev_str.push_str(&format!("{}", address_string));
+                }
+                else {
+                    dev_str.push_str(&format!("{}\n                           ", address_string));
+                }
             }
             dev_str_list.push((dev.name, dev_str));
         }
@@ -291,10 +304,10 @@ impl Application for Sniffer {
             .padding(20)
             .spacing(10)
             .height(Length::Fill)
-            .width(Length::FillPortion(5))
+            .width(Length::FillPortion(4))
             .push(Text::new("Select network adapter to inspect").size(32))
             .push(dev_str_list.iter().fold(
-                Scrollable::new(&mut self.scroll).padding(10).spacing(20).height(Length::FillPortion(8)),
+                Scrollable::new(&mut self.scroll).style(self.style).padding(10).spacing(20).height(Length::FillPortion(8)),
                 |scroll, adapter| {
                     scroll.push(Radio::new(
                         &adapter.0,
@@ -312,9 +325,7 @@ impl Application for Sniffer {
 
         let filtri = self.filters.lock().unwrap();
         let ip_active = &*filtri.ip;
-        let col_ip = Column::new()
-            .spacing(10)
-            .width(Length::FillPortion(2))
+        let col_ip_radio = Column::new().spacing(10)
             .push(Text::new("IP version").size(24))
             .push(Radio::new(
                 "ipv4",
@@ -334,11 +345,13 @@ impl Application for Sniffer {
                 Some(ip_active),
                 |version| Message::IpVersionSelection(version.to_string())
             ).size(15).style(self.style));
+        let col_ip = Column::new()
+            .spacing(10)
+            .width(Length::FillPortion(1))
+            .push(col_ip_radio);
 
         let transport_active = filtri.transport;
-        let col_transport = Column::new()
-            .spacing(10)
-            .width(Length::FillPortion(2))
+        let col_transport_radio = Column::new().spacing(10)
             .push(Text::new("Transport protocol").size(24))
             .push(Radio::new(
                 TransProtocol::TCP,
@@ -358,6 +371,14 @@ impl Application for Sniffer {
                 Some(transport_active),
                 |protocol| Message::TransportProtocolSelection(protocol)
             ).size(15).style(self.style));
+        let col_transport = Column::new()
+            .align_items(Alignment::Center)
+            .spacing(10)
+            .width(Length::FillPortion(2))
+            .push(col_transport_radio)
+            .push(Row::new().height(Length::FillPortion(2)))
+            .push(button_start)
+            .push(Row::new().height(Length::FillPortion(1)));
 
         let app_active = filtri.application;
         let picklist_app = PickList::new(
@@ -366,23 +387,17 @@ impl Application for Sniffer {
             Some(app_active),
             |protocol| Message::AppProtocolSelection(protocol),
         )
-            .width(Length::FillPortion(3))
             .placeholder("Select application protocol")
             .style(self.style);
         let mut col_app = Column::new()
             .width(Length::FillPortion(2))
-            .align_items(Alignment::Center)
             .spacing(10)
             .push(iced::Text::new("Application protocol").size(24))
             .push(picklist_app);
 
         let filters = Column::new().width(Length::FillPortion(6)).padding(20).spacing(20)
-            .push(Row::new().push(Text::new("Select network traffic filters").size(32)))
-            .align_items(Alignment::Center)
-            .push(Row::new().height(Length::FillPortion(3)).push(col_ip).push(col_transport).push(col_app))
-            .push(Row::new().height(Length::FillPortion(1)))
-            .push(button_start)
-            .push(Row::new().height(Length::FillPortion(1)));
+            .push(Row::new().push(Text::new("Select filters to be applied on network traffic").size(32)))
+            .push(Row::new().height(Length::FillPortion(3)).push(col_ip).push(col_transport).push(col_app));
 
 
         let sniffer = self.info_traffic.lock().unwrap();
@@ -396,7 +411,7 @@ impl Application for Sniffer {
         if sniffer.tot_received_packets + sniffer.tot_sent_packets > 0 {
             col_packets = col_packets
                 .push(iced::Text::new("Packets count per application protocol"))
-                .push(iced::Text::new(get_app_count_string(sniffer.app_protocols.clone(), sniffer.all_packets)));
+                .push(iced::Text::new(get_app_count_string(sniffer.app_protocols.clone(), sniffer.tot_received_packets + sniffer.tot_sent_packets)));
         }
         col_packets = col_packets.push(button_reset).push(button_report);
 
@@ -427,6 +442,7 @@ impl Application for Sniffer {
 mod style {
     use iced::{pick_list, container, Background, Color, Vector, Container, Element, Row, Application, button};
     use iced::container::{Style, StyleSheet};
+    use iced_style::scrollable::{Scrollbar, Scroller};
     use crate::Message;
 
     #[derive(Copy, Eq, PartialEq)]
@@ -608,6 +624,51 @@ mod style {
             }
         }
     }
+
+    impl iced_style::scrollable::StyleSheet for Mode {
+        fn active(&self) -> Scrollbar {
+            Scrollbar {
+                background: Some(Background::Color(match self {
+                    Mode::Day => Color{r: 0.9, g: 0.9, b: 0.9, a: 1.0,},
+                    Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
+                })),
+                border_radius: 12.0,
+                border_width: 0.0,
+                border_color: Color::BLACK,
+                scroller: Scroller {
+                    color: match self {
+                        Mode::Day => Color{r: 0.8, g: 0.8, b: 0.8, a: 1.0,},
+                        Mode::Night => Color{r: 0.2, g: 0.2, b: 0.2, a: 1.0,},
+                    },
+                    border_radius: 12.0,
+                    border_width: 2.0,
+                    border_color: Color::BLACK
+                }
+            }
+        }
+
+        fn hovered(&self) -> Scrollbar {
+            Scrollbar {
+                background: Some(Background::Color(match self {
+                    Mode::Day => Color{r: 0.9, g: 0.9, b: 0.9, a: 1.0,},
+                    Mode::Night => Color{r: 0.1, g: 0.1, b: 0.1, a: 1.0,},
+                })),
+                border_radius: 12.0,
+                border_width: 2.0,
+                border_color: Color::BLACK,
+                scroller: Scroller {
+                    color: match self {
+                        Mode::Day => Color{r: 0.0, g: 0.5, b: 0.8, a: 1.0,},
+                        Mode::Night => Color{r: 0.0, g: 0.8, b: 0.5, a: 1.0,},
+                    },
+                    border_radius: 12.0,
+                    border_width: 2.0,
+                    border_color: Color::BLACK
+                }
+            }
+        }
+    }
+
 }
 
 const ICONS: Font = Font::External {
@@ -621,4 +682,19 @@ fn icon(unicode: char) -> Text {
         .width(Length::Units(20))
         .horizontal_alignment(alignment::Horizontal::Center)
         .size(20)
+}
+
+fn icon_sun_moon(style: Mode) -> Text {
+    match style {
+        Mode::Night => {    Text::new(format!("{} {} {}", font_awesome::MOON, font_awesome::ANGLE_DOUBLE_RIGHT, font_awesome::SUN))
+            .font(ICONS)
+            .width(Length::Units(20))
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .size(20)}
+        Mode::Day => {    Text::new(format!("{} {} {}", font_awesome::SUN, font_awesome::ANGLE_DOUBLE_RIGHT, font_awesome::MOON))
+            .font(ICONS)
+            .width(Length::Units(20))
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .size(20)}
+    }
 }

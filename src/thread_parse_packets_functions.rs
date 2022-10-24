@@ -26,7 +26,7 @@ use crate::address_port_pair::TrafficType;
 /// * `network_layer` - A String representing the IP version to be filtered. Specified by the user through the
 /// ```-n``` option.
 ///
-/// * `transport_layer` - A TransProtocl representing the transport protocol to be filtered. Specified by the user through the
+/// * `transport_layer` - A TransProtocol representing the transport protocol to be filtered. Specified by the user through the
 /// ```-t``` option.
 ///
 /// * `app_layer` - An AppProtocol representing the application protocol to be filtered. Specified by the user through the
@@ -77,7 +77,8 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
         if *status == Status::Running {
             drop(status);
             //reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
-            if has_been_paused {
+            if has_been_paused { // TO BE FIXED!!!!!!!!!!!!!!!!!!
+                todo!();
                 cap = Capture::from_device(&*device.clone().lock().unwrap().name)
                     .expect("Capture initialization error\n\r")
                     .promisc(true)
