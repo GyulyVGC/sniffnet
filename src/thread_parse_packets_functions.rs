@@ -6,8 +6,9 @@ use std::sync::{Arc, Condvar, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
-use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Message, Status, TransProtocol};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
 use crate::address_port_pair::TrafficType;
+use crate::app::Message;
 
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
@@ -78,7 +79,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
             drop(status);
             //reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
             if has_been_paused { // TO BE FIXED!!!!!!!!!!!!!!!!!!
-                todo!();
+                //todo!();
                 cap = Capture::from_device(&*device.clone().lock().unwrap().name)
                     .expect("Capture initialization error\n\r")
                     .promisc(true)
