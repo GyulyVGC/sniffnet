@@ -3,11 +3,34 @@ use iced::container::{Style, StyleSheet};
 use iced_style::scrollable::{Scrollbar, Scroller};
 use crate::app::Message;
 
+
+pub const ICONS: Font = Font::External {
+    name: "Icons",
+    bytes: include_bytes!("../fonts/icons.ttf"),
+};
+
+
+pub const COURIER_PRIME: Font = Font::External {
+    name: "CourierPrimeSans",
+    bytes: include_bytes!("../fonts/CourierPrimeSans.ttf"),
+};
+
+pub const COURIER_PRIME_ITALIC: Font = Font::External {
+    name: "CourierPrimeSans",
+    bytes: include_bytes!("../fonts/CourierPrimeSansItalic.ttf"),
+};
+
+pub const FONT_SIZE_BODY: u16 = 16;
+pub const FONT_SIZE_SUBTITLE: u16 = 18;
+pub const FONT_SIZE_TITLE: u16 = 22;
+
+
 #[derive(Copy, Eq, PartialEq)]
 pub enum Mode {
     Night,
     Day
 }
+
 
 impl Clone for Mode {
     fn clone(&self) -> Self {
@@ -15,7 +38,9 @@ impl Clone for Mode {
     }
 }
 
+
 impl StyleSheet for Mode {
+
     fn style(&self) -> Style {
         Style {
             text_color: match self {
@@ -31,9 +56,12 @@ impl StyleSheet for Mode {
             border_color: Default::default()
         }
     }
+
 }
 
+
 impl pick_list::StyleSheet for Mode {
+
     fn menu(&self) -> iced_style::menu::Style {
         iced_style::menu::Style {
             text_color: match self {
@@ -102,6 +130,7 @@ impl pick_list::StyleSheet for Mode {
         }
     }
 }
+
 
 impl button::StyleSheet for Mode {
 
@@ -181,7 +210,9 @@ impl iced_style::radio::StyleSheet for Mode {
             text_color: None
         }
     }
+
 }
+
 
 impl iced_style::scrollable::StyleSheet for Mode {
 
@@ -229,10 +260,6 @@ impl iced_style::scrollable::StyleSheet for Mode {
 
 }
 
-pub const ICONS: Font = Font::External {
-    name: "Icons",
-    bytes: include_bytes!("../fonts/icons.ttf"),
-};
 
 pub fn icon(unicode: char) -> Text {
     Text::new(unicode.to_string())
@@ -241,6 +268,7 @@ pub fn icon(unicode: char) -> Text {
         .horizontal_alignment(alignment::Horizontal::Center)
         .size(20)
 }
+
 
 pub fn icon_sun_moon(style: Mode) -> Text {
     match style {
@@ -260,17 +288,3 @@ pub fn icon_sun_moon(style: Mode) -> Text {
         }
     }
 }
-
-pub const CourierPrime: Font = Font::External {
-    name: "CourierPrimeSans",
-    bytes: include_bytes!("../fonts/CourierPrimeSans.ttf"),
-};
-
-pub const CourierPrimeItalic: Font = Font::External {
-    name: "CourierPrimeSans",
-    bytes: include_bytes!("../fonts/CourierPrimeSansItalic.ttf"),
-};
-
-pub const FontSizeBody: u16 = 16;
-pub const FontSizeSubtitle: u16 = 18;
-pub const FontSizeTitle: u16 = 22;

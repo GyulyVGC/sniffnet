@@ -6,6 +6,8 @@ mod thread_write_report_functions;
 mod info_traffic;
 mod style;
 mod app;
+mod gui_initial_page;
+mod gui_run_page;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -34,7 +36,7 @@ use iced::futures::FutureExt;
 use iced_style::pane_grid::Line;
 use indexmap::IndexMap;
 use crate::info_traffic::InfoTraffic;
-use style::{Mode, FontSizeBody, FontSizeSubtitle, FontSizeTitle, icon_sun_moon};
+use style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
 
 
 pub struct Filters {
@@ -44,7 +46,7 @@ pub struct Filters {
 }
 
 
-struct Sniffer {
+pub struct Sniffer {
     info_traffic: Arc<Mutex<InfoTraffic>>,
     device: Arc<Mutex<Device>>,
     filters: Arc<Mutex<Filters>>,
@@ -60,7 +62,7 @@ struct Sniffer {
 
 
 /// This enum represents the sniffing process status.
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Status {
     /// Sniffnet has just been launched/restarted
     Init,
@@ -129,7 +131,7 @@ pub fn main() {
             style: Mode::Night
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSans.ttf")),
-        default_text_size: FontSizeBody,
+        default_text_size: FONT_SIZE_BODY,
         text_multithreading: false,
         antialiasing: false,
 
