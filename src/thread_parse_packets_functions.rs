@@ -65,6 +65,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256)
+        .immediate_mode(true)
         .open()
         .expect("Capture initialization error\n\r");
 
@@ -84,6 +85,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
                     .expect("Capture initialization error\n\r")
                     .promisc(true)
                     .snaplen(256)
+                    .immediate_mode(true)
                     .open()
                     .expect("Capture initialization error\n\r");
 

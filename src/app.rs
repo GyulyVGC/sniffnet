@@ -10,6 +10,10 @@ use crate::gui_run_page::run_page;
 use crate::style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
 
 
+pub const FPS_RUNNING: u64 = 2; //frame per second
+pub const PERIOD_INIT: u64 = 5; //seconds
+
+
 #[derive(Debug, Clone)]
 pub enum Message {
     Tick,
@@ -93,9 +97,12 @@ impl Application for Sniffer {
 
 
     fn subscription(&self) -> Subscription<Message> {
-        match self.status_pair.0.lock().unwrap() {
+        match *self.status_pair.0.lock().unwrap() {
+            Status::Running => {
+                iced::time::every(Duration::from_millis(1000/FPS_RUNNING)).map(|_| Message::Tick)
+            }
             _ => {
-                iced::time::every(Duration::from_millis(1000)).map(|_| Message::Tick)
+                iced::time::every(Duration::from_secs(PERIOD_INIT)).map(|_| Message::Tick)
             }
         }
     }
