@@ -1,17 +1,15 @@
-use std::os::macos::raw::stat;
-use crate::{get_app_count_string, InfoTraffic, Sniffer, Status};
-use iced::{ Svg, alignment, button, scrollable, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color, Radio, Scrollable, PickList, pick_list, Font, widget};
-use std::sync::{Arc, Mutex, Condvar};
+use crate::{InfoTraffic, Sniffer, Status};
+use iced::{ executor, Application, Column, Command, Container, Element, Length, Subscription};
 use std::time::Duration;
 use pcap::Device;
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::gui_initial_page::initial_page;
 use crate::gui_run_page::run_page;
-use crate::style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
+use crate::style::{Mode};
 
 
-pub const FPS_RUNNING: u64 = 2; //frame per second
-pub const PERIOD_INIT: u64 = 5; //seconds
+pub const PERIOD_RUNNING: u64 = 500; //milliseconds
+pub const PERIOD_INIT: u64 = 5000; //milliseconds
 
 
 #[derive(Debug, Clone)]
@@ -63,19 +61,25 @@ impl Application for Sniffer {
             }
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]
-                    let command = "explorer";
+                std::process::Command::new( "explorer" )
+                    .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
                 #[cfg(target_os = "macos")]
-                    let command = "open";
+                std::process::Command::new( "open" )
+                    .arg("-t")
+                    .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
                 #[cfg(target_os = "linux")]
-                    let command = "explorer";
-                std::process::Command::new( command )
+                std::process::Command::new( "explorer" )
                     .arg( "./sniffnet_report/report.txt" )
                     .spawn( )
                     .unwrap( );
             }
             Message::Start => {
                 *self.status_pair.0.lock().unwrap() = Status::Running;
-                &self.status_pair.1.notify_all();
+                self.status_pair.1.notify_all();
             }
             Message::Reset => {
                 let mut info_traffic = self.info_traffic.lock().unwrap();
@@ -99,10 +103,10 @@ impl Application for Sniffer {
     fn subscription(&self) -> Subscription<Message> {
         match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
-                iced::time::every(Duration::from_millis(1000/FPS_RUNNING)).map(|_| Message::Tick)
+                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::Tick)
             }
             _ => {
-                iced::time::every(Duration::from_secs(PERIOD_INIT)).map(|_| Message::Tick)
+                iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::Tick)
             }
         }
     }
@@ -125,8 +129,7 @@ impl Application for Sniffer {
         };
 
         Container::new(
-            Column::new()
-                .push(body)
+            body
         )
             .width(Length::Fill)
             .height(Length::Fill)

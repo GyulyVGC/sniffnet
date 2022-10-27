@@ -15,7 +15,6 @@ use chrono::{Local};
 use std::io::{BufWriter, Seek, SeekFrom, Write};
 use colored::Colorize;
 use thousands::Separable;
-use plotters::prelude::*;
 use crate::{AppProtocol, Filters, InfoTraffic, Status, TransProtocol};
 
 use std::time::{Instant};

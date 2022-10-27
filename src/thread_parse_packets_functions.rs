@@ -6,9 +6,8 @@ use std::sync::{Arc, Condvar, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
 use pcap::{Capture, Device};
-use crate::{address_port_pair::AddressPortPair, AppProtocol, Command, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
 use crate::address_port_pair::TrafficType;
-use crate::app::Message;
 
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according

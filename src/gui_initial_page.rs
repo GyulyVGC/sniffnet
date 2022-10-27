@@ -1,4 +1,4 @@
-use iced::{alignment, Alignment, Button, Column, Length, PickList, Radio, Renderer, Row, Scrollable, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Length, PickList, Radio, Row, Scrollable, Svg, Text};
 use pcap::Device;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Sniffer, TransProtocol};
@@ -156,7 +156,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
         .placeholder("Select application protocol")
         .style(sniffer.style);
-    let mut col_app = Column::new()
+    let col_app = Column::new()
         .width(Length::FillPortion(2))
         .spacing(10)
         .push(iced::Text::new("Application protocol").size(FONT_SIZE_SUBTITLE))

@@ -26,7 +26,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_reset = Button::new(
         &mut sniffer.reset,
-        Text::new("Reset").horizontal_alignment(alignment::Horizontal::Center),
+        Text::new("Reset")
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center)
     )
         .padding(10)
         .height(Length::Units(40))
@@ -36,11 +38,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_report = Button::new(
         &mut sniffer.report,
-        Text::new("Open network traffic report").horizontal_alignment(alignment::Horizontal::Center),
+        Text::new("Open full report")
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center)
     )
         .padding(10)
         .height(Length::Units(40))
-        .width(Length::Units(270))
+        .width(Length::Units(200))
         .style(sniffer.style)
         .on_press(Message::OpenReport);
 

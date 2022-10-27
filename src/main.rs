@@ -9,32 +9,14 @@ mod app;
 mod gui_initial_page;
 mod gui_run_page;
 
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
-use std::time::Duration;
-use font_awesome;
-use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
-use iced::{ Svg, alignment, button, scrollable, executor, Alignment, Application, Button, Column, Command, Container, Element, Length, Row, Settings, Subscription, Text, Color, Radio, Scrollable, PickList, pick_list, Font, widget};
-use pcap::{Capture, Device};
+use pcap::{Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::thread_parse_packets_functions::parse_packets_loop;
-use std::cmp::Ordering::Equal;
-use crate::args::Args;
 use crate::thread_write_report_functions::sleep_and_write_report_loop;
 use crate::thread_write_report_functions::get_app_count_string;
-use clap::Parser;
-use std::{io, panic, process, thread};
-use std::borrow::BorrowMut;
-use std::collections::{HashMap, HashSet};
-use std::io::Write;
+use std::{thread};
 use std::sync::{Arc, Mutex, Condvar};
-use crossterm::{screen::RawScreen,  input::{input, InputEvent, KeyEvent}};
-use colored::Colorize;
-use iced::canvas::LineDash;
-use iced::futures::FutureExt;
-use iced_style::pane_grid::Line;
-use indexmap::IndexMap;
+use iced::{Application, button, pick_list, scrollable, Settings, window};
 use crate::info_traffic::InfoTraffic;
 use style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
 
@@ -74,7 +56,7 @@ pub enum Status {
     Stop
 }
 
-pub fn main() {
+pub fn main() -> iced::Result {
 
     //shared tuple containing:
     // - the map of the address:ports pairs with the relative info
@@ -116,7 +98,17 @@ pub fn main() {
 
     Sniffer::run(Settings {
         id: None,
-        window: Default::default(),
+        window: window::Settings {
+            size: (5000, 5000),
+            position: Default::default(),
+            min_size: None,
+            max_size: None,
+            resizable: true,
+            decorations: true,
+            transparent: false,
+            always_on_top: false,
+            icon: None
+        },
         flags: Sniffer {
             info_traffic: mutex_map3,
             device: found_device3,
@@ -132,11 +124,10 @@ pub fn main() {
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSans.ttf")),
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: false,
+        text_multithreading: true, //to be evaluated
         antialiasing: false,
-
         exit_on_close_request: true,
         try_opengles_first: false
-    });
+    })
 
 }

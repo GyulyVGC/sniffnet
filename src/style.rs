@@ -1,7 +1,6 @@
-use iced::{pick_list, container, Background, Color, Vector, Container, Element, Row, Application, button, Font, Text, Length, alignment};
+use iced::{pick_list, Background, Color, Vector, button, Font, Text, Length, alignment};
 use iced::container::{Style, StyleSheet};
 use iced_style::scrollable::{Scrollbar, Scroller};
-use crate::app::Message;
 
 
 pub const ICONS: Font = Font::External {

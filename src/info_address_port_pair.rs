@@ -2,7 +2,7 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
-use clap::App;
+
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
