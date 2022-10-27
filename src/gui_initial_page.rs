@@ -74,9 +74,9 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .width(Length::FillPortion(4))
         .push(Text::new("Select network adapter to inspect").size(FONT_SIZE_TITLE))
         .push(dev_str_list.iter().fold(
-            Scrollable::new(&mut sniffer.scroll).style(sniffer.style).padding(10).spacing(20).height(Length::FillPortion(8)),
-            |scroll, adapter| {
-                scroll.push(Radio::new(
+            Scrollable::new(&mut sniffer.scroll_adapters).style(sniffer.style).padding(10).spacing(20).height(Length::FillPortion(8)),
+            |scroll_adapters, adapter| {
+                scroll_adapters.push(Radio::new(
                     &adapter.0,
                     &adapter.1,
                     Some(&sniffer.device.clone().lock().unwrap().name),

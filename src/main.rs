@@ -38,7 +38,8 @@ pub struct Sniffer {
     mode: button::State,
     report: button::State,
     app: pick_list::State<AppProtocol>,
-    scroll: scrollable::State,
+    scroll_adapters: scrollable::State,
+    scroll_run: scrollable::State,
     style: Mode
 }
 
@@ -99,9 +100,9 @@ pub fn main() -> iced::Result {
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
-            size: (5000, 5000),
+            size: (1280, 800),
             position: Default::default(),
-            min_size: None,
+            min_size: Some((1185, 0)), //allow to reduce the most I can sustain
             max_size: None,
             resizable: true,
             decorations: true,
@@ -119,7 +120,8 @@ pub fn main() -> iced::Result {
             mode: button::State::new(),
             report: button::State::new(),
             app: pick_list::State::new(),
-            scroll: scrollable::State::new(),
+            scroll_adapters: scrollable::State::new(),
+            scroll_run: scrollable::State::new(),
             style: Mode::Night
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSans.ttf")),

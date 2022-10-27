@@ -24,6 +24,18 @@ pub struct InfoAddressPortPair {
     pub very_long_address: bool
 }
 
+
+impl InfoAddressPortPair {
+
+    pub  fn print_without_timestamps(&self) -> String {
+        // format!("   {}   |{:^9}|{:>10}  |{:>10}  |", self.trans_protocol, app_string,
+        //         self.transmitted_packets, bytes_string)
+        self.to_string().get(0..47).unwrap().to_string()
+    }
+
+}
+
+
 impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut multiple_transmitted = "".to_string();
