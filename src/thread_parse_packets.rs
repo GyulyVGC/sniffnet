@@ -5,6 +5,7 @@ use std::cmp::Ordering::Equal;
 use std::sync::{Arc, Condvar, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
+use iced::Command;
 use pcap::{Capture, Device};
 use crate::{address_port_pair::AddressPortPair, AppProtocol, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
 use crate::address_port_pair::TrafficType;
@@ -62,13 +63,16 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
     let mut skip_packet;
     let mut reported_packet;
 
-    let mut cap = Capture::from_device(&*device.clone().lock().unwrap().name)
+    let cap_result = Capture::from_device(&*device.clone().lock().unwrap().name)
         .expect("Capture initialization error\n\r")
         .promisc(true)
-        .snaplen(256)
-        .immediate_mode(true)
-        .open()
-        .expect("Capture initialization error\n\r");
+        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
+        .immediate_mode(true) //parse packets ASAP!
+        .open();
+    if cap_result.is_err() {
+        return;
+    }
+    let mut cap = cap_result.unwrap();
 
     loop {
         match cap.next_packet() {

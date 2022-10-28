@@ -1,8 +1,11 @@
 use iced::{alignment, Alignment, Button, Column, Container, Element, Length, PickList, Radio, Row, Scrollable, Svg, Text};
-use iced::alignment::Horizontal;
+use iced::alignment::{Horizontal, Vertical};
+use iced::Font::Default;
+use iced::Length::FillPortion;
 use pcap::Device;
 use crate::app::Message;
-use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Sniffer, TransProtocol};
+use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
+use crate::style::{COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
@@ -20,7 +23,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::Style);
 
     let header = Row::new()
-        .height(Length::FillPortion(3))
+        .height(Length::FillPortion(HEIGHT_HEADER))
         .width(Length::Fill)
         .align_items(Alignment::Center)
         .push(Container::new(Row::new()).width(Length::FillPortion(1)).align_x(Horizontal::Center))
@@ -29,7 +32,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_start = Button::new(
         &mut sniffer.start,
-        Text::new("Run!").vertical_alignment(alignment::Vertical::Center).horizontal_alignment(alignment::Horizontal::Center),
+        Text::new("Run!").size(FONT_SIZE_TITLE).vertical_alignment(alignment::Vertical::Center).horizontal_alignment(alignment::Horizontal::Center),
     )
         .padding(10)
         .height(Length::Units(80))
@@ -70,20 +73,20 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     }
 
     let col_adapter = Column::new()
-        .padding(20)
-        .spacing(10)
+        .padding(10)
+        .spacing(5)
         .height(Length::Fill)
         .width(Length::FillPortion(4))
         .push(Text::new("Select network adapter to inspect").size(FONT_SIZE_TITLE))
         .push(dev_str_list.iter().fold(
-            Scrollable::new(&mut sniffer.scroll_adapters).style(sniffer.style).padding(10).spacing(20).height(Length::FillPortion(8)),
+            Scrollable::new(&mut sniffer.scroll_adapters).style(sniffer.style).padding(13).spacing(5),
             |scroll_adapters, adapter| {
-                scroll_adapters.push(Radio::new(
+                scroll_adapters.push(Container::new(Radio::new(
                     &adapter.0,
                     &adapter.1,
                     Some(&sniffer.device.clone().lock().unwrap().name),
                     |name| Message::AdapterSelection(name.to_string()),
-                ).size(15).style(sniffer.style))
+                ).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::Bordered))
             },
         ));
 
@@ -164,17 +167,40 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(iced::Text::new("Application protocol").size(FONT_SIZE_SUBTITLE))
         .push(picklist_app);
 
-    let filters = Column::new().width(Length::FillPortion(6)).padding(20).spacing(20)
+    let filters = Column::new().width(Length::FillPortion(6)).padding(10).spacing(15)
         .push(Row::new().push(Text::new("Select filters to be applied on network traffic").size(FONT_SIZE_TITLE)))
         .push(Row::new().height(Length::FillPortion(3)).push(col_ip).push(col_transport).push(col_app));
 
-    let body = Row::new().height(Length::FillPortion(9))
+    let body = Row::new().height(Length::FillPortion(HEIGHT_BODY))
         .push(col_adapter)
         .push(col_space)
         .push(filters);
 
+    let button_github = Button::new(
+        &mut sniffer.git,
+        icon('\u{f09b}').size(30)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center)
+    )
+        .height(Length::Units(35))
+        .width(Length::Units(35))
+        .style(sniffer.style)
+        .on_press(Message::OpenGithub);
+    let footer_row = Row::new()
+        .align_items(Alignment::Center)
+        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(COURIER_PRIME_ITALIC))
+        .push(button_github)
+        .push(Text::new("  "));
+    let footer = Container::new(footer_row)
+        .width(Length::Fill)
+        .height(FillPortion(HEIGHT_FOOTER))
+        .align_y(Vertical::Center)
+        .align_x(Horizontal::Center)
+        .style(Mode::Bordered);
+
     Column::new()
         .push(header)
         .push(body)
+        .push(footer)
 
 }

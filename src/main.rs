@@ -13,7 +13,7 @@ use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::thread_write_report::get_app_count_string;
-use std::{thread};
+use std::{panic, process, thread};
 use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
 use crate::info_traffic::InfoTraffic;
@@ -37,6 +37,7 @@ pub struct Sniffer {
     reset: button::State,
     mode: button::State,
     report: button::State,
+    git: button::State,
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
     scroll_run: scrollable::State,
@@ -84,6 +85,14 @@ pub fn main() -> iced::Result {
     }));
     let filters2 = filters1.clone();
 
+    // to kill the main thread as soon as a secondary thread panics
+    let orig_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        // invoke the default handler and exit the process
+        orig_hook(panic_info);
+        process::exit(1);
+    }));
+
     thread::spawn(move || {
         sleep_and_write_report_loop(current_capture_id2, 0, 65535, 1,
                                     found_device2, filters2, "./sniffnet_report".to_string(),
@@ -113,6 +122,7 @@ pub fn main() -> iced::Result {
             reset: button::State::new(),
             mode: button::State::new(),
             report: button::State::new(),
+            git: button::State::new(),
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
             scroll_run: scrollable::State::new(),

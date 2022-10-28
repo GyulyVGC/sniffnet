@@ -21,6 +21,7 @@ pub enum Message {
     TransportProtocolSelection(TransProtocol),
     AppProtocolSelection(AppProtocol),
     OpenReport,
+    OpenGithub,
     Start,
     Reset,
     Style
@@ -70,6 +71,23 @@ impl Application for Sniffer {
                 std::process::Command::new( "open" )
                     .arg("-t")
                     .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
+                #[cfg(target_os = "linux")]
+                std::process::Command::new( "explorer" )
+                    .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
+            }
+            Message::OpenGithub => {
+                #[cfg(target_os = "windows")]
+                std::process::Command::new( "explorer" )
+                    .arg( "./sniffnet_report/report.txt" )
+                    .spawn( )
+                    .unwrap( );
+                #[cfg(target_os = "macos")]
+                std::process::Command::new( "open" )
+                    .arg( "https://github.com/GyulyVGC/sniffnet" )
                     .spawn( )
                     .unwrap( );
                 #[cfg(target_os = "linux")]

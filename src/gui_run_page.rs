@@ -1,12 +1,13 @@
 use std::cmp::min;
 use std::fmt::format;
 use iced::{alignment, Alignment, Button, Column, Container, Length, Renderer, Row, Scrollable, Svg, Text};
-use iced::alignment::Horizontal;
+use iced::alignment::{Horizontal, Vertical};
+use iced::Length::FillPortion;
 use crate::app::Message;
-use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, Sniffer};
+use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer};
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
-use crate::style::icon;
+use crate::style::{COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
@@ -36,7 +37,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::Reset);
 
     let header = Row::new()
-        .height(Length::FillPortion(3))
+        .height(Length::FillPortion(HEIGHT_HEADER))
         .width(Length::Fill)
         .align_items(Alignment::Center)
         .push(Container::new(button_reset).width(Length::FillPortion(1)).align_x(Horizontal::Center))
@@ -96,14 +97,37 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             .push(col_open_report);
     }
 
-    let body = Column::new().height(Length::FillPortion(9))
+    let body = Column::new().height(Length::FillPortion(HEIGHT_BODY))
         .align_items(Alignment::Center)
         .spacing(10)
         .push(col_packets)
         .push(row_report);
 
+    let button_github = Button::new(
+        &mut sniffer.git,
+        icon('\u{f09b}').size(30)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center)
+    )
+        .height(Length::Units(35))
+        .width(Length::Units(35))
+        .style(sniffer.style)
+        .on_press(Message::OpenGithub);
+    let footer_row = Row::new()
+        .align_items(Alignment::Center)
+        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(COURIER_PRIME_ITALIC))
+        .push(button_github)
+        .push(Text::new("  "));
+    let footer = Container::new(footer_row)
+        .width(Length::Fill)
+        .height(FillPortion(HEIGHT_FOOTER))
+        .align_y(Vertical::Center)
+        .align_x(Horizontal::Center)
+        .style(Mode::Bordered);
+
     Column::new()
         .push(header)
         .push(body)
+        .push(footer)
 
 }

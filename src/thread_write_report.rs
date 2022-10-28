@@ -108,6 +108,13 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
         // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
 
+        if *current_capture_id.lock().unwrap() != capture_id {
+            output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
+            writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+            writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
+            writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
+        }
+
         let tot_seconds = (Local::now() - time_origin).num_seconds();
 
         if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Running {
@@ -119,13 +126,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
             let all_packets = info_traffic.all_packets;
             let tot_sent_bytes = info_traffic.tot_sent_bytes;
             let tot_received_bytes = info_traffic.tot_received_bytes;
-
-            if *current_capture_id.lock().unwrap() != capture_id {
-                output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
-                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-                writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
-                writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
-            }
 
             start = Instant::now();
 
