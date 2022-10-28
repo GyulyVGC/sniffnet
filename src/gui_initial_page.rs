@@ -1,4 +1,5 @@
-use iced::{alignment, Alignment, Button, Column, Length, PickList, Radio, Row, Scrollable, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Element, Length, PickList, Radio, Row, Scrollable, Svg, Text};
+use iced::alignment::Horizontal;
 use pcap::Device;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Sniffer, TransProtocol};
@@ -20,10 +21,11 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let header = Row::new()
         .height(Length::FillPortion(3))
+        .width(Length::Fill)
         .align_items(Alignment::Center)
-        .push(Column::new().width(Length::FillPortion(1)))
-        .push(Column::new().width(Length::FillPortion(6)).push(logo))
-        .push(Row::new().width(Length::FillPortion(1)).align_items(Alignment::Center).push(button_style));
+        .push(Container::new(Row::new()).width(Length::FillPortion(1)).align_x(Horizontal::Center))
+        .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
+        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center));
 
     let button_start = Button::new(
         &mut sniffer.start,

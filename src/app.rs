@@ -1,4 +1,5 @@
-use crate::{InfoTraffic, Sniffer, Status};
+use std::thread;
+use crate::{InfoTraffic, parse_packets_loop, Sniffer, Status};
 use iced::{ executor, Application, Column, Command, Container, Element, Length, Subscription};
 use std::time::Duration;
 use pcap::Device;
@@ -78,13 +79,22 @@ impl Application for Sniffer {
                     .unwrap( );
             }
             Message::Start => {
+                let current_capture_id = self.current_capture_id.clone();
+                let device = self.device.clone();
+                let filters = self.filters.clone();
+                let info_traffic_mutex = self.info_traffic.clone();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 self.status_pair.1.notify_all();
+                thread::spawn(move || {
+                    parse_packets_loop(current_capture_id, device,
+                                       0, 65535, filters,
+                                       info_traffic_mutex);
+                });
             }
             Message::Reset => {
+                *self.current_capture_id.lock().unwrap() += 1; //change capture id to stop previous thread capturing
                 let mut info_traffic = self.info_traffic.lock().unwrap();
                 *info_traffic = InfoTraffic::new();
-                info_traffic.reset();
                 *self.status_pair.0.lock().unwrap() = Status::Init;
             }
             Message::Style => {

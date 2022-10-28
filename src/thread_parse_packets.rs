@@ -35,20 +35,22 @@ use crate::address_port_pair::TrafficType;
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
+pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
                           filters: Arc<Mutex<Filters>>,
-                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-                          status_pair: Arc<(Mutex<Status>, Condvar)>) {
+                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>) {
 
-    let cvar = &status_pair.1;
-
-    let mut has_been_paused = true;
+    let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
+    for address in device.lock().unwrap().clone().addresses {
+        my_interface_addresses.push(address.addr.to_string());
+    }
 
-    let mut network_layer_filter = "no filter".to_string();
-    let mut transport_layer= TransProtocol::Other;
-    let mut app_layer= AppProtocol::Other;
+    let filtri = filters.lock().unwrap();
+    let network_layer_filter = filtri.ip.clone();
+    let transport_layer = filtri.transport;
+    let app_layer = filtri.application;
+    drop(filtri);
 
     let mut network_layer = "".to_string();
     let mut port1 = 0;
@@ -60,7 +62,7 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
     let mut skip_packet;
     let mut reported_packet;
 
-    let mut cap = Capture::from_device(Device::lookup().unwrap().unwrap())
+    let mut cap = Capture::from_device(&*device.clone().lock().unwrap().name)
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256)
@@ -69,138 +71,102 @@ pub fn parse_packets_loop(device: Arc<Mutex<Device>>, lowest_port: u16, highest_
         .expect("Capture initialization error\n\r");
 
     loop {
-        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
-        while *status == Status::Pause || *status == Status::Init {
-            status = cvar.wait(status).expect("Error acquiring mutex\n\r");
-            has_been_paused = true; //to reinitialize the capture handle -- TO FIX!!!!!
-        }
-
-        if *status == Status::Running {
-            drop(status);
-            //reinitialize the capture handle, in order to NOT parse packets accumulated in the pcap buffer during pause
-            if has_been_paused { // TO BE FIXED!!!!!!!!!!!!!!!!!!
-                //todo!();
-                cap = Capture::from_device(&*device.clone().lock().unwrap().name)
-                    .expect("Capture initialization error\n\r")
-                    .promisc(true)
-                    .snaplen(256)
-                    .immediate_mode(true)
-                    .open()
-                    .expect("Capture initialization error\n\r");
-
-                my_interface_addresses = Vec::new();
-                for address in device.lock().unwrap().clone().addresses {
-                    my_interface_addresses.push(address.addr.to_string());
+        match cap.next_packet() {
+            Err(_) => {
+                if *current_capture_id.lock().unwrap() != capture_id {
+                    return;
                 }
-
-                let filtri = filters.lock().unwrap();
-                network_layer_filter = filtri.ip.clone();
-                transport_layer = filtri.transport;
-                app_layer = filtri.application;
-
-                has_been_paused = false;
+                continue;
             }
-
-            match cap.next_packet() {
-                Err(_) => {
-                    continue;
+            Ok(packet) => {
+                if *current_capture_id.lock().unwrap() != capture_id {
+                    return;
                 }
-                Ok(packet) => {
-                    match PacketHeaders::from_ethernet_slice(&packet) {
-                        Err(_) => {
+                match PacketHeaders::from_ethernet_slice(&packet) {
+                    Err(_) => {
+                        continue;
+                    }
+                    Ok(value) => {
+                        let mut address1 = "".to_string();
+                        let mut address2 = "".to_string();
+                        transport_protocol = TransProtocol::Other;
+                        application_protocol = AppProtocol::Other;
+                        traffic_type = TrafficType::Other;
+                        skip_packet = false;
+                        reported_packet = false;
+
+                        analyze_network_header(value.ip, &mut exchanged_bytes,
+                                               &mut network_layer, &mut address1, &mut address2,
+                                               &mut skip_packet);
+                        if skip_packet {
                             continue;
                         }
-                        Ok(value) => {
-                            let mut address1 = "".to_string();
-                            let mut address2 = "".to_string();
-                            transport_protocol = TransProtocol::Other;
-                            application_protocol = AppProtocol::Other;
-                            traffic_type = TrafficType::Other;
-                            skip_packet = false;
-                            reported_packet = false;
 
-                            analyze_network_header(value.ip, &mut exchanged_bytes,
-                                                   &mut network_layer, &mut address1, &mut address2,
-                                                   &mut skip_packet);
-                            if skip_packet {
-                                continue;
+                        analyze_transport_header(value.transport,
+                                                 &mut port1, &mut port2,
+                                                 &mut application_protocol,
+                                                 &mut transport_protocol, &mut skip_packet);
+                        if skip_packet {
+                            continue;
+                        }
+
+                        let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+                        //increment number of sniffed packets
+                        info_traffic.all_packets += 1;
+
+                        drop(info_traffic);
+
+                        if my_interface_addresses.contains(&address1) {
+                            traffic_type = TrafficType::Outgoing;
+                        } else if my_interface_addresses.contains(&address2) {
+                            traffic_type = TrafficType::Incoming;
+                        } else if is_multicast_address(&address2) {
+                            traffic_type = TrafficType::Multicast;
+                        }
+
+                        let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
+                                                                        transport_protocol, traffic_type);
+
+
+                        if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
+                            && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
+                            && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
+                            if (port1 >= lowest_port && port1 <= highest_port)
+                                || (port2 >= lowest_port && port2 <= highest_port) {
+                                modify_or_insert_in_map(info_traffic_mutex.clone(), key,
+                                                        exchanged_bytes, transport_protocol,
+                                                        application_protocol);
+                                reported_packet = true;
                             }
 
-                            analyze_transport_header(value.transport,
-                                                     &mut port1, &mut port2,
-                                                     &mut application_protocol,
-                                                     &mut transport_protocol, &mut skip_packet);
-                            if skip_packet {
-                                continue;
-                            }
+                            if reported_packet {
+                                //increment the packet count for the sniffed app protocol
+                                info_traffic_mutex.lock().unwrap().app_protocols
+                                    .entry(application_protocol)
+                                    .and_modify(|n| { *n += 1 })
+                                    .or_insert(1);
 
-                            let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
-                            //increment number of sniffed packets
-                            info_traffic.all_packets += 1;
-
-                            drop(info_traffic);
-
-                            if my_interface_addresses.contains(&address1) {
-                                traffic_type = TrafficType::Outgoing;
-                            }
-                            else if my_interface_addresses.contains(&address2) {
-                                traffic_type = TrafficType::Incoming;
-                            }
-                            else if is_multicast_address(&address2) {
-                                traffic_type = TrafficType::Multicast;
-                            }
-
-                            let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
-                                                                            transport_protocol, traffic_type);
-
-
-                            if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
-                                && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
-                                    && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
-
-                                        if (port1 >= lowest_port && port1 <= highest_port)
-                                            || (port2 >= lowest_port && port2 <= highest_port)  {
-                                            modify_or_insert_in_map(info_traffic_mutex.clone(), key,
-                                                                           exchanged_bytes, transport_protocol,
-                                                                           application_protocol);
-                                            reported_packet = true;
-                                        }
-
-                                        if reported_packet {
-                                            //increment the packet count for the sniffed app protocol
-                                            info_traffic_mutex.lock().unwrap().app_protocols
-                                                .entry(application_protocol)
-                                                .and_modify(|n| {*n+=1})
-                                                .or_insert(1);
-
-                                            if traffic_type == TrafficType::Incoming
-                                                || traffic_type == TrafficType::Multicast {
-                                                //increment number of received packets and bytes
-                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                                    .tot_received_packets += 1;
-                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                                    .tot_received_bytes += exchanged_bytes;
-                                            }
-                                            else {
-                                                //increment number of sent packets and bytes
-                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                                    .tot_sent_packets += 1;
-                                                info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                                    .tot_sent_bytes += exchanged_bytes;
-                                            }
-                                        }
-
+                                if traffic_type == TrafficType::Incoming
+                                    || traffic_type == TrafficType::Multicast {
+                                    //increment number of received packets and bytes
+                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                        .tot_received_packets += 1;
+                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                        .tot_received_bytes += exchanged_bytes;
+                                } else {
+                                    //increment number of sent packets and bytes
+                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                        .tot_sent_packets += 1;
+                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
+                                        .tot_sent_bytes += exchanged_bytes;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        else if *status == Status::Stop {
-            return;
-        }
     }
-
 }
 
 
@@ -233,15 +199,15 @@ fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mu
         Some(IpHeader::Version4(ipv4header, _)) => {
             *network_layer = "ipv4".to_string();
             *address1 = format!("{:?}", ipv4header.source)
-                .replace('[',"")
-                .replace(']',"")
-                .replace(',',".")
-                .replace(' ',"");
+                .replace('[', "")
+                .replace(']', "")
+                .replace(',', ".")
+                .replace(' ', "");
             *address2 = format!("{:?}", ipv4header.destination)
-                .replace('[',"")
-                .replace(']',"")
-                .replace(',',".")
-                .replace(' ',"");
+                .replace('[', "")
+                .replace(']', "")
+                .replace(',', ".")
+                .replace(' ', "");
             *exchanged_bytes = ipv4header.payload_len as u128;
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
@@ -334,7 +300,8 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
     info_traffic.map.entry(key.clone()).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
-        info.final_timestamp = now.clone();})
+        info.final_timestamp = now.clone();
+    })
         .or_insert(InfoAddressPortPair {
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
@@ -342,7 +309,7 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
             final_timestamp: now,
             trans_protocol: transport_protocol,
             app_protocol: application_protocol,
-            very_long_address: key.address1.len() > 25 || key.address2.len() > 25
+            very_long_address: key.address1.len() > 25 || key.address2.len() > 25,
         });
     info_traffic.addresses_last_interval.insert(key);
 }
@@ -395,7 +362,7 @@ fn from_port_to_application_protocol(port: u16) -> AppProtocol {
         1900 => AppProtocol::SSDP,
         5222 => AppProtocol::XMPP,
         5353 => AppProtocol::mDNS,
-        _ => {AppProtocol::Other}
+        _ => { AppProtocol::Other }
     }
 }
 
@@ -411,8 +378,7 @@ fn is_multicast_address(address: &str) -> bool {
         if address.starts_with("ff") {
             ret_val = true;
         }
-    }
-    else { //IPv4 address
+    } else { //IPv4 address
         let first_group = address.split('.').next().unwrap().to_string().parse::<u8>().unwrap();
         if (224..=239).contains(&first_group) {
             ret_val = true;
@@ -436,7 +402,7 @@ fn is_multicast_address(address: &str) -> bool {
 /// let result = ipv6_from_long_dec_to_short_hex([255,10,10,255,0,0,0,0,28,4,4,28,255,1,0,0]);
 /// assert_eq!(result, "ff0a:aff::1c04:41c:ff01:0".to_string());
 /// ```
-fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
+fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 
     //from hex to dec, paying attention to the correct number of digits
     let mut ipv6_hex = "".to_string();
@@ -450,12 +416,11 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
         }
 
         //dispari: secondo byte del gruppo
-        else if *ipv6_long.get(i-1).unwrap() == 0 {
-                ipv6_hex.push_str(&format!("{:x}:", ipv6_long.get(i).unwrap()));
-            }
-            else {
-                ipv6_hex.push_str(&format!("{:02x}:", ipv6_long.get(i).unwrap()));
-            }
+        else if *ipv6_long.get(i - 1).unwrap() == 0 {
+            ipv6_hex.push_str(&format!("{:x}:", ipv6_long.get(i).unwrap()));
+        } else {
+            ipv6_hex.push_str(&format!("{:02x}:", ipv6_long.get(i).unwrap()));
+        }
     }
     ipv6_hex.pop();
 
@@ -472,14 +437,13 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
                 current_zero_sequence_start = i;
             }
             current_zero_sequence += 1;
-        }
-        else if current_zero_sequence != 0 {
-                if current_zero_sequence > longest_zero_sequence {
-                    longest_zero_sequence = current_zero_sequence;
-                    longest_zero_sequence_start = current_zero_sequence_start;
-                }
-                current_zero_sequence = 0;
+        } else if current_zero_sequence != 0 {
+            if current_zero_sequence > longest_zero_sequence {
+                longest_zero_sequence = current_zero_sequence;
+                longest_zero_sequence_start = current_zero_sequence_start;
             }
+            current_zero_sequence = 0;
+        }
         i += 1;
     }
     if current_zero_sequence != 0 { // to catch consecutive zeros at the end
@@ -510,7 +474,7 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
         }
     }
     if ipv6_hex_compressed.ends_with("::") {
-        return  ipv6_hex_compressed;
+        return ipv6_hex_compressed;
     }
     ipv6_hex_compressed.pop();
 
@@ -520,91 +484,89 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8;16]) -> String {
 
 #[cfg(test)]
 mod ipv6_format_tests {
-
-    use crate::thread_parse_packets_functions::ipv6_from_long_dec_to_short_hex;
+    use crate::thread_parse_packets::ipv6_from_long_dec_to_short_hex;
 
     #[test]
     fn simple_test() {
-        let result = ipv6_from_long_dec_to_short_hex([255,10,10,255,255,10,10,255,255,10,10,255,255,10,10,255,]);
+        let result = ipv6_from_long_dec_to_short_hex([255, 10, 10, 255, 255, 10, 10, 255, 255, 10, 10, 255, 255, 10, 10, 255, ]);
         assert_eq!(result, "ff0a:aff:ff0a:aff:ff0a:aff:ff0a:aff".to_string());
     }
 
     #[test]
     fn zeros_in_the_middle() {
-        let result = ipv6_from_long_dec_to_short_hex([255,10,10,255,0,0,0,0,28,4,4,28,255,1,0,0]);
+        let result = ipv6_from_long_dec_to_short_hex([255, 10, 10, 255, 0, 0, 0, 0, 28, 4, 4, 28, 255, 1, 0, 0]);
         assert_eq!(result, "ff0a:aff::1c04:41c:ff01:0".to_string());
     }
 
     #[test]
     fn leading_zeros() {
-        let result = ipv6_from_long_dec_to_short_hex([0,0,0,0,0,0,0,0,28,4,4,28,255,1,0,10]);
+        let result = ipv6_from_long_dec_to_short_hex([0, 0, 0, 0, 0, 0, 0, 0, 28, 4, 4, 28, 255, 1, 0, 10]);
         assert_eq!(result, "::1c04:41c:ff01:a".to_string());
     }
 
     #[test]
     fn tail_one_after_zeros() {
-        let result = ipv6_from_long_dec_to_short_hex([28,4,4,28,255,1,0,10,0,0,0,0,0,0,0,1]);
+        let result = ipv6_from_long_dec_to_short_hex([28, 4, 4, 28, 255, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1]);
         assert_eq!(result, "1c04:41c:ff01:a::1".to_string());
     }
 
     #[test]
     fn tail_zeros() {
-        let result = ipv6_from_long_dec_to_short_hex([28,4,4,28,255,1,0,10,0,0,0,0,0,0,0,0]);
+        let result = ipv6_from_long_dec_to_short_hex([28, 4, 4, 28, 255, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0]);
         assert_eq!(result, "1c04:41c:ff01:a::".to_string());
     }
 
     #[test]
     fn multiple_zero_sequences_first_longer() {
-        let result = ipv6_from_long_dec_to_short_hex([32,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1]);
+        let result = ipv6_from_long_dec_to_short_hex([32, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1]);
         assert_eq!(result, "2000::101:0:0:1".to_string());
     }
 
     #[test]
     fn multiple_zero_sequences_first_longer_head() {
-        let result = ipv6_from_long_dec_to_short_hex([0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1]);
+        let result = ipv6_from_long_dec_to_short_hex([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1]);
         assert_eq!(result, "::101:0:0:1".to_string());
     }
 
     #[test]
     fn multiple_zero_sequences_second_longer() {
-        let result = ipv6_from_long_dec_to_short_hex([1,0,0,0,0,0,0,1,0,0,0,0,0,0,3,118]);
+        let result = ipv6_from_long_dec_to_short_hex([1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3, 118]);
         assert_eq!(result, "100:0:0:1::376".to_string());
     }
 
     #[test]
     fn multiple_zero_sequences_second_longer_tail() {
-        let result = ipv6_from_long_dec_to_short_hex([32,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0]);
+        let result = ipv6_from_long_dec_to_short_hex([32, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]);
         assert_eq!(result, "2000:0:0:1:101::".to_string());
     }
 
     #[test]
     fn multiple_zero_sequences_equal_length() {
-        let result = ipv6_from_long_dec_to_short_hex([118,3,0,0,0,0,0,1,1,1,0,0,0,0,0,1]);
+        let result = ipv6_from_long_dec_to_short_hex([118, 3, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1]);
         assert_eq!(result, "7603::1:101:0:0:1".to_string());
     }
 
     #[test]
     fn all_zeros() {
-        let result = ipv6_from_long_dec_to_short_hex([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        let result = ipv6_from_long_dec_to_short_hex([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         assert_eq!(result, "::".to_string());
     }
 
     #[test]
     fn x_all_zeros() {
-        let result = ipv6_from_long_dec_to_short_hex([161,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        let result = ipv6_from_long_dec_to_short_hex([161, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         assert_eq!(result, "a100::".to_string());
     }
 
     #[test]
     fn all_zeros_x() {
-        let result = ipv6_from_long_dec_to_short_hex([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,176]);
+        let result = ipv6_from_long_dec_to_short_hex([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176]);
         assert_eq!(result, "::b0".to_string());
     }
 
     #[test]
     fn many_zeros_but_no_compression() {
-        let result = ipv6_from_long_dec_to_short_hex([0,16, 16,0, 0,1, 7,0, 0,2, 216,0, 1,0, 0,1]);
+        let result = ipv6_from_long_dec_to_short_hex([0, 16, 16, 0, 0, 1, 7, 0, 0, 2, 216, 0, 1, 0, 0, 1]);
         assert_eq!(result, "10:1000:1:700:2:d800:100:1".to_string());
     }
-
 }

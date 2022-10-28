@@ -28,9 +28,7 @@ pub struct InfoAddressPortPair {
 impl InfoAddressPortPair {
 
     pub  fn print_without_timestamps(&self) -> String {
-        // format!("   {}   |{:^9}|{:>10}  |{:>10}  |", self.trans_protocol, app_string,
-        //         self.transmitted_packets, bytes_string)
-        self.to_string().get(0..47).unwrap().to_string()
+        self.to_string().get(0..46).unwrap().to_string()
     }
 
 }

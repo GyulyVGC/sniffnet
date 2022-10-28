@@ -1,8 +1,7 @@
-mod thread_parse_packets_functions;
+mod thread_parse_packets;
 mod address_port_pair;
 mod info_address_port_pair;
-mod args;
-mod thread_write_report_functions;
+mod thread_write_report;
 mod info_traffic;
 mod style;
 mod app;
@@ -11,9 +10,9 @@ mod gui_run_page;
 
 use pcap::{Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
-use crate::thread_parse_packets_functions::parse_packets_loop;
-use crate::thread_write_report_functions::sleep_and_write_report_loop;
-use crate::thread_write_report_functions::get_app_count_string;
+use crate::thread_parse_packets::parse_packets_loop;
+use crate::thread_write_report::sleep_and_write_report_loop;
+use crate::thread_write_report::get_app_count_string;
 use std::{thread};
 use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
@@ -29,6 +28,7 @@ pub struct Filters {
 
 
 pub struct Sniffer {
+    current_capture_id: Arc<Mutex<u16>>,
     info_traffic: Arc<Mutex<InfoTraffic>>,
     device: Arc<Mutex<Device>>,
     filters: Arc<Mutex<Filters>>,
@@ -59,6 +59,9 @@ pub enum Status {
 
 pub fn main() -> iced::Result {
 
+    let current_capture_id1 = Arc::new(Mutex::new(0));
+    let current_capture_id2 = current_capture_id1.clone();
+
     //shared tuple containing:
     // - the map of the address:ports pairs with the relative info
     // - the total number of sniffed packets
@@ -66,16 +69,13 @@ pub fn main() -> iced::Result {
     // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2= mutex_map1.clone();
-    let mutex_map3= mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 =  status_pair1.clone();
-    let status_pair3 =  status_pair1.clone();
 
     let found_device1 = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
     let found_device2 = found_device1.clone();
-    let found_device3 = found_device1.clone();
 
     let filters1 = Arc::new(Mutex::new(Filters {
         ip: "no filter".to_string(),
@@ -83,18 +83,11 @@ pub fn main() -> iced::Result {
         application: AppProtocol::Other
     }));
     let filters2 = filters1.clone();
-    let filters3 = filters1.clone();
 
     thread::spawn(move || {
-        sleep_and_write_report_loop(0, 65535, 1,
+        sleep_and_write_report_loop(current_capture_id2, 0, 65535, 1,
                                     found_device2, filters2, "./sniffnet_report".to_string(),
                                     mutex_map2, status_pair2);
-    });
-
-    thread::spawn(move || {
-        parse_packets_loop(found_device1, 0, 65535,
-                           filters1,
-                           mutex_map1, status_pair1);
     });
 
     Sniffer::run(Settings {
@@ -111,10 +104,11 @@ pub fn main() -> iced::Result {
             icon: None
         },
         flags: Sniffer {
-            info_traffic: mutex_map3,
-            device: found_device3,
-            filters: filters3,
-            status_pair: status_pair3,
+            current_capture_id: current_capture_id1,
+            info_traffic: mutex_map1,
+            device: found_device1,
+            filters: filters1,
+            status_pair: status_pair1,
             start: button::State::new(),
             reset: button::State::new(),
             mode: button::State::new(),

@@ -1,14 +1,16 @@
 use std::cmp::min;
 use std::fmt::format;
-use iced::{alignment, Alignment, Button, Column, Length, Renderer, Row, Scrollable, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Length, Renderer, Row, Scrollable, Svg, Text};
+use iced::alignment::Horizontal;
 use crate::app::Message;
 use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, Sniffer};
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
+use crate::style::icon;
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
-    let logo = Svg::from_path("./resources/logo.svg");
+    let logo = Svg::from_path("./resources/sniffnet_logo.svg");
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -21,16 +23,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .style(sniffer.style)
         .on_press(Message::Style);
 
-    let header = Row::new()
-        .height(Length::FillPortion(2))
-        .align_items(Alignment::Center)
-        //.push(Column::new().width(Length::FillPortion(1)))
-        //.push(Column::new().width(Length::FillPortion(2)).push(logo))
-        .push(Row::new().width(Length::FillPortion(1)).align_items(Alignment::Center).push(button_style));
-
     let button_reset = Button::new(
         &mut sniffer.reset,
-        Text::new("Reset")
+        icon('\u{f177}')
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center)
     )
@@ -39,6 +34,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .width(Length::Units(80))
         .style(sniffer.style)
         .on_press(Message::Reset);
+
+    let header = Row::new()
+        .height(Length::FillPortion(3))
+        .width(Length::Fill)
+        .align_items(Alignment::Center)
+        .push(Container::new(button_reset).width(Length::FillPortion(1)).align_x(Horizontal::Center))
+        .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
+        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center));
 
     let button_report = Button::new(
         &mut sniffer.report,
@@ -65,7 +68,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             .push(iced::Text::new("Packets count per application protocol"))
             .push(iced::Text::new(get_app_count_string(sniffer_lock.app_protocols.clone(), sniffer_lock.tot_received_packets + sniffer_lock.tot_sent_packets)));
     }
-    col_packets = col_packets.push(button_reset);
 
     let mut row_report = Row::new()
         .align_items(Alignment::Center);

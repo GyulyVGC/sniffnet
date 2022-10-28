@@ -54,7 +54,7 @@ use plotters::style::full_palette::{GREEN_800, GREY};
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval: u64,
+pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_port: u16, highest_port: u16, interval: u64,
                                    device: Arc<Mutex<Device>>, filters: Arc<Mutex<Filters>>,
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
@@ -103,6 +103,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
 
     loop {
+        let capture_id = *current_capture_id.lock().unwrap();
+
         // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
 
@@ -118,9 +120,8 @@ pub fn sleep_and_write_report_loop(lowest_port: u16, highest_port: u16, interval
             let tot_sent_bytes = info_traffic.tot_sent_bytes;
             let tot_received_bytes = info_traffic.tot_received_bytes;
 
-            if info_traffic.reset {
+            if *current_capture_id.lock().unwrap() != capture_id {
                 output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
-                info_traffic.reset = false;
                 writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
                 writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
                 writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
