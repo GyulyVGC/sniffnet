@@ -1,8 +1,8 @@
 use std::cmp::min;
-use std::fmt::format;
-use iced::{alignment, Alignment, Button, Column, Container, Length, Renderer, Row, Scrollable, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Length, Row, Svg, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
+use thousands::Separable;
 use crate::app::Message;
 use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer};
 use crate::address_port_pair::AddressPortPair;
@@ -63,7 +63,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .align_items(Alignment::Center)
         .spacing(20)
         .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()))
-        .push(iced::Text::new(sniffer_lock.all_packets.to_string()));
+        .push(Text::new(format!("Total intercepted packets: {}",
+                                sniffer_lock.all_packets.separate_with_spaces())))
+        .push(Text::new(format!("Filtered packets: {}",
+                                (sniffer_lock.tot_received_packets + sniffer_lock.tot_sent_packets).separate_with_spaces())));
     if sniffer_lock.tot_received_packets + sniffer_lock.tot_sent_packets > 0 {
         col_packets = col_packets
             .push(iced::Text::new("Packets count per application protocol"))

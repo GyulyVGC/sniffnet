@@ -1,6 +1,5 @@
-use iced::{alignment, Alignment, Button, Column, Container, Element, Length, PickList, Radio, Row, Scrollable, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Length, PickList, Radio, Row, Scrollable, Svg, Text};
 use iced::alignment::{Horizontal, Vertical};
-use iced::Font::Default;
 use iced::Length::FillPortion;
 use pcap::Device;
 use crate::app::Message;
@@ -58,16 +57,9 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             _ => {dev_str.push_str("\nAddresses:");}
         }
 
-        let mut x = 0;
         for addr in dev.addresses {
-            x += 1;
             let address_string = addr.addr.to_string();
-            // if x == num_addresses {
-            //     dev_str.push_str(&format!("{}", address_string));
-            // }
-            //else {
             dev_str.push_str(&format!("\n    {}", address_string));
-            //}
         }
         dev_str_list.push((dev.name, dev_str));
     }

@@ -2,12 +2,11 @@
 //! inserting them in the shared map.
 
 use std::cmp::Ordering::Equal;
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Mutex};
 use chrono::{Local};
 use etherparse::{IpHeader, PacketHeaders, TransportHeader};
-use iced::Command;
 use pcap::{Capture, Device};
-use crate::{address_port_pair::AddressPortPair, AppProtocol, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, Status, TransProtocol};
+use crate::{address_port_pair::AddressPortPair, AppProtocol, Filters, info_address_port_pair::InfoAddressPortPair, InfoTraffic, TransProtocol};
 use crate::address_port_pair::TrafficType;
 
 

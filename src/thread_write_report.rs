@@ -13,13 +13,10 @@ use std::time::{Duration};
 use std::{fs, thread};
 use chrono::{Local};
 use std::io::{BufWriter, Seek, SeekFrom, Write};
-use colored::Colorize;
 use thousands::Separable;
 use crate::{AppProtocol, Filters, InfoTraffic, Status, TransProtocol};
-
 use std::time::{Instant};
 use pcap::Device;
-use plotters::style::full_palette::{GREEN_800, GREY};
 
 
 /// The calling thread enters in a loop in which it waits for ```interval``` seconds and then re-write
@@ -59,12 +56,14 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
+    let cvar = &status_pair.1;
+
     if fs::create_dir(output_folder.clone()).is_err() {
         fs::remove_dir_all(output_folder.clone()).unwrap();
         fs::create_dir(output_folder.clone()).unwrap();
     }
 
-    let path_graph = &*format!("{}/bandwidth.svg", output_folder);
+    // let path_graph = &*format!("{}/bandwidth.svg", output_folder);
     let path_report = format!("{}/report.txt", output_folder);
     let path_statistics = format!("{}/statistics.txt", output_folder);
 
@@ -74,28 +73,30 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
     let mut network_layer = "no filter".to_string();
     let mut transport_layer= TransProtocol::Other;
     let mut app_layer= AppProtocol::Other;
+    let mut update_filters = true;
 
     let mut start;
     let mut _time_header = 0;
     let mut _time_header_sort = 0;
     let mut _time_header_sort_print = 0;
-    //let mut _start_drawing;
 
-    let mut sent_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    let mut tot_sent_bits_prev: i128 = 0;
-    let mut min_sent_bits_second: i128 = 0;
+    // let mut sent_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    // let mut tot_sent_bits_prev: i128 = 0;
+    // let mut min_sent_bits_second: i128 = 0;
+    //
+    // let mut received_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    // let mut tot_received_bits_prev: i128 = 0;
+    // let mut max_received_bits_second: i128 = 0;
+    //
+    // let mut sent_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    // let mut tot_sent_packets_prev: i128 = 0;
+    // let mut min_sent_packets_second: i128 = 0;
+    //
+    // let mut received_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
+    // let mut tot_received_packets_prev: i128 = 0;
+    // let mut max_received_packets_second: i128 = 0;
 
-    let mut received_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    let mut tot_received_bits_prev: i128 = 0;
-    let mut max_received_bits_second: i128 = 0;
-
-    let mut sent_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    let mut tot_sent_packets_prev: i128 = 0;
-    let mut min_sent_packets_second: i128 = 0;
-
-    let mut received_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    let mut tot_received_packets_prev: i128 = 0;
-    let mut max_received_packets_second: i128 = 0;
+    let mut capture_id = *current_capture_id.lock().unwrap();
 
     let mut output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
@@ -103,39 +104,49 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
 
     loop {
-        let capture_id = *current_capture_id.lock().unwrap();
-
         // sleep interval seconds
         thread::sleep(Duration::from_secs(interval));
 
-        if *current_capture_id.lock().unwrap() != capture_id {
+        let current_capture_id_lock = current_capture_id.lock().unwrap();
+        if *current_capture_id_lock != capture_id {
+            update_filters = true;
+            capture_id = *current_capture_id_lock;
             output = BufWriter::new(File::create(path_report.clone()).expect("Error creating output file\n\r"));
             writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
             writeln!(output, "|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |  Initial timestamp  |   Final timestamp   |").expect("Error writing output file\n\r");
             writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
         }
+        drop(current_capture_id_lock);
 
-        let tot_seconds = (Local::now() - time_origin).num_seconds();
+        // let tot_seconds = (Local::now() - time_origin).num_seconds();
 
-        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Running {
+        let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
+
+        if *status == Status::Running {
+
+            drop(status);
 
             let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
             let tot_sent_packets = info_traffic.tot_sent_packets;
             let tot_received_packets = info_traffic.tot_received_packets;
             let all_packets = info_traffic.all_packets;
-            let tot_sent_bytes = info_traffic.tot_sent_bytes;
-            let tot_received_bytes = info_traffic.tot_received_bytes;
+            // let tot_sent_bytes = info_traffic.tot_sent_bytes;
+            // let tot_received_bytes = info_traffic.tot_received_bytes;
 
             start = Instant::now();
 
             let mut output2 = BufWriter::new(File::create(path_statistics.clone()).expect("Error creating output file\n\r"));
 
-            let filtri = filters.lock().unwrap();
-            network_layer = filtri.ip.clone();
-            transport_layer = filtri.transport;
-            app_layer = filtri.application;
-            drop(filtri);
+            if update_filters {
+                let filtri = filters.lock().unwrap();
+                network_layer = filtri.ip.clone();
+                transport_layer = filtri.transport;
+                app_layer = filtri.application;
+                drop(filtri);
+                update_filters = false;
+            }
+
             write_statistics(output2.get_mut().try_clone().expect("Error cloning file handler\n\r"),
                                      device.lock().unwrap().name.to_string(), first_timestamp.clone(),
                                      lowest_port, highest_port, network_layer.clone(),
@@ -302,11 +313,13 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
         //     sent_packets_graph.push((tot_seconds as u128,0));
         //     received_packets_graph.push((tot_seconds as u128,0));
         }
-
-        if *status_pair.0.lock().expect("Error acquiring mutex\n\r") == Status::Stop {
-            println!("{}{}{}\r", "\tThe final reports are available in the folder '".cyan().italic(),
-                     output_folder.cyan().bold(), "'\n\n\r".cyan().italic());
+        else if *status == Status::Stop {
             return;
+        }
+        else { //status is Init
+            while *status == Status::Init {
+                status = cvar.wait(status).expect("Error acquiring mutex\n\r");
+            }
         }
     }
 }

@@ -101,6 +101,7 @@ impl Application for Sniffer {
                 let device = self.device.clone();
                 let filters = self.filters.clone();
                 let info_traffic_mutex = self.info_traffic.clone();
+                *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 self.status_pair.1.notify_all();
                 thread::spawn(move || {
@@ -110,9 +111,7 @@ impl Application for Sniffer {
                 });
             }
             Message::Reset => {
-                *self.current_capture_id.lock().unwrap() += 1; //change capture id to stop previous thread capturing
-                let mut info_traffic = self.info_traffic.lock().unwrap();
-                *info_traffic = InfoTraffic::new();
+                *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 *self.status_pair.0.lock().unwrap() = Status::Init;
             }
             Message::Style => {
@@ -152,7 +151,6 @@ impl Application for Sniffer {
             Status::Running => {
                 run_page(self)
             }
-            Status::Pause => {Column::new()}
             Status::Stop => {Column::new()}
         };
 

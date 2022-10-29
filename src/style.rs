@@ -9,10 +9,10 @@ pub const ICONS: Font = Font::External {
 };
 
 
-pub const COURIER_PRIME: Font = Font::External {
-    name: "CourierPrimeSans",
-    bytes: include_bytes!("../fonts/CourierPrimeSans.ttf"),
-};
+// pub const COURIER_PRIME: Font = Font::External {
+//     name: "CourierPrimeSans",
+//     bytes: include_bytes!("../fonts/CourierPrimeSans.ttf"),
+// };
 
 pub const COURIER_PRIME_ITALIC: Font = Font::External {
     name: "CourierPrimeSans",

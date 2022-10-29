@@ -40,7 +40,6 @@ pub struct Sniffer {
     git: button::State,
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
-    scroll_run: scrollable::State,
     style: Mode
 }
 
@@ -48,12 +47,10 @@ pub struct Sniffer {
 /// This enum represents the sniffing process status.
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Status {
-    /// Sniffnet has just been launched/restarted
+    /// Sniffnet has just been launched/restarted and GUI is in the main screen.
     Init,
     /// The sniffing process is running: the application parses packets and periodically update the output report.
     Running,
-    /// The sniffing process is pause by the user and waiting to be later resumed.
-    Pause,
     /// The sniffing process is killed.
     Stop
 }
@@ -125,7 +122,6 @@ pub fn main() -> iced::Result {
             git: button::State::new(),
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
-            scroll_run: scrollable::State::new(),
             style: Mode::Night
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSans.ttf")),
