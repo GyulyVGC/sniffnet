@@ -38,7 +38,6 @@ use crate::address_port_pair::TrafficType;
 pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
                           filters: Arc<Mutex<Filters>>,
                           info_traffic_mutex: Arc<Mutex<InfoTraffic>>) {
-
     let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
@@ -113,12 +112,6 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                             continue;
                         }
 
-                        let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
-                        //increment number of sniffed packets
-                        info_traffic.all_packets += 1;
-
-                        drop(info_traffic);
-
                         if my_interface_addresses.contains(&address1) {
                             traffic_type = TrafficType::Outgoing;
                         } else if my_interface_addresses.contains(&address2) {
@@ -130,7 +123,6 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
                                                                         transport_protocol, traffic_type);
 
-
                         if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
                             && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
                             && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
@@ -141,28 +133,28 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                                                         application_protocol);
                                 reported_packet = true;
                             }
+                        }
 
-                            if reported_packet {
-                                //increment the packet count for the sniffed app protocol
-                                info_traffic_mutex.lock().unwrap().app_protocols
-                                    .entry(application_protocol)
-                                    .and_modify(|n| { *n += 1 })
-                                    .or_insert(1);
+                        let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+                        //increment number of sniffed packets
+                        info_traffic.all_packets += 1;
 
-                                if traffic_type == TrafficType::Incoming
-                                    || traffic_type == TrafficType::Multicast {
-                                    //increment number of received packets and bytes
-                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                        .tot_received_packets += 1;
-                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                        .tot_received_bytes += exchanged_bytes;
-                                } else {
-                                    //increment number of sent packets and bytes
-                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                        .tot_sent_packets += 1;
-                                    info_traffic_mutex.lock().expect("Error acquiring mutex\n\r")
-                                        .tot_sent_bytes += exchanged_bytes;
-                                }
+                        if reported_packet {
+                            //increment the packet count for the sniffed app protocol
+                            info_traffic.app_protocols
+                                .entry(application_protocol)
+                                .and_modify(|n| { *n += 1 })
+                                .or_insert(1);
+
+                            if traffic_type == TrafficType::Incoming
+                                || traffic_type == TrafficType::Multicast {
+                                //increment number of received packets and bytes
+                                info_traffic.tot_received_packets += 1;
+                                info_traffic.tot_received_bytes += exchanged_bytes;
+                            } else {
+                                //increment number of sent packets and bytes
+                                info_traffic.tot_sent_packets += 1;
+                                info_traffic.tot_sent_bytes += exchanged_bytes;
                             }
                         }
                     }

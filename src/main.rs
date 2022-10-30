@@ -23,7 +23,7 @@ use style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_
 pub struct Filters {
     ip: String,
     transport: TransProtocol,
-    application: AppProtocol
+    application: AppProtocol,
 }
 
 
@@ -40,7 +40,7 @@ pub struct Sniffer {
     git: button::State,
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
-    style: Mode
+    style: Mode,
 }
 
 
@@ -52,11 +52,10 @@ pub enum Status {
     /// The sniffing process is running: the application parses packets and periodically update the output report.
     Running,
     /// The sniffing process is killed.
-    Stop
+    Stop,
 }
 
 pub fn main() -> iced::Result {
-
     let current_capture_id1 = Arc::new(Mutex::new(0));
     let current_capture_id2 = current_capture_id1.clone();
 
@@ -66,11 +65,11 @@ pub fn main() -> iced::Result {
     // - the number of filtered packets
     // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
-    let mutex_map2= mutex_map1.clone();
+    let mutex_map2 = mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
-    let status_pair2 =  status_pair1.clone();
+    let status_pair2 = status_pair1.clone();
 
     let found_device1 = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
     let found_device2 = found_device1.clone();
@@ -78,7 +77,7 @@ pub fn main() -> iced::Result {
     let filters1 = Arc::new(Mutex::new(Filters {
         ip: "no filter".to_string(),
         transport: TransProtocol::Other,
-        application: AppProtocol::Other
+        application: AppProtocol::Other,
     }));
     let filters2 = filters1.clone();
 
@@ -107,7 +106,7 @@ pub fn main() -> iced::Result {
             decorations: true,
             transparent: false,
             always_on_top: false,
-            icon: None
+            icon: None,
         },
         flags: Sniffer {
             current_capture_id: current_capture_id1,
@@ -122,14 +121,13 @@ pub fn main() -> iced::Result {
             git: button::State::new(),
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
-            style: Mode::Night
+            style: Mode::Night,
         },
-        default_font: Some(include_bytes!("../fonts/CourierPrimeSans.ttf")),
+        default_font: Some(include_bytes!("../fonts/CourierPrimeSansBold.ttf")),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true, //to be evaluated
         antialiasing: false,
         exit_on_close_request: true,
-        try_opengles_first: false
+        try_opengles_first: false,
     })
-
 }

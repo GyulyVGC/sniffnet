@@ -21,16 +21,14 @@ pub struct InfoAddressPortPair {
     /// Set of application layer protocols carried through the associate address:port pair.
     pub app_protocol: AppProtocol,
     /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
-    pub very_long_address: bool
+    pub very_long_address: bool,
 }
 
 
 impl InfoAddressPortPair {
-
-    pub  fn print_without_timestamps(&self) -> String {
+    pub fn print_without_timestamps(&self) -> String {
         self.to_string().get(0..46).unwrap().to_string()
     }
-
 }
 
 
@@ -40,22 +38,34 @@ impl fmt::Display for InfoAddressPortPair {
         let mut n = self.transmitted_bytes as f32;
 
         match self.transmitted_bytes {
-            0..=999 => {},
-            1_000..=999_999 => {n /= 1000_f32; multiple_transmitted.push('k'); }, // kilo
-            1_000_000..=999_999_999 => {n /= 1_000_000_f32; multiple_transmitted.push('M');}, // mega
-            1_000_000_000..=999_999_999_999 => {n /= 1_000_000_000_f32; multiple_transmitted.push('G');}, // giga
-            _ => {n /= 1_000_000_000_000_f32; multiple_transmitted.push('T');} // tera
+            0..=999 => {}
+            1_000..=999_999 => {
+                n /= 1000_f32;
+                multiple_transmitted.push('k');
+            } // kilo
+            1_000_000..=999_999_999 => {
+                n /= 1_000_000_f32;
+                multiple_transmitted.push('M');
+            } // mega
+            1_000_000_000..=999_999_999_999 => {
+                n /= 1_000_000_000_f32;
+                multiple_transmitted.push('G');
+            } // giga
+            _ => {
+                n /= 1_000_000_000_000_f32;
+                multiple_transmitted.push('T');
+            } // tera
         }
 
         let bytes_string = if !multiple_transmitted.is_empty() { // with multiple
-                format!("{:.1} {}B", n, multiple_transmitted)
-            } else { // no multiple
-                format!("{}  B", n)
-            };
+            format!("{:.1} {}B", n, multiple_transmitted)
+        } else { // no multiple
+            format!("{}  B", n)
+        };
 
         let app_string = match self.app_protocol {
-            AppProtocol::Other => {"Other".to_string()}
-            _ => {self.app_protocol.to_string()}
+            AppProtocol::Other => { "Other".to_string() }
+            _ => { self.app_protocol.to_string() }
         };
 
         if self.very_long_address {
@@ -63,14 +73,12 @@ impl fmt::Display for InfoAddressPortPair {
                    self.trans_protocol, app_string,
                    self.transmitted_packets, bytes_string,
                    self.initial_timestamp, self.final_timestamp)
-        }
-        else {
+        } else {
             write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
                    self.trans_protocol, app_string,
                    self.transmitted_packets, bytes_string,
                    self.initial_timestamp, self.final_timestamp, " ".repeat(40))
         }
-
     }
 }
 
@@ -83,7 +91,7 @@ pub enum TransProtocol {
     /// User Datagram Protocol
     UDP,
     /// Not identified
-    Other
+    Other,
 }
 
 
@@ -147,7 +155,7 @@ pub enum AppProtocol {
     /// Extensible Messaging and Presence Protocol |
     XMPP,
     /// not identified
-    Other
+    Other,
 }
 
 
@@ -155,8 +163,7 @@ impl fmt::Display for AppProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.eq(&AppProtocol::Other) {
             write!(f, "All protocols")
-        }
-        else {
+        } else {
             write!(f, "{:?}", self)
         }
     }

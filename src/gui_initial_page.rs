@@ -4,10 +4,9 @@ use iced::Length::FillPortion;
 use pcap::Device;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
+use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
-
     let logo = Svg::from_path("./resources/sniffnet_logo.svg");
 
     let button_style = Button::new(
@@ -52,9 +51,9 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         }
         let num_addresses = dev.addresses.len();
         match num_addresses {
-            0 => {},
-            1 => {dev_str.push_str("\nAddress:");},
-            _ => {dev_str.push_str("\nAddresses:");}
+            0 => {}
+            1 => { dev_str.push_str("\nAddress:"); }
+            _ => { dev_str.push_str("\nAddresses:"); }
         }
 
         for addr in dev.addresses {
@@ -95,19 +94,19 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             "ipv4",
             "IPv4",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string())
+            |version| Message::IpVersionSelection(version.to_string()),
         ).size(15).style(sniffer.style))
         .push(Radio::new(
             "ipv6",
             "IPv6",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string())
+            |version| Message::IpVersionSelection(version.to_string()),
         ).size(15).style(sniffer.style))
         .push(Radio::new(
             "no filter",
             "both",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string())
+            |version| Message::IpVersionSelection(version.to_string()),
         ).size(15).style(sniffer.style));
     let col_ip = Column::new()
         .spacing(10)
@@ -121,19 +120,19 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             TransProtocol::TCP,
             "TCP",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol)
+            |protocol| Message::TransportProtocolSelection(protocol),
         ).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::UDP,
             "UDP",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol)
+            |protocol| Message::TransportProtocolSelection(protocol),
         ).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::Other,
             "both",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol)
+            |protocol| Message::TransportProtocolSelection(protocol),
         ).size(15).style(sniffer.style));
     let col_transport = Column::new()
         .align_items(Alignment::Center)
@@ -172,7 +171,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         &mut sniffer.git,
         icon('\u{f09b}').size(30)
             .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center)
+            .vertical_alignment(alignment::Vertical::Center),
     )
         .height(Length::Units(35))
         .width(Length::Units(35))
@@ -180,7 +179,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(COURIER_PRIME_ITALIC))
+        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(COURIER_PRIME_BOLD_ITALIC))
         .push(button_github)
         .push(Text::new("  "));
     let footer = Container::new(footer_row)
@@ -194,5 +193,4 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(header)
         .push(body)
         .push(footer)
-
 }
