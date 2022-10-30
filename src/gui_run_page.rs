@@ -60,15 +60,47 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let filtered = sniffer_lock.tot_sent_packets + sniffer_lock.tot_received_packets;
     drop(sniffer_lock);
 
-    let mut body = Column::new().height(Length::FillPortion(HEIGHT_BODY))
+    let mut body = Column::new()
+        .height(Length::FillPortion(HEIGHT_BODY))
+        .width(Length::Fill)
         .align_items(Alignment::Center)
         .spacing(10);
 
     match (observed, filtered) {
         (0, 0) => { //no packets observed at all
+            if sniffer.waiting.len() > 5 {
+                sniffer.waiting = "".to_string();
+            }
+            sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+            let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
+            let nothing_to_see_text = Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+                                                              Network adapter: {}\n\n\
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name));
+            body = body
+                .push(Row::new().height(Length::FillPortion(1)))
+                .push(Text::new(sniffer.waiting.clone()).size(50))
+                .push(nothing_to_see_text)
+                .push(Text::new(sniffer.waiting.clone()).size(50))
+                .push(Row::new().height(Length::FillPortion(2)));
         }
 
         (_observed, 0) => { //no packets have been filtered but some have been observed
+            if sniffer.waiting.len() > 5 {
+                sniffer.waiting = "".to_string();
+            }
+            sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+
+            let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
+                                                    Filtered packets: 0\n\n\
+                                                    Some packets have been intercepted, but still none has been selected according to the filters you specified...",
+                                                     observed.separate_with_spaces()));
+
+            body = body
+                .push(Row::new().height(Length::FillPortion(1)))
+                .push(Text::new(sniffer.waiting.clone()).size(50))
+                .push(tot_packets_text)
+                .push(Text::new(sniffer.waiting.clone()).size(50))
+                .push(Row::new().height(Length::FillPortion(2)));
         }
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0

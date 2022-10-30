@@ -41,6 +41,7 @@ pub struct Sniffer {
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
     style: Mode,
+    waiting: String
 }
 
 
@@ -122,6 +123,7 @@ pub fn main() -> iced::Result {
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
             style: Mode::Night,
+            waiting: String::new()
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSansBold.ttf")),
         default_text_size: FONT_SIZE_BODY,
