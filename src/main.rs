@@ -13,6 +13,7 @@ use crate::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::thread_write_report::get_app_count_string;
+use crate::gui_run_page::TrafficChart;
 use std::{panic, process, thread};
 use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
@@ -41,7 +42,8 @@ pub struct Sniffer {
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
     style: Mode,
-    waiting: String
+    waiting: String,
+    traffic_chart: TrafficChart,
 }
 
 
@@ -67,6 +69,7 @@ pub fn main() -> iced::Result {
     // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
+    let mutex_map3 = mutex_map1.clone();
 
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
@@ -123,7 +126,8 @@ pub fn main() -> iced::Result {
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
             style: Mode::Night,
-            waiting: String::new()
+            waiting: String::new(),
+            traffic_chart: TrafficChart::new(mutex_map3)
         },
         default_font: Some(include_bytes!("../fonts/CourierPrimeSansBold.ttf")),
         default_text_size: FONT_SIZE_BODY,

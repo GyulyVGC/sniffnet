@@ -63,7 +63,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
         fs::create_dir(output_folder.clone()).unwrap();
     }
 
-    // let path_graph = &*format!("{}/bandwidth.svg", output_folder);
     let path_report = format!("{}/report.txt", output_folder);
     let path_statistics = format!("{}/statistics.txt", output_folder);
 
@@ -75,25 +74,16 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
     let mut app_layer= AppProtocol::Other;
     let mut update_filters = true;
 
-    let mut start;
     let mut _time_header = 0;
     let mut _time_header_sort = 0;
     let mut _time_header_sort_print = 0;
 
-    // let mut sent_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    // let mut tot_sent_bits_prev: i128 = 0;
     // let mut min_sent_bits_second: i128 = 0;
-    //
-    // let mut received_bits_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    // let mut tot_received_bits_prev: i128 = 0;
+
     // let mut max_received_bits_second: i128 = 0;
-    //
-    // let mut sent_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    // let mut tot_sent_packets_prev: i128 = 0;
+
     // let mut min_sent_packets_second: i128 = 0;
-    //
-    // let mut received_packets_graph: Vec<(u128, i128)> = vec![(0, 0)];
-    // let mut tot_received_packets_prev: i128 = 0;
+
     // let mut max_received_packets_second: i128 = 0;
 
     let mut capture_id = *current_capture_id.lock().unwrap();
@@ -129,10 +119,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
             let tot_sent_packets = info_traffic.tot_sent_packets;
             let tot_received_packets = info_traffic.tot_received_packets;
             let all_packets = info_traffic.all_packets;
-            // let tot_sent_bytes = info_traffic.tot_sent_bytes;
-            // let tot_received_bytes = info_traffic.tot_received_bytes;
-
-            start = Instant::now();
 
             let mut output2 = BufWriter::new(File::create(path_statistics.clone()).expect("Error creating output file\n\r"));
 
@@ -154,11 +140,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
                                      info_traffic.app_protocols.clone());
             output2.flush().expect("Error writing output file\n\r");
 
-            _time_header = start.elapsed().as_millis();
-
-
-            let _num_written_tuples_interval = info_traffic.addresses_last_interval.len();
-
             for key in info_traffic.addresses_last_interval.iter() {
                 let val = info_traffic.map.get(key).unwrap();
                 let index = info_traffic.map.get_index_of(key).unwrap();
@@ -170,146 +151,8 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
 
             output.flush().expect("Error writing output file\n\r");
 
-            _time_header_sort_print = start.elapsed().as_millis();
-
-
             drop(info_traffic);
 
-        //     // graphs
-        //     _start_drawing = Instant::now();
-        //
-        //     // update bits traffic data
-        //     sent_bits_graph.push((tot_seconds as u128, (-1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev)/interval as i128 ));
-        //     if -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev < min_sent_bits_second {
-        //         min_sent_bits_second = -1*(tot_sent_bytes*8) as i128 + tot_sent_bits_prev;
-        //     }
-        //     tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-        //     received_bits_graph.push((tot_seconds as u128, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)/interval as i128 ));
-        //     if tot_received_bytes as i128 * 8 - tot_received_bits_prev  > max_received_bits_second {
-        //         max_received_bits_second = tot_received_bytes as i128 * 8 - tot_received_bits_prev ;
-        //     }
-        //     tot_received_bits_prev = (tot_received_bytes * 8) as i128;
-        //
-        //     // update packets traffic data
-        //     sent_packets_graph.push((tot_seconds as u128, (-(tot_sent_packets as i128) + tot_sent_packets_prev)/interval as i128 ));
-        //     if -(tot_sent_packets as i128) + tot_sent_packets_prev < min_sent_packets_second {
-        //         min_sent_packets_second = -(tot_sent_packets as i128) + tot_sent_packets_prev;
-        //     }
-        //     tot_sent_packets_prev = tot_sent_packets as i128;
-        //     received_packets_graph.push((tot_seconds as u128, (tot_received_packets as i128 - tot_received_packets_prev)/interval as i128 ));
-        //     if tot_received_packets as i128 - tot_received_packets_prev > max_received_packets_second {
-        //         max_received_packets_second = tot_received_packets as i128 - tot_received_packets_prev;
-        //     }
-        //     tot_received_packets_prev = tot_received_packets as i128;
-        //
-        //
-        //     // declare drawing area
-        //     let root_area = SVGBackend::new(path_graph, (1280, 720)).into_drawing_area();
-        //     root_area.fill(&GREY).expect("Error drawing graph");
-        //     let (graphs_area, _) = root_area.split_horizontally(1255);
-        //     let (bits_area, packets_area) = graphs_area.split_vertically(360);
-        //     let (_, footer) = root_area.split_vertically(700);
-        //     footer.titled(
-        //         &*format!("Charts are updated every {} seconds", interval),
-        //         ("helvetica", 16).into_font().color(&BLACK.mix(0.5)),
-        //     ).expect("Error drawing graph");
-        //
-        //
-        //     // bits graph
-        //
-        //     let mut chart_bits = ChartBuilder::on(&bits_area)
-        //         .set_label_area_size(LabelAreaPosition::Left, 60)
-        //         .set_label_area_size(LabelAreaPosition::Bottom, 50)
-        //         .caption("Bit traffic per second", ("helvetica", 30))
-        //         .build_cartesian_2d(0..tot_seconds as u128, min_sent_bits_second/interval as i128..max_received_bits_second/interval as i128)
-        //         .expect("Error drawing graph");
-        //     chart_bits.configure_mesh()
-        //         .y_desc("bit/s")
-        //         .label_style(("helvetica", 16))
-        //         .axis_desc_style(("helvetica", 16))
-        //         .x_label_formatter(&|seconds| {
-        //             (time_origin+chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
-        //                 .format("%H:%M:%S").to_string()
-        //         })
-        //         .y_label_formatter(&|bits| {
-        //             match bits {
-        //                 0..=999 | -999..=-1 => { format!("{}",bits) },
-        //                 1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}",*bits as f64/1_000_f64, "k") },
-        //                 1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}",*bits as f64/1_000_000_f64, "M") },
-        //                 _ => { format!("{:.1} {}",*bits as f64/1_000_000_000_f64, "G") }
-        //             }
-        //         })
-        //         .draw().unwrap();
-        //     chart_bits.draw_series(
-        //         AreaSeries::new(received_bits_graph.iter().copied(), 0, GREEN_800.mix(0.2))
-        //             .border_style(&GREEN_800))
-        //         .expect("Error drawing graph")
-        //         .label("Incoming bits")
-        //         .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], GREEN_800.filled()));
-        //     chart_bits.draw_series(
-        //         AreaSeries::new(sent_bits_graph.iter().copied(), 0, BLUE.mix(0.2))
-        //             .border_style(&BLUE))
-        //         .expect("Error drawing graph")
-        //         .label("Outgoing bits")
-        //         .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], BLUE.filled()));
-        //     chart_bits.configure_series_labels().position(SeriesLabelPosition::UpperRight).margin(5)
-        //         .border_style(BLACK).label_font(("helvetica", 16)).draw().expect("Error drawing graph");
-        //
-        //
-        //
-        //     // packets graph
-        //
-        //     let mut chart_packets = ChartBuilder::on(&packets_area)
-        //         .set_label_area_size(LabelAreaPosition::Left, 60)
-        //         .set_label_area_size(LabelAreaPosition::Bottom, 50)
-        //         .caption("Packet traffic per second", ("helvetica", 30))
-        //         .build_cartesian_2d(0..tot_seconds as u128, min_sent_packets_second/interval as i128..max_received_packets_second/interval as i128)
-        //         .expect("Error drawing graph");
-        //     chart_packets.configure_mesh()
-        //         .y_desc("packet/s")
-        //         .label_style(("helvetica", 16))
-        //         .axis_desc_style(("helvetica", 16))
-        //         .x_label_formatter(&|seconds| {
-        //             (time_origin+chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
-        //                 .format("%H:%M:%S").to_string()
-        //         })
-        //         .draw().unwrap();
-        //     chart_packets.draw_series(
-        //         AreaSeries::new(received_packets_graph.iter().copied(), 0, GREEN_800.mix(0.2))
-        //             .border_style(&GREEN_800))
-        //         .expect("Error drawing graph")
-        //         .label("Incoming packets")
-        //         .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], GREEN_800.filled()));
-        //     chart_packets.draw_series(
-        //         AreaSeries::new(sent_packets_graph.iter().copied(), 0, BLUE.mix(0.2))
-        //             .border_style(&BLUE))
-        //         .expect("Error drawing graph")
-        //         .label("Outgoing packets")
-        //         .legend(|(x,y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], BLUE.filled()));
-        //     chart_packets.configure_series_labels().position(SeriesLabelPosition::UpperRight).margin(5)
-        //         .border_style(BLACK).label_font(("helvetica", 16)).draw().expect("Error drawing graph");
-        //
-        //     // draw graphs on file
-        //     root_area.present().expect("Error drawing graph");
-        //
-        //     #[cfg(feature = "elapsed_time")]
-        //     {
-        //         println!("---------------------------------------------------------\r\n\
-        //     \t\tTimings (written tuples = {})\r\n\
-        //     \t\t\tPrint header: {} ms\r\n\
-        //     \t\t\tPrint map: {} ms\r\n\
-        //     \t\t\tTot time mutex held: {} ms\r\n\
-        //     \t\t\tDraw graphical report: {} ms\r\n",
-        //                  _num_written_tuples_interval, _time_header,
-        //                  _time_header_sort_print-_time_header_sort,
-        //                  _time_header_sort_print, _start_drawing.elapsed().as_millis());
-        //     }
-        // }
-        // else {
-        //     sent_bits_graph.push((tot_seconds as u128,0));
-        //     received_bits_graph.push((tot_seconds as u128,0));
-        //     sent_packets_graph.push((tot_seconds as u128,0));
-        //     received_packets_graph.push((tot_seconds as u128,0));
         }
         else if *status == Status::Stop {
             return;
