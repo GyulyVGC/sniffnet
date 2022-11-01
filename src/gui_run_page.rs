@@ -1,5 +1,6 @@
 use std::cmp::min;
-use iced::{alignment, Alignment, Button, Column, Container, Length, Row, Svg, Text};
+use std::collections::VecDeque;
+use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Row, Svg, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use thousands::Separable;
@@ -8,6 +9,7 @@ use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer}
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
 use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
+use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let logo = Svg::from_path("./resources/sniffnet_logo.svg");
@@ -177,4 +179,41 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(header)
         .push(body)
         .push(footer)
+}
+
+
+struct TrafficChart {
+    sent_bits: VecDeque<(u128, i128)>,
+    received_bits: VecDeque<(u128, i128)>,
+    sent_packets: VecDeque<(u128, i128)>,
+    received_packets: VecDeque<(u128, i128)>,
+}
+
+
+impl TrafficChart {
+    fn view(&mut self, idx: usize) -> Element<Message> {
+        Container::new(
+            Column::new()
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .spacing(5)
+                .push(iced::Text::new(format!("Processor {}", idx)))
+                .push(
+                    ChartWidget::new(self).height(Length::Fill)
+                ),
+        )
+/*            .style(style::ChartContainer)*/
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .align_x(Horizontal::Center)
+            .align_y(Vertical::Center)
+            .into()
+    }
+}
+
+
+impl Chart<Message> for TrafficChart {
+    fn build_chart<DB: DrawingBackend>(&self, builder: ChartBuilder<DB>) {
+        todo!()
+    }
 }

@@ -24,12 +24,10 @@ pcap = "0.10.1"
 etherparse = "0.12.0"
 clap = { version = "3.2.6", features = ["derive"] }
 chrono = "0.4.20"
-crossterm = "0.13.3"
-colored = "2.0.0"
 thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
-plotters-iced = "0.3"
+plotters-iced = "0.3.3"
 iced = {version = "0.4.2", features = ["smol", "svg", "canvas", "tokio"] }
 iced_style = "0.4.0"
 font-awesome = "0.2.0"

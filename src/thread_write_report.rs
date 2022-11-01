@@ -118,8 +118,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
         }
         drop(current_capture_id_lock);
 
-        // let tot_seconds = (Local::now() - time_origin).num_seconds();
-
         let mut status = status_pair.0.lock().expect("Error acquiring mutex\n\r");
 
         if *status == Status::Running {
