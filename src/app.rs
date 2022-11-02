@@ -51,7 +51,13 @@ impl Application for Sniffer {
         match message {
             Message::Tick => {}
             Message::AdapterSelection(name) => {
-                *self.device.lock().unwrap() = Device::from(&*name);
+                for dev in Device::list().expect("Error retrieving device list\r\n") {
+                    if dev.name.eq(&name) {
+                        *self.device.lock().unwrap() = dev;
+                        //println!("{}",dev.addresses.len());
+                        break;
+                    }
+                }
             }
             Message::IpVersionSelection(version) => {
                 self.filters.lock().unwrap().ip = version;

@@ -15,9 +15,11 @@ use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
 use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
+use crate::Mode::{HeadersDay, HeadersNight};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let logo = Svg::from_path("./resources/sniffnet_logo.svg");
+    let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -42,13 +44,16 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .style(sniffer.style)
         .on_press(Message::Reset);
 
-    let header = Row::new()
+    let header = Container::new(Row::new()
+                                    .height(Length::Fill)
+                                    .width(Length::Fill)
+                                    .align_items(Alignment::Center)
+                                    .push(Container::new(button_reset).width(Length::FillPortion(1)).align_x(Horizontal::Center))
+                                    .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
+                                    .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
         .height(Length::FillPortion(HEIGHT_HEADER))
         .width(Length::Fill)
-        .align_items(Alignment::Center)
-        .push(Container::new(button_reset).width(Length::FillPortion(1)).align_x(Horizontal::Center))
-        .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
-        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center));
+        .style(headers_style);
 
     let button_report = Button::new(
         &mut sniffer.report,
@@ -70,19 +75,25 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let mut body = Column::new()
         .height(Length::FillPortion(HEIGHT_BODY))
         .width(Length::Fill)
-        .align_items(Alignment::Center)
-        .spacing(10);
+        .align_items(Alignment::Center);
 
     match (observed, filtered) {
         (0, 0) => { //no packets observed at all
-            if sniffer.waiting.len() > 5 {
+            if sniffer.waiting.len() > 4 {
                 sniffer.waiting = "".to_string();
             }
             sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
             let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
-            let nothing_to_see_text = Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+            let nothing_to_see_text = if sniffer.device.lock().unwrap().addresses.len() > 0 {
+                Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                                               Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name));
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name))
+            }
+            else {
+                Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
+                                                              Network adapter: {}\n\n\
+                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name))
+            };
             body = body
                 .push(Row::new().height(Length::FillPortion(1)))
                 .push(Text::new(sniffer.waiting.clone()).size(50))
@@ -92,7 +103,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         }
 
         (_observed, 0) => { //no packets have been filtered but some have been observed
-            if sniffer.waiting.len() > 5 {
+            if sniffer.waiting.len() > 4 {
                 sniffer.waiting = "".to_string();
             }
             sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
@@ -111,15 +122,18 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         }
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
-            let chart = sniffer.traffic_chart.view(99);
-            sniffer_lock = sniffer.info_traffic.lock().unwrap();
 
+            let mut col_chart = Column::new()
+                .width(Length::FillPortion(2))
+                .align_items(Alignment::Center)
+                .push(sniffer.traffic_chart.view(sniffer.style));
+
+            sniffer_lock = sniffer.info_traffic.lock().unwrap();
             let mut col_packets = Column::new()
                 .width(Length::FillPortion(1))
                 .align_items(Alignment::Center)
                 .spacing(20)
                 .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()))
-                .push(chart)
                 .push(Text::new(format!("Total intercepted packets: {}",
                                         observed.separate_with_spaces())))
                 .push(Text::new(format!("Filtered packets: {}",
@@ -129,13 +143,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(iced::Text::new(get_app_count_string(sniffer_lock.app_protocols.clone(), filtered)));
 
             let mut row_report = Row::new()
+                .height(Length::FillPortion(2))
                 .align_items(Alignment::Center);
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
             sorted_vec.sort_by(|&(_, a), &(_, b)|
                 b.final_timestamp.cmp(&a.final_timestamp));
-            let n_entry = min(sorted_vec.len(), 10);
+            let n_entry = min(sorted_vec.len(), 9);
             let mut col_report = Column::new()
-                .padding(10);
+                .height(Length::Fill);
             col_report = col_report
                 .push(iced::Text::new("Latest connections\n").size(FONT_SIZE_TITLE))
                 .push(iced::Text::new("-------------------------------------------------------------------------------------------------------------------------"))
@@ -155,7 +170,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(col_open_report);
 
             body = body
-                .push(col_packets)
+                .push(Row::new().height(Length::FillPortion(3))
+                    .push(col_chart)
+                    .push(col_packets))
                 .push(row_report);
         }
     }
@@ -180,9 +197,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .height(FillPortion(HEIGHT_FOOTER))
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(Mode::Bordered);
+        .style(headers_style);
 
     Column::new()
+        .spacing(10)
         .push(header)
         .push(body)
         .push(footer)
@@ -227,7 +245,7 @@ impl TrafficChart {
         }
     }
     
-    fn view(&mut self, idx: usize) -> Element<Message> {
+    fn view(&mut self, mode: Mode) -> Element<Message> {
 
         let info_traffic_lock = self.info_traffic.lock().unwrap();
         let tot_received_bytes = info_traffic_lock.tot_received_bytes;
@@ -252,17 +270,11 @@ impl TrafficChart {
 
         Container::new(
             Column::new()
-                .width(Length::Fill)
-                .height(Length::Fill)
                 .spacing(5)
-                .push(iced::Text::new(format!("ciao {}", self.tick)))
                 .push(
-                    ChartWidget::new(self).height(Length::Fill)
+                    ChartWidget::new(self)//.height(Length::Fill)
                 ),
         )
-            /*            .style(style::ChartContainer)*/
-            .width(Length::Fill)
-            .height(Length::Fill)
             .align_x(Horizontal::Center)
             .align_y(Vertical::Center)
             .into()
@@ -305,14 +317,13 @@ impl Chart<Message> for TrafficChart {
         let mut chart = chart
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50)
-            .caption("Bit traffic per second", ("helvetica", 30))
+            .caption("Bit traffic per second", ("helvetica", 15))
             .build_cartesian_2d(0..tot_seconds as u128, self.min_sent_bits / interval as i128..self.max_received_bits / interval as i128)
             .expect("Error drawing graph");
 
         chart.configure_mesh()
-            .y_desc("bit/s")
-            .label_style(("helvetica", 16))
-            .axis_desc_style(("helvetica", 16))
+            .label_style(("helvetica", 13))
+            .axis_desc_style(("helvetica", 13))
             // .x_label_formatter(&|seconds| {
             //     (time_origin + chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
             //         .format("%H:%M:%S").to_string()
@@ -338,8 +349,8 @@ impl Chart<Message> for TrafficChart {
             .expect("Error drawing graph")
             .label("Outgoing bits")
             .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], BLUE.filled()));
-        chart.configure_series_labels().position(SeriesLabelPosition::UpperRight).margin(5)
-            .border_style(BLACK).label_font(("helvetica", 16)).draw().expect("Error drawing graph");
+        chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
+            .border_style(BLACK).label_font(("helvetica", 13)).draw().expect("Error drawing graph");
 
 
         // // packets graph

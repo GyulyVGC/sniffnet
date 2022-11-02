@@ -8,6 +8,7 @@ use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEI
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let logo = Svg::from_path("./resources/sniffnet_logo.svg");
+    let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -20,13 +21,16 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .style(sniffer.style)
         .on_press(Message::Style);
 
-    let header = Row::new()
-        .height(Length::FillPortion(HEIGHT_HEADER))
+    let header = Container::new(Row::new()
+        .height(Length::Fill)
         .width(Length::Fill)
         .align_items(Alignment::Center)
-        .push(Container::new(Row::new()).width(Length::FillPortion(1)).align_x(Horizontal::Center))
+        .push(Container::new(Row::new()).width(Length::FillPortion(1)).width(Length::FillPortion(1)).align_x(Horizontal::Center))
         .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
-        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center));
+        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
+        .height(Length::FillPortion(HEIGHT_HEADER))
+        .width(Length::Fill)
+        .style(headers_style);
 
     let button_start = Button::new(
         &mut sniffer.start,
@@ -77,7 +81,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                     &adapter.1,
                     Some(&sniffer.device.clone().lock().unwrap().name),
                     |name| Message::AdapterSelection(name.to_string()),
-                ).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::Bordered))
+                ).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::BorderedRound))
             },
         ));
 
@@ -187,9 +191,10 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .height(FillPortion(HEIGHT_FOOTER))
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(Mode::Bordered);
+        .style(headers_style);
 
     Column::new()
+        .spacing(10)
         .push(header)
         .push(body)
         .push(footer)
