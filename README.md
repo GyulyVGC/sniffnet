@@ -3,7 +3,7 @@
 
 <hr>
 
-<p align="center"> Application to analyze and filter your network traffic. </p>
+<p align="center"> Real-time dashboard to explore your network traffic. </p>
 <p align="center"> Multithreaded, cross-platform, reliable. </p>
 
 <p align="center">
@@ -15,13 +15,7 @@
 
 <hr>
 
-<p align="center">
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="100%"/>
-</p>
-
-<p align="center">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475329-a3338a8f-620e-4b70-954c-f6b0bf6ab4f7.png" width="100%"/>
-</p>
+TO BE CONTINUED.......
 
 
 ## Install
