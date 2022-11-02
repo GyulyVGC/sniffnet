@@ -1,4 +1,5 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/199615882-469ed931-5c70-4e2b-afca-14b6b0262971.png" width="100%"/></a></p>
+
 
 <hr>
 
@@ -6,16 +7,11 @@
 <p align="center"> Multithreaded, cross-platform, reliable. </p>
 
 <p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml"><img alt="" src="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg"/></a>
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
 &nbsp;
 <a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/></a>
 </p>
 
-<p align="center">
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
-&nbsp;
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet"/></a>
-</p>
 
 <hr>
 
