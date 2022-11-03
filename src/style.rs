@@ -1,6 +1,7 @@
 use iced::{pick_list, Background, Color, Vector, button, Font, Text, Length, alignment};
 use iced::container::{Style, StyleSheet};
 use iced_style::scrollable::{Scrollbar, Scroller};
+use plotters::style::RGBColor;
 
 
 pub const ICONS: Font = Font::External {
@@ -9,10 +10,10 @@ pub const ICONS: Font = Font::External {
 };
 
 
-// pub const COURIER_PRIME: Font = Font::External {
-//     name: "CourierPrimeSans",
-//     bytes: include_bytes!("../fonts/CourierPrimeSans.ttf"),
-// };
+pub const COURIER_PRIME: Font = Font::External {
+    name: "CourierPrime",
+    bytes: include_bytes!("../fonts/CourierPrime.ttf"),
+};
 
 // pub const COURIER_PRIME_BOLD: Font = Font::External {
 //     name: "CourierPrimeSansBold",
@@ -20,28 +21,35 @@ pub const ICONS: Font = Font::External {
 // };
 
 pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
-    name: "CourierPrimeSansItalic",
-    bytes: include_bytes!("../fonts/CourierPrimeSansBoldItalic.ttf"),
+    name: "CourierPrimeItalic",
+    bytes: include_bytes!("../fonts/CourierPrimeBoldItalic.ttf"),
 };
 
 pub const FONT_SIZE_FOOTER: u16 = 14;
 pub const FONT_SIZE_BODY: u16 = 16;
 pub const FONT_SIZE_SUBTITLE: u16 = 18;
 pub const FONT_SIZE_TITLE: u16 = 22;
+pub const FONT_SIZE_SNIFFNET: u16 = 60;
 
 pub const BORDER_WIDTH: f32 = 2.0;
 
-pub const HEIGHT_HEADER: u16 = 2;
-pub const HEIGHT_BODY: u16 = 12;
+pub const HEIGHT_HEADER: u16 = 3;
+pub const HEIGHT_BODY: u16 = 15;
 pub const HEIGHT_FOOTER: u16 = 1;
 
 
-const DAY_BACKGROUND: Color = Color::WHITE;
-const NIGHT_BACKGROUND: Color = Color { r: 0.2, g: 0.2, b: 0.2, a: 1.0 };
-const DAY_BUTTONS: Color = Color { r: 0.8, g: 0.8, b: 0.8, a: 1.0 };
-const NIGHT_BUTTONS: Color = Color { r: 0.1, g: 0.1, b: 0.1, a: 1.0 };
-const SPECIAL_NIGHT: Color = Color { r: 0.7, g: 0.35, b: 0.0, a: 1.0 };
-const SPECIAL_DAY: Color = Color { r: 0.0, g: 0.35, b: 0.7, a: 1.0 };
+pub const DAY_BACKGROUND: Color = Color::WHITE;
+pub const NIGHT_BACKGROUND: Color = Color { r: 0.2, g: 0.2, b: 0.2, a: 1.0 };
+pub const DAY_BUTTONS: Color = Color { r: 0.8, g: 0.8, b: 0.8, a: 1.0 };
+pub const NIGHT_BUTTONS: Color = Color { r: 0.1, g: 0.1, b: 0.1, a: 1.0 };
+pub const SPECIAL_NIGHT: Color = Color { r: 0.7, g: 0.35, b: 0.0, a: 1.0 };
+pub const SPECIAL_DAY: Color = Color { r: 0.0, g: 0.35, b: 0.7, a: 1.0 };
+
+pub const SPECIAL_NIGHT_RGB: RGBColor = RGBColor {0: 189, 1: 89, 2: 0};
+pub const SPECIAL_DAY_RGB: RGBColor = RGBColor {0: 0, 1: 89, 2: 189};
+
+pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
+pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
 
 
 #[derive(Copy, Eq, PartialEq)]
@@ -67,6 +75,8 @@ impl StyleSheet for Mode {
             text_color: match self {
                 Mode::Day => Some(Color::BLACK),
                 Mode::Night => Some(Color::WHITE),
+                Mode::HeadersDay => Some(Color::WHITE),
+                Mode::HeadersNight => Some((Color::BLACK)),
                 _ => { None }
             },
             background: match self {

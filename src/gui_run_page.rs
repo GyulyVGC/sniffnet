@@ -1,25 +1,32 @@
-use std::cmp::min;
+use std::cmp::{max, min};
 use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Row, Svg, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Row, Text, image};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
+use iced_native::widget::image::Image;
 use plotters::prelude::full_palette::GREY;
 use plotters::style::full_palette::GREEN_800;
 use thousands::Separable;
 use crate::app::Message;
+use crate::style;
 use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, InfoTraffic, Mode, Sniffer};
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
-use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
+use crate::style::{COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 use crate::Mode::{HeadersDay, HeadersNight};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
-    let logo = Svg::from_path("./resources/sniffnet_logo.svg");
     let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
+    let logo = if sniffer.style == Mode::Day {
+        Image::<image::Handle>::new("resources/logo_in_app_day.png")
+    }
+    else {
+        Image::<image::Handle>::new("resources/logo_in_app_night.png")
+    };
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -45,12 +52,12 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::Reset);
 
     let header = Container::new(Row::new()
-                                    .height(Length::Fill)
-                                    .width(Length::Fill)
-                                    .align_items(Alignment::Center)
-                                    .push(Container::new(button_reset).width(Length::FillPortion(1)).align_x(Horizontal::Center))
-                                    .push(Container::new(logo).width(Length::FillPortion(6)).align_x(Horizontal::Center))
-                                    .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .align_items(Alignment::Center)
+        .push(Container::new(button_reset).width(Length::FillPortion(1)).width(Length::FillPortion(1)).align_x(Horizontal::Center))
+        .push(Container::new(Row::new().align_items(Alignment::Center).push(logo).push(Text::new("SNIFFNET").font(COURIER_PRIME).size(FONT_SIZE_SNIFFNET))).width(Length::FillPortion(6)).height(Length::Fill).align_x(Horizontal::Center).align_y(Vertical::Center))
+        .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
         .height(Length::FillPortion(HEIGHT_HEADER))
         .width(Length::Fill)
         .style(headers_style);
@@ -75,6 +82,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let mut body = Column::new()
         .height(Length::FillPortion(HEIGHT_BODY))
         .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
         .align_items(Alignment::Center);
 
     match (observed, filtered) {
@@ -123,24 +132,25 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
 
-            let mut col_chart = Column::new()
+            let mut col_chart = Container::new(sniffer.traffic_chart.view(sniffer.style))
                 .width(Length::FillPortion(2))
-                .align_items(Alignment::Center)
-                .push(sniffer.traffic_chart.view(sniffer.style));
+                .align_x(Horizontal::Center)
+                .align_y(Vertical::Center)
+                .padding(10)
+                .style(Mode::BorderedRound);
 
             sniffer_lock = sniffer.info_traffic.lock().unwrap();
             let mut col_packets = Column::new()
                 .width(Length::FillPortion(1))
-                .align_items(Alignment::Center)
-                .spacing(20)
+                .padding(10)
+                .spacing(15)
                 .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()))
                 .push(Text::new(format!("Total intercepted packets: {}",
                                         observed.separate_with_spaces())))
                 .push(Text::new(format!("Filtered packets: {}",
                                         filtered.separate_with_spaces())));
             col_packets = col_packets
-                .push(iced::Text::new("Packets count per application protocol"))
-                .push(iced::Text::new(get_app_count_string(sniffer_lock.app_protocols.clone(), filtered)));
+                .push(iced::Text::new(format!("Filtered packets per application protocol:\n{}",get_app_count_string(sniffer_lock.app_protocols.clone(), filtered))));
 
             let mut row_report = Row::new()
                 .height(Length::FillPortion(2))
@@ -213,6 +223,7 @@ pub struct TrafficChart {
     received_bits: VecDeque<(u128, i128)>,
     sent_packets: VecDeque<(u128, i128)>,
     received_packets: VecDeque<(u128, i128)>,
+    color_mix: f64,
     tot_sent_bits_prev: i128,
     tot_received_bits_prev: i128,
     tot_sent_packets_prev: i128,
@@ -233,6 +244,7 @@ impl TrafficChart {
             received_bits: Default::default(),
             sent_packets: Default::default(),
             received_packets: Default::default(),
+            color_mix: 0.0,
             tot_sent_bits_prev: 0,
             tot_received_bits_prev: 0,
             tot_sent_packets_prev: 0,
@@ -256,16 +268,21 @@ impl TrafficChart {
         let interval = 1;
         self.tick += 1;
 
-        // update bits traffic data
+        self.color_mix = if mode == Mode::Day {COLOR_CHART_MIX_DAY} else { COLOR_CHART_MIX_NIGHT };
+
+        // update sent bits traffic data
+        if self.sent_bits.len() >= 60 {
+            self.sent_bits.pop_front();
+        }
         self.sent_bits.push_back((tot_seconds as u128, (-1 * (tot_sent_bytes * 8) as i128 + self.tot_sent_bits_prev) / interval as i128));
-        if -1 * (tot_sent_bytes * 8) as i128 + self.tot_sent_bits_prev < self.min_sent_bits {
-            self.min_sent_bits = -1 * (tot_sent_bytes * 8) as i128 + self.tot_sent_bits_prev;
-        }
+        self.min_sent_bits = get_min(self.sent_bits.clone());
         self.tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-        self.received_bits.push_back((tot_seconds as u128, (tot_received_bytes as i128 * 8 - self.tot_received_bits_prev) / interval as i128));
-        if tot_received_bytes as i128 * 8 - self.tot_received_bits_prev > self.max_received_bits {
-            self.max_received_bits = tot_received_bytes as i128 * 8 - self.tot_received_bits_prev;
+        // update received bits traffic data
+        if self.received_bits.len() >= 60 {
+            self.received_bits.pop_front();
         }
+        self.received_bits.push_back((tot_seconds as u128, (tot_received_bytes as i128 * 8 - self.tot_received_bits_prev) / interval as i128));
+        self.max_received_bits = get_max(self.received_bits.clone());
         self.tot_received_bits_prev = (tot_received_bytes * 8) as i128;
 
         Container::new(
@@ -282,12 +299,35 @@ impl TrafficChart {
 }
 
 
+fn get_min(deque: VecDeque<(u128, i128)>) -> i128 {
+    let mut min = 0;
+    for (_, x) in deque.iter() {
+        if *x < min {
+            min = *x;
+        }
+    }
+    min
+}
+
+
+fn get_max(deque: VecDeque<(u128, i128)>) -> i128 {
+    let mut max = 0;
+    for (_, x) in deque.iter() {
+        if *x > max {
+            max = *x;
+        }
+    }
+    max
+}
+
+
 impl Chart<Message> for TrafficChart {
     fn build_chart<DB: DrawingBackend>(&self, mut chart: ChartBuilder<DB>) {
         use plotters::{prelude::*, style::Color};
 
         let interval = 1;
-        let tot_seconds = self.tick;
+        let tot_seconds = self.tick - 1;
+        let first_time_displayed = max(0, self.tick as i128 - 60) as u128;
 
         // // update packets traffic data
         // self.sent_packets.push((tot_seconds as u128, (-(tot_sent_packets as i128) + tot_sent_packets_prev) / interval as i128));
@@ -317,8 +357,7 @@ impl Chart<Message> for TrafficChart {
         let mut chart = chart
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50)
-            .caption("Bit traffic per second", ("helvetica", 15))
-            .build_cartesian_2d(0..tot_seconds as u128, self.min_sent_bits / interval as i128..self.max_received_bits / interval as i128)
+            .build_cartesian_2d(first_time_displayed..tot_seconds as u128, self.min_sent_bits / interval as i128..self.max_received_bits / interval as i128)
             .expect("Error drawing graph");
 
         chart.configure_mesh()
@@ -338,17 +377,17 @@ impl Chart<Message> for TrafficChart {
             })
             .draw().unwrap();
         chart.draw_series(
-            AreaSeries::new(self.received_bits.iter().copied(), 0, GREEN_800.mix(0.2))
-                .border_style(&GREEN_800))
+            AreaSeries::new(self.received_bits.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
+                .border_style(&SPECIAL_NIGHT_RGB))
             .expect("Error drawing graph")
-            .label("Incoming bits")
-            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], GREEN_800.filled()));
+            .label("Incoming")
+            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
         chart.draw_series(
-            AreaSeries::new(self.sent_bits.iter().copied(), 0, BLUE.mix(0.2))
-                .border_style(&BLUE))
+            AreaSeries::new(self.sent_bits.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
+                .border_style(&SPECIAL_DAY_RGB))
             .expect("Error drawing graph")
-            .label("Outgoing bits")
-            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], BLUE.filled()));
+            .label("Outgoing")
+            .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
         chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
             .border_style(BLACK).label_font(("helvetica", 13)).draw().expect("Error drawing graph");
 

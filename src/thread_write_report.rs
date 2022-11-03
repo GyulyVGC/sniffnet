@@ -331,7 +331,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
         let spaces_string_2 = " ".to_string()
             .repeat(11-percentage_string.len());
 
-        ret_val.push_str(&format!("\t-{}:{}{}{}{}\n",
+        ret_val.push_str(&format!("  \t-{}:{}{}{}{}\n",
                                   app_proto_string,
                                   spaces_string_1,
                                   num_string,

@@ -9,8 +9,7 @@ use crate::gui_run_page::run_page;
 use crate::style::{Mode};
 
 
-pub const PERIOD_RUNNING: u64 = 500;
-//milliseconds
+pub const PERIOD_RUNNING: u64 = 500; //milliseconds
 pub const PERIOD_INIT: u64 = 5000; //milliseconds
 
 

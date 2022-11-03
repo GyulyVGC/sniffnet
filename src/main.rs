@@ -129,7 +129,7 @@ pub fn main() -> iced::Result {
             waiting: String::new(),
             traffic_chart: TrafficChart::new(mutex_map3)
         },
-        default_font: Some(include_bytes!("../fonts/CourierPrimeSansBold.ttf")),
+        default_font: Some(include_bytes!("../fonts/CourierPrime.ttf")),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true, //to be evaluated
         antialiasing: false,
