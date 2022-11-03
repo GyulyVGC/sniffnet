@@ -15,18 +15,13 @@ use crate::style;
 use crate::{FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, InfoTraffic, Mode, Sniffer};
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
-use crate::style::{COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
+use crate::style::{COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 use crate::Mode::{HeadersDay, HeadersNight};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
-    let logo = if sniffer.style == Mode::Day {
-        Image::<image::Handle>::new("resources/logo_in_app_day.png")
-    }
-    else {
-        Image::<image::Handle>::new("resources/logo_in_app_night.png")
-    };
+    let logo = logo_glyph().size(100);
 
     let button_style = Button::new(
         &mut sniffer.mode,

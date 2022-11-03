@@ -1,4 +1,5 @@
 use iced::{pick_list, Background, Color, Vector, button, Font, Text, Length, alignment};
+use iced::alignment::Horizontal;
 use iced::container::{Style, StyleSheet};
 use iced_style::scrollable::{Scrollbar, Scroller};
 use plotters::style::RGBColor;
@@ -15,6 +16,13 @@ pub const COURIER_PRIME: Font = Font::External {
     bytes: include_bytes!("../fonts/CourierPrime.ttf"),
 };
 
+
+pub const LOGO: Font = Font::External {
+    name: "Logo",
+    bytes: include_bytes!("../fonts/Glyphter.ttf"),
+};
+
+
 // pub const COURIER_PRIME_BOLD: Font = Font::External {
 //     name: "CourierPrimeSansBold",
 //     bytes: include_bytes!("../fonts/CourierPrimeSansBold.ttf"),
@@ -29,12 +37,12 @@ pub const FONT_SIZE_FOOTER: u16 = 14;
 pub const FONT_SIZE_BODY: u16 = 16;
 pub const FONT_SIZE_SUBTITLE: u16 = 18;
 pub const FONT_SIZE_TITLE: u16 = 22;
-pub const FONT_SIZE_SNIFFNET: u16 = 60;
+pub const FONT_SIZE_SNIFFNET: u16 = 0;
 
 pub const BORDER_WIDTH: f32 = 2.0;
 
-pub const HEIGHT_HEADER: u16 = 3;
-pub const HEIGHT_BODY: u16 = 15;
+pub const HEIGHT_HEADER: u16 = 2;
+pub const HEIGHT_BODY: u16 = 12;
 pub const HEIGHT_FOOTER: u16 = 1;
 
 
@@ -329,6 +337,13 @@ pub fn icon(unicode: char) -> Text {
         .width(Length::Units(20))
         .horizontal_alignment(alignment::Horizontal::Center)
         .size(20)
+}
+
+
+pub fn logo_glyph() -> Text {
+    Text::new('A'.to_string())
+        .font(LOGO)
+        .horizontal_alignment(Horizontal::Center)
 }
 
 

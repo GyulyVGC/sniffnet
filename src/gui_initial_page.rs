@@ -5,16 +5,11 @@ use pcap::Device;
 use iced_native::widget::image::Image;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon};
+use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
-    let logo = if sniffer.style == Mode::Day {
-        Image::<image::Handle>::new("resources/logo_in_app_day.png")
-    }
-    else {
-        Image::<image::Handle>::new("resources/logo_in_app_night.png")
-    };
+    let logo = logo_glyph().size(100);
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -32,9 +27,10 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .width(Length::Fill)
         .align_items(Alignment::Center)
         .push(Container::new(Row::new()).width(Length::FillPortion(1)).width(Length::FillPortion(1)).align_x(Horizontal::Center))
-        .push(Container::new(Row::new().align_items(Alignment::Center).push(logo).push(Text::new("SNIFFNET").font(COURIER_PRIME).size(FONT_SIZE_SNIFFNET))).width(Length::FillPortion(6)).height(Length::Fill).align_x(Horizontal::Center).align_y(Vertical::Center))
+        .push(Container::new(Row::new().height(Length::Fill).align_items(Alignment::Center).push(logo).push(Text::new("SNIFFNET").vertical_alignment(Vertical::Center).height(Length::Fill).size(FONT_SIZE_SNIFFNET))).width(Length::FillPortion(6)).height(Length::Fill).align_y(Vertical::Center).align_x(Horizontal::Center))
         .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
         .height(Length::FillPortion(HEIGHT_HEADER))
+        .align_y(Vertical::Center)
         .width(Length::Fill)
         .style(headers_style);
 
