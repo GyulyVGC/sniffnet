@@ -15,20 +15,18 @@ license = "MIT OR Apache-2.0"
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
-icon = ["./resources/logo.ico"]
-resources = ["./resources/sniffnet_logo.svg"]
+icon = ["./resources/icon.ico"]
 
 
 [dependencies]
 pcap = "0.10.1"
 etherparse = "0.12.0"
-clap = { version = "3.2.6", features = ["derive"] }
 chrono = "0.4.20"
 thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
 plotters-iced = "0.3.3"
-iced = {version = "0.4.2", features = ["smol", "image", "canvas", "tokio"] }
+iced = {version = "0.4.2", features = ["smol", "canvas", "tokio"] }
 iced_style = "0.4.0"
 iced_native = "0.5.1"
 font-awesome = "0.2.0"

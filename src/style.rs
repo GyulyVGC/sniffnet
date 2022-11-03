@@ -84,7 +84,7 @@ impl StyleSheet for Mode {
                 Mode::Day => Some(Color::BLACK),
                 Mode::Night => Some(Color::WHITE),
                 Mode::HeadersDay => Some(Color::WHITE),
-                Mode::HeadersNight => Some((Color::BLACK)),
+                Mode::HeadersNight => Some(Color::BLACK),
                 _ => { None }
             },
             background: match self {

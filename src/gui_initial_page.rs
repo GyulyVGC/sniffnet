@@ -1,11 +1,10 @@
-use iced::{alignment, Alignment, Button, Column, Container, image, Length, PickList, Radio, Row, Scrollable, Text};
+use iced::{alignment, Alignment, Button, Column, Container, Length, PickList, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use pcap::Device;
-use iced_native::widget::image::Image;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
+use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };

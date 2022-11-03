@@ -15,7 +15,6 @@ use chrono::{Local};
 use std::io::{BufWriter, Seek, SeekFrom, Write};
 use thousands::Separable;
 use crate::{AppProtocol, Filters, InfoTraffic, Status, TransProtocol};
-use std::time::{Instant};
 use pcap::Device;
 
 
@@ -57,6 +56,22 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
+
+    // #[cfg(target_os = "windows")]
+    // std::process::Command::new("explorer")
+    //     .arg("./sniffnet_report/report.txt")
+    //     .spawn()
+    //     .unwrap();
+    // #[cfg(target_os = "macos")]
+    // std::process::Command::new("cd")
+    //     .args('~`)
+    //     .spawn()
+    //     .unwrap();
+    // #[cfg(target_os = "linux")]
+    // std::process::Command::new("explorer")
+    //     .arg("./sniffnet_report/report.txt")
+    //     .spawn()
+    //     .unwrap();
 
     if fs::create_dir(output_folder.clone()).is_err() {
         fs::remove_dir_all(output_folder.clone()).unwrap();
