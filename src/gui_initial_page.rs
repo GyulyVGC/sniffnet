@@ -4,9 +4,11 @@ use iced::Length::FillPortion;
 use pcap::Device;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME_BOLD_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SNIFFNET, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
+use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
+    let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
+    let font_footer = if sniffer.style == Mode::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
     let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
     let logo = logo_glyph().size(100);
 
@@ -26,7 +28,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .width(Length::Fill)
         .align_items(Alignment::Center)
         .push(Container::new(Row::new()).width(Length::FillPortion(1)).width(Length::FillPortion(1)).align_x(Horizontal::Center))
-        .push(Container::new(Row::new().height(Length::Fill).align_items(Alignment::Center).push(logo).push(Text::new("SNIFFNET").vertical_alignment(Vertical::Center).height(Length::Fill).size(FONT_SIZE_SNIFFNET))).width(Length::FillPortion(6)).height(Length::Fill).align_y(Vertical::Center).align_x(Horizontal::Center))
+        .push(Container::new(Row::new().height(Length::Fill).align_items(Alignment::Center).push(logo)).width(Length::FillPortion(6)).height(Length::Fill).align_y(Vertical::Center).align_x(Horizontal::Center))
         .push(Container::new(button_style).width(Length::FillPortion(1)).align_x(Horizontal::Center)))
         .height(Length::FillPortion(HEIGHT_HEADER))
         .align_y(Vertical::Center)
@@ -35,7 +37,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_start = Button::new(
         &mut sniffer.start,
-        Text::new("Run!").size(FONT_SIZE_TITLE).vertical_alignment(alignment::Vertical::Center).horizontal_alignment(alignment::Horizontal::Center),
+        Text::new("Run!").font(font).size(FONT_SIZE_TITLE).vertical_alignment(alignment::Vertical::Center).horizontal_alignment(alignment::Horizontal::Center),
     )
         .padding(10)
         .height(Length::Units(80))
@@ -73,7 +75,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .spacing(5)
         .height(Length::Fill)
         .width(Length::FillPortion(4))
-        .push(Text::new("Select network adapter to inspect").size(FONT_SIZE_TITLE))
+        .push(Text::new("Select network adapter to inspect").font(font).size(FONT_SIZE_TITLE))
         .push(dev_str_list.iter().fold(
             Scrollable::new(&mut sniffer.scroll_adapters).style(sniffer.style).padding(13).spacing(5),
             |scroll_adapters, adapter| {
@@ -82,7 +84,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                     &adapter.1,
                     Some(&sniffer.device.clone().lock().unwrap().name),
                     |name| Message::AdapterSelection(name.to_string()),
-                ).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::BorderedRound))
+                ).font(font).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::BorderedRound))
             },
         ));
 
@@ -94,25 +96,25 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let filtri = sniffer.filters.lock().unwrap();
     let ip_active = &*filtri.ip;
     let col_ip_radio = Column::new().spacing(10)
-        .push(Text::new("IP version").size(FONT_SIZE_SUBTITLE))
+        .push(Text::new("IP version").font(font).size(FONT_SIZE_SUBTITLE))
         .push(Radio::new(
             "ipv4",
             "IPv4",
             Some(ip_active),
             |version| Message::IpVersionSelection(version.to_string()),
-        ).size(15).style(sniffer.style))
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             "ipv6",
             "IPv6",
             Some(ip_active),
             |version| Message::IpVersionSelection(version.to_string()),
-        ).size(15).style(sniffer.style))
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             "no filter",
             "both",
             Some(ip_active),
             |version| Message::IpVersionSelection(version.to_string()),
-        ).size(15).style(sniffer.style));
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style));
     let col_ip = Column::new()
         .spacing(10)
         .width(Length::FillPortion(1))
@@ -120,25 +122,25 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let transport_active = filtri.transport;
     let col_transport_radio = Column::new().spacing(10)
-        .push(Text::new("Transport protocol").size(FONT_SIZE_SUBTITLE))
+        .push(Text::new("Transport protocol").font(font).size(FONT_SIZE_SUBTITLE))
         .push(Radio::new(
             TransProtocol::TCP,
             "TCP",
             Some(transport_active),
             |protocol| Message::TransportProtocolSelection(protocol),
-        ).size(15).style(sniffer.style))
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::UDP,
             "UDP",
             Some(transport_active),
             |protocol| Message::TransportProtocolSelection(protocol),
-        ).size(15).style(sniffer.style))
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::Other,
             "both",
             Some(transport_active),
             |protocol| Message::TransportProtocolSelection(protocol),
-        ).size(15).style(sniffer.style));
+        ).width(Length::Fill).font(font).size(15).style(sniffer.style));
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
@@ -155,16 +157,17 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         Some(app_active),
         |protocol| Message::AppProtocolSelection(protocol),
     )
+        .font(font)
         .placeholder("Select application protocol")
         .style(sniffer.style);
     let col_app = Column::new()
         .width(Length::FillPortion(2))
         .spacing(10)
-        .push(iced::Text::new("Application protocol").size(FONT_SIZE_SUBTITLE))
+        .push(iced::Text::new("Application protocol").font(font).size(FONT_SIZE_SUBTITLE))
         .push(picklist_app);
 
     let filters = Column::new().width(Length::FillPortion(6)).padding(10).spacing(15)
-        .push(Row::new().push(Text::new("Select filters to be applied on network traffic").size(FONT_SIZE_TITLE)))
+        .push(Row::new().push(Text::new("Select filters to be applied on network traffic").font(font).size(FONT_SIZE_TITLE)))
         .push(Row::new().height(Length::FillPortion(3)).push(col_ip).push(col_transport).push(col_app));
 
     let body = Row::new().height(Length::FillPortion(HEIGHT_BODY))
@@ -184,9 +187,9 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(COURIER_PRIME_BOLD_ITALIC))
+        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(font_footer))
         .push(button_github)
-        .push(Text::new("  "));
+        .push(Text::new("  ").font(font));
     let footer = Container::new(footer_row)
         .width(Length::Fill)
         .height(FillPortion(HEIGHT_FOOTER))

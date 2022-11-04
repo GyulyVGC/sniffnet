@@ -44,6 +44,7 @@ pub struct Sniffer {
     style: Mode,
     waiting: String,
     traffic_chart: TrafficChart,
+    chart_packets: bool
 }
 
 
@@ -127,11 +128,12 @@ pub fn main() -> iced::Result {
             scroll_adapters: scrollable::State::new(),
             style: Mode::Night,
             waiting: String::new(),
-            traffic_chart: TrafficChart::new(mutex_map3)
+            traffic_chart: TrafficChart::new(mutex_map3),
+            chart_packets: false
         },
-        default_font: Some(include_bytes!("../fonts/CourierPrime.ttf")),
+        default_font: None,
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: true, //to be evaluated
+        text_multithreading: true,
         antialiasing: false,
         exit_on_close_request: true,
         try_opengles_first: false,

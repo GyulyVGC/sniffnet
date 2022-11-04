@@ -9,7 +9,7 @@ use crate::gui_run_page::run_page;
 use crate::style::{Mode};
 
 
-pub const PERIOD_RUNNING: u64 = 500; //milliseconds
+pub const PERIOD_RUNNING: u64 = 1000; //milliseconds
 pub const PERIOD_INIT: u64 = 5000; //milliseconds
 
 
@@ -20,6 +20,7 @@ pub enum Message {
     IpVersionSelection(String),
     TransportProtocolSelection(TransProtocol),
     AppProtocolSelection(AppProtocol),
+    ChartSelection(String),
     OpenReport,
     OpenGithub,
     Start,
@@ -66,6 +67,14 @@ impl Application for Sniffer {
             }
             Message::AppProtocolSelection(protocol) => {
                 self.filters.lock().unwrap().application = protocol;
+            }
+            Message::ChartSelection(what_to_display) => {
+                if what_to_display.eq("packets") {
+                    self.chart_packets = true;
+                }
+                else {
+                    self.chart_packets = false;
+                }
             }
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]
