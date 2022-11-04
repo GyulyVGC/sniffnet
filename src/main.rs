@@ -7,6 +7,7 @@ mod style;
 mod app;
 mod gui_initial_page;
 mod gui_run_page;
+mod charts_data;
 
 use pcap::{Device};
 use crate::info_address_port_pair::{AppProtocol, TransProtocol};
@@ -19,6 +20,7 @@ use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
 use crate::info_traffic::InfoTraffic;
 use style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
+use crate::charts_data::ChartsData;
 
 
 pub struct Filters {
@@ -31,6 +33,7 @@ pub struct Filters {
 pub struct Sniffer {
     current_capture_id: Arc<Mutex<u16>>,
     info_traffic: Arc<Mutex<InfoTraffic>>,
+    charts_data: Arc<Mutex<ChartsData>>,
     device: Arc<Mutex<Device>>,
     filters: Arc<Mutex<Filters>>,
     status_pair: Arc<(Mutex<Status>, Condvar)>,
@@ -41,10 +44,11 @@ pub struct Sniffer {
     git: button::State,
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
+    scroll_packets: scrollable::State,
     style: Mode,
     waiting: String,
     traffic_chart: TrafficChart,
-    chart_packets: bool
+    chart_packets: bool,
 }
 
 
@@ -72,6 +76,10 @@ pub fn main() -> iced::Result {
     let mutex_map2 = mutex_map1.clone();
     let mutex_map3 = mutex_map1.clone();
 
+    let charts_data1 = Arc::new(Mutex::new(ChartsData::new()));
+    let charts_data2 = charts_data1.clone();
+    let charts_data3 = charts_data1.clone();
+
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
@@ -97,7 +105,7 @@ pub fn main() -> iced::Result {
     thread::spawn(move || {
         sleep_and_write_report_loop(current_capture_id2, 0, 65535, 1,
                                     found_device2, filters2, "./sniffnet_report".to_string(),
-                                    mutex_map2, status_pair2);
+                                    mutex_map2, status_pair2, charts_data2);
     });
 
     Sniffer::run(Settings {
@@ -116,6 +124,7 @@ pub fn main() -> iced::Result {
         flags: Sniffer {
             current_capture_id: current_capture_id1,
             info_traffic: mutex_map1,
+            charts_data: charts_data1,
             device: found_device1,
             filters: filters1,
             status_pair: status_pair1,
@@ -126,10 +135,11 @@ pub fn main() -> iced::Result {
             git: button::State::new(),
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
+            scroll_packets: scrollable::State::new(),
             style: Mode::Night,
             waiting: String::new(),
-            traffic_chart: TrafficChart::new(mutex_map3),
-            chart_packets: false
+            traffic_chart: TrafficChart::new(mutex_map3, charts_data3),
+            chart_packets: true
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

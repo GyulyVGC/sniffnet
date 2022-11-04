@@ -62,6 +62,7 @@ pub const SPECIAL_DAY_RGB: RGBColor = RGBColor {0: 0, 1: 89, 2: 189};
 
 pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
 pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
+pub const CHARTS_LINE_BORDER: u32 = 1;
 
 
 #[derive(Copy, Eq, PartialEq)]
