@@ -6,7 +6,7 @@
 
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::{Duration};
@@ -53,8 +53,7 @@ use pcap::Device;
 pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_port: u16, highest_port: u16, interval: u64,
                                    device: Arc<Mutex<Device>>, filters: Arc<Mutex<Filters>>,
                                    output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-                                   status_pair: Arc<(Mutex<Status>, Condvar)>,
-                                   charts_data: Arc<Mutex<ChartsData>>) {
+                                   status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
 
@@ -171,46 +170,6 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
             output.flush().expect("Error writing output file\n\r");
 
             drop(info_traffic);
-
-            let mut charts_data_lock = charts_data.lock().unwrap();
-
-            let tot_seconds = charts_data_lock.ticks;
-            charts_data_lock.ticks += 1;
-
-            let tot_sent_bits_prev = charts_data_lock.tot_sent_bits_prev;
-            let tot_received_bits_prev = charts_data_lock.tot_received_bits_prev;
-            let tot_sent_packets_prev = charts_data_lock.tot_sent_packets_prev;
-            let tot_received_packets_prev = charts_data_lock.tot_received_packets_prev;
-
-            // update sent bits traffic data
-            if charts_data_lock.sent_bits.len() >= 30 {
-                charts_data_lock.sent_bits.pop_front();
-            }
-            charts_data_lock.sent_bits.push_back((tot_seconds as u128, (-1 * (tot_sent_bytes * 8) as i128 + tot_sent_bits_prev)));
-            charts_data_lock.min_sent_bits = get_min(charts_data_lock.sent_bits.clone());
-            charts_data_lock.tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-            // update received bits traffic data
-            if charts_data_lock.received_bits.len() >= 30 {
-                charts_data_lock.received_bits.pop_front();
-            }
-            charts_data_lock.received_bits.push_back((tot_seconds as u128, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)));
-            charts_data_lock.max_received_bits = get_max(charts_data_lock.received_bits.clone());
-            charts_data_lock.tot_received_bits_prev = (tot_received_bytes * 8) as i128;
-
-            // update sent packets traffic data
-            if charts_data_lock.sent_packets.len() >= 30 {
-                charts_data_lock.sent_packets.pop_front();
-            }
-            charts_data_lock.sent_packets.push_back((tot_seconds as u128, (-1 * tot_sent_packets as i128 + tot_sent_packets_prev)));
-            charts_data_lock.min_sent_packets = get_min(charts_data_lock.sent_packets.clone());
-            charts_data_lock.tot_sent_packets_prev = tot_sent_packets as i128;
-            // update received bits traffic data
-            if charts_data_lock.received_packets.len() >= 30 {
-                charts_data_lock.received_packets.pop_front();
-            }
-            charts_data_lock.received_packets.push_back((tot_seconds as u128, (tot_received_packets as i128 - tot_received_packets_prev)));
-            charts_data_lock.max_received_packets = get_max(charts_data_lock.received_packets.clone());
-            charts_data_lock.tot_received_packets_prev = tot_received_packets as i128;
 
         }
         else if *status == Status::Stop {
@@ -472,26 +431,4 @@ fn write_statistics(mut output: File, device_name: String, first_timestamp: Stri
         writeln!(output, "{}", app_count_string).expect("Error writing output file\n");
     }
 
-}
-
-
-fn get_min(deque: VecDeque<(u128, i128)>) -> i128 {
-    let mut min = 0;
-    for (_, x) in deque.iter() {
-        if *x < min {
-            min = *x;
-        }
-    }
-    min
-}
-
-
-fn get_max(deque: VecDeque<(u128, i128)>) -> i128 {
-    let mut max = 0;
-    for (_, x) in deque.iter() {
-        if *x > max {
-            max = *x;
-        }
-    }
-    max
 }

@@ -16,6 +16,7 @@ use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::thread_write_report::get_app_count_string;
 use crate::gui_run_page::TrafficChart;
 use std::{panic, process, thread};
+use std::rc::Rc;
 use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
 use crate::info_traffic::InfoTraffic;
@@ -78,7 +79,6 @@ pub fn main() -> iced::Result {
 
     let charts_data1 = Arc::new(Mutex::new(ChartsData::new()));
     let charts_data2 = charts_data1.clone();
-    let charts_data3 = charts_data1.clone();
 
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
@@ -105,7 +105,7 @@ pub fn main() -> iced::Result {
     thread::spawn(move || {
         sleep_and_write_report_loop(current_capture_id2, 0, 65535, 1,
                                     found_device2, filters2, "./sniffnet_report".to_string(),
-                                    mutex_map2, status_pair2, charts_data2);
+                                    mutex_map2, status_pair2);
     });
 
     Sniffer::run(Settings {
@@ -138,7 +138,7 @@ pub fn main() -> iced::Result {
             scroll_packets: scrollable::State::new(),
             style: Mode::Night,
             waiting: String::new(),
-            traffic_chart: TrafficChart::new(mutex_map3, charts_data3),
+            traffic_chart: TrafficChart::new(charts_data2),
             chart_packets: true
         },
         default_font: None,

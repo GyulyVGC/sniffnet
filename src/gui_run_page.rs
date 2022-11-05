@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
@@ -143,7 +144,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let col_chart = Container::new(
                 Column::new()
                     .push(row_radio_chart)
-                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_packets)))
+                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.charts_data.clone(), sniffer.chart_packets)))
                 .width(Length::FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
@@ -230,7 +231,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
 
 pub struct TrafficChart {
-    info_traffic: Arc<Mutex<InfoTraffic>>,
     charts_data: Arc<Mutex<ChartsData>>,
     color_mix: f64,
     font_color: RGBColor,
@@ -239,9 +239,8 @@ pub struct TrafficChart {
 
 
 impl TrafficChart {
-    pub fn new(info_traffic: Arc<Mutex<InfoTraffic>>, charts_data: Arc<Mutex<ChartsData>>) -> Self {
+    pub fn new(charts_data: Arc<Mutex<ChartsData>>) -> Self {
         TrafficChart {
-            info_traffic,
             charts_data,
             color_mix: 0.0,
             font_color: Default::default(),
@@ -249,7 +248,7 @@ impl TrafficChart {
         }
     }
     
-    fn view(&mut self, mode: Mode, chart_packets: bool) -> Element<Message> {
+    fn view(&mut self, mode: Mode, charts_data: Arc<Mutex<ChartsData>>, chart_packets: bool) -> Element<Message> {
 
         self.color_mix = if mode == Mode::Day {COLOR_CHART_MIX_DAY} else { COLOR_CHART_MIX_NIGHT };
         self.chart_packets = chart_packets;

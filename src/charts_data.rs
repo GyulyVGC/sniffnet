@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+// #[derive(Clone)]
 pub struct ChartsData {
     pub sent_bits: VecDeque<(u128, i128)>,
     pub received_bits: VecDeque<(u128, i128)>,
