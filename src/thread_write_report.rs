@@ -336,20 +336,20 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
         let num_string = entry.1.separate_with_spaces().to_string();
 
         let percentage_string =
-            if format!("{:.2}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.00") {
-                "(<0.01%)".to_string()
+            if format!("{:.1}", 100.0*(*entry.1) as f32/tot_packets as f32).eq("0.0") {
+                "(<0.1%)".to_string()
             }
             else {
-                format!("({:.2}%)", 100.0*(*entry.1) as f32/tot_packets as f32)
+                format!("({:.1}%)", 100.0*(*entry.1) as f32/tot_packets as f32)
             };
 
         //to align digits
         let spaces_string_1 = " ".to_string()
             .repeat(9+longest_num-num_string.len()-app_proto_string.len());
         let spaces_string_2 = " ".to_string()
-            .repeat(11-percentage_string.len());
+            .repeat(10-percentage_string.len());
 
-        ret_val.push_str(&format!("  \t-{}:{}{}{}{}\n",
+        ret_val.push_str(&format!("   {}:{}{}{}{}\n",
                                   app_proto_string,
                                   spaces_string_1,
                                   num_string,

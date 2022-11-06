@@ -21,6 +21,8 @@ pub struct InfoTraffic {
     pub tot_sent_packets: u128,
     /// Total packets including those not filtered
     pub all_packets: u128,
+    /// Total bytes including those not filtered
+    pub all_bytes: u128,
     /// Map of the filtered traffic
     pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
     /// Set with the addresses of the last time interval
@@ -40,6 +42,7 @@ impl InfoTraffic {
             tot_received_packets: 0,
             tot_sent_packets: 0,
             all_packets: 0,
+            all_bytes: 0,
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
             app_protocols: HashMap::new()

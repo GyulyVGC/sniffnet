@@ -84,12 +84,7 @@ impl Application for Sniffer {
                 }
             }
             Message::ReportSelection(what_to_display) => {
-                if what_to_display.eq("latest") {
-                    self.report_latest = true;
-                }
-                else {
-                    self.report_latest = false;
-                }
+                self.report_type = what_to_display;
             }
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]

@@ -34,34 +34,7 @@ impl InfoAddressPortPair {
 
 impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut multiple_transmitted = "".to_string();
-        let mut n = self.transmitted_bytes as f32;
-
-        match self.transmitted_bytes {
-            0..=999 => {}
-            1_000..=999_999 => {
-                n /= 1000_f32;
-                multiple_transmitted.push('k');
-            } // kilo
-            1_000_000..=999_999_999 => {
-                n /= 1_000_000_f32;
-                multiple_transmitted.push('M');
-            } // mega
-            1_000_000_000..=999_999_999_999 => {
-                n /= 1_000_000_000_f32;
-                multiple_transmitted.push('G');
-            } // giga
-            _ => {
-                n /= 1_000_000_000_000_f32;
-                multiple_transmitted.push('T');
-            } // tera
-        }
-
-        let bytes_string = if !multiple_transmitted.is_empty() { // with multiple
-            format!("{:.1} {}B", n, multiple_transmitted)
-        } else { // no multiple
-            format!("{}  B", n)
-        };
+        let bytes_string = get_formatted_bytes_string(self.transmitted_bytes);
 
         let app_string = match self.app_protocol {
             AppProtocol::Other => { "Other".to_string() }
@@ -80,6 +53,39 @@ impl fmt::Display for InfoAddressPortPair {
                    self.initial_timestamp, self.final_timestamp, " ".repeat(40))
         }
     }
+}
+
+
+pub fn get_formatted_bytes_string(bytes: u128) -> String {
+    let mut multiple_transmitted = "".to_string();
+    let mut n = bytes as f32;
+
+    match bytes {
+        0..=999 => {}
+        1_000..=999_999 => {
+            n /= 1000_f32;
+            multiple_transmitted.push('k');
+        } // kilo
+        1_000_000..=999_999_999 => {
+            n /= 1_000_000_f32;
+            multiple_transmitted.push('M');
+        } // mega
+        1_000_000_000..=999_999_999_999 => {
+            n /= 1_000_000_000_f32;
+            multiple_transmitted.push('G');
+        } // giga
+        _ => {
+            n /= 1_000_000_000_000_f32;
+            multiple_transmitted.push('T');
+        } // tera
+    }
+
+   if !multiple_transmitted.is_empty() { // with multiple
+        format!("{:.1} {}B", n, multiple_transmitted)
+    } else { // no multiple
+        format!("{}  B", n)
+    }
+
 }
 
 

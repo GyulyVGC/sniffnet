@@ -6,9 +6,9 @@ use iced::Length::FillPortion;
 use plotters::style::RGBColor;
 use thousands::Separable;
 use crate::app::Message;
-use crate::{ChartsData, get_app_count_string, icon_sun_moon, Mode, Sniffer};
+use crate::{AppProtocol, ChartsData, Filters, FONT_SIZE_SUBTITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer, TransProtocol};
 use crate::address_port_pair::AddressPortPair;
-use crate::info_address_port_pair::InfoAddressPortPair;
+use crate::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
 use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 
@@ -67,7 +67,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let mut sniffer_lock = sniffer.info_traffic.lock().unwrap();
     let observed = sniffer_lock.all_packets;
     let filtered = sniffer_lock.tot_sent_packets + sniffer_lock.tot_received_packets;
+    let observed_bytes = sniffer_lock.all_bytes;
+    let filtered_bytes = sniffer_lock.tot_sent_bytes + sniffer_lock.tot_received_bytes;
     drop(sniffer_lock);
+    let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
 
     let mut body = Column::new()
         .height(Length::FillPortion(HEIGHT_BODY))
@@ -121,6 +124,23 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         }
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
+            let filters_string = get_active_filters_string(sniffer.filters.clone());
+
+            let percentage_string_packets =
+                if format!("{:.1}", 100.0*(filtered) as f32/observed as f32).eq("0.0") {
+                    "<0.1%".to_string()
+                }
+                else {
+                    format!("{:.1}%", 100.0*(filtered) as f32/observed as f32)
+                };
+
+            let percentage_string_bytes =
+                if format!("{:.1}", 100.0*(filtered_bytes) as f32/observed_bytes as f32).eq("0.0") {
+                    "<0.1%".to_string()
+                }
+                else {
+                    format!("{:.1}%", 100.0*(filtered_bytes) as f32/observed_bytes as f32)
+                };
 
             let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bits" };
             let row_radio_chart = Row::new().padding(10).spacing(10)
@@ -149,58 +169,73 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .style(Mode::BorderedRound);
 
             sniffer_lock = sniffer.info_traffic.lock().unwrap();
-            let mut col_packets = Column::new()
+            let col_packets = Column::new()
                 .width(Length::FillPortion(1))
                 .padding(10)
                 .spacing(15)
+                //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
+                .push(Text::new(filters_string).font(font))
+                .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
+                                            filtered.separate_with_spaces(), percentage_string_packets)).font(font))
+                .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
+                                        filtered_bytes_string, percentage_string_bytes)).font(font))
                 .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
-                    .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-                    .push(Text::new(format!("Total intercepted packets: {}",
-                                            observed.separate_with_spaces())).font(font))
-                    .push(Text::new(format!("Filtered packets: {}",
-                                            filtered.separate_with_spaces())).font(font))
-                );
-            col_packets = col_packets
-                .push(iced::Text::new(format!("Filtered packets per application protocol:\n{}",get_app_count_string(sniffer_lock.app_protocols.clone(), filtered))).font(font));
+                          .push(iced::Text::new(format!("Filtered packets per application protocol:\n{}",get_app_count_string(sniffer_lock.app_protocols.clone(), filtered))).font(font)));
 
-            let active_radio_report = if sniffer.report_latest { "latest" } else { "most_used" };
-            let row_radio_report = Row::new().padding(10).spacing(10)
-                //.push(Column::new().width(Length::FillPortion(1)))
+            let active_radio_report = &*sniffer.report_type;
+            let row_radio_report = Row::new().padding(10)
+                .push(Text::new("Relevant connections:    ").size(FONT_SIZE_SUBTITLE).font(font))
                 .push(Radio::new(
                     "latest",
-                    "Latest connections",
+                    "most recent",
                     Some(active_radio_report),
                     |what_to_display| Message::ReportSelection(what_to_display.to_string()),
                 )
-                    //.width(Length::FillPortion(2))
+                    .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
-                    "most_used",
-                    "Most used connections",
+                    "packets",
+                    "most packets",
                     Some(active_radio_report),
                     |what_to_display| Message::ReportSelection(what_to_display.to_string()),
                 )
-                    //.width(Length::FillPortion(2))
+                    .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
-                //.push(Column::new().width(Length::FillPortion(1)))
+                .push(Radio::new(
+                    "bytes",
+                    "most bytes",
+                    Some(active_radio_report),
+                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                )
+                    .width(Length::Units(200))
+                    .font(font).size(15).style(sniffer.style))
                 ;
 
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
-            if sniffer.report_latest {
-                sorted_vec.sort_by(|&(_, a), &(_, b)|
-                    b.final_timestamp.cmp(&a.final_timestamp));
-            }
-            else {
-                sorted_vec.sort_by(|&(_, a), &(_, b)|
-                    b.transmitted_packets.cmp(&a.transmitted_packets));
+            match active_radio_report {
+                "latest" => {
+                    sorted_vec.sort_by(|&(_, a), &(_, b)|
+                        b.final_timestamp.cmp(&a.final_timestamp));
+                }
+                "packets" => {
+                    sorted_vec.sort_by(|&(_, a), &(_, b)|
+                        b.transmitted_packets.cmp(&a.transmitted_packets));
+                }
+                "bytes" => {
+                    sorted_vec.sort_by(|&(_, a), &(_, b)|
+                        b.transmitted_bytes.cmp(&a.transmitted_bytes));
+                }
+                _ => {}
             }
             let n_entry = min(sorted_vec.len(), 10);
             let mut col_report = Column::new()
                 .height(Length::Fill)
                 .push(row_radio_report)
-                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                //.push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                .push(Text::new(" "))
                 .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
-                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font));
+                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                ;
             let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
             for i in 0..n_entry {
                 let key_val = sorted_vec.get(i).unwrap();
@@ -259,6 +294,29 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(header)
         .push(body)
         .push(footer)
+}
+
+
+fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
+    let filters_lock = filters.lock().unwrap();
+    if filters_lock.ip == "no filter"
+        && filters_lock.application.eq(&AppProtocol::Other)
+        && filters_lock.transport.eq(&TransProtocol::Other) {
+        "Active filters:\n   none".to_string()
+    }
+    else {
+        let mut ret_val = "Active filters:".to_string();
+        if filters_lock.ip != "no filter" {
+            ret_val.push_str(&*format!("\n   {}", filters_lock.ip.replace('v', "V")));
+        }
+        if filters_lock.transport.ne(&TransProtocol::Other) {
+            ret_val.push_str(&*format!("\n   {}", filters_lock.transport));
+        }
+        if filters_lock.application.ne(&AppProtocol::Other) {
+            ret_val.push_str(&*format!("\n   {}", filters_lock.application));
+        }
+        ret_val
+    }
 }
 
 

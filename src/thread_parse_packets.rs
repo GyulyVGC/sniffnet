@@ -136,8 +136,9 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         }
 
                         let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
-                        //increment number of sniffed packets
+                        //increment number of sniffed packets and bytes
                         info_traffic.all_packets += 1;
+                        info_traffic.all_bytes += exchanged_bytes;
 
                         if reported_packet {
                             //increment the packet count for the sniffed app protocol

@@ -50,7 +50,7 @@ pub struct Sniffer {
     waiting: String,
     traffic_chart: TrafficChart,
     chart_packets: bool,
-    report_latest: bool,
+    report_type: String,
 }
 
 
@@ -141,7 +141,7 @@ pub fn main() -> iced::Result {
             waiting: String::new(),
             traffic_chart: TrafficChart::new(charts_data2),
             chart_packets: true,
-            report_latest: true
+            report_type: "latest".to_string()
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,
