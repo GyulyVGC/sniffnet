@@ -86,7 +86,7 @@ impl Application for Sniffer {
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
-                    .arg("./sniffnet_report/report.txt")
+                    .arg(r".\sniffnet_report\report.txt")
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "macos")]
@@ -104,7 +104,7 @@ impl Application for Sniffer {
             Message::OpenGithub => {
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
-                    .arg("./sniffnet_report/report.txt")
+                    .arg("https://github.com/GyulyVGC/sniffnet")
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "macos")]
@@ -114,7 +114,7 @@ impl Application for Sniffer {
                     .unwrap();
                 #[cfg(target_os = "linux")]
                 std::process::Command::new("explorer")
-                    .arg("./sniffnet_report/report.txt")
+                    .arg("https://github.com/GyulyVGC/sniffnet")
                     .spawn()
                     .unwrap();
             }

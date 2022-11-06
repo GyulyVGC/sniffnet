@@ -1,5 +1,4 @@
 use std::cmp::{max, min};
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};

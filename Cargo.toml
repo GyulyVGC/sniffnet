@@ -2,6 +2,7 @@
 name = "sniffnet"
 version = "0.5.0"
 edition = "2021"
+authors = ["me"]
 description = "Framework to explore network traffic through graphical and textual reports"
 repository = "https://github.com/GyulyVGC/sniffnet"
 readme = "README.md"
