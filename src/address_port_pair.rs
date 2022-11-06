@@ -39,6 +39,10 @@ impl AddressPortPair {
             traffic_type,
         }
     }
+
+    pub fn print_gui(&self) -> String {
+        self.to_string().replace('|',"")
+    }
 }
 
 

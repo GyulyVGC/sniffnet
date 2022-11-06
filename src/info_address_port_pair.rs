@@ -26,8 +26,8 @@ pub struct InfoAddressPortPair {
 
 
 impl InfoAddressPortPair {
-    pub fn print_without_timestamps(&self) -> String {
-        self.to_string().get(0..46).unwrap().to_string()
+    pub fn print_gui(&self) -> String {
+        self.to_string().get(0..46).unwrap().to_string().replace('|', "")
     }
 }
 

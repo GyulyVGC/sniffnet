@@ -16,7 +16,6 @@ use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::thread_write_report::get_app_count_string;
 use crate::gui_run_page::TrafficChart;
 use std::{panic, process, thread};
-use std::rc::Rc;
 use std::sync::{Arc, Mutex, Condvar};
 use iced::{Application, button, pick_list, scrollable, Settings, window};
 use crate::info_traffic::InfoTraffic;
@@ -46,10 +45,12 @@ pub struct Sniffer {
     app: pick_list::State<AppProtocol>,
     scroll_adapters: scrollable::State,
     scroll_packets: scrollable::State,
+    scroll_report: scrollable::State,
     style: Mode,
     waiting: String,
     traffic_chart: TrafficChart,
     chart_packets: bool,
+    report_latest: bool,
 }
 
 
@@ -75,7 +76,6 @@ pub fn main() -> iced::Result {
     // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
-    let mutex_map3 = mutex_map1.clone();
 
     let charts_data1 = Arc::new(Mutex::new(ChartsData::new()));
     let charts_data2 = charts_data1.clone();
@@ -102,11 +102,11 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    thread::spawn(move || {
+    thread::Builder::new().name("thread_write_report".to_string()).spawn(move || {
         sleep_and_write_report_loop(current_capture_id2, 0, 65535, 1,
                                     found_device2, filters2, "./sniffnet_report".to_string(),
                                     mutex_map2, status_pair2);
-    });
+    }).unwrap();
 
     Sniffer::run(Settings {
         id: None,
@@ -136,10 +136,12 @@ pub fn main() -> iced::Result {
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
             scroll_packets: scrollable::State::new(),
+            scroll_report: scrollable::State::new(),
             style: Mode::Night,
             waiting: String::new(),
             traffic_chart: TrafficChart::new(charts_data2),
-            chart_packets: true
+            chart_packets: true,
+            report_latest: true
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

@@ -31,6 +31,16 @@ pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
     bytes: include_bytes!("../fonts/CourierPrimeBoldItalic.ttf"),
 };
 
+pub const NOTOSANS: Font = Font::External {
+    name: "Notosans",
+    bytes: include_bytes!("../fonts/notosans-regular.ttf"),
+};
+
+pub const NOTOSANS_BOLD: Font = Font::External {
+    name: "NotosansBold",
+    bytes: include_bytes!("../fonts/notosans-bold.ttf"),
+};
+
 
 pub const LOGO: Font = Font::External {
     name: "Logo",

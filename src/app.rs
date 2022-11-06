@@ -1,5 +1,4 @@
 use std::collections::VecDeque;
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use crate::{ChartsData, InfoTraffic, parse_packets_loop, Sniffer, Status, TrafficChart};
@@ -25,6 +24,7 @@ pub enum Message {
     TransportProtocolSelection(TransProtocol),
     AppProtocolSelection(AppProtocol),
     ChartSelection(String),
+    ReportSelection(String),
     OpenReport,
     OpenGithub,
     Start,
@@ -83,6 +83,14 @@ impl Application for Sniffer {
                     self.chart_packets = false;
                 }
             }
+            Message::ReportSelection(what_to_display) => {
+                if what_to_display.eq("latest") {
+                    self.report_latest = true;
+                }
+                else {
+                    self.report_latest = false;
+                }
+            }
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
@@ -129,11 +137,11 @@ impl Application for Sniffer {
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 self.traffic_chart = TrafficChart::new(charts_data_mutex.clone());
                 self.status_pair.1.notify_all();
-                thread::spawn(move || {
+                thread::Builder::new().name(format!("thread_parse_packets_{}",current_capture_id.lock().unwrap())).spawn(move || {
                     parse_packets_loop(current_capture_id, device,
                                        0, 65535, filters,
                                        info_traffic_mutex);
-                });
+                }).unwrap();
             }
             Message::Reset => {
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file

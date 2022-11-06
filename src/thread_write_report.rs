@@ -14,7 +14,7 @@ use std::{fs, thread};
 use chrono::{Local};
 use std::io::{BufWriter, Seek, SeekFrom, Write};
 use thousands::Separable;
-use crate::{AppProtocol, ChartsData, Filters, InfoTraffic, Status, TransProtocol};
+use crate::{AppProtocol, Filters, InfoTraffic, Status, TransProtocol};
 use pcap::Device;
 
 
@@ -134,8 +134,8 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, lowest_p
             let tot_sent_packets = info_traffic.tot_sent_packets;
             let tot_received_packets = info_traffic.tot_received_packets;
             let all_packets = info_traffic.all_packets;
-            let tot_received_bytes = info_traffic.tot_received_bytes;
-            let tot_sent_bytes = info_traffic.tot_sent_bytes;
+            // let tot_received_bytes = info_traffic.tot_received_bytes;
+            // let tot_sent_bytes = info_traffic.tot_sent_bytes;
 
 
             let mut output2 = BufWriter::new(File::create(path_statistics.clone()).expect("Error creating output file\n\r"));

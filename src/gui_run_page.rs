@@ -3,14 +3,13 @@ use std::sync::{Arc, Mutex};
 use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
-use plotters::prelude::IntoFont;
 use plotters::style::RGBColor;
 use thousands::Separable;
 use crate::app::Message;
-use crate::{ChartsData, FONT_SIZE_TITLE, get_app_count_string, icon_sun_moon, InfoTraffic, Mode, Sniffer};
+use crate::{ChartsData, get_app_count_string, icon_sun_moon, Mode, Sniffer};
 use crate::address_port_pair::AddressPortPair;
 use crate::info_address_port_pair::InfoAddressPortPair;
-use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
+use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -143,7 +142,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let col_chart = Container::new(
                 Column::new()
                     .push(row_radio_chart)
-                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.charts_data.clone(), sniffer.chart_packets)))
+                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_packets)))
                 .width(Length::FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
@@ -154,7 +153,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .width(Length::FillPortion(1))
                 .padding(10)
                 .spacing(15)
-                .push(Scrollable::new(&mut sniffer.scroll_packets)
+                .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
                     .push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     .push(Text::new(format!("Total intercepted packets: {}",
                                             observed.separate_with_spaces())).font(font))
@@ -164,31 +163,65 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             col_packets = col_packets
                 .push(iced::Text::new(format!("Filtered packets per application protocol:\n{}",get_app_count_string(sniffer_lock.app_protocols.clone(), filtered))).font(font));
 
-            let mut row_report = Row::new()
-                .height(Length::FillPortion(2))
-                .align_items(Alignment::Center);
+            let active_radio_report = if sniffer.report_latest { "latest" } else { "most_used" };
+            let row_radio_report = Row::new().padding(10).spacing(10)
+                //.push(Column::new().width(Length::FillPortion(1)))
+                .push(Radio::new(
+                    "latest",
+                    "Latest connections",
+                    Some(active_radio_report),
+                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                )
+                    //.width(Length::FillPortion(2))
+                    .font(font).size(15).style(sniffer.style))
+                .push(Radio::new(
+                    "most_used",
+                    "Most used connections",
+                    Some(active_radio_report),
+                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                )
+                    //.width(Length::FillPortion(2))
+                    .font(font).size(15).style(sniffer.style))
+                //.push(Column::new().width(Length::FillPortion(1)))
+                ;
+
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
-            sorted_vec.sort_by(|&(_, a), &(_, b)|
-                b.final_timestamp.cmp(&a.final_timestamp));
-            let n_entry = min(sorted_vec.len(), 9);
+            if sniffer.report_latest {
+                sorted_vec.sort_by(|&(_, a), &(_, b)|
+                    b.final_timestamp.cmp(&a.final_timestamp));
+            }
+            else {
+                sorted_vec.sort_by(|&(_, a), &(_, b)|
+                    b.transmitted_packets.cmp(&a.transmitted_packets));
+            }
+            let n_entry = min(sorted_vec.len(), 10);
             let mut col_report = Column::new()
-                .height(Length::Fill);
-            col_report = col_report
-                .push(iced::Text::new("Latest connections\n").font(font).size(FONT_SIZE_TITLE))
-                .push(iced::Text::new("-------------------------------------------------------------------------------------------------------------------------").font(font))
-                .push(iced::Text::new("|     Src IP address      | Src port |     Dst IP address      | Dst port | Layer 4 | Layer 7 |   Packets  |   Bytes    |").font(font))
-                .push(iced::Text::new("-------------------------------------------------------------------------------------------------------------------------").font(font));
+                .height(Length::Fill)
+                .push(row_radio_report)
+                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
+                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font));
+            let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
             for i in 0..n_entry {
                 let key_val = sorted_vec.get(i).unwrap();
-                col_report = col_report.push(iced::Text::new(format!("{}{}", key_val.0, key_val.1.print_without_timestamps())).font(font));
+                scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).font(font));
             }
+            col_report = col_report.push(scroll_report);
             drop(sniffer_lock);
-            col_report = col_report
-                .push(iced::Text::new("-------------------------------------------------------------------------------------------------------------------------").font(font));
-            let col_open_report = Column::new()
-                .push(button_report);
-            row_report = row_report
-                .push(col_report)
+            let col_open_report = Container::new(button_report)
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .align_x(Horizontal::Center)
+                .align_y(Vertical::Center);
+            let row_report = Row::new()
+                .spacing(10)
+                .height(Length::FillPortion(2))
+                .width(Length::Fill)
+                .align_items(Alignment::Start)
+                .push(Container::new(col_report)
+                    .padding(10)
+                    .height(Length::Fill)
+                    .style(Mode::BorderedRound))
                 .push(col_open_report);
 
             body = body
@@ -247,7 +280,7 @@ impl TrafficChart {
         }
     }
     
-    fn view(&mut self, mode: Mode, charts_data: Arc<Mutex<ChartsData>>, chart_packets: bool) -> Element<Message> {
+    fn view(&mut self, mode: Mode, chart_packets: bool) -> Element<Message> {
 
         self.color_mix = if mode == Mode::Day {COLOR_CHART_MIX_DAY} else { COLOR_CHART_MIX_NIGHT };
         self.chart_packets = chart_packets;
@@ -255,7 +288,13 @@ impl TrafficChart {
 
         Container::new(
             Column::new()
-                .push(ChartWidget::new(self)))
+                .push(ChartWidget::new(self).resolve_font(
+                    move |_, _| match mode {
+                        Mode::Night => {NOTOSANS}
+                        Mode::Day => {NOTOSANS_BOLD}
+                        _ => {NOTOSANS}
+                    }
+                )))
             .align_x(Horizontal::Left)
             .align_y(Vertical::Bottom)
             .into()
@@ -284,11 +323,7 @@ impl Chart<Message> for TrafficChart {
                     .expect("Error drawing graph");
 
                 chart.configure_mesh()
-                    .label_style(("helvetica", 13).into_font().color(&self.font_color))
-                    // .x_label_formatter(&|seconds| {
-                    //     (time_origin + chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
-                    //         .format("%H:%M:%S").to_string()
-                    // })
+                    .label_style(("notosans", 15).into_font().color(&self.font_color))
                     .y_label_formatter(&|bits| {
                         match bits {
                             0..=999 | -999..=-1 => { format!("{}", bits) }
@@ -311,7 +346,7 @@ impl Chart<Message> for TrafficChart {
                     .label("Outgoing bits")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
                 chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
-                    .border_style(BLACK).label_font(("helvetica", 13).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
+                    .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
 
             }
 
@@ -323,11 +358,7 @@ impl Chart<Message> for TrafficChart {
                     .expect("Error drawing graph");
 
                 chart.configure_mesh()
-                    .label_style(("helvetica", 13).into_font().color(&self.font_color))
-                    // .x_label_formatter(&|seconds| {
-                    //     (time_origin + chrono::Duration::from_std(Duration::from_secs(*seconds as u64)).unwrap())
-                    //         .format("%H:%M:%S").to_string()
-                    // })
+                    .label_style(("notosans", 15).into_font().color(&self.font_color))
                     .draw().unwrap();
                 chart.draw_series(
                     AreaSeries::new(charts_data_lock.received_packets.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
@@ -342,7 +373,7 @@ impl Chart<Message> for TrafficChart {
                     .label("Outgoing packets")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
                 chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
-                    .border_style(BLACK).label_font(("helvetica", 13).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
+                    .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
 
             }
         }

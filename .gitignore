@@ -226,4 +226,7 @@ $RECYCLE.BIN/
 #folder with reports
 /sniffnet_*
 
+#folder used for Windows installer
+/wix
+
 .idea
