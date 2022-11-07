@@ -315,7 +315,7 @@ impl iced_style::scrollable::StyleSheet for Mode {
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
-                border_width: BORDER_WIDTH,
+                border_width: BORDER_WIDTH/1.5,
                 border_color: Color::BLACK,
             },
         }
@@ -329,7 +329,7 @@ impl iced_style::scrollable::StyleSheet for Mode {
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
-            border_width: BORDER_WIDTH,
+            border_width: BORDER_WIDTH/1.5,
             border_color: Color::BLACK,
             scroller: Scroller {
                 color: match self {
@@ -338,7 +338,7 @@ impl iced_style::scrollable::StyleSheet for Mode {
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
-                border_width: BORDER_WIDTH,
+                border_width: BORDER_WIDTH/1.5,
                 border_color: Color::BLACK,
             },
         }
@@ -353,19 +353,19 @@ pub fn logo_glyph() -> Text {
 }
 
 
-pub fn icon_sun_moon(style: Mode) -> Text {
+pub fn icon_sun_moon(style: Mode) -> Text { //F: sun, G: moon, K: sun adjust
     match style {
         Mode::Night => {
-            Text::new('F'.to_string())
+            Text::new('K'.to_string())
                 .font(ICONS)
-                .width(Length::Units(20))
+                .width(Length::Units(25))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .size(20)
         }
         Mode::Day => {
-            Text::new('G'.to_string())
+            Text::new('K'.to_string())
                 .font(ICONS)
-                .width(Length::Units(20))
+                .width(Length::Units(25))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .size(20)
         }

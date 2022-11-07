@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use crate::{ChartsData, InfoTraffic, parse_packets_loop, Sniffer, Status, TrafficChart};
+use crate::{RunTimeData, InfoTraffic, parse_packets_loop, Sniffer, Status, TrafficChart};
 use iced::{executor, Application, Column, Command, Container, Element, Length, Subscription};
 use std::time::Duration;
 use pcap::Device;
@@ -18,7 +18,7 @@ pub const PERIOD_INIT: u64 = 5000; //milliseconds
 #[derive(Debug, Clone)]
 pub enum Message {
     Tick,
-    TickChart,
+    TickRun,
     AdapterSelection(String),
     IpVersionSelection(String),
     TransportProtocolSelection(TransProtocol),
@@ -54,8 +54,19 @@ impl Application for Sniffer {
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::Tick => {}
-            Message::TickChart => {
-                update_charts_data(self.charts_data.clone(), self.info_traffic.clone());
+            Message::TickRun => {
+                let mut runtime_data_lock = self.runtime_data.lock().unwrap();
+                let info_traffic_lock = self.info_traffic.lock().unwrap();
+                runtime_data_lock.all_packets = info_traffic_lock.all_packets;
+                runtime_data_lock.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
+                runtime_data_lock.tot_received_packets = info_traffic_lock.tot_received_packets as i128;
+                runtime_data_lock.all_bytes = info_traffic_lock.all_bytes;
+                runtime_data_lock.tot_received_bytes = info_traffic_lock.tot_received_bytes as i128;
+                runtime_data_lock.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
+                runtime_data_lock.app_protocols = info_traffic_lock.app_protocols.clone();
+                drop(info_traffic_lock);
+                drop(runtime_data_lock);
+                update_charts_data(self.runtime_data.clone());
             }
             Message::AdapterSelection(name) => {
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
@@ -127,8 +138,8 @@ impl Application for Sniffer {
                 let filters = self.filters.clone();
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                let charts_data_mutex = self.charts_data.clone();
-                *charts_data_mutex.lock().unwrap() = ChartsData::new();
+                let charts_data_mutex = self.runtime_data.clone();
+                *charts_data_mutex.lock().unwrap() = RunTimeData::new();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 self.traffic_chart = TrafficChart::new(charts_data_mutex.clone());
                 self.status_pair.1.notify_all();
@@ -157,7 +168,7 @@ impl Application for Sniffer {
     fn subscription(&self) -> Subscription<Message> {
         match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickChart)
+                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
             }
             _ => {
                 iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::Tick)
@@ -193,54 +204,46 @@ impl Application for Sniffer {
 }
 
 
-pub fn update_charts_data(charts_data_mutex: Arc<Mutex<ChartsData>>, info_traffic: Arc<Mutex<InfoTraffic>>) {
-
-    let info_traffic_lock = info_traffic.lock().unwrap();
-    let tot_sent_packets = info_traffic_lock.tot_sent_packets;
-    let tot_received_packets = info_traffic_lock.tot_received_packets;
-    //let all_packets = info_traffic_lock.all_packets;
-    let tot_received_bytes = info_traffic_lock.tot_received_bytes;
-    let tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
-    drop(info_traffic_lock);
+pub fn update_charts_data(charts_data_mutex: Arc<Mutex<RunTimeData>>) {
 
     let mut charts_data = charts_data_mutex.lock().unwrap();
     let tot_seconds = charts_data.ticks;
     charts_data.ticks += 1;
 
-    let tot_sent_bits_prev = charts_data.tot_sent_bits_prev;
-    let tot_received_bits_prev = charts_data.tot_received_bits_prev;
-    let tot_sent_packets_prev = charts_data.tot_sent_packets_prev;
-    let tot_received_packets_prev = charts_data.tot_received_packets_prev;
+    let sent_bytes_entry =  charts_data.tot_sent_bytes_prev - charts_data.tot_sent_bytes;
+    let received_bytes_entry = charts_data.tot_received_bytes - charts_data.tot_received_bytes_prev;
+    let sent_packets_entry = charts_data.tot_sent_packets_prev - charts_data.tot_sent_packets;
+    let received_packets_entry = charts_data.tot_received_packets - charts_data.tot_received_packets_prev;
 
-    // update sent bits traffic data
-    if charts_data.sent_bits.len() >= 30 {
-        charts_data.sent_bits.pop_front();
+    // update sent bytes traffic data
+    if charts_data.sent_bytes.len() >= 30 {
+        charts_data.sent_bytes.pop_front();
     }
-    charts_data.sent_bits.push_back((tot_seconds as u128, (-1 * (tot_sent_bytes * 8) as i128 + tot_sent_bits_prev)));
-    charts_data.min_sent_bits = get_min(charts_data.sent_bits.clone());
-    charts_data.tot_sent_bits_prev = (tot_sent_bytes * 8) as i128;
-    // update received bits traffic data
-    if charts_data.received_bits.len() >= 30 {
-        charts_data.received_bits.pop_front();
+    charts_data.sent_bytes.push_back((tot_seconds as u128, sent_bytes_entry));
+    charts_data.min_sent_bytes = get_min(charts_data.sent_bytes.clone());
+    charts_data.tot_sent_bytes_prev = charts_data.tot_sent_bytes;
+    // update received bytes traffic data
+    if charts_data.received_bytes.len() >= 30 {
+        charts_data.received_bytes.pop_front();
     }
-    charts_data.received_bits.push_back((tot_seconds as u128, (tot_received_bytes as i128 * 8 - tot_received_bits_prev)));
-    charts_data.max_received_bits = get_max(charts_data.received_bits.clone());
-    charts_data.tot_received_bits_prev = (tot_received_bytes * 8) as i128;
+    charts_data.received_bytes.push_back((tot_seconds as u128, received_bytes_entry));
+    charts_data.max_received_bytes = get_max(charts_data.received_bytes.clone());
+    charts_data.tot_received_bytes_prev = charts_data.tot_received_bytes;
 
     // update sent packets traffic data
     if charts_data.sent_packets.len() >= 30 {
         charts_data.sent_packets.pop_front();
     }
-    charts_data.sent_packets.push_back((tot_seconds as u128, (-1 * tot_sent_packets as i128 + tot_sent_packets_prev)));
+    charts_data.sent_packets.push_back((tot_seconds as u128, sent_packets_entry));
     charts_data.min_sent_packets = get_min(charts_data.sent_packets.clone());
-    charts_data.tot_sent_packets_prev = tot_sent_packets as i128;
-    // update received bits traffic data
+    charts_data.tot_sent_packets_prev = charts_data.tot_sent_packets;
+    // update received packets traffic data
     if charts_data.received_packets.len() >= 30 {
         charts_data.received_packets.pop_front();
     }
-    charts_data.received_packets.push_back((tot_seconds as u128, (tot_received_packets as i128 - tot_received_packets_prev)));
+    charts_data.received_packets.push_back((tot_seconds as u128, received_packets_entry));
     charts_data.max_received_packets = get_max(charts_data.received_packets.clone());
-    charts_data.tot_received_packets_prev = tot_received_packets as i128;
+    charts_data.tot_received_packets_prev = charts_data.tot_received_packets;
 
 }
 

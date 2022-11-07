@@ -6,7 +6,7 @@ use iced::Length::FillPortion;
 use plotters::style::RGBColor;
 use thousands::Separable;
 use crate::app::Message;
-use crate::{AppProtocol, ChartsData, Filters, FONT_SIZE_SUBTITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer, TransProtocol};
+use crate::{AppProtocol, RunTimeData, Filters, FONT_SIZE_SUBTITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer, TransProtocol};
 use crate::address_port_pair::{AddressPortPair, TrafficType};
 use crate::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
 use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY, SPECIAL_DAY_RGB, SPECIAL_NIGHT, SPECIAL_NIGHT_RGB};
@@ -65,13 +65,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .style(sniffer.style)
         .on_press(Message::OpenReport);
 
-    let mut sniffer_lock = sniffer.info_traffic.lock().unwrap();
-    let observed = sniffer_lock.all_packets;
-    let filtered = sniffer_lock.tot_sent_packets + sniffer_lock.tot_received_packets;
-    let observed_bytes = sniffer_lock.all_bytes;
-    let filtered_bytes = sniffer_lock.tot_sent_bytes + sniffer_lock.tot_received_bytes;
-    drop(sniffer_lock);
-    let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
+    let runtime_data_lock = sniffer.runtime_data.lock().unwrap();
+    let observed = runtime_data_lock.all_packets;
+    let filtered = runtime_data_lock.tot_sent_packets + runtime_data_lock.tot_received_packets;
+    let observed_bytes = runtime_data_lock.all_bytes;
+    let filtered_bytes = runtime_data_lock.tot_sent_bytes + runtime_data_lock.tot_received_bytes;
+    let app_protocols = runtime_data_lock.app_protocols.clone();
+    drop(runtime_data_lock);
+    let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
 
     let mut body = Column::new()
         .height(Length::FillPortion(HEIGHT_BODY))
@@ -145,7 +146,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     format!("{:.1}%", 100.0*(filtered_bytes) as f32/observed_bytes as f32)
                 };
 
-            let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bits" };
+            let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bytes" };
             let row_radio_chart = Row::new().padding(15).spacing(10)
                 .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
                 .push(Radio::new(
@@ -153,14 +154,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     "packets per second",
                     Some(active_radio_chart),
                     |what_to_display| Message::ChartSelection(what_to_display.to_string()),
-                ).width(Length::FillPortion(2)).font(font).size(15).style(sniffer.style))
+                ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
-                    "bits",
-                    "bits per second",
+                    "bytes",
+                    "bytes per second",
                     Some(active_radio_chart),
                     |what_to_display| Message::ChartSelection(what_to_display.to_string()),
-                ).width(Length::FillPortion(2)).font(font).size(15).style(sniffer.style))
-                .push(Column::new().width(Length::FillPortion(1)));
+                ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
+               ;
 
             let col_chart = Container::new(
                 Column::new()
@@ -171,19 +172,22 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .align_y(Vertical::Center)
                 .style(Mode::BorderedRound);
 
-            sniffer_lock = sniffer.info_traffic.lock().unwrap();
             let col_packets = Column::new()
                 .width(Length::FillPortion(1))
                 .padding(10)
-                .spacing(15)
                 //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                 .push(Text::new(filters_string).font(font))
+                .push(Text::new(" "))
                 .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
                                             filtered.separate_with_spaces(), percentage_string_packets)).font(font))
+                .push(Text::new(" "))
                 .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
                                         filtered_bytes_string, percentage_string_bytes)).font(font))
+                .push(Text::new(" "))
+                .push(Text::new("Filtered packets per application protocol:").font(font))
                 .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
-                          .push(iced::Text::new(format!("Filtered packets per application protocol:\n{}",get_app_count_string(sniffer_lock.app_protocols.clone(), filtered))).font(font)));
+                    .push(Text::new(format!("{}",get_app_count_string(app_protocols, filtered as u128))).font(font)))
+            ;
 
             let active_radio_report = &*sniffer.report_type;
             let row_radio_report = Row::new().padding(10)
@@ -214,6 +218,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .font(font).size(15).style(sniffer.style))
                 ;
 
+            let sniffer_lock = sniffer.info_traffic.lock().unwrap();
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
             match active_radio_report {
                 "latest" => {
@@ -334,7 +339,7 @@ fn get_connection_color(traffic_type: TrafficType) -> Color {
 
 
 pub struct TrafficChart {
-    charts_data: Arc<Mutex<ChartsData>>,
+    charts_data: Arc<Mutex<RunTimeData>>,
     color_mix: f64,
     font_color: RGBColor,
     chart_packets: bool,
@@ -342,7 +347,7 @@ pub struct TrafficChart {
 
 
 impl TrafficChart {
-    pub fn new(charts_data: Arc<Mutex<ChartsData>>) -> Self {
+    pub fn new(charts_data: Arc<Mutex<RunTimeData>>) -> Self {
         TrafficChart {
             charts_data,
             color_mix: 0.0,
@@ -386,32 +391,32 @@ impl Chart<Message> for TrafficChart {
         let first_time_displayed = max(0, charts_data_lock.ticks as i128 - 30) as u128;
 
         match self.chart_packets {
-            false => { //display bits chart
+            false => { //display bytes chart
                 let mut chart = chart.margin_right(30)
                     .set_label_area_size(LabelAreaPosition::Left, 60)
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
-                    .build_cartesian_2d(first_time_displayed..tot_seconds as u128, charts_data_lock.min_sent_bits..charts_data_lock.max_received_bits)
+                    .build_cartesian_2d(first_time_displayed..tot_seconds as u128, charts_data_lock.min_sent_bytes..charts_data_lock.max_received_bytes)
                     .expect("Error drawing graph");
 
                 chart.configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.font_color))
-                    .y_label_formatter(&|bits| {
-                        match bits {
-                            0..=999 | -999..=-1 => { format!("{}", bits) }
-                            1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}", *bits as f64 / 1_000_f64, "k") }
-                            1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}", *bits as f64 / 1_000_000_f64, "M") }
-                            _ => { format!("{:.1} {}", *bits as f64 / 1_000_000_000_f64, "G") }
+                    .y_label_formatter(&|bytes| {
+                        match bytes {
+                            0..=999 | -999..=-1 => { format!("{}", bytes) }
+                            1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}", *bytes as f64 / 1_000_f64, "k") }
+                            1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}", *bytes as f64 / 1_000_000_f64, "M") }
+                            _ => { format!("{:.1} {}", *bytes as f64 / 1_000_000_000_f64, "G") }
                         }
                     })
                     .draw().unwrap();
                 chart.draw_series(
-                    AreaSeries::new(charts_data_lock.received_bits.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
+                    AreaSeries::new(charts_data_lock.received_bytes.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
                     .label("Incoming")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
                 chart.draw_series(
-                    AreaSeries::new(charts_data_lock.sent_bits.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
+                    AreaSeries::new(charts_data_lock.sent_bytes.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
                     .label("Outgoing")
