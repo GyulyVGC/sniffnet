@@ -1,15 +1,15 @@
 use std::cmp::{max, min};
 use std::sync::{Arc, Mutex};
-use iced::{alignment, Alignment, Button, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
+use iced::{alignment, Alignment, Button, Color, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use plotters::style::RGBColor;
 use thousands::Separable;
 use crate::app::Message;
 use crate::{AppProtocol, ChartsData, Filters, FONT_SIZE_SUBTITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::address_port_pair::AddressPortPair;
+use crate::address_port_pair::{AddressPortPair, TrafficType};
 use crate::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
-use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
+use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY, SPECIAL_DAY_RGB, SPECIAL_NIGHT, SPECIAL_NIGHT_RGB};
 use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -25,19 +25,20 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
         .padding(10)
         .height(Length::Units(40))
-        .width(Length::Units(100))
+        .width(Length::Units(60))
         .style(sniffer.style)
         .on_press(Message::Style);
 
     let button_reset = Button::new(
         &mut sniffer.reset,
-        icon('\u{f177}')
+        Text::new('C'.to_string()).font(ICONS)
+            .size(20)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
         .padding(10)
         .height(Length::Units(40))
-        .width(Length::Units(80))
+        .width(Length::Units(60))
         .style(sniffer.style)
         .on_press(Message::Reset);
 
@@ -81,31 +82,33 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     match (observed, filtered) {
         (0, 0) => { //no packets observed at all
-            if sniffer.waiting.len() > 4 {
+            if sniffer.waiting.len() > 2 {
                 sniffer.waiting = "".to_string();
             }
             sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
             let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
-            let nothing_to_see_text = if sniffer.device.lock().unwrap().addresses.len() > 0 {
+            let (icon_text, nothing_to_see_text) = if sniffer.device.lock().unwrap().addresses.len() > 0 {
+                (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
                 Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                                               Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font)
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
             }
             else {
+                (Text::new('T'.to_string()).font(ICONS).size(60),
                 Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                                               Network adapter: {}\n\n\
-                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font)
+                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
             };
             body = body
                 .push(Row::new().height(Length::FillPortion(1)))
-                .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
+                .push(icon_text)
                 .push(nothing_to_see_text)
                 .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
                 .push(Row::new().height(Length::FillPortion(2)));
         }
 
         (_observed, 0) => { //no packets have been filtered but some have been observed
-            if sniffer.waiting.len() > 4 {
+            if sniffer.waiting.len() > 2 {
                 sniffer.waiting = "".to_string();
             }
             sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
@@ -143,8 +146,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 };
 
             let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bits" };
-            let row_radio_chart = Row::new().padding(10).spacing(10)
-                .push(Column::new().width(Length::FillPortion(1)))
+            let row_radio_chart = Row::new().padding(15).spacing(10)
+                .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
                 .push(Radio::new(
                     "packets",
                     "packets per second",
@@ -227,11 +230,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 }
                 _ => {}
             }
-            let n_entry = min(sorted_vec.len(), 10);
+            let n_entry = min(sorted_vec.len(), 15);
             let mut col_report = Column::new()
                 .height(Length::Fill)
                 .push(row_radio_report)
-                //.push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
                 .push(Text::new(" "))
                 .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
                 .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
@@ -239,7 +241,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
             for i in 0..n_entry {
                 let key_val = sorted_vec.get(i).unwrap();
-                scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).font(font));
+                let entry_color = get_connection_color(key_val.0.traffic_type);
+                scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).color(entry_color).font(COURIER_PRIME_BOLD));
             }
             col_report = col_report.push(scroll_report);
             drop(sniffer_lock);
@@ -269,7 +272,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_github = Button::new(
         &mut sniffer.git,
-        icon('\u{f09b}').size(30)
+        Text::new('H'.to_string()).font(ICONS).size(24)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
@@ -316,6 +319,16 @@ fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
             ret_val.push_str(&*format!("\n   {}", filters_lock.application));
         }
         ret_val
+    }
+}
+
+
+fn get_connection_color(traffic_type: TrafficType) -> Color {
+    if traffic_type == TrafficType::Incoming
+        || traffic_type == TrafficType::Multicast {
+        SPECIAL_NIGHT
+    } else {
+        SPECIAL_DAY
     }
 }
 
@@ -395,13 +408,13 @@ impl Chart<Message> for TrafficChart {
                     AreaSeries::new(charts_data_lock.received_bits.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
-                    .label("Incoming bits")
+                    .label("Incoming")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
                 chart.draw_series(
                     AreaSeries::new(charts_data_lock.sent_bits.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
-                    .label("Outgoing bits")
+                    .label("Outgoing")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
                 chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
                     .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
@@ -422,13 +435,13 @@ impl Chart<Message> for TrafficChart {
                     AreaSeries::new(charts_data_lock.received_packets.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
-                    .label("Incoming packets")
+                    .label("Incoming")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
                 chart.draw_series(
                     AreaSeries::new(charts_data_lock.sent_packets.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
                         .border_style(ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER)))
                     .expect("Error drawing graph")
-                    .label("Outgoing packets")
+                    .label("Outgoing")
                     .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
                 chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
                     .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");

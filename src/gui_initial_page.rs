@@ -4,7 +4,7 @@ use iced::Length::FillPortion;
 use pcap::Device;
 use crate::app::Message;
 use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon, logo_glyph};
+use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS, logo_glyph};
 
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
@@ -19,7 +19,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
         .padding(10)
         .height(Length::Units(40))
-        .width(Length::Units(100))
+        .width(Length::Units(60))
         .style(sniffer.style)
         .on_press(Message::Style);
 
@@ -177,7 +177,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_github = Button::new(
         &mut sniffer.git,
-        icon('\u{f09b}').size(30)
+        Text::new('H'.to_string()).font(ICONS).size(24)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )

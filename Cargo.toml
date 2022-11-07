@@ -35,7 +35,6 @@ plotters-iced = "0.3.3"
 iced = {version = "0.4.2", features = ["smol", "canvas", "tokio"] }
 iced_style = "0.4.0"
 iced_native = "0.5.1"
-font-awesome = "0.2.0"
 
 
 #used for debug purposes to measure time needed to write output reports

@@ -5,10 +5,10 @@ use iced_style::scrollable::{Scrollbar, Scroller};
 use plotters::style::RGBColor;
 
 
-pub const ICONS: Font = Font::External {
-    name: "Icons",
-    bytes: include_bytes!("../fonts/icons.ttf"),
-};
+// pub const ICONS: Font = Font::External {
+//     name: "Icons",
+//     bytes: include_bytes!("../fonts/icons.ttf"),
+// };
 
 
 pub const COURIER_PRIME: Font = Font::External {
@@ -42,8 +42,8 @@ pub const NOTOSANS_BOLD: Font = Font::External {
 };
 
 
-pub const LOGO: Font = Font::External {
-    name: "Logo",
+pub const ICONS: Font = Font::External {
+    name: "icons",
     bytes: include_bytes!("../fonts/Glyphter.ttf"),
 };
 
@@ -346,18 +346,9 @@ impl iced_style::scrollable::StyleSheet for Mode {
 }
 
 
-pub fn icon(unicode: char) -> Text {
-    Text::new(unicode.to_string())
-        .font(ICONS)
-        .width(Length::Units(20))
-        .horizontal_alignment(alignment::Horizontal::Center)
-        .size(20)
-}
-
-
 pub fn logo_glyph() -> Text {
     Text::new('A'.to_string())
-        .font(LOGO)
+        .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
 }
 
@@ -365,14 +356,14 @@ pub fn logo_glyph() -> Text {
 pub fn icon_sun_moon(style: Mode) -> Text {
     match style {
         Mode::Night => {
-            Text::new(format!("{} {} {}", font_awesome::MOON, font_awesome::ANGLE_DOUBLE_RIGHT, font_awesome::SUN))
+            Text::new('F'.to_string())
                 .font(ICONS)
                 .width(Length::Units(20))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .size(20)
         }
         Mode::Day => {
-            Text::new(format!("{} {} {}", font_awesome::SUN, font_awesome::ANGLE_DOUBLE_RIGHT, font_awesome::MOON))
+            Text::new('G'.to_string())
                 .font(ICONS)
                 .width(Length::Units(20))
                 .horizontal_alignment(alignment::Horizontal::Center)
