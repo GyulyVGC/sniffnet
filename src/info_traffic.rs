@@ -26,7 +26,7 @@ pub struct InfoTraffic {
     /// Map of the filtered traffic
     pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
     /// Set with the addresses of the last time interval
-    pub addresses_last_interval: HashSet<AddressPortPair>,
+    pub addresses_last_interval: HashSet<usize>,
     /// Map of the application layer protocols with their packet count
     pub app_protocols: HashMap<AppProtocol, u128>
 }

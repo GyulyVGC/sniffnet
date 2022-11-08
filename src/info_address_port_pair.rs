@@ -2,6 +2,7 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
+use crate::address_port_pair::TrafficType;
 
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
@@ -22,6 +23,8 @@ pub struct InfoAddressPortPair {
     pub app_protocol: AppProtocol,
     /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
     pub very_long_address: bool,
+    /// Flag to determine which of the address is that of the sniffed adapter or remote
+    pub traffic_type: TrafficType,
 }
 
 

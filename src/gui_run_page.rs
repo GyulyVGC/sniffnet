@@ -246,7 +246,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
             for i in 0..n_entry {
                 let key_val = sorted_vec.get(i).unwrap();
-                let entry_color = get_connection_color(key_val.0.traffic_type);
+                let entry_color = get_connection_color(key_val.1.traffic_type);
                 scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).color(entry_color).font(COURIER_PRIME_BOLD));
             }
             col_report = col_report.push(scroll_report);

@@ -47,8 +47,8 @@ use crate::{AppProtocol, InfoTraffic, Status};
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, interval: u64,
-                                   output_folder: String, info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>,
+                                   info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
                                    status_pair: Arc<(Mutex<Status>, Condvar)>) {
 
     let cvar = &status_pair.1;
@@ -69,12 +69,12 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, interval
     //     .spawn()
     //     .unwrap();
 
-    if fs::create_dir(output_folder.clone()).is_err() {
-        fs::remove_dir_all(output_folder.clone()).unwrap();
-        fs::create_dir(output_folder.clone()).unwrap();
+    if fs::create_dir("./sniffnet_report").is_err() {
+        fs::remove_dir_all("./sniffnet_report").unwrap();
+        fs::create_dir("./sniffnet_report").unwrap();
     }
 
-    let path_report = format!("{}/report.txt", output_folder);
+    let path_report = "./sniffnet_report/report.txt";
 
     // let time_origin = Local::now();
     // let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();
@@ -91,8 +91,8 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, interval
     writeln!(output, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------").expect("Error writing output file\n\r");
 
     loop {
-        // sleep interval seconds
-        thread::sleep(Duration::from_secs(interval));
+        // sleep 1 second
+        thread::sleep(Duration::from_secs(1));
 
         let current_capture_id_lock = current_capture_id.lock().unwrap();
         if *current_capture_id_lock != capture_id {
@@ -112,12 +112,11 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>, interval
 
             let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
 
-            for key in info_traffic.addresses_last_interval.iter() {
-                let val = info_traffic.map.get(key).unwrap();
-                let index = info_traffic.map.get_index_of(key).unwrap();
-                let seek_pos = 166*3 + 206*index as u64;
+            for index in info_traffic.addresses_last_interval.iter() {
+                let key_val = info_traffic.map.get_index(*index).unwrap();
+                let seek_pos = 166*3 + 206*(*index) as u64;
                 output.seek(SeekFrom::Start(seek_pos)).unwrap();
-                writeln!(output, "{}{}", key, val).expect("Error writing output file\n\r");
+                writeln!(output, "{}{}", key_val.0, key_val.1).expect("Error writing output file\n\r");
             }
             info_traffic.addresses_last_interval = HashSet::new(); // empty set
 

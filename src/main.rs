@@ -101,8 +101,7 @@ pub fn main() -> iced::Result {
     }));
 
     thread::Builder::new().name("thread_write_report".to_string()).spawn(move || {
-        sleep_and_write_report_loop(current_capture_id2, 0,
-                                    "./sniffnet_report".to_string(),
+        sleep_and_write_report_loop(current_capture_id2,
                                     mutex_map2, status_pair2);
     }).unwrap();
 

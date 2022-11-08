@@ -35,7 +35,7 @@ use crate::address_port_pair::TrafficType;
 /// * `info_traffic_mutex` - Struct with all the relevant info on the network traffic analyzed.
 ///
 /// * `status_pair` - Shared variable to check the application current status.
-pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>, lowest_port: u16, highest_port: u16,
+pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>,
                           filters: Arc<Mutex<Filters>>,
                           info_traffic_mutex: Arc<Mutex<InfoTraffic>>) {
     let capture_id = *current_capture_id.lock().unwrap();
@@ -121,18 +121,18 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         }
 
                         let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
-                                                                        transport_protocol, traffic_type);
+                                                                        transport_protocol);
 
-                        if (network_layer_filter.cmp(&network_layer) == Equal || network_layer_filter.cmp(&"no filter".to_string()) == Equal)
-                            && (transport_protocol.eq(&transport_layer) || transport_layer.eq(&TransProtocol::Other))
-                            && (application_protocol.eq(&app_layer) || app_layer.eq(&AppProtocol::Other)) {
-                            if (port1 >= lowest_port && port1 <= highest_port)
-                                || (port2 >= lowest_port && port2 <= highest_port) {
+                        if (network_layer_filter.cmp(&"no filter".to_string()) == Equal || network_layer_filter.cmp(&network_layer) == Equal)
+                            && (transport_layer.eq(&TransProtocol::Other) || transport_protocol.eq(&transport_layer))
+                            && (app_layer.eq(&AppProtocol::Other) || application_protocol.eq(&app_layer)) {
+                            // if (port1 >= lowest_port && port1 <= highest_port)
+                            //     || (port2 >= lowest_port && port2 <= highest_port) {
                                 modify_or_insert_in_map(info_traffic_mutex.clone(), key,
-                                                        exchanged_bytes, transport_protocol,
+                                                        exchanged_bytes, traffic_type,
                                                         application_protocol);
                                 reported_packet = true;
-                            }
+                           // }
                         }
 
                         let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
@@ -289,11 +289,15 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>,
 ///
 /// * `application_protocol` - Application layer protocol (obtained from port numbers).
 fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-                           key: AddressPortPair, exchanged_bytes: u128, transport_protocol: TransProtocol,
-                           application_protocol: AppProtocol) {
-    let now = Local::now().format("%Y/%m/%d %H:%M:%S").to_string();
+                           key: AddressPortPair, exchanged_bytes: u128,
+                           traffic_type: TrafficType, application_protocol: AppProtocol) {
+    let now = Local::now().to_string().get(0..19).unwrap().to_string();
+    let trans_protocol = key.trans_protocol;
+    let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
     let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
-    info_traffic.map.entry(key.clone()).and_modify(|info| {
+    let len = info_traffic.map.len();
+    let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
+    info_traffic.map.entry(key).and_modify(|info| {
         info.transmitted_bytes += exchanged_bytes;
         info.transmitted_packets += 1;
         info.final_timestamp = now.clone();
@@ -303,11 +307,12 @@ fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
             transmitted_packets: 1,
             initial_timestamp: now.clone(),
             final_timestamp: now,
-            trans_protocol: transport_protocol,
+            trans_protocol,
             app_protocol: application_protocol,
-            very_long_address: key.address1.len() > 25 || key.address2.len() > 25,
+            very_long_address,
+            traffic_type
         });
-    info_traffic.addresses_last_interval.insert(key);
+    info_traffic.addresses_last_interval.insert(index);
 }
 
 

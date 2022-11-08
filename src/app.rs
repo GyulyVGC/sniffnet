@@ -144,8 +144,7 @@ impl Application for Sniffer {
                 self.traffic_chart = TrafficChart::new(charts_data_mutex.clone());
                 self.status_pair.1.notify_all();
                 thread::Builder::new().name(format!("thread_parse_packets_{}",current_capture_id.lock().unwrap())).spawn(move || {
-                    parse_packets_loop(current_capture_id, device,
-                                       0, 65535, filters,
+                    parse_packets_loop(current_capture_id, device, filters,
                                        info_traffic_mutex);
                 }).unwrap();
             }
