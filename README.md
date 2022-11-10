@@ -3,7 +3,7 @@
 
 <hr>
 
-<p align="center"> Real-time dashboard to explore your network traffic. </p>
+<p align="center"> Application to comfortably monitor your network traffic. </p>
 <p align="center"> Multithreaded, cross-platform, reliable. </p>
 
 <p align="center">
@@ -14,6 +14,8 @@
 
 
 <hr>
+
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img src="https://user-images.githubusercontent.com/100347457/201078839-dbfdf602-f0ec-460c-a584-f4d2e7a4ca8f.gif" width="90%"/></a></p>
 
 TO BE CONTINUED.......
 
