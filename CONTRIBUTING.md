@@ -1,4 +1,4 @@
-<img alt="sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
 
 # How can you contribute to the Sniffnet project?
 
@@ -21,10 +21,3 @@ Ensure the pull request description clearly describes the problem and your solut
 ## Do you intend to propose a whole new feature or an improvement of an existing feature?
 
 All proposals to enlarge or improve Sniffnet are warmly welcomed, join the discussion and don't hesitate to share your thoughts!
-
-
-## None of the above?
-
-In case you wish to contribute in a different way, you can consider help me by writing a ```lib.rs``` file or some tests on the application. 
-
-That'd be amazing! 
