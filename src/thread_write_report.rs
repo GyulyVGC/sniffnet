@@ -58,11 +58,8 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>,
     //     .arg("./sniffnet_report/report.txt")
     //     .spawn()
     //     .unwrap();
-    // #[cfg(target_os = "macos")]
-    // std::process::Command::new("cd")
-    //     .args('~`)
-    //     .spawn()
-    //     .unwrap();
+    #[cfg(target_os = "macos")]
+    std::env::set_current_dir(std::env::var("HOME").unwrap()).unwrap();
     // #[cfg(target_os = "linux")]
     // std::process::Command::new("explorer")
     //     .arg("./sniffnet_report/report.txt")
@@ -195,7 +192,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
         let spaces_string_2 = " ".to_string()
             .repeat(10-percentage_string.len());
 
-        ret_val.push_str(&format!("   {}:{}{}{}{}\n",
+        ret_val.push_str(&format!("   {}:{}{}{}{}  \n",
                                   app_proto_string,
                                   spaces_string_1,
                                   num_string,

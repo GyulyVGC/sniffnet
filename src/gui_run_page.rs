@@ -116,8 +116,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
             let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
                                                     Filtered packets: 0\n\n\
-                                                    Some packets have been intercepted, but still none has been selected according to the filters you specified...",
-                                                     observed.separate_with_spaces())).font(font);
+                                                    Some packets have been intercepted, but still none has been selected according to the filters you specified...\n\n{}",
+                                                     observed.separate_with_spaces(), get_active_filters_string_nobr(sniffer.filters.clone()))).font(font);
 
             body = body
                 .push(Row::new().height(Length::FillPortion(1)))
@@ -128,7 +128,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         }
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
-            let filters_string = get_active_filters_string(sniffer.filters.clone());
 
             let percentage_string_packets =
                 if format!("{:.1}", 100.0*(filtered) as f32/observed as f32).eq("0.0") {
@@ -176,7 +175,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .width(Length::FillPortion(1))
                 .padding(10)
                 //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-                .push(Text::new(filters_string).font(font))
+                .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
                 .push(Text::new(" "))
                 .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
                                             filtered.separate_with_spaces(), percentage_string_packets)).font(font))
@@ -315,7 +314,7 @@ fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
     else {
         let mut ret_val = "Active filters:".to_string();
         if filters_lock.ip != "no filter" {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip.replace('v', "V")));
+            ret_val.push_str(&format!("\n   {}", filters_lock.ip.replace("ip", "IP")));
         }
         if filters_lock.transport.ne(&TransProtocol::Other) {
             ret_val.push_str(&format!("\n   {}", filters_lock.transport));
@@ -325,6 +324,22 @@ fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
         }
         ret_val
     }
+}
+
+
+fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
+    let filters_lock = filters.lock().unwrap();
+        let mut ret_val = "Active filters:".to_string();
+        if filters_lock.ip != "no filter" {
+            ret_val.push_str(&format!(" {}", filters_lock.ip.replace("ip", "IP")));
+        }
+        if filters_lock.transport.ne(&TransProtocol::Other) {
+            ret_val.push_str(&format!(" {}", filters_lock.transport));
+        }
+        if filters_lock.application.ne(&AppProtocol::Other) {
+            ret_val.push_str(&format!(" {}", filters_lock.application));
+        }
+        ret_val
 }
 
 
