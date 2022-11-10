@@ -67,8 +67,8 @@ pub const NIGHT_BUTTONS: Color = Color { r: 0.1, g: 0.1, b: 0.1, a: 1.0 };
 pub const SPECIAL_NIGHT: Color = Color { r: 0.7, g: 0.35, b: 0.0, a: 1.0 };
 pub const SPECIAL_DAY: Color = Color { r: 0.0, g: 0.35, b: 0.7, a: 1.0 };
 
-pub const SPECIAL_NIGHT_RGB: RGBColor = RGBColor {0: 189, 1: 89, 2: 0};
-pub const SPECIAL_DAY_RGB: RGBColor = RGBColor {0: 0, 1: 89, 2: 189};
+pub const SPECIAL_NIGHT_RGB: RGBColor = RGBColor(189, 89, 0);
+pub const SPECIAL_DAY_RGB: RGBColor = RGBColor (0,89, 189);
 
 pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
 pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;

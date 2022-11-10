@@ -74,7 +74,7 @@ pub fn sleep_and_write_report_loop(current_capture_id: Arc<Mutex<u16>>,
         fs::create_dir("./sniffnet_report").unwrap();
     }
 
-    let path_report = "./sniffnet_report/report.txt";
+    let path_report = "./sniffnet_report/report.txt".to_string();
 
     // let time_origin = Local::now();
     // let first_timestamp = time_origin.format("%d/%m/%Y %H:%M:%S").to_string();

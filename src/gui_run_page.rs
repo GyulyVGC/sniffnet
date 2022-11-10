@@ -88,7 +88,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             }
             sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
             let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
-            let (icon_text, nothing_to_see_text) = if sniffer.device.lock().unwrap().addresses.len() > 0 {
+            let (icon_text, nothing_to_see_text) = if !sniffer.device.lock().unwrap().addresses.is_empty() {
                 (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
                 Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                                               Network adapter: {}\n\n\
@@ -186,7 +186,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(Text::new(" "))
                 .push(Text::new("Filtered packets per application protocol:").font(font))
                 .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
-                    .push(Text::new(format!("{}",get_app_count_string(app_protocols, filtered as u128))).font(font)))
+                    .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
             ;
 
             let active_radio_report = &*sniffer.report_type;
@@ -315,13 +315,13 @@ fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
     else {
         let mut ret_val = "Active filters:".to_string();
         if filters_lock.ip != "no filter" {
-            ret_val.push_str(&*format!("\n   {}", filters_lock.ip.replace('v', "V")));
+            ret_val.push_str(&format!("\n   {}", filters_lock.ip.replace('v', "V")));
         }
         if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&*format!("\n   {}", filters_lock.transport));
+            ret_val.push_str(&format!("\n   {}", filters_lock.transport));
         }
         if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&*format!("\n   {}", filters_lock.application));
+            ret_val.push_str(&format!("\n   {}", filters_lock.application));
         }
         ret_val
     }

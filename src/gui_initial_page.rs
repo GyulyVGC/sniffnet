@@ -50,7 +50,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         let mut dev_str = String::new();
         match dev.desc {
             None => {
-                dev_str.push_str(&format!("{}", dev.name));
+                dev_str.push_str(&dev.name);
             }
             Some(description) => {
                 dev_str.push_str(&format!("{}\n{}", dev.name, description));
@@ -127,19 +127,19 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             TransProtocol::TCP,
             "TCP",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol),
+            Message::TransportProtocolSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::UDP,
             "UDP",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol),
+            Message::TransportProtocolSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             TransProtocol::Other,
             "both",
             Some(transport_active),
-            |protocol| Message::TransportProtocolSelection(protocol),
+            Message::TransportProtocolSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style));
     let col_transport = Column::new()
         .align_items(Alignment::Center)
@@ -155,7 +155,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         &mut sniffer.app,
         &AppProtocol::ALL[..],
         Some(app_active),
-        |protocol| Message::AppProtocolSelection(protocol),
+        Message::AppProtocolSelection,
     )
         .font(font)
         .placeholder("Select application protocol")

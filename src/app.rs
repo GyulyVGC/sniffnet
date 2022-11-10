@@ -141,7 +141,7 @@ impl Application for Sniffer {
                 let charts_data_mutex = self.runtime_data.clone();
                 *charts_data_mutex.lock().unwrap() = RunTimeData::new();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
-                self.traffic_chart = TrafficChart::new(charts_data_mutex.clone());
+                self.traffic_chart = TrafficChart::new(charts_data_mutex);
                 self.status_pair.1.notify_all();
                 thread::Builder::new().name(format!("thread_parse_packets_{}",current_capture_id.lock().unwrap())).spawn(move || {
                     parse_packets_loop(current_capture_id, device, filters,

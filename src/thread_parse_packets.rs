@@ -61,7 +61,7 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
     let mut skip_packet;
     let mut reported_packet;
 
-    let cap_result = Capture::from_device(&*device.clone().lock().unwrap().name)
+    let cap_result = Capture::from_device(&*device.lock().unwrap().name)
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
