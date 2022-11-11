@@ -1,6 +1,7 @@
 //! Module defining the `AddressPortPair` struct, which represents a network address:port pair.
 
 use std::fmt;
+
 use crate::TransProtocol;
 
 /// Struct representing a network address:port pair.
@@ -19,7 +20,6 @@ pub struct AddressPortPair {
 }
 
 impl AddressPortPair {
-
     /// Returns a new AddressPort element.
     ///
     /// # Arguments
@@ -27,7 +27,7 @@ impl AddressPortPair {
     /// * `address` - A string representing the network layer IPv4 or IPv6 address.
     ///
     /// * `port` - An integer representing the transport layer port number (in the range 0..=65535).
-    pub fn new (address1: String, port1: u16, address2: String, port2: u16, trans_protocol: TransProtocol) -> Self {
+    pub fn new(address1: String, port1: u16, address2: String, port2: u16, trans_protocol: TransProtocol) -> Self {
         AddressPortPair {
             address1,
             port1,
@@ -38,7 +38,7 @@ impl AddressPortPair {
     }
 
     pub fn print_gui(&self) -> String {
-        self.to_string().replace('|',"")
+        self.to_string().replace('|', "")
     }
 }
 
@@ -46,11 +46,10 @@ impl AddressPortPair {
 impl fmt::Display for AddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.address1.len() > 25 || self.address2.len() > 25 {
-            write!(f,"|{:^45}|{:>8}  |{:^45}|{:>8}  |",
+            write!(f, "|{:^45}|{:>8}  |{:^45}|{:>8}  |",
                    self.address1, self.port1, self.address2, self.port2)
-        }
-        else {
-            write!(f,"|{:^25}|{:>8}  |{:^25}|{:>8}  |",
+        } else {
+            write!(f, "|{:^25}|{:>8}  |{:^25}|{:>8}  |",
                    self.address1, self.port1, self.address2, self.port2)
         }
     }
@@ -67,5 +66,5 @@ pub enum TrafficType {
     /// Multicast traffic (from remote address to multicast address)
     Multicast,
     /// Not identified
-    Other
+    Other,
 }

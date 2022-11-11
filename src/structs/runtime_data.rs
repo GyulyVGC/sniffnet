@@ -1,7 +1,10 @@
+//! Module defining the `RunTimeData` struct, useful to to generate charts and to display statistics about network traffic
+//!
 use std::collections::{HashMap, VecDeque};
+
 use crate::AppProtocol;
 
-// #[derive(Clone)]
+/// Struct containing useful data to generate charts and to display statistics about network traffic
 pub struct RunTimeData {
     pub all_bytes: u128,
     pub sent_bytes: VecDeque<(u128, i128)>,
@@ -22,14 +25,13 @@ pub struct RunTimeData {
     pub max_received_bytes: i128,
     pub min_sent_packets: i128,
     pub max_received_packets: i128,
-    pub ticks: u128
+    pub ticks: u128,
 }
 
 
 impl RunTimeData {
-
     /// Constructs a new ChartsData element.
-    pub fn new () -> Self {
+    pub fn new() -> Self {
         RunTimeData {
             all_bytes: 0,
             sent_bytes: Default::default(),
@@ -50,8 +52,7 @@ impl RunTimeData {
             max_received_bytes: 0,
             min_sent_packets: 0,
             max_received_packets: 0,
-            ticks: 0
+            ticks: 0,
         }
     }
-
 }

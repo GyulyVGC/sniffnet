@@ -2,8 +2,8 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
-use crate::address_port_pair::TrafficType;
 
+use crate::structs::address_port_pair::TrafficType;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -83,12 +83,11 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         } // tera
     }
 
-   if !multiple_transmitted.is_empty() { // with multiple
+    if !multiple_transmitted.is_empty() { // with multiple
         format!("{:.1} {}B", n, multiple_transmitted)
     } else { // no multiple
         format!("{}  B", n)
     }
-
 }
 
 
@@ -178,6 +177,7 @@ impl fmt::Display for AppProtocol {
     }
 }
 
+/// Defines a constant to be used in the picklist in gui initial page
 impl AppProtocol {
     pub(crate) const ALL: [AppProtocol; 25] = [
         AppProtocol::Other,

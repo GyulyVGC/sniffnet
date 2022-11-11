@@ -1,11 +1,17 @@
+//! Module defining the initial page of the application.
+//!
+//! It contains elements to select network adapter and traffic filters.
+
 use iced::{alignment, Alignment, Button, Column, Container, Length, PickList, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use pcap::Device;
-use crate::app::Message;
-use crate::{AppProtocol, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::style::{COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS, logo_glyph};
 
+use crate::{AppProtocol, Mode, Sniffer, TransProtocol};
+use crate::gui::app::Message;
+use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
+
+/// Computes the body of gui initial page
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
     let font_footer = if sniffer.style == Mode::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
@@ -187,7 +193,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").size(FONT_SIZE_FOOTER).font(font_footer))
+        .push(Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION)).size(FONT_SIZE_FOOTER).font(font_footer))
         .push(button_github)
         .push(Text::new("  ").font(font));
     let footer = Container::new(footer_row)

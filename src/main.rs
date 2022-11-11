@@ -1,35 +1,35 @@
-mod thread_parse_packets;
-mod address_port_pair;
-mod info_address_port_pair;
-mod thread_write_report;
-mod info_traffic;
-mod style;
-mod app;
-mod gui_initial_page;
-mod gui_run_page;
-mod runtime_data;
+//! Module containing the entry point of application execution.
 
-use pcap::{Device};
-use crate::info_address_port_pair::{AppProtocol, TransProtocol};
-use crate::thread_parse_packets::parse_packets_loop;
-use crate::thread_write_report::sleep_and_write_report_loop;
-use crate::thread_write_report::get_app_count_string;
-use crate::gui_run_page::TrafficChart;
 use std::{panic, process, thread};
-use std::sync::{Arc, Mutex, Condvar};
+use std::sync::{Arc, Condvar, Mutex};
+
 use iced::{Application, button, pick_list, scrollable, Settings, window};
-use crate::info_traffic::InfoTraffic;
-use style::{Mode, FONT_SIZE_BODY, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, icon_sun_moon};
-use crate::runtime_data::RunTimeData;
+use pcap::Device;
 
+use gui::style::{FONT_SIZE_BODY, Mode};
 
+use crate::structs::info_address_port_pair::{AppProtocol, TransProtocol};
+use crate::structs::info_traffic::InfoTraffic;
+use crate::structs::runtime_data::RunTimeData;
+use crate::structs::traffic_chart::TrafficChart;
+use crate::thread_write_report::sleep_and_write_report_loop;
+
+mod thread_parse_packets;
+mod thread_write_report;
+mod gui;
+mod structs;
+mod utility;
+
+/// Possible filters applicable to network traffic
 pub struct Filters {
     ip: String,
     transport: TransProtocol,
     application: AppProtocol,
 }
 
-
+/// Struct on which the gui is based
+///
+/// It contains gui statuses and network traffic statistics to be shared among the different threads
 pub struct Sniffer {
     current_capture_id: Arc<Mutex<u16>>,
     info_traffic: Arc<Mutex<InfoTraffic>>,
@@ -57,23 +57,19 @@ pub struct Sniffer {
 /// This enum represents the sniffing process status.
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Status {
-    /// Sniffnet has just been launched/restarted and GUI is in the main screen.
+    /// Sniffnet has just been launched/restarted and gui is in the main screen.
     Init,
     /// The sniffing process is running: the application parses packets and periodically update the output report.
     Running,
-    /// The sniffing process is killed.
-    Stop,
 }
 
+/// Entry point of application execution
+///
+/// It initialized shared variables and gui parameters
 pub fn main() -> iced::Result {
     let current_capture_id1 = Arc::new(Mutex::new(0));
     let current_capture_id2 = current_capture_id1.clone();
 
-    //shared tuple containing:
-    // - the map of the address:ports pairs with the relative info
-    // - the total number of sniffed packets
-    // - the number of filtered packets
-    // - the map of the observed app protocols with the relative packet count
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
@@ -84,9 +80,9 @@ pub fn main() -> iced::Result {
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
-    let found_device1 = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
+    let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
 
-    let filters1 = Arc::new(Mutex::new(Filters {
+    let filters = Arc::new(Mutex::new(Filters {
         ip: "no filter".to_string(),
         transport: TransProtocol::Other,
         application: AppProtocol::Other,
@@ -122,8 +118,8 @@ pub fn main() -> iced::Result {
             current_capture_id: current_capture_id1,
             info_traffic: mutex_map1,
             runtime_data: runtime_data1,
-            device: found_device1,
-            filters: filters1,
+            device: found_device,
+            filters,
             status_pair: status_pair1,
             start: button::State::new(),
             reset: button::State::new(),
@@ -138,7 +134,7 @@ pub fn main() -> iced::Result {
             waiting: String::new(),
             traffic_chart: TrafficChart::new(runtime_data2),
             chart_packets: true,
-            report_type: "latest".to_string()
+            report_type: "latest".to_string(),
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

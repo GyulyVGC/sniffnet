@@ -1,17 +1,23 @@
-use std::cmp::{max, min};
-use std::sync::{Arc, Mutex};
-use iced::{alignment, Alignment, Button, Color, Column, Container, Element, Length, Radio, Row, Scrollable, Text};
+//! Module defining the run page of the application.
+//!
+//! It contains elements to display traffic statistics: charts, detailed connections data
+//! and overall statistics about the filtered traffic.
+
+use std::cmp::min;
+
+use iced::{alignment, Alignment, Button, Column, Container, Length, Radio, Row, Scrollable, Text};
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
-use plotters::style::RGBColor;
 use thousands::Separable;
-use crate::app::Message;
-use crate::{AppProtocol, RunTimeData, Filters, FONT_SIZE_SUBTITLE, get_app_count_string, icon_sun_moon, Mode, Sniffer, TransProtocol};
-use crate::address_port_pair::{AddressPortPair, TrafficType};
-use crate::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
-use crate::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS, logo_glyph, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY, SPECIAL_DAY_RGB, SPECIAL_NIGHT, SPECIAL_NIGHT_RGB};
-use plotters_iced::{Chart, ChartWidget, DrawingBackend, ChartBuilder};
 
+use crate::{Mode, Sniffer};
+use crate::gui::app::Message;
+use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
+use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
+use crate::utility::{get_active_filters_string, get_active_filters_string_nobr, get_app_count_string, get_connection_color, get_percentage_string};
+
+/// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
     let font_footer = if sniffer.style == Mode::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
@@ -90,13 +96,12 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
             let (icon_text, nothing_to_see_text) = if !sniffer.device.lock().unwrap().addresses.is_empty() {
                 (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
-                Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+                 Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                                               Network adapter: {}\n\n\
                                                               Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
-            }
-            else {
+            } else {
                 (Text::new('T'.to_string()).font(ICONS).size(60),
-                Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
+                 Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                                               Network adapter: {}\n\n\
                                                               If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
             };
@@ -129,22 +134,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
 
-            let percentage_string_packets =
-                if format!("{:.1}", 100.0*(filtered) as f32/observed as f32).eq("0.0") {
-                    "<0.1%".to_string()
-                }
-                else {
-                    format!("{:.1}%", 100.0*(filtered) as f32/observed as f32)
-                };
-
-            let percentage_string_bytes =
-                if format!("{:.1}", 100.0*(filtered_bytes) as f32/observed_bytes as f32).eq("0.0") {
-                    "<0.1%".to_string()
-                }
-                else {
-                    format!("{:.1}%", 100.0*(filtered_bytes) as f32/observed_bytes as f32)
-                };
-
             let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bytes" };
             let row_radio_chart = Row::new().padding(15).spacing(10)
                 .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
@@ -160,7 +149,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     Some(active_radio_chart),
                     |what_to_display| Message::ChartSelection(what_to_display.to_string()),
                 ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
-               ;
+                ;
 
             let col_chart = Container::new(
                 Column::new()
@@ -178,15 +167,15 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
                 .push(Text::new(" "))
                 .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
-                                            filtered.separate_with_spaces(), percentage_string_packets)).font(font))
+                                        filtered.separate_with_spaces(), get_percentage_string(observed, filtered))).font(font))
                 .push(Text::new(" "))
                 .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
-                                        filtered_bytes_string, percentage_string_bytes)).font(font))
+                                        filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font))
                 .push(Text::new(" "))
                 .push(Text::new("Filtered packets per application protocol:").font(font))
                 .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
                     .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
-            ;
+                ;
 
             let active_radio_report = &*sniffer.report_type;
             let row_radio_report = Row::new().padding(10)
@@ -286,7 +275,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new("Sniffnet v1.0.0 - by Giuliano Bellini ").font(font_footer).size(FONT_SIZE_FOOTER))
+        .push(Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION)).size(FONT_SIZE_FOOTER).font(font_footer))
         .push(button_github)
         .push(Text::new("  ").font(font));
     let footer = Container::new(footer_row)
@@ -301,172 +290,4 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(header)
         .push(body)
         .push(footer)
-}
-
-
-fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-    if filters_lock.ip == "no filter"
-        && filters_lock.application.eq(&AppProtocol::Other)
-        && filters_lock.transport.eq(&TransProtocol::Other) {
-        "Active filters:\n   none".to_string()
-    }
-    else {
-        let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip != "no filter" {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip.replace("ip", "IP")));
-        }
-        if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.transport));
-        }
-        if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.application));
-        }
-        ret_val
-    }
-}
-
-
-fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-        let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip != "no filter" {
-            ret_val.push_str(&format!(" {}", filters_lock.ip.replace("ip", "IP")));
-        }
-        if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!(" {}", filters_lock.transport));
-        }
-        if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!(" {}", filters_lock.application));
-        }
-        ret_val
-}
-
-
-fn get_connection_color(traffic_type: TrafficType) -> Color {
-    if traffic_type == TrafficType::Incoming
-        || traffic_type == TrafficType::Multicast {
-        SPECIAL_NIGHT
-    } else {
-        SPECIAL_DAY
-    }
-}
-
-
-pub struct TrafficChart {
-    charts_data: Arc<Mutex<RunTimeData>>,
-    color_mix: f64,
-    font_color: RGBColor,
-    chart_packets: bool,
-}
-
-
-impl TrafficChart {
-    pub fn new(charts_data: Arc<Mutex<RunTimeData>>) -> Self {
-        TrafficChart {
-            charts_data,
-            color_mix: 0.0,
-            font_color: Default::default(),
-            chart_packets: true,
-        }
-    }
-    
-    fn view(&mut self, mode: Mode, chart_packets: bool) -> Element<Message> {
-
-        self.color_mix = if mode == Mode::Day {COLOR_CHART_MIX_DAY} else { COLOR_CHART_MIX_NIGHT };
-        self.chart_packets = chart_packets;
-        self.font_color = if mode == Mode::Day { plotters::style::colors::BLACK } else { plotters::style::colors::WHITE };
-
-        Container::new(
-            Column::new()
-                .push(ChartWidget::new(self).resolve_font(
-                    move |_, _| match mode {
-                        Mode::Night => {NOTOSANS}
-                        Mode::Day => {NOTOSANS_BOLD}
-                        _ => {NOTOSANS}
-                    }
-                )))
-            .align_x(Horizontal::Left)
-            .align_y(Vertical::Bottom)
-            .into()
-    }
-}
-
-
-impl Chart<Message> for TrafficChart {
-    fn build_chart<DB: DrawingBackend>(&self, mut chart: ChartBuilder<DB>) {
-        use plotters::{prelude::*, style::Color};
-
-        let charts_data_lock = self.charts_data.lock().unwrap();
-
-        if charts_data_lock.ticks == 0 {
-            return
-        }
-        let tot_seconds = charts_data_lock.ticks - 1;
-        let first_time_displayed = max(0, charts_data_lock.ticks as i128 - 30) as u128;
-
-        match self.chart_packets {
-            false => { //display bytes chart
-                let mut chart = chart.margin_right(30)
-                    .set_label_area_size(LabelAreaPosition::Left, 60)
-                    .set_label_area_size(LabelAreaPosition::Bottom, 50)
-                    .build_cartesian_2d(first_time_displayed..tot_seconds as u128, charts_data_lock.min_sent_bytes..charts_data_lock.max_received_bytes)
-                    .expect("Error drawing graph");
-
-                chart.configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.font_color))
-                    .y_label_formatter(&|bytes| {
-                        match bytes {
-                            0..=999 | -999..=-1 => { format!("{}", bytes) }
-                            1000..=999_999 | -999_999..=-1000 => { format!("{:.1} {}", *bytes as f64 / 1_000_f64, "k") }
-                            1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => { format!("{:.1} {}", *bytes as f64 / 1_000_000_f64, "M") }
-                            _ => { format!("{:.1} {}", *bytes as f64 / 1_000_000_000_f64, "G") }
-                        }
-                    })
-                    .draw().unwrap();
-                chart.draw_series(
-                    AreaSeries::new(charts_data_lock.received_bytes.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
-                        .border_style(ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER)))
-                    .expect("Error drawing graph")
-                    .label("Incoming")
-                    .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
-                chart.draw_series(
-                    AreaSeries::new(charts_data_lock.sent_bytes.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
-                        .border_style(ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER)))
-                    .expect("Error drawing graph")
-                    .label("Outgoing")
-                    .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
-                chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
-                    .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
-
-            }
-
-            true => { //display packets chart
-                let mut chart = chart.margin_right(30)
-                    .set_label_area_size(LabelAreaPosition::Left, 60)
-                    .set_label_area_size(LabelAreaPosition::Bottom, 50)
-                    .build_cartesian_2d(first_time_displayed..tot_seconds as u128, charts_data_lock.min_sent_packets..charts_data_lock.max_received_packets)
-                    .expect("Error drawing graph");
-
-                chart.configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.font_color))
-                    .draw().unwrap();
-                chart.draw_series(
-                    AreaSeries::new(charts_data_lock.received_packets.iter().copied(), 0, SPECIAL_NIGHT_RGB.mix(self.color_mix))
-                        .border_style(ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER)))
-                    .expect("Error drawing graph")
-                    .label("Incoming")
-                    .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled()));
-                chart.draw_series(
-                    AreaSeries::new(charts_data_lock.sent_packets.iter().copied(), 0, SPECIAL_DAY_RGB.mix(self.color_mix))
-                        .border_style(ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER)))
-                    .expect("Error drawing graph")
-                    .label("Outgoing")
-                    .legend(|(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled()));
-                chart.configure_series_labels().position(SeriesLabelPosition::UpperRight)//.margin(5)
-                    .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
-
-            }
-        }
-    }
 }

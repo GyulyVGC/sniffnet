@@ -2,14 +2,14 @@
 name = "sniffnet"
 version = "0.5.0"
 edition = "2021"
-authors = ["me"]
-description = "Framework to explore network traffic through graphical and textual reports"
+authors = ["Giuliano Bellini"]
+description = "Application to comfortably monitor your network traffic"
 repository = "https://github.com/GyulyVGC/sniffnet"
 readme = "README.md"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
 license = "MIT OR Apache-2.0"
-exclude = ["resources/*", "fonts/*", ".github/*", ".gitignore", "CHANGELOG.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md"]
+include = ["src/**/*", "LICENSE-*", "README.md"]
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

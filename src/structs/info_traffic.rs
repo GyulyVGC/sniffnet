@@ -1,13 +1,13 @@
 //! Module defining the `ReportInfo` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-
-
 use std::collections::{HashMap, HashSet};
+
 use indexmap::IndexMap;
-use crate::address_port_pair::AddressPortPair;
+
 use crate::AppProtocol;
-use crate::info_address_port_pair::InfoAddressPortPair;
+use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {
@@ -28,14 +28,13 @@ pub struct InfoTraffic {
     /// Set with the addresses of the last time interval
     pub addresses_last_interval: HashSet<usize>,
     /// Map of the application layer protocols with their packet count
-    pub app_protocols: HashMap<AppProtocol, u128>
+    pub app_protocols: HashMap<AppProtocol, u128>,
 }
 
 
 impl InfoTraffic {
-
     /// Constructs a new InfoTraffic element.
-    pub fn new () -> Self {
+    pub fn new() -> Self {
         InfoTraffic {
             tot_received_bytes: 0,
             tot_sent_bytes: 0,
@@ -45,8 +44,7 @@ impl InfoTraffic {
             all_bytes: 0,
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
-            app_protocols: HashMap::new()
+            app_protocols: HashMap::new(),
         }
     }
-
 }

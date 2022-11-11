@@ -1,52 +1,50 @@
-use iced::{pick_list, Background, Color, Vector, button, Font, Text, Length, alignment};
+//! Module defining the application styles: fonts, colors, containers, picklists, buttons,
+//! radios, scrollbars, icons.
+
+
+use iced::{alignment, Background, button, Color, Font, Length, pick_list, Text, Vector};
 use iced::alignment::Horizontal;
 use iced::container::{Style, StyleSheet};
 use iced_style::scrollable::{Scrollbar, Scroller};
 use plotters::style::RGBColor;
 
+/// Application version number (to be displayed in gui footer)
+pub const APP_VERSION: &str = "v1.0.0";
 
-// pub const ICONS: Font = Font::External {
-//     name: "Icons",
-//     bytes: include_bytes!("../fonts/icons.ttf"),
-// };
-
-
+// gui Text fonts
 pub const COURIER_PRIME: Font = Font::External {
     name: "CourierPrime",
-    bytes: include_bytes!("../fonts/CourierPrime.ttf"),
+    bytes: include_bytes!("../../fonts/CourierPrime.ttf"),
 };
-
 pub const COURIER_PRIME_BOLD: Font = Font::External {
     name: "CourierPrimeBold",
-    bytes: include_bytes!("../fonts/CourierPrimeBold.ttf"),
+    bytes: include_bytes!("../../fonts/CourierPrimeBold.ttf"),
 };
-
 pub const COURIER_PRIME_ITALIC: Font = Font::External {
     name: "CourierPrimeItalic",
-    bytes: include_bytes!("../fonts/CourierPrimeItalic.ttf"),
+    bytes: include_bytes!("../../fonts/CourierPrimeItalic.ttf"),
 };
-
 pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
     name: "CourierPrimeBoldItalic",
-    bytes: include_bytes!("../fonts/CourierPrimeBoldItalic.ttf"),
+    bytes: include_bytes!("../../fonts/CourierPrimeBoldItalic.ttf"),
 };
 
+
+// gui charts fonts
 pub const NOTOSANS: Font = Font::External {
     name: "Notosans",
-    bytes: include_bytes!("../fonts/notosans-regular.ttf"),
+    bytes: include_bytes!("../../fonts/notosans-regular.ttf"),
 };
-
 pub const NOTOSANS_BOLD: Font = Font::External {
     name: "NotosansBold",
-    bytes: include_bytes!("../fonts/notosans-bold.ttf"),
+    bytes: include_bytes!("../../fonts/notosans-bold.ttf"),
 };
 
-
+//font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../fonts/Glyphter.ttf"),
+    bytes: include_bytes!("../../fonts/Glyphter.ttf"),
 };
-
 
 pub const FONT_SIZE_FOOTER: u16 = 14;
 pub const FONT_SIZE_BODY: u16 = 16;
@@ -59,7 +57,6 @@ pub const HEIGHT_HEADER: u16 = 2;
 pub const HEIGHT_BODY: u16 = 12;
 pub const HEIGHT_FOOTER: u16 = 1;
 
-
 pub const DAY_BACKGROUND: Color = Color::WHITE;
 pub const NIGHT_BACKGROUND: Color = Color { r: 0.2, g: 0.2, b: 0.2, a: 1.0 };
 pub const DAY_BUTTONS: Color = Color { r: 0.8, g: 0.8, b: 0.8, a: 1.0 };
@@ -68,7 +65,7 @@ pub const SPECIAL_NIGHT: Color = Color { r: 0.7, g: 0.35, b: 0.0, a: 1.0 };
 pub const SPECIAL_DAY: Color = Color { r: 0.0, g: 0.35, b: 0.7, a: 1.0 };
 
 pub const SPECIAL_NIGHT_RGB: RGBColor = RGBColor(189, 89, 0);
-pub const SPECIAL_DAY_RGB: RGBColor = RGBColor (0,89, 189);
+pub const SPECIAL_DAY_RGB: RGBColor = RGBColor(0, 89, 189);
 
 pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
 pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
@@ -76,12 +73,13 @@ pub const CHARTS_LINE_BORDER: u32 = 1;
 
 
 #[derive(Copy, Eq, PartialEq)]
+/// Used to specify the kind of style to be applied to an element
 pub enum Mode {
     Night,
     Day,
     BorderedRound,
     HeadersDay,
-    HeadersNight
+    HeadersNight,
 }
 
 
@@ -91,7 +89,7 @@ impl Clone for Mode {
     }
 }
 
-
+/// Containers style
 impl StyleSheet for Mode {
     fn style(&self) -> Style {
         Style {
@@ -103,7 +101,7 @@ impl StyleSheet for Mode {
                 _ => { None }
             },
             background: match self {
-                Mode::Day => { Some(Background::Color(DAY_BACKGROUND))}
+                Mode::Day => { Some(Background::Color(DAY_BACKGROUND)) }
                 Mode::Night => { Some(Background::Color(NIGHT_BACKGROUND)) }
                 Mode::BorderedRound => { None }
                 Mode::HeadersDay => { Some(Background::Color(SPECIAL_DAY)) }
@@ -123,7 +121,7 @@ impl StyleSheet for Mode {
     }
 }
 
-
+/// Picklists style
 impl pick_list::StyleSheet for Mode {
     fn menu(&self) -> iced_style::menu::Style {
         iced_style::menu::Style {
@@ -205,31 +203,8 @@ impl pick_list::StyleSheet for Mode {
     }
 }
 
-
+/// Buttons style
 impl button::StyleSheet for Mode {
-    fn hovered(&self) -> iced_style::button::Style {
-        iced_style::button::Style {
-            shadow_offset: Vector::new(1.0, 1.0),
-            background: Some(Background::Color(match self {
-                Mode::Day => DAY_BACKGROUND,
-                Mode::Night => NIGHT_BACKGROUND,
-                _ => { Color::BLACK }
-            })),
-            border_radius: 12.0,
-            border_width: BORDER_WIDTH,
-            border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
-                _ => { Color::BLACK }
-            },
-            text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
-                _ => { Color::BLACK }
-            },
-        }
-    }
-
     fn active(&self) -> button::Style {
         button::Style {
             background: Some(Background::Color(match self {
@@ -252,8 +227,32 @@ impl button::StyleSheet for Mode {
             },
         }
     }
+
+    fn hovered(&self) -> iced_style::button::Style {
+        iced_style::button::Style {
+            shadow_offset: Vector::new(1.0, 1.0),
+            background: Some(Background::Color(match self {
+                Mode::Day => DAY_BACKGROUND,
+                Mode::Night => NIGHT_BACKGROUND,
+                _ => { Color::BLACK }
+            })),
+            border_radius: 12.0,
+            border_width: BORDER_WIDTH,
+            border_color: match self {
+                Mode::Day => SPECIAL_DAY,
+                Mode::Night => SPECIAL_NIGHT,
+                _ => { Color::BLACK }
+            },
+            text_color: match self {
+                Mode::Day => Color::BLACK,
+                Mode::Night => Color::WHITE,
+                _ => { Color::BLACK }
+            },
+        }
+    }
 }
 
+/// Radios style
 impl iced_style::radio::StyleSheet for Mode {
     fn active(&self) -> iced_style::radio::Style {
         iced_style::radio::Style {
@@ -296,7 +295,7 @@ impl iced_style::radio::StyleSheet for Mode {
     }
 }
 
-
+/// Scrollbars style
 impl iced_style::scrollable::StyleSheet for Mode {
     fn active(&self) -> Scrollbar {
         Scrollbar {
@@ -315,7 +314,7 @@ impl iced_style::scrollable::StyleSheet for Mode {
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
-                border_width: BORDER_WIDTH/1.5,
+                border_width: BORDER_WIDTH / 1.5,
                 border_color: Color::BLACK,
             },
         }
@@ -329,7 +328,7 @@ impl iced_style::scrollable::StyleSheet for Mode {
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
-            border_width: BORDER_WIDTH/1.5,
+            border_width: BORDER_WIDTH / 1.5,
             border_color: Color::BLACK,
             scroller: Scroller {
                 color: match self {
@@ -338,14 +337,14 @@ impl iced_style::scrollable::StyleSheet for Mode {
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
-                border_width: BORDER_WIDTH/1.5,
+                border_width: BORDER_WIDTH / 1.5,
                 border_color: Color::BLACK,
             },
         }
     }
 }
 
-
+/// It returns a glyph featuring Sniffnet's logo
 pub fn logo_glyph() -> Text {
     Text::new('A'.to_string())
         .font(ICONS)
