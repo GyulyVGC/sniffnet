@@ -53,13 +53,16 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
-        let mut dev_str = String::new();
+        let mut dev_str = "\n".to_string();
+        let name = dev.name;
         match dev.desc {
             None => {
-                dev_str.push_str(&dev.name);
+                dev_str.push_str(&name);
             }
             Some(description) => {
-                dev_str.push_str(&format!("{}\n{}", dev.name, description));
+                #[cfg(not(target_os = "windows"))]
+                dev_str.push_str(&format!("{}\n", name));
+                dev_str.push_str(&description);
             }
         }
         let num_addresses = dev.addresses.len();
@@ -73,7 +76,8 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             let address_string = addr.addr.to_string();
             dev_str.push_str(&format!("\n    {}", address_string));
         }
-        dev_str_list.push((dev.name, dev_str));
+        dev_str.push_str("\n ");
+        dev_str_list.push((name, dev_str));
     }
 
     let col_adapter = Column::new()
