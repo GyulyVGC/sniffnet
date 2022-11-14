@@ -7,9 +7,9 @@
 <p align="center"> Multithreaded, cross-platform, reliable. </p>
 
 <p align="center">
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
 &nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
 </p>
 
 

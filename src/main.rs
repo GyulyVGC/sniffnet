@@ -104,9 +104,9 @@ pub fn main() -> iced::Result {
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
-            size: (1280, 800),
+            size: (1190, 715), // start size
             position: Default::default(),
-            min_size: Some((1185, 0)), //allow to reduce the most I can sustain
+            min_size: Some((1190, 715)), // min size allowed
             max_size: None,
             resizable: true,
             decorations: true,
@@ -138,7 +138,7 @@ pub fn main() -> iced::Result {
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: true,
+        text_multithreading: false,
         antialiasing: false,
         exit_on_close_request: true,
         try_opengles_first: false,

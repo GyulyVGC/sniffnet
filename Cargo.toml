@@ -12,13 +12,15 @@ license = "MIT OR Apache-2.0"
 include = ["src/**/*", "LICENSE-*", "README.md"]
 
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
 icon = ["./resources/icon.ico"]
+
+
+[profile.release]
+opt-level = 3
+lto = true
 
 
 [dependencies]
