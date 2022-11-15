@@ -7,9 +7,10 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use pcap::Device;
 
-use crate::{AppProtocol, Mode, Sniffer, TransProtocol};
+use crate::{AppProtocol, Mode, TransProtocol};
 use crate::gui::app::Message;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
+use crate::structs::sniffer::Sniffer;
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {

@@ -10,12 +10,13 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use thousands::Separable;
 
-use crate::{Mode, Sniffer};
+use crate::{Mode};
+use crate::structs::sniffer::Sniffer;
 use crate::gui::app::Message;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
 use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::{get_formatted_bytes_string, InfoAddressPortPair};
-use crate::utility::{get_active_filters_string, get_active_filters_string_nobr, get_app_count_string, get_connection_color, get_percentage_string};
+use crate::structs::info_address_port_pair::{InfoAddressPortPair};
+use crate::utility::get_formatted_strings::{get_formatted_bytes_string, get_active_filters_string, get_active_filters_string_nobr, get_app_count_string, get_connection_color, get_percentage_string};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -113,7 +114,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(Row::new().height(Length::FillPortion(2)));
         }
 
-        (_observed, 0) => { //no packets have been filtered but some have been observed
+        (observed, 0) => { //no packets have been filtered but some have been observed
             if sniffer.waiting.len() > 2 {
                 sniffer.waiting = "".to_string();
             }

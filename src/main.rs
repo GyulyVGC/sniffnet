@@ -8,9 +8,11 @@ use pcap::Device;
 
 use gui::style::{FONT_SIZE_BODY, Mode};
 
+use crate::structs::filters::Filters;
 use crate::structs::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::runtime_data::RunTimeData;
+use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_write_report::sleep_and_write_report_loop;
 
@@ -19,39 +21,7 @@ mod thread_write_report;
 mod gui;
 mod structs;
 mod utility;
-
-/// Possible filters applicable to network traffic
-pub struct Filters {
-    ip: String,
-    transport: TransProtocol,
-    application: AppProtocol,
-}
-
-/// Struct on which the gui is based
-///
-/// It contains gui statuses and network traffic statistics to be shared among the different threads
-pub struct Sniffer {
-    current_capture_id: Arc<Mutex<u16>>,
-    info_traffic: Arc<Mutex<InfoTraffic>>,
-    runtime_data: Arc<Mutex<RunTimeData>>,
-    device: Arc<Mutex<Device>>,
-    filters: Arc<Mutex<Filters>>,
-    status_pair: Arc<(Mutex<Status>, Condvar)>,
-    start: button::State,
-    reset: button::State,
-    mode: button::State,
-    report: button::State,
-    git: button::State,
-    app: pick_list::State<AppProtocol>,
-    scroll_adapters: scrollable::State,
-    scroll_packets: scrollable::State,
-    scroll_report: scrollable::State,
-    style: Mode,
-    waiting: String,
-    traffic_chart: TrafficChart,
-    chart_packets: bool,
-    report_type: String,
-}
+mod enums;
 
 
 /// This enum represents the sniffing process status.
