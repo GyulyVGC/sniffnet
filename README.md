@@ -48,13 +48,12 @@ The application can then be run using ```sniffnet [OPTIONS]```
   <summary>Build on Linux&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
   
   <br>
-  In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library. For example:
+ 
+  In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library: 
+  `sudo apt-get install libpcap-dev`
 
-  - On Debian based Linux: ```install libpcap-dev```.
-
-  - On Fedora Linux: ```install libpcap-devel```.
-
-  - Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
+  Note that if you are not running as root, you need to set capabilities like so: 
+  `sudo setcap cap_net_raw,cap_net_admin=eip ~/.cargo/bin/sniffnet`
     
 </details>
 
