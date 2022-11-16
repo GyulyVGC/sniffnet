@@ -8,7 +8,7 @@ use iced::alignment::{Horizontal, Vertical};
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::{ChartType, StyleType, RunTimeData};
+use crate::{ChartType, RunTimeData, StyleType};
 use crate::enums::message::Message;
 use crate::gui::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 

@@ -1,17 +1,19 @@
 use std::sync::{Arc, Mutex};
+
 use chrono::Local;
 use etherparse::{IpHeader, TransportHeader};
+
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 use crate::enums::app_protocol::from_port_to_application_protocol;
 use crate::enums::traffic_type::TrafficType;
-use crate::structs::address_port_pair::{AddressPortPair};
+use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
 pub fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mut u128,
-                          network_protocol: &mut IpVersion, address1: &mut String,
-                          address2: &mut String, skip_packet: &mut bool) {
+                              network_protocol: &mut IpVersion, address1: &mut String,
+                              address2: &mut String, skip_packet: &mut bool) {
     match network_header {
         Some(IpHeader::Version4(ipv4header, _)) => {
             *network_protocol = IpVersion::IPv4;
@@ -43,9 +45,9 @@ pub fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes:
 /// This function analyzes the transport layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
 pub fn analyze_transport_header(transport_header: Option<TransportHeader>,
-                            port1: &mut u16, port2: &mut u16,
-                            application_protocol: &mut AppProtocol,
-                            transport_protocol: &mut TransProtocol, skip_packet: &mut bool) {
+                                port1: &mut u16, port2: &mut u16,
+                                application_protocol: &mut AppProtocol,
+                                transport_protocol: &mut TransProtocol, skip_packet: &mut bool) {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
             *port1 = udp_header.source_port;
@@ -74,8 +76,8 @@ pub fn analyze_transport_header(transport_header: Option<TransportHeader>,
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-                           key: AddressPortPair, exchanged_bytes: u128,
-                           traffic_type: TrafficType, application_protocol: AppProtocol) {
+                               key: AddressPortPair, exchanged_bytes: u128,
+                               traffic_type: TrafficType, application_protocol: AppProtocol) {
     let now = Local::now().to_string().get(0..19).unwrap().to_string();
     let trans_protocol = key.trans_protocol;
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;

@@ -8,13 +8,13 @@ use iced::window::Position;
 use pcap::Device;
 
 use gui::style::{FONT_SIZE_BODY, StyleType};
+
 use crate::enums::app_protocol::AppProtocol;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
 use crate::enums::trans_protocol::TransProtocol;
-
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::runtime_data::RunTimeData;

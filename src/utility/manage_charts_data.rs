@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
+
 use crate::RunTimeData;
 
 /// This function is invoked every second by the application subscription

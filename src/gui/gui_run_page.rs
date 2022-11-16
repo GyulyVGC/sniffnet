@@ -10,13 +10,13 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use thousands::Separable;
 
-use crate::{ChartType, StyleType, ReportType};
+use crate::{ChartType, ReportType, StyleType};
 use crate::enums::message::Message;
-use crate::structs::sniffer::Sniffer;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
 use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::{InfoAddressPortPair};
-use crate::utility::get_formatted_strings::{get_formatted_bytes_string, get_active_filters_string, get_active_filters_string_nobr, get_app_count_string, get_connection_color, get_percentage_string};
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
+use crate::structs::sniffer::Sniffer;
+use crate::utility::get_formatted_strings::{get_active_filters_string, get_active_filters_string_nobr, get_app_count_string, get_connection_color, get_formatted_bytes_string, get_percentage_string};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -142,13 +142,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     ChartType::Packets,
                     "packets per second",
                     Some(active_radio_chart),
-                    |what_to_display| Message::ChartSelection(what_to_display),
+                    Message::ChartSelection,
                 ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
                     ChartType::Bytes,
                     "bytes per second",
                     Some(active_radio_chart),
-                    |what_to_display| Message::ChartSelection(what_to_display),
+                    Message::ChartSelection,
                 ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
                 ;
 
@@ -185,7 +185,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     ReportType::MostRecent,
                     "most recent",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display),
+                    Message::ReportSelection,
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
@@ -193,7 +193,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     ReportType::MostPackets,
                     "most packets",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display),
+                    Message::ReportSelection,
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
@@ -201,7 +201,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     ReportType::MostBytes,
                     "most bytes",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display),
+                    Message::ReportSelection,
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
@@ -218,7 +218,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     sorted_vec.sort_by(|&(_, a), &(_, b)|
                         b.transmitted_packets.cmp(&a.transmitted_packets));
                 }
-               ReportType::MostBytes => {
+                ReportType::MostBytes => {
                     sorted_vec.sort_by(|&(_, a), &(_, b)|
                         b.transmitted_bytes.cmp(&a.transmitted_bytes));
                 }

@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use iced::Color;
@@ -9,7 +9,6 @@ use crate::{AppProtocol, IpVersion, TransProtocol};
 use crate::enums::traffic_type::TrafficType;
 use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
 use crate::structs::filters::Filters;
-
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: i128) -> String {

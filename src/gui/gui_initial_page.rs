@@ -112,19 +112,19 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             IpVersion::IPv4,
             "IPv4",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version),
+            Message::IpVersionSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             IpVersion::IPv6,
             "IPv6",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version),
+            Message::IpVersionSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
             IpVersion::Other,
             "both",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version),
+            Message::IpVersionSelection,
         ).width(Length::Fill).font(font).size(15).style(sniffer.style));
     let col_ip = Column::new()
         .spacing(10)

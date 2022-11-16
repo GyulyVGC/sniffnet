@@ -3,14 +3,14 @@
 
 use std::sync::{Arc, Mutex};
 
-use etherparse::{PacketHeaders};
+use etherparse::PacketHeaders;
 use pcap::{Capture, Device};
 
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 use crate::enums::traffic_type::TrafficType;
-use crate::structs::{address_port_pair::AddressPortPair};
+use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
-use crate::utility::manage_packets::{is_multicast_address, analyze_transport_header, analyze_network_header, modify_or_insert_in_map};
+use crate::utility::manage_packets::{analyze_network_header, analyze_transport_header, is_multicast_address, modify_or_insert_in_map};
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.

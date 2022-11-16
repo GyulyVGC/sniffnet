@@ -1,6 +1,5 @@
 use crate::{AppProtocol, ChartType, IpVersion, ReportType, TransProtocol};
 
-
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
 pub enum Message {

@@ -3,9 +3,11 @@
 
 
 use std::sync::{Arc, Condvar, Mutex};
+
 use iced::{button, pick_list, scrollable};
 use pcap::Device;
-use crate::{AppProtocol, InfoTraffic, StyleType, RunTimeData, TrafficChart};
+
+use crate::{AppProtocol, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 use crate::enums::chart_type::ChartType;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;

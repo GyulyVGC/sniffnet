@@ -19,7 +19,8 @@ use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
 
 /// Update period when app is running
-pub const PERIOD_RUNNING: u64 = 1000; //milliseconds
+pub const PERIOD_RUNNING: u64 = 1000;
+//milliseconds
 /// Update period when app is in its initial state
 pub const PERIOD_INIT: u64 = 5000; //milliseconds
 
