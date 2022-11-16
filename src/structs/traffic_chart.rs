@@ -8,8 +8,8 @@ use iced::alignment::{Horizontal, Vertical};
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::{Mode, RunTimeData};
-use crate::gui::app::Message;
+use crate::{ChartType, StyleType, RunTimeData};
+use crate::enums::message::Message;
 use crate::gui::style::{CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, NOTOSANS, NOTOSANS_BOLD, SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB};
 
 /// Struct defining the chart to be displayed in gui run page
@@ -17,7 +17,7 @@ pub struct TrafficChart {
     charts_data: Arc<Mutex<RunTimeData>>,
     color_mix: f64,
     font_color: RGBColor,
-    chart_packets: bool,
+    chart_type: ChartType,
 }
 
 
@@ -27,21 +27,21 @@ impl TrafficChart {
             charts_data,
             color_mix: 0.0,
             font_color: Default::default(),
-            chart_packets: true,
+            chart_type: ChartType::Packets,
         }
     }
 
-    pub fn view(&mut self, mode: Mode, chart_packets: bool) -> Element<Message> {
-        self.color_mix = if mode == Mode::Day { COLOR_CHART_MIX_DAY } else { COLOR_CHART_MIX_NIGHT };
-        self.chart_packets = chart_packets;
-        self.font_color = if mode == Mode::Day { plotters::style::colors::BLACK } else { plotters::style::colors::WHITE };
+    pub fn view(&mut self, mode: StyleType, chart_type: ChartType) -> Element<Message> {
+        self.color_mix = if mode == StyleType::Day { COLOR_CHART_MIX_DAY } else { COLOR_CHART_MIX_NIGHT };
+        self.chart_type = chart_type;
+        self.font_color = if mode == StyleType::Day { plotters::style::colors::BLACK } else { plotters::style::colors::WHITE };
 
         Container::new(
             Column::new()
                 .push(ChartWidget::new(self).resolve_font(
                     move |_, _| match mode {
-                        Mode::Night => { NOTOSANS }
-                        Mode::Day => { NOTOSANS_BOLD }
+                        StyleType::Night => { NOTOSANS }
+                        StyleType::Day => { NOTOSANS_BOLD }
                         _ => { NOTOSANS }
                     }
                 )))
@@ -64,8 +64,8 @@ impl Chart<Message> for TrafficChart {
         let tot_seconds = charts_data_lock.ticks - 1;
         let first_time_displayed = max(0, charts_data_lock.ticks as i128 - 30) as u128;
 
-        match self.chart_packets {
-            false => { //display bytes chart
+        match self.chart_type {
+            ChartType::Bytes => { //display bytes chart
                 let mut chart = chart.margin_right(30)
                     .set_label_area_size(LabelAreaPosition::Left, 60)
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
@@ -99,7 +99,7 @@ impl Chart<Message> for TrafficChart {
                     .border_style(BLACK).label_font(("notosans", 15).into_font().color(&self.font_color)).draw().expect("Error drawing graph");
             }
 
-            true => { //display packets chart
+            ChartType::Packets => { //display packets chart
                 let mut chart = chart.margin_right(30)
                     .set_label_area_size(LabelAreaPosition::Left, 60)
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)

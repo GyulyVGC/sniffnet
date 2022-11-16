@@ -8,10 +8,11 @@ use std::time::Duration;
 use iced::{Application, Command, Container, Element, executor, Length, Subscription};
 use pcap::Device;
 
-use crate::{InfoTraffic, RunTimeData, Status};
+use crate::{InfoTraffic, RunTimeData};
+use crate::enums::message::Message;
+use crate::enums::status::Status;
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
-use crate::gui::style::Mode;
-use crate::structs::info_address_port_pair::{AppProtocol, TransProtocol};
+use crate::gui::style::StyleType;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
@@ -21,25 +22,6 @@ use crate::utility::manage_charts_data::update_charts_data;
 pub const PERIOD_RUNNING: u64 = 1000; //milliseconds
 /// Update period when app is in its initial state
 pub const PERIOD_INIT: u64 = 5000; //milliseconds
-
-
-#[derive(Debug, Clone)]
-/// Messages types that permit to react to application interactions/subscriptions
-pub enum Message {
-    TickInit,
-    TickRun,
-    AdapterSelection(String),
-    IpVersionSelection(String),
-    TransportProtocolSelection(TransProtocol),
-    AppProtocolSelection(AppProtocol),
-    ChartSelection(String),
-    ReportSelection(String),
-    OpenReport,
-    OpenGithub,
-    Start,
-    Reset,
-    Style,
-}
 
 
 impl Application for Sniffer {
@@ -95,11 +77,7 @@ impl Application for Sniffer {
                 self.filters.lock().unwrap().application = protocol;
             }
             Message::ChartSelection(what_to_display) => {
-                if what_to_display.eq("packets") {
-                    self.chart_packets = true;
-                } else {
-                    self.chart_packets = false;
-                }
+                self.chart_type = what_to_display;
             }
             Message::ReportSelection(what_to_display) => {
                 self.report_type = what_to_display;
@@ -160,10 +138,10 @@ impl Application for Sniffer {
                 *self.status_pair.0.lock().unwrap() = Status::Init;
             }
             Message::Style => {
-                self.style = if self.style == Mode::Day {
-                    Mode::Night
+                self.style = if self.style == StyleType::Day {
+                    StyleType::Night
                 } else {
-                    Mode::Day
+                    StyleType::Day
                 };
             }
         }

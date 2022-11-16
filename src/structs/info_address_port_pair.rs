@@ -3,6 +3,7 @@
 
 use std::fmt;
 use crate::enums::traffic_type::TrafficType;
+use crate::{AppProtocol, TransProtocol};
 
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 

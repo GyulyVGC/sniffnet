@@ -5,9 +5,9 @@ use std::sync::{Arc, Mutex};
 use iced::Color;
 use thousands::Separable;
 
-use crate::{AppProtocol, TransProtocol};
+use crate::{AppProtocol, IpVersion, TransProtocol};
+use crate::enums::traffic_type::TrafficType;
 use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
-use crate::structs::address_port_pair::TrafficType;
 use crate::structs::filters::Filters;
 
 
@@ -23,14 +23,14 @@ pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
 /// Computes the String representing the active filters
 pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
     let filters_lock = filters.lock().unwrap();
-    if filters_lock.ip == "no filter"
+    if filters_lock.ip.eq(&IpVersion::Other)
         && filters_lock.application.eq(&AppProtocol::Other)
         && filters_lock.transport.eq(&TransProtocol::Other) {
         "Active filters:\n   none".to_string()
     } else {
         let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip != "no filter" {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip.replace("ip", "IP")));
+        if filters_lock.ip.ne(&IpVersion::Other) {
+            ret_val.push_str(&format!("\n   {}", filters_lock.ip));
         }
         if filters_lock.transport.ne(&TransProtocol::Other) {
             ret_val.push_str(&format!("\n   {}", filters_lock.transport));
@@ -46,8 +46,8 @@ pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
 pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
     let filters_lock = filters.lock().unwrap();
     let mut ret_val = "Active filters:".to_string();
-    if filters_lock.ip != "no filter" {
-        ret_val.push_str(&format!(" {}", filters_lock.ip.replace("ip", "IP")));
+    if filters_lock.ip.ne(&IpVersion::Other) {
+        ret_val.push_str(&format!(" {}", filters_lock.ip));
     }
     if filters_lock.transport.ne(&TransProtocol::Other) {
         ret_val.push_str(&format!(" {}", filters_lock.transport));

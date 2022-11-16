@@ -10,9 +10,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use thousands::Separable;
 
-use crate::{Mode};
+use crate::{ChartType, StyleType, ReportType};
+use crate::enums::message::Message;
 use crate::structs::sniffer::Sniffer;
-use crate::gui::app::Message;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::{InfoAddressPortPair};
@@ -20,9 +20,9 @@ use crate::utility::get_formatted_strings::{get_formatted_bytes_string, get_acti
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
-    let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
-    let font_footer = if sniffer.style == Mode::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
-    let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
+    let font = if sniffer.style == StyleType::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
+    let font_footer = if sniffer.style == StyleType::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
+    let headers_style = if sniffer.style == StyleType::Day { StyleType::HeadersDay } else { StyleType::HeadersNight };
     let logo = logo_glyph().size(100);
 
     let button_style = Button::new(
@@ -135,31 +135,31 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
 
-            let active_radio_chart = if sniffer.chart_packets { "packets" } else { "bytes" };
+            let active_radio_chart = sniffer.chart_type;
             let row_radio_chart = Row::new().padding(15).spacing(10)
                 .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
                 .push(Radio::new(
-                    "packets",
+                    ChartType::Packets,
                     "packets per second",
                     Some(active_radio_chart),
-                    |what_to_display| Message::ChartSelection(what_to_display.to_string()),
+                    |what_to_display| Message::ChartSelection(what_to_display),
                 ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
-                    "bytes",
+                    ChartType::Bytes,
                     "bytes per second",
                     Some(active_radio_chart),
-                    |what_to_display| Message::ChartSelection(what_to_display.to_string()),
+                    |what_to_display| Message::ChartSelection(what_to_display),
                 ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
                 ;
 
             let col_chart = Container::new(
                 Column::new()
                     .push(row_radio_chart)
-                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_packets)))
+                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_type)))
                 .width(Length::FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
-                .style(Mode::BorderedRound);
+                .style(StyleType::BorderedRound);
 
             let col_packets = Column::new()
                 .width(Length::FillPortion(1))
@@ -178,30 +178,30 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
                 ;
 
-            let active_radio_report = &*sniffer.report_type;
+            let active_radio_report = sniffer.report_type;
             let row_radio_report = Row::new().padding(10)
                 .push(Text::new("Relevant connections:    ").size(FONT_SIZE_SUBTITLE).font(font))
                 .push(Radio::new(
-                    "latest",
+                    ReportType::MostRecent,
                     "most recent",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                    |what_to_display| Message::ReportSelection(what_to_display),
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
-                    "packets",
+                    ReportType::MostPackets,
                     "most packets",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                    |what_to_display| Message::ReportSelection(what_to_display),
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
                 .push(Radio::new(
-                    "bytes",
+                    ReportType::MostBytes,
                     "most bytes",
                     Some(active_radio_report),
-                    |what_to_display| Message::ReportSelection(what_to_display.to_string()),
+                    |what_to_display| Message::ReportSelection(what_to_display),
                 )
                     .width(Length::Units(200))
                     .font(font).size(15).style(sniffer.style))
@@ -210,19 +210,18 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             let sniffer_lock = sniffer.info_traffic.lock().unwrap();
             let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
             match active_radio_report {
-                "latest" => {
+                ReportType::MostRecent => {
                     sorted_vec.sort_by(|&(_, a), &(_, b)|
                         b.final_timestamp.cmp(&a.final_timestamp));
                 }
-                "packets" => {
+                ReportType::MostPackets => {
                     sorted_vec.sort_by(|&(_, a), &(_, b)|
                         b.transmitted_packets.cmp(&a.transmitted_packets));
                 }
-                "bytes" => {
+               ReportType::MostBytes => {
                     sorted_vec.sort_by(|&(_, a), &(_, b)|
                         b.transmitted_bytes.cmp(&a.transmitted_bytes));
                 }
-                _ => {}
             }
             let n_entry = min(sorted_vec.len(), 15);
             let mut col_report = Column::new()
@@ -253,13 +252,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .push(Container::new(col_report)
                     .padding(10)
                     .height(Length::Fill)
-                    .style(Mode::BorderedRound))
+                    .style(StyleType::BorderedRound))
                 .push(col_open_report);
 
             body = body
                 .push(Row::new().spacing(10).height(Length::FillPortion(3))
                     .push(col_chart)
-                    .push(Container::new(col_packets).padding(10).height(Length::Fill).style(Mode::BorderedRound)))
+                    .push(Container::new(col_packets).padding(10).height(Length::Fill).style(StyleType::BorderedRound)))
                 .push(row_report);
         }
     }

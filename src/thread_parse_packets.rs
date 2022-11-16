@@ -1,18 +1,16 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets and
 //! inserting them in the shared map.
 
-use std::cmp::Ordering::Equal;
 use std::sync::{Arc, Mutex};
 
-use chrono::Local;
-use etherparse::{IpHeader, PacketHeaders, TransportHeader};
+use etherparse::{PacketHeaders};
 use pcap::{Capture, Device};
 
-use crate::{AppProtocol, InfoTraffic, TransProtocol};
-use crate::structs::{address_port_pair::AddressPortPair, info_address_port_pair::InfoAddressPortPair};
-use crate::structs::address_port_pair::TrafficType;
+use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
+use crate::enums::traffic_type::TrafficType;
+use crate::structs::{address_port_pair::AddressPortPair};
 use crate::structs::filters::Filters;
-use crate::utility::manage_packets::{ipv6_from_long_dec_to_short_hex, is_multicast_address, analyze_transport_header, analyze_network_header, modify_or_insert_in_map};
+use crate::utility::manage_packets::{is_multicast_address, analyze_transport_header, analyze_network_header, modify_or_insert_in_map};
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -27,15 +25,15 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
     }
 
     let filtri = filters.lock().unwrap();
-    let network_layer_filter = filtri.ip.clone();
-    let transport_layer = filtri.transport;
-    let app_layer = filtri.application;
+    let network_layer_filter = filtri.ip;
+    let transport_layer_filter = filtri.transport;
+    let app_layer_filter = filtri.application;
     drop(filtri);
 
-    let mut network_layer = "".to_string();
     let mut port1 = 0;
     let mut port2 = 0;
     let mut exchanged_bytes: u128 = 0;
+    let mut network_protocol;
     let mut transport_protocol;
     let mut application_protocol;
     let mut traffic_type;
@@ -72,6 +70,7 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                     Ok(value) => {
                         let mut address1 = "".to_string();
                         let mut address2 = "".to_string();
+                        network_protocol = IpVersion::Other;
                         transport_protocol = TransProtocol::Other;
                         application_protocol = AppProtocol::Other;
                         traffic_type = TrafficType::Other;
@@ -79,7 +78,7 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         reported_packet = false;
 
                         analyze_network_header(value.ip, &mut exchanged_bytes,
-                                               &mut network_layer, &mut address1, &mut address2,
+                                               &mut network_protocol, &mut address1, &mut address2,
                                                &mut skip_packet);
                         if skip_packet {
                             continue;
@@ -104,9 +103,9 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
                                                                         transport_protocol);
 
-                        if (network_layer_filter.cmp(&"no filter".to_string()) == Equal || network_layer_filter.cmp(&network_layer) == Equal)
-                            && (transport_layer.eq(&TransProtocol::Other) || transport_protocol.eq(&transport_layer))
-                            && (app_layer.eq(&AppProtocol::Other) || application_protocol.eq(&app_layer)) {
+                        if (network_layer_filter.eq(&IpVersion::Other) || network_layer_filter.eq(&network_protocol))
+                            && (transport_layer_filter.eq(&TransProtocol::Other) || transport_layer_filter.eq(&transport_protocol))
+                            && (app_layer_filter.eq(&AppProtocol::Other) || app_layer_filter.eq(&application_protocol)) {
                             // if (port1 >= lowest_port && port1 <= highest_port)
                             //     || (port2 >= lowest_port && port2 <= highest_port) {
                             modify_or_insert_in_map(info_traffic_mutex.clone(), key,

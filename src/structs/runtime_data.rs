@@ -6,25 +6,45 @@ use crate::AppProtocol;
 
 /// Struct containing useful data to generate charts and to display statistics about network traffic
 pub struct RunTimeData {
+    /// Total number of bytes (filtered and not filtered)
     pub all_bytes: u128,
+    /// Sent bytes filtered and their time occurrence
     pub sent_bytes: VecDeque<(u128, i128)>,
+    /// Received bytes filtered and their time occurrence
     pub received_bytes: VecDeque<(u128, i128)>,
+    /// Total number of packets (filtered and not filtered)
     pub all_packets: u128,
+    /// Sent packets filtered and their time occurrence
     pub sent_packets: VecDeque<(u128, i128)>,
+    /// Received packets filtered and their time occurrence
     pub received_packets: VecDeque<(u128, i128)>,
+    /// Application protocol with the respective number of filtered packets
     pub app_protocols: HashMap<AppProtocol, u128>,
+    /// Total sent bytes filtered
     pub tot_sent_bytes: i128,
+    /// Total received bytes filtered
     pub tot_received_bytes: i128,
+    /// Total sent packets filtered
     pub tot_sent_packets: i128,
+    /// Total received packets filtered
     pub tot_received_packets: i128,
+    /// Total sent bytes filtered before the current time interval
     pub tot_sent_bytes_prev: i128,
+    /// Total received bytes filtered before the current time interval
     pub tot_received_bytes_prev: i128,
+    /// Total sent packets filtered before the current time interval
     pub tot_sent_packets_prev: i128,
+    /// Total received packets filtered before the current time interval
     pub tot_received_packets_prev: i128,
+    /// Minimum number of sent bytes per time interval (computed on last 30 intervals)
     pub min_sent_bytes: i128,
+    /// Minimum number of received bytes per time interval (computed on last 30 intervals)
     pub max_received_bytes: i128,
+    /// Minimum number of sent packets per time interval (computed on last 30 intervals)
     pub min_sent_packets: i128,
+    /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i128,
+    /// Current time interval number
     pub ticks: u128,
 }
 

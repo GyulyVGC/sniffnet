@@ -4,12 +4,18 @@ use std::{panic, process, thread};
 use std::sync::{Arc, Condvar, Mutex};
 
 use iced::{Application, button, pick_list, scrollable, Settings, window};
+use iced::window::Position;
 use pcap::Device;
 
-use gui::style::{FONT_SIZE_BODY, Mode};
+use gui::style::{FONT_SIZE_BODY, StyleType};
+use crate::enums::app_protocol::AppProtocol;
+use crate::enums::chart_type::ChartType;
+use crate::enums::ip_version::IpVersion;
+use crate::enums::report_type::ReportType;
+use crate::enums::status::Status;
+use crate::enums::trans_protocol::TransProtocol;
 
 use crate::structs::filters::Filters;
-use crate::structs::info_address_port_pair::{AppProtocol, TransProtocol};
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::runtime_data::RunTimeData;
 use crate::structs::sniffer::Sniffer;
@@ -23,15 +29,6 @@ mod structs;
 mod utility;
 mod enums;
 
-
-/// This enum represents the sniffing process status.
-#[derive(PartialEq, Eq, Clone, Copy)]
-pub enum Status {
-    /// Sniffnet has just been launched/restarted and gui is in the main screen.
-    Init,
-    /// The sniffing process is running: the application parses packets and periodically update the output report.
-    Running,
-}
 
 /// Entry point of application execution
 ///
@@ -53,7 +50,7 @@ pub fn main() -> iced::Result {
     let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
 
     let filters = Arc::new(Mutex::new(Filters {
-        ip: "no filter".to_string(),
+        ip: IpVersion::Other,
         transport: TransProtocol::Other,
         application: AppProtocol::Other,
     }));
@@ -75,7 +72,7 @@ pub fn main() -> iced::Result {
         id: None,
         window: window::Settings {
             size: (1190, 715), // start size
-            position: Default::default(),
+            position: Position::Centered,
             min_size: Some((1190, 715)), // min size allowed
             max_size: None,
             resizable: true,
@@ -100,11 +97,11 @@ pub fn main() -> iced::Result {
             scroll_adapters: scrollable::State::new(),
             scroll_packets: scrollable::State::new(),
             scroll_report: scrollable::State::new(),
-            style: Mode::Night,
+            style: StyleType::Night,
             waiting: String::new(),
             traffic_chart: TrafficChart::new(runtime_data2),
-            chart_packets: true,
-            report_type: "latest".to_string(),
+            chart_type: ChartType::Packets,
+            report_type: ReportType::MostRecent,
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

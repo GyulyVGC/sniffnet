@@ -7,7 +7,8 @@ use std::io::{BufWriter, Seek, SeekFrom, Write};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
-use crate::{InfoTraffic, Status};
+use crate::enums::status::Status;
+use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it sleeps for 1 second and then
 /// updates the output report containing detailed traffic information

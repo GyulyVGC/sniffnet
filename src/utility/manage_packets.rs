@@ -1,18 +1,20 @@
 use std::sync::{Arc, Mutex};
 use chrono::Local;
 use etherparse::{IpHeader, TransportHeader};
-use crate::{AppProtocol, InfoTraffic, TransProtocol};
-use crate::structs::address_port_pair::{AddressPortPair, TrafficType};
+use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
+use crate::enums::app_protocol::from_port_to_application_protocol;
+use crate::enums::traffic_type::TrafficType;
+use crate::structs::address_port_pair::{AddressPortPair};
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
 pub fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes: &mut u128,
-                          network_layer: &mut String, address1: &mut String,
+                          network_protocol: &mut IpVersion, address1: &mut String,
                           address2: &mut String, skip_packet: &mut bool) {
     match network_header {
         Some(IpHeader::Version4(ipv4header, _)) => {
-            *network_layer = "ipv4".to_string();
+            *network_protocol = IpVersion::IPv4;
             *address1 = format!("{:?}", ipv4header.source)
                 .replace('[', "")
                 .replace(']', "")
@@ -26,7 +28,7 @@ pub fn analyze_network_header(network_header: Option<IpHeader>, exchanged_bytes:
             *exchanged_bytes = ipv4header.payload_len as u128;
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
-            *network_layer = "ipv6".to_string();
+            *network_protocol = IpVersion::IPv6;
             *address1 = ipv6_from_long_dec_to_short_hex(ipv6header.source);
             *address2 = ipv6_from_long_dec_to_short_hex(ipv6header.destination);
             *exchanged_bytes = ipv6header.payload_length as u128;

@@ -74,7 +74,7 @@ pub const CHARTS_LINE_BORDER: u32 = 1;
 
 #[derive(Copy, Eq, PartialEq)]
 /// Used to specify the kind of style to be applied to an element
-pub enum Mode {
+pub enum StyleType {
     Night,
     Day,
     BorderedRound,
@@ -83,37 +83,37 @@ pub enum Mode {
 }
 
 
-impl Clone for Mode {
+impl Clone for StyleType {
     fn clone(&self) -> Self {
         *self
     }
 }
 
 /// Containers style
-impl StyleSheet for Mode {
+impl StyleSheet for StyleType {
     fn style(&self) -> Style {
         Style {
             text_color: match self {
-                Mode::Day => Some(Color::BLACK),
-                Mode::Night => Some(Color::WHITE),
-                Mode::HeadersDay => Some(Color::WHITE),
-                Mode::HeadersNight => Some(Color::BLACK),
+                StyleType::Day => Some(Color::BLACK),
+                StyleType::Night => Some(Color::WHITE),
+                StyleType::HeadersDay => Some(Color::WHITE),
+                StyleType::HeadersNight => Some(Color::BLACK),
                 _ => { None }
             },
             background: match self {
-                Mode::Day => { Some(Background::Color(DAY_BACKGROUND)) }
-                Mode::Night => { Some(Background::Color(NIGHT_BACKGROUND)) }
-                Mode::BorderedRound => { None }
-                Mode::HeadersDay => { Some(Background::Color(SPECIAL_DAY)) }
-                Mode::HeadersNight => { Some(Background::Color(SPECIAL_NIGHT)) }
+                StyleType::Day => { Some(Background::Color(DAY_BACKGROUND)) }
+                StyleType::Night => { Some(Background::Color(NIGHT_BACKGROUND)) }
+                StyleType::BorderedRound => { None }
+                StyleType::HeadersDay => { Some(Background::Color(SPECIAL_DAY)) }
+                StyleType::HeadersNight => { Some(Background::Color(SPECIAL_NIGHT)) }
             },
             border_radius: match self {
-                Mode::BorderedRound => { 12.0 }
+                StyleType::BorderedRound => { 12.0 }
                 _ => { 0.0 }
             },
             border_width: match self {
-                Mode::Night => { 0.0 }
-                Mode::Day => { 0.0 }
+                StyleType::Night => { 0.0 }
+                StyleType::Day => { 0.0 }
                 _ => { BORDER_WIDTH }
             },
             border_color: Color::BLACK,
@@ -122,33 +122,33 @@ impl StyleSheet for Mode {
 }
 
 /// Picklists style
-impl pick_list::StyleSheet for Mode {
+impl pick_list::StyleSheet for StyleType {
     fn menu(&self) -> iced_style::menu::Style {
         iced_style::menu::Style {
             text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => DAY_BUTTONS,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => DAY_BUTTONS,
                 _ => { Color::BLACK }
             },
             background: Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             }),
             border_width: BORDER_WIDTH,
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             selected_text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => Color::WHITE,
                 _ => { Color::BLACK }
             },
             selected_background: Background::Color(match self {
-                Mode::Day => DAY_BACKGROUND,
-                Mode::Night => NIGHT_BACKGROUND,
+                StyleType::Day => DAY_BACKGROUND,
+                StyleType::Night => NIGHT_BACKGROUND,
                 _ => { Color::BLACK }
             }),
         }
@@ -157,21 +157,21 @@ impl pick_list::StyleSheet for Mode {
     fn active(&self) -> pick_list::Style {
         pick_list::Style {
             text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => Color::WHITE,
                 _ => { Color::BLACK }
             },
             placeholder_color: Color::BLACK,
             background: Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             }),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             icon_size: 0.5,
@@ -181,21 +181,21 @@ impl pick_list::StyleSheet for Mode {
     fn hovered(&self) -> pick_list::Style {
         pick_list::Style {
             text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => Color::WHITE,
                 _ => { Color::BLACK }
             },
             placeholder_color: Color::BLACK,
             background: Background::Color(match self {
-                Mode::Day => DAY_BACKGROUND,
-                Mode::Night => NIGHT_BACKGROUND,
+                StyleType::Day => DAY_BACKGROUND,
+                StyleType::Night => NIGHT_BACKGROUND,
                 _ => { Color::BLACK }
             }),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             icon_size: 0.5,
@@ -204,25 +204,25 @@ impl pick_list::StyleSheet for Mode {
 }
 
 /// Buttons style
-impl button::StyleSheet for Mode {
+impl button::StyleSheet for StyleType {
     fn active(&self) -> button::Style {
         button::Style {
             background: Some(Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
             border_width: BORDER_WIDTH,
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => Color::WHITE,
                 _ => { Color::BLACK }
             },
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
         }
@@ -232,20 +232,20 @@ impl button::StyleSheet for Mode {
         iced_style::button::Style {
             shadow_offset: Vector::new(1.0, 1.0),
             background: Some(Background::Color(match self {
-                Mode::Day => DAY_BACKGROUND,
-                Mode::Night => NIGHT_BACKGROUND,
+                StyleType::Day => DAY_BACKGROUND,
+                StyleType::Night => NIGHT_BACKGROUND,
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
             border_width: BORDER_WIDTH,
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             text_color: match self {
-                Mode::Day => Color::BLACK,
-                Mode::Night => Color::WHITE,
+                StyleType::Day => Color::BLACK,
+                StyleType::Night => Color::WHITE,
                 _ => { Color::BLACK }
             },
         }
@@ -253,17 +253,17 @@ impl button::StyleSheet for Mode {
 }
 
 /// Radios style
-impl iced_style::radio::StyleSheet for Mode {
+impl iced_style::radio::StyleSheet for StyleType {
     fn active(&self) -> iced_style::radio::Style {
         iced_style::radio::Style {
             background: Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             }),
             dot_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             border_width: 0.0,
@@ -275,19 +275,19 @@ impl iced_style::radio::StyleSheet for Mode {
     fn hovered(&self) -> iced_style::radio::Style {
         iced_style::radio::Style {
             background: Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             }),
             dot_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             border_width: BORDER_WIDTH,
             border_color: match self {
-                Mode::Day => SPECIAL_DAY,
-                Mode::Night => SPECIAL_NIGHT,
+                StyleType::Day => SPECIAL_DAY,
+                StyleType::Night => SPECIAL_NIGHT,
                 _ => { Color::BLACK }
             },
             text_color: None,
@@ -296,12 +296,12 @@ impl iced_style::radio::StyleSheet for Mode {
 }
 
 /// Scrollbars style
-impl iced_style::scrollable::StyleSheet for Mode {
+impl iced_style::scrollable::StyleSheet for StyleType {
     fn active(&self) -> Scrollbar {
         Scrollbar {
             background: Some(Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
@@ -309,8 +309,8 @@ impl iced_style::scrollable::StyleSheet for Mode {
             border_color: Color::BLACK,
             scroller: Scroller {
                 color: match self {
-                    Mode::Day => DAY_BACKGROUND,
-                    Mode::Night => NIGHT_BACKGROUND,
+                    StyleType::Day => DAY_BACKGROUND,
+                    StyleType::Night => NIGHT_BACKGROUND,
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
@@ -323,8 +323,8 @@ impl iced_style::scrollable::StyleSheet for Mode {
     fn hovered(&self) -> Scrollbar {
         Scrollbar {
             background: Some(Background::Color(match self {
-                Mode::Day => DAY_BUTTONS,
-                Mode::Night => NIGHT_BUTTONS,
+                StyleType::Day => DAY_BUTTONS,
+                StyleType::Night => NIGHT_BUTTONS,
                 _ => { Color::BLACK }
             })),
             border_radius: 12.0,
@@ -332,8 +332,8 @@ impl iced_style::scrollable::StyleSheet for Mode {
             border_color: Color::BLACK,
             scroller: Scroller {
                 color: match self {
-                    Mode::Day => SPECIAL_DAY,
-                    Mode::Night => SPECIAL_NIGHT,
+                    StyleType::Day => SPECIAL_DAY,
+                    StyleType::Night => SPECIAL_NIGHT,
                     _ => { Color::BLACK }
                 },
                 border_radius: 12.0,
@@ -352,16 +352,16 @@ pub fn logo_glyph() -> Text {
 }
 
 
-pub fn icon_sun_moon(style: Mode) -> Text { //F: sun, G: moon, K: sun adjust
+pub fn icon_sun_moon(style: StyleType) -> Text { //F: sun, G: moon, K: sun adjust
     match style {
-        Mode::Night => {
+        StyleType::Night => {
             Text::new('K'.to_string())
                 .font(ICONS)
                 .width(Length::Units(25))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .size(20)
         }
-        Mode::Day => {
+        StyleType::Day => {
             Text::new('K'.to_string())
                 .font(ICONS)
                 .width(Length::Units(25))

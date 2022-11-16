@@ -7,16 +7,16 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use pcap::Device;
 
-use crate::{AppProtocol, Mode, TransProtocol};
-use crate::gui::app::Message;
+use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
+use crate::enums::message::Message;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
 use crate::structs::sniffer::Sniffer;
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
-    let font = if sniffer.style == Mode::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
-    let font_footer = if sniffer.style == Mode::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
-    let headers_style = if sniffer.style == Mode::Day { Mode::HeadersDay } else { Mode::HeadersNight };
+    let font = if sniffer.style == StyleType::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
+    let font_footer = if sniffer.style == StyleType::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
+    let headers_style = if sniffer.style == StyleType::Day { StyleType::HeadersDay } else { StyleType::HeadersNight };
     let logo = logo_glyph().size(100);
 
     let button_style = Button::new(
@@ -95,7 +95,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                     &adapter.1,
                     Some(&sniffer.device.clone().lock().unwrap().name),
                     |name| Message::AdapterSelection(name.to_string()),
-                ).font(font).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(Mode::BorderedRound))
+                ).font(font).size(15).width(Length::Fill).style(sniffer.style)).padding(10).style(StyleType::BorderedRound))
             },
         ));
 
@@ -105,26 +105,26 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .width(Length::FillPortion(1));
 
     let filtri = sniffer.filters.lock().unwrap();
-    let ip_active = &*filtri.ip;
+    let ip_active = filtri.ip;
     let col_ip_radio = Column::new().spacing(10)
         .push(Text::new("IP version").font(font).size(FONT_SIZE_SUBTITLE))
         .push(Radio::new(
-            "ipv4",
+            IpVersion::IPv4,
             "IPv4",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string()),
+            |version| Message::IpVersionSelection(version),
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
-            "ipv6",
+            IpVersion::IPv6,
             "IPv6",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string()),
+            |version| Message::IpVersionSelection(version),
         ).width(Length::Fill).font(font).size(15).style(sniffer.style))
         .push(Radio::new(
-            "no filter",
+            IpVersion::Other,
             "both",
             Some(ip_active),
-            |version| Message::IpVersionSelection(version.to_string()),
+            |version| Message::IpVersionSelection(version),
         ).width(Length::Fill).font(font).size(15).style(sniffer.style));
     let col_ip = Column::new()
         .spacing(10)
