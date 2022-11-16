@@ -17,7 +17,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let font = if sniffer.style == StyleType::Day { COURIER_PRIME_BOLD } else { COURIER_PRIME };
     let font_footer = if sniffer.style == StyleType::Day { COURIER_PRIME_ITALIC } else { COURIER_PRIME_BOLD_ITALIC };
     let headers_style = if sniffer.style == StyleType::Day { StyleType::HeadersDay } else { StyleType::HeadersNight };
-    let logo = logo_glyph().size(100);
+    let logo = logo_glyph().size(90);
 
     let button_style = Button::new(
         &mut sniffer.mode,

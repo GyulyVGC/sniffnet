@@ -73,7 +73,7 @@ pub fn main() -> iced::Result {
         window: window::Settings {
             size: (1190, 715), // start size
             position: Position::Centered,
-            min_size: Some((1190, 715)), // min size allowed
+            min_size: Some((1190, 0)), // min size allowed
             max_size: None,
             resizable: true,
             decorations: true,
