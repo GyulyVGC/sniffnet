@@ -71,7 +71,7 @@ pub fn main() -> iced::Result {
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
-            size: (1190, 715), // start size
+            size: (1190, 670), // start size
             position: Position::Centered,
             min_size: Some((1190, 0)), // min size allowed
             max_size: None,

@@ -18,8 +18,8 @@
 <p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
 
 <div align="center">
-<p style="width:85%">Sniffnet is a simple yet robust packet sniffer developed with the aim to let people have a glance into their network traffic without pain,
-in a straightforward and comprehensible way </p>
+<p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
+in a straightforward and appealing way </p>
 </div>
 
 <hr>
@@ -74,14 +74,21 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
 ## Features
 
 - choose a network adapter to inspect
-- select filters to apply to the observed traffic:
-  * IP version
-  * transport protocol
-  * application protocol
+<p align="center"><img src="resources/adapters_view.png" width="50%"/></p>
+
+- select filters to apply to the observed traffic
+<p align="center"><img src="resources/filters_view.png" width="60%"/></p>
+  
 - view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
+<p align="center"><img src="resources/charts_view.png" width="80%"/></p>
+
 - view overall statistics about the filtered traffic
+<p align="center"><img src="resources/packets_view.png" width="50%"/></p>
+
 - view most relevant connections (most recent, most packets, most bytes)
-- save textual report with detailed information for each connection:
+<p align="center"><img src="resources/report_view.png" width="95%"/></p>
+
+- save complete textual report with detailed information for each connection:
   * source and destination IP addresses
   * source and destination ports
   * carried protocols
