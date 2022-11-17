@@ -29,6 +29,8 @@ pub struct Sniffer {
     pub filters: Arc<Mutex<Filters>>,
     /// Status of the application (init or running) and the associated condition variable
     pub status_pair: Arc<(Mutex<Status>, Condvar)>,
+    /// Signals if a pcap error occurred
+    pub pcap_error: Arc<Mutex<Option<String>>>,
     /// Start button state
     pub start: button::State,
     /// Reset button state

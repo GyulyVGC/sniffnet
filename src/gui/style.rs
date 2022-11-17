@@ -43,7 +43,7 @@ pub const NOTOSANS_BOLD: Font = Font::External {
 //font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../../fonts/Glyphter.ttf"),
+    bytes: include_bytes!("../../fonts/icons.ttf"),
 };
 
 pub const FONT_SIZE_FOOTER: u16 = 14;

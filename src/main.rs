@@ -49,6 +49,8 @@ pub fn main() -> iced::Result {
 
     let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
 
+    let pcap_error = Arc::new(Mutex::new(None)); // None means no error
+
     let filters = Arc::new(Mutex::new(Filters {
         ip: IpVersion::Other,
         transport: TransProtocol::Other,
@@ -88,6 +90,7 @@ pub fn main() -> iced::Result {
             device: found_device,
             filters,
             status_pair: status_pair1,
+            pcap_error,
             start: button::State::new(),
             reset: button::State::new(),
             mode: button::State::new(),

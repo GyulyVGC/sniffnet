@@ -122,6 +122,7 @@ impl Application for Sniffer {
                 let current_capture_id = self.current_capture_id.clone();
                 let device = self.device.clone();
                 let filters = self.filters.clone();
+                let pcap_error = self.pcap_error.clone();
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
                 let runtime_data_mutex = self.runtime_data.clone();
@@ -131,12 +132,13 @@ impl Application for Sniffer {
                 self.status_pair.1.notify_all();
                 thread::Builder::new().name(format!("thread_parse_packets_{}", current_capture_id.lock().unwrap())).spawn(move || {
                     parse_packets_loop(current_capture_id, device, filters,
-                                       info_traffic_mutex);
+                                       info_traffic_mutex, pcap_error);
                 }).unwrap();
             }
             Message::Reset => {
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 *self.status_pair.0.lock().unwrap() = Status::Init;
+                *self.pcap_error.lock().unwrap() = Option::None;
             }
             Message::Style => {
                 self.style = if self.style == StyleType::Day {

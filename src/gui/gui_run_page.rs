@@ -88,179 +88,200 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .spacing(10)
         .align_items(Alignment::Center);
 
-    match (observed, filtered) {
-        (0, 0) => { //no packets observed at all
-            if sniffer.waiting.len() > 2 {
-                sniffer.waiting = "".to_string();
-            }
-            sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
-            let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
-            let (icon_text, nothing_to_see_text) = if !sniffer.device.lock().unwrap().addresses.is_empty() {
-                (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
-                 Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+    if sniffer.pcap_error.lock().unwrap().is_none() { // NO pcap error detected
+
+        match (observed, filtered) {
+            (0, 0) => { //no packets observed at all
+                if sniffer.waiting.len() > 2 {
+                    sniffer.waiting = "".to_string();
+                }
+                sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+                let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
+                let (icon_text, nothing_to_see_text) = if !sniffer.device.lock().unwrap().addresses.is_empty() {
+                    (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
+                     Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                                               Network adapter: {}\n\n\
                                                               Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
-            } else {
-                (Text::new('T'.to_string()).font(ICONS).size(60),
-                 Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
+                } else {
+                    (Text::new('T'.to_string()).font(ICONS).size(60),
+                     Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                                               Network adapter: {}\n\n\
                                                               If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
-            };
-            body = body
-                .push(Row::new().height(Length::FillPortion(1)))
-                .push(icon_text)
-                .push(nothing_to_see_text)
-                .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                .push(Row::new().height(Length::FillPortion(2)));
-        }
-
-        (observed, 0) => { //no packets have been filtered but some have been observed
-            if sniffer.waiting.len() > 2 {
-                sniffer.waiting = "".to_string();
+                };
+                body = body
+                    .push(Row::new().height(Length::FillPortion(1)))
+                    .push(icon_text)
+                    .push(nothing_to_see_text)
+                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
+                    .push(Row::new().height(Length::FillPortion(2)));
             }
-            sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
 
-            let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
+            (observed, 0) => { //no packets have been filtered but some have been observed
+                if sniffer.waiting.len() > 2 {
+                    sniffer.waiting = "".to_string();
+                }
+                sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+
+                let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
                                                     Filtered packets: 0\n\n\
                                                     Some packets have been intercepted, but still none has been selected according to the filters you specified...\n\n{}",
-                                                     observed.separate_with_spaces(), get_active_filters_string_nobr(sniffer.filters.clone()))).font(font);
+                                                         observed.separate_with_spaces(), get_active_filters_string_nobr(sniffer.filters.clone()))).font(font);
 
-            body = body
-                .push(Row::new().height(Length::FillPortion(1)))
-                .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                .push(tot_packets_text)
-                .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                .push(Row::new().height(Length::FillPortion(2)));
-        }
-
-        (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
-
-            let active_radio_chart = sniffer.chart_type;
-            let row_radio_chart = Row::new().padding(15).spacing(10)
-                .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
-                .push(Radio::new(
-                    ChartType::Packets,
-                    "packets per second",
-                    Some(active_radio_chart),
-                    Message::ChartSelection,
-                ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
-                .push(Radio::new(
-                    ChartType::Bytes,
-                    "bytes per second",
-                    Some(active_radio_chart),
-                    Message::ChartSelection,
-                ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
-                ;
-
-            let col_chart = Container::new(
-                Column::new()
-                    .push(row_radio_chart)
-                    .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_type)))
-                .width(Length::FillPortion(2))
-                .align_x(Horizontal::Center)
-                .align_y(Vertical::Center)
-                .style(StyleType::BorderedRound);
-
-            let col_packets = Column::new()
-                .width(Length::FillPortion(1))
-                .padding(10)
-                //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-                .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
-                .push(Text::new(" "))
-                .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
-                                        filtered.separate_with_spaces(), get_percentage_string(observed, filtered))).font(font))
-                .push(Text::new(" "))
-                .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
-                                        filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font))
-                .push(Text::new(" "))
-                .push(Text::new("Filtered packets per application protocol:").font(font))
-                .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
-                    .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
-                ;
-
-            let active_radio_report = sniffer.report_type;
-            let row_radio_report = Row::new().padding(10)
-                .push(Text::new("Relevant connections:    ").size(FONT_SIZE_SUBTITLE).font(font))
-                .push(Radio::new(
-                    ReportType::MostRecent,
-                    "most recent",
-                    Some(active_radio_report),
-                    Message::ReportSelection,
-                )
-                    .width(Length::Units(200))
-                    .font(font).size(15).style(sniffer.style))
-                .push(Radio::new(
-                    ReportType::MostPackets,
-                    "most packets",
-                    Some(active_radio_report),
-                    Message::ReportSelection,
-                )
-                    .width(Length::Units(200))
-                    .font(font).size(15).style(sniffer.style))
-                .push(Radio::new(
-                    ReportType::MostBytes,
-                    "most bytes",
-                    Some(active_radio_report),
-                    Message::ReportSelection,
-                )
-                    .width(Length::Units(200))
-                    .font(font).size(15).style(sniffer.style))
-                ;
-
-            let sniffer_lock = sniffer.info_traffic.lock().unwrap();
-            let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
-            match active_radio_report {
-                ReportType::MostRecent => {
-                    sorted_vec.sort_by(|&(_, a), &(_, b)|
-                        b.final_timestamp.cmp(&a.final_timestamp));
-                }
-                ReportType::MostPackets => {
-                    sorted_vec.sort_by(|&(_, a), &(_, b)|
-                        b.transmitted_packets.cmp(&a.transmitted_packets));
-                }
-                ReportType::MostBytes => {
-                    sorted_vec.sort_by(|&(_, a), &(_, b)|
-                        b.transmitted_bytes.cmp(&a.transmitted_bytes));
-                }
+                body = body
+                    .push(Row::new().height(Length::FillPortion(1)))
+                    .push(Text::new('V'.to_string()).font(ICONS).size(60))
+                    .push(tot_packets_text)
+                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
+                    .push(Row::new().height(Length::FillPortion(2)));
             }
-            let n_entry = min(sorted_vec.len(), 15);
-            let mut col_report = Column::new()
-                .height(Length::Fill)
-                .push(row_radio_report)
-                .push(Text::new(" "))
-                .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
-                .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
-                ;
-            let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
-            for i in 0..n_entry {
-                let key_val = sorted_vec.get(i).unwrap();
-                let entry_color = get_connection_color(key_val.1.traffic_type);
-                scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).color(entry_color).font(COURIER_PRIME_BOLD));
-            }
-            col_report = col_report.push(scroll_report);
-            drop(sniffer_lock);
-            let col_open_report = Container::new(button_report)
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .align_x(Horizontal::Center)
-                .align_y(Vertical::Center);
-            let row_report = Row::new()
-                .spacing(10)
-                .height(Length::FillPortion(2))
-                .width(Length::Fill)
-                .align_items(Alignment::Start)
-                .push(Container::new(col_report)
+
+            (observed, filtered) => { //observed > filtered > 0 || observed = filtered > 0
+
+                let active_radio_chart = sniffer.chart_type;
+                let row_radio_chart = Row::new().padding(15).spacing(10)
+                    .push(Text::new("Plotted data:    ").size(FONT_SIZE_SUBTITLE).font(font))
+                    .push(Radio::new(
+                        ChartType::Packets,
+                        "packets per second",
+                        Some(active_radio_chart),
+                        Message::ChartSelection,
+                    ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
+                    .push(Radio::new(
+                        ChartType::Bytes,
+                        "bytes per second",
+                        Some(active_radio_chart),
+                        Message::ChartSelection,
+                    ).width(Length::Units(220)).font(font).size(15).style(sniffer.style))
+                    ;
+
+                let col_chart = Container::new(
+                    Column::new()
+                        .push(row_radio_chart)
+                        .push(sniffer.traffic_chart.view(sniffer.style, sniffer.chart_type)))
+                    .width(Length::FillPortion(2))
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .style(StyleType::BorderedRound);
+
+                let col_packets = Column::new()
+                    .width(Length::FillPortion(1))
                     .padding(10)
-                    .height(Length::Fill)
-                    .style(StyleType::BorderedRound))
-                .push(col_open_report);
+                    //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
+                    .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
+                    .push(Text::new(" "))
+                    .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
+                                            filtered.separate_with_spaces(), get_percentage_string(observed, filtered))).font(font))
+                    .push(Text::new(" "))
+                    .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
+                                            filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font))
+                    .push(Text::new(" "))
+                    .push(Text::new("Filtered packets per application protocol:").font(font))
+                    .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
+                        .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
+                    ;
 
-            body = body
-                .push(Row::new().spacing(10).height(Length::FillPortion(3))
-                    .push(col_chart)
-                    .push(Container::new(col_packets).padding(10).height(Length::Fill).style(StyleType::BorderedRound)))
-                .push(row_report);
+                let active_radio_report = sniffer.report_type;
+                let row_radio_report = Row::new().padding(10)
+                    .push(Text::new("Relevant connections:    ").size(FONT_SIZE_SUBTITLE).font(font))
+                    .push(Radio::new(
+                        ReportType::MostRecent,
+                        "most recent",
+                        Some(active_radio_report),
+                        Message::ReportSelection,
+                    )
+                        .width(Length::Units(200))
+                        .font(font).size(15).style(sniffer.style))
+                    .push(Radio::new(
+                        ReportType::MostPackets,
+                        "most packets",
+                        Some(active_radio_report),
+                        Message::ReportSelection,
+                    )
+                        .width(Length::Units(200))
+                        .font(font).size(15).style(sniffer.style))
+                    .push(Radio::new(
+                        ReportType::MostBytes,
+                        "most bytes",
+                        Some(active_radio_report),
+                        Message::ReportSelection,
+                    )
+                        .width(Length::Units(200))
+                        .font(font).size(15).style(sniffer.style))
+                    ;
+
+                let sniffer_lock = sniffer.info_traffic.lock().unwrap();
+                let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = sniffer_lock.map.iter().collect();
+                match active_radio_report {
+                    ReportType::MostRecent => {
+                        sorted_vec.sort_by(|&(_, a), &(_, b)|
+                            b.final_timestamp.cmp(&a.final_timestamp));
+                    }
+                    ReportType::MostPackets => {
+                        sorted_vec.sort_by(|&(_, a), &(_, b)|
+                            b.transmitted_packets.cmp(&a.transmitted_packets));
+                    }
+                    ReportType::MostBytes => {
+                        sorted_vec.sort_by(|&(_, a), &(_, b)|
+                            b.transmitted_bytes.cmp(&a.transmitted_bytes));
+                    }
+                }
+                let n_entry = min(sorted_vec.len(), 15);
+                let mut col_report = Column::new()
+                    .height(Length::Fill)
+                    .push(row_radio_report)
+                    .push(Text::new(" "))
+                    .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
+                    .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                    ;
+                let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
+                for i in 0..n_entry {
+                    let key_val = sorted_vec.get(i).unwrap();
+                    let entry_color = get_connection_color(key_val.1.traffic_type);
+                    scroll_report = scroll_report.push(iced::Text::new(format!("{}{}", key_val.0.print_gui(), key_val.1.print_gui())).color(entry_color).font(COURIER_PRIME_BOLD));
+                }
+                col_report = col_report.push(scroll_report);
+                drop(sniffer_lock);
+                let col_open_report = Container::new(button_report)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center);
+                let row_report = Row::new()
+                    .spacing(10)
+                    .height(Length::FillPortion(2))
+                    .width(Length::Fill)
+                    .align_items(Alignment::Start)
+                    .push(Container::new(col_report)
+                        .padding(10)
+                        .height(Length::Fill)
+                        .style(StyleType::BorderedRound))
+                    .push(col_open_report);
+
+                body = body
+                    .push(Row::new().spacing(10).height(Length::FillPortion(3))
+                        .push(col_chart)
+                        .push(Container::new(col_packets).padding(10).height(Length::Fill).style(StyleType::BorderedRound)))
+                    .push(row_report);
+            }
         }
+    }
+    else { // pcap threw an ERROR!
+        let err_string = sniffer.pcap_error.lock().unwrap().clone().unwrap();
+
+        if sniffer.waiting.len() > 2 {
+            sniffer.waiting = "".to_string();
+        }
+        sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+
+        let error_text = Text::new(format!("An error occurred! \n\n\
+                                                    {}", err_string)).font(font);
+
+        body = body
+            .push(Row::new().height(Length::FillPortion(1)))
+            .push(Text::new('U'.to_string()).font(ICONS).size(60))
+            .push(error_text)
+            .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
+            .push(Row::new().height(Length::FillPortion(2)));
     }
 
     let button_github = Button::new(

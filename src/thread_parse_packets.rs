@@ -16,7 +16,8 @@ use crate::utility::manage_packets::{analyze_network_header, analyze_transport_h
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>,
                           filters: Arc<Mutex<Filters>>,
-                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>) {
+                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+                          pcap_error: Arc<Mutex<Option<String>>>) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
@@ -47,6 +48,8 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
         .immediate_mode(true) //parse packets ASAP!
         .open();
     if cap_result.is_err() {
+        let err_string = cap_result.err().unwrap().to_string();
+        *pcap_error.lock().unwrap() = Option::Some(err_string);
         return;
     }
     let mut cap = cap_result.unwrap();
