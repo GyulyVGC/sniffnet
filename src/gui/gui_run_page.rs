@@ -264,8 +264,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(row_report);
             }
         }
-    }
-    else { // pcap threw an ERROR!
+    } else { // pcap threw an ERROR!
         let err_string = sniffer.pcap_error.lock().unwrap().clone().unwrap();
 
         if sniffer.waiting.len() > 2 {

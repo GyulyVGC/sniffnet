@@ -1,14 +1,14 @@
 [package]
 name = "sniffnet"
 version = "0.5.0"
-edition = "2021"
 authors = ["Giuliano Bellini"]
+edition = "2021"
 description = "Application to comfortably monitor your network traffic"
-repository = "https://github.com/GyulyVGC/sniffnet"
 readme = "README.md"
+repository = "https://github.com/GyulyVGC/sniffnet"
+license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
-license = "MIT OR Apache-2.0"
 include = ["src/**/*", "LICENSE-*", "README.md"]
 
 
@@ -31,5 +31,5 @@ thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
 plotters-iced = "0.3.3"
-iced = {version = "0.4.2", features = ["tokio"] }
+iced = { version = "0.4.2", features = ["tokio"] }
 iced_style = "0.4.0"

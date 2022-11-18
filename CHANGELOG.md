@@ -2,6 +2,15 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [1.0.0] - 2022-11-xx
+
+- The application is no longer just a command line interface: Sniffnet has now a whole graphical user interface!
+  * Charts and traffic statistics are now constantly updated and shown interactively in the GUI
+  * Users don't have to worry about command line options anymore: it is now possible to comfortably specify adapters and filters through the GUI
+  * Sniffnet is now more accessible, available in real-time, easy to use and aesthetically pleasing thanks to its new interface
+- In order to reach out as many people as possible, I created [installers](https://github.com/GyulyVGC/sniffnet/releases) for Windows and macOS, to make it easier to install Sniffnet for those that still doesn't have Rust on their machines
+
+
 ## [0.5.0] - 2022-10-02
 
 - Optimized textual report updates: only changed entries are rewritten (file `report.txt`)
@@ -33,8 +42,8 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [0.3.1] - 2022-08-31
 
-- Added devices description when application is launched with the `-d` option
-- Intruduced feature to measure write timings and added a BufWriter to improve write performance
+- Added devices' description when application is launched with the `-d` option
+- Introduced feature to measure write timings and added a BufWriter to improve write performance
 - Fixed standard output colors for Windows systems
 
 

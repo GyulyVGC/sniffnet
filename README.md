@@ -1,12 +1,12 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+<p style="text-align:center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
 
 
 <hr>
 
-<p align="center"> Application to comfortably monitor your network traffic </p>
-<p align="center"> Multithreaded, cross-platform, reliable </p>
+<p style="text-align:center"> Application to comfortably monitor your network traffic </p>
+<p style="text-align:center"> Multithreaded, cross-platform, reliable </p>
 
-<p align="center">
+<p style="text-align:center">
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
 &nbsp;
 <a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
@@ -15,9 +15,9 @@
 
 <hr>
 
-<p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
+<p style="text-align:center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
 
-<div align="center">
+<div style="text-align:center">
 <p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
 in a straightforward and appealing way </p>
 </div>
@@ -74,19 +74,19 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
 ## Features
 
 - choose a network adapter to inspect
-<p align="center"><img src="resources/adapters_view.png" width="50%"/></p>
+<p style="text-align:center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
 
 - select filters to apply to the observed traffic
-<p align="center"><img src="resources/filters_view.png" width="60%"/></p>
+<p style="text-align:center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
   
 - view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-<p align="center"><img src="resources/charts_view.png" width="80%"/></p>
+<p style="text-align:center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
 
 - view overall statistics about the filtered traffic
-<p align="center"><img src="resources/packets_view.png" width="50%"/></p>
+<p style="text-align:center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
 
 - view most relevant connections (most recent, most packets, most bytes)
-<p align="center"><img src="resources/report_view.png" width="95%"/></p>
+<p style="text-align:center"><img alt="" src="resources/report_view.png" width="95%"/></p>
 
 - save complete textual report with detailed information for each connection:
   * source and destination IP addresses
@@ -108,7 +108,7 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
   
   <br>
   
-<div align="center">
+<div style="text-align:center">
 
 |Port number(s)|Application protocol  |  Description |
 |--|--|--|
@@ -148,35 +148,23 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
 
   <summary>See details</summary>
 
+### Missing dependencies
 
-### Pcap permission denied error
+Most of the errors that can occur are likely due to your system missing required pcap dependencies,
+necessary to correctly analyze a network adapter. 
 
-You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
+Check the [Install & Run](#Install-&-Run) section for instructions on how to proceed.
 
-<p align="center"> <img alt="" src="https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png" width="100%"/> </p>
+For a Windows reference, you can check [issue #1](https://github.com/GyulyVGC/sniffnet/issues/1).
 
-To solve this error you can execute the following command:
-```sudo chown username /dev/bp*```
+### Installers incompatibilities
 
-Where ```username``` can be retrieved with the command ```whoami```
+If you have problems after having installed Sniffnet through the provided installers,
+it could be due to your OS not being compatible with the pre-built binaries I generated for you.
 
-Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
+Reach me out, and I'll try to generate an installer for your specific operating system.
 
-In both cases you will be requested to insert your system password.
-
-
-### Textual report contains just the header
-
-If the textual output is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
-option to see the full list of your network adapters' names and addresses). 
-To inspect a network adapter of your choice, remember to specify the ```-a``` option followed by the name of the adapter to be analyzed. 
-If you don't include such option a default adapter is chosen by the application, but it may not be the one you expected to sniff.
-
-Note that to see report updates while Sniffnet is running you may have to close and re-open the report file.
-
-If you are still not able to see any packet statistic, then it probably means that you are just not receiving packets from the network: 
-surf the web to receive some packets. 
-
+### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
 </details>
 
