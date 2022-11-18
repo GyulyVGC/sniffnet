@@ -10,7 +10,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use thousands::Separable;
 
-use crate::{ChartType, ReportType, StyleType};
+use crate::{AppProtocol, ChartType, ReportType, StyleType};
 use crate::enums::message::Message;
 use crate::gui::style::{APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, icon_sun_moon, ICONS, logo_glyph};
 use crate::structs::address_port_pair::AddressPortPair;
@@ -163,7 +163,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .align_y(Vertical::Center)
                     .style(StyleType::BorderedRound);
 
-                let col_packets = Column::new()
+                let mut col_packets = Column::new()
                     .width(Length::FillPortion(1))
                     .padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
@@ -173,12 +173,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                                             filtered.separate_with_spaces(), get_percentage_string(observed, filtered))).font(font))
                     .push(Text::new(" "))
                     .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
-                                            filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font))
-                    .push(Text::new(" "))
-                    .push(Text::new("Filtered packets per application protocol:").font(font))
-                    .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
-                        .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)))
-                    ;
+                                            filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font));
+                if sniffer.filters.lock().unwrap().application.eq(&AppProtocol::Other) {
+                    col_packets = col_packets
+                        .push(Text::new(" "))
+                        .push(Text::new("Filtered packets per application protocol:").font(font))
+                        .push(Scrollable::new(&mut sniffer.scroll_packets).style(sniffer.style)
+                            .push(Text::new(get_app_count_string(app_protocols, filtered as u128)).font(font)));
+                }
 
                 let active_radio_report = sniffer.report_type;
                 let row_radio_report = Row::new().padding(10)
