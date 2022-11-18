@@ -1,12 +1,12 @@
-<p style="text-align:center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
 
 
 <hr>
 
-<p style="text-align:center"> Application to comfortably monitor your network traffic </p>
-<p style="text-align:center"> Multithreaded, cross-platform, reliable </p>
+<p align="center"> Application to comfortably monitor your network traffic </p>
+<p align="center"> Multithreaded, cross-platform, reliable </p>
 
-<p style="text-align:center">
+<p align="center">
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
 &nbsp;
 <a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
@@ -15,9 +15,9 @@
 
 <hr>
 
-<p style="text-align:center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
+<p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
 
-<div style="text-align:center">
+<div align="center">
 <p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
 in a straightforward and appealing way </p>
 </div>
@@ -74,19 +74,19 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
 ## Features
 
 - choose a network adapter to inspect
-<p style="text-align:center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
 
 - select filters to apply to the observed traffic
-<p style="text-align:center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
+<p align="center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
   
 - view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-<p style="text-align:center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
+<p align="center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
 
 - view overall statistics about the filtered traffic
-<p style="text-align:center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
 
 - view most relevant connections (most recent, most packets, most bytes)
-<p style="text-align:center"><img alt="" src="resources/report_view.png" width="95%"/></p>
+<p align="center"><img alt="" src="resources/report_view.png" width="95%"/></p>
 
 - save complete textual report with detailed information for each connection:
   * source and destination IP addresses
@@ -108,7 +108,7 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
   
   <br>
   
-<div style="text-align:center">
+<div align="center">
 
 |Port number(s)|Application protocol  |  Description |
 |--|--|--|
