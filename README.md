@@ -25,7 +25,7 @@ in a straightforward and appealing way </p>
 <hr>
 
 
-## Install & Run
+## Install and Run
 
 If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with ```cargo install sniffnet```
 
@@ -153,7 +153,7 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
 Most of the errors that can occur are likely due to your system missing required pcap dependencies,
 necessary to correctly analyze a network adapter. 
 
-Check the [Install & Run](#Install-&-Run) section for instructions on how to proceed.
+Check the [Install and Run](#install-and-run) section for instructions on how to proceed.
 
 For a Windows reference, you can check [issue #1](https://github.com/GyulyVGC/sniffnet/issues/1).
 
