@@ -27,9 +27,12 @@ in a straightforward and appealing way </p>
 
 ## Install and Run
 
-If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with ```cargo install sniffnet```
+If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with: 
+```sh
+cargo install sniffnet
+```
 
-Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases)
+Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
 
 
 <details>
@@ -53,11 +56,15 @@ Otherwise, you can install Sniffnet through the installers available in the [lat
  
   In order to correctly run Sniffnet on Linux systems, install the libraries and header files for the libpcap library: 
   
-`sudo apt-get install libpcap-dev`
+```sh
+sudo apt-get install libpcap-dev
+```
 
   Note that if you are not running as root, you need to set capabilities to inspect a network adapter: 
   
-`sudo setcap cap_net_raw,cap_net_admin=eip <YOUR/SNIFFNET/EXECUTABLE/PATH>`
+```sh
+sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
+```
     
 </details>
 
