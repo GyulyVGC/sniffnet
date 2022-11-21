@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "0.5.0"
+version = "1.0.0"
 authors = ["Giuliano Bellini"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -9,7 +9,6 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
-include = ["src/**/*", "LICENSE-*", "README.md"]
 
 
 [package.metadata.bundle]
