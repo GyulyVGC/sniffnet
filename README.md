@@ -1,46 +1,45 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/189483152-24b1f51d-5a28-4c96-911a-f6d8126149b8.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+
 
 <hr>
 
-<p align="center"> Application to analyze and filter your network traffic. </p>
-<p align="center"> Multithreaded, cross-platform, reliable. </p>
+<p align="center"> Application to comfortably monitor your network traffic </p>
+<p align="center"> Multithreaded, cross-platform, reliable </p>
 
 <p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml"><img alt="" src="https://github.com/GyulyVGC/sniffnet/actions/workflows/rust.yml/badge.svg"/></a>
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
 &nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?color=gold&label=GitHub%20stars"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
 </p>
 
-<p align="center">
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet.svg"/></a>
-&nbsp;
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet"/></a>
-</p>
 
 <hr>
 
-<p align="center">
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192570836-29d0b1ca-a43e-4728-8877-a4d3dfbbe785.svg" width="100%"/>
-</p>
+<p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
 
-<p align="center">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475329-a3338a8f-620e-4b70-954c-f6b0bf6ab4f7.png" width="100%"/>
-</p>
+<div align="center">
+<p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
+in a straightforward and appealing way </p>
+</div>
+
+<hr>
 
 
-## Install
+## Install and Run
 
-The application binary can be installed with ```cargo install sniffnet```
+If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with: 
+```sh
+cargo install sniffnet
+```
 
-The application can then be run using ```sniffnet [OPTIONS]```
+Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
 
 
 <details>
 
-  <summary>Build on Windows&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
-  
-  <br>
-  In order to build and run Sniffnet on Windows systems you need to:
+  <summary>Windows dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
+
+  In order to correctly run Sniffnet on Windows systems you need to:
 
   - Install [Npcap](https://npcap.com/#download).
 
@@ -53,140 +52,66 @@ The application can then be run using ```sniffnet [OPTIONS]```
 
 <details>
 
-  <summary>Build on Linux&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
+  <summary>Linux dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
+ 
+  In order to correctly run Sniffnet on Linux systems, install the libraries and header files for the libpcap library: 
   
-  <br>
-  In order to build and run Sniffnet on Linux systems, install the libraries and header files for the libpcap library. For example:
+```sh
+sudo apt-get install libpcap-dev
+```
 
-  - On Debian based Linux: ```install libpcap-dev```.
-
-  - On Fedora Linux: ```install libpcap-devel```.
-
-  - Note that if you are not running as root, you need to set capabilities like so: ```sudo setcap cap_net_raw,cap_net_admin=eip path/to/bin```.
+  Note that if you are not running as root, you need to set capabilities to inspect a network adapter: 
+  
+```sh
+sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
+```
     
 </details>
 
 
 <details>
 
-  <summary>Build on MacOS&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
-  
-  <br>
+  <summary>MacOS dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
+
   MacOS natively has all the dependencies you need to build and run Sniffnet!
     
 </details>
 
 
-## Command line options
+## Features
 
- - **-a, --adapter**: 
-specifies the name of the network adapter to be inspected; if omitted the default adapter is chosen.
+- choose a network adapter to inspect
+<p align="center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
 
-   
- - **--app**:
-filters packets on the basis of the provided application layer protocol.
-
-
- - **-d, --device-list**:
-prints list of the available network interfaces. Immediately terminates the program.
- 
-
- - **-h, --highest-port**:
-specifies the maximum port value to be considered; if omitted there is no ports higher bound.
- 
-
- -  **-i, --interval**:
-sets the interval of time between report updates (value in seconds).
- 
-
- - **-l, --lowest-port**:
-specifies the minimum port value to be considered; if omitted there is no ports lower bound.
- 
-
-- **-n, --net**:
-filters packets on the basis of the provided IP address version (IPv4 or IPv6).
- 
-
- - **-o, --output-folder**:
-specifies the name of the output folder to contain textual and graphical reports; if omitted the folder name is ```sniffnet_report```
- 
-
-- **-t, --trans**:
-filters packets on the basis of the provided transport layer protocol (TCP or UDP).
-
-
-## Graphical report
-
-<details>
-
-  <summary>See details</summary>
+- select filters to apply to the observed traffic
+<p align="center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
   
-  <br>
+- view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
+<p align="center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
 
-The graphical report consists of a svg file, constantly updated while Sniffnet is running.
-It is suggested to open this file with a web browser, in order to be able to comfortably refresh it.
+- view overall statistics about the filtered traffic
+<p align="center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
 
-It reports the amount of sent (outgoing) and received (incoming) bits and packets per second.
+- view most relevant connections (most recent, most packets, most bytes)
+<p align="center"><img alt="" src="resources/report_view.png" width="95%"/></p>
 
-<img alt="" src="https://user-images.githubusercontent.com/100347457/192573923-b4dc0d03-21c3-44b3-924a-ced1d0f4c8f0.svg" width="100%"/>
-
-Note that the number of bits and packets in the graph refers to one single second even if the update frequency is different.
-
-The default update frequency is set to 5 seconds, but you can change it launching the application with the ```-i``` option.
-Note that the default interval of 5 seconds is more suitable if the network traffic is constant and steady (e.g., large file download);
-in case of intermittent traffic, you can consider using a lower time interval.
-
-</details>
-
-## Textual reports
-
-<details>
-
-  <summary>See details</summary>
+- save complete textual report with detailed information for each connection:
+  * source and destination IP addresses
+  * source and destination ports
+  * carried protocols
+  * amount of exchanged packets and bytes
+  * initial and final timestamp of information exchange
   
-### statistics.txt
-
-This file contains details and statistics about the sniffing process.
-
-<p align="center">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475549-d4368750-e449-4c31-b69d-7d284f242866.png" width="50%"/>
-</p>
-
-First, it specifies the name of the network adapter analyzed.
-
-Then there is a detail about the initial timestamp of the sniffing process and the last timestamp in which the report was updated.
-
-It also describes the status of the possible filters applicable by the user through the command line: IP address version, transport layer protocol, port minimum and maximum number, and application layer protocol.
-
-Finally, it reports some statistics about the observed traffic: the number of [address:port] pairs considered, the total number
-of sniffed packets, the number (and percentage) of packets selected according to the active filters and a list of the 
-observed application layer protocols with the respective packets count.
-
-
-### report.txt
-
-This file contains a detailed analysis of the packets stream for each [address:port] pair.
-
-This analysis results in a table in which each row represents an [address:port] pair with the relative statistics.
-
-<p align="center">
-    <img alt="" src="https://user-images.githubusercontent.com/100347457/193475329-a3338a8f-620e-4b70-954c-f6b0bf6ab4f7.png" width="100%"/>
-</p>
-
-For each [address:port] pair it is reported the amount of exchanged data measured in number of packets and in number of bytes between the source and the destination.
-
-For each [address:port] pair are reported the first and the last timestamp in which a packet was transmitted between that [address:port] pair.
-
-Level 4 and level 7 carried protocols are also described (respectively transport layer and application layer protocols); 
-please note that application level protocols are just inferred from the transport port numbers.
-
-</details>
 
 ## Supported application layer protocols
 
 <details>
 
   <summary>See details</summary>
+  
+  <br>
+  
+  Please, note that application layer protocols are just inferred from the transport port numbers.
   
   <br>
   
@@ -224,86 +149,29 @@ please note that application level protocols are just inferred from the transpor
 </details>
 
 
-## Error conditions
+## Troubleshooting
 
 <details>
 
   <summary>See details</summary>
 
-### Wrong command line options specification
+### Missing dependencies
 
-- **Not existing adapter name**:
-if a non-existing adapter name is provided, the application raises an error and terminates.
-In this case the application will suggest using the ```-d``` option to print on the standard output a list of the available devices.
-```sniffnet -d``` prints a list of all the available network adapters names and addresses, as in the example that follows.
+Most of the errors that can occur are likely due to your system missing required pcap dependencies,
+necessary to correctly analyze a network adapter. 
 
-<p align="center"> <img alt="" src="https://user-images.githubusercontent.com/100347457/186926068-d510a609-d035-4b1a-b8c6-a8d7d1402ee2.png" width="50%"/> </p>
+Check the [Install and Run](#install-and-run) section for instructions on how to proceed.
 
+For a Windows reference, you can check [issue #1](https://github.com/GyulyVGC/sniffnet/issues/1).
 
-- **Invalid application layer protocol filter**:
-if an invalid string is provided the application raises an error and terminates.
-The list of the supported application layer protocols is available in [this](#supported-application-layer-protocols) section. 
-Note that not including the ```--app``` option is equal to provide ```--app "no filter"```.
+### Installers incompatibilities
 
+If you have problems after having installed Sniffnet through the provided installers,
+it could be due to your OS not being compatible with the pre-built binaries I generated for you.
 
-- **Invalid highest port number**:
-if the provided highest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
-If also the lowest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
+Reach me out, and I'll try to generate an installer for your specific operating system.
 
-
-- **Invalid interval value**:
-if the provided interval value is not an integer in the range ```1..=u64::MAX``` the program raises an error and terminates.
-
-
-- **Invalid lowest port number**:
-if the provided lowest port number is not an integer in the range ```0..=65535``` the program raises an error and terminates.
-If also the highest port number is specified and ```highest_port < lowest_port == true``` the program raises an error and terminates.
-
-
-- **Invalid network layer protocol filter**:
-if a string different from "IPv4", "IPv6" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
-Note that not including the ```-n``` option is equal to provide ```-n "no filter"```.
-
-
-- **Already existing output folder**:
-there is no particular limitation on the output folder name.
-However, if the provided name corresponds to an already existing directory of your PC, keep in mind that the directory will be deleted and overwritten.
-
-
-- **Invalid transport layer protocol filter**:
-if a string different from "TCP", "UDP" or "no filter" is provided (not case-sensitive), the application raises an error and terminates.
-Note that not including the ```-t``` option is equal to provide ```-t "no filter"```.
-
-
-
-### Pcap permission denied error
-
-You may incur in this error if you have not the privilege to open a network adapter. Full error is reported below.
-
-<p align="center"> <img alt="" src="https://user-images.githubusercontent.com/100347457/186926239-31590d94-1eb4-49e4-aeb7-925a04e00142.png" width="100%"/> </p>
-
-To solve this error you can execute the following command:
-```sudo chown username /dev/bp*```
-
-Where ```username``` can be retrieved with the command ```whoami```
-
-Alternatively, you can run the application as root: ```sudo sniffnet [OPTIONS]```
-
-In both cases you will be requested to insert your system password.
-
-
-### Textual report contains just the header
-
-If the textual output is not reporting packets statistics, make sure you are sniffing the correct network adapter (use the ```-d```
-option to see the full list of your network adapters' names and addresses). 
-To inspect a network adapter of your choice, remember to specify the ```-a``` option followed by the name of the adapter to be analyzed. 
-If you don't include such option a default adapter is chosen by the application, but it may not be the one you expected to sniff.
-
-Note that to see report updates while Sniffnet is running you may have to close and re-open the report file.
-
-If you are still not able to see any packet statistic, then it probably means that you are just not receiving packets from the network: 
-surf the web to receive some packets. 
-
+### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
 </details>
 

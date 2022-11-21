@@ -1,29 +1,34 @@
 [package]
 name = "sniffnet"
-version = "0.5.0"
+version = "1.0.0"
+authors = ["Giuliano Bellini"]
 edition = "2021"
-description = "Framework to explore network traffic through graphical and textual reports"
-repository = "https://github.com/GyulyVGC/sniffnet"
+description = "Application to comfortably monitor your network traffic"
 readme = "README.md"
+repository = "https://github.com/GyulyVGC/sniffnet"
+license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
-license = "MIT OR Apache-2.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package.metadata.bundle]
+name = "Sniffnet"
+identifier = "gyulyvgc.sniffnet"
+icon = ["./resources/icon.ico"]
+
+
+[profile.release]
+opt-level = 3
+lto = true
+
 
 [dependencies]
-pcap = "0.10.1"
+pcap = "0.11.0"
 etherparse = "0.12.0"
-clap = { version = "3.2.6", features = ["derive"] }
-chrono = "0.4.20"
-crossterm = "0.13.3"
-colored = "2.0.0"
+chrono = "0.4.22"
 thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
-
-
-#used for debug purposes to measure time needed to write output reports
-#[features]
-#default = ["elapsed_time"]
-#elapsed_time = []
+plotters-iced = "0.3.3"
+iced = { version = "0.4.2", features = ["tokio"] }
+iced_style = "0.4.0"

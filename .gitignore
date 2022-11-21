@@ -223,10 +223,10 @@ $RECYCLE.BIN/
 #folder with gif and images
 /img
 
-#graphs
-*.svg
-
 #folder with reports
 /sniffnet_*
+
+#folder used for Windows installer
+/wix
 
 .idea
