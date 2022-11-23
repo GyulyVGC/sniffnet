@@ -96,7 +96,7 @@ impl Application for Sniffer {
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "linux")]
-                std::process::Command::new("open")
+                std::process::Command::new("xdg-open")
                     .arg("./sniffnet_report/report.txt")
                     .spawn()
                     .unwrap();
@@ -113,7 +113,7 @@ impl Application for Sniffer {
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "linux")]
-                std::process::Command::new("open")
+                std::process::Command::new("xdg-open")
                     .arg("https://github.com/GyulyVGC/sniffnet")
                     .spawn()
                     .unwrap();
