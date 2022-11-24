@@ -149,3 +149,41 @@ impl AppProtocol {
         AppProtocol::XMPP,
     ];
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_port_to_application_protocol_ftp() {
+        let result1 = from_port_to_application_protocol(20);
+        assert_eq!(AppProtocol::FTP, result1);
+        let result2 = from_port_to_application_protocol(21);
+        assert_eq!(AppProtocol::FTP, result2);
+    }
+
+    #[test]
+    fn from_port_to_application_protocol_ssh() {
+        let result = from_port_to_application_protocol(22);
+        assert_eq!(AppProtocol::SSH, result);
+    }
+
+    #[test]
+    fn from_port_to_application_protocol_other() {
+        let result = from_port_to_application_protocol(500);
+        assert_eq!(AppProtocol::Other, result);
+    }
+
+    #[test]
+    fn app_protocol_display_ftp() {
+        let test_str = AppProtocol::FTP.to_string();
+        assert_eq!(test_str, "FTP");
+    }
+
+    #[test]
+    fn app_protocol_display_other() {
+        let test_str = AppProtocol::Other.to_string();
+        assert_eq!(test_str, "All protocols");
+    }
+}
