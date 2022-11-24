@@ -346,7 +346,7 @@ impl iced_style::scrollable::StyleSheet for StyleType {
 
 /// It returns a glyph featuring Sniffnet's logo
 pub fn logo_glyph() -> Text {
-    Text::new('A'.to_string())
+    Text::new("A")
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
 }
@@ -355,14 +355,14 @@ pub fn logo_glyph() -> Text {
 pub fn icon_sun_moon(style: StyleType) -> Text { //F: sun, G: moon, K: sun adjust
     match style {
         StyleType::Night => {
-            Text::new('K'.to_string())
+            Text::new("K")
                 .font(ICONS)
                 .width(Length::Units(25))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .size(20)
         }
         StyleType::Day => {
-            Text::new('K'.to_string())
+            Text::new("K")
                 .font(ICONS)
                 .width(Length::Units(25))
                 .horizontal_alignment(alignment::Horizontal::Center)

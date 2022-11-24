@@ -62,7 +62,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{}\n", name));
+                dev_str.push_str(&format!("{name}\n"));
                 dev_str.push_str(&description);
             }
         }
@@ -75,7 +75,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n    {}", address_string));
+            dev_str.push_str(&format!("\n    {address_string}"));
         }
         dev_str.push_str("\n ");
         dev_str_list.push((name, dev_str));
@@ -188,7 +188,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_github = Button::new(
         &mut sniffer.git,
-        Text::new('H'.to_string()).font(ICONS).size(24)
+        Text::new("H").font(ICONS).size(24)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
@@ -198,7 +198,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION)).size(FONT_SIZE_FOOTER).font(font_footer))
+        .push(Text::new(format!("Sniffnet {APP_VERSION} - by Giuliano Bellini ")).size(FONT_SIZE_FOOTER).font(font_footer))
         .push(button_github)
         .push(Text::new("  ").font(font));
     let footer = Container::new(footer_row)

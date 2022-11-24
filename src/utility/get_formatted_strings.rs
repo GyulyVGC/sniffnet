@@ -59,11 +59,9 @@ pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
 pub fn get_connection_color(traffic_type: TrafficType) -> Color {
-    if traffic_type == TrafficType::Incoming
-        || traffic_type == TrafficType::Multicast {
-        SPECIAL_NIGHT
-    } else {
-        SPECIAL_DAY
+    match traffic_type {
+        TrafficType::Incoming | TrafficType::Multicast =>  SPECIAL_NIGHT,
+        _ => SPECIAL_DAY,
     }
 }
 
@@ -96,12 +94,9 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
 
     //compute the length of the longest packet count string, used to align text
     let mut longest_num = sorted_app_count.get(0).unwrap().1.separate_with_spaces().len();
-    match app_count.get(&AppProtocol::Other) {
-        None => {}
-        Some(x) => {
-            if x.separate_with_spaces().len() > longest_num {
-                longest_num = x.separate_with_spaces().len();
-            }
+    if let Some(x) = app_count.get(&AppProtocol::Other) {
+        if x.separate_with_spaces().len() > longest_num {
+            longest_num = x.separate_with_spaces().len();
         }
     }
 
@@ -123,12 +118,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
         let spaces_string_2 = " ".to_string()
             .repeat(10 - percentage_string.len());
 
-        ret_val.push_str(&format!("   {}:{}{}{}{}  \n",
-                                  app_proto_string,
-                                  spaces_string_1,
-                                  num_string,
-                                  spaces_string_2,
-                                  percentage_string));
+        ret_val.push_str(&format!("   {app_proto_string}:{spaces_string_1}{num_string}{spaces_string_2}{percentage_string}  \n"));
     }
     ret_val
 }
@@ -160,8 +150,8 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
     }
 
     if !multiple_transmitted.is_empty() { // with multiple
-        format!("{:.1} {}B", n, multiple_transmitted)
+        format!("{n:.1} {multiple_transmitted}B")
     } else { // no multiple
-        format!("{}  B", n)
+        format!("{n}  B")
     }
 }

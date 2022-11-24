@@ -38,7 +38,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_reset = Button::new(
         &mut sniffer.reset,
-        Text::new('C'.to_string()).font(ICONS)
+        Text::new("C").font(ICONS)
             .size(20)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
@@ -100,13 +100,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 let (icon_text, nothing_to_see_text) = if !sniffer.device.lock().unwrap().addresses.is_empty() {
                     (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?")).font(font))
                 } else {
-                    (Text::new('T'.to_string()).font(ICONS).size(60),
+                    (Text::new("T").font(ICONS).size(60),
                      Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              If you are sure you are connected to the internet, try choosing a different adapter.")).font(font))
                 };
                 body = body
                     .push(Row::new().height(Length::FillPortion(1)))
@@ -129,7 +129,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
                 body = body
                     .push(Row::new().height(Length::FillPortion(1)))
-                    .push(Text::new('V'.to_string()).font(ICONS).size(60))
+                    .push(Text::new("V").font(ICONS).size(60))
                     .push(tot_packets_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
                     .push(Row::new().height(Length::FillPortion(2)));
@@ -172,8 +172,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(Text::new(format!("Filtered packets:\n   {} ({} of the total)",
                                             filtered.separate_with_spaces(), get_percentage_string(observed, filtered))).font(font))
                     .push(Text::new(" "))
-                    .push(Text::new(format!("Filtered bytes:\n   {} ({} of the total)",
-                                            filtered_bytes_string, get_percentage_string(observed_bytes, filtered_bytes))).font(font));
+                    .push(Text::new(format!("Filtered bytes:\n   {filtered_bytes_string} ({} of the total)",
+                                            get_percentage_string(observed_bytes, filtered_bytes))).font(font));
                 if sniffer.filters.lock().unwrap().application.eq(&AppProtocol::Other) {
                     col_packets = col_packets
                         .push(Text::new(" "))
@@ -275,11 +275,11 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
 
         let error_text = Text::new(format!("An error occurred! \n\n\
-                                                    {}", err_string)).font(font);
+                                                    {err_string}")).font(font);
 
         body = body
             .push(Row::new().height(Length::FillPortion(1)))
-            .push(Text::new('U'.to_string()).font(ICONS).size(60))
+            .push(Text::new("U").font(ICONS).size(60))
             .push(error_text)
             .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
             .push(Row::new().height(Length::FillPortion(2)));
@@ -287,7 +287,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     let button_github = Button::new(
         &mut sniffer.git,
-        Text::new('H'.to_string()).font(ICONS).size(24)
+        Text::new("H").font(ICONS).size(24)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
@@ -297,7 +297,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
-        .push(Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION)).size(FONT_SIZE_FOOTER).font(font_footer))
+        .push(Text::new(format!("Sniffnet {APP_VERSION} - by Giuliano Bellini ")).size(FONT_SIZE_FOOTER).font(font_footer))
         .push(button_github)
         .push(Text::new("  ").font(font));
     let footer = Container::new(footer_row)
