@@ -107,12 +107,9 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                 let key =
                     AddressPortPair::new(address1, port1, address2, port2, transport_protocol);
 
-                if (network_layer_filter.eq(&IpVersion::Other)
-                    || network_layer_filter.eq(&network_protocol))
-                    && (transport_layer_filter.eq(&TransProtocol::Other)
-                        || transport_layer_filter.eq(&transport_protocol))
-                    && (app_layer_filter.eq(&AppProtocol::Other)
-                        || app_layer_filter.eq(&application_protocol))
+                if (network_layer_filter.eq(&IpVersion::Other) || network_layer_filter.eq(&network_protocol))
+                    && (transport_layer_filter.eq(&TransProtocol::Other) || transport_layer_filter.eq(&transport_protocol))
+                    && (app_layer_filter.eq(&AppProtocol::Other) || app_layer_filter.eq(&application_protocol))
                 {
                     // if (port1 >= lowest_port && port1 <= highest_port)
                     //     || (port2 >= lowest_port && port2 <= highest_port) {
