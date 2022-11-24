@@ -184,3 +184,22 @@ Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffn
 ## Stargazers
 
 <a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://reporoster.com/stars/dark/GyulyVGC/sniffnet"/></a>
+
+## Developement
+
+```bash
+cargo run
+```
+
+then close the app, run
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip ./target/debug/sniffnet
+```
+
+then run
+
+```bash
+cargo run
+```
+again
