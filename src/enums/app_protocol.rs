@@ -174,7 +174,6 @@ mod tests {
         let result = from_port_to_application_protocol(500);
         assert_eq!(AppProtocol::Other, result);
     }
-    // Please let me know if you want tests on every one, happy to do it so
 
     #[test]
     fn app_protocol_display_ftp() {
