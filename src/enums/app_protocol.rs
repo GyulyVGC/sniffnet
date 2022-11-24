@@ -56,7 +56,6 @@ pub enum AppProtocol {
     Other,
 }
 
-
 /// Given an integer in the range `0..=65535`, this function returns an `Option<AppProtocol>` containing
 /// the respective application protocol represented by a value of the `AppProtocol` enum.
 /// Only the most common application layer protocols are considered; if a unknown port number
@@ -104,10 +103,9 @@ pub fn from_port_to_application_protocol(port: u16) -> AppProtocol {
         1900 => AppProtocol::SSDP,
         5222 => AppProtocol::XMPP,
         5353 => AppProtocol::mDNS,
-        _ => { AppProtocol::Other }
+        _ => AppProtocol::Other,
     }
 }
-
 
 impl fmt::Display for AppProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -149,7 +147,6 @@ impl AppProtocol {
         AppProtocol::XMPP,
     ];
 }
-
 
 #[cfg(test)]
 mod tests {

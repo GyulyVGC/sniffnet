@@ -5,10 +5,10 @@ use std::sync::{Arc, Mutex};
 use iced::Color;
 use thousands::Separable;
 
-use crate::{AppProtocol, IpVersion, TransProtocol};
 use crate::enums::traffic_type::TrafficType;
 use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
 use crate::structs::filters::Filters;
+use crate::{AppProtocol, IpVersion, TransProtocol};
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
@@ -24,7 +24,8 @@ pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
     let filters_lock = filters.lock().unwrap();
     if filters_lock.ip.eq(&IpVersion::Other)
         && filters_lock.application.eq(&AppProtocol::Other)
-        && filters_lock.transport.eq(&TransProtocol::Other) {
+        && filters_lock.transport.eq(&TransProtocol::Other)
+    {
         "Active filters:\n   none".to_string()
     } else {
         let mut ret_val = "Active filters:".to_string();
@@ -59,8 +60,7 @@ pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
 pub fn get_connection_color(traffic_type: TrafficType) -> Color {
-    if traffic_type == TrafficType::Incoming
-        || traffic_type == TrafficType::Multicast {
+    if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
         SPECIAL_NIGHT
     } else {
         SPECIAL_DAY
@@ -95,7 +95,12 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
     });
 
     //compute the length of the longest packet count string, used to align text
-    let mut longest_num = sorted_app_count.get(0).unwrap().1.separate_with_spaces().len();
+    let mut longest_num = sorted_app_count
+        .get(0)
+        .unwrap()
+        .1
+        .separate_with_spaces()
+        .len();
     match app_count.get(&AppProtocol::Other) {
         None => {}
         Some(x) => {
@@ -118,21 +123,18 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
             };
 
         //to align digits
-        let spaces_string_1 = " ".to_string()
+        let spaces_string_1 = " "
+            .to_string()
             .repeat(9 + longest_num - num_string.len() - app_proto_string.len());
-        let spaces_string_2 = " ".to_string()
-            .repeat(10 - percentage_string.len());
+        let spaces_string_2 = " ".to_string().repeat(10 - percentage_string.len());
 
-        ret_val.push_str(&format!("   {}:{}{}{}{}  \n",
-                                  app_proto_string,
-                                  spaces_string_1,
-                                  num_string,
-                                  spaces_string_2,
-                                  percentage_string));
+        ret_val.push_str(&format!(
+            "   {}:{}{}{}{}  \n",
+            app_proto_string, spaces_string_1, num_string, spaces_string_2, percentage_string
+        ));
     }
     ret_val
 }
-
 
 /// Returns a String representing a quantity of bytes with their proper multiple (kB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
@@ -159,9 +161,11 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         } // tera
     }
 
-    if !multiple_transmitted.is_empty() { // with multiple
+    if !multiple_transmitted.is_empty() {
+        // with multiple
         format!("{:.1} {}B", n, multiple_transmitted)
-    } else { // no multiple
+    } else {
+        // no multiple
         format!("{}  B", n)
     }
 }

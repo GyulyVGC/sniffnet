@@ -1,17 +1,16 @@
 //! Module defining the `Sniffer` struct, which trace gui's component statuses and permits
 //! to share data among the different threads.
 
-
 use std::sync::{Arc, Condvar, Mutex};
 
 use iced::{button, pick_list, scrollable};
 use pcap::Device;
 
-use crate::{AppProtocol, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 use crate::enums::chart_type::ChartType;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
+use crate::{AppProtocol, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///

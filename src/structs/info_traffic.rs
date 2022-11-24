@@ -5,9 +5,9 @@ use std::collections::{HashMap, HashSet};
 
 use indexmap::IndexMap;
 
-use crate::AppProtocol;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
+use crate::AppProtocol;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {
@@ -30,7 +30,6 @@ pub struct InfoTraffic {
     /// Map of the application layer protocols with their packet count
     pub app_protocols: HashMap<AppProtocol, u128>,
 }
-
 
 impl InfoTraffic {
     /// Constructs a new InfoTraffic element.

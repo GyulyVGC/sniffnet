@@ -6,18 +6,23 @@ use std::sync::{Arc, Mutex};
 use etherparse::PacketHeaders;
 use pcap::{Capture, Device};
 
-use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
-use crate::utility::manage_packets::{analyze_network_header, analyze_transport_header, is_multicast_address, modify_or_insert_in_map};
+use crate::utility::manage_packets::{
+    analyze_network_header, analyze_transport_header, is_multicast_address, modify_or_insert_in_map,
+};
+use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
-pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex<Device>>,
-                          filters: Arc<Mutex<Filters>>,
-                          info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-                          pcap_error: Arc<Mutex<Option<String>>>) {
+pub fn parse_packets_loop(
+    current_capture_id: Arc<Mutex<u16>>,
+    device: Arc<Mutex<Device>>,
+    filters: Arc<Mutex<Filters>>,
+    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+    pcap_error: Arc<Mutex<Option<String>>>,
+) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
@@ -80,17 +85,26 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                         skip_packet = false;
                         reported_packet = false;
 
-                        analyze_network_header(value.ip, &mut exchanged_bytes,
-                                               &mut network_protocol, &mut address1, &mut address2,
-                                               &mut skip_packet);
+                        analyze_network_header(
+                            value.ip,
+                            &mut exchanged_bytes,
+                            &mut network_protocol,
+                            &mut address1,
+                            &mut address2,
+                            &mut skip_packet,
+                        );
                         if skip_packet {
                             continue;
                         }
 
-                        analyze_transport_header(value.transport,
-                                                 &mut port1, &mut port2,
-                                                 &mut application_protocol,
-                                                 &mut transport_protocol, &mut skip_packet);
+                        analyze_transport_header(
+                            value.transport,
+                            &mut port1,
+                            &mut port2,
+                            &mut application_protocol,
+                            &mut transport_protocol,
+                            &mut skip_packet,
+                        );
                         if skip_packet {
                             continue;
                         }
@@ -103,35 +117,52 @@ pub fn parse_packets_loop(current_capture_id: Arc<Mutex<u16>>, device: Arc<Mutex
                             traffic_type = TrafficType::Multicast;
                         }
 
-                        let key: AddressPortPair = AddressPortPair::new(address1, port1, address2, port2,
-                                                                        transport_protocol);
+                        let key: AddressPortPair = AddressPortPair::new(
+                            address1,
+                            port1,
+                            address2,
+                            port2,
+                            transport_protocol,
+                        );
 
-                        if (network_layer_filter.eq(&IpVersion::Other) || network_layer_filter.eq(&network_protocol))
-                            && (transport_layer_filter.eq(&TransProtocol::Other) || transport_layer_filter.eq(&transport_protocol))
-                            && (app_layer_filter.eq(&AppProtocol::Other) || app_layer_filter.eq(&application_protocol)) {
+                        if (network_layer_filter.eq(&IpVersion::Other)
+                            || network_layer_filter.eq(&network_protocol))
+                            && (transport_layer_filter.eq(&TransProtocol::Other)
+                                || transport_layer_filter.eq(&transport_protocol))
+                            && (app_layer_filter.eq(&AppProtocol::Other)
+                                || app_layer_filter.eq(&application_protocol))
+                        {
                             // if (port1 >= lowest_port && port1 <= highest_port)
                             //     || (port2 >= lowest_port && port2 <= highest_port) {
-                            modify_or_insert_in_map(info_traffic_mutex.clone(), key,
-                                                    exchanged_bytes, traffic_type,
-                                                    application_protocol);
+                            modify_or_insert_in_map(
+                                info_traffic_mutex.clone(),
+                                key,
+                                exchanged_bytes,
+                                traffic_type,
+                                application_protocol,
+                            );
                             reported_packet = true;
                             // }
                         }
 
-                        let mut info_traffic = info_traffic_mutex.lock().expect("Error acquiring mutex\n\r");
+                        let mut info_traffic = info_traffic_mutex
+                            .lock()
+                            .expect("Error acquiring mutex\n\r");
                         //increment number of sniffed packets and bytes
                         info_traffic.all_packets += 1;
                         info_traffic.all_bytes += exchanged_bytes;
 
                         if reported_packet {
                             //increment the packet count for the sniffed app protocol
-                            info_traffic.app_protocols
+                            info_traffic
+                                .app_protocols
                                 .entry(application_protocol)
-                                .and_modify(|n| { *n += 1 })
+                                .and_modify(|n| *n += 1)
                                 .or_insert(1);
 
                             if traffic_type == TrafficType::Incoming
-                                || traffic_type == TrafficType::Multicast {
+                                || traffic_type == TrafficType::Multicast
+                            {
                                 //increment number of received packets and bytes
                                 info_traffic.tot_received_packets += 1;
                                 info_traffic.tot_received_bytes += exchanged_bytes;

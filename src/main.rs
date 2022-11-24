@@ -1,13 +1,13 @@
 //! Module containing the entry point of application execution.
 
-use std::{panic, process, thread};
 use std::sync::{Arc, Condvar, Mutex};
+use std::{panic, process, thread};
 
-use iced::{Application, button, pick_list, scrollable, Settings, window};
 use iced::window::Position;
+use iced::{button, pick_list, scrollable, window, Application, Settings};
 use pcap::Device;
 
-use gui::style::{FONT_SIZE_BODY, StyleType};
+use gui::style::{StyleType, FONT_SIZE_BODY};
 
 use crate::enums::app_protocol::AppProtocol;
 use crate::enums::chart_type::ChartType;
@@ -22,13 +22,12 @@ use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_write_report::sleep_and_write_report_loop;
 
-mod thread_parse_packets;
-mod thread_write_report;
+mod enums;
 mod gui;
 mod structs;
+mod thread_parse_packets;
+mod thread_write_report;
 mod utility;
-mod enums;
-
 
 /// Entry point of application execution
 ///
@@ -65,10 +64,12 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    thread::Builder::new().name("thread_write_report".to_string()).spawn(move || {
-        sleep_and_write_report_loop(current_capture_id2,
-                                    mutex_map2, status_pair2);
-    }).unwrap();
+    thread::Builder::new()
+        .name("thread_write_report".to_string())
+        .spawn(move || {
+            sleep_and_write_report_loop(current_capture_id2, mutex_map2, status_pair2);
+        })
+        .unwrap();
 
     Sniffer::run(Settings {
         id: None,

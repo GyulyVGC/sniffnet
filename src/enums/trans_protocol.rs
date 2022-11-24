@@ -11,7 +11,6 @@ pub enum TransProtocol {
     Other,
 }
 
-
 impl fmt::Display for TransProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)

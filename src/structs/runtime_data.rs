@@ -48,7 +48,6 @@ pub struct RunTimeData {
     pub ticks: u128,
 }
 
-
 impl RunTimeData {
     /// Constructs a new ChartsData element.
     pub fn new() -> Self {

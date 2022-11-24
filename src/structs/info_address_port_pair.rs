@@ -3,9 +3,9 @@
 
 use std::fmt;
 
-use crate::{AppProtocol, TransProtocol};
 use crate::enums::traffic_type::TrafficType;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
+use crate::{AppProtocol, TransProtocol};
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -29,33 +29,48 @@ pub struct InfoAddressPortPair {
     pub traffic_type: TrafficType,
 }
 
-
 impl InfoAddressPortPair {
     pub fn print_gui(&self) -> String {
-        self.to_string().get(0..46).unwrap().to_string().replace('|', "")
+        self.to_string()
+            .get(0..46)
+            .unwrap()
+            .to_string()
+            .replace('|', "")
     }
 }
-
 
 impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bytes_string = get_formatted_bytes_string(self.transmitted_bytes);
 
         let app_string = match self.app_protocol {
-            AppProtocol::Other => { "Other".to_string() }
-            _ => { self.app_protocol.to_string() }
+            AppProtocol::Other => "Other".to_string(),
+            _ => self.app_protocol.to_string(),
         };
 
         if self.very_long_address {
-            write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
-                   self.trans_protocol, app_string,
-                   self.transmitted_packets, bytes_string,
-                   self.initial_timestamp, self.final_timestamp)
+            write!(
+                f,
+                "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
+                self.trans_protocol,
+                app_string,
+                self.transmitted_packets,
+                bytes_string,
+                self.initial_timestamp,
+                self.final_timestamp
+            )
         } else {
-            write!(f, "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
-                   self.trans_protocol, app_string,
-                   self.transmitted_packets, bytes_string,
-                   self.initial_timestamp, self.final_timestamp, " ".repeat(40))
+            write!(
+                f,
+                "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
+                self.trans_protocol,
+                app_string,
+                self.transmitted_packets,
+                bytes_string,
+                self.initial_timestamp,
+                self.final_timestamp,
+                " ".repeat(40)
+            )
         }
     }
 }
