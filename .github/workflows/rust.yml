@@ -37,6 +37,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Install npcap
+      run: choco install npcap
     - name: Build 
       run: cargo build --verbose
     - name: Run tests 
