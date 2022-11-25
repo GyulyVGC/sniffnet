@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# Linters inspired from here: https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 jobs:
   fmt:
     name: Rustfmt
@@ -58,28 +59,6 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install libpcap
       run: sudo apt-get install libpcap-dev
-    - name: Build 
-      run: cargo build --verbose
-    - name: Run tests 
-      run: cargo test --verbose
-
-  Windows:
-    name: Windows tests
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install npcap sdk
-      run: |
-         Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
-         Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
-         echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
-    - name: Install npcap dll
-      run: |
-        # $SecPassword = ConvertTo-SecureString "${{ secrets.NPCAP_OEM_PASSWORD }}" -AsPlainText -Force
-        # $CredObject = New-Object System.Management.Automation.PSCredential ("${{ secrets.NPCAP_OEM_USERNAME }}", $SecPassword)
-          Invoke-WebRequest -Uri "https://npcap.com/oem/dist/npcap-1.71-oem.exe" -OutFile C:/npcap-oem.exe # -Credential $CredObject
-          C:/npcap-oem.exe /S
-
     - name: Build 
       run: cargo build --verbose
     - name: Run tests 
