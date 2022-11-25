@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Install libpcap
+      run: sudo apt-get install libpcap-dev
     - name: Build 
       run: cargo build --verbose
     - name: Run tests 
