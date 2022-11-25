@@ -11,35 +11,30 @@ env:
 
 jobs:
   Test:
+
     name: Mac
-
-      runs-on: macos-latest
-
-      steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
 
     name: Linux
-
-      runs-on: ubuntu-latest
-
-      steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
 
     name: Windows
-
-      runs-on: windows-latest
-
-      steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
