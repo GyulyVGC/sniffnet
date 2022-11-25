@@ -16,25 +16,25 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Build mac
       run: cargo build --verbose
-    - name: Run tests
+    - name: Run tests mac
       run: cargo test --verbose
 
     name: Linux
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Build linux
       run: cargo build --verbose
-    - name: Run tests
+    - name: Run tests linux
       run: cargo test --verbose
 
     name: Windows
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Build windows
       run: cargo build --verbose
-    - name: Run tests
+    - name: Run tests windows
       run: cargo test --verbose
