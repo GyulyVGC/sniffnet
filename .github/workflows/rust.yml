@@ -10,31 +10,32 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  Test:
-
-    name: Mac
+  Mac:
+    name: Mac Tests
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build mac
+    - name: Build
       run: cargo build --verbose
-    - name: Run tests mac
+    - name: Run tests
       run: cargo test --verbose
 
-    name: Linux
+  Linux: 
+    name: Linux Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build linux
+    - name: Build 
       run: cargo build --verbose
-    - name: Run tests linux
+    - name: Run tests 
       run: cargo test --verbose
 
-    name: Windows
+  Windows:
+    name: Windows tests
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build windows
+    - name: Build 
       run: cargo build --verbose
-    - name: Run tests windows
+    - name: Run tests 
       run: cargo test --verbose
