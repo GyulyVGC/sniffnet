@@ -1,3 +1,4 @@
+#![allow(clippy::upper_case_acronyms)]
 use std::fmt;
 
 /// Enum representing the possible observed values of transport layer protocol.
