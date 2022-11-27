@@ -32,6 +32,17 @@ If you have [Rust installed](https://www.rust-lang.org/tools/install) on your ma
 cargo install sniffnet
 ```
 
+On NetBSD a pre-compiled binary is available from the official repositories. To install this simply run:
+```sh
+pkgin install sniffnet
+```
+
+Or, if you prefer to build it from source:
+```sh
+cd /usr/pkgsrc/net/sniffnet
+make install
+```
+
 Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
 
 
