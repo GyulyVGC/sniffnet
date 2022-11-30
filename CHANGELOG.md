@@ -2,6 +2,13 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [1.0.1] - 2022-11-30
+
+- Substituted command `open` with command `xdg-open` on Linux systems to solve the problem described in issues [#13](https://github.com/GyulyVGC/sniffnet/issues/13) and [#23](https://github.com/GyulyVGC/sniffnet/issues/23)
+- Introduced a constraint on minimum window height to avoid problem described in issue [#12](https://github.com/GyulyVGC/sniffnet/issues/12)
+- Added some tests on `AppProtocol` and improved GitHub workflows
+
+
 ## [1.0.0] - 2022-11-21
 
 - The application is no longer just a command line interface: Sniffnet has now a whole graphical user interface!

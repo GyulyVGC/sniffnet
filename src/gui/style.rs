@@ -8,7 +8,7 @@ use iced_style::scrollable::{Scrollbar, Scroller};
 use plotters::style::RGBColor;
 
 /// Application version number (to be displayed in gui footer)
-pub const APP_VERSION: &str = "v1.0.0";
+pub const APP_VERSION: &str = "v1.0.1";
 
 // gui Text fonts
 pub const COURIER_PRIME: Font = Font::External {
