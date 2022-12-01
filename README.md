@@ -157,12 +157,14 @@ sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 
 ### Missing dependencies
 
-Most of the errors that can occur are likely due to your system missing required pcap dependencies,
+Most of the errors that can occur are likely due to your system missing required `pcap` dependencies,
 necessary to correctly analyze a network adapter. 
 
 Check the [Install and Run](#install-and-run) section for instructions on how to proceed.
 
-For a Windows reference, you can check [issue #1](https://github.com/GyulyVGC/sniffnet/issues/1).
+For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
+
+Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
 
 ### Installers incompatibilities
 
