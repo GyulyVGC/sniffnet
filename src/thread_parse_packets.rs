@@ -59,6 +59,8 @@ pub fn parse_packets_loop(
     }
     let mut cap = cap_result.unwrap();
 
+    let db = db_ip::include_country_code_database!();
+
     loop {
         match cap.next_packet() {
             Err(_) => {
@@ -140,6 +142,7 @@ pub fn parse_packets_loop(
                                 exchanged_bytes,
                                 traffic_type,
                                 application_protocol,
+                                &db,
                             );
                             reported_packet = true;
                             // }

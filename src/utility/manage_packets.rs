@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
+use db_ip::{CountryCode, DbIpDatabase};
 use etherparse::{IpHeader, TransportHeader};
 
 use crate::enums::app_protocol::from_port_to_application_protocol;
@@ -88,6 +89,7 @@ pub fn modify_or_insert_in_map(
     exchanged_bytes: u128,
     traffic_type: TrafficType,
     application_protocol: AppProtocol,
+    db: &DbIpDatabase<CountryCode>,
 ) {
     let now = Local::now().to_string().get(0..19).unwrap().to_string();
     let trans_protocol = key.trans_protocol;
@@ -97,6 +99,18 @@ pub fn modify_or_insert_in_map(
         .expect("Error acquiring mutex\n\r");
     let len = info_traffic.map.len();
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
+    let country = if info_traffic.map.get(&key).is_none() {
+        // first occurrence of key => retrieve country code
+        match traffic_type {
+            TrafficType::Incoming | TrafficType::Multicast => {
+                db.get(&key.address1.parse().unwrap()).unwrap().to_string()
+            }
+            TrafficType::Outgoing => db.get(&key.address2.parse().unwrap()).unwrap().to_string(),
+            _ => "".to_string(),
+        }
+    } else {
+        "".to_string()
+    };
     info_traffic
         .map
         .entry(key)
@@ -114,6 +128,7 @@ pub fn modify_or_insert_in_map(
             app_protocol: application_protocol,
             very_long_address,
             traffic_type,
+            country,
         });
     info_traffic.addresses_last_interval.insert(index);
 }

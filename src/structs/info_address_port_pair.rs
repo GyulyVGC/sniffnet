@@ -2,6 +2,7 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
+use std::ops::Add;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
@@ -27,6 +28,8 @@ pub struct InfoAddressPortPair {
     pub very_long_address: bool,
     /// Flag to determine which of the address is that of the sniffed adapter or remote
     pub traffic_type: TrafficType,
+    /// Country of the remote IP address
+    pub country: String,
 }
 
 impl InfoAddressPortPair {
@@ -36,6 +39,7 @@ impl InfoAddressPortPair {
             .unwrap()
             .to_string()
             .replace('|', "")
+            .add(&self.country)
     }
 }
 

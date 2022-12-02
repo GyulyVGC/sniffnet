@@ -11,11 +11,7 @@ use iced::{alignment, Alignment, Button, Column, Container, Length, Radio, Row, 
 use thousands::Separable;
 
 use crate::enums::message::Message;
-use crate::gui::style::{
-    icon_sun_moon, logo_glyph, APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD,
-    COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE,
-    HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
-};
+use crate::gui::style::{icon_sun_moon, logo_glyph, APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS};
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::sniffer::Sniffer;
