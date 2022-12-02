@@ -91,7 +91,7 @@ pub fn modify_or_insert_in_map(
     application_protocol: AppProtocol,
     db: &DbIpDatabase<CountryCode>,
 ) {
-    let now = Local::now().to_string().get(0..19).unwrap().to_string();
+    let now = Local::now();
     let trans_protocol = key.trans_protocol;
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
     let mut info_traffic = info_traffic_mutex
@@ -117,12 +117,12 @@ pub fn modify_or_insert_in_map(
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
-            info.final_timestamp = now.clone();
+            info.final_timestamp = now;
         })
         .or_insert(InfoAddressPortPair {
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
-            initial_timestamp: now.clone(),
+            initial_timestamp: now,
             final_timestamp: now,
             trans_protocol,
             app_protocol: application_protocol,

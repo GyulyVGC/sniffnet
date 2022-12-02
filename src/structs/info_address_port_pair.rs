@@ -1,6 +1,7 @@
 //! Module defining the `IndoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
+use chrono::{DateTime, Local};
 use std::fmt;
 use std::ops::Add;
 
@@ -17,9 +18,9 @@ pub struct InfoAddressPortPair {
     /// Amount of packets transmitted between the pair.
     pub transmitted_packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub initial_timestamp: String,
+    pub initial_timestamp: DateTime<Local>,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub final_timestamp: String,
+    pub final_timestamp: DateTime<Local>,
     ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
     pub trans_protocol: TransProtocol,
     /// Set of application layer protocols carried through the associate address:port pair.
@@ -39,7 +40,7 @@ impl InfoAddressPortPair {
             .unwrap()
             .to_string()
             .replace('|', "")
-            .add(&self.country)
+            .add(&*format!("{}  ", &self.country))
     }
 }
 
@@ -60,8 +61,8 @@ impl fmt::Display for InfoAddressPortPair {
                 app_string,
                 self.transmitted_packets,
                 bytes_string,
-                self.initial_timestamp,
-                self.final_timestamp
+                self.initial_timestamp.to_string().get(0..19).unwrap(),
+                self.final_timestamp.to_string().get(0..19).unwrap()
             )
         } else {
             write!(
@@ -71,8 +72,8 @@ impl fmt::Display for InfoAddressPortPair {
                 app_string,
                 self.transmitted_packets,
                 bytes_string,
-                self.initial_timestamp,
-                self.final_timestamp,
+                self.initial_timestamp.to_string().get(0..19).unwrap(),
+                self.final_timestamp.to_string().get(0..19).unwrap(),
                 " ".repeat(40)
             )
         }
