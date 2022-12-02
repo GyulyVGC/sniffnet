@@ -182,6 +182,10 @@ Reach me out, and I'll try to generate an installer for your specific operating 
 
 Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) 
 
+Sniffnet is also open to design contributions: 
+
+[![contribute.design](https://contribute.design/api/shield/GyulyVGC/sniffnet)](https://contribute.design/GyulyVGC/sniffnet)
+
 
 ## Stargazers
 
