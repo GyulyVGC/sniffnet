@@ -104,8 +104,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(85))
-    .width(Length::Units(75))
+    .height(Length::Units(35))
+    .width(Length::Units(200))
     .style(sniffer.style)
     .on_press(Message::OpenReport);
 
@@ -345,8 +345,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .height(Length::Fill)
                     .push(row_radio_report)
                     .push(Text::new(" "))
-                    .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer 4  Layer 7    Packets      Bytes  ").font(font))
-                    .push(iced::Text::new("---------------------------------------------------------------------------------------------------------------").font(font))
+                    .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+                    .push(iced::Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
                 let mut scroll_report =
                     Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
@@ -365,11 +365,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 }
                 col_report = col_report.push(scroll_report);
                 drop(sniffer_lock);
-                let col_open_report = Container::new(button_report)
-                    .width(Length::Fill)
-                    .height(Length::Fill)
-                    .align_x(Horizontal::Center)
-                    .align_y(Vertical::Center);
+
                 let row_report = Row::new()
                     .spacing(10)
                     .height(Length::FillPortion(2))
@@ -380,8 +376,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                             .padding(10)
                             .height(Length::Fill)
                             .style(StyleType::BorderedRound),
-                    )
-                    .push(col_open_report);
+                    );
 
                 body = body
                     .push(
@@ -390,10 +385,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                             .height(Length::FillPortion(3))
                             .push(col_chart)
                             .push(
-                                Container::new(col_packets)
-                                    .padding(10)
-                                    .height(Length::Fill)
-                                    .style(StyleType::BorderedRound),
+                                Column::new()
+                                    .spacing(10)
+                                    .align_items(Alignment::Center)
+                                    .push(Container::new(col_packets)
+                                        .padding(10)
+                                        .height(Length::Fill)
+                                        .style(StyleType::BorderedRound))
+                                    .push(button_report)
                             ),
                     )
                     .push(row_report);

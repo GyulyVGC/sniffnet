@@ -9,6 +9,7 @@ use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
+use crate::utility::get_formatted_strings::get_country_code;
 
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
@@ -101,13 +102,7 @@ pub fn modify_or_insert_in_map(
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
     let country = if info_traffic.map.get(&key).is_none() {
         // first occurrence of key => retrieve country code
-        match traffic_type {
-            TrafficType::Incoming | TrafficType::Multicast => {
-                db.get(&key.address1.parse().unwrap()).unwrap().to_string()
-            }
-            TrafficType::Outgoing => db.get(&key.address2.parse().unwrap()).unwrap().to_string(),
-            _ => "".to_string(),
-        }
+        get_country_code(db, traffic_type, &key)
     } else {
         "".to_string()
     };
