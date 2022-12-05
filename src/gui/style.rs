@@ -102,6 +102,10 @@ pub enum StyleType {
     BorderedRound,
     HeadersDay,
     HeadersNight,
+    TabsActiveNight,
+    TabsInactiveNight,
+    TabsActiveDay,
+    TabsInactiveDay,
 }
 
 impl Clone for StyleType {
@@ -124,9 +128,9 @@ impl StyleSheet for StyleType {
             background: match self {
                 StyleType::Day => Some(Background::Color(DAY_BACKGROUND)),
                 StyleType::Night => Some(Background::Color(NIGHT_BACKGROUND)),
-                StyleType::BorderedRound => None,
                 StyleType::HeadersDay => Some(Background::Color(SPECIAL_DAY)),
                 StyleType::HeadersNight => Some(Background::Color(SPECIAL_NIGHT)),
+                _ => None,
             },
             border_radius: match self {
                 StyleType::BorderedRound => 12.0,
@@ -231,14 +235,34 @@ impl button::StyleSheet for StyleType {
             background: Some(Background::Color(match self {
                 StyleType::Day => DAY_BUTTONS,
                 StyleType::Night => NIGHT_BUTTONS,
+                StyleType::TabsActiveNight => NIGHT_BACKGROUND,
+                StyleType::TabsInactiveNight => NIGHT_BUTTONS,
+                StyleType::TabsActiveDay => DAY_BACKGROUND,
+                StyleType::TabsInactiveDay => DAY_BUTTONS,
                 _ => Color::BLACK,
             })),
-            border_radius: 12.0,
-            border_width: BORDER_WIDTH,
+            border_radius: match self {
+                StyleType::TabsActiveNight
+                | StyleType::TabsInactiveNight
+                | StyleType::TabsInactiveDay
+                | StyleType::TabsActiveDay => 0.0,
+                _ => 12.0,
+            },
+            border_width: match self {
+                StyleType::TabsActiveNight
+                | StyleType::TabsInactiveNight
+                | StyleType::TabsInactiveDay
+                | StyleType::TabsActiveDay => BORDER_WIDTH / 2.0,
+                _ => BORDER_WIDTH,
+            },
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => Color::WHITE,
+                StyleType::Day | StyleType::TabsActiveDay | StyleType::TabsInactiveDay => {
+                    Color::BLACK
+                }
+                StyleType::Night | StyleType::TabsActiveNight | StyleType::TabsInactiveNight => {
+                    Color::WHITE
+                }
                 _ => Color::BLACK,
             },
             border_color: match self {
@@ -255,18 +279,36 @@ impl button::StyleSheet for StyleType {
             background: Some(Background::Color(match self {
                 StyleType::Day => DAY_BACKGROUND,
                 StyleType::Night => NIGHT_BACKGROUND,
+                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BACKGROUND,
+                StyleType::TabsActiveDay | StyleType::TabsInactiveDay => DAY_BACKGROUND,
                 _ => Color::BLACK,
             })),
-            border_radius: 12.0,
-            border_width: BORDER_WIDTH,
+            border_radius: match self {
+                StyleType::TabsActiveNight
+                | StyleType::TabsInactiveNight
+                | StyleType::TabsInactiveDay
+                | StyleType::TabsActiveDay => 0.0,
+                _ => 12.0,
+            },
+            border_width: match self {
+                StyleType::TabsActiveNight
+                | StyleType::TabsInactiveNight
+                | StyleType::TabsInactiveDay
+                | StyleType::TabsActiveDay => BORDER_WIDTH / 2.0,
+                _ => BORDER_WIDTH,
+            },
             border_color: match self {
                 StyleType::Day => SPECIAL_DAY,
                 StyleType::Night => SPECIAL_NIGHT,
                 _ => Color::BLACK,
             },
             text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => Color::WHITE,
+                StyleType::Day | StyleType::TabsActiveDay | StyleType::TabsInactiveDay => {
+                    Color::BLACK
+                }
+                StyleType::Night | StyleType::TabsActiveNight | StyleType::TabsInactiveNight => {
+                    Color::WHITE
+                }
                 _ => Color::BLACK,
             },
         }

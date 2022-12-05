@@ -97,6 +97,8 @@ pub fn main() -> iced::Result {
             mode: button::State::new(),
             report: button::State::new(),
             git: button::State::new(),
+            overview: button::State::new(),
+            inspect: button::State::new(),
             app: pick_list::State::new(),
             scroll_adapters: scrollable::State::new(),
             scroll_packets: scrollable::State::new(),

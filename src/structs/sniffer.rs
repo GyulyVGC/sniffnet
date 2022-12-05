@@ -40,6 +40,10 @@ pub struct Sniffer {
     pub report: button::State,
     /// GitHub button state
     pub git: button::State,
+    /// Overview button state
+    pub overview: button::State,
+    /// Inspect button state
+    pub inspect: button::State,
     /// Application protocol picklist state
     pub app: pick_list::State<AppProtocol>,
     /// Adapters scrollbar state

@@ -1,16 +1,16 @@
+use db_ip::{CountryCode, DbIpDatabase};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use db_ip::{CountryCode, DbIpDatabase};
 
 use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
+use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
 use crate::{AppProtocol, IpVersion, TransProtocol};
-use crate::structs::address_port_pair::AddressPortPair;
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
@@ -172,13 +172,22 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
     }
 }
 
-
-pub fn get_country_code(db: &DbIpDatabase<CountryCode>, traffic_type: TrafficType, key: &AddressPortPair) -> String {
+pub fn get_country_code(
+    db: &DbIpDatabase<CountryCode>,
+    traffic_type: TrafficType,
+    key: &AddressPortPair,
+) -> String {
     match traffic_type {
-        TrafficType::Incoming | TrafficType::Multicast => {
-            db.get(&key.address1.parse().unwrap()).unwrap().to_string().replace("ZZ", "//")
-        }
-        TrafficType::Outgoing => db.get(&key.address2.parse().unwrap()).unwrap().to_string().replace("ZZ", "//"),
+        TrafficType::Incoming | TrafficType::Multicast => db
+            .get(&key.address1.parse().unwrap())
+            .unwrap()
+            .to_string()
+            .replace("ZZ", "//"),
+        TrafficType::Outgoing => db
+            .get(&key.address2.parse().unwrap())
+            .unwrap()
+            .to_string()
+            .replace("ZZ", "//"),
         _ => "".to_string(),
     }
 }

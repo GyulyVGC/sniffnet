@@ -68,6 +68,38 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     .style(sniffer.style)
     .on_press(Message::Reset);
 
+    let button_overview = Button::new(
+        &mut sniffer.overview,
+        Text::new("Overview")
+            .font(font)
+            .size(FONT_SIZE_SUBTITLE)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .height(Length::Units(25))
+    .width(Length::FillPortion(1))
+    .style(match sniffer.style {
+        StyleType::Day => StyleType::TabsActiveDay,
+        _ => StyleType::TabsActiveNight,
+    })
+    .on_press(Message::TickInit); //do nothing, just update the page
+
+    let button_inspect = Button::new(
+        &mut sniffer.inspect,
+        Text::new("Inspect")
+            .font(font)
+            .size(FONT_SIZE_SUBTITLE)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .height(Length::Units(25))
+    .width(Length::FillPortion(1))
+    .style(match sniffer.style {
+        StyleType::Day => StyleType::TabsInactiveDay,
+        _ => StyleType::TabsInactiveNight,
+    })
+    .on_press(Message::Reset);
+
     let header = Container::new(
         Row::new()
             .height(Length::Fill)
@@ -121,8 +153,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let mut body = Column::new()
         .height(Length::FillPortion(HEIGHT_BODY))
         .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
+        .padding(3)
+        .spacing(5)
         .align_items(Alignment::Center);
 
     if sniffer.pcap_error.lock().unwrap().is_none() {
@@ -183,6 +215,12 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
+
+                let tabs = Row::new()
+                    .width(Length::Fill)
+                    .align_items(Alignment::Center)
+                    .push(button_overview)
+                    .push(button_inspect);
 
                 let active_radio_chart = sniffer.chart_type;
                 let row_radio_chart = Row::new()
@@ -366,36 +404,40 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 col_report = col_report.push(scroll_report);
                 drop(sniffer_lock);
 
-                let row_report = Row::new()
-                    .spacing(10)
-                    .height(Length::FillPortion(2))
-                    .width(Length::Fill)
-                    .align_items(Alignment::Start)
-                    .push(
-                        Container::new(col_report)
-                            .padding(10)
-                            .height(Length::Fill)
-                            .style(StyleType::BorderedRound),
-                    );
+                let row_report = Row::new().push(
+                    Container::new(col_report)
+                        .padding(10)
+                        .height(Length::Fill)
+                        .style(StyleType::BorderedRound),
+                );
 
                 body = body
+                    .push(tabs)
                     .push(
                         Row::new()
-                            .spacing(10)
+                            .spacing(5)
                             .height(Length::FillPortion(3))
                             .push(col_chart)
                             .push(
                                 Column::new()
-                                    .spacing(10)
+                                    .spacing(5)
                                     .align_items(Alignment::Center)
-                                    .push(Container::new(col_packets)
-                                        .padding(10)
-                                        .height(Length::Fill)
-                                        .style(StyleType::BorderedRound))
-                                    .push(button_report)
+                                    .push(
+                                        Container::new(col_packets)
+                                            .padding(10)
+                                            .height(Length::Fill)
+                                            .style(StyleType::BorderedRound),
+                                    )
+                                    .push(button_report),
                             ),
                     )
-                    .push(row_report);
+                    .push(
+                        Column::new()
+                            .align_items(Alignment::Center)
+                            .height(Length::FillPortion(2))
+                            .width(Length::Fill)
+                            .push(row_report),
+                    );
             }
         }
     } else {
@@ -450,9 +492,5 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .align_x(Horizontal::Center)
         .style(headers_style);
 
-    Column::new()
-        .spacing(10)
-        .push(header)
-        .push(body)
-        .push(footer)
+    Column::new().push(header).push(body).push(footer)
 }
