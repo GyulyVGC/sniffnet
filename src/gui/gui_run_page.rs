@@ -24,6 +24,7 @@ use crate::utility::get_formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, ReportType, StyleType};
+use crate::utility::countries::{get_flag};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -391,15 +392,19 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 for i in 0..n_entry {
                     let key_val = sorted_vec.get(i).unwrap();
                     let entry_color = get_connection_color(key_val.1.traffic_type);
+                    let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
-                        iced::Text::new(format!(
+                        Row::new()
+                            .push(iced::Text::new(format!(
                             "{}{}",
                             key_val.0.print_gui(),
                             key_val.1.print_gui()
                         ))
                         .color(entry_color)
                         .font(COURIER_PRIME_BOLD),
-                    );
+                    )
+                            .push(flag)
+                            .push(Text::new("   ").font(font)));
                 }
                 col_report = col_report.push(scroll_report);
                 drop(sniffer_lock);
