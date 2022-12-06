@@ -139,6 +139,8 @@ impl StyleSheet for StyleType {
             border_width: match self {
                 StyleType::Night => 0.0,
                 StyleType::Day => 0.0,
+                StyleType::HeadersNight => 0.0,
+                StyleType::HeadersDay => 0.0,
                 _ => BORDER_WIDTH,
             },
             border_color: Color::BLACK,

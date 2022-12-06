@@ -35,7 +35,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     } else {
         StyleType::HeadersNight
     };
-    let logo = logo_glyph().size(90);
+    let logo = logo_glyph().size(95);
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -166,8 +166,6 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         );
 
     let col_space = Column::new()
-        .padding(20)
-        .spacing(10)
         .width(Length::FillPortion(1));
 
     let filtri = sniffer.filters.lock().unwrap();
@@ -343,7 +341,6 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .style(headers_style);
 
     Column::new()
-        .spacing(10)
         .push(header)
         .push(body)
         .push(footer)

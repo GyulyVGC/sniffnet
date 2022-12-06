@@ -43,7 +43,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     } else {
         StyleType::HeadersNight
     };
-    let logo = logo_glyph().size(90);
+    let logo = logo_glyph().size(95);
 
     let button_style = Button::new(
         &mut sniffer.mode,
@@ -168,11 +168,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
 
     let mut body = Column::new()
-        .height(Length::FillPortion(HEIGHT_BODY))
         .width(Length::Fill)
-        .padding(3)
+        .padding(5)
         .spacing(5)
         .align_items(Alignment::Center);
+
+    let mut tab_body = Column::new()
+        .height(Length::FillPortion(HEIGHT_BODY));
 
     if sniffer.pcap_error.lock().unwrap().is_none() {
         // NO pcap error detected
@@ -240,6 +242,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(button_inspect)
                     .push(button_settings);
 
+                tab_body = tab_body
+                    .push(tabs);
+
                 let active_radio_chart = sniffer.chart_type;
                 let row_radio_chart = Row::new()
                     .padding(15)
@@ -275,7 +280,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     );
 
                 let col_chart = Container::new(
-                    Column::new().push(row_radio_chart).push(
+                    Column::new()
+                        .push(row_radio_chart)
+                        .push(
                         sniffer
                             .traffic_chart
                             .view(sniffer.style, sniffer.chart_type),
@@ -400,7 +407,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 let mut col_report = Column::new()
                     .height(Length::Fill)
                     .push(row_radio_report)
-                    .push(Text::new(" "))
                     .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
                     .push(iced::Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
@@ -430,13 +436,12 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
                 let row_report = Row::new().push(
                     Container::new(col_report)
-                        .padding(10)
+                        .padding(5)
                         .height(Length::Fill)
                         .style(StyleType::BorderedRound),
                 );
 
                 body = body
-                    .push(tabs)
                     .push(
                         Row::new()
                             .spacing(5)
@@ -516,5 +521,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .align_x(Horizontal::Center)
         .style(headers_style);
 
-    Column::new().push(header).push(body).push(footer)
+    Column::new()
+        .push(header)
+        .push(tab_body
+            .push(body))
+        .push(footer)
 }
