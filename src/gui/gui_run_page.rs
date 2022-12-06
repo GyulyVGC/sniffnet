@@ -19,12 +19,12 @@ use crate::gui::style::{
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::sniffer::Sniffer;
+use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, ReportType, StyleType};
-use crate::utility::countries::{get_flag};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
@@ -77,7 +77,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
-    .height(Length::Units(25))
+    .height(Length::Units(30))
     .width(Length::FillPortion(1))
     .style(match sniffer.style {
         StyleType::Day => StyleType::TabsActiveDay,
@@ -93,7 +93,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
-    .height(Length::Units(25))
+    .height(Length::Units(30))
     .width(Length::FillPortion(1))
     .style(match sniffer.style {
         StyleType::Day => StyleType::TabsInactiveDay,
@@ -395,16 +395,18 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
                         Row::new()
-                            .push(iced::Text::new(format!(
-                            "{}{}",
-                            key_val.0.print_gui(),
-                            key_val.1.print_gui()
-                        ))
-                        .color(entry_color)
-                        .font(COURIER_PRIME_BOLD),
-                    )
+                            .push(
+                                iced::Text::new(format!(
+                                    "{}{}",
+                                    key_val.0.print_gui(),
+                                    key_val.1.print_gui()
+                                ))
+                                .color(entry_color)
+                                .font(COURIER_PRIME_BOLD),
+                            )
                             .push(flag)
-                            .push(Text::new("   ").font(font)));
+                            .push(Text::new("   ").font(font)),
+                    );
                 }
                 col_report = col_report.push(scroll_report);
                 drop(sniffer_lock);

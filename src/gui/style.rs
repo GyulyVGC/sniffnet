@@ -46,7 +46,7 @@ pub const ICONS: Font = Font::External {
 
 pub const FONT_SIZE_FOOTER: u16 = 14;
 pub const FONT_SIZE_BODY: u16 = 16;
-pub const FONT_SIZE_SUBTITLE: u16 = 18;
+pub const FONT_SIZE_SUBTITLE: u16 = 19;
 pub const FONT_SIZE_TITLE: u16 = 22;
 
 pub const BORDER_WIDTH: f32 = 2.0;
@@ -72,6 +72,12 @@ pub const NIGHT_BUTTONS: Color = Color {
     r: 0.1,
     g: 0.1,
     b: 0.1,
+    a: 1.0,
+};
+pub const TAB_BUTTONS_BORDER: Color = Color {
+    r: 0.45,
+    g: 0.45,
+    b: 0.45,
     a: 1.0,
 };
 pub const SPECIAL_NIGHT: Color = Color {
@@ -252,7 +258,7 @@ impl button::StyleSheet for StyleType {
                 StyleType::TabsActiveNight
                 | StyleType::TabsInactiveNight
                 | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => BORDER_WIDTH / 2.0,
+                | StyleType::TabsActiveDay => 3.3,
                 _ => BORDER_WIDTH,
             },
             shadow_offset: Vector::new(0.0, 0.0),
@@ -268,6 +274,8 @@ impl button::StyleSheet for StyleType {
             border_color: match self {
                 StyleType::Day => SPECIAL_DAY,
                 StyleType::Night => SPECIAL_NIGHT,
+                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BUTTONS,
+                StyleType::TabsInactiveDay | StyleType::TabsActiveDay => DAY_BUTTONS,
                 _ => Color::BLACK,
             },
         }
@@ -294,12 +302,14 @@ impl button::StyleSheet for StyleType {
                 StyleType::TabsActiveNight
                 | StyleType::TabsInactiveNight
                 | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => BORDER_WIDTH / 2.0,
+                | StyleType::TabsActiveDay => 2.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
                 StyleType::Day => SPECIAL_DAY,
                 StyleType::Night => SPECIAL_NIGHT,
+                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BUTTONS,
+                StyleType::TabsInactiveDay | StyleType::TabsActiveDay => DAY_BUTTONS,
                 _ => Color::BLACK,
             },
             text_color: match self {
