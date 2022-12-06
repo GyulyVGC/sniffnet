@@ -40,7 +40,7 @@ impl InfoAddressPortPair {
             .unwrap()
             .to_string()
             .replace('|', "")
-            .add(&*format!(" {} ", &self.country))
+            .add(&*format!("  {} ", &self.country))
     }
 }
 

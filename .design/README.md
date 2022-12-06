@@ -1,5 +1,5 @@
 <div align="center">
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="../resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
   <h1>Design Guidelines & Resources</h1>
   <p>A collection of design contribution guidelines and resources for Sniffnet.</p>
 </div>
@@ -66,7 +66,7 @@ For info on the used RGB colors, I suggest you to give a look at the file [style
 
 ### Logos
 
-You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources)
+You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/logos)
 
 ## 🎓 License
 

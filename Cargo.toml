@@ -9,12 +9,13 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
+include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
 
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
-icon = ["./resources/icon.ico"]
+icon = ["./resources/logos/icon.ico"]
 
 
 [profile.release]

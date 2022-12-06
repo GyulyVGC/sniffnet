@@ -44,6 +44,8 @@ pub struct Sniffer {
     pub overview: button::State,
     /// Inspect button state
     pub inspect: button::State,
+    /// Settings button state
+    pub settings: button::State,
     /// Application protocol picklist state
     pub app: pick_list::State<AppProtocol>,
     /// Adapters scrollbar state

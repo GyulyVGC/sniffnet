@@ -74,12 +74,6 @@ pub const NIGHT_BUTTONS: Color = Color {
     b: 0.1,
     a: 1.0,
 };
-pub const TAB_BUTTONS_BORDER: Color = Color {
-    r: 0.45,
-    g: 0.45,
-    b: 0.45,
-    a: 1.0,
-};
 pub const SPECIAL_NIGHT: Color = Color {
     r: 0.7,
     g: 0.35,
@@ -298,13 +292,7 @@ impl button::StyleSheet for StyleType {
                 | StyleType::TabsActiveDay => 0.0,
                 _ => 12.0,
             },
-            border_width: match self {
-                StyleType::TabsActiveNight
-                | StyleType::TabsInactiveNight
-                | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => 2.0,
-                _ => BORDER_WIDTH,
-            },
+            border_width: BORDER_WIDTH,
             border_color: match self {
                 StyleType::Day => SPECIAL_DAY,
                 StyleType::Night => SPECIAL_NIGHT,

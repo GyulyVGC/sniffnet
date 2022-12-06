@@ -101,6 +101,22 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     })
     .on_press(Message::Reset);
 
+    let button_settings = Button::new(
+        &mut sniffer.settings,
+        Text::new("Settings")
+            .font(font)
+            .size(FONT_SIZE_SUBTITLE)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .height(Length::Units(30))
+    .width(Length::FillPortion(1))
+    .style(match sniffer.style {
+        StyleType::Day => StyleType::TabsInactiveDay,
+        _ => StyleType::TabsInactiveNight,
+    })
+    .on_press(Message::Reset);
+
     let header = Container::new(
         Row::new()
             .height(Length::Fill)
@@ -221,7 +237,8 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .width(Length::Fill)
                     .align_items(Alignment::Center)
                     .push(button_overview)
-                    .push(button_inspect);
+                    .push(button_inspect)
+                    .push(button_settings);
 
                 let active_radio_chart = sniffer.chart_type;
                 let row_radio_chart = Row::new()

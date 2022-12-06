@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
 
 
 <hr>
@@ -15,7 +15,7 @@
 
 <hr>
 
-<p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967647-ef77cf89-20b0-49e3-a10d-0d4fe1da7752.gif" width="85%"/></p>
 
 <div align="center">
 <p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
@@ -81,19 +81,19 @@ sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ## Features
 
 - choose a network adapter to inspect
-<p align="center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967942-1ee5d1b2-222e-46ee-bad7-e9aa63492628.png" width="50%"/></p>
 
 - select filters to apply to the observed traffic
-<p align="center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968099-a68f32c4-c077-4f82-be2c-1cf88ce5522d.png" width="60%"/></p>
   
 - view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-<p align="center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968195-f979f1b4-b737-4ece-8433-cf539d140eb4.png" width="80%"/></p>
 
 - view overall statistics about the filtered traffic
-<p align="center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968251-b331a2b7-14df-45ab-aafd-20d93d9156bf.png" width="50%"/></p>
 
 - view most relevant connections (most recent, most packets, most bytes)
-<p align="center"><img alt="" src="resources/report_view.png" width="95%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967785-ff98bc0a-f3e8-44ad-bafe-4b9a46344f74.png" width="95%"/></p>
 
 - save complete textual report with detailed information for each connection:
   * source and destination IP addresses
