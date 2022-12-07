@@ -8,16 +8,17 @@ use std::time::Duration;
 use iced::{executor, Application, Command, Container, Element, Length, Subscription};
 use pcap::Device;
 
+use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::status::Status;
-use crate::gui::style::{ElementType, StyleTuple, StyleType};
+use crate::gui::style::StyleTuple;
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
-use crate::{InfoTraffic, RunTimeData};
+use crate::{InfoTraffic, RunTimeData, StyleType};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;

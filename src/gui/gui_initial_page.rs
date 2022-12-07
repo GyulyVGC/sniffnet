@@ -9,13 +9,16 @@ use iced::{
 };
 use pcap::Device;
 
+use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::style::{
-    icon_sun_moon, logo_glyph, ElementType, StyleTuple, APP_VERSION, COURIER_PRIME,
-    COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER,
-    FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
-};
+use crate::gui::style::StyleTuple;
 use crate::structs::sniffer::Sniffer;
+use crate::utility::get_formatted_strings::{icon_sun_moon, logo_glyph, APP_VERSION};
+use crate::utility::style_constants::{
+    COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
+    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
+    HEIGHT_HEADER, ICONS,
+};
 use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the body of gui initial page
@@ -30,17 +33,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     } else {
         COURIER_PRIME_BOLD_ITALIC
     };
-    let logo = logo_glyph().size(95);
+    let logo = logo_glyph();
 
-    let button_style = Button::new(
-        &mut sniffer.mode,
-        icon_sun_moon().horizontal_alignment(alignment::Horizontal::Center),
-    )
-    .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
-    .style(StyleTuple(sniffer.style, ElementType::Standard))
-    .on_press(Message::Style);
+    let button_style = Button::new(&mut sniffer.mode, icon_sun_moon())
+        .padding(10)
+        .height(Length::Units(40))
+        .width(Length::Units(60))
+        .style(StyleTuple(sniffer.style, ElementType::Standard))
+        .on_press(Message::Style);
 
     let header = Container::new(
         Row::new()

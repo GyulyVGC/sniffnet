@@ -1,13 +1,14 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
+use iced::{Color, Font};
+
 use crate::structs::colors::Colors;
-use iced::Color;
 
 pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
 
 pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
 
-// NIGHT
+// night theme
 const PRIMARY_NIGHT: Color = Color {
     r: 0.2,
     g: 0.2,
@@ -36,7 +37,7 @@ pub const NIGHT_STYLE: Colors = Colors {
     text_body: Color::WHITE,
 };
 
-//DAY
+// day theme
 const PRIMARY_DAY: Color = Color::WHITE;
 const SECONDARY_DAY: Color = Color {
     r: 0.0,
@@ -59,3 +60,55 @@ pub const DAY_STYLE: Colors = Colors {
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
 };
+
+// gui Text fonts
+pub const COURIER_PRIME: Font = Font::External {
+    name: "CourierPrime",
+    bytes: include_bytes!("../../fonts/CourierPrime.ttf"),
+};
+pub const COURIER_PRIME_BOLD: Font = Font::External {
+    name: "CourierPrimeBold",
+    bytes: include_bytes!("../../fonts/CourierPrimeBold.ttf"),
+};
+pub const COURIER_PRIME_ITALIC: Font = Font::External {
+    name: "CourierPrimeItalic",
+    bytes: include_bytes!("../../fonts/CourierPrimeItalic.ttf"),
+};
+pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
+    name: "CourierPrimeBoldItalic",
+    bytes: include_bytes!("../../fonts/CourierPrimeBoldItalic.ttf"),
+};
+
+// gui charts fonts
+pub const NOTOSANS: Font = Font::External {
+    name: "Notosans",
+    bytes: include_bytes!("../../fonts/notosans-regular.ttf"),
+};
+pub const NOTOSANS_BOLD: Font = Font::External {
+    name: "NotosansBold",
+    bytes: include_bytes!("../../fonts/notosans-bold.ttf"),
+};
+
+//font to display icons
+pub const ICONS: Font = Font::External {
+    name: "icons",
+    bytes: include_bytes!("../../fonts/icons.ttf"),
+};
+
+// font sizes
+pub const FONT_SIZE_FOOTER: u16 = 14;
+pub const FONT_SIZE_BODY: u16 = 16;
+pub const FONT_SIZE_SUBTITLE: u16 = 19;
+pub const FONT_SIZE_TITLE: u16 = 22;
+
+// border styles
+pub const BORDER_WIDTH: f32 = 2.0;
+pub const BORDER_WIDTH_TABS: f32 = 3.3;
+pub const CHARTS_LINE_BORDER: u32 = 1;
+pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
+pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
+
+// body proportions
+pub const HEIGHT_HEADER: u16 = 2;
+pub const HEIGHT_BODY: u16 = 12;
+pub const HEIGHT_FOOTER: u16 = 1;

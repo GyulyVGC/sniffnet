@@ -7,13 +7,14 @@ use iced::window::Position;
 use iced::{button, pick_list, scrollable, window, Application, Settings};
 use pcap::Device;
 
-use gui::style::{StyleType, FONT_SIZE_BODY};
+use utility::style_constants::FONT_SIZE_BODY;
 
 use crate::enums::app_protocol::AppProtocol;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
+use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
 use crate::structs::colors::get_colors;
 use crate::structs::filters::Filters;

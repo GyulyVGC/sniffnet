@@ -3,13 +3,18 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use iced::Color;
+use iced::alignment::Horizontal;
+use iced::{Color, Length, Text};
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
+use crate::utility::style_constants::ICONS;
 use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
+
+/// Application version number (to be displayed in gui footer)
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
@@ -189,4 +194,21 @@ pub fn get_country_code(
             .replace("ZZ", "//"),
         _ => "".to_string(),
     }
+}
+
+/// It returns a glyph featuring Sniffnet's logo
+pub fn logo_glyph() -> Text {
+    Text::new('A'.to_string())
+        .font(ICONS)
+        .horizontal_alignment(Horizontal::Center)
+        .size(95)
+}
+
+pub fn icon_sun_moon() -> Text {
+    //F: sun, G: moon, K: sun adjust
+    Text::new('K'.to_string())
+        .font(ICONS)
+        .width(Length::Units(25))
+        .horizontal_alignment(Horizontal::Center)
+        .size(20)
 }

@@ -9,9 +9,10 @@ use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
-use crate::gui::style::{CHARTS_LINE_BORDER, NOTOSANS, NOTOSANS_BOLD};
 use crate::structs::colors::to_rgb_color;
-use crate::utility::style_constants::{COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT};
+use crate::utility::style_constants::{
+    CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, NOTOSANS, NOTOSANS_BOLD,
+};
 use crate::{get_colors, ChartType, RunTimeData, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
