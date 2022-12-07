@@ -1,11 +1,11 @@
 //! Module defining the application styles: fonts, colors, containers, picklists, buttons,
 //! radios, scrollbars, icons.
 
+use crate::get_colors;
 use iced::alignment::Horizontal;
 use iced::container::{Style, StyleSheet};
 use iced::{alignment, button, pick_list, Background, Color, Font, Length, Text, Vector};
 use iced_style::scrollable::{Scrollbar, Scroller};
-use plotters::style::RGBColor;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = "v1.0.1";
@@ -51,62 +51,36 @@ pub const FONT_SIZE_TITLE: u16 = 22;
 
 pub const BORDER_WIDTH: f32 = 2.0;
 
+pub const CHARTS_LINE_BORDER: u32 = 1;
+
 pub const HEIGHT_HEADER: u16 = 2;
 pub const HEIGHT_BODY: u16 = 12;
 pub const HEIGHT_FOOTER: u16 = 1;
 
-pub const DAY_BACKGROUND: Color = Color::WHITE;
-pub const NIGHT_BACKGROUND: Color = Color {
-    r: 0.2,
-    g: 0.2,
-    b: 0.2,
-    a: 1.0,
-};
-pub const DAY_BUTTONS: Color = Color {
-    r: 0.8,
-    g: 0.8,
-    b: 0.8,
-    a: 1.0,
-};
-pub const NIGHT_BUTTONS: Color = Color {
-    r: 0.1,
-    g: 0.1,
-    b: 0.1,
-    a: 1.0,
-};
-pub const SPECIAL_NIGHT: Color = Color {
-    r: 0.7,
-    g: 0.35,
-    b: 0.0,
-    a: 1.0,
-};
-pub const SPECIAL_DAY: Color = Color {
-    r: 0.0,
-    g: 0.35,
-    b: 0.7,
-    a: 1.0,
-};
+/// Used to specify the kind of `iced` element to be able to choose the appropriate style for it
+#[derive(Copy, Eq, PartialEq)]
+pub enum ElementType {
+    Standard,
+    Headers,
+    BorderedRound,
+    TabActive,
+    TabInactive,
+}
 
-pub const SPECIAL_NIGHT_RGB: RGBColor = RGBColor(189, 89, 0);
-pub const SPECIAL_DAY_RGB: RGBColor = RGBColor(0, 89, 189);
-
-pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
-pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
-pub const CHARTS_LINE_BORDER: u32 = 1;
+impl Clone for ElementType {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
 
 #[derive(Copy, Eq, PartialEq)]
 /// Used to specify the kind of style to be applied to an element
 pub enum StyleType {
     Night,
     Day,
-    BorderedRound,
-    HeadersDay,
-    HeadersNight,
-    TabsActiveNight,
-    TabsInactiveNight,
-    TabsActiveDay,
-    TabsInactiveDay,
 }
+
+pub struct StyleTuple(pub StyleType, pub ElementType);
 
 impl Clone for StyleType {
     fn clone(&self) -> Self {
@@ -115,32 +89,23 @@ impl Clone for StyleType {
 }
 
 /// Containers style
-impl StyleSheet for StyleType {
+impl StyleSheet for StyleTuple {
     fn style(&self) -> Style {
         Style {
-            text_color: match self {
-                StyleType::Day => Some(Color::BLACK),
-                StyleType::Night => Some(Color::WHITE),
-                StyleType::HeadersDay => Some(Color::WHITE),
-                StyleType::HeadersNight => Some(Color::BLACK),
-                _ => None,
-            },
-            background: match self {
-                StyleType::Day => Some(Background::Color(DAY_BACKGROUND)),
-                StyleType::Night => Some(Background::Color(NIGHT_BACKGROUND)),
-                StyleType::HeadersDay => Some(Background::Color(SPECIAL_DAY)),
-                StyleType::HeadersNight => Some(Background::Color(SPECIAL_NIGHT)),
-                _ => None,
-            },
+            text_color: Option::Some(match self {
+                StyleTuple(style, ElementType::Headers) => get_colors(*style).text_headers,
+                StyleTuple(style, _) => get_colors(*style).text_body,
+            }),
+            background: Option::Some(Background::Color(match self {
+                StyleTuple(style, ElementType::Headers) => get_colors(*style).secondary,
+                StyleTuple(style, _) => get_colors(*style).primary,
+            })),
             border_radius: match self {
-                StyleType::BorderedRound => 12.0,
-                _ => 0.0,
+                StyleTuple(_, ElementType::BorderedRound) => 12.0,
+                StyleTuple(_, _) => 0.0,
             },
             border_width: match self {
-                StyleType::Night => 0.0,
-                StyleType::Day => 0.0,
-                StyleType::HeadersNight => 0.0,
-                StyleType::HeadersDay => 0.0,
+                StyleTuple(_, ElementType::Standard | ElementType::Headers) => 0.0,
                 _ => BORDER_WIDTH,
             },
             border_color: Color::BLACK,
@@ -149,130 +114,69 @@ impl StyleSheet for StyleType {
 }
 
 /// Picklists style
-impl pick_list::StyleSheet for StyleType {
+impl pick_list::StyleSheet for StyleTuple {
     fn menu(&self) -> iced_style::menu::Style {
         iced_style::menu::Style {
-            text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => DAY_BUTTONS,
-                _ => Color::BLACK,
-            },
-            background: Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            }),
+            text_color: get_colors(self.0).text_body,
+            background: Background::Color(get_colors(self.0).buttons),
             border_width: BORDER_WIDTH,
-            border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
-            selected_text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => Color::WHITE,
-                _ => Color::BLACK,
-            },
-            selected_background: Background::Color(match self {
-                StyleType::Day => DAY_BACKGROUND,
-                StyleType::Night => NIGHT_BACKGROUND,
-                _ => Color::BLACK,
-            }),
+            border_color: get_colors(self.0).secondary,
+            selected_text_color: get_colors(self.0).text_body,
+            selected_background: Background::Color(get_colors(self.0).primary),
         }
     }
 
     fn active(&self) -> pick_list::Style {
         pick_list::Style {
-            text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => Color::WHITE,
-                _ => Color::BLACK,
-            },
+            text_color: get_colors(self.0).text_body,
             placeholder_color: Color::BLACK,
-            background: Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            }),
+            background: Background::Color(get_colors(self.0).buttons),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
-            border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
+            border_color: get_colors(self.0).secondary,
             icon_size: 0.5,
         }
     }
 
     fn hovered(&self) -> pick_list::Style {
         pick_list::Style {
-            text_color: match self {
-                StyleType::Day => Color::BLACK,
-                StyleType::Night => Color::WHITE,
-                _ => Color::BLACK,
-            },
+            text_color: get_colors(self.0).text_body,
             placeholder_color: Color::BLACK,
-            background: Background::Color(match self {
-                StyleType::Day => DAY_BACKGROUND,
-                StyleType::Night => NIGHT_BACKGROUND,
-                _ => Color::BLACK,
-            }),
+            background: Background::Color(get_colors(self.0).primary),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
-            border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
+            border_color: get_colors(self.0).secondary,
             icon_size: 0.5,
         }
     }
 }
 
 /// Buttons style
-impl button::StyleSheet for StyleType {
+impl button::StyleSheet for StyleTuple {
     fn active(&self) -> button::Style {
         button::Style {
             background: Some(Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                StyleType::TabsActiveNight => NIGHT_BACKGROUND,
-                StyleType::TabsInactiveNight => NIGHT_BUTTONS,
-                StyleType::TabsActiveDay => DAY_BACKGROUND,
-                StyleType::TabsInactiveDay => DAY_BUTTONS,
-                _ => Color::BLACK,
+                StyleTuple(_, ElementType::TabActive) => get_colors(self.0).primary,
+                _ => get_colors(self.0).buttons,
             })),
             border_radius: match self {
-                StyleType::TabsActiveNight
-                | StyleType::TabsInactiveNight
-                | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => 0.0,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
                 _ => 12.0,
             },
             border_width: match self {
-                StyleType::TabsActiveNight
-                | StyleType::TabsInactiveNight
-                | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => 3.3,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 3.3,
                 _ => BORDER_WIDTH,
             },
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
-                StyleType::Day | StyleType::TabsActiveDay | StyleType::TabsInactiveDay => {
-                    Color::BLACK
-                }
-                StyleType::Night | StyleType::TabsActiveNight | StyleType::TabsInactiveNight => {
-                    Color::WHITE
-                }
-                _ => Color::BLACK,
+                StyleTuple(StyleType::Day, _) => Color::BLACK,
+                StyleTuple(StyleType::Night, _) => Color::WHITE,
             },
             border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BUTTONS,
-                StyleType::TabsInactiveDay | StyleType::TabsActiveDay => DAY_BUTTONS,
-                _ => Color::BLACK,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => {
+                    get_colors(self.0).buttons
+                }
+                _ => get_colors(self.0).secondary,
             },
         }
     }
@@ -280,55 +184,32 @@ impl button::StyleSheet for StyleType {
     fn hovered(&self) -> iced_style::button::Style {
         iced_style::button::Style {
             shadow_offset: Vector::new(1.0, 1.0),
-            background: Some(Background::Color(match self {
-                StyleType::Day => DAY_BACKGROUND,
-                StyleType::Night => NIGHT_BACKGROUND,
-                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BACKGROUND,
-                StyleType::TabsActiveDay | StyleType::TabsInactiveDay => DAY_BACKGROUND,
-                _ => Color::BLACK,
-            })),
+            background: Some(Background::Color(get_colors(self.0).primary)),
             border_radius: match self {
-                StyleType::TabsActiveNight
-                | StyleType::TabsInactiveNight
-                | StyleType::TabsInactiveDay
-                | StyleType::TabsActiveDay => 0.0,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
                 _ => 12.0,
             },
             border_width: BORDER_WIDTH,
             border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                StyleType::TabsActiveNight | StyleType::TabsInactiveNight => NIGHT_BUTTONS,
-                StyleType::TabsInactiveDay | StyleType::TabsActiveDay => DAY_BUTTONS,
-                _ => Color::BLACK,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => {
+                    get_colors(self.0).buttons
+                }
+                _ => get_colors(self.0).secondary,
             },
             text_color: match self {
-                StyleType::Day | StyleType::TabsActiveDay | StyleType::TabsInactiveDay => {
-                    Color::BLACK
-                }
-                StyleType::Night | StyleType::TabsActiveNight | StyleType::TabsInactiveNight => {
-                    Color::WHITE
-                }
-                _ => Color::BLACK,
+                StyleTuple(StyleType::Day, _) => Color::BLACK,
+                StyleTuple(StyleType::Night, _) => Color::WHITE,
             },
         }
     }
 }
 
 /// Radios style
-impl iced_style::radio::StyleSheet for StyleType {
+impl iced_style::radio::StyleSheet for StyleTuple {
     fn active(&self) -> iced_style::radio::Style {
         iced_style::radio::Style {
-            background: Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            }),
-            dot_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
+            background: Background::Color(get_colors(self.0).buttons),
+            dot_color: get_colors(self.0).secondary,
             border_width: 0.0,
             border_color: Default::default(),
             text_color: None,
@@ -337,45 +218,25 @@ impl iced_style::radio::StyleSheet for StyleType {
 
     fn hovered(&self) -> iced_style::radio::Style {
         iced_style::radio::Style {
-            background: Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            }),
-            dot_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
+            background: Background::Color(get_colors(self.0).buttons),
+            dot_color: get_colors(self.0).secondary,
             border_width: BORDER_WIDTH,
-            border_color: match self {
-                StyleType::Day => SPECIAL_DAY,
-                StyleType::Night => SPECIAL_NIGHT,
-                _ => Color::BLACK,
-            },
+            border_color: get_colors(self.0).secondary,
             text_color: None,
         }
     }
 }
 
 /// Scrollbars style
-impl iced_style::scrollable::StyleSheet for StyleType {
+impl iced_style::scrollable::StyleSheet for StyleTuple {
     fn active(&self) -> Scrollbar {
         Scrollbar {
-            background: Some(Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            })),
+            background: Some(Background::Color(get_colors(self.0).buttons)),
             border_radius: 12.0,
             border_width: 0.0,
             border_color: Color::BLACK,
             scroller: Scroller {
-                color: match self {
-                    StyleType::Day => DAY_BACKGROUND,
-                    StyleType::Night => NIGHT_BACKGROUND,
-                    _ => Color::BLACK,
-                },
+                color: get_colors(self.0).primary,
                 border_radius: 12.0,
                 border_width: BORDER_WIDTH / 1.5,
                 border_color: Color::BLACK,
@@ -385,20 +246,12 @@ impl iced_style::scrollable::StyleSheet for StyleType {
 
     fn hovered(&self) -> Scrollbar {
         Scrollbar {
-            background: Some(Background::Color(match self {
-                StyleType::Day => DAY_BUTTONS,
-                StyleType::Night => NIGHT_BUTTONS,
-                _ => Color::BLACK,
-            })),
+            background: Some(Background::Color(get_colors(self.0).buttons)),
             border_radius: 12.0,
             border_width: BORDER_WIDTH / 1.5,
             border_color: Color::BLACK,
             scroller: Scroller {
-                color: match self {
-                    StyleType::Day => SPECIAL_DAY,
-                    StyleType::Night => SPECIAL_NIGHT,
-                    _ => Color::BLACK,
-                },
+                color: get_colors(self.0).secondary,
                 border_radius: 12.0,
                 border_width: BORDER_WIDTH / 1.5,
                 border_color: Color::BLACK,
@@ -414,19 +267,11 @@ pub fn logo_glyph() -> Text {
         .horizontal_alignment(Horizontal::Center)
 }
 
-pub fn icon_sun_moon(style: StyleType) -> Text {
+pub fn icon_sun_moon() -> Text {
     //F: sun, G: moon, K: sun adjust
-    match style {
-        StyleType::Night => Text::new('K'.to_string())
-            .font(ICONS)
-            .width(Length::Units(25))
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .size(20),
-        StyleType::Day => Text::new('K'.to_string())
-            .font(ICONS)
-            .width(Length::Units(25))
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .size(20),
-        _ => Text::new(""),
-    }
+    Text::new('K'.to_string())
+        .font(ICONS)
+        .width(Length::Units(25))
+        .horizontal_alignment(alignment::Horizontal::Center)
+        .size(20)
 }

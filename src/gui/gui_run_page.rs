@@ -10,9 +10,9 @@ use thousands::Separable;
 
 use crate::enums::message::Message;
 use crate::gui::style::{
-    icon_sun_moon, logo_glyph, APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD,
-    COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE,
-    HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
+    icon_sun_moon, logo_glyph, ElementType, StyleTuple, APP_VERSION, COURIER_PRIME,
+    COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER,
+    FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
 };
 use crate::structs::sniffer::Sniffer;
 use crate::utility::countries::get_flag;
@@ -34,21 +34,16 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     } else {
         COURIER_PRIME_BOLD_ITALIC
     };
-    let headers_style = if sniffer.style == StyleType::Day {
-        StyleType::HeadersDay
-    } else {
-        StyleType::HeadersNight
-    };
     let logo = logo_glyph().size(95);
 
     let button_style = Button::new(
         &mut sniffer.mode,
-        icon_sun_moon(sniffer.style).horizontal_alignment(alignment::Horizontal::Center),
+        icon_sun_moon().horizontal_alignment(alignment::Horizontal::Center),
     )
     .padding(10)
     .height(Length::Units(40))
     .width(Length::Units(60))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::Style);
 
     let button_reset = Button::new(
@@ -62,7 +57,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     .padding(10)
     .height(Length::Units(40))
     .width(Length::Units(60))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::Reset);
 
     let button_overview = Button::new(
@@ -75,10 +70,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::Units(30))
     .width(Length::FillPortion(1))
-    .style(match sniffer.style {
-        StyleType::Day => StyleType::TabsActiveDay,
-        _ => StyleType::TabsActiveNight,
-    })
+    .style(StyleTuple(sniffer.style, ElementType::TabActive))
     .on_press(Message::TickInit); //do nothing, just update the page
 
     let button_inspect = Button::new(
@@ -91,10 +83,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::Units(30))
     .width(Length::FillPortion(1))
-    .style(match sniffer.style {
-        StyleType::Day => StyleType::TabsInactiveDay,
-        _ => StyleType::TabsInactiveNight,
-    })
+    .style(StyleTuple(sniffer.style, ElementType::TabInactive))
     .on_press(Message::Reset);
 
     let button_settings = Button::new(
@@ -107,10 +96,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::Units(30))
     .width(Length::FillPortion(1))
-    .style(match sniffer.style {
-        StyleType::Day => StyleType::TabsInactiveDay,
-        _ => StyleType::TabsInactiveNight,
-    })
+    .style(StyleTuple(sniffer.style, ElementType::TabInactive))
     .on_press(Message::Reset);
 
     let header = Container::new(
@@ -139,7 +125,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::FillPortion(HEIGHT_HEADER))
     .width(Length::Fill)
-    .style(headers_style);
+    .style(StyleTuple(sniffer.style, ElementType::Headers));
 
     let button_report = Button::new(
         &mut sniffer.report,
@@ -151,7 +137,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     .padding(10)
     .height(Length::Units(35))
     .width(Length::Units(200))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::OpenReport);
 
     let runtime_data_lock = sniffer.runtime_data.lock().unwrap();
@@ -258,7 +244,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(220))
                         .font(font)
                         .size(15)
-                        .style(sniffer.style),
+                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
                     )
                     .push(
                         Radio::new(
@@ -270,7 +256,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(220))
                         .font(font)
                         .size(15)
-                        .style(sniffer.style),
+                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
                     );
 
                 let col_chart = Container::new(
@@ -283,7 +269,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .width(Length::FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
-                .style(StyleType::BorderedRound);
+                .style(StyleTuple(sniffer.style, ElementType::BorderedRound));
 
                 let mut col_packets = Column::new()
                     .width(Length::FillPortion(1))
@@ -320,7 +306,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .push(Text::new("Filtered packets per application protocol:").font(font))
                         .push(
                             Scrollable::new(&mut sniffer.scroll_packets)
-                                .style(sniffer.style)
+                                .style(StyleTuple(sniffer.style, ElementType::Standard))
                                 .push(
                                     Text::new(get_app_count_string(
                                         app_protocols,
@@ -349,7 +335,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(sniffer.style),
+                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
                     )
                     .push(
                         Radio::new(
@@ -361,7 +347,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(sniffer.style),
+                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
                     )
                     .push(
                         Radio::new(
@@ -373,7 +359,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(sniffer.style),
+                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
                     );
 
                 let mut col_report = Column::new()
@@ -382,10 +368,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(iced::Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
                     .push(iced::Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
-                let mut scroll_report =
-                    Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
+                let mut scroll_report = Scrollable::new(&mut sniffer.scroll_report)
+                    .style(StyleTuple(sniffer.style, ElementType::Standard));
                 for key_val in sniffer.runtime_data.lock().unwrap().report_vec.iter() {
-                    let entry_color = get_connection_color(key_val.1.traffic_type);
+                    let entry_color = get_connection_color(key_val.1.traffic_type, &sniffer.style);
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
                         Row::new()
@@ -408,7 +394,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
-                        .style(StyleType::BorderedRound),
+                        .style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
                 );
 
                 body = body
@@ -425,7 +411,10 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                                         Container::new(col_packets)
                                             .padding(10)
                                             .height(Length::Fill)
-                                            .style(StyleType::BorderedRound),
+                                            .style(StyleTuple(
+                                                sniffer.style,
+                                                ElementType::BorderedRound,
+                                            )),
                                     )
                                     .push(button_report),
                             ),
@@ -473,7 +462,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::Units(35))
     .width(Length::Units(35))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
@@ -489,7 +478,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .height(FillPortion(HEIGHT_FOOTER))
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(headers_style);
+        .style(StyleTuple(sniffer.style, ElementType::Headers));
 
     Column::new()
         .push(header)

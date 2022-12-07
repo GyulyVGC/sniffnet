@@ -7,10 +7,9 @@ use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
-use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
-use crate::{AppProtocol, IpVersion, TransProtocol};
+use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
@@ -61,11 +60,11 @@ pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_type: TrafficType) -> Color {
+pub fn get_connection_color(traffic_type: TrafficType, style: &StyleType) -> Color {
     if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
-        SPECIAL_NIGHT
+        get_colors(*style).incoming
     } else {
-        SPECIAL_DAY
+        get_colors(*style).outgoing
     }
 }
 

@@ -11,9 +11,9 @@ use pcap::Device;
 
 use crate::enums::message::Message;
 use crate::gui::style::{
-    icon_sun_moon, logo_glyph, APP_VERSION, COURIER_PRIME, COURIER_PRIME_BOLD,
-    COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE,
-    FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
+    icon_sun_moon, logo_glyph, ElementType, StyleTuple, APP_VERSION, COURIER_PRIME,
+    COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER,
+    FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
 };
 use crate::structs::sniffer::Sniffer;
 use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
@@ -30,21 +30,16 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     } else {
         COURIER_PRIME_BOLD_ITALIC
     };
-    let headers_style = if sniffer.style == StyleType::Day {
-        StyleType::HeadersDay
-    } else {
-        StyleType::HeadersNight
-    };
     let logo = logo_glyph().size(95);
 
     let button_style = Button::new(
         &mut sniffer.mode,
-        icon_sun_moon(sniffer.style).horizontal_alignment(alignment::Horizontal::Center),
+        icon_sun_moon().horizontal_alignment(alignment::Horizontal::Center),
     )
     .padding(10)
     .height(Length::Units(40))
     .width(Length::Units(60))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::Style);
 
     let header = Container::new(
@@ -79,7 +74,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     .height(Length::FillPortion(HEIGHT_HEADER))
     .align_y(Vertical::Center)
     .width(Length::Fill)
-    .style(headers_style);
+    .style(StyleTuple(sniffer.style, ElementType::Headers));
 
     let button_start = Button::new(
         &mut sniffer.start,
@@ -92,7 +87,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     .padding(10)
     .height(Length::Units(80))
     .width(Length::Units(160))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::Start);
 
     let mut dev_str_list = vec![];
@@ -141,7 +136,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .push(
             dev_str_list.iter().fold(
                 Scrollable::new(&mut sniffer.scroll_adapters)
-                    .style(sniffer.style)
+                    .style(StyleTuple(sniffer.style, ElementType::Standard))
                     .padding(13)
                     .spacing(5),
                 |scroll_adapters, adapter| {
@@ -156,10 +151,10 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                             .font(font)
                             .size(15)
                             .width(Length::Fill)
-                            .style(sniffer.style),
+                            .style(StyleTuple(sniffer.style, ElementType::Standard)),
                         )
                         .padding(10)
-                        .style(StyleType::BorderedRound),
+                        .style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
                     )
                 },
             ),
@@ -182,7 +177,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         )
         .push(
             Radio::new(
@@ -194,7 +189,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         )
         .push(
             Radio::new(
@@ -206,7 +201,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         );
     let col_ip = Column::new()
         .spacing(10)
@@ -231,7 +226,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         )
         .push(
             Radio::new(
@@ -243,7 +238,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         )
         .push(
             Radio::new(
@@ -255,7 +250,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(sniffer.style),
+            .style(StyleTuple(sniffer.style, ElementType::Standard)),
         );
     let col_transport = Column::new()
         .align_items(Alignment::Center)
@@ -275,7 +270,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .font(font)
     .placeholder("Select application protocol")
-    .style(sniffer.style);
+    .style(StyleTuple(sniffer.style, ElementType::Standard));
     let col_app = Column::new()
         .width(Length::FillPortion(2))
         .spacing(10)
@@ -321,7 +316,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     )
     .height(Length::Units(35))
     .width(Length::Units(35))
-    .style(sniffer.style)
+    .style(StyleTuple(sniffer.style, ElementType::Standard))
     .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
@@ -337,7 +332,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .height(FillPortion(HEIGHT_FOOTER))
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(headers_style);
+        .style(StyleTuple(sniffer.style, ElementType::Headers));
 
     Column::new().push(header).push(body).push(footer)
 }

@@ -9,17 +9,18 @@ use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
-use crate::gui::style::{
-    CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, NOTOSANS, NOTOSANS_BOLD,
-    SPECIAL_DAY_RGB, SPECIAL_NIGHT_RGB,
-};
-use crate::{ChartType, RunTimeData, StyleType};
+use crate::gui::style::{CHARTS_LINE_BORDER, NOTOSANS, NOTOSANS_BOLD};
+use crate::structs::colors::to_rgb_color;
+use crate::utility::style_constants::{COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT};
+use crate::{get_colors, ChartType, RunTimeData, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
     charts_data: Arc<Mutex<RunTimeData>>,
     color_mix: f64,
-    font_color: RGBColor,
+    color_incoming: RGBColor,
+    color_outgoing: RGBColor,
+    color_font: RGBColor,
     chart_type: ChartType,
 }
 
@@ -28,31 +29,32 @@ impl TrafficChart {
         TrafficChart {
             charts_data,
             color_mix: 0.0,
-            font_color: Default::default(),
+            color_incoming: Default::default(),
+            color_outgoing: Default::default(),
+            color_font: Default::default(),
             chart_type: ChartType::Packets,
         }
     }
 
-    pub fn view(&mut self, mode: StyleType, chart_type: ChartType) -> Element<Message> {
-        self.color_mix = if mode == StyleType::Day {
+    pub fn view(&mut self, style: StyleType, chart_type: ChartType) -> Element<Message> {
+        self.color_mix = if style == StyleType::Day {
             COLOR_CHART_MIX_DAY
         } else {
             COLOR_CHART_MIX_NIGHT
         };
         self.chart_type = chart_type;
-        self.font_color = if mode == StyleType::Day {
-            plotters::style::colors::BLACK
-        } else {
-            plotters::style::colors::WHITE
-        };
+        self.color_font = to_rgb_color(get_colors(style).text_body);
+        self.color_incoming = to_rgb_color(get_colors(style).incoming);
+        self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
 
-        Container::new(Column::new().push(ChartWidget::new(self).resolve_font(
-            move |_, _| match mode {
-                StyleType::Night => NOTOSANS,
-                StyleType::Day => NOTOSANS_BOLD,
-                _ => NOTOSANS,
-            },
-        )))
+        Container::new(
+            Column::new().push(
+                ChartWidget::new(self).resolve_font(move |_, _| match style {
+                    StyleType::Night => NOTOSANS,
+                    StyleType::Day => NOTOSANS_BOLD,
+                }),
+            ),
+        )
         .align_x(Horizontal::Left)
         .align_y(Vertical::Bottom)
         .into()
@@ -61,7 +63,7 @@ impl TrafficChart {
 
 impl Chart<Message> for TrafficChart {
     fn build_chart<DB: DrawingBackend>(&self, mut chart: ChartBuilder<DB>) {
-        use plotters::{prelude::*, style::Color};
+        use plotters::prelude::*;
 
         let charts_data_lock = self.charts_data.lock().unwrap();
 
@@ -70,6 +72,9 @@ impl Chart<Message> for TrafficChart {
         }
         let tot_seconds = charts_data_lock.ticks - 1;
         let first_time_displayed = max(0, charts_data_lock.ticks as i128 - 30) as u128;
+
+        let color_incoming = self.color_incoming;
+        let color_outgoing = self.color_outgoing;
 
         match self.chart_type {
             ChartType::Bytes => {
@@ -86,7 +91,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.font_color))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| match bytes {
                         0..=999 | -999..=-1 => {
                             format!("{}", bytes)
@@ -108,38 +113,38 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             charts_data_lock.received_bytes.iter().copied(),
                             0,
-                            SPECIAL_NIGHT_RGB.mix(self.color_mix),
+                            color_incoming.mix(self.color_mix),
                         )
                         .border_style(
-                            ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER),
+                            ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
                         ),
                     )
                     .expect("Error drawing graph")
                     .label("Incoming")
-                    .legend(|(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled())
+                    .legend(move |(x, y)| {
+                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
                     });
                 chart
                     .draw_series(
                         AreaSeries::new(
                             charts_data_lock.sent_bytes.iter().copied(),
                             0,
-                            SPECIAL_DAY_RGB.mix(self.color_mix),
+                            color_outgoing.mix(self.color_mix),
                         )
                         .border_style(
-                            ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER),
+                            ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
                         ),
                     )
                     .expect("Error drawing graph")
                     .label("Outgoing")
-                    .legend(|(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled())
+                    .legend(move |(x, y)| {
+                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
                     });
                 chart
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.font_color))
+                    .label_font(("notosans", 15).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }
@@ -158,7 +163,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.font_color))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .draw()
                     .unwrap();
                 chart
@@ -166,38 +171,38 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             charts_data_lock.received_packets.iter().copied(),
                             0,
-                            SPECIAL_NIGHT_RGB.mix(self.color_mix),
+                            color_incoming.mix(self.color_mix),
                         )
                         .border_style(
-                            ShapeStyle::from(&SPECIAL_NIGHT_RGB).stroke_width(CHARTS_LINE_BORDER),
+                            ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
                         ),
                     )
                     .expect("Error drawing graph")
                     .label("Incoming")
-                    .legend(|(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_NIGHT_RGB.filled())
+                    .legend(move |(x, y)| {
+                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
                     });
                 chart
                     .draw_series(
                         AreaSeries::new(
                             charts_data_lock.sent_packets.iter().copied(),
                             0,
-                            SPECIAL_DAY_RGB.mix(self.color_mix),
+                            color_outgoing.mix(self.color_mix),
                         )
                         .border_style(
-                            ShapeStyle::from(&SPECIAL_DAY_RGB).stroke_width(CHARTS_LINE_BORDER),
+                            ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
                         ),
                     )
                     .expect("Error drawing graph")
                     .label("Outgoing")
-                    .legend(|(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], SPECIAL_DAY_RGB.filled())
+                    .legend(move |(x, y)| {
+                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
                     });
                 chart
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.font_color))
+                    .label_font(("notosans", 15).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }

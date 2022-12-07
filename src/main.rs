@@ -15,6 +15,7 @@ use crate::enums::ip_version::IpVersion;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
 use crate::enums::trans_protocol::TransProtocol;
+use crate::structs::colors::get_colors;
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::runtime_data::RunTimeData;

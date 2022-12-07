@@ -10,7 +10,7 @@ use pcap::Device;
 
 use crate::enums::message::Message;
 use crate::enums::status::Status;
-use crate::gui::style::StyleType;
+use crate::gui::style::{ElementType, StyleTuple, StyleType};
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -158,10 +158,10 @@ impl Application for Sniffer {
                 *self.pcap_error.lock().unwrap() = Option::None;
             }
             Message::Style => {
-                self.style = if self.style == StyleType::Day {
-                    StyleType::Night
+                if self.style == StyleType::Day {
+                    self.style = StyleType::Night;
                 } else {
-                    StyleType::Day
+                    self.style = StyleType::Day;
                 };
             }
         }
@@ -179,7 +179,7 @@ impl Application for Sniffer {
 
     fn view(&mut self) -> Element<Message> {
         let status = *self.status_pair.0.lock().unwrap();
-        let mode = self.style;
+        let style = self.style;
 
         let body = match status {
             Status::Init => initial_page(self),
@@ -191,7 +191,7 @@ impl Application for Sniffer {
             .height(Length::Fill)
             .center_x()
             .center_y()
-            .style(mode)
+            .style(StyleTuple(style, ElementType::Standard))
             .into()
     }
 }
