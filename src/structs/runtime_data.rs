@@ -2,6 +2,8 @@
 //!
 use std::collections::{HashMap, VecDeque};
 
+use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
 
 /// Struct containing useful data to generate charts and to display statistics about network traffic
@@ -20,6 +22,8 @@ pub struct RunTimeData {
     pub received_packets: VecDeque<(u128, i128)>,
     /// Application protocol with the respective number of filtered packets
     pub app_protocols: HashMap<AppProtocol, u128>,
+    /// Connection entries to be displayed in report column
+    pub report_vec: Vec<(AddressPortPair, InfoAddressPortPair)>,
     /// Total sent bytes filtered
     pub tot_sent_bytes: i128,
     /// Total received bytes filtered
@@ -59,6 +63,7 @@ impl RunTimeData {
             sent_packets: Default::default(),
             received_packets: Default::default(),
             app_protocols: Default::default(),
+            report_vec: Default::default(),
             tot_sent_bytes: 0,
             tot_received_bytes: 0,
             tot_sent_packets: 0,

@@ -16,6 +16,7 @@ use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
+use crate::utility::manage_report_data::update_report_data;
 use crate::{InfoTraffic, RunTimeData};
 
 /// Update period when app is running
@@ -54,6 +55,11 @@ impl Application for Sniffer {
                 drop(info_traffic_lock);
                 drop(runtime_data_lock);
                 update_charts_data(self.runtime_data.clone());
+                update_report_data(
+                    self.runtime_data.clone(),
+                    self.info_traffic.clone(),
+                    self.report_type,
+                );
             }
             Message::AdapterSelection(name) => {
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
@@ -77,6 +83,11 @@ impl Application for Sniffer {
             }
             Message::ReportSelection(what_to_display) => {
                 self.report_type = what_to_display;
+                update_report_data(
+                    self.runtime_data.clone(),
+                    self.info_traffic.clone(),
+                    self.report_type,
+                );
             }
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]

@@ -12,6 +12,7 @@ use crate::{AppProtocol, TransProtocol};
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each InfoAddressPortPair struct is associated to a single address:port pair.
+#[derive(Clone)]
 pub struct InfoAddressPortPair {
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,

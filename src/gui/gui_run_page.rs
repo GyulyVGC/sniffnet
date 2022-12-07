@@ -3,8 +3,6 @@
 //! It contains elements to display traffic statistics: charts, detailed connections data
 //! and overall statistics about the filtered traffic.
 
-use std::cmp::min;
-
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Button, Column, Container, Length, Radio, Row, Scrollable, Text};
@@ -16,8 +14,6 @@ use crate::gui::style::{
     COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE,
     HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
 };
-use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::sniffer::Sniffer;
 use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
@@ -173,8 +169,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
         .spacing(5)
         .align_items(Alignment::Center);
 
-    let mut tab_body = Column::new()
-        .height(Length::FillPortion(HEIGHT_BODY));
+    let mut tab_body = Column::new().height(Length::FillPortion(HEIGHT_BODY));
 
     if sniffer.pcap_error.lock().unwrap().is_none() {
         // NO pcap error detected
@@ -242,8 +237,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .push(button_inspect)
                     .push(button_settings);
 
-                tab_body = tab_body
-                    .push(tabs);
+                tab_body = tab_body.push(tabs);
 
                 let active_radio_chart = sniffer.chart_type;
                 let row_radio_chart = Row::new()
@@ -280,9 +274,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     );
 
                 let col_chart = Container::new(
-                    Column::new()
-                        .push(row_radio_chart)
-                        .push(
+                    Column::new().push(row_radio_chart).push(
                         sniffer
                             .traffic_chart
                             .view(sniffer.style, sniffer.chart_type),
@@ -384,26 +376,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .style(sniffer.style),
                     );
 
-                let sniffer_lock = sniffer.info_traffic.lock().unwrap();
-                let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> =
-                    sniffer_lock.map.iter().collect();
-                match active_radio_report {
-                    ReportType::MostRecent => {
-                        sorted_vec
-                            .sort_by(|&(_, a), &(_, b)| b.final_timestamp.cmp(&a.final_timestamp));
-                    }
-                    ReportType::MostPackets => {
-                        sorted_vec.sort_by(|&(_, a), &(_, b)| {
-                            b.transmitted_packets.cmp(&a.transmitted_packets)
-                        });
-                    }
-                    ReportType::MostBytes => {
-                        sorted_vec.sort_by(|&(_, a), &(_, b)| {
-                            b.transmitted_bytes.cmp(&a.transmitted_bytes)
-                        });
-                    }
-                }
-                let n_entry = min(sorted_vec.len(), 15);
                 let mut col_report = Column::new()
                     .height(Length::Fill)
                     .push(row_radio_report)
@@ -412,8 +384,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     ;
                 let mut scroll_report =
                     Scrollable::new(&mut sniffer.scroll_report).style(sniffer.style);
-                for i in 0..n_entry {
-                    let key_val = sorted_vec.get(i).unwrap();
+                for key_val in sniffer.runtime_data.lock().unwrap().report_vec.iter() {
                     let entry_color = get_connection_color(key_val.1.traffic_type);
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
@@ -432,7 +403,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                     );
                 }
                 col_report = col_report.push(scroll_report);
-                drop(sniffer_lock);
 
                 let row_report = Row::new().push(
                     Container::new(col_report)
@@ -523,7 +493,6 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
     Column::new()
         .push(header)
-        .push(tab_body
-            .push(body))
+        .push(tab_body.push(body))
         .push(footer)
 }

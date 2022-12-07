@@ -165,8 +165,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             ),
         );
 
-    let col_space = Column::new()
-        .width(Length::FillPortion(1));
+    let col_space = Column::new().width(Length::FillPortion(1));
 
     let filtri = sniffer.filters.lock().unwrap();
     let ip_active = filtri.ip;
@@ -340,8 +339,5 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         .align_x(Horizontal::Center)
         .style(headers_style);
 
-    Column::new()
-        .push(header)
-        .push(body)
-        .push(footer)
+    Column::new().push(header).push(body).push(footer)
 }
