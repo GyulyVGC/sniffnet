@@ -4,9 +4,9 @@ use iced::{Color, Font};
 
 use crate::structs::colors::Colors;
 
-pub const COLOR_CHART_MIX_DAY: f64 = 0.6;
+pub const COLOR_CHART_MIX_DAY: f64 = 1.0;
 
-pub const COLOR_CHART_MIX_NIGHT: f64 = 0.6;
+pub const COLOR_CHART_MIX_NIGHT: f64 = 1.0;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -99,6 +99,43 @@ pub const TRY_STYLE: Colors = Colors {
     round_borders: BUTTONS_TRY,
 };
 
+// red theme
+const PRIMARY_RED: Color = Color {
+    r: 130.0 / 255.0,
+    g: 0.0 / 255.0,
+    b: 0.0 / 255.0,
+    a: 1.0,
+};
+const SECONDARY_RED: Color = Color {
+    r: 254.0 / 255.0,
+    g: 224.0 / 255.0,
+    b: 192.0 / 255.0,
+    a: 1.0,
+};
+const BUTTONS_RED: Color = Color {
+    r: 185.0 / 255.0,
+    g: 0.0 / 255.0,
+    b: 91.0 / 255.0,
+    a: 1.0,
+};
+const INCOMING_RED: Color = SECONDARY_RED;
+const OUTGOING_RED: Color = Color {
+    r: 34.0 / 255.0,
+    g: 34.0 / 255.0,
+    b: 34.0 / 255.0,
+    a: 1.0,
+};
+pub const RED_STYLE: Colors = Colors {
+    primary: PRIMARY_RED,
+    secondary: SECONDARY_RED,
+    buttons: BUTTONS_RED,
+    incoming: INCOMING_RED,
+    outgoing: OUTGOING_RED,
+    text_headers: Color::BLACK,
+    text_body: Color::WHITE,
+    round_borders: Color::BLACK,
+};
+
 // almond theme
 const PRIMARY_ALMOND: Color = Color {
     r: 139.0 / 255.0,
@@ -107,23 +144,13 @@ const PRIMARY_ALMOND: Color = Color {
     a: 1.0,
 };
 const SECONDARY_ALMOND: Color = Color {
-    r: 199.0 / 255.0,
-    g: 188.0 / 255.0,
-    b: 161.0 / 255.0,
+    r: 54.0 / 255.0,
+    g: 39.0 / 255.0,
+    b: 6.0 / 255.0,
     a: 1.0,
 };
-const BUTTONS_ALMOND: Color = Color {
-    r: 101.0 / 255.0,
-    g: 100.0 / 255.0,
-    b: 124.0 / 255.0,
-    a: 1.0,
-};
-const INCOMING_ALMOND: Color = Color {
-    r: 68.0 / 255.0,
-    g: 106.0 / 255.0,
-    b: 70.0 / 255.0,
-    a: 1.0,
-};
+const BUTTONS_ALMOND: Color = OUTGOING_ALMOND;
+const INCOMING_ALMOND: Color = SECONDARY_ALMOND;
 const OUTGOING_ALMOND: Color = Color {
     r: 241.0 / 255.0,
     g: 211.0 / 255.0,
@@ -136,7 +163,7 @@ pub const ALMOND_STYLE: Colors = Colors {
     buttons: BUTTONS_ALMOND,
     incoming: INCOMING_ALMOND,
     outgoing: OUTGOING_ALMOND,
-    text_headers: Color::BLACK,
+    text_headers: Color::WHITE,
     text_body: Color::BLACK,
     round_borders: SECONDARY_ALMOND,
 };

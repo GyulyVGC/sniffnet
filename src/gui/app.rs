@@ -19,6 +19,7 @@ use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
+use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
 
 /// Update period when app is running
@@ -42,8 +43,11 @@ impl Application for Sniffer {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::TickInit => {}
+            Message::TickInit => {
+                play_sound();
+            }
             Message::TickRun => {
+                play_sound();
                 let mut runtime_data_lock = self.runtime_data.lock().unwrap();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
                 runtime_data_lock.all_packets = info_traffic_lock.all_packets;
@@ -165,7 +169,8 @@ impl Application for Sniffer {
                     StyleType::Night => StyleType::Day,
                     StyleType::Day => StyleType::Try,
                     StyleType::Try => StyleType::Almond,
-                    StyleType::Almond => StyleType::Night,
+                    StyleType::Almond => StyleType::Red,
+                    StyleType::Red => StyleType::Night,
                 };
                 let cfg = Config { style: self.style };
                 confy::store("sniffnet", None, cfg).unwrap();

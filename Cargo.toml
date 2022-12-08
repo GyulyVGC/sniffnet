@@ -36,3 +36,4 @@ iced_style = "0.4.0"
 db_ip = "0.3.7"
 confy = "0.5.1"
 serde = { version = "1.0.149", features = ["derive"] }
+rodio = "0.16.0"

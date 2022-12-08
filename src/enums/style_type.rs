@@ -7,6 +7,7 @@ pub enum StyleType {
     Day,
     Try,
     Almond,
+    Red,
 }
 
 impl Clone for StyleType {
@@ -17,6 +18,6 @@ impl Clone for StyleType {
 
 impl ::std::default::Default for StyleType {
     fn default() -> Self {
-        Self::Try
+        Self::Night
     }
 }

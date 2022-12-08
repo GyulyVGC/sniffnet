@@ -53,7 +53,6 @@ impl TrafficChart {
             Column::new().push(
                 ChartWidget::new(self).resolve_font(move |_, _| match color_font {
                     RGBColor(255, 255, 255) => NOTOSANS, // if white non-bold
-                    RGBColor(0, 0, 0) => NOTOSANS_BOLD,  // if black bold
                     _ => NOTOSANS_BOLD,
                 }),
             ),
