@@ -6,6 +6,7 @@ pub enum ElementType {
     BorderedRound,
     TabActive,
     TabInactive,
+    SelectedRadio,
 }
 
 impl Clone for ElementType {

@@ -48,11 +48,13 @@ impl TrafficChart {
         self.color_incoming = to_rgb_color(get_colors(style).incoming);
         self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
 
+        let color_font = self.color_font;
         Container::new(
             Column::new().push(
-                ChartWidget::new(self).resolve_font(move |_, _| match style {
-                    StyleType::Night => NOTOSANS,
-                    StyleType::Day => NOTOSANS_BOLD,
+                ChartWidget::new(self).resolve_font(move |_, _| match color_font {
+                    RGBColor(255, 255, 255) => NOTOSANS, // if white non-bold
+                    RGBColor(0, 0, 0) => NOTOSANS_BOLD,  // if black bold
+                    _ => NOTOSANS_BOLD,
                 }),
             ),
         )

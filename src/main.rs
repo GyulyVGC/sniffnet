@@ -17,6 +17,7 @@ use crate::enums::status::Status;
 use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
 use crate::structs::colors::get_colors;
+use crate::structs::config::Config;
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::runtime_data::RunTimeData;
@@ -106,7 +107,7 @@ pub fn main() -> iced::Result {
             scroll_adapters: scrollable::State::new(),
             scroll_packets: scrollable::State::new(),
             scroll_report: scrollable::State::new(),
-            style: StyleType::Night,
+            style: confy::load::<Config>("sniffnet", None).unwrap().style,
             waiting: String::new(),
             traffic_chart: TrafficChart::new(runtime_data2),
             chart_type: ChartType::Packets,

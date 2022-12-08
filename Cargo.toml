@@ -34,3 +34,5 @@ plotters-iced = "0.3.3"
 iced = { version = "0.4.2", features = ["tokio", "image"] }
 iced_style = "0.4.0"
 db_ip = "0.3.7"
+confy = "0.5.1"
+serde = { version = "1.0.149", features = ["derive"] }

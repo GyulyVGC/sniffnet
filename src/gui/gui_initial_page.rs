@@ -8,10 +8,12 @@ use iced::{
     alignment, Alignment, Button, Column, Container, Length, PickList, Radio, Row, Scrollable, Text,
 };
 use pcap::Device;
+use plotters::style::RGBColor;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::gui::style::StyleTuple;
+use crate::structs::colors::to_rgb_color;
 use crate::structs::sniffer::Sniffer;
 use crate::utility::get_formatted_strings::{icon_sun_moon, logo_glyph, APP_VERSION};
 use crate::utility::style_constants::{
@@ -19,19 +21,17 @@ use crate::utility::style_constants::{
     FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
     HEIGHT_HEADER, ICONS,
 };
-use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
+use crate::{get_colors, AppProtocol, IpVersion, TransProtocol};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
-    let font = if sniffer.style == StyleType::Day {
-        COURIER_PRIME_BOLD
-    } else {
-        COURIER_PRIME
+    let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
+        RGBColor(255, 255, 255) => COURIER_PRIME,
+        _ => COURIER_PRIME_BOLD,
     };
-    let font_footer = if sniffer.style == StyleType::Day {
-        COURIER_PRIME_ITALIC
-    } else {
-        COURIER_PRIME_BOLD_ITALIC
+    let font_footer = match to_rgb_color(get_colors(sniffer.style).text_headers) {
+        RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
+        _ => COURIER_PRIME_BOLD_ITALIC,
     };
     let logo = logo_glyph();
 
@@ -123,6 +123,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
         dev_str_list.push((name, dev_str));
     }
 
+    let adapter_active = &sniffer.device.lock().unwrap().name.clone();
     let col_adapter = Column::new()
         .padding(10)
         .spacing(5)
@@ -140,10 +141,11 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                     .padding(13)
                     .spacing(5),
                 |scroll_adapters, adapter| {
+                    let name = &adapter.0;
                     scroll_adapters.push(
                         Container::new(
                             Radio::new(
-                                &adapter.0,
+                                name,
                                 &adapter.1,
                                 Some(&sniffer.device.clone().lock().unwrap().name),
                                 |name| Message::AdapterSelection(name.to_string()),
@@ -151,7 +153,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
                             .font(font)
                             .size(15)
                             .width(Length::Fill)
-                            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                            .style(StyleTuple(
+                                sniffer.style,
+                                if adapter_active.eq(name) {
+                                    ElementType::SelectedRadio
+                                } else {
+                                    ElementType::Standard
+                                },
+                            )),
                         )
                         .padding(10)
                         .style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
@@ -177,7 +186,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if ip_active.eq(&IpVersion::IPv4) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         )
         .push(
             Radio::new(
@@ -189,7 +205,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if ip_active.eq(&IpVersion::IPv6) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         )
         .push(
             Radio::new(
@@ -201,7 +224,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if ip_active.eq(&IpVersion::Other) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         );
     let col_ip = Column::new()
         .spacing(10)
@@ -226,7 +256,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if transport_active.eq(&TransProtocol::TCP) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         )
         .push(
             Radio::new(
@@ -238,7 +275,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if transport_active.eq(&TransProtocol::UDP) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         )
         .push(
             Radio::new(
@@ -250,7 +294,14 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(StyleTuple(sniffer.style, ElementType::Standard)),
+            .style(StyleTuple(
+                sniffer.style,
+                if transport_active.eq(&TransProtocol::Other) {
+                    ElementType::SelectedRadio
+                } else {
+                    ElementType::Standard
+                },
+            )),
         );
     let col_transport = Column::new()
         .align_items(Alignment::Center)

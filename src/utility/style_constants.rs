@@ -4,9 +4,9 @@ use iced::{Color, Font};
 
 use crate::structs::colors::Colors;
 
-pub const COLOR_CHART_MIX_DAY: f64 = 0.8;
+pub const COLOR_CHART_MIX_DAY: f64 = 0.6;
 
-pub const COLOR_CHART_MIX_NIGHT: f64 = 0.4;
+pub const COLOR_CHART_MIX_NIGHT: f64 = 0.6;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -35,6 +35,7 @@ pub const NIGHT_STYLE: Colors = Colors {
     outgoing: SECONDARY_DAY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
+    round_borders: Color::BLACK,
 };
 
 // day theme
@@ -59,6 +60,85 @@ pub const DAY_STYLE: Colors = Colors {
     outgoing: SECONDARY_DAY,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
+    round_borders: Color::BLACK,
+};
+
+// try theme
+const PRIMARY_TRY: Color = Color {
+    r: 0.1,
+    g: 0.1,
+    b: 0.1,
+    a: 1.0,
+};
+const SECONDARY_TRY: Color = Color {
+    r: 1.0,
+    g: 0.72,
+    b: 0.17,
+    a: 1.0,
+};
+const BUTTONS_TRY: Color = Color {
+    r: 0.3,
+    g: 0.3,
+    b: 0.3,
+    a: 1.0,
+};
+const OUTGOING_TRY: Color = Color {
+    r: 0.45,
+    g: 0.17,
+    b: 1.0,
+    a: 1.0,
+};
+pub const TRY_STYLE: Colors = Colors {
+    primary: PRIMARY_TRY,
+    secondary: SECONDARY_TRY,
+    buttons: BUTTONS_TRY,
+    incoming: SECONDARY_TRY,
+    outgoing: OUTGOING_TRY,
+    text_headers: Color::BLACK,
+    text_body: Color::WHITE,
+    round_borders: BUTTONS_TRY,
+};
+
+// almond theme
+const PRIMARY_ALMOND: Color = Color {
+    r: 139.0 / 255.0,
+    g: 126.0 / 255.0,
+    b: 116.0 / 255.0,
+    a: 1.0,
+};
+const SECONDARY_ALMOND: Color = Color {
+    r: 199.0 / 255.0,
+    g: 188.0 / 255.0,
+    b: 161.0 / 255.0,
+    a: 1.0,
+};
+const BUTTONS_ALMOND: Color = Color {
+    r: 101.0 / 255.0,
+    g: 100.0 / 255.0,
+    b: 124.0 / 255.0,
+    a: 1.0,
+};
+const INCOMING_ALMOND: Color = Color {
+    r: 68.0 / 255.0,
+    g: 106.0 / 255.0,
+    b: 70.0 / 255.0,
+    a: 1.0,
+};
+const OUTGOING_ALMOND: Color = Color {
+    r: 241.0 / 255.0,
+    g: 211.0 / 255.0,
+    b: 179.0 / 255.0,
+    a: 1.0,
+};
+pub const ALMOND_STYLE: Colors = Colors {
+    primary: PRIMARY_ALMOND,
+    secondary: SECONDARY_ALMOND,
+    buttons: BUTTONS_ALMOND,
+    incoming: INCOMING_ALMOND,
+    outgoing: OUTGOING_ALMOND,
+    text_headers: Color::BLACK,
+    text_body: Color::BLACK,
+    round_borders: SECONDARY_ALMOND,
 };
 
 // gui Text fonts

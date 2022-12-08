@@ -6,11 +6,13 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Button, Column, Container, Length, Radio, Row, Scrollable, Text};
+use plotters::style::RGBColor;
 use thousands::Separable;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::gui::style::StyleTuple;
+use crate::structs::colors::to_rgb_color;
 use crate::structs::sniffer::Sniffer;
 use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
@@ -22,19 +24,17 @@ use crate::utility::style_constants::{
     COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
     FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
 };
-use crate::{AppProtocol, ChartType, ReportType, StyleType};
+use crate::{get_colors, AppProtocol, ChartType, ReportType};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
-    let font = if sniffer.style == StyleType::Day {
-        COURIER_PRIME_BOLD
-    } else {
-        COURIER_PRIME
+    let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
+        RGBColor(255, 255, 255) => COURIER_PRIME,
+        _ => COURIER_PRIME_BOLD,
     };
-    let font_footer = if sniffer.style == StyleType::Day {
-        COURIER_PRIME_ITALIC
-    } else {
-        COURIER_PRIME_BOLD_ITALIC
+    let font_footer = match to_rgb_color(get_colors(sniffer.style).text_headers) {
+        RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
+        _ => COURIER_PRIME_BOLD_ITALIC,
     };
     let logo = logo_glyph();
 
@@ -126,7 +126,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     .width(Length::Fill)
     .style(StyleTuple(sniffer.style, ElementType::Headers));
 
-    let button_report = Button::new(
+    let _button_report = Button::new(
         &mut sniffer.report,
         Text::new("Open full report")
             .font(font)
@@ -243,7 +243,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(220))
                         .font(font)
                         .size(15)
-                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                        .style(StyleTuple(
+                            sniffer.style,
+                            if active_radio_chart.eq(&ChartType::Packets) {
+                                ElementType::SelectedRadio
+                            } else {
+                                ElementType::Standard
+                            },
+                        )),
                     )
                     .push(
                         Radio::new(
@@ -255,7 +262,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(220))
                         .font(font)
                         .size(15)
-                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                        .style(StyleTuple(
+                            sniffer.style,
+                            if active_radio_chart.eq(&ChartType::Bytes) {
+                                ElementType::SelectedRadio
+                            } else {
+                                ElementType::Standard
+                            },
+                        )),
                     );
 
                 let col_chart = Container::new(
@@ -271,9 +285,9 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 .style(StyleTuple(sniffer.style, ElementType::BorderedRound));
 
                 let mut col_packets = Column::new()
-                    .width(Length::FillPortion(1))
                     .padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
+                    //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
                     .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
                     .push(Text::new(" "))
                     .push(
@@ -334,7 +348,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                        .style(StyleTuple(
+                            sniffer.style,
+                            if active_radio_report.eq(&ReportType::MostRecent) {
+                                ElementType::SelectedRadio
+                            } else {
+                                ElementType::Standard
+                            },
+                        )),
                     )
                     .push(
                         Radio::new(
@@ -346,7 +367,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                        .style(StyleTuple(
+                            sniffer.style,
+                            if active_radio_report.eq(&ReportType::MostPackets) {
+                                ElementType::SelectedRadio
+                            } else {
+                                ElementType::Standard
+                            },
+                        )),
                     )
                     .push(
                         Radio::new(
@@ -358,7 +386,14 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                         .width(Length::Units(200))
                         .font(font)
                         .size(15)
-                        .style(StyleTuple(sniffer.style, ElementType::Standard)),
+                        .style(StyleTuple(
+                            sniffer.style,
+                            if active_radio_report.eq(&ReportType::MostBytes) {
+                                ElementType::SelectedRadio
+                            } else {
+                                ElementType::Standard
+                            },
+                        )),
                     );
 
                 let mut col_report = Column::new()
@@ -403,19 +438,11 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                             .height(Length::FillPortion(3))
                             .push(col_chart)
                             .push(
-                                Column::new()
-                                    .spacing(5)
-                                    .align_items(Alignment::Center)
-                                    .push(
-                                        Container::new(col_packets)
-                                            .padding(10)
-                                            .height(Length::Fill)
-                                            .style(StyleTuple(
-                                                sniffer.style,
-                                                ElementType::BorderedRound,
-                                            )),
-                                    )
-                                    .push(button_report),
+                                Container::new(col_packets)
+                                    .width(Length::FillPortion(1))
+                                    .padding(10)
+                                    .height(Length::Fill)
+                                    .style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
                             ),
                     )
                     .push(

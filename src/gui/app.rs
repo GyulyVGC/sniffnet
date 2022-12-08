@@ -13,6 +13,7 @@ use crate::enums::message::Message;
 use crate::enums::status::Status;
 use crate::gui::style::StyleTuple;
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
+use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
@@ -159,11 +160,15 @@ impl Application for Sniffer {
                 *self.pcap_error.lock().unwrap() = Option::None;
             }
             Message::Style => {
-                if self.style == StyleType::Day {
-                    self.style = StyleType::Night;
-                } else {
-                    self.style = StyleType::Day;
+                let current_style = self.style;
+                self.style = match current_style {
+                    StyleType::Night => StyleType::Day,
+                    StyleType::Day => StyleType::Try,
+                    StyleType::Try => StyleType::Almond,
+                    StyleType::Almond => StyleType::Night,
                 };
+                let cfg = Config { style: self.style };
+                confy::store("sniffnet", None, cfg).unwrap();
             }
         }
         Command::none()
