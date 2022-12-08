@@ -3,8 +3,9 @@
 use std::cmp::max;
 use std::sync::{Arc, Mutex};
 
+use iced::Element;
 use iced::alignment::{Horizontal, Vertical};
-use iced::{Column, Container, Element};
+use iced::widget::{Column, Container};
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
@@ -64,7 +65,9 @@ impl TrafficChart {
 }
 
 impl Chart<Message> for TrafficChart {
-    fn build_chart<DB: DrawingBackend>(&self, mut chart: ChartBuilder<DB>) {
+    type State = ();
+
+    fn build_chart<DB: DrawingBackend>(&self, _state: &Self::State, mut chart: ChartBuilder<DB>) {
         use plotters::prelude::*;
 
         let charts_data_lock = self.charts_data.lock().unwrap();

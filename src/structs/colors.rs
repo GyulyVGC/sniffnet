@@ -50,3 +50,9 @@ pub fn to_rgb_color(color: Color) -> RGBColor {
         (color.b * 255.0) as u8,
     )
 }
+
+impl Default for Colors {
+    fn default() -> Self {
+        get_colors(StyleType::Night)
+    }
+}

@@ -4,8 +4,8 @@
 
 use std::thread;
 use std::time::Duration;
-
-use iced::{executor, Application, Command, Container, Element, Length, Subscription};
+use iced::{executor, Application, Command, Element, Length, Subscription, Renderer, Theme};
+use iced::widget::Container;
 use pcap::Device;
 
 use crate::enums::element_type::ElementType;
@@ -21,6 +21,8 @@ use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
+use crate::structs::colors::Colors;
+use crate::utility::style_constants::{ALMOND_STYLE, DAY_STYLE, NIGHT_STYLE, RED_STYLE, TRY_STYLE};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -31,6 +33,7 @@ pub const PERIOD_INIT: u64 = 5000; //milliseconds
 impl Application for Sniffer {
     type Executor = executor::Default;
     type Message = Message;
+    type Theme = Theme;
     type Flags = Sniffer;
 
     fn new(flags: Sniffer) -> (Sniffer, Command<Message>) {
@@ -179,16 +182,7 @@ impl Application for Sniffer {
         Command::none()
     }
 
-    fn subscription(&self) -> Subscription<Message> {
-        match *self.status_pair.0.lock().unwrap() {
-            Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
-            }
-            _ => iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit),
-        }
-    }
-
-    fn view(&mut self) -> Element<Message> {
+    fn view(&self) -> Element<Message> {
         let status = *self.status_pair.0.lock().unwrap();
         let style = self.style;
 
@@ -202,7 +196,27 @@ impl Application for Sniffer {
             .height(Length::Fill)
             .center_x()
             .center_y()
-            .style(StyleTuple(style, ElementType::Standard))
+            //.style(StyleTuple(style, ElementType::Standard))
             .into()
+    }
+
+    fn subscription(&self) -> Subscription<Message> {
+        match *self.status_pair.0.lock().unwrap() {
+            Status::Running => {
+                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
+            }
+            _ => iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit),
+        }
+    }
+
+    fn theme(&self) -> Theme {
+        Theme::Dark
+        // match self.style {
+        //     StyleType::Night => NIGHT_STYLE,
+        //     StyleType::Day => DAY_STYLE,
+        //     StyleType::Try => TRY_STYLE,
+        //     StyleType::Almond => ALMOND_STYLE,
+        //     StyleType::Red => RED_STYLE,
+        // }
     }
 }

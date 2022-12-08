@@ -3,8 +3,8 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use iced::alignment::Horizontal;
-use iced::{Color, Length, Text};
+use iced::widget::Text;
+use iced::{alignment::Horizontal, Color, Length};
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
