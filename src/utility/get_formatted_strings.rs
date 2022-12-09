@@ -3,14 +3,12 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use iced::widget::Text;
-use iced::{alignment::Horizontal, Color, Length};
+use iced::{Color};
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
-use crate::utility::style_constants::ICONS;
 use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
@@ -195,20 +193,3 @@ pub fn get_country_code(
         _ => "".to_string(),
     }
 }
-
-// /// It returns a glyph featuring Sniffnet's logo
-// pub fn logo_glyph() -> Text {
-//     Text::new('A'.to_string())
-//         .font(ICONS)
-//         .horizontal_alignment(Horizontal::Center)
-//         .size(95)
-// }
-
-// pub fn icon_sun_moon() -> Text {
-//     //F: sun, G: moon, K: sun adjust
-//     Text::new('K'.to_string())
-//         .font(ICONS)
-//         .width(Length::Units(25))
-//         .horizontal_alignment(Horizontal::Center)
-//         .size(20)
-// }

@@ -5,7 +5,7 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Application, Command, Length};
+use iced::{alignment, Alignment, Length};
 use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use plotters::style::RGBColor;
 use thousands::Separable;
@@ -39,7 +39,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
-        .size(95);;
+        .size(95);
 
     let button_style = button(
         Text::new('K'.to_string())
@@ -221,7 +221,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
 
                 tab_body = tab_body.push(tabs);
 
-                let active_radio_chart = sniffer.chart_type;
+                let active_radio_chart = sniffer.traffic_chart.chart_type;
                 let row_radio_chart = Row::new()
                     .padding(15)
                     .spacing(10)
@@ -273,7 +273,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
                     Column::new().push(row_radio_chart).push(
                         sniffer
                             .traffic_chart
-                            .view(sniffer.style, sniffer.chart_type),
+                            .view()
                     ),
                 )
                 .width(Length::FillPortion(2))

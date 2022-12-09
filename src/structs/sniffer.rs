@@ -3,14 +3,12 @@
 
 use std::sync::{Arc, Condvar, Mutex};
 
-use iced::widget::{button, pick_list, scrollable};
 use pcap::Device;
 
-use crate::enums::chart_type::ChartType;
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
-use crate::{AppProtocol, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///
@@ -30,38 +28,12 @@ pub struct Sniffer {
     pub status_pair: Arc<(Mutex<Status>, Condvar)>,
     /// Signals if a pcap error occurred
     pub pcap_error: Arc<Mutex<Option<String>>>,
-    // /// Start button state
-    // pub start: button::State,
-    // /// Reset button state
-    // pub reset: button::State,
-    // /// Style button state
-    // pub mode: button::State,
-    // /// Full report button state
-    // pub report: button::State,
-    // /// GitHub button state
-    // pub git: button::State,
-    // /// Overview button state
-    // pub overview: button::State,
-    // /// Inspect button state
-    // pub inspect: button::State,
-    // /// Settings button state
-    // pub settings: button::State,
-    // /// Application protocol picklist state
-    // pub app: pick_list::State<AppProtocol>,
-    // /// Adapters scrollbar state
-    // pub scroll_adapters: scrollable::State,
-    // /// Packets information scrollbar state
-    // pub scroll_packets: scrollable::State,
-    // /// Relevant connections scrollbar state
-    // pub scroll_report: scrollable::State,
     /// Application style (only values Day and Night are possible for this field)
     pub style: StyleType,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
     pub traffic_chart: TrafficChart,
-    /// Chart type to be displayed
-    pub chart_type: ChartType,
     /// Report type to be displayed
     pub report_type: ReportType,
 }

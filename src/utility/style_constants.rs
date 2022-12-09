@@ -4,9 +4,7 @@ use iced::{Color, Font};
 
 use crate::structs::colors::Colors;
 
-pub const COLOR_CHART_MIX_DAY: f64 = 1.0;
-
-pub const COLOR_CHART_MIX_NIGHT: f64 = 1.0;
+pub const COLOR_CHART_MIX: f64 = 1.0;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {

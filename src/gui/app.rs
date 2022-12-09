@@ -94,7 +94,7 @@ impl Application for Sniffer {
                 self.filters.lock().unwrap().application = protocol;
             }
             Message::ChartSelection(what_to_display) => {
-                self.chart_type = what_to_display;
+                self.traffic_chart.change_kind(what_to_display);
             }
             Message::ReportSelection(what_to_display) => {
                 self.report_type = what_to_display;
@@ -181,6 +181,7 @@ impl Application for Sniffer {
                     StyleType::Almond => StyleType::Red,
                     StyleType::Red => StyleType::Night,
                 };
+                self.traffic_chart.change_colors(self.style);
                 let cfg = Config { style: self.style };
                 confy::store("sniffnet", None, cfg).unwrap();
             }

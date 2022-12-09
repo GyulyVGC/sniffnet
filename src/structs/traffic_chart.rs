@@ -12,7 +12,7 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use crate::enums::message::Message;
 use crate::structs::colors::to_rgb_color;
 use crate::utility::style_constants::{
-    CHARTS_LINE_BORDER, COLOR_CHART_MIX_DAY, COLOR_CHART_MIX_NIGHT, NOTOSANS, NOTOSANS_BOLD,
+    CHARTS_LINE_BORDER, COLOR_CHART_MIX, NOTOSANS, NOTOSANS_BOLD,
 };
 use crate::{get_colors, ChartType, RunTimeData, StyleType};
 
@@ -23,14 +23,14 @@ pub struct TrafficChart {
     color_incoming: RGBColor,
     color_outgoing: RGBColor,
     color_font: RGBColor,
-    chart_type: ChartType,
+    pub chart_type: ChartType,
 }
 
 impl TrafficChart {
     pub fn new(charts_data: Arc<Mutex<RunTimeData>>, style: StyleType) -> Self {
         TrafficChart {
             charts_data,
-            color_mix: 1.0,
+            color_mix: COLOR_CHART_MIX,
             color_incoming: to_rgb_color(get_colors(style).incoming),
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
@@ -38,12 +38,7 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self, style: StyleType, chart_type: ChartType) -> Element<Message> {
-        // self.chart_type = chart_type;
-        // self.color_font = to_rgb_color(get_colors(style).text_body);
-        // self.color_incoming = to_rgb_color(get_colors(style).incoming);
-        // self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
-
+    pub fn view(&self) -> Element<Message> {
         let color_font = self.color_font;
         Container::new(
             Column::new().push(
@@ -56,6 +51,16 @@ impl TrafficChart {
         .align_x(Horizontal::Left)
         .align_y(Vertical::Bottom)
         .into()
+    }
+
+    pub fn change_kind(&mut self, kind: ChartType) {
+        self.chart_type = kind;
+    }
+
+    pub fn change_colors(&mut self, style: StyleType) {
+        self.color_font = to_rgb_color(get_colors(style).text_body);
+        self.color_incoming = to_rgb_color(get_colors(style).incoming);
+        self.color_outgoing  = to_rgb_color(get_colors(style).outgoing);
     }
 }
 
