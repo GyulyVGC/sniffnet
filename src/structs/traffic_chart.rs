@@ -27,27 +27,22 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(charts_data: Arc<Mutex<RunTimeData>>) -> Self {
+    pub fn new(charts_data: Arc<Mutex<RunTimeData>>, style: StyleType) -> Self {
         TrafficChart {
             charts_data,
-            color_mix: 0.0,
-            color_incoming: Default::default(),
-            color_outgoing: Default::default(),
-            color_font: Default::default(),
+            color_mix: 1.0,
+            color_incoming: to_rgb_color(get_colors(style).incoming),
+            color_outgoing: to_rgb_color(get_colors(style).outgoing),
+            color_font: to_rgb_color(get_colors(style).text_body),
             chart_type: ChartType::Packets,
         }
     }
 
-    pub fn view(&mut self, style: StyleType, chart_type: ChartType) -> Element<Message> {
-        self.color_mix = if style == StyleType::Day {
-            COLOR_CHART_MIX_DAY
-        } else {
-            COLOR_CHART_MIX_NIGHT
-        };
-        self.chart_type = chart_type;
-        self.color_font = to_rgb_color(get_colors(style).text_body);
-        self.color_incoming = to_rgb_color(get_colors(style).incoming);
-        self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
+    pub fn view(&self, style: StyleType, chart_type: ChartType) -> Element<Message> {
+        // self.chart_type = chart_type;
+        // self.color_font = to_rgb_color(get_colors(style).text_body);
+        // self.color_incoming = to_rgb_color(get_colors(style).incoming);
+        // self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
 
         let color_font = self.color_font;
         Container::new(

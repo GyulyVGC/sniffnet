@@ -51,24 +51,30 @@ impl Application for Sniffer {
             }
             Message::TickRun => {
                 play_sound();
-                let mut runtime_data_lock = self.runtime_data.lock().unwrap();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
-                runtime_data_lock.all_packets = info_traffic_lock.all_packets;
-                runtime_data_lock.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
-                runtime_data_lock.tot_received_packets =
-                    info_traffic_lock.tot_received_packets as i128;
-                runtime_data_lock.all_bytes = info_traffic_lock.all_bytes;
-                runtime_data_lock.tot_received_bytes = info_traffic_lock.tot_received_bytes as i128;
-                runtime_data_lock.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
-                runtime_data_lock.app_protocols = info_traffic_lock.app_protocols.clone();
-                drop(info_traffic_lock);
-                drop(runtime_data_lock);
-                update_charts_data(self.runtime_data.clone());
-                update_report_data(
-                    self.runtime_data.clone(),
-                    self.info_traffic.clone(),
-                    self.report_type,
-                );
+                if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0 {
+                    drop(info_traffic_lock);
+                    self.update(Message::Waiting);
+                }
+                else {
+                    let mut runtime_data_lock = self.runtime_data.lock().unwrap();
+                    runtime_data_lock.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
+                    runtime_data_lock.tot_received_packets =
+                        info_traffic_lock.tot_received_packets as i128;
+                    runtime_data_lock.all_packets = info_traffic_lock.all_packets;
+                    runtime_data_lock.all_bytes = info_traffic_lock.all_bytes;
+                    runtime_data_lock.tot_received_bytes = info_traffic_lock.tot_received_bytes as i128;
+                    runtime_data_lock.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
+                    runtime_data_lock.app_protocols = info_traffic_lock.app_protocols.clone();
+                    drop(info_traffic_lock);
+                    drop(runtime_data_lock);
+                    update_charts_data(self.runtime_data.clone());
+                    update_report_data(
+                        self.runtime_data.clone(),
+                        self.info_traffic.clone(),
+                        self.report_type,
+                    );
+                }
             }
             Message::AdapterSelection(name) => {
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
@@ -143,7 +149,7 @@ impl Application for Sniffer {
                 let runtime_data_mutex = self.runtime_data.clone();
                 *runtime_data_mutex.lock().unwrap() = RunTimeData::new();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
-                self.traffic_chart = TrafficChart::new(runtime_data_mutex);
+                self.traffic_chart = TrafficChart::new(runtime_data_mutex, self.style);
                 self.status_pair.1.notify_all();
                 thread::Builder::new()
                     .name(format!(
@@ -177,6 +183,12 @@ impl Application for Sniffer {
                 };
                 let cfg = Config { style: self.style };
                 confy::store("sniffnet", None, cfg).unwrap();
+            }
+            Message::Waiting => {
+                if self.waiting.len() > 2 {
+                    self.waiting = "".to_string();
+                }
+                self.waiting = ".".repeat(self.waiting.len() + 1);
             }
         }
         Command::none()

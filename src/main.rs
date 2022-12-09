@@ -5,7 +5,6 @@ use std::{panic, process, thread};
 
 use iced::window::Position;
 use iced::{window, Application, Settings};
-use iced::widget::{button, pick_list, scrollable};
 use pcap::Device;
 
 use utility::style_constants::FONT_SIZE_BODY;
@@ -75,6 +74,8 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
+    let style = confy::load::<Config>("sniffnet", None).unwrap().style;
+
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
@@ -82,7 +83,7 @@ pub fn main() -> iced::Result {
             position: Position::Centered,
             min_size: Some((1190, 600)), // min size allowed
             max_size: None,
-            visible: true,////////////////////////////////
+            visible: true,
             resizable: true,
             decorations: true,
             transparent: false,
@@ -97,21 +98,9 @@ pub fn main() -> iced::Result {
             filters,
             status_pair: status_pair1,
             pcap_error,
-            // start: button::State::new(),
-            // reset: button::State::new(),
-            // mode: button::State::new(),
-            // report: button::State::new(),
-            // git: button::State::new(),
-            // overview: button::State::new(),
-            // inspect: button::State::new(),
-            // settings: button::State::new(),
-            // app: pick_list::State::new(),
-            // scroll_adapters: scrollable::State::new(),
-            // scroll_packets: scrollable::State::new(),
-            // scroll_report: scrollable::State::new(),
-            style: confy::load::<Config>("sniffnet", None).unwrap().style,
-            waiting: String::new(),
-            traffic_chart: TrafficChart::new(runtime_data2),
+            style,
+            waiting: ".".to_string(),
+            traffic_chart: TrafficChart::new(runtime_data2, style),
             chart_type: ChartType::Packets,
             report_type: ReportType::MostRecent,
         },

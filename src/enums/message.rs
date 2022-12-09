@@ -29,4 +29,6 @@ pub enum Message {
     Reset,
     /// Change application style (day or night)
     Style,
+    /// Manage waiting time
+    Waiting
 }

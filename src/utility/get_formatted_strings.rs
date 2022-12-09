@@ -196,19 +196,19 @@ pub fn get_country_code(
     }
 }
 
-/// It returns a glyph featuring Sniffnet's logo
-pub fn logo_glyph() -> Text {
-    Text::new('A'.to_string())
-        .font(ICONS)
-        .horizontal_alignment(Horizontal::Center)
-        .size(95)
-}
+// /// It returns a glyph featuring Sniffnet's logo
+// pub fn logo_glyph() -> Text {
+//     Text::new('A'.to_string())
+//         .font(ICONS)
+//         .horizontal_alignment(Horizontal::Center)
+//         .size(95)
+// }
 
-pub fn icon_sun_moon() -> Text {
-    //F: sun, G: moon, K: sun adjust
-    Text::new('K'.to_string())
-        .font(ICONS)
-        .width(Length::Units(25))
-        .horizontal_alignment(Horizontal::Center)
-        .size(20)
-}
+// pub fn icon_sun_moon() -> Text {
+//     //F: sun, G: moon, K: sun adjust
+//     Text::new('K'.to_string())
+//         .font(ICONS)
+//         .width(Length::Units(25))
+//         .horizontal_alignment(Horizontal::Center)
+//         .size(20)
+// }

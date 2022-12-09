@@ -5,7 +5,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Length};
-use iced::widget::{Button, Column, Container, PickList, Radio, Row, Text, Scrollable};
+use iced::widget::{button, Column, Container, PickList, Radio, Row, Text, Scrollable};
 use pcap::Device;
 use plotters::style::RGBColor;
 
@@ -14,7 +14,7 @@ use crate::enums::{message::Message};
 use crate::gui::style::StyleTuple;
 use crate::structs::colors::to_rgb_color;
 use crate::structs::sniffer::Sniffer;
-use crate::utility::get_formatted_strings::{icon_sun_moon, logo_glyph, APP_VERSION};
+use crate::utility::get_formatted_strings::{APP_VERSION};
 use crate::utility::style_constants::{
     COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
     FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
@@ -32,9 +32,18 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
         _ => COURIER_PRIME_BOLD_ITALIC,
     };
-    let logo = logo_glyph();
+    let logo = Text::new('A'.to_string())
+        .font(ICONS)
+        .horizontal_alignment(Horizontal::Center)
+        .size(95);
 
-    let button_style = Button::new(icon_sun_moon())
+    let button_style = button(
+        Text::new('K'.to_string())
+            .font(ICONS)
+            .width(Length::Units(25))
+            .horizontal_alignment(Horizontal::Center)
+            .size(20)
+    )
         .padding(10)
         .height(Length::Units(40))
         .width(Length::Units(60))
@@ -75,7 +84,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
     .width(Length::Fill);
     //.style(StyleTuple(sniffer.style, ElementType::Headers));
 
-    let button_start = Button::new(
+    let button_start = button(
         Text::new("Run!")
             .font(font)
             .size(FONT_SIZE_TITLE)
@@ -132,40 +141,41 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
                 .font(font)
                 .size(FONT_SIZE_TITLE),
         )
-        // .push(
-        //     dev_str_list.iter().fold(
-        //         Scrollable::new("")
-        //            // .style(StyleTuple(sniffer.style, ElementType::Standard))
-        //            //  .padding(13)
-        //            //  .spacing(5)
-        //         ,
-        //         |scroll_adapters, adapter| {
-        //             let name = &adapter.0;
-        //             // scroll_adapters.push(
-        //             //     Container::new(
-        //             //         Radio::new(
-        //             //             name,
-        //             //             &adapter.1,
-        //             //             Some(&sniffer.device.clone().lock().unwrap().name),
-        //             //             |name| Message::AdapterSelection(name.to_string()),
-        //             //         )
-        //             //         .font(font)
-        //             //         .size(15)
-        //             //         .width(Length::Fill)
-        //                     // .style(StyleTuple(
-        //                     //     sniffer.style,
-        //                     //     if adapter_active.eq(name) {
-        //                     //         ElementType::SelectedRadio
-        //                     //     } else {
-        //                     //         ElementType::Standard
-        //                     //     },
-        //                     // )),
-        //                  )
-        //                 .padding(10)
-        //                 //.style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
-        //             )
+        .push(Scrollable::new(
+            dev_str_list.iter().fold(
+                Column::new()
+                   // .style(StyleTuple(sniffer.style, ElementType::Standard))
+                   //  .padding(13)
+                   //  .spacing(5)
+                ,
+                |scroll_adapters, adapter| {
+                    let name = &adapter.0;
+                    scroll_adapters.push(
+                        Container::new(
+                            Radio::new(
+                                name,
+                                &adapter.1,
+                                Some(&sniffer.device.clone().lock().unwrap().name),
+                                |name| Message::AdapterSelection(name.to_string()),
+                            )
+                            .font(font)
+                            .size(15)
+                            .width(Length::Fill)
+                            // .style(StyleTuple(
+                            //     sniffer.style,
+                            //     if adapter_active.eq(name) {
+                            //         ElementType::SelectedRadio
+                            //     } else {
+                            //         ElementType::Standard
+                            //     },
+                            // )),
+                         )
+                        .padding(10)
+                        //.style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
+                    )
                 },
             ),
+        )
         );
 
     let col_space = Column::new().width(Length::FillPortion(1));
@@ -317,8 +327,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         Some(app_active),
         Message::AppProtocolSelection,
     )
-    .font(font)
-    .placeholder("Select application protocol");
+    .font(font);
     //.style(StyleTuple(sniffer.style, ElementType::Standard));
     let col_app = Column::new()
         .width(Length::FillPortion(2))
@@ -355,7 +364,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         .push(col_space)
         .push(filters);
 
-    let button_github = Button::new(
+    let button_github = button(
         Text::new('H'.to_string())
             .font(ICONS)
             .size(24)

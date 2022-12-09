@@ -5,8 +5,8 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
-use iced::widget::{Button, Column, Container, Radio, Row, Scrollable, Text};
+use iced::{alignment, Alignment, Application, Command, Length};
+use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use plotters::style::RGBColor;
 use thousands::Separable;
 
@@ -18,8 +18,7 @@ use crate::structs::sniffer::Sniffer;
 use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string, icon_sun_moon,
-    logo_glyph, APP_VERSION,
+    get_connection_color, get_formatted_bytes_string, get_percentage_string, APP_VERSION,
 };
 use crate::utility::style_constants::{
     COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
@@ -37,16 +36,25 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
         _ => COURIER_PRIME_BOLD_ITALIC,
     };
-    let logo = logo_glyph();
+    let logo = Text::new('A'.to_string())
+        .font(ICONS)
+        .horizontal_alignment(Horizontal::Center)
+        .size(95);;
 
-    let button_style = Button::new(icon_sun_moon())
+    let button_style = button(
+        Text::new('K'.to_string())
+        .font(ICONS)
+        .width(Length::Units(25))
+        .horizontal_alignment(Horizontal::Center)
+        .size(20)
+    )
         .padding(10)
         .height(Length::Units(40))
         .width(Length::Units(60))
         // .style(iced::theme::Button::Primary)
         .on_press(Message::Style);
 
-    let button_reset = Button::new(
+    let button_reset = button(
         Text::new('C'.to_string())
             .font(ICONS)
             .size(20)
@@ -59,7 +67,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
     // .style(iced::theme::Button::Primary)
     .on_press(Message::Reset);
 
-    let button_overview = Button::new(
+    let button_overview = button(
         Text::new("Overview")
             .font(font)
             .size(FONT_SIZE_SUBTITLE)
@@ -71,7 +79,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
     // .style(iced::theme::Button::Positive)
     .on_press(Message::TickInit); //do nothing, just update the page
 
-    let button_inspect = Button::new(
+    let button_inspect = button(
         Text::new("Inspect")
             .font(font)
             .size(FONT_SIZE_SUBTITLE)
@@ -83,7 +91,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
     // .style(iced::theme::Button::Secondary)
     .on_press(Message::Reset);
 
-    let button_settings = Button::new(
+    let button_settings = button(
         Text::new("Settings")
             .font(font)
             .size(FONT_SIZE_SUBTITLE)
@@ -123,17 +131,17 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
     .width(Length::Fill);
     // .style(StyleTuple(sniffer.style, ElementType::Headers));
 
-    let _button_report = Button::new(
-        Text::new("Open full report")
-            .font(font)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .padding(10)
-    .height(Length::Units(35))
-    .width(Length::Units(200))
-    // .style(StyleTuple(sniffer.style, ElementType::Standard))
-    .on_press(Message::OpenReport);
+    // let _button_report = Button::new(
+    //     Text::new("Open full report")
+    //         .font(font)
+    //         .horizontal_alignment(alignment::Horizontal::Center)
+    //         .vertical_alignment(alignment::Vertical::Center),
+    // )
+    // .padding(10)
+    // .height(Length::Units(35))
+    // .width(Length::Units(200))
+    // // .style(StyleTuple(sniffer.style, ElementType::Standard))
+    // .on_press(Message::OpenReport);
 
     let runtime_data_lock = sniffer.runtime_data.lock().unwrap();
     let observed = runtime_data_lock.all_packets;
@@ -158,10 +166,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                if sniffer.waiting.len() > 2 {
-                    sniffer.waiting = "".to_string();
-                }
-                sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+
                 let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
                 let (icon_text, nothing_to_see_text) = if !sniffer
                     .device
@@ -190,10 +195,6 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
 
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                if sniffer.waiting.len() > 2 {
-                    sniffer.waiting = "".to_string();
-                }
-                sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
 
                 let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
                                                     Filtered packets: 0\n\n\
@@ -314,15 +315,14 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
                         .push(Text::new(" "))
                         .push(Text::new("Filtered packets per application protocol:").font(font))
                         .push(
-                            Scrollable::new("")
-                                // .style(StyleTuple(sniffer.style, ElementType::Standard))
-                                .push(
-                                    Text::new(get_app_count_string(
-                                        app_protocols,
-                                        filtered as u128,
-                                    ))
+                            Scrollable::new(
+                                Text::new(get_app_count_string(
+                                    app_protocols,
+                                    filtered as u128,
+                                ))
                                     .font(font),
-                                ),
+                            )
+                                // .style(StyleTuple(sniffer.style, ElementType::Standard))
                         );
                 }
 
@@ -398,7 +398,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
                     .push(Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
                     .push(Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
-                let mut scroll_report = Scrollable::new("");
+                let mut scroll_report = Column::new();
                     // .style(StyleTuple(sniffer.style, ElementType::Standard));
                 for key_val in sniffer.runtime_data.lock().unwrap().report_vec.iter() {
                     let entry_color = get_connection_color(key_val.1.traffic_type, &sniffer.style);
@@ -411,14 +411,14 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
                                     key_val.0.print_gui(),
                                     key_val.1.print_gui()
                                 ))
-                                .color(entry_color)
+                                //.color(entry_color)
                                 .font(COURIER_PRIME_BOLD),
                             )
                             .push(flag)
                             .push(Text::new("   ").font(font)),
                     );
                 }
-                col_report = col_report.push(scroll_report);
+                col_report = col_report.push(Scrollable::new(scroll_report));
 
                 let row_report = Row::new().push(
                     Container::new(col_report)
@@ -454,10 +454,10 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         // pcap threw an ERROR!
         let err_string = sniffer.pcap_error.lock().unwrap().clone().unwrap();
 
-        if sniffer.waiting.len() > 2 {
-            sniffer.waiting = "".to_string();
-        }
-        sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
+        // if sniffer.waiting.len() > 2 {
+        //     sniffer.waiting = "".to_string();
+        // }
+        // sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
 
         let error_text = Text::new(format!(
             "An error occurred! \n\n\
@@ -474,7 +474,7 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
             .push(Row::new().height(Length::FillPortion(2)));
     }
 
-    let button_github = Button::new(
+    let button_github = button(
         Text::new('H'.to_string())
             .font(ICONS)
             .size(24)

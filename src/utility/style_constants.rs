@@ -100,29 +100,29 @@ pub const TRY_STYLE: Colors = Colors {
 };
 
 // red theme
-const PRIMARY_RED: Color = Color {
+const SECONDARY_RED: Color = Color {
     r: 130.0 / 255.0,
     g: 0.0 / 255.0,
     b: 0.0 / 255.0,
     a: 1.0,
 };
-const SECONDARY_RED: Color = Color {
+const PRIMARY_RED: Color = Color {
     r: 254.0 / 255.0,
     g: 224.0 / 255.0,
     b: 192.0 / 255.0,
     a: 1.0,
 };
 const BUTTONS_RED: Color = Color {
-    r: 185.0 / 255.0,
-    g: 0.0 / 255.0,
-    b: 91.0 / 255.0,
+    r: 151.0 / 255.0,
+    g: 92.0 / 255.0,
+    b: 141.0 / 255.0,
     a: 1.0,
 };
 const INCOMING_RED: Color = SECONDARY_RED;
 const OUTGOING_RED: Color = Color {
-    r: 34.0 / 255.0,
-    g: 34.0 / 255.0,
-    b: 34.0 / 255.0,
+    r: 109.0 / 255.0,
+    g: 103.0 / 255.0,
+    b: 228.0 / 255.0,
     a: 1.0,
 };
 pub const RED_STYLE: Colors = Colors {
@@ -131,8 +131,8 @@ pub const RED_STYLE: Colors = Colors {
     buttons: BUTTONS_RED,
     incoming: INCOMING_RED,
     outgoing: OUTGOING_RED,
-    text_headers: Color::BLACK,
-    text_body: Color::WHITE,
+    text_headers: Color::WHITE,
+    text_body: Color::BLACK,
     round_borders: Color::BLACK,
 };
 
