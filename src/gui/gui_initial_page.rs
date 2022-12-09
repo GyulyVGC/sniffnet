@@ -11,16 +11,16 @@ use plotters::style::RGBColor;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::style::StyleTuple;
-use crate::structs::colors::{Colors, to_rgb_color};
+use crate::structs::colors::{to_rgb_color, Colors};
 use crate::structs::sniffer::Sniffer;
+use crate::structs::style_tuple::StyleTuple;
 use crate::utility::get_formatted_strings::APP_VERSION;
 use crate::utility::style_constants::{
     COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
     FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
     HEIGHT_HEADER, ICONS,
 };
-use crate::{get_colors, AppProtocol, IpVersion, TransProtocol, StyleType};
+use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
@@ -47,7 +47,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
     .padding(10)
     .height(Length::Units(40))
     .width(Length::Units(60))
-    .style(get_colors(sniffer.style).into())
+    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
     .on_press(Message::Style);
 
     let header = Container::new(
@@ -143,8 +143,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         )
         .push(Scrollable::new(dev_str_list.iter().fold(
             Column::new(), // .style(StyleTuple(sniffer.style, ElementType::Standard))
-                           //  .padding(13)
-                           //  .spacing(5)
+            //  .padding(13)
+            //  .spacing(5)
             |scroll_adapters, adapter| {
                 let name = &adapter.0;
                 scroll_adapters.push(
@@ -314,8 +314,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         Some(app_active),
         Message::AppProtocolSelection,
     )
-    .font(font);
-    //.style(StyleTuple(sniffer.style, ElementType::Standard));
+    .font(font)
+    .style(<StyleTuple as Into<iced::theme::PickList>>::into(
+        StyleTuple(sniffer.style, ElementType::Standard),
+    ));
     let col_app = Column::new()
         .width(Length::FillPortion(2))
         .spacing(10)

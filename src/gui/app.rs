@@ -11,11 +11,11 @@ use std::time::Duration;
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::status::Status;
-use crate::gui::style::StyleTuple;
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
 use crate::structs::colors::Colors;
 use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
+use crate::structs::style_tuple::StyleTuple;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
@@ -214,10 +214,10 @@ impl Application for Sniffer {
             .into()
     }
 
-    fn theme(&self) -> Theme { // returns the `kind` parameter used in `style.rs`
-        Theme::Light
-        // get_colors(self.style).into()
-    }
+    // fn theme(&self) -> Theme { // returns the `kind` parameter used in `style.rs`
+    //     Theme::Light
+    //     // get_colors(self.style).into()
+    // }
 
     fn subscription(&self) -> Subscription<Message> {
         match *self.status_pair.0.lock().unwrap() {

@@ -12,9 +12,9 @@ use thousands::Separable;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::style::StyleTuple;
 use crate::structs::colors::to_rgb_color;
 use crate::structs::sniffer::Sniffer;
+use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,

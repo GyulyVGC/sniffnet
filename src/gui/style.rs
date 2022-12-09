@@ -4,6 +4,7 @@ use crate::enums::element_type::ElementType;
 use crate::enums::style_type::StyleType;
 use crate::get_colors;
 use crate::structs::colors::Colors;
+use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     BORDER_BUTTON_RADIUS, BORDER_ROUNDED_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS,
 };
@@ -12,9 +13,7 @@ use iced::{Background, Color, Vector};
 use iced_style::application::Appearance;
 use iced_style::scrollable::{Scrollbar, Scroller};
 use iced_style::Theme;
-
-/// This tuple permits to specify the correct style depending on the style type and on the element type
-pub struct StyleTuple(pub StyleType, pub ElementType);
+use std::rc::Rc;
 
 // impl From<Colors> for iced_style::theme::Theme {
 //     fn from(colors: Colors) -> Self {
@@ -22,22 +21,20 @@ pub struct StyleTuple(pub StyleType, pub ElementType);
 //     }
 // }
 
-impl iced::application::StyleSheet for Colors {
-    type Style = Theme;
-
-    fn appearance(&self, _: &Self::Style) -> Appearance {
-        Appearance {
-            background_color: self.primary,
-            text_color: self.text_body,
-        }
-    }
-}
+// impl iced::application::StyleSheet for Colors {
+//     type Style = Theme;
+//
+//     fn appearance(&self, _: &Self::Style) -> Appearance {
+//         Appearance {
+//             background_color: self.primary,
+//             text_color: self.text_body,
+//         }
+//     }
+// }
 
 // /// Containers style
 // impl StyleSheet for StyleTuple {
-//     type Style = ();
-//
-//     fn appearance(&self, _: Style) -> Style {
+//     fn style(&self) -> Style {
 //         let colors = get_colors(self.0);
 //         Style {
 //             text_color: Option::Some(match self {
@@ -60,111 +57,65 @@ impl iced::application::StyleSheet for Colors {
 //         }
 //     }
 // }
-//
-// /// Picklists style
-// impl pick_list::StyleSheet for StyleTuple {
-//     type Style = ();
-//
-//     fn active(&self, _: Style) -> pick_list::Style {
-//         let colors = get_colors(self.0);
-//         pick_list::Style {
-//             text_color: colors.text_body,
-//             placeholder_color: colors.text_body,
-//             background: Background::Color(colors.buttons),
-//             border_radius: 0.0,
-//             border_width: BORDER_WIDTH,
-//             border_color: colors.secondary,
-//             icon_size: 0.5,
-//         }
-//     }
-//
-//     fn hovered(&self, _: Style) -> pick_list::Style {
-//         let colors = get_colors(self.0);
-//         pick_list::Style {
-//             text_color: colors.text_body,
-//             placeholder_color: colors.text_body,
-//             background: Background::Color(colors.primary),
-//             border_radius: 0.0,
-//             border_width: BORDER_WIDTH,
-//             border_color: colors.secondary,
-//             icon_size: 0.5,
-//         }
-//     }
-// }
 
-impl From<Colors> for iced::theme::Button {
-    fn from(colors: Colors) -> Self {
-        iced_style::theme::Button::Custom(Box::new(colors))
+/// Picklists style
+
+impl From<StyleTuple> for iced::theme::PickList {
+    fn from(tuple: StyleTuple) -> Self {
+        iced_style::theme::PickList::Custom(Rc::new(tuple.clone()), Rc::new(tuple))
     }
 }
 
-/// Buttons style
-impl button::StyleSheet for Colors {
-    type Style = iced_style::Theme;
-    // primary => standard
-    // secondary => inactive tabs
-    // positive => active tabs
+impl iced_style::menu::StyleSheet for StyleTuple {
+    type Style = iced::Theme;
 
-    fn active(&self, kind: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            background: Some(Background::Color(match kind {
-                // &Self::Style::Positive => self.primary,
-                // _ => self.buttons,
-                Theme::Custom(_) | Theme::Light => {self.secondary}
-                _ => Color::BLACK
-            })),
-            border_radius: match kind {
-                // &Self::Style::Secondary | &Self::Style::Positive => 0.0,
-                // _ => BORDER_BUTTON_RADIUS,
-                Theme::Custom(_) => {BORDER_WIDTH}
-                _ => BORDER_WIDTH
-            },
-            border_width: match kind {
-                // &Self::Style::Secondary | &Self::Style:Positive => {
-                //     BORDER_WIDTH_TABS
-                // }
-                // _ => BORDER_WIDTH,
-                Theme::Custom(_) => {BORDER_WIDTH}
-                _ => BORDER_WIDTH
-            },
-            shadow_offset: Vector::new(0.0, 0.0),
-            text_color: self.text_body,
-            border_color: match kind {
-                // &Self::Style::Secondary | &Style::Positive => self.buttons,
-                // _ => self.secondary,
-                Theme::Custom(_) => {self.primary}
-                _ => Color::BLACK
-            },
+    fn appearance(&self, style: &Self::Style) -> iced_style::menu::Appearance {
+        let colors = get_colors(self.0);
+        iced_style::menu::Appearance {
+            text_color: colors.text_body,
+            background: Background::Color(colors.buttons),
+            border_width: BORDER_WIDTH,
+            border_radius: 0.0,
+            border_color: colors.secondary,
+            selected_text_color: colors.text_body,
+            selected_background: Background::Color(colors.primary),
+        }
+    }
+}
+
+impl pick_list::StyleSheet for StyleTuple {
+    type Style = iced::Theme;
+
+    fn active(&self, _: &Self::Style) -> pick_list::Appearance {
+        let colors = get_colors(self.0);
+        pick_list::Appearance {
+            text_color: colors.text_body,
+            placeholder_color: colors.text_body,
+            background: Background::Color(colors.buttons),
+            border_radius: 0.0,
+            border_width: BORDER_WIDTH,
+            border_color: colors.secondary,
+            icon_size: 0.5,
         }
     }
 
-    fn hovered(&self, kind: &Self::Style) -> button::Appearance {
-        button::Appearance {
-            shadow_offset: Vector::new(2.0, 2.0),
-            background: Some(Background::Color(self.primary)),
-            border_radius: match kind {
-                // &Self::Style::Secondary | &iced::theme::Button::Positive => 0.0,
-                // _ => BORDER_BUTTON_RADIUS,
-                Theme::Custom(_) => {BORDER_WIDTH}
-                _ => BORDER_WIDTH
-            },
+    fn hovered(&self, _: &Self::Style) -> pick_list::Appearance {
+        let colors = get_colors(self.0);
+        pick_list::Appearance {
+            text_color: colors.text_body,
+            placeholder_color: colors.text_body,
+            background: Background::Color(colors.primary),
+            border_radius: 0.0,
             border_width: BORDER_WIDTH,
-            border_color: match kind {
-                // &Self::Style::Secondary | &iced::theme::Button::Positive => self.buttons,
-                // _ => self.secondary,
-                Theme::Custom(_) => {self.primary}
-                _ => Color::BLACK
-            },
-            text_color: self.text_body,
+            border_color: colors.secondary,
+            icon_size: 0.5,
         }
     }
 }
 
 // /// Radios style
 // impl iced_style::radio::StyleSheet for StyleTuple {
-//     type Style = ();
-//
-//     fn active(&self, _: ()) -> () {
+//     fn active(&self) -> iced_style::radio::Style {
 //         let colors = get_colors(self.0);
 //         iced_style::radio::Style {
 //             background: Background::Color(colors.buttons),
@@ -181,7 +132,7 @@ impl button::StyleSheet for Colors {
 //         }
 //     }
 //
-//     fn hovered(&self, _: Style) -> () {
+//     fn hovered(&self) -> iced_style::radio::Style {
 //         let colors = get_colors(self.0);
 //         iced_style::radio::Style {
 //             background: Background::Color(colors.buttons),
