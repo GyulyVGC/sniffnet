@@ -2,17 +2,18 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
+use iced::widget::Container;
+use iced::{executor, Application, Command, Element, Length, Renderer, Subscription, Theme};
+use pcap::Device;
 use std::thread;
 use std::time::Duration;
-use iced::{executor, Application, Command, Element, Length, Subscription, Renderer, Theme};
-use iced::widget::Container;
-use pcap::Device;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::status::Status;
 use crate::gui::style::StyleTuple;
 use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
+use crate::structs::colors::Colors;
 use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -20,9 +21,8 @@ use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
-use crate::{InfoTraffic, RunTimeData, StyleType};
-use crate::structs::colors::Colors;
 use crate::utility::style_constants::{ALMOND_STYLE, DAY_STYLE, NIGHT_STYLE, RED_STYLE, TRY_STYLE};
+use crate::{get_colors, InfoTraffic, RunTimeData, StyleType};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -52,18 +52,19 @@ impl Application for Sniffer {
             Message::TickRun => {
                 play_sound();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
-                if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0 {
+                if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
+                {
                     drop(info_traffic_lock);
                     self.update(Message::Waiting);
-                }
-                else {
+                } else {
                     let mut runtime_data_lock = self.runtime_data.lock().unwrap();
                     runtime_data_lock.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
                     runtime_data_lock.tot_received_packets =
                         info_traffic_lock.tot_received_packets as i128;
                     runtime_data_lock.all_packets = info_traffic_lock.all_packets;
                     runtime_data_lock.all_bytes = info_traffic_lock.all_bytes;
-                    runtime_data_lock.tot_received_bytes = info_traffic_lock.tot_received_bytes as i128;
+                    runtime_data_lock.tot_received_bytes =
+                        info_traffic_lock.tot_received_bytes as i128;
                     runtime_data_lock.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
                     runtime_data_lock.app_protocols = info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
@@ -213,6 +214,11 @@ impl Application for Sniffer {
             .into()
     }
 
+    fn theme(&self) -> Theme { // returns the `kind` parameter used in `style.rs`
+        Theme::Light
+        // get_colors(self.style).into()
+    }
+
     fn subscription(&self) -> Subscription<Message> {
         match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
@@ -220,16 +226,5 @@ impl Application for Sniffer {
             }
             _ => iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit),
         }
-    }
-
-    fn theme(&self) -> Theme {
-        Theme::Dark
-        // match self.style {
-        //     StyleType::Night => NIGHT_STYLE,
-        //     StyleType::Day => DAY_STYLE,
-        //     StyleType::Try => TRY_STYLE,
-        //     StyleType::Almond => ALMOND_STYLE,
-        //     StyleType::Red => RED_STYLE,
-        // }
     }
 }

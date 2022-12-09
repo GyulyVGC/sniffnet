@@ -3,25 +3,32 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::style_type::StyleType;
 use crate::get_colors;
+use crate::structs::colors::Colors;
 use crate::utility::style_constants::{
     BORDER_BUTTON_RADIUS, BORDER_ROUNDED_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS,
 };
-use iced::widget::{button, pick_list, container::{StyleSheet}};
-use iced::{Background, Vector};
+use iced::widget::{button, container::StyleSheet, pick_list};
+use iced::{Background, Color, Vector};
 use iced_style::application::Appearance;
 use iced_style::scrollable::{Scrollbar, Scroller};
-use crate::structs::colors::Colors;
+use iced_style::Theme;
 
 /// This tuple permits to specify the correct style depending on the style type and on the element type
 pub struct StyleTuple(pub StyleType, pub ElementType);
 
+// impl From<Colors> for iced_style::theme::Theme {
+//     fn from(colors: Colors) -> Self {
+//         iced_style::theme::Theme::Custom(colors)
+//     }
+// }
+
 impl iced::application::StyleSheet for Colors {
-    type Style = ();
+    type Style = Theme;
 
     fn appearance(&self, _: &Self::Style) -> Appearance {
         Appearance {
             background_color: self.primary,
-            text_color: self.text_body
+            text_color: self.text_body,
         }
     }
 }
@@ -85,50 +92,68 @@ impl iced::application::StyleSheet for Colors {
 //     }
 // }
 
+impl From<Colors> for iced::theme::Button {
+    fn from(colors: Colors) -> Self {
+        iced_style::theme::Button::Custom(Box::new(colors))
+    }
+}
+
 /// Buttons style
 impl button::StyleSheet for Colors {
-    type Style = iced::theme::Button;
+    type Style = iced_style::Theme;
     // primary => standard
     // secondary => inactive tabs
     // positive => active tabs
 
-    fn active(&self, kind: &iced::theme::Button) -> button::Appearance {
+    fn active(&self, kind: &Self::Style) -> button::Appearance {
         button::Appearance {
             background: Some(Background::Color(match kind {
-                &iced::theme::Button::Positive => self.primary,
-                _ => self.buttons,
+                // &Self::Style::Positive => self.primary,
+                // _ => self.buttons,
+                Theme::Custom(_) | Theme::Light => {self.secondary}
+                _ => Color::BLACK
             })),
             border_radius: match kind {
-                &iced::theme::Button::Secondary | &iced::theme::Button::Positive => 0.0,
-                _ => BORDER_BUTTON_RADIUS,
+                // &Self::Style::Secondary | &Self::Style::Positive => 0.0,
+                // _ => BORDER_BUTTON_RADIUS,
+                Theme::Custom(_) => {BORDER_WIDTH}
+                _ => BORDER_WIDTH
             },
             border_width: match kind {
-                &iced::theme::Button::Secondary | &iced::theme::Button::Positive => {
-                    BORDER_WIDTH_TABS
-                }
-                _ => BORDER_WIDTH,
+                // &Self::Style::Secondary | &Self::Style:Positive => {
+                //     BORDER_WIDTH_TABS
+                // }
+                // _ => BORDER_WIDTH,
+                Theme::Custom(_) => {BORDER_WIDTH}
+                _ => BORDER_WIDTH
             },
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: self.text_body,
             border_color: match kind {
-                &iced::theme::Button::Secondary | &iced::theme::Button::Positive => self.buttons,
-                _ => self.secondary,
+                // &Self::Style::Secondary | &Style::Positive => self.buttons,
+                // _ => self.secondary,
+                Theme::Custom(_) => {self.primary}
+                _ => Color::BLACK
             },
         }
     }
 
-    fn hovered(&self, kind: &iced::theme::Button) -> button::Appearance {
+    fn hovered(&self, kind: &Self::Style) -> button::Appearance {
         button::Appearance {
             shadow_offset: Vector::new(2.0, 2.0),
             background: Some(Background::Color(self.primary)),
             border_radius: match kind {
-                &iced::theme::Button::Secondary | &iced::theme::Button::Positive => 0.0,
-                _ => BORDER_BUTTON_RADIUS,
+                // &Self::Style::Secondary | &iced::theme::Button::Positive => 0.0,
+                // _ => BORDER_BUTTON_RADIUS,
+                Theme::Custom(_) => {BORDER_WIDTH}
+                _ => BORDER_WIDTH
             },
             border_width: BORDER_WIDTH,
             border_color: match kind {
-                &iced::theme::Button::Secondary | &iced::theme::Button::Positive => self.buttons,
-                _ => self.secondary,
+                // &Self::Style::Secondary | &iced::theme::Button::Positive => self.buttons,
+                // _ => self.secondary,
+                Theme::Custom(_) => {self.primary}
+                _ => Color::BLACK
             },
             text_color: self.text_body,
         }

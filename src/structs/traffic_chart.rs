@@ -3,9 +3,9 @@
 use std::cmp::max;
 use std::sync::{Arc, Mutex};
 
-use iced::Element;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
+use iced::Element;
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
@@ -60,7 +60,7 @@ impl TrafficChart {
     pub fn change_colors(&mut self, style: StyleType) {
         self.color_font = to_rgb_color(get_colors(style).text_body);
         self.color_incoming = to_rgb_color(get_colors(style).incoming);
-        self.color_outgoing  = to_rgb_color(get_colors(style).outgoing);
+        self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
     }
 }
 
