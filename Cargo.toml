@@ -31,4 +31,4 @@ plotters = "0.3.4"
 indexmap = "1.9.1"
 plotters-iced = "0.3.3"
 iced = { version = "0.4.2", features = ["tokio"] }
-iced_style = "0.4.0"
+iced_style = "0.5.1"
