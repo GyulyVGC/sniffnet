@@ -8,10 +8,5 @@ updates:
 - package-ecosystem: cargo
   directory: "/"
   schedule:
-    interval: "weekly"
-  assignees:
-    - "GyulyVGC"
-  reviewers:
-    - "GyulyVGC"
-  open-pull-requests-limit: 4
-  target-branch: "upgrade_iced"
+    interval: "daily"
+  target-branch: "*"
