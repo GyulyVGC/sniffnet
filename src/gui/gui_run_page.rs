@@ -36,36 +36,19 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
         _ => COURIER_PRIME_BOLD_ITALIC,
     };
-    let logo = Text::new('A'.to_string())
-        .font(ICONS)
-        .horizontal_alignment(Horizontal::Center)
-        .size(95);
 
-    let button_style = button(
-        Text::new('K'.to_string())
-            .font(ICONS)
-            .width(Length::Units(25))
-            .horizontal_alignment(Horizontal::Center)
-            .size(20),
-    )
-    .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
-    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::Style);
-
-    let button_reset = button(
-        Text::new('C'.to_string())
-            .font(ICONS)
-            .size(20)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
-        .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::Reset);
+    // let button_reset = button(
+    //     Text::new('C'.to_string())
+    //         .font(ICONS)
+    //         .size(20)
+    //         .horizontal_alignment(alignment::Horizontal::Center)
+    //         .vertical_alignment(alignment::Vertical::Center),
+    // )
+    // .padding(10)
+    // .height(Length::Units(40))
+    // .width(Length::Units(60))
+    //     .style(StyleTuple(sniffer.style, ElementType::Standard).into())
+    // .on_press(Message::Reset);
 
     let button_overview = button(
         Text::new("Overview")
@@ -103,35 +86,35 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         .style(StyleTuple(sniffer.style, ElementType::TabInactive).into())
     .on_press(Message::Reset);
 
-    let header = Container::new(
-        Row::new()
-            .height(Length::Fill)
-            .width(Length::Fill)
-            .align_items(Alignment::Center)
-            .push(
-                Container::new(button_reset)
-                    .width(Length::FillPortion(1))
-                    .width(Length::FillPortion(1))
-                    .align_x(Horizontal::Center),
-            )
-            .push(
-                Container::new(Row::new().align_items(Alignment::Center).push(logo))
-                    .width(Length::FillPortion(6))
-                    .height(Length::Fill)
-                    .align_x(Horizontal::Center)
-                    .align_y(Vertical::Center),
-            )
-            .push(
-                Container::new(button_style)
-                    .width(Length::FillPortion(1))
-                    .align_x(Horizontal::Center),
-            ),
-    )
-    .height(Length::FillPortion(HEIGHT_HEADER))
-    .width(Length::Fill)
-    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-        StyleTuple(sniffer.style, ElementType::Headers),
-    ));
+    // let header = Container::new(
+    //     Row::new()
+    //         .height(Length::Fill)
+    //         .width(Length::Fill)
+    //         .align_items(Alignment::Center)
+    //         .push(
+    //             Container::new(button_reset)
+    //                 .width(Length::FillPortion(1))
+    //                 .width(Length::FillPortion(1))
+    //                 .align_x(Horizontal::Center),
+    //         )
+    //         .push(
+    //             Container::new(Row::new().align_items(Alignment::Center).push(logo))
+    //                 .width(Length::FillPortion(6))
+    //                 .height(Length::Fill)
+    //                 .align_x(Horizontal::Center)
+    //                 .align_y(Vertical::Center),
+    //         )
+    //         .push(
+    //             Container::new(button_style)
+    //                 .width(Length::FillPortion(1))
+    //                 .align_x(Horizontal::Center),
+    //         ),
+    // )
+    // .height(Length::FillPortion(HEIGHT_HEADER))
+    // .width(Length::Fill)
+    // .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+    //     StyleTuple(sniffer.style, ElementType::Headers),
+    // ));
 
     // let _button_report = Button::new(
     //     Text::new("Open full report")
@@ -500,7 +483,6 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         ));
 
     Column::new()
-        .push(header)
         .push(tab_body.push(body))
         .push(footer)
 }

@@ -2,7 +2,7 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
-use iced::widget::Container;
+use iced::widget::{Column, Container};
 use iced::{executor, Application, Command, Element, Length, Subscription, Theme};
 use pcap::Device;
 use std::thread;
@@ -21,6 +21,8 @@ use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
+use crate::gui::components::header::get_header;
+use crate::utility::style_constants::{HEIGHT_BODY, HEIGHT_HEADER};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -203,14 +205,19 @@ impl Application for Sniffer {
             Status::Running => run_page(self),
         };
 
-        Container::new(body)
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .center_x()
-            .center_y()
-            .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-                StyleTuple(style, ElementType::Standard),
-            ))
+        Column::new()
+            .push(
+                get_header(self.style)
+                    .height(Length::FillPortion(HEIGHT_HEADER))
+            )
+            .push(
+                Container::new(body)
+                    .width(Length::Fill)
+                    .height(Length::FillPortion(HEIGHT_BODY))
+                    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+                        StyleTuple(style, ElementType::Standard),
+                    ))
+            )
             .into()
     }
 

@@ -21,6 +21,7 @@ use crate::utility::style_constants::{
     HEIGHT_HEADER, ICONS,
 };
 use crate::{get_colors, AppProtocol, IpVersion, TransProtocol};
+use crate::gui::components::buttons::get_button_start;
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
@@ -32,72 +33,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
         _ => COURIER_PRIME_BOLD_ITALIC,
     };
-    let logo = Text::new('A'.to_string())
-        .font(ICONS)
-        .horizontal_alignment(Horizontal::Center)
-        .size(95);
-
-    let button_style = button(
-        Text::new('K'.to_string())
-            .font(ICONS)
-            .width(Length::Units(25))
-            .horizontal_alignment(Horizontal::Center)
-            .size(20),
-    )
-    .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
-    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::Style);
-
-    let header = Container::new(
-        Row::new()
-            .height(Length::Fill)
-            .width(Length::Fill)
-            .align_items(Alignment::Center)
-            .push(
-                Container::new(Row::new())
-                    .width(Length::FillPortion(1))
-                    .width(Length::FillPortion(1))
-                    .align_x(Horizontal::Center),
-            )
-            .push(
-                Container::new(
-                    Row::new()
-                        .height(Length::Fill)
-                        .align_items(Alignment::Center)
-                        .push(logo),
-                )
-                .width(Length::FillPortion(6))
-                .height(Length::Fill)
-                .align_y(Vertical::Center)
-                .align_x(Horizontal::Center),
-            )
-            .push(
-                Container::new(button_style)
-                    .width(Length::FillPortion(1))
-                    .align_x(Horizontal::Center),
-            ),
-    )
-    .height(Length::FillPortion(HEIGHT_HEADER))
-    .align_y(Vertical::Center)
-    .width(Length::Fill)
-    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-        StyleTuple(sniffer.style, ElementType::Headers),
-    ));
-
-    let button_start = button(
-        Text::new("Run!")
-            .font(font)
-            .size(FONT_SIZE_TITLE)
-            .vertical_alignment(alignment::Vertical::Center)
-            .horizontal_alignment(alignment::Horizontal::Center),
-    )
-    .padding(10)
-    .height(Length::Units(80))
-    .width(Length::Units(160))
-    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::Start);
 
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
@@ -292,7 +227,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         .width(Length::FillPortion(2))
         .push(col_transport_radio)
         .push(Row::new().height(Length::FillPortion(2)))
-        .push(button_start)
+        .push(get_button_start(sniffer.style, font))
         .push(Row::new().height(Length::FillPortion(1)));
 
     let app_active = filtri.application;
@@ -335,7 +270,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         );
 
     let body = Row::new()
-        .height(Length::FillPortion(HEIGHT_BODY))
         .push(col_adapter)
         .push(col_space)
         .push(filters);
@@ -369,5 +303,5 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             StyleTuple(sniffer.style, ElementType::Headers),
         ));
 
-    Column::new().push(header).push(body).push(footer)
+    Column::new().push(body).push(footer)
 }
