@@ -24,7 +24,7 @@ lto = true
 
 
 [dependencies]
-pcap = "0.11.0"
+pcap = "1.0.0"
 etherparse = "0.13.0"
 chrono = "0.4.22"
 thousands = "0.2.0"
