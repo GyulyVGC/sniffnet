@@ -61,6 +61,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install libpcap
       run: sudo apt-get install libpcap-dev
+    - name: Install dependency for alsa-sys
+      run: sudo apt install libsdl2-dev
     - name: Build 
       run: cargo build --verbose
     - name: Run tests 
