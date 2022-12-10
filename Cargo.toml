@@ -29,6 +29,6 @@ chrono = "0.4.22"
 thousands = "0.2.0"
 plotters = "0.3.4"
 indexmap = "1.9.1"
-plotters-iced = "0.3.3"
+plotters-iced = "0.5.0"
 iced = { version = "0.4.2", features = ["tokio"] }
 iced_style = "0.4.0"
