@@ -14,4 +14,4 @@ updates:
   reviewers:
     - "GyulyVGC"
   open-pull-requests-limit: 4
-  target-branch: "main"
+  target-branch: "upgrade_iced"
