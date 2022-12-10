@@ -1,19 +1,13 @@
 //! Buttons style
 
 use crate::enums::element_type::ElementType;
-use crate::enums::style_type::StyleType;
 use crate::get_colors;
-use crate::structs::colors::Colors;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    BORDER_BUTTON_RADIUS, BORDER_ROUNDED_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS,
+    BORDER_BUTTON_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS,
 };
-use iced::widget::{button, container::StyleSheet, pick_list};
-use iced::{Background, Color, Vector};
-use iced_style::application::Appearance;
-use iced_style::scrollable::{Scrollbar, Scroller};
-use iced_style::Theme;
-use std::rc::Rc;
+use iced::widget::{button};
+use iced::{Background, Vector};
 
 impl From<StyleTuple> for iced::theme::Button {
     fn from(tuple: StyleTuple) -> Self {
@@ -50,7 +44,7 @@ impl button::StyleSheet for StyleTuple {
         }
     }
 
-    fn hovered(&self, kind: &Self::Style) -> button::Appearance {
+    fn hovered(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
         iced_style::button::Appearance {
             shadow_offset: Vector::new(2.0, 2.0),

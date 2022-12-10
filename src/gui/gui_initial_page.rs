@@ -11,7 +11,7 @@ use plotters::style::RGBColor;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::structs::colors::{to_rgb_color, Colors};
+use crate::structs::colors::{to_rgb_color};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::get_formatted_strings::APP_VERSION;
@@ -20,7 +20,7 @@ use crate::utility::style_constants::{
     FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
     HEIGHT_HEADER, ICONS,
 };
-use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
+use crate::{get_colors, AppProtocol, IpVersion, TransProtocol};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
@@ -81,8 +81,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
     )
     .height(Length::FillPortion(HEIGHT_HEADER))
     .align_y(Vertical::Center)
-    .width(Length::Fill);
-    //.style(StyleTuple(sniffer.style, ElementType::Headers));
+    .width(Length::Fill)
+    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+        StyleTuple(sniffer.style, ElementType::Headers),
+    ));
 
     let button_start = button(
         Text::new("Run!")
@@ -94,7 +96,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
     .padding(10)
     .height(Length::Units(80))
     .width(Length::Units(160))
-    //.style(iced::theme::Button::Primary)
+    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
     .on_press(Message::Start);
 
     let mut dev_str_list = vec![];
@@ -130,7 +132,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         dev_str_list.push((name, dev_str));
     }
 
-    let adapter_active = &sniffer.device.lock().unwrap().name.clone();
     let col_adapter = Column::new()
         .padding(10)
         .spacing(5)
@@ -141,35 +142,45 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
                 .font(font)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(Scrollable::new(dev_str_list.iter().fold(
-            Column::new(), // .style(StyleTuple(sniffer.style, ElementType::Standard))
-            //  .padding(13)
-            //  .spacing(5)
-            |scroll_adapters, adapter| {
-                let name = &adapter.0;
-                scroll_adapters.push(
-                    Container::new(
-                        Radio::new(
-                            name,
-                            &adapter.1,
-                            Some(&sniffer.device.clone().lock().unwrap().name),
-                            |name| Message::AdapterSelection(name.to_string()),
+        .push(
+            Scrollable::new(
+                dev_str_list.iter().fold(
+                    Column::new() // .style(StyleTuple(sniffer.style, ElementType::Standard))
+                        .padding(13)
+                        .spacing(5),
+                    |scroll_adapters, adapter| {
+                        let name = &adapter.0;
+                        scroll_adapters.push(
+                            Container::new(
+                                Radio::new(
+                                    name,
+                                    &adapter.1,
+                                    Some(&sniffer.device.clone().lock().unwrap().name),
+                                    |name| Message::AdapterSelection(name.to_string()),
+                                )
+                                .font(font)
+                                .size(15)
+                                .width(Length::Fill)
+                                .style(<StyleTuple as Into<
+                                    iced_style::theme::Radio,
+                                >>::into(
+                                    StyleTuple(sniffer.style, ElementType::Standard),
+                                )),
+                            )
+                            .padding(10)
+                            .style(<StyleTuple as Into<
+                                iced_style::theme::Container,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                            )),
                         )
-                        .font(font)
-                        .size(15)
-                        .width(Length::Fill), // .style(StyleTuple(
-                                              //     sniffer.style,
-                                              //     if adapter_active.eq(name) {
-                                              //         ElementType::SelectedRadio
-                                              //     } else {
-                                              //         ElementType::Standard
-                                              //     },
-                                              // )),
-                    )
-                    .padding(10), //.style(StyleTuple(sniffer.style, ElementType::BorderedRound)),
-                )
-            },
-        )));
+                    },
+                ),
+            )
+            .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
+        );
 
     let col_space = Column::new().width(Length::FillPortion(1));
 
@@ -187,14 +198,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if ip_active.eq(&IpVersion::IPv4) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         )
         .push(
             Radio::new(
@@ -205,14 +212,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if ip_active.eq(&IpVersion::IPv6) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         )
         .push(
             Radio::new(
@@ -223,14 +226,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if ip_active.eq(&IpVersion::Other) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         );
     let col_ip = Column::new()
         .spacing(10)
@@ -254,14 +253,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if transport_active.eq(&TransProtocol::TCP) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         )
         .push(
             Radio::new(
@@ -272,14 +267,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if transport_active.eq(&TransProtocol::UDP) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         )
         .push(
             Radio::new(
@@ -290,14 +281,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
             )
             .width(Length::Fill)
             .font(font)
-            .size(15), // .style(StyleTuple(
-                       //     sniffer.style,
-                       //     if transport_active.eq(&TransProtocol::Other) {
-                       //         ElementType::SelectedRadio
-                       //     } else {
-                       //         ElementType::Standard
-                       //     },
-                       // )),
+            .size(15)
+            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         );
     let col_transport = Column::new()
         .align_items(Alignment::Center)
@@ -362,7 +349,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
     )
     .height(Length::Units(35))
     .width(Length::Units(35))
-    // .style(iced::theme::Button::Primary)
+    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
     .on_press(Message::OpenGithub);
     let footer_row = Row::new()
         .align_items(Alignment::Center)
@@ -377,8 +364,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         .width(Length::Fill)
         .height(FillPortion(HEIGHT_FOOTER))
         .align_y(Vertical::Center)
-        .align_x(Horizontal::Center);
-    // .style(StyleTuple(sniffer.style, ElementType::Headers));
+        .align_x(Horizontal::Center)
+        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::Headers),
+        ));
 
     Column::new().push(header).push(body).push(footer)
 }
