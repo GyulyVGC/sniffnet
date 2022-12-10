@@ -1,5 +1,5 @@
-use iced::{Length};
 use iced::widget::{image::Handle, Image};
+use iced::Length;
 
 const FLAGS_WIDTH: u16 = 13;
 

@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use iced::{Color};
+use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
