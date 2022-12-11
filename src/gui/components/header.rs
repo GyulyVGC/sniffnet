@@ -1,7 +1,7 @@
 //! GUI upper header
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::{Alignment, Length};
+use iced::{Alignment, Element, Length};
 use iced::widget::{button, Container, Row, Text};
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
@@ -51,3 +51,18 @@ pub fn get_header(style: StyleType) -> Container<'static, Message> {
             StyleTuple(style, ElementType::Headers),
         ))
 }
+
+//pub fn get_button_reset(style: StyleType) -> Element<'static, Message> {
+// let button_reset = button(
+//     Text::new('C'.to_string())
+//         .font(ICONS)
+//         .size(20)
+//         .horizontal_alignment(alignment::Horizontal::Center)
+//         .vertical_alignment(alignment::Vertical::Center),
+// )
+// .padding(10)
+// .height(Length::Units(40))
+// .width(Length::Units(60))
+//     .style(StyleTuple(sniffer.style, ElementType::Standard).into())
+// .on_press(Message::Reset);
+//}

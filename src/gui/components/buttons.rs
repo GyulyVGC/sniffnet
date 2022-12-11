@@ -40,3 +40,18 @@ pub fn get_button_start(style: StyleType, font: Font) -> Element<'static, Messag
         .on_press(Message::Start)
         .into()
 }
+
+pub fn get_button_github(style: StyleType) -> Element<'static, Message> {
+    button(
+        Text::new('H'.to_string())
+            .font(ICONS)
+            .size(24)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+        .height(Length::Units(35))
+        .width(Length::Units(35))
+        .style(StyleTuple(style, ElementType::Standard).into())
+        .on_press(Message::OpenGithub)
+        .into()
+}

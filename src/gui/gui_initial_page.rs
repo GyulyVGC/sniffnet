@@ -5,7 +5,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Column, Container, PickList, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Element, Length};
 use pcap::Device;
 use plotters::style::RGBColor;
 
@@ -24,14 +24,10 @@ use crate::{get_colors, AppProtocol, IpVersion, TransProtocol};
 use crate::gui::components::buttons::get_button_start;
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
+pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
         RGBColor(255, 255, 255) => COURIER_PRIME,
         _ => COURIER_PRIME_BOLD,
-    };
-    let font_footer = match to_rgb_color(get_colors(sniffer.style).text_headers) {
-        RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
-        _ => COURIER_PRIME_BOLD_ITALIC,
     };
 
     let mut dev_str_list = vec![];
@@ -274,34 +270,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Column<Message> {
         .push(col_space)
         .push(filters);
 
-    let button_github = button(
-        Text::new('H'.to_string())
-            .font(ICONS)
-            .size(24)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(35))
-    .width(Length::Units(35))
-    .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::OpenGithub);
-    let footer_row = Row::new()
-        .align_items(Alignment::Center)
-        .push(
-            Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION))
-                .size(FONT_SIZE_FOOTER)
-                .font(font_footer),
-        )
-        .push(button_github)
-        .push(Text::new("  ").font(font));
-    let footer = Container::new(footer_row)
-        .width(Length::Fill)
-        .height(FillPortion(HEIGHT_FOOTER))
-        .align_y(Vertical::Center)
-        .align_x(Horizontal::Center)
+    Container::new(body)
         .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Headers),
-        ));
-
-    Column::new().push(body).push(footer)
+            StyleTuple(sniffer.style, ElementType::Standard),
+        ))
 }

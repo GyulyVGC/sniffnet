@@ -6,7 +6,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Element, Length};
 use plotters::style::RGBColor;
 use thousands::Separable;
 
@@ -27,28 +27,11 @@ use crate::utility::style_constants::{
 use crate::{get_colors, AppProtocol, ChartType, ReportType};
 
 /// Computes the body of gui run page
-pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
+pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
     let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
         RGBColor(255, 255, 255) => COURIER_PRIME,
         _ => COURIER_PRIME_BOLD,
     };
-    let font_footer = match to_rgb_color(get_colors(sniffer.style).text_headers) {
-        RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
-        _ => COURIER_PRIME_BOLD_ITALIC,
-    };
-
-    // let button_reset = button(
-    //     Text::new('C'.to_string())
-    //         .font(ICONS)
-    //         .size(20)
-    //         .horizontal_alignment(alignment::Horizontal::Center)
-    //         .vertical_alignment(alignment::Vertical::Center),
-    // )
-    // .padding(10)
-    // .height(Length::Units(40))
-    // .width(Length::Units(60))
-    //     .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    // .on_press(Message::Reset);
 
     let button_overview = button(
         Text::new("Overview")
@@ -433,11 +416,6 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
         // pcap threw an ERROR!
         let err_string = sniffer.pcap_error.lock().unwrap().clone().unwrap();
 
-        // if sniffer.waiting.len() > 2 {
-        //     sniffer.waiting = "".to_string();
-        // }
-        // sniffer.waiting = ".".repeat(sniffer.waiting.len() + 1);
-
         let error_text = Text::new(format!(
             "An error occurred! \n\n\
                                                     {}",
@@ -453,36 +431,11 @@ pub fn run_page(sniffer: &Sniffer) -> Column<Message> {
             .push(Row::new().height(Length::FillPortion(2)));
     }
 
-    let button_github = button(
-        Text::new('H'.to_string())
-            .font(ICONS)
-            .size(24)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(35))
-    .width(Length::Units(35))
-        .style(StyleTuple(sniffer.style, ElementType::Standard).into())
-    .on_press(Message::OpenGithub);
-    let footer_row = Row::new()
-        .align_items(Alignment::Center)
-        .push(
-            Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION))
-                .size(FONT_SIZE_FOOTER)
-                .font(font_footer),
-        )
-        .push(button_github)
-        .push(Text::new("  ").font(font));
-    let footer = Container::new(footer_row)
-        .width(Length::Fill)
-        .height(FillPortion(HEIGHT_FOOTER))
-        .align_y(Vertical::Center)
-        .align_x(Horizontal::Center)
-        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Headers),
-        ));
-
-    Column::new()
+    Container::new(
+        Column::new()
         .push(tab_body.push(body))
-        .push(footer)
+    )
+        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::Standard),
+        ))
 }

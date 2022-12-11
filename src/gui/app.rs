@@ -7,6 +7,7 @@ use iced::{executor, Application, Command, Element, Length, Subscription, Theme}
 use pcap::Device;
 use std::thread;
 use std::time::Duration;
+use iced::Length::FillPortion;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
@@ -21,8 +22,9 @@ use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
+use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
-use crate::utility::style_constants::{HEIGHT_BODY, HEIGHT_HEADER};
+use crate::utility::style_constants::{HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -207,16 +209,16 @@ impl Application for Sniffer {
 
         Column::new()
             .push(
-                get_header(self.style)
-                    .height(Length::FillPortion(HEIGHT_HEADER))
+                get_header(style)
+                    .height(FillPortion(HEIGHT_HEADER))
             )
             .push(
-                Container::new(body)
-                    .width(Length::Fill)
-                    .height(Length::FillPortion(HEIGHT_BODY))
-                    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Standard),
-                    ))
+                body
+                    .height(FillPortion(HEIGHT_BODY))
+            )
+            .push(
+                get_footer(style)
+                    .height(FillPortion(HEIGHT_FOOTER))
             )
             .into()
     }
