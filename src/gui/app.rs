@@ -111,6 +111,7 @@ impl Application for Sniffer {
                     self.report_type,
                 );
             }
+            /*
             Message::OpenReport => {
                 play_sound();
                 #[cfg(target_os = "windows")]
@@ -129,7 +130,7 @@ impl Application for Sniffer {
                     .arg("./sniffnet_report/report.txt")
                     .spawn()
                     .unwrap();
-            }
+            }*/
             Message::OpenGithub => {
                 play_sound();
                 #[cfg(target_os = "windows")]

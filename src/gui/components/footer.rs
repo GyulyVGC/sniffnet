@@ -13,7 +13,7 @@ use crate::utility::style_constants::{
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Button, Container, Row, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
+use iced::{Alignment, Length};
 use plotters::prelude::RGBColor;
 
 pub fn get_footer(style: StyleType) -> Container<'static, Message> {
@@ -48,8 +48,8 @@ pub fn get_button_github(style: StyleType) -> Button<'static, Message> {
         Text::new('H'.to_string())
             .font(ICONS)
             .size(24)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
     )
     .height(Length::Units(35))
     .width(Length::Units(35))

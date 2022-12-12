@@ -8,7 +8,7 @@ use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Button, Container, Row, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
+use iced::{Alignment, Length};
 
 pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Message> {
     let logo = Text::new('A'.to_string())
@@ -23,13 +23,13 @@ pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Mes
             .align_items(Alignment::Center)
             .push(if back_button {
                 Container::new(get_button_reset(style))
-                    .width(Length::FillPortion(1))
-                    .width(Length::FillPortion(1))
+                    .width(FillPortion(1))
+                    .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             } else {
                 Container::new(Row::new())
-                    .width(Length::FillPortion(1))
-                    .width(Length::FillPortion(1))
+                    .width(FillPortion(1))
+                    .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             })
             .push(
@@ -39,14 +39,14 @@ pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Mes
                         .align_items(Alignment::Center)
                         .push(logo),
                 )
-                .width(Length::FillPortion(6))
+                .width(FillPortion(6))
                 .height(Length::Fill)
                 .align_y(Vertical::Center)
                 .align_x(Horizontal::Center),
             )
             .push(
                 Container::new(get_button_style(style))
-                    .width(Length::FillPortion(1))
+                    .width(FillPortion(1))
                     .align_x(Horizontal::Center),
             ),
     )
@@ -63,8 +63,8 @@ pub fn get_button_reset(style: StyleType) -> Button<'static, Message> {
         Text::new('C'.to_string())
             .font(ICONS)
             .size(20)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
     )
     .padding(10)
     .height(Length::Units(40))

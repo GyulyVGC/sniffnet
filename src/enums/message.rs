@@ -20,7 +20,7 @@ pub enum Message {
     /// Select report type to be displayed
     ReportSelection(ReportType),
     /// Open Sniffnet's complete textual report
-    OpenReport,
+    //OpenReport,
     /// Open Sniffnet's GitHub page
     OpenGithub,
     /// Start sniffing packets

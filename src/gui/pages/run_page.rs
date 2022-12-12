@@ -50,7 +50,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(5)
         .align_items(Alignment::Center);
 
-    let mut tab_and_body = Column::new().height(Length::FillPortion(HEIGHT_BODY));
+    let mut tab_and_body = Column::new().height(FillPortion(HEIGHT_BODY));
 
     if sniffer.pcap_error.lock().unwrap().is_none() {
         // NO pcap error detected
@@ -78,11 +78,11 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                                               Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
                 };
                 body = body
-                    .push(Row::new().height(Length::FillPortion(1)))
+                    .push(Row::new().height(FillPortion(1)))
                     .push(icon_text)
                     .push(nothing_to_see_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(Row::new().height(Length::FillPortion(2)));
+                    .push(Row::new().height(FillPortion(2)));
             }
 
             (observed, 0) => {
@@ -94,11 +94,11 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                                          observed.separate_with_spaces(), get_active_filters_string_nobr(sniffer.filters.clone()))).font(font);
 
                 body = body
-                    .push(Row::new().height(Length::FillPortion(1)))
+                    .push(Row::new().height(FillPortion(1)))
                     .push(Text::new('V'.to_string()).font(ICONS).size(60))
                     .push(tot_packets_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(Row::new().height(Length::FillPortion(2)));
+                    .push(Row::new().height(FillPortion(2)));
             }
 
             (observed, filtered) => {
@@ -153,7 +153,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                         .push(row_radio_chart)
                         .push(sniffer.traffic_chart.view()),
                 )
-                .width(Length::FillPortion(2))
+                .width(FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
                 .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
@@ -308,11 +308,11 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(
                         Row::new()
                             .spacing(5)
-                            .height(Length::FillPortion(3))
+                            .height(FillPortion(3))
                             .push(col_chart)
                             .push(
                                 Container::new(col_packets)
-                                    .width(Length::FillPortion(1))
+                                    .width(FillPortion(1))
                                     .padding(10)
                                     .height(Length::Fill)
                                     .style(
@@ -325,7 +325,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(
                         Column::new()
                             .align_items(Alignment::Center)
-                            .height(Length::FillPortion(2))
+                            .height(FillPortion(2))
                             .width(Length::Fill)
                             .push(row_report),
                     );
@@ -343,11 +343,11 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         .font(font);
 
         body = body
-            .push(Row::new().height(Length::FillPortion(1)))
+            .push(Row::new().height(FillPortion(1)))
             .push(Text::new('U'.to_string()).font(ICONS).size(60))
             .push(error_text)
             .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(Row::new().height(Length::FillPortion(2)));
+            .push(Row::new().height(FillPortion(2)));
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))

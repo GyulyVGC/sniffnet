@@ -18,55 +18,9 @@ use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
-    let dev_str_list = get_devices_names_descriptions();
+    let col_adapter = get_col_adapter(sniffer, font);
 
-    let col_adapter = Column::new()
-        .padding(10)
-        .spacing(5)
-        .height(Length::Fill)
-        .width(Length::FillPortion(4))
-        .push(
-            Text::new("Select network adapter to inspect")
-                .font(font)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(
-            Scrollable::new(dev_str_list.iter().fold(
-                Column::new().padding(13).spacing(5),
-                |scroll_adapters, adapter| {
-                    let name = &adapter.0;
-                    scroll_adapters.push(
-                        Container::new(
-                            Radio::new(
-                                name,
-                                &adapter.1,
-                                Some(&sniffer.device.clone().lock().unwrap().name),
-                                |name| Message::AdapterSelection(name.to_string()),
-                            )
-                            .font(font)
-                            .size(15)
-                            .width(Length::Fill)
-                            .style(<StyleTuple as Into<
-                                iced_style::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .padding(10)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Container,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                        )),
-                    )
-                },
-            ))
-            .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
-        );
-
-    let col_space = Column::new().width(Length::FillPortion(1));
+    let col_space = Column::new().width(FillPortion(1));
 
     let filtri = sniffer.filters.lock().unwrap();
     let ip_active = filtri.ip;
@@ -117,7 +71,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         );
     let col_ip = Column::new()
         .spacing(10)
-        .width(Length::FillPortion(1))
+        .width(FillPortion(1))
         .push(col_ip_radio);
 
     let transport_active = filtri.transport;
@@ -173,11 +127,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
-        .width(Length::FillPortion(2))
+        .width(FillPortion(2))
         .push(col_transport_radio)
-        .push(Row::new().height(Length::FillPortion(2)))
+        .push(Row::new().height(FillPortion(2)))
         .push(get_button_start(sniffer.style, font))
-        .push(Row::new().height(Length::FillPortion(1)));
+        .push(Row::new().height(FillPortion(1)));
 
     let app_active = filtri.application;
     let picklist_app = PickList::new(
@@ -190,7 +144,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         StyleTuple(sniffer.style, ElementType::Standard),
     ));
     let col_app = Column::new()
-        .width(Length::FillPortion(2))
+        .width(FillPortion(2))
         .spacing(10)
         .push(
             Text::new("Application protocol")
@@ -200,7 +154,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .push(picklist_app);
 
     let filters = Column::new()
-        .width(Length::FillPortion(6))
+        .width(FillPortion(6))
         .padding(10)
         .spacing(15)
         .push(
@@ -212,7 +166,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         )
         .push(
             Row::new()
-                .height(Length::FillPortion(3))
+                .height(FillPortion(3))
                 .push(col_ip)
                 .push(col_transport)
                 .push(col_app),
@@ -242,7 +196,7 @@ pub fn get_button_start(style: StyleType, font: Font) -> Button<'static, Message
     .on_press(Message::Start)
 }
 
-fn get_devices_names_descriptions() -> Vec<(String, String)> {
+fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
         let mut dev_str = "\n".to_string();
@@ -275,5 +229,50 @@ fn get_devices_names_descriptions() -> Vec<(String, String)> {
         dev_str.push_str("\n ");
         dev_str_list.push((name, dev_str));
     }
-    dev_str_list
+
+     Column::new()
+        .padding(10)
+        .spacing(5)
+        .height(Length::Fill)
+        .width(FillPortion(4))
+        .push(
+            Text::new("Select network adapter to inspect")
+                .font(font)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(
+            Scrollable::new(dev_str_list.iter().fold(
+                Column::new().padding(13).spacing(5),
+                |scroll_adapters, adapter| {
+                    let name = &adapter.0;
+                    scroll_adapters.push(
+                        Container::new(
+                            Radio::new(
+                                name,
+                                &adapter.1,
+                                Some(&sniffer.device.clone().lock().unwrap().name),
+                                |name| Message::AdapterSelection(name.to_string()),
+                            )
+                                .font(font)
+                                .size(15)
+                                .width(Length::Fill)
+                                .style(<StyleTuple as Into<
+                                    iced_style::theme::Radio,
+                                >>::into(
+                                    StyleTuple(sniffer.style, ElementType::Standard),
+                                )),
+                        )
+                            .padding(10)
+                            .style(<StyleTuple as Into<
+                                iced_style::theme::Container,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                            )),
+                    )
+                },
+            ))
+                .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+        )
 }
