@@ -111,7 +111,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .padding(15)
                     .spacing(10)
                     .push(
-                        Text::new("Plotted data:    ")
+                        Text::new("Traffic rate:    ")
                             .size(FONT_SIZE_SUBTITLE)
                             .font(font),
                     )
