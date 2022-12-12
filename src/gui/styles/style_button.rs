@@ -3,10 +3,8 @@
 use crate::enums::element_type::ElementType;
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    BORDER_BUTTON_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS,
-};
-use iced::widget::{button};
+use crate::utility::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS};
+use iced::widget::button;
 use iced::{Background, Vector};
 
 impl From<StyleTuple> for iced::theme::Button {

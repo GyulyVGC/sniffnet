@@ -19,18 +19,8 @@ pub fn sleep_and_write_report_loop(
 ) {
     let cvar = &status_pair.1;
 
-    // #[cfg(target_os = "windows")]
-    // std::process::Command::new("explorer")
-    //     .arg("./sniffnet_report/report.txt")
-    //     .spawn()
-    //     .unwrap();
     #[cfg(target_os = "macos")]
     std::env::set_current_dir(std::env::var("HOME").unwrap()).unwrap();
-    // #[cfg(target_os = "linux")]
-    // std::process::Command::new("explorer")
-    //     .arg("./sniffnet_report/report.txt")
-    //     .spawn()
-    //     .unwrap();
 
     if fs::create_dir("./sniffnet_report").is_err() {
         fs::remove_dir_all("./sniffnet_report").unwrap();
@@ -38,10 +28,6 @@ pub fn sleep_and_write_report_loop(
     }
 
     let path_report = "./sniffnet_report/report.txt".to_string();
-
-    let mut _time_header = 0;
-    let mut _time_header_sort = 0;
-    let mut _time_header_sort_print = 0;
 
     let mut capture_id = *current_capture_id.lock().unwrap();
 

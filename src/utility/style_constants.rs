@@ -1,8 +1,10 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
+use crate::{get_colors, StyleType};
 use iced::{Color, Font};
+use plotters::style::RGBColor;
 
-use crate::structs::colors::Colors;
+use crate::structs::colors::{to_rgb_color, Colors};
 
 pub const COLOR_CHART_MIX: f64 = 1.0;
 
@@ -183,6 +185,13 @@ pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
     name: "CourierPrimeBoldItalic",
     bytes: include_bytes!("../../fonts/CourierPrimeBoldItalic.ttf"),
 };
+
+pub fn get_font(style: StyleType) -> Font {
+    match to_rgb_color(get_colors(style).text_body) {
+        RGBColor(255, 255, 255) => COURIER_PRIME,
+        _ => COURIER_PRIME_BOLD,
+    }
+}
 
 // gui charts fonts
 pub const NOTOSANS: Font = Font::External {

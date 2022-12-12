@@ -2,66 +2,23 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, Column, Container, PickList, Radio, Row, Scrollable, Text};
+use iced::widget::{button, Button, Column, Container, PickList, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Element, Length};
+use iced::{alignment, Alignment, Font, Length};
 use pcap::Device;
-use plotters::style::RGBColor;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::structs::colors::{to_rgb_color};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::get_formatted_strings::APP_VERSION;
-use crate::utility::style_constants::{
-    COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
-    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, HEIGHT_FOOTER,
-    HEIGHT_HEADER, ICONS,
-};
-use crate::{get_colors, AppProtocol, IpVersion, TransProtocol};
-use crate::gui::components::buttons::get_button_start;
+use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY};
+use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
-        RGBColor(255, 255, 255) => COURIER_PRIME,
-        _ => COURIER_PRIME_BOLD,
-    };
+    let font = get_font(sniffer.style);
 
-    let mut dev_str_list = vec![];
-    for dev in Device::list().expect("Error retrieving device list\r\n") {
-        let mut dev_str = "\n".to_string();
-        let name = dev.name;
-        match dev.desc {
-            None => {
-                dev_str.push_str(&name);
-            }
-            Some(description) => {
-                #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{}\n", name));
-                dev_str.push_str(&description);
-            }
-        }
-        let num_addresses = dev.addresses.len();
-        match num_addresses {
-            0 => {}
-            1 => {
-                dev_str.push_str("\nAddress:");
-            }
-            _ => {
-                dev_str.push_str("\nAddresses:");
-            }
-        }
-
-        for addr in dev.addresses {
-            let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n    {}", address_string));
-        }
-        dev_str.push_str("\n ");
-        dev_str_list.push((name, dev_str));
-    }
+    let dev_str_list = get_devices_names_descriptions();
 
     let col_adapter = Column::new()
         .padding(10)
@@ -74,40 +31,36 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
                 .size(FONT_SIZE_TITLE),
         )
         .push(
-            Scrollable::new(
-                dev_str_list.iter().fold(
-                    Column::new() // .style(StyleTuple(sniffer.style, ElementType::Standard))
-                        .padding(13)
-                        .spacing(5),
-                    |scroll_adapters, adapter| {
-                        let name = &adapter.0;
-                        scroll_adapters.push(
-                            Container::new(
-                                Radio::new(
-                                    name,
-                                    &adapter.1,
-                                    Some(&sniffer.device.clone().lock().unwrap().name),
-                                    |name| Message::AdapterSelection(name.to_string()),
-                                )
-                                .font(font)
-                                .size(15)
-                                .width(Length::Fill)
-                                .style(<StyleTuple as Into<
-                                    iced_style::theme::Radio,
-                                >>::into(
-                                    StyleTuple(sniffer.style, ElementType::Standard),
-                                )),
+            Scrollable::new(dev_str_list.iter().fold(
+                Column::new().padding(13).spacing(5),
+                |scroll_adapters, adapter| {
+                    let name = &adapter.0;
+                    scroll_adapters.push(
+                        Container::new(
+                            Radio::new(
+                                name,
+                                &adapter.1,
+                                Some(&sniffer.device.clone().lock().unwrap().name),
+                                |name| Message::AdapterSelection(name.to_string()),
                             )
-                            .padding(10)
+                            .font(font)
+                            .size(15)
+                            .width(Length::Fill)
                             .style(<StyleTuple as Into<
-                                iced_style::theme::Container,
+                                iced_style::theme::Radio,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                                StyleTuple(sniffer.style, ElementType::Standard),
                             )),
                         )
-                    },
-                ),
-            )
+                        .padding(10)
+                        .style(<StyleTuple as Into<
+                            iced_style::theme::Container,
+                        >>::into(
+                            StyleTuple(sniffer.style, ElementType::BorderedRound),
+                        )),
+                    )
+                },
+            ))
             .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
                 StyleTuple(sniffer.style, ElementType::Standard),
             )),
@@ -265,13 +218,62 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(col_app),
         );
 
-    let body = Row::new()
-        .push(col_adapter)
-        .push(col_space)
-        .push(filters);
+    let body = Row::new().push(col_adapter).push(col_space).push(filters);
 
     Container::new(body)
+        .height(FillPortion(HEIGHT_BODY))
         .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+pub fn get_button_start(style: StyleType, font: Font) -> Button<'static, Message> {
+    button(
+        Text::new("Run!")
+            .font(font)
+            .size(FONT_SIZE_TITLE)
+            .vertical_alignment(alignment::Vertical::Center)
+            .horizontal_alignment(alignment::Horizontal::Center),
+    )
+    .padding(10)
+    .height(Length::Units(80))
+    .width(Length::Units(160))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::Start)
+}
+
+fn get_devices_names_descriptions() -> Vec<(String, String)> {
+    let mut dev_str_list = vec![];
+    for dev in Device::list().expect("Error retrieving device list\r\n") {
+        let mut dev_str = "\n".to_string();
+        let name = dev.name;
+        match dev.desc {
+            None => {
+                dev_str.push_str(&name);
+            }
+            Some(description) => {
+                #[cfg(not(target_os = "windows"))]
+                dev_str.push_str(&format!("{}\n", name));
+                dev_str.push_str(&description);
+            }
+        }
+        let num_addresses = dev.addresses.len();
+        match num_addresses {
+            0 => {}
+            1 => {
+                dev_str.push_str("\nAddress:");
+            }
+            _ => {
+                dev_str.push_str("\nAddresses:");
+            }
+        }
+
+        for addr in dev.addresses {
+            let address_string = addr.addr.to_string();
+            dev_str.push_str(&format!("\n    {}", address_string));
+        }
+        dev_str.push_str("\n ");
+        dev_str_list.push((name, dev_str));
+    }
+    dev_str_list
 }

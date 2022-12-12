@@ -2,29 +2,26 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
-use iced::widget::{Column, Container};
-use iced::{executor, Application, Command, Element, Length, Subscription, Theme};
+use iced::widget::Column;
+use iced::{executor, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::thread;
 use std::time::Duration;
-use iced::Length::FillPortion;
 
-use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::status::Status;
-use crate::gui::{gui_initial_page::initial_page, gui_run_page::run_page};
+use crate::gui::components::footer::get_footer;
+use crate::gui::components::header::get_header;
+use crate::gui::pages::initial_page::initial_page;
+use crate::gui::pages::run_page::run_page;
 use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
-use crate::structs::style_tuple::StyleTuple;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
-use crate::gui::components::footer::get_footer;
-use crate::gui::components::header::get_header;
-use crate::utility::style_constants::{HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -49,13 +46,14 @@ impl Application for Sniffer {
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::TickInit => {
-                play_sound();
+                //play_sound();
             }
             Message::TickRun => {
-                play_sound();
+                //play_sound();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
+                    self.runtime_data.lock().unwrap().all_packets = info_traffic_lock.all_packets;
                     drop(info_traffic_lock);
                     self.update(Message::Waiting);
                 } else {
@@ -80,6 +78,7 @@ impl Application for Sniffer {
                 }
             }
             Message::AdapterSelection(name) => {
+                play_sound();
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
                     if dev.name.eq(&name) {
                         *self.device.lock().unwrap() = dev;
@@ -88,18 +87,23 @@ impl Application for Sniffer {
                 }
             }
             Message::IpVersionSelection(version) => {
+                play_sound();
                 self.filters.lock().unwrap().ip = version;
             }
             Message::TransportProtocolSelection(protocol) => {
+                play_sound();
                 self.filters.lock().unwrap().transport = protocol;
             }
             Message::AppProtocolSelection(protocol) => {
+                play_sound();
                 self.filters.lock().unwrap().application = protocol;
             }
             Message::ChartSelection(what_to_display) => {
+                play_sound();
                 self.traffic_chart.change_kind(what_to_display);
             }
             Message::ReportSelection(what_to_display) => {
+                play_sound();
                 self.report_type = what_to_display;
                 update_report_data(
                     self.runtime_data.clone(),
@@ -108,6 +112,7 @@ impl Application for Sniffer {
                 );
             }
             Message::OpenReport => {
+                play_sound();
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
                     .arg(r".\sniffnet_report\report.txt")
@@ -126,6 +131,7 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::OpenGithub => {
+                play_sound();
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
                     .arg("https://github.com/GyulyVGC/sniffnet")
@@ -143,6 +149,7 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::Start => {
+                play_sound();
                 let current_capture_id = self.current_capture_id.clone();
                 let device = self.device.clone();
                 let filters = self.filters.clone();
@@ -171,11 +178,13 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::Reset => {
+                play_sound();
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 *self.status_pair.0.lock().unwrap() = Status::Init;
                 *self.pcap_error.lock().unwrap() = Option::None;
             }
             Message::Style => {
+                play_sound();
                 let current_style = self.style;
                 self.style = match current_style {
                     StyleType::Night => StyleType::Day,
@@ -190,7 +199,7 @@ impl Application for Sniffer {
             }
             Message::Waiting => {
                 if self.waiting.len() > 2 {
-                    self.waiting = "".to_string();
+                    self.waiting = String::new();
                 }
                 self.waiting = ".".repeat(self.waiting.len() + 1);
             }
@@ -202,24 +211,20 @@ impl Application for Sniffer {
         let status = *self.status_pair.0.lock().unwrap();
         let style = self.style;
 
+        let header = match status {
+            Status::Init => get_header(style, false),
+            Status::Running => get_header(style, true),
+        };
+
         let body = match status {
             Status::Init => initial_page(self),
             Status::Running => run_page(self),
         };
 
         Column::new()
-            .push(
-                get_header(style)
-                    .height(FillPortion(HEIGHT_HEADER))
-            )
-            .push(
-                body
-                    .height(FillPortion(HEIGHT_BODY))
-            )
-            .push(
-                get_footer(style)
-                    .height(FillPortion(HEIGHT_FOOTER))
-            )
+            .push(header)
+            .push(body)
+            .push(get_footer(style))
             .into()
     }
 
@@ -228,7 +233,9 @@ impl Application for Sniffer {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
             }
-            _ => iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit),
+            Status::Init => {
+                iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit)
+            }
         }
     }
 }

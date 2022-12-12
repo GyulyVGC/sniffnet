@@ -4,112 +4,36 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
+use iced::widget::{Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Element, Length};
-use plotters::style::RGBColor;
+use iced::{Alignment, Length};
 use thousands::Separable;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::structs::colors::to_rgb_color;
+use crate::gui::components::tabs::get_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string, APP_VERSION,
+    get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
 use crate::utility::style_constants::{
-    COURIER_PRIME, COURIER_PRIME_BOLD, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC,
-    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, HEIGHT_BODY, HEIGHT_FOOTER, HEIGHT_HEADER, ICONS,
+    get_font, COURIER_PRIME_BOLD, FONT_SIZE_SUBTITLE, HEIGHT_BODY, ICONS,
 };
-use crate::{get_colors, AppProtocol, ChartType, ReportType};
+use crate::{AppProtocol, ChartType, ReportType};
 
 /// Computes the body of gui run page
 pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = match to_rgb_color(get_colors(sniffer.style).text_body) {
-        RGBColor(255, 255, 255) => COURIER_PRIME,
-        _ => COURIER_PRIME_BOLD,
-    };
+    let font = get_font(sniffer.style);
 
-    let button_overview = button(
-        Text::new("Overview")
-            .font(font)
-            .size(FONT_SIZE_SUBTITLE)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(30))
-    .width(Length::FillPortion(1))
-        .style(StyleTuple(sniffer.style, ElementType::TabActive).into())
-    .on_press(Message::TickInit); //do nothing, just update the page
-
-    let button_inspect = button(
-        Text::new("Inspect")
-            .font(font)
-            .size(FONT_SIZE_SUBTITLE)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(30))
-    .width(Length::FillPortion(1))
-        .style(StyleTuple(sniffer.style, ElementType::TabInactive).into())
-    .on_press(Message::Reset);
-
-    let button_settings = button(
-        Text::new("Settings")
-            .font(font)
-            .size(FONT_SIZE_SUBTITLE)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(30))
-    .width(Length::FillPortion(1))
-        .style(StyleTuple(sniffer.style, ElementType::TabInactive).into())
-    .on_press(Message::Reset);
-
-    // let header = Container::new(
-    //     Row::new()
-    //         .height(Length::Fill)
-    //         .width(Length::Fill)
-    //         .align_items(Alignment::Center)
-    //         .push(
-    //             Container::new(button_reset)
-    //                 .width(Length::FillPortion(1))
-    //                 .width(Length::FillPortion(1))
-    //                 .align_x(Horizontal::Center),
-    //         )
-    //         .push(
-    //             Container::new(Row::new().align_items(Alignment::Center).push(logo))
-    //                 .width(Length::FillPortion(6))
-    //                 .height(Length::Fill)
-    //                 .align_x(Horizontal::Center)
-    //                 .align_y(Vertical::Center),
-    //         )
-    //         .push(
-    //             Container::new(button_style)
-    //                 .width(Length::FillPortion(1))
-    //                 .align_x(Horizontal::Center),
-    //         ),
-    // )
-    // .height(Length::FillPortion(HEIGHT_HEADER))
-    // .width(Length::Fill)
-    // .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
-    //     StyleTuple(sniffer.style, ElementType::Headers),
-    // ));
-
-    // let _button_report = Button::new(
-    //     Text::new("Open full report")
-    //         .font(font)
-    //         .horizontal_alignment(alignment::Horizontal::Center)
-    //         .vertical_alignment(alignment::Vertical::Center),
-    // )
-    // .padding(10)
-    // .height(Length::Units(35))
-    // .width(Length::Units(200))
-    // // .style(StyleTuple(sniffer.style, ElementType::Standard))
-    // .on_press(Message::OpenReport);
+    let tabs = get_tabs(
+        &["Overview", "Inspect", "Prova prova Try try"],
+        &[Message::TickInit, Message::Reset, Message::Reset],
+        "Overview",
+        sniffer.style,
+    );
 
     let runtime_data_lock = sniffer.runtime_data.lock().unwrap();
     let observed = runtime_data_lock.all_packets;
@@ -126,7 +50,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(5)
         .align_items(Alignment::Center);
 
-    let mut tab_body = Column::new().height(Length::FillPortion(HEIGHT_BODY));
+    let mut tab_and_body = Column::new().height(Length::FillPortion(HEIGHT_BODY));
 
     if sniffer.pcap_error.lock().unwrap().is_none() {
         // NO pcap error detected
@@ -136,22 +60,22 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 //no packets observed at all
 
                 let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
-                let (icon_text, nothing_to_see_text) = if !sniffer
+                let (icon_text, nothing_to_see_text) = if sniffer
                     .device
                     .lock()
                     .unwrap()
                     .addresses
                     .is_empty()
                 {
-                    (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
-                     Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
-                } else {
                     (Text::new('T'.to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                                               Network adapter: {}\n\n\
                                                               If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
+                } else {
+                    (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
+                     Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+                                                              Network adapter: {}\n\n\
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
                 };
                 body = body
                     .push(Row::new().height(Length::FillPortion(1)))
@@ -180,14 +104,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
 
-                let tabs = Row::new()
-                    .width(Length::Fill)
-                    .align_items(Alignment::Center)
-                    .push(button_overview)
-                    .push(button_inspect)
-                    .push(button_settings);
-
-                tab_body = tab_body.push(tabs);
+                tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
                 let row_radio_chart = Row::new()
@@ -278,7 +195,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                         .push(Text::new("Filtered packets per application protocol:").font(font))
                         .push(
                             Scrollable::new(
-                                Text::new(get_app_count_string(app_protocols, filtered as u128))
+                                Text::new(get_app_count_string(&app_protocols, filtered as u128))
                                     .font(font),
                             )
                             .style(<StyleTuple as Into<
@@ -354,7 +271,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     ;
                 let mut scroll_report = Column::new();
                 for key_val in sniffer.runtime_data.lock().unwrap().report_vec.iter() {
-                    let entry_color = get_connection_color(key_val.1.traffic_type, &sniffer.style);
+                    let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
                         Row::new()
@@ -371,8 +288,10 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(Text::new("   ").font(font)),
                     );
                 }
-                col_report = col_report.push(Scrollable::new(scroll_report)
-                    .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
+                col_report =
+                    col_report.push(Scrollable::new(scroll_report).style(<StyleTuple as Into<
+                        iced_style::theme::Scrollable,
+                    >>::into(
                         StyleTuple(sniffer.style, ElementType::Standard),
                     )));
 
@@ -431,10 +350,8 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
             .push(Row::new().height(Length::FillPortion(2)));
     }
 
-    Container::new(
-        Column::new()
-        .push(tab_body.push(body))
-    )
+    Container::new(Column::new().push(tab_and_body.push(body)))
+        .height(FillPortion(HEIGHT_BODY))
         .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))

@@ -63,11 +63,11 @@ pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_type: TrafficType, style: &StyleType) -> Color {
+pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Color {
     if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
-        get_colors(*style).incoming
+        get_colors(style).incoming
     } else {
-        get_colors(*style).outgoing
+        get_colors(style).outgoing
     }
 }
 
@@ -80,8 +80,8 @@ pub fn get_connection_color(traffic_type: TrafficType, style: &StyleType) -> Col
 /// * `app_count` - Map of app layer protocols with the relative sniffed packets count
 ///
 /// * `tot_packets` - Total number of sniffed packets
-pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
-    let mut ret_val = "".to_string();
+pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
+    let mut ret_val = String::new();
 
     if app_count.is_empty() {
         return ret_val;
@@ -142,7 +142,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
 
 /// Returns a String representing a quantity of bytes with their proper multiple (kB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
-    let mut multiple_transmitted = "".to_string();
+    let mut multiple_transmitted = String::new();
     let mut n = bytes as f32;
 
     match bytes {
@@ -165,12 +165,12 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         } // tera
     }
 
-    if !multiple_transmitted.is_empty() {
-        // with multiple
-        format!("{:.1} {}B", n, multiple_transmitted)
-    } else {
+    if multiple_transmitted.is_empty() {
         // no multiple
         format!("{}  B", n)
+    } else {
+        // with multiple
+        format!("{:.1} {}B", n, multiple_transmitted)
     }
 }
 
@@ -190,6 +190,6 @@ pub fn get_country_code(
             .unwrap()
             .to_string()
             .replace("ZZ", "//"),
-        _ => "".to_string(),
+        TrafficType::Other => String::new(),
     }
 }

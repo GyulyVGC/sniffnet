@@ -32,7 +32,7 @@ pub struct InfoTraffic {
 }
 
 impl InfoTraffic {
-    /// Constructs a new InfoTraffic element.
+    /// Constructs a new `InfoTraffic` element.
     pub fn new() -> Self {
         InfoTraffic {
             tot_received_bytes: 0,

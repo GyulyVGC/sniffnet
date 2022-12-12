@@ -20,7 +20,7 @@ pub struct AddressPortPair {
 }
 
 impl AddressPortPair {
-    /// Returns a new AddressPort element.
+    /// Returns a new `AddressPort` element.
     ///
     /// # Arguments
     ///

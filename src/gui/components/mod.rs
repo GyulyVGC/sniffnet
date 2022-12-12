@@ -1,3 +1,3 @@
-pub mod header;
-pub mod buttons;
 pub mod footer;
+pub mod header;
+pub mod tabs;

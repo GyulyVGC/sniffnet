@@ -12,7 +12,7 @@ pub fn update_report_data(
     let mut runtime_data_lock = runtime_data.lock().unwrap();
     let info_traffic_lock = info_traffic.lock().unwrap();
 
-    runtime_data_lock.report_vec = Default::default();
+    runtime_data_lock.report_vec = std::vec::Vec::default();
     let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> =
         info_traffic_lock.map.iter().collect();
 

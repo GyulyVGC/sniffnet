@@ -53,17 +53,17 @@ pub struct RunTimeData {
 }
 
 impl RunTimeData {
-    /// Constructs a new ChartsData element.
+    /// Constructs a new `ChartsData` element.
     pub fn new() -> Self {
         RunTimeData {
             all_bytes: 0,
-            sent_bytes: Default::default(),
-            received_bytes: Default::default(),
+            sent_bytes: std::collections::VecDeque::default(),
+            received_bytes: std::collections::VecDeque::default(),
             all_packets: 0,
-            sent_packets: Default::default(),
-            received_packets: Default::default(),
-            app_protocols: Default::default(),
-            report_vec: Default::default(),
+            sent_packets: std::collections::VecDeque::default(),
+            received_packets: std::collections::VecDeque::default(),
+            app_protocols: std::collections::HashMap::default(),
+            report_vec: std::vec::Vec::default(),
             tot_sent_bytes: 0,
             tot_received_bytes: 0,
             tot_sent_packets: 0,

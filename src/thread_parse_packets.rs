@@ -78,8 +78,8 @@ pub fn parse_packets_loop(
                         continue;
                     }
                     Ok(value) => {
-                        let mut address1 = "".to_string();
-                        let mut address2 = "".to_string();
+                        let mut address1 = String::new();
+                        let mut address2 = String::new();
                         network_protocol = IpVersion::Other;
                         transport_protocol = TransProtocol::Other;
                         application_protocol = AppProtocol::Other;

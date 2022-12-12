@@ -1,5 +1,5 @@
 /// Used to specify the kind of `iced` element, to be able to choose the appropriate style for it
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ElementType {
     Standard,
     Headers,
@@ -8,8 +8,8 @@ pub enum ElementType {
     TabInactive,
 }
 
-impl Clone for ElementType {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
+// impl Clone for ElementType {
+//     fn clone(&self) -> Self {
+//         *self
+//     }
+// }

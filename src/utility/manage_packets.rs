@@ -104,7 +104,7 @@ pub fn modify_or_insert_in_map(
         // first occurrence of key => retrieve country code
         get_country_code(db, traffic_type, &key)
     } else {
-        "".to_string()
+        String::new()
     };
     info_traffic
         .map
@@ -172,7 +172,7 @@ pub fn is_multicast_address(address: &str) -> bool {
 /// ```
 pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     //from hex to dec, paying attention to the correct number of digits
-    let mut ipv6_hex = "".to_string();
+    let mut ipv6_hex = String::new();
     for i in 0..=15 {
         //pari: primo byte del gruppo
         if i % 2 == 0 {
@@ -225,7 +225,7 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     }
 
     //from longest sequence of consecutive zeros to '::'
-    let mut ipv6_hex_compressed = "".to_string();
+    let mut ipv6_hex_compressed = String::new();
     for _ in 0..longest_zero_sequence {
         to_compress.remove(longest_zero_sequence_start);
     }
