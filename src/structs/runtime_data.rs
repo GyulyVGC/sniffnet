@@ -7,6 +7,7 @@ use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
 
 /// Struct containing useful data to generate charts and to display statistics about network traffic
+#[derive(Clone)]
 pub struct RunTimeData {
     /// Total number of bytes (filtered and not filtered)
     pub all_bytes: u128,

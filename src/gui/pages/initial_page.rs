@@ -22,8 +22,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     let col_space = Column::new().width(FillPortion(1));
 
-    let filtri = sniffer.filters.lock().unwrap();
-    let ip_active = filtri.ip;
+    let ip_active = sniffer.filters.ip;
     let col_ip_radio = Column::new()
         .spacing(10)
         .push(Text::new("IP version").font(font).size(FONT_SIZE_SUBTITLE))
@@ -74,7 +73,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(1))
         .push(col_ip_radio);
 
-    let transport_active = filtri.transport;
+    let transport_active = sniffer.filters.transport;
     let col_transport_radio = Column::new()
         .spacing(10)
         .push(
@@ -133,7 +132,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .push(get_button_start(sniffer.style, font))
         .push(Row::new().height(FillPortion(1)));
 
-    let app_active = filtri.application;
+    let app_active = sniffer.filters.application;
     let picklist_app = PickList::new(
         &AppProtocol::ALL[..],
         Some(app_active),
@@ -250,7 +249,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                             Radio::new(
                                 name,
                                 &adapter.1,
-                                Some(&sniffer.device.clone().lock().unwrap().name),
+                                Some(&sniffer.device.name),
                                 |name| Message::AdapterSelection(name.to_string()),
                             )
                                 .font(font)

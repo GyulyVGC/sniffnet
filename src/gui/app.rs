@@ -53,25 +53,24 @@ impl Application for Sniffer {
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
-                    self.runtime_data.lock().unwrap().all_packets = info_traffic_lock.all_packets;
+                    self.runtime_data.all_packets = info_traffic_lock.all_packets;
                     drop(info_traffic_lock);
                     self.update(Message::Waiting);
                 } else {
-                    let mut runtime_data_lock = self.runtime_data.lock().unwrap();
-                    runtime_data_lock.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
-                    runtime_data_lock.tot_received_packets =
+                    self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
+                    self.runtime_data.tot_received_packets =
                         info_traffic_lock.tot_received_packets as i128;
-                    runtime_data_lock.all_packets = info_traffic_lock.all_packets;
-                    runtime_data_lock.all_bytes = info_traffic_lock.all_bytes;
-                    runtime_data_lock.tot_received_bytes =
+                    self.runtime_data.all_packets = info_traffic_lock.all_packets;
+                    self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
+                    self.runtime_data.tot_received_bytes =
                         info_traffic_lock.tot_received_bytes as i128;
-                    runtime_data_lock.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
-                    runtime_data_lock.app_protocols = info_traffic_lock.app_protocols.clone();
+                    self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
+                    self.runtime_data.app_protocols = info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
-                    drop(runtime_data_lock);
-                    update_charts_data(self.runtime_data.clone());
+                    update_charts_data(&mut self.runtime_data);
+                    self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
                     update_report_data(
-                        self.runtime_data.clone(),
+                        &mut self.runtime_data,
                         self.info_traffic.clone(),
                         self.report_type,
                     );
@@ -81,22 +80,22 @@ impl Application for Sniffer {
                 play_sound();
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
                     if dev.name.eq(&name) {
-                        *self.device.lock().unwrap() = dev;
+                        self.device = dev;
                         break;
                     }
                 }
             }
             Message::IpVersionSelection(version) => {
                 play_sound();
-                self.filters.lock().unwrap().ip = version;
+                self.filters.ip = version;
             }
             Message::TransportProtocolSelection(protocol) => {
                 play_sound();
-                self.filters.lock().unwrap().transport = protocol;
+                self.filters.transport = protocol;
             }
             Message::AppProtocolSelection(protocol) => {
                 play_sound();
-                self.filters.lock().unwrap().application = protocol;
+                self.filters.application = protocol;
             }
             Message::ChartSelection(what_to_display) => {
                 play_sound();
@@ -106,7 +105,7 @@ impl Application for Sniffer {
                 play_sound();
                 self.report_type = what_to_display;
                 update_report_data(
-                    self.runtime_data.clone(),
+                    &mut self.runtime_data,
                     self.info_traffic.clone(),
                     self.report_type,
                 );
@@ -157,10 +156,9 @@ impl Application for Sniffer {
                 let pcap_error = self.pcap_error.clone();
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                let runtime_data_mutex = self.runtime_data.clone();
-                *runtime_data_mutex.lock().unwrap() = RunTimeData::new();
+                self.runtime_data = RunTimeData::new();
                 *self.status_pair.0.lock().unwrap() = Status::Running;
-                self.traffic_chart = TrafficChart::new(runtime_data_mutex, self.style);
+                self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
                 self.status_pair.1.notify_all();
                 thread::Builder::new()
                     .name(format!(

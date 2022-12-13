@@ -1,7 +1,6 @@
 use db_ip::{CountryCode, DbIpDatabase};
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
 use iced::Color;
 use thousands::Separable;
@@ -24,40 +23,38 @@ pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
 }
 
 /// Computes the String representing the active filters
-pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-    if filters_lock.ip.eq(&IpVersion::Other)
-        && filters_lock.application.eq(&AppProtocol::Other)
-        && filters_lock.transport.eq(&TransProtocol::Other)
+pub fn get_active_filters_string(filters: &Filters) -> String {
+    if filters.ip.eq(&IpVersion::Other)
+        && filters.application.eq(&AppProtocol::Other)
+        && filters.transport.eq(&TransProtocol::Other)
     {
         "Active filters:\n   none".to_string()
     } else {
         let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip.ne(&IpVersion::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip));
+        if filters.ip.ne(&IpVersion::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.ip));
         }
-        if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.transport));
+        if filters.transport.ne(&TransProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.transport));
         }
-        if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.application));
+        if filters.application.ne(&AppProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.application));
         }
         ret_val
     }
 }
 
 /// Computes the String representing the active filters, without line breaks
-pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
+pub fn get_active_filters_string_nobr(filters: &Filters) -> String {
     let mut ret_val = "Active filters:".to_string();
-    if filters_lock.ip.ne(&IpVersion::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.ip));
+    if filters.ip.ne(&IpVersion::Other) {
+        ret_val.push_str(&format!(" {}", filters.ip));
     }
-    if filters_lock.transport.ne(&TransProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.transport));
+    if filters.transport.ne(&TransProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.transport));
     }
-    if filters_lock.application.ne(&AppProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.application));
+    if filters.application.ne(&AppProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.application));
     }
     ret_val
 }

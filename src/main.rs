@@ -42,22 +42,19 @@ pub fn main() -> iced::Result {
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
-    let runtime_data1 = Arc::new(Mutex::new(RunTimeData::new()));
-    let runtime_data2 = runtime_data1.clone();
-
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
-    let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
+    let found_device = Device::lookup().unwrap().unwrap();
 
     let pcap_error = Arc::new(Mutex::new(None)); // None means no error
 
-    let filters = Arc::new(Mutex::new(Filters {
+    let filters = Filters {
         ip: IpVersion::Other,
         transport: TransProtocol::Other,
         application: AppProtocol::Other,
-    }));
+    };
 
     // to kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -93,14 +90,14 @@ pub fn main() -> iced::Result {
         flags: Sniffer {
             current_capture_id: current_capture_id1,
             info_traffic: mutex_map1,
-            runtime_data: runtime_data1,
+            runtime_data: RunTimeData::new(),
             device: found_device,
             filters,
             status_pair: status_pair1,
             pcap_error,
             style,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(runtime_data2, style),
+            traffic_chart: TrafficChart::new(RunTimeData::new(), style),
             report_type: ReportType::MostRecent,
         },
         default_font: None,

@@ -1,7 +1,6 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display charts in GUI run page
 
 use std::cmp::max;
-use std::sync::{Arc, Mutex};
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
@@ -18,7 +17,7 @@ use crate::{get_colors, ChartType, RunTimeData, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
-    charts_data: Arc<Mutex<RunTimeData>>,
+    charts_data: RunTimeData,
     color_mix: f64,
     color_incoming: RGBColor,
     color_outgoing: RGBColor,
@@ -27,7 +26,7 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(charts_data: Arc<Mutex<RunTimeData>>, style: StyleType) -> Self {
+    pub fn new(charts_data: RunTimeData, style: StyleType) -> Self {
         TrafficChart {
             charts_data,
             color_mix: COLOR_CHART_MIX,
@@ -70,13 +69,11 @@ impl Chart<Message> for TrafficChart {
     fn build_chart<DB: DrawingBackend>(&self, _state: &Self::State, mut chart: ChartBuilder<DB>) {
         use plotters::prelude::*;
 
-        let charts_data_lock = self.charts_data.lock().unwrap();
-
-        if charts_data_lock.ticks == 0 {
+        if self.charts_data.ticks == 0 {
             return;
         }
-        let tot_seconds = charts_data_lock.ticks - 1;
-        let first_time_displayed = max(0, charts_data_lock.ticks as i128 - 30) as u128;
+        let tot_seconds = self.charts_data.ticks - 1;
+        let first_time_displayed = max(0, self.charts_data.ticks as i128 - 30) as u128;
 
         let color_incoming = self.color_incoming;
         let color_outgoing = self.color_outgoing;
@@ -90,7 +87,7 @@ impl Chart<Message> for TrafficChart {
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
                     .build_cartesian_2d(
                         first_time_displayed..tot_seconds as u128,
-                        charts_data_lock.min_sent_bytes..charts_data_lock.max_received_bytes,
+                        self.charts_data.min_sent_bytes..self.charts_data.max_received_bytes,
                     )
                     .expect("Error drawing graph");
 
@@ -116,7 +113,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .draw_series(
                         AreaSeries::new(
-                            charts_data_lock.received_bytes.iter().copied(),
+                            self.charts_data.received_bytes.iter().copied(),
                             0,
                             color_incoming.mix(self.color_mix),
                         )
@@ -132,7 +129,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .draw_series(
                         AreaSeries::new(
-                            charts_data_lock.sent_bytes.iter().copied(),
+                            self.charts_data.sent_bytes.iter().copied(),
                             0,
                             color_outgoing.mix(self.color_mix),
                         )
@@ -162,7 +159,7 @@ impl Chart<Message> for TrafficChart {
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
                     .build_cartesian_2d(
                         first_time_displayed..tot_seconds as u128,
-                        charts_data_lock.min_sent_packets..charts_data_lock.max_received_packets,
+                        self.charts_data.min_sent_packets..self.charts_data.max_received_packets,
                     )
                     .expect("Error drawing graph");
 
@@ -174,7 +171,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .draw_series(
                         AreaSeries::new(
-                            charts_data_lock.received_packets.iter().copied(),
+                            self.charts_data.received_packets.iter().copied(),
                             0,
                             color_incoming.mix(self.color_mix),
                         )
@@ -190,7 +187,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .draw_series(
                         AreaSeries::new(
-                            charts_data_lock.sent_packets.iter().copied(),
+                            self.charts_data.sent_packets.iter().copied(),
                             0,
                             color_outgoing.mix(self.color_mix),
                         )

@@ -18,23 +18,22 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets_loop(
     current_capture_id: Arc<Mutex<u16>>,
-    device: Arc<Mutex<Device>>,
-    filters: Arc<Mutex<Filters>>,
+    device: Device,
+    filters: Filters,
     info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
     pcap_error: Arc<Mutex<Option<String>>>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
-    for address in device.lock().unwrap().clone().addresses {
+    for address in device.addresses {
         my_interface_addresses.push(address.addr.to_string());
     }
 
-    let filtri = filters.lock().unwrap();
+    let filtri = filters;
     let network_layer_filter = filtri.ip;
     let transport_layer_filter = filtri.transport;
     let app_layer_filter = filtri.application;
-    drop(filtri);
 
     let mut port1 = 0;
     let mut port2 = 0;
@@ -46,7 +45,7 @@ pub fn parse_packets_loop(
     let mut skip_packet;
     let mut reported_packet;
 
-    let cap_result = Capture::from_device(&*device.lock().unwrap().name)
+    let cap_result = Capture::from_device(&*device.name)
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)

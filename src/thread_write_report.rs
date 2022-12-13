@@ -62,7 +62,7 @@ pub fn sleep_and_write_report_loop(
                 .lock()
                 .expect("Error acquiring mutex\n\r");
 
-            for index in info_traffic.addresses_last_interval.iter() {
+            for index in &info_traffic.addresses_last_interval {
                 let key_val = info_traffic.map.get_index(*index).unwrap();
                 let seek_pos = 166 * 3 + 206 * (*index) as u64;
                 output.seek(SeekFrom::Start(seek_pos)).unwrap();

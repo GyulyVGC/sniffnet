@@ -7,9 +7,3 @@ pub enum ElementType {
     TabActive,
     TabInactive,
 }
-
-// impl Clone for ElementType {
-//     fn clone(&self) -> Self {
-//         *self
-//     }
-// }

@@ -35,13 +35,11 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         sniffer.style,
     );
 
-    let runtime_data_lock = sniffer.runtime_data.lock().unwrap();
-    let observed = runtime_data_lock.all_packets;
-    let filtered = runtime_data_lock.tot_sent_packets + runtime_data_lock.tot_received_packets;
-    let observed_bytes = runtime_data_lock.all_bytes;
-    let filtered_bytes = runtime_data_lock.tot_sent_bytes + runtime_data_lock.tot_received_bytes;
-    let app_protocols = runtime_data_lock.app_protocols.clone();
-    drop(runtime_data_lock);
+    let observed = sniffer.runtime_data.all_packets;
+    let filtered = sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
+    let observed_bytes = sniffer.runtime_data.all_bytes;
+    let filtered_bytes = sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let app_protocols = sniffer.runtime_data.app_protocols.clone();
     let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
 
     let mut body = Column::new()
@@ -59,11 +57,9 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
             (0, 0) => {
                 //no packets observed at all
 
-                let adapter_name = &*sniffer.device.clone().lock().unwrap().name.clone();
+                let adapter_name = sniffer.device.name.clone();
                 let (icon_text, nothing_to_see_text) = if sniffer
                     .device
-                    .lock()
-                    .unwrap()
                     .addresses
                     .is_empty()
                 {
@@ -91,7 +87,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
                                                     Filtered packets: 0\n\n\
                                                     Some packets have been intercepted, but still none has been selected according to the filters you specified...\n\n{}",
-                                                         observed.separate_with_spaces(), get_active_filters_string_nobr(sniffer.filters.clone()))).font(font);
+                                                         observed.separate_with_spaces(), get_active_filters_string_nobr(&sniffer.filters.clone()))).font(font);
 
                 body = body
                     .push(Row::new().height(FillPortion(1)))
@@ -164,7 +160,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
-                    .push(Text::new(get_active_filters_string(sniffer.filters.clone())).font(font))
+                    .push(Text::new(get_active_filters_string(&sniffer.filters.clone())).font(font))
                     .push(Text::new(" "))
                     .push(
                         Text::new(format!(
@@ -185,8 +181,6 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     );
                 if sniffer
                     .filters
-                    .lock()
-                    .unwrap()
                     .application
                     .eq(&AppProtocol::Other)
                 {
@@ -270,7 +264,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
                 let mut scroll_report = Column::new();
-                for key_val in sniffer.runtime_data.lock().unwrap().report_vec.iter() {
+                for key_val in &sniffer.runtime_data.report_vec {
                     let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
