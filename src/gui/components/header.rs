@@ -53,7 +53,7 @@ pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Mes
     .height(FillPortion(HEIGHT_HEADER))
     .align_y(Vertical::Center)
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+    .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
 }

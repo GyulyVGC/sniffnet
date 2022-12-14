@@ -38,7 +38,7 @@ pub fn get_footer(style: StyleType) -> Container<'static, Message> {
         .width(Length::Fill)
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Headers),
         ))
 }

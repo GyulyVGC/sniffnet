@@ -9,12 +9,12 @@ use iced::{Background, Vector};
 
 impl From<StyleTuple> for iced::theme::Button {
     fn from(tuple: StyleTuple) -> Self {
-        iced_style::theme::Button::Custom(Box::new(tuple))
+        iced::theme::Button::Custom(Box::new(tuple))
     }
 }
 
 impl button::StyleSheet for StyleTuple {
-    type Style = iced_style::Theme;
+    type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
@@ -44,7 +44,7 @@ impl button::StyleSheet for StyleTuple {
 
     fn hovered(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
-        iced_style::button::Appearance {
+        iced::widget::button::Appearance {
             shadow_offset: Vector::new(2.0, 2.0),
             background: Some(Background::Color(colors.primary)),
             border_radius: match self {

@@ -36,9 +36,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         )
         .push(
             Radio::new(
@@ -50,9 +51,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         )
         .push(
             Radio::new(
@@ -64,9 +66,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         );
     let col_ip = Column::new()
         .spacing(10)
@@ -91,9 +94,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         )
         .push(
             Radio::new(
@@ -105,9 +109,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         )
         .push(
             Radio::new(
@@ -119,9 +124,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .width(Length::Fill)
             .font(font)
             .size(15)
-            .style(<StyleTuple as Into<iced_style::theme::Radio>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         );
     let col_transport = Column::new()
         .align_items(Alignment::Center)
@@ -175,7 +181,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(body)
         .height(FillPortion(HEIGHT_BODY))
-        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
 }
@@ -253,21 +259,21 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                             .size(15)
                             .width(Length::Fill)
                             .style(<StyleTuple as Into<
-                                iced_style::theme::Radio,
+                                iced::theme::Radio,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Standard),
                             )),
                         )
                         .padding(10)
                         .style(<StyleTuple as Into<
-                            iced_style::theme::Container,
+                            iced::theme::Container,
                         >>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
                     )
                 },
             ))
-            .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
+            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
                 StyleTuple(sniffer.style, ElementType::Standard),
             )),
         )

@@ -101,46 +101,47 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
-                let row_radio_chart = Row::new()
-                    .padding(15)
-                    .spacing(10)
-                    .push(
-                        Text::new("Traffic rate:    ")
-                            .size(FONT_SIZE_SUBTITLE)
-                            .font(font),
-                    )
-                    .push(
-                        Radio::new(
-                            ChartType::Packets,
-                            "packets per second",
-                            Some(active_radio_chart),
-                            Message::ChartSelection,
+                let row_radio_chart =
+                    Row::new()
+                        .padding(15)
+                        .spacing(10)
+                        .push(
+                            Text::new("Traffic rate:    ")
+                                .size(FONT_SIZE_SUBTITLE)
+                                .font(font),
                         )
-                        .width(Length::Units(220))
-                        .font(font)
-                        .size(15)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Radio,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
-                    )
-                    .push(
-                        Radio::new(
-                            ChartType::Bytes,
-                            "bytes per second",
-                            Some(active_radio_chart),
-                            Message::ChartSelection,
+                        .push(
+                            Radio::new(
+                                ChartType::Packets,
+                                "packets per second",
+                                Some(active_radio_chart),
+                                Message::ChartSelection,
+                            )
+                            .width(Length::Units(220))
+                            .font(font)
+                            .size(15)
+                            .style(<StyleTuple as Into<
+                                iced::theme::Radio,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Standard),
+                            )),
                         )
-                        .width(Length::Units(220))
-                        .font(font)
-                        .size(15)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Radio,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
-                    );
+                        .push(
+                            Radio::new(
+                                ChartType::Bytes,
+                                "bytes per second",
+                                Some(active_radio_chart),
+                                Message::ChartSelection,
+                            )
+                            .width(Length::Units(220))
+                            .font(font)
+                            .size(15)
+                            .style(<StyleTuple as Into<
+                                iced::theme::Radio,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Standard),
+                            )),
+                        );
 
                 let col_chart = Container::new(
                     Column::new()
@@ -150,7 +151,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(FillPortion(2))
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
-                .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 ));
 
@@ -187,7 +188,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                     .font(font),
                             )
                             .style(<StyleTuple as Into<
-                                iced_style::theme::Scrollable,
+                                iced::theme::Scrollable,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Standard),
                             )),
@@ -195,61 +196,62 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 }
 
                 let active_radio_report = sniffer.report_type;
-                let row_radio_report = Row::new()
-                    .padding(10)
-                    .push(
-                        Text::new("Relevant connections:    ")
-                            .size(FONT_SIZE_SUBTITLE)
-                            .font(font),
-                    )
-                    .push(
-                        Radio::new(
-                            ReportType::MostRecent,
-                            "most recent",
-                            Some(active_radio_report),
-                            Message::ReportSelection,
+                let row_radio_report =
+                    Row::new()
+                        .padding(10)
+                        .push(
+                            Text::new("Relevant connections:    ")
+                                .size(FONT_SIZE_SUBTITLE)
+                                .font(font),
                         )
-                        .width(Length::Units(200))
-                        .font(font)
-                        .size(15)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Radio,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
-                    )
-                    .push(
-                        Radio::new(
-                            ReportType::MostPackets,
-                            "most packets",
-                            Some(active_radio_report),
-                            Message::ReportSelection,
+                        .push(
+                            Radio::new(
+                                ReportType::MostRecent,
+                                "most recent",
+                                Some(active_radio_report),
+                                Message::ReportSelection,
+                            )
+                            .width(Length::Units(200))
+                            .font(font)
+                            .size(15)
+                            .style(<StyleTuple as Into<
+                                iced::theme::Radio,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Standard),
+                            )),
                         )
-                        .width(Length::Units(200))
-                        .font(font)
-                        .size(15)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Radio,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
-                    )
-                    .push(
-                        Radio::new(
-                            ReportType::MostBytes,
-                            "most bytes",
-                            Some(active_radio_report),
-                            Message::ReportSelection,
+                        .push(
+                            Radio::new(
+                                ReportType::MostPackets,
+                                "most packets",
+                                Some(active_radio_report),
+                                Message::ReportSelection,
+                            )
+                            .width(Length::Units(200))
+                            .font(font)
+                            .size(15)
+                            .style(<StyleTuple as Into<
+                                iced::theme::Radio,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Standard),
+                            )),
                         )
-                        .width(Length::Units(200))
-                        .font(font)
-                        .size(15)
-                        .style(<StyleTuple as Into<
-                            iced_style::theme::Radio,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
-                    );
+                        .push(
+                            Radio::new(
+                                ReportType::MostBytes,
+                                "most bytes",
+                                Some(active_radio_report),
+                                Message::ReportSelection,
+                            )
+                            .width(Length::Units(200))
+                            .font(font)
+                            .size(15)
+                            .style(<StyleTuple as Into<
+                                iced::theme::Radio,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Standard),
+                            )),
+                        );
 
                 let mut col_report = Column::new()
                     .height(Length::Fill)
@@ -269,7 +271,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                     key_val.0.print_gui(),
                                     key_val.1.print_gui()
                                 ))
-                                .style(iced_style::theme::Text::Color(entry_color))
+                                .style(iced::theme::Text::Color(entry_color))
                                 .font(COURIER_PRIME_BOLD),
                             )
                             .push(flag)
@@ -278,7 +280,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 }
                 col_report =
                     col_report.push(Scrollable::new(scroll_report).style(<StyleTuple as Into<
-                        iced_style::theme::Scrollable,
+                        iced::theme::Scrollable,
                     >>::into(
                         StyleTuple(sniffer.style, ElementType::Standard),
                     )));
@@ -287,7 +289,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
-                        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+                        .style(<StyleTuple as Into<iced::theme::Container>>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
                 );
@@ -303,11 +305,9 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                     .width(FillPortion(1))
                                     .padding(10)
                                     .height(Length::Fill)
-                                    .style(
-                                        <StyleTuple as Into<iced_style::theme::Container>>::into(
-                                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                                        ),
-                                    ),
+                                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                                        StyleTuple(sniffer.style, ElementType::BorderedRound),
+                                    )),
                             ),
                     )
                     .push(
@@ -340,7 +340,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(FillPortion(HEIGHT_BODY))
-        .style(<StyleTuple as Into<iced_style::theme::Container>>::into(
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
 }

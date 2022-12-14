@@ -32,7 +32,6 @@ indexmap = "1.9.1"
 plotters = { version = "0.3.4", default_features = false, features = ["area_series"] }
 iced = { version = "0.6.0", features = ["tokio", "image"] }
 plotters-iced = "0.5.0"
-iced_style = "0.5.1"
 db_ip = { version = "0.3.7", default_features = false, features = ["ipv4", "ipv6","include-country-code-lite"] }
 confy = "0.5.1"
 serde = { version = "1.0.149", default_features = false, features = ["derive"] }

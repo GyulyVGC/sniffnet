@@ -74,7 +74,6 @@ impl Application for Sniffer {
                         info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
                     update_charts_data(self.runtime_data.borrow_mut());
-                    //self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
                     update_report_data(
                         self.runtime_data.borrow_mut(),
                         self.info_traffic.clone(),

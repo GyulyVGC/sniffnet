@@ -9,16 +9,16 @@ use std::rc::Rc;
 
 impl From<StyleTuple> for iced::theme::PickList {
     fn from(tuple: StyleTuple) -> Self {
-        iced_style::theme::PickList::Custom(Rc::new(tuple.clone()), Rc::new(tuple))
+        iced::theme::PickList::Custom(Rc::new(tuple.clone()), Rc::new(tuple))
     }
 }
 
-impl iced_style::menu::StyleSheet for StyleTuple {
+impl iced::overlay::menu::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
-    fn appearance(&self, _: &Self::Style) -> iced_style::menu::Appearance {
+    fn appearance(&self, _: &Self::Style) -> iced::overlay::menu::Appearance {
         let colors = get_colors(self.0);
-        iced_style::menu::Appearance {
+        iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(colors.buttons),
             border_width: BORDER_WIDTH,

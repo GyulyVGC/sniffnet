@@ -3,17 +3,17 @@
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::Background;
-use iced_style::scrollable::{Scrollbar, Scroller};
-use iced_style::Theme;
+use iced::Theme;
 
 impl From<StyleTuple> for iced::theme::Scrollable {
     fn from(tuple: StyleTuple) -> Self {
-        iced_style::theme::Scrollable::Custom(Box::new(tuple))
+        iced::theme::Scrollable::Custom(Box::new(tuple))
     }
 }
 
-impl iced_style::scrollable::StyleSheet for StyleTuple {
+impl iced::widget::scrollable::StyleSheet for StyleTuple {
     type Style = Theme;
 
     fn active(&self, _: &Self::Style) -> Scrollbar {

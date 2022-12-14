@@ -4,17 +4,17 @@ use crate::enums::element_type::ElementType;
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use iced::widget::container::Appearance;
 use iced::Background;
-use iced_style::container::Appearance;
-use iced_style::Theme;
+use iced::Theme;
 
 impl From<StyleTuple> for iced::theme::Container {
     fn from(tuple: StyleTuple) -> Self {
-        iced_style::theme::Container::Custom(Box::new(tuple))
+        iced::theme::Container::Custom(Box::new(tuple))
     }
 }
 
-impl iced_style::container::StyleSheet for StyleTuple {
+impl iced::widget::container::StyleSheet for StyleTuple {
     type Style = Theme;
 
     fn appearance(&self, _: &Self::Style) -> Appearance {
