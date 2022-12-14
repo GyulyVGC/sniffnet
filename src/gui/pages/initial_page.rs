@@ -229,7 +229,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         dev_str_list.push((name, dev_str));
     }
 
-     Column::new()
+    Column::new()
         .padding(10)
         .spacing(5)
         .height(Length::Fill)
@@ -246,32 +246,29 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                     let name = &adapter.0;
                     scroll_adapters.push(
                         Container::new(
-                            Radio::new(
-                                name,
-                                &adapter.1,
-                                Some(&sniffer.device.name),
-                                |name| Message::AdapterSelection(name.to_string()),
-                            )
-                                .font(font)
-                                .size(15)
-                                .width(Length::Fill)
-                                .style(<StyleTuple as Into<
-                                    iced_style::theme::Radio,
-                                >>::into(
-                                    StyleTuple(sniffer.style, ElementType::Standard),
-                                )),
-                        )
-                            .padding(10)
+                            Radio::new(name, &adapter.1, Some(&sniffer.device.name), |name| {
+                                Message::AdapterSelection(name.to_string())
+                            })
+                            .font(font)
+                            .size(15)
+                            .width(Length::Fill)
                             .style(<StyleTuple as Into<
-                                iced_style::theme::Container,
+                                iced_style::theme::Radio,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                                StyleTuple(sniffer.style, ElementType::Standard),
                             )),
+                        )
+                        .padding(10)
+                        .style(<StyleTuple as Into<
+                            iced_style::theme::Container,
+                        >>::into(
+                            StyleTuple(sniffer.style, ElementType::BorderedRound),
+                        )),
                     )
                 },
             ))
-                .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
+            .style(<StyleTuple as Into<iced_style::theme::Scrollable>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
         )
 }

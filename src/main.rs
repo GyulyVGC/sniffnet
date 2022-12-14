@@ -1,5 +1,7 @@
 //! Module containing the entry point of application execution.
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
@@ -48,7 +50,10 @@ pub fn main() -> iced::Result {
 
     let found_device = Device::lookup().unwrap().unwrap();
 
-    let pcap_error = Arc::new(Mutex::new(None)); // None means no error
+    let pcap_error = None; // None means no error
+
+    let runtime_data1 = Rc::new(RefCell::new(RunTimeData::new()));
+    let runtime_data2 = runtime_data1.clone();
 
     let filters = Filters {
         ip: IpVersion::Other,
@@ -90,14 +95,14 @@ pub fn main() -> iced::Result {
         flags: Sniffer {
             current_capture_id: current_capture_id1,
             info_traffic: mutex_map1,
-            runtime_data: RunTimeData::new(),
+            runtime_data: runtime_data1,
             device: found_device,
             filters,
             status_pair: status_pair1,
             pcap_error,
             style,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(RunTimeData::new(), style),
+            traffic_chart: TrafficChart::new(runtime_data2, style),
             report_type: ReportType::MostRecent,
         },
         default_font: None,

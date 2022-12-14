@@ -1,11 +1,12 @@
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::{InfoTraffic, ReportType, RunTimeData};
+use std::cell::RefMut;
 use std::cmp::min;
 use std::sync::{Arc, Mutex};
 
 pub fn update_report_data(
-    runtime_data: &mut RunTimeData,
+    mut runtime_data: RefMut<RunTimeData>,
     info_traffic: Arc<Mutex<InfoTraffic>>,
     report_type: ReportType,
 ) {

@@ -28,20 +28,6 @@ use crate::{AppProtocol, ChartType, ReportType};
 pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
-    let tabs = get_tabs(
-        &["Overview", "Inspect", "Prova prova Try try"],
-        &[Message::TickInit, Message::Reset, Message::Reset],
-        "Overview",
-        sniffer.style,
-    );
-
-    let observed = sniffer.runtime_data.all_packets;
-    let filtered = sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
-    let observed_bytes = sniffer.runtime_data.all_bytes;
-    let filtered_bytes = sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-    let app_protocols = sniffer.runtime_data.app_protocols.clone();
-    let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
-
     let mut body = Column::new()
         .width(Length::Fill)
         .padding(5)
@@ -50,19 +36,31 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
 
     let mut tab_and_body = Column::new().height(FillPortion(HEIGHT_BODY));
 
-    if sniffer.pcap_error.lock().unwrap().is_none() {
+    if sniffer.pcap_error.is_none() {
         // NO pcap error detected
+
+        let tabs = get_tabs(
+            &["Overview", "Inspect", "Prova prova Try try"],
+            &[Message::TickInit, Message::Reset, Message::Reset],
+            "Overview",
+            sniffer.style,
+        );
+
+        let observed = sniffer.runtime_data.borrow().all_packets;
+        let filtered = sniffer.runtime_data.borrow().tot_sent_packets
+            + sniffer.runtime_data.borrow().tot_received_packets;
+        let observed_bytes = sniffer.runtime_data.borrow().all_bytes;
+        let filtered_bytes = sniffer.runtime_data.borrow().tot_sent_bytes
+            + sniffer.runtime_data.borrow().tot_received_bytes;
+        let app_protocols = sniffer.runtime_data.borrow().app_protocols.clone();
+        let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
 
                 let adapter_name = sniffer.device.name.clone();
-                let (icon_text, nothing_to_see_text) = if sniffer
-                    .device
-                    .addresses
-                    .is_empty()
-                {
+                let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
                     (Text::new('T'.to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                                               Network adapter: {}\n\n\
@@ -179,11 +177,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                         ))
                         .font(font),
                     );
-                if sniffer
-                    .filters
-                    .application
-                    .eq(&AppProtocol::Other)
-                {
+                if sniffer.filters.application.eq(&AppProtocol::Other) {
                     col_packets = col_packets
                         .push(Text::new(" "))
                         .push(Text::new("Filtered packets per application protocol:").font(font))
@@ -264,7 +258,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
                 let mut scroll_report = Column::new();
-                for key_val in &sniffer.runtime_data.report_vec {
+                for key_val in &sniffer.runtime_data.borrow().report_vec {
                     let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
                     let flag = get_flag(&key_val.1.country);
                     scroll_report = scroll_report.push(
@@ -327,7 +321,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         }
     } else {
         // pcap threw an ERROR!
-        let err_string = sniffer.pcap_error.lock().unwrap().clone().unwrap();
+        let err_string = sniffer.pcap_error.clone().unwrap();
 
         let error_text = Text::new(format!(
             "An error occurred! \n\n\

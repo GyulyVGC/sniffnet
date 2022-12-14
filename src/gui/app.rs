@@ -5,6 +5,8 @@
 use iced::widget::Column;
 use iced::{executor, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
@@ -19,6 +21,7 @@ use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
+use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
 use crate::{InfoTraffic, RunTimeData, StyleType};
@@ -51,26 +54,29 @@ impl Application for Sniffer {
             Message::TickRun => {
                 //play_sound();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
+                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
-                    self.runtime_data.all_packets = info_traffic_lock.all_packets;
                     drop(info_traffic_lock);
                     self.update(Message::Waiting);
                 } else {
-                    self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets as i128;
-                    self.runtime_data.tot_received_packets =
+                    self.runtime_data.borrow_mut().tot_sent_packets =
+                        info_traffic_lock.tot_sent_packets as i128;
+                    self.runtime_data.borrow_mut().tot_received_packets =
                         info_traffic_lock.tot_received_packets as i128;
-                    self.runtime_data.all_packets = info_traffic_lock.all_packets;
-                    self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
-                    self.runtime_data.tot_received_bytes =
+                    self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
+                    self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
+                    self.runtime_data.borrow_mut().tot_received_bytes =
                         info_traffic_lock.tot_received_bytes as i128;
-                    self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes as i128;
-                    self.runtime_data.app_protocols = info_traffic_lock.app_protocols.clone();
+                    self.runtime_data.borrow_mut().tot_sent_bytes =
+                        info_traffic_lock.tot_sent_bytes as i128;
+                    self.runtime_data.borrow_mut().app_protocols =
+                        info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
-                    update_charts_data(&mut self.runtime_data);
-                    self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
+                    update_charts_data(self.runtime_data.borrow_mut());
+                    //self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
                     update_report_data(
-                        &mut self.runtime_data,
+                        self.runtime_data.borrow_mut(),
                         self.info_traffic.clone(),
                         self.report_type,
                     );
@@ -105,7 +111,7 @@ impl Application for Sniffer {
                 play_sound();
                 self.report_type = what_to_display;
                 update_report_data(
-                    &mut self.runtime_data,
+                    self.runtime_data.borrow_mut(),
                     self.info_traffic.clone(),
                     self.report_type,
                 );
@@ -150,37 +156,42 @@ impl Application for Sniffer {
             }
             Message::Start => {
                 play_sound();
-                let current_capture_id = self.current_capture_id.clone();
                 let device = self.device.clone();
-                let filters = self.filters.clone();
-                let pcap_error = self.pcap_error.clone();
+                let (pcap_error, cap) = get_capture_result(&device);
+                self.pcap_error = pcap_error.clone();
+                *self.status_pair.0.lock().unwrap() = Status::Running;
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                self.runtime_data = RunTimeData::new();
-                *self.status_pair.0.lock().unwrap() = Status::Running;
+                self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
                 self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
-                self.status_pair.1.notify_all();
-                thread::Builder::new()
-                    .name(format!(
-                        "thread_parse_packets_{}",
-                        current_capture_id.lock().unwrap()
-                    ))
-                    .spawn(move || {
-                        parse_packets_loop(
-                            current_capture_id,
-                            device,
-                            filters,
-                            info_traffic_mutex,
-                            pcap_error,
-                        );
-                    })
-                    .unwrap();
+
+                if pcap_error.is_none() {
+                    // no pcap error
+                    let current_capture_id = self.current_capture_id.clone();
+                    let filters = self.filters.clone();
+                    self.status_pair.1.notify_all();
+                    thread::Builder::new()
+                        .name(format!(
+                            "thread_parse_packets_{}",
+                            current_capture_id.lock().unwrap()
+                        ))
+                        .spawn(move || {
+                            parse_packets_loop(
+                                current_capture_id,
+                                device.clone(),
+                                cap.unwrap(),
+                                &filters,
+                                info_traffic_mutex,
+                            );
+                        })
+                        .unwrap();
+                }
             }
             Message::Reset => {
                 play_sound();
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 *self.status_pair.0.lock().unwrap() = Status::Init;
-                *self.pcap_error.lock().unwrap() = Option::None;
+                self.pcap_error = Option::None;
             }
             Message::Style => {
                 play_sound();

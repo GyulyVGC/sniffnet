@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use chrono::Local;
 use db_ip::{CountryCode, DbIpDatabase};
 use etherparse::{IpHeader, TransportHeader};
+use pcap::{Active, Capture, Device};
 
 use crate::enums::app_protocol::from_port_to_application_protocol;
 use crate::enums::traffic_type::TrafficType;
@@ -154,6 +155,22 @@ pub fn is_multicast_address(address: &str) -> bool {
         }
     }
     ret_val
+}
+
+/// Determines if the capture opening resolves into an Error
+pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Active>>) {
+    let cap_result = Capture::from_device(&*device.name)
+        .expect("Capture initialization error\n\r")
+        .promisc(true)
+        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
+        .immediate_mode(true) //parse packets ASAP!
+        .open();
+    if cap_result.is_err() {
+        let err_string = cap_result.err().unwrap().to_string();
+        (Option::Some(err_string), None)
+    } else {
+        (None, cap_result.ok())
+    }
 }
 
 // Test for this function at the end of this file (run with cargo test)

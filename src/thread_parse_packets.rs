@@ -4,7 +4,7 @@
 use std::sync::{Arc, Mutex};
 
 use etherparse::PacketHeaders;
-use pcap::{Capture, Device};
+use pcap::{Active, Capture, Device};
 
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
@@ -19,9 +19,9 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 pub fn parse_packets_loop(
     current_capture_id: Arc<Mutex<u16>>,
     device: Device,
-    filters: Filters,
+    mut cap: Capture<Active>,
+    filters: &Filters,
     info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-    pcap_error: Arc<Mutex<Option<String>>>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
@@ -30,10 +30,9 @@ pub fn parse_packets_loop(
         my_interface_addresses.push(address.addr.to_string());
     }
 
-    let filtri = filters;
-    let network_layer_filter = filtri.ip;
-    let transport_layer_filter = filtri.transport;
-    let app_layer_filter = filtri.application;
+    let network_layer_filter = filters.ip;
+    let transport_layer_filter = filters.transport;
+    let app_layer_filter = filters.application;
 
     let mut port1 = 0;
     let mut port2 = 0;
@@ -44,19 +43,6 @@ pub fn parse_packets_loop(
     let mut traffic_type;
     let mut skip_packet;
     let mut reported_packet;
-
-    let cap_result = Capture::from_device(&*device.name)
-        .expect("Capture initialization error\n\r")
-        .promisc(true)
-        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
-        .immediate_mode(true) //parse packets ASAP!
-        .open();
-    if cap_result.is_err() {
-        let err_string = cap_result.err().unwrap().to_string();
-        *pcap_error.lock().unwrap() = Option::Some(err_string);
-        return;
-    }
-    let mut cap = cap_result.unwrap();
 
     let db = db_ip::include_country_code_database!();
 

@@ -1,3 +1,4 @@
+use std::cell::RefMut;
 use std::collections::VecDeque;
 
 use crate::RunTimeData;
@@ -5,7 +6,7 @@ use crate::RunTimeData;
 /// This function is invoked every second by the application subscription
 ///
 /// It updates data (packets and bytes per second) to be displayed in the charts of gui run page
-pub fn update_charts_data(charts_data: &mut RunTimeData) {
+pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     let tot_seconds = charts_data.ticks;
     charts_data.ticks += 1;
 
