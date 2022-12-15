@@ -170,10 +170,7 @@ impl Application for Sniffer {
                     let filters = self.filters.clone();
                     self.status_pair.1.notify_all();
                     thread::Builder::new()
-                        .name(format!(
-                            "thread_parse_packets_{}",
-                            current_capture_id.lock().unwrap()
-                        ))
+                        .name("thread_parse_packets".to_string())
                         .spawn(move || {
                             parse_packets_loop(
                                 current_capture_id,
@@ -188,9 +185,9 @@ impl Application for Sniffer {
             }
             Message::Reset => {
                 play_sound();
-                *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 *self.status_pair.0.lock().unwrap() = Status::Init;
-                self.pcap_error = Option::None;
+                *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
+                self.pcap_error = None;
             }
             Message::Style => {
                 play_sound();
