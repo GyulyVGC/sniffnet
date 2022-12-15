@@ -94,7 +94,6 @@ pub fn modify_or_insert_in_map(
     db: &DbIpDatabase<CountryCode>,
 ) {
     let now = Local::now();
-    let trans_protocol = key.trans_protocol;
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
     let mut info_traffic = info_traffic_mutex
         .lock()
@@ -120,7 +119,6 @@ pub fn modify_or_insert_in_map(
             transmitted_packets: 1,
             initial_timestamp: now,
             final_timestamp: now,
-            trans_protocol,
             app_protocol: application_protocol,
             very_long_address,
             traffic_type,

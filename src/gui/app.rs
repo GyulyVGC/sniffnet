@@ -108,12 +108,14 @@ impl Application for Sniffer {
             }
             Message::ReportSelection(what_to_display) => {
                 play_sound();
-                self.report_type = what_to_display;
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    self.info_traffic.clone(),
-                    self.report_type,
-                );
+                if what_to_display.ne(&self.report_type) {
+                    self.report_type = what_to_display;
+                    update_report_data(
+                        self.runtime_data.borrow_mut(),
+                        self.info_traffic.clone(),
+                        self.report_type,
+                    );
+                }
             }
             /*
             Message::OpenReport => {
