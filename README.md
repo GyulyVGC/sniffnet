@@ -9,7 +9,13 @@
 <p align="center">
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
 &nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet?color=orange&label=crate%20downloads&logo=rust"/></a>
+</p>
+
+<p align="center">
+<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
+&nbsp;
+<a href="https://github.com/GyulyVGC/sniffnet/releases"><img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=blue&logo=github"/></a>
 </p>
 
 
