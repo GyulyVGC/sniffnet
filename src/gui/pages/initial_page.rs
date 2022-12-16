@@ -229,7 +229,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n    {}", address_string));
+            dev_str.push_str(&format!("\n    {address_string}"));
         }
         dev_str.push_str("\n ");
         dev_str_list.push((name, dev_str));

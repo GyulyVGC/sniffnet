@@ -63,13 +63,13 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
                     (Text::new('T'.to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              If you are sure you are connected to the internet, try choosing a different adapter.")).font(font))
                 } else {
                     (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?")).font(font))
                 };
                 body = body
                     .push(Row::new().height(FillPortion(1)))

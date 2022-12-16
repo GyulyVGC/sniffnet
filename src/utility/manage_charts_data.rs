@@ -22,7 +22,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data
         .sent_bytes
-        .push_back((tot_seconds as u128, sent_bytes_entry));
+        .push_back((tot_seconds, sent_bytes_entry));
     charts_data.min_sent_bytes = get_min(&charts_data.sent_bytes.clone());
     charts_data.tot_sent_bytes_prev = charts_data.tot_sent_bytes;
     // update received bytes traffic data
@@ -31,7 +31,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data
         .received_bytes
-        .push_back((tot_seconds as u128, received_bytes_entry));
+        .push_back((tot_seconds, received_bytes_entry));
     charts_data.max_received_bytes = get_max(&charts_data.received_bytes.clone());
     charts_data.tot_received_bytes_prev = charts_data.tot_received_bytes;
 
@@ -41,7 +41,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data
         .sent_packets
-        .push_back((tot_seconds as u128, sent_packets_entry));
+        .push_back((tot_seconds, sent_packets_entry));
     charts_data.min_sent_packets = get_min(&charts_data.sent_packets.clone());
     charts_data.tot_sent_packets_prev = charts_data.tot_sent_packets;
     // update received packets traffic data
@@ -50,7 +50,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data
         .received_packets
-        .push_back((tot_seconds as u128, received_packets_entry));
+        .push_back((tot_seconds, received_packets_entry));
     charts_data.max_received_packets = get_max(&charts_data.received_packets.clone());
     charts_data.tot_received_packets_prev = charts_data.tot_received_packets;
 }

@@ -76,7 +76,7 @@ impl Application for Sniffer {
                     update_charts_data(self.runtime_data.borrow_mut());
                     update_report_data(
                         self.runtime_data.borrow_mut(),
-                        self.info_traffic.clone(),
+                        &self.info_traffic,
                         self.report_type,
                     );
                 }
@@ -112,7 +112,7 @@ impl Application for Sniffer {
                     self.report_type = what_to_display;
                     update_report_data(
                         self.runtime_data.borrow_mut(),
-                        self.info_traffic.clone(),
+                        &self.info_traffic,
                         self.report_type,
                     );
                 }
@@ -175,11 +175,11 @@ impl Application for Sniffer {
                         .name("thread_parse_packets".to_string())
                         .spawn(move || {
                             parse_packets_loop(
-                                current_capture_id,
+                                &current_capture_id,
                                 device.clone(),
                                 cap.unwrap(),
                                 &filters,
-                                info_traffic_mutex,
+                                &info_traffic_mutex,
                             );
                         })
                         .unwrap();

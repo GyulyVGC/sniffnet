@@ -13,9 +13,9 @@ use crate::InfoTraffic;
 /// The calling thread enters in a loop in which it sleeps for 1 second and then
 /// updates the output report containing detailed traffic information
 pub fn sleep_and_write_report_loop(
-    current_capture_id: Arc<Mutex<u16>>,
-    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-    status_pair: Arc<(Mutex<Status>, Condvar)>,
+    current_capture_id: &Arc<Mutex<u16>>,
+    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
+    status_pair: &Arc<(Mutex<Status>, Condvar)>,
 ) {
     let cvar = &status_pair.1;
 

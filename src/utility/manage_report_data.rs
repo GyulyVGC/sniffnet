@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 
 pub fn update_report_data(
     mut runtime_data: RefMut<RunTimeData>,
-    info_traffic: Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Arc<Mutex<InfoTraffic>>,
     report_type: ReportType,
 ) {
     let info_traffic_lock = info_traffic.lock().unwrap();

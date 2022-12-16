@@ -17,11 +17,11 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets_loop(
-    current_capture_id: Arc<Mutex<u16>>,
+    current_capture_id: &Arc<Mutex<u16>>,
     device: Device,
     mut cap: Capture<Active>,
     filters: &Filters,
-    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
@@ -122,7 +122,7 @@ pub fn parse_packets_loop(
                             // if (port1 >= lowest_port && port1 <= highest_port)
                             //     || (port2 >= lowest_port && port2 <= highest_port) {
                             modify_or_insert_in_map(
-                                info_traffic_mutex.clone(),
+                                info_traffic_mutex,
                                 key,
                                 exchanged_bytes,
                                 traffic_type,

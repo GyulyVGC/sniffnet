@@ -86,7 +86,7 @@ pub fn analyze_transport_header(
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
-    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
     exchanged_bytes: u128,
     traffic_type: TrafficType,
