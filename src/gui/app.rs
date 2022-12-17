@@ -39,7 +39,7 @@ impl Application for Sniffer {
     type Flags = Sniffer;
 
     fn new(flags: Sniffer) -> (Sniffer, Command<Message>) {
-        (flags, Command::none())
+        (flags, iced::window::maximize(true))
     }
 
     fn title(&self) -> String {

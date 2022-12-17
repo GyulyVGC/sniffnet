@@ -1,4 +1,3 @@
-use db_ip::{CountryCode, DbIpDatabase};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -6,7 +5,6 @@ use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
-use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
 use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
 
@@ -168,25 +166,5 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
     } else {
         // with multiple
         format!("{n:.1} {multiple_transmitted}B")
-    }
-}
-
-pub fn get_country_code(
-    db: &DbIpDatabase<CountryCode>,
-    traffic_type: TrafficType,
-    key: &AddressPortPair,
-) -> String {
-    match traffic_type {
-        TrafficType::Incoming | TrafficType::Multicast => db
-            .get(&key.address1.parse().unwrap())
-            .unwrap()
-            .to_string()
-            .replace("ZZ", "//"),
-        TrafficType::Outgoing => db
-            .get(&key.address2.parse().unwrap())
-            .unwrap()
-            .to_string()
-            .replace("ZZ", "//"),
-        TrafficType::Other => String::new(),
     }
 }
