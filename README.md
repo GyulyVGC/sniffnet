@@ -71,6 +71,12 @@ sudo apt-get install libpcap-dev
 ```sh
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
+
+Depending on your Linux environment you may also need `libfontconfig`:
+
+```sh
+sudo apt-get install libfontconfig libfontconfig1-dev
+```
     
 </details>
 
