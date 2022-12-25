@@ -86,7 +86,7 @@ impl Chart<Message> for TrafficChart {
                     .set_label_area_size(LabelAreaPosition::Left, 60)
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
                     .build_cartesian_2d(
-                        first_time_displayed..tot_seconds as u128,
+                        first_time_displayed..tot_seconds,
                         charts_data_lock.min_sent_bytes..charts_data_lock.max_received_bytes,
                     )
                     .expect("Error drawing graph");
@@ -158,7 +158,7 @@ impl Chart<Message> for TrafficChart {
                     .set_label_area_size(LabelAreaPosition::Left, 60)
                     .set_label_area_size(LabelAreaPosition::Bottom, 50)
                     .build_cartesian_2d(
-                        first_time_displayed..tot_seconds as u128,
+                        first_time_displayed..tot_seconds,
                         charts_data_lock.min_sent_packets..charts_data_lock.max_received_packets,
                     )
                     .expect("Error drawing graph");
