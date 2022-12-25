@@ -9,4 +9,4 @@ updates:
   directory: "/"
   schedule:
     interval: "daily"
-  target-branch: "upgrade_iced"
+  target-branch: "v1.1.0"
