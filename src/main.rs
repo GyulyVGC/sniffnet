@@ -1,10 +1,12 @@
 //! Module containing the entry point of application execution.
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
 use iced::window::Position;
-use iced::{button, pick_list, scrollable, window, Application, Settings};
+use iced::{window, Application, Settings};
 use pcap::Device;
 
 use utility::style_constants::FONT_SIZE_BODY;
@@ -42,22 +44,22 @@ pub fn main() -> iced::Result {
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
-    let runtime_data1 = Arc::new(Mutex::new(RunTimeData::new()));
-    let runtime_data2 = runtime_data1.clone();
-
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
-    let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
+    let found_device = Device::lookup().unwrap().unwrap();
 
-    let pcap_error = Arc::new(Mutex::new(None)); // None means no error
+    let pcap_error = None; // None means no error
 
-    let filters = Arc::new(Mutex::new(Filters {
+    let runtime_data1 = Rc::new(RefCell::new(RunTimeData::new()));
+    let runtime_data2 = runtime_data1.clone();
+
+    let filters = Filters {
         ip: IpVersion::Other,
         transport: TransProtocol::Other,
         application: AppProtocol::Other,
-    }));
+    };
 
     // to kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -70,9 +72,11 @@ pub fn main() -> iced::Result {
     thread::Builder::new()
         .name("thread_write_report".to_string())
         .spawn(move || {
-            sleep_and_write_report_loop(current_capture_id2, mutex_map2, status_pair2);
+            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
         })
         .unwrap();
+
+    let style = confy::load::<Config>("sniffnet", None).unwrap().style;
 
     Sniffer::run(Settings {
         id: None,
@@ -81,6 +85,7 @@ pub fn main() -> iced::Result {
             position: Position::Centered,
             min_size: Some((1190, 600)), // min size allowed
             max_size: None,
+            visible: true,
             resizable: true,
             decorations: true,
             transparent: false,
@@ -95,22 +100,9 @@ pub fn main() -> iced::Result {
             filters,
             status_pair: status_pair1,
             pcap_error,
-            start: button::State::new(),
-            reset: button::State::new(),
-            mode: button::State::new(),
-            report: button::State::new(),
-            git: button::State::new(),
-            overview: button::State::new(),
-            inspect: button::State::new(),
-            settings: button::State::new(),
-            app: pick_list::State::new(),
-            scroll_adapters: scrollable::State::new(),
-            scroll_packets: scrollable::State::new(),
-            scroll_report: scrollable::State::new(),
-            style: confy::load::<Config>("sniffnet", None).unwrap().style,
-            waiting: String::new(),
-            traffic_chart: TrafficChart::new(runtime_data2),
-            chart_type: ChartType::Packets,
+            style,
+            waiting: ".".to_string(),
+            traffic_chart: TrafficChart::new(runtime_data2, style),
             report_type: ReportType::MostRecent,
         },
         default_font: None,

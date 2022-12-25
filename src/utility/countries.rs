@@ -1,4 +1,26 @@
-use iced::{image::Handle, Image, Length};
+use crate::enums::traffic_type::TrafficType;
+use crate::structs::address_port_pair::AddressPortPair;
+use db_ip::{CountryCode, DbIpDatabase};
+use iced::widget::{image::Handle, Image};
+use iced::Length;
+
+pub fn get_country_code(
+    db: &DbIpDatabase<CountryCode>,
+    traffic_type: TrafficType,
+    key: &AddressPortPair,
+) -> String {
+    let address_to_lookup = match traffic_type {
+        TrafficType::Incoming | TrafficType::Multicast => &key.address1,
+        _ => &key.address2,
+    };
+
+    let country_code = db.get(&address_to_lookup.parse().unwrap());
+    if let Some(value) = country_code {
+        value.to_string().replace("ZZ", "//")
+    } else {
+        "//".to_string()
+    }
+}
 
 const FLAGS_WIDTH: u16 = 13;
 

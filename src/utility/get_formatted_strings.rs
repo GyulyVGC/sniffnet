@@ -1,16 +1,11 @@
-use db_ip::{CountryCode, DbIpDatabase};
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
-use iced::alignment::Horizontal;
-use iced::{Color, Length, Text};
+use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
-use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
-use crate::utility::style_constants::ICONS;
 use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
@@ -26,50 +21,48 @@ pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
 }
 
 /// Computes the String representing the active filters
-pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-    if filters_lock.ip.eq(&IpVersion::Other)
-        && filters_lock.application.eq(&AppProtocol::Other)
-        && filters_lock.transport.eq(&TransProtocol::Other)
+pub fn get_active_filters_string(filters: &Filters) -> String {
+    if filters.ip.eq(&IpVersion::Other)
+        && filters.application.eq(&AppProtocol::Other)
+        && filters.transport.eq(&TransProtocol::Other)
     {
         "Active filters:\n   none".to_string()
     } else {
         let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip.ne(&IpVersion::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip));
+        if filters.ip.ne(&IpVersion::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.ip));
         }
-        if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.transport));
+        if filters.transport.ne(&TransProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.transport));
         }
-        if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.application));
+        if filters.application.ne(&AppProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.application));
         }
         ret_val
     }
 }
 
 /// Computes the String representing the active filters, without line breaks
-pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
+pub fn get_active_filters_string_nobr(filters: &Filters) -> String {
     let mut ret_val = "Active filters:".to_string();
-    if filters_lock.ip.ne(&IpVersion::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.ip));
+    if filters.ip.ne(&IpVersion::Other) {
+        ret_val.push_str(&format!(" {}", filters.ip));
     }
-    if filters_lock.transport.ne(&TransProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.transport));
+    if filters.transport.ne(&TransProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.transport));
     }
-    if filters_lock.application.ne(&AppProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.application));
+    if filters.application.ne(&AppProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.application));
     }
     ret_val
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_type: TrafficType, style: &StyleType) -> Color {
+pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Color {
     if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
-        get_colors(*style).incoming
+        get_colors(style).incoming
     } else {
-        get_colors(*style).outgoing
+        get_colors(style).outgoing
     }
 }
 
@@ -82,8 +75,8 @@ pub fn get_connection_color(traffic_type: TrafficType, style: &StyleType) -> Col
 /// * `app_count` - Map of app layer protocols with the relative sniffed packets count
 ///
 /// * `tot_packets` - Total number of sniffed packets
-pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
-    let mut ret_val = "".to_string();
+pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
+    let mut ret_val = String::new();
 
     if app_count.is_empty() {
         return ret_val;
@@ -144,7 +137,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
 
 /// Returns a String representing a quantity of bytes with their proper multiple (kB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
-    let mut multiple_transmitted = "".to_string();
+    let mut multiple_transmitted = String::new();
     let mut n = bytes as f32;
 
     match bytes {
@@ -167,48 +160,11 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         } // tera
     }
 
-    if !multiple_transmitted.is_empty() {
-        // with multiple
-        format!("{:.1} {}B", n, multiple_transmitted)
-    } else {
+    if multiple_transmitted.is_empty() {
         // no multiple
-        format!("{}  B", n)
+        format!("{n}  B")
+    } else {
+        // with multiple
+        format!("{n:.1} {multiple_transmitted}B")
     }
-}
-
-pub fn get_country_code(
-    db: &DbIpDatabase<CountryCode>,
-    traffic_type: TrafficType,
-    key: &AddressPortPair,
-) -> String {
-    match traffic_type {
-        TrafficType::Incoming | TrafficType::Multicast => db
-            .get(&key.address1.parse().unwrap())
-            .unwrap()
-            .to_string()
-            .replace("ZZ", "//"),
-        TrafficType::Outgoing => db
-            .get(&key.address2.parse().unwrap())
-            .unwrap()
-            .to_string()
-            .replace("ZZ", "//"),
-        _ => "".to_string(),
-    }
-}
-
-/// It returns a glyph featuring Sniffnet's logo
-pub fn logo_glyph() -> Text {
-    Text::new('A'.to_string())
-        .font(ICONS)
-        .horizontal_alignment(Horizontal::Center)
-        .size(95)
-}
-
-pub fn icon_sun_moon() -> Text {
-    //F: sun, G: moon, K: sun adjust
-    Text::new('K'.to_string())
-        .font(ICONS)
-        .width(Length::Units(25))
-        .horizontal_alignment(Horizontal::Center)
-        .size(20)
 }

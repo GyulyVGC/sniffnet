@@ -8,12 +8,12 @@ use plotters::style::RGBColor;
 /// Set of colors to apply to GUI
 ///
 /// Best practices:
-/// - primary should be a kind of neutral color
-/// - primary and buttons should be similar colors
-/// - secondary and one of incoming or outgoing should be the same color
-/// - incoming and outgoing should be complementary colors if possible
-/// - text_headers should be black or white and must have a strong contrast with secondary
-/// - text_body should be black or white and must have a strong contrast with primary
+/// - `primary` should be a kind of neutral color
+/// - `primary` and `buttons` should be similar colors
+/// - `secondary` and one of `incoming` or `outgoing` should be the same color
+/// - `incoming` and `outgoing` should be complementary colors if possible
+/// - `text_headers` should be black or white and must have a strong contrast with `secondary`
+/// - `text_body` should be black or white and must have a strong contrast with `primary`
 pub struct Colors {
     /// Main color of the GUI (background, hovered buttons, active tab)
     pub primary: Color,
@@ -49,4 +49,10 @@ pub fn to_rgb_color(color: Color) -> RGBColor {
         (color.g * 255.0) as u8,
         (color.b * 255.0) as u8,
     )
+}
+
+impl Default for Colors {
+    fn default() -> Self {
+        get_colors(StyleType::Night)
+    }
 }

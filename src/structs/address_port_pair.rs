@@ -20,7 +20,7 @@ pub struct AddressPortPair {
 }
 
 impl AddressPortPair {
-    /// Returns a new AddressPort element.
+    /// Returns a new `AddressPort` element.
     ///
     /// # Arguments
     ///
@@ -53,14 +53,14 @@ impl fmt::Display for AddressPortPair {
         if self.address1.len() > 25 || self.address2.len() > 25 {
             write!(
                 f,
-                "|{:^45}|{:>8}  |{:^45}|{:>8}  |",
-                self.address1, self.port1, self.address2, self.port2
+                "|{:^45}|{:>8}  |{:^45}|{:>8}  |   {}   |",
+                self.address1, self.port1, self.address2, self.port2, self.trans_protocol
             )
         } else {
             write!(
                 f,
-                "|{:^25}|{:>8}  |{:^25}|{:>8}  |",
-                self.address1, self.port1, self.address2, self.port2
+                "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |",
+                self.address1, self.port1, self.address2, self.port2, self.trans_protocol
             )
         }
     }

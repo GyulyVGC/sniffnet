@@ -7,11 +7,11 @@ use std::ops::Add;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
-use crate::{AppProtocol, TransProtocol};
+use crate::AppProtocol;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
-/// Each InfoAddressPortPair struct is associated to a single address:port pair.
+/// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
 #[derive(Clone)]
 pub struct InfoAddressPortPair {
     /// Amount of bytes transmitted between the pair.
@@ -22,9 +22,7 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: DateTime<Local>,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: DateTime<Local>,
-    ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
-    pub trans_protocol: TransProtocol,
-    /// Set of application layer protocols carried through the associate address:port pair.
+    /// Set of application layer protocols carried by the associated address:port pair.
     pub app_protocol: AppProtocol,
     /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
     pub very_long_address: bool,
@@ -37,11 +35,11 @@ pub struct InfoAddressPortPair {
 impl InfoAddressPortPair {
     pub fn print_gui(&self) -> String {
         self.to_string()
-            .get(0..46)
+            .get(0..37)
             .unwrap()
             .to_string()
             .replace('|', "")
-            .add(&*format!("  {} ", &self.country))
+            .add(&*format!(" {} ", &self.country))
     }
 }
 
@@ -57,8 +55,7 @@ impl fmt::Display for InfoAddressPortPair {
         if self.very_long_address {
             write!(
                 f,
-                "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |",
-                self.trans_protocol,
+                "{:^9}|{:>10}  |{:>10}  | {} | {} |",
                 app_string,
                 self.transmitted_packets,
                 bytes_string,
@@ -68,8 +65,7 @@ impl fmt::Display for InfoAddressPortPair {
         } else {
             write!(
                 f,
-                "   {}   |{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
-                self.trans_protocol,
+                "{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
                 app_string,
                 self.transmitted_packets,
                 bytes_string,

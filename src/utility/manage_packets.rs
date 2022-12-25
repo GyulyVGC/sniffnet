@@ -3,12 +3,13 @@ use std::sync::{Arc, Mutex};
 use chrono::Local;
 use db_ip::{CountryCode, DbIpDatabase};
 use etherparse::{IpHeader, TransportHeader};
+use pcap::{Active, Capture, Device};
 
 use crate::enums::app_protocol::from_port_to_application_protocol;
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
-use crate::utility::get_formatted_strings::get_country_code;
+use crate::utility::countries::get_country_code;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
 /// This function analyzes the network layer header passed as parameter and updates variables
@@ -85,7 +86,7 @@ pub fn analyze_transport_header(
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
-    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
+    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
     exchanged_bytes: u128,
     traffic_type: TrafficType,
@@ -93,7 +94,6 @@ pub fn modify_or_insert_in_map(
     db: &DbIpDatabase<CountryCode>,
 ) {
     let now = Local::now();
-    let trans_protocol = key.trans_protocol;
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
     let mut info_traffic = info_traffic_mutex
         .lock()
@@ -104,7 +104,7 @@ pub fn modify_or_insert_in_map(
         // first occurrence of key => retrieve country code
         get_country_code(db, traffic_type, &key)
     } else {
-        "".to_string()
+        String::new()
     };
     info_traffic
         .map
@@ -119,7 +119,6 @@ pub fn modify_or_insert_in_map(
             transmitted_packets: 1,
             initial_timestamp: now,
             final_timestamp: now,
-            trans_protocol,
             app_protocol: application_protocol,
             very_long_address,
             traffic_type,
@@ -156,6 +155,22 @@ pub fn is_multicast_address(address: &str) -> bool {
     ret_val
 }
 
+/// Determines if the capture opening resolves into an Error
+pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Active>>) {
+    let cap_result = Capture::from_device(&*device.name)
+        .expect("Capture initialization error\n\r")
+        .promisc(true)
+        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
+        .immediate_mode(true) //parse packets ASAP!
+        .open();
+    if cap_result.is_err() {
+        let err_string = cap_result.err().unwrap().to_string();
+        (Option::Some(err_string), None)
+    } else {
+        (None, cap_result.ok())
+    }
+}
+
 // Test for this function at the end of this file (run with cargo test)
 /// Function to convert a long decimal ipv6 address to a
 /// shorter compressed ipv6 address
@@ -172,7 +187,7 @@ pub fn is_multicast_address(address: &str) -> bool {
 /// ```
 pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     //from hex to dec, paying attention to the correct number of digits
-    let mut ipv6_hex = "".to_string();
+    let mut ipv6_hex = String::new();
     for i in 0..=15 {
         //pari: primo byte del gruppo
         if i % 2 == 0 {
@@ -225,7 +240,7 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     }
 
     //from longest sequence of consecutive zeros to '::'
-    let mut ipv6_hex_compressed = "".to_string();
+    let mut ipv6_hex_compressed = String::new();
     for _ in 0..longest_zero_sequence {
         to_compress.remove(longest_zero_sequence_start);
     }

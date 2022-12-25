@@ -1,12 +1,12 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
+use crate::{get_colors, StyleType};
 use iced::{Color, Font};
+use plotters::style::RGBColor;
 
-use crate::structs::colors::Colors;
+use crate::structs::colors::{to_rgb_color, Colors};
 
-pub const COLOR_CHART_MIX_DAY: f64 = 1.0;
-
-pub const COLOR_CHART_MIX_NIGHT: f64 = 1.0;
+pub const COLOR_CHART_MIX: f64 = 1.0;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -100,29 +100,29 @@ pub const TRY_STYLE: Colors = Colors {
 };
 
 // red theme
-const PRIMARY_RED: Color = Color {
+const SECONDARY_RED: Color = Color {
     r: 130.0 / 255.0,
     g: 0.0 / 255.0,
     b: 0.0 / 255.0,
     a: 1.0,
 };
-const SECONDARY_RED: Color = Color {
+const PRIMARY_RED: Color = Color {
     r: 254.0 / 255.0,
     g: 224.0 / 255.0,
     b: 192.0 / 255.0,
     a: 1.0,
 };
 const BUTTONS_RED: Color = Color {
-    r: 185.0 / 255.0,
-    g: 0.0 / 255.0,
-    b: 91.0 / 255.0,
+    r: 151.0 / 255.0,
+    g: 92.0 / 255.0,
+    b: 141.0 / 255.0,
     a: 1.0,
 };
 const INCOMING_RED: Color = SECONDARY_RED;
 const OUTGOING_RED: Color = Color {
-    r: 34.0 / 255.0,
-    g: 34.0 / 255.0,
-    b: 34.0 / 255.0,
+    r: 109.0 / 255.0,
+    g: 103.0 / 255.0,
+    b: 228.0 / 255.0,
     a: 1.0,
 };
 pub const RED_STYLE: Colors = Colors {
@@ -131,8 +131,8 @@ pub const RED_STYLE: Colors = Colors {
     buttons: BUTTONS_RED,
     incoming: INCOMING_RED,
     outgoing: OUTGOING_RED,
-    text_headers: Color::BLACK,
-    text_body: Color::WHITE,
+    text_headers: Color::WHITE,
+    text_body: Color::BLACK,
     round_borders: Color::BLACK,
 };
 
@@ -185,6 +185,13 @@ pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
     name: "CourierPrimeBoldItalic",
     bytes: include_bytes!("../../fonts/CourierPrimeBoldItalic.ttf"),
 };
+
+pub fn get_font(style: StyleType) -> Font {
+    match to_rgb_color(get_colors(style).text_body) {
+        RGBColor(255, 255, 255) => COURIER_PRIME,
+        _ => COURIER_PRIME_BOLD,
+    }
+}
 
 // gui charts fonts
 pub const NOTOSANS: Font = Font::External {
