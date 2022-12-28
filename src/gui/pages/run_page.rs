@@ -156,7 +156,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 ));
 
                 let mut col_packets = Column::new()
-                    .padding(10)
+                    //.padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
                     .push(Text::new(get_active_filters_string(&sniffer.filters.clone())).font(font))
@@ -305,6 +305,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                     .width(FillPortion(1))
                                     .padding(10)
                                     .height(Length::Fill)
+                                    .align_x(Horizontal::Center)
                                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
                                         StyleTuple(sniffer.style, ElementType::BorderedRound),
                                     )),
