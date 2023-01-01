@@ -24,15 +24,15 @@ lto = true
 
 
 [dependencies]
-pcap = "^1.0.0"
-etherparse = "^0.13.0"
-chrono = { version = "^0.4.22", default_features = false, features = ["clock"] }
-thousands = "^0.2.0"
-indexmap = "^1.9.1"
-plotters = { version = "^0.3.4", default_features = false, features = ["area_series"] }
-iced = { version = "^0.6.0", features = ["tokio", "image"] }
-plotters-iced = "^0.5.0"
-db_ip = { version = "^0.3.7", default_features = false, features = ["ipv4", "ipv6","include-country-code-lite"] }
-confy = "^0.5.1"
-serde = { version = "^1.0.149", default_features = false, features = ["derive"] }
-rodio = { version = "^0.16.0", default_features = false, features = ["mp3"] }
+pcap = "1.0.0"
+etherparse = "0.13.0"
+chrono = { version = "0.4.22", default_features = false, features = ["clock"] }
+thousands = "0.2.0"
+indexmap = "1.9.1"
+plotters = { version = "0.3.4", default_features = false, features = ["area_series"] }
+iced = { version = "0.6.0", features = ["tokio", "image"] }
+plotters-iced = "0.5.0"
+db_ip = { version = "0.3.7", default_features = false, features = ["ipv4", "ipv6","include-country-code-lite"] }
+confy = "0.5.1"
+serde = { version = "1.0.149", default_features = false, features = ["derive"] }
+rodio = { version = "0.16.0", default_features = false, features = ["mp3"] }
