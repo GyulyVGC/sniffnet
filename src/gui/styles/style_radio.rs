@@ -22,11 +22,7 @@ impl iced::widget::radio::StyleSheet for StyleTuple {
             dot_color: colors.secondary,
             border_width: if is_selected { BORDER_WIDTH } else { 0.0 },
             border_color: colors.secondary,
-            text_color: if is_selected {
-                Some(colors.secondary)
-            } else {
-                None
-            },
+            text_color: None,
         }
     }
 

@@ -56,8 +56,8 @@ pub const DAY_STYLE: Colors = Colors {
     primary: PRIMARY_DAY,
     secondary: SECONDARY_DAY,
     buttons: BUTTONS_DAY,
-    incoming: SECONDARY_NIGHT,
-    outgoing: SECONDARY_DAY,
+    incoming: SECONDARY_DAY,
+    outgoing: SECONDARY_NIGHT,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
     round_borders: Color::BLACK,
@@ -65,27 +65,27 @@ pub const DAY_STYLE: Colors = Colors {
 
 // try theme
 const PRIMARY_TRY: Color = Color {
-    r: 0.1,
-    g: 0.1,
-    b: 0.1,
+    r: 28.0 / 255.0,
+    g: 49.0 / 255.0,
+    b: 94.0 / 255.0,
     a: 1.0,
 };
 const SECONDARY_TRY: Color = Color {
-    r: 1.0,
-    g: 0.72,
-    b: 0.17,
+    r: 34.0 / 255.0,
+    g: 124.0 / 255.0,
+    b: 112.0 / 255.0,
     a: 1.0,
 };
 const BUTTONS_TRY: Color = Color {
-    r: 0.3,
-    g: 0.3,
-    b: 0.3,
+    r: 48.0 / 255.0,
+    g: 71.0 / 255.0,
+    b: 94.0 / 255.0,
     a: 1.0,
 };
 const OUTGOING_TRY: Color = Color {
-    r: 0.45,
-    g: 0.17,
-    b: 1.0,
+    r: 230.0 / 255.0,
+    g: 226.0 / 255.0,
+    b: 195.0 / 255.0,
     a: 1.0,
 };
 pub const TRY_STYLE: Colors = Colors {
@@ -96,40 +96,39 @@ pub const TRY_STYLE: Colors = Colors {
     outgoing: OUTGOING_TRY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
-    round_borders: BUTTONS_TRY,
+    round_borders: Color::BLACK,
 };
 
 // red theme
 const SECONDARY_RED: Color = Color {
-    r: 130.0 / 255.0,
-    g: 0.0 / 255.0,
-    b: 0.0 / 255.0,
+    r: 127.0 / 255.0,
+    g: 102.0 / 255.0,
+    b: 157.0 / 255.0,
     a: 1.0,
 };
 const PRIMARY_RED: Color = Color {
-    r: 254.0 / 255.0,
-    g: 224.0 / 255.0,
-    b: 192.0 / 255.0,
+    r: 245.0 / 255.0,
+    g: 245.0 / 255.0,
+    b: 220.0 / 255.0,
     a: 1.0,
 };
 const BUTTONS_RED: Color = Color {
-    r: 151.0 / 255.0,
-    g: 92.0 / 255.0,
-    b: 141.0 / 255.0,
+    r: 222.0 / 255.0,
+    g: 186.0 / 255.0,
+    b: 206.0 / 255.0,
     a: 1.0,
 };
-const INCOMING_RED: Color = SECONDARY_RED;
 const OUTGOING_RED: Color = Color {
-    r: 109.0 / 255.0,
-    g: 103.0 / 255.0,
-    b: 228.0 / 255.0,
+    r: 90.0 / 255.0,
+    g: 164.0 / 255.0,
+    b: 105.0 / 255.0,
     a: 1.0,
 };
 pub const RED_STYLE: Colors = Colors {
     primary: PRIMARY_RED,
     secondary: SECONDARY_RED,
     buttons: BUTTONS_RED,
-    incoming: INCOMING_RED,
+    incoming: SECONDARY_RED,
     outgoing: OUTGOING_RED,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
