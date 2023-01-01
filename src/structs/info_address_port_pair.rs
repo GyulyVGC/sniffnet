@@ -1,4 +1,4 @@
-//! Module defining the `IndoAddressPortPair` struct, useful to format the output report file and
+//! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
 use chrono::{DateTime, Local};
@@ -30,6 +30,10 @@ pub struct InfoAddressPortPair {
     pub traffic_type: TrafficType,
     /// Country of the remote IP address
     pub country: String,
+    /// Integer corresponding to the index inside the connections map
+    pub index: usize,
+    /// Flag that indicates if this connection is marked as favourite
+    pub is_favorite: bool,
 }
 
 impl InfoAddressPortPair {

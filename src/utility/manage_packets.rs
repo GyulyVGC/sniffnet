@@ -123,6 +123,8 @@ pub fn modify_or_insert_in_map(
             very_long_address,
             traffic_type,
             country,
+            index,
+            is_favorite: false,
         });
     info_traffic.addresses_last_interval.insert(index);
 }

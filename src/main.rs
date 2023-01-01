@@ -1,6 +1,7 @@
 //! Module containing the entry point of application execution.
 
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
@@ -104,6 +105,7 @@ pub fn main() -> iced::Result {
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(runtime_data2, style),
             report_type: ReportType::MostRecent,
+            favorite_connections: HashSet::new(),
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

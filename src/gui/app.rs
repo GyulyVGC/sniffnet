@@ -211,6 +211,18 @@ impl Application for Sniffer {
                 }
                 self.waiting = ".".repeat(self.waiting.len() + 1);
             }
+            Message::SaveConnection(index) => {
+                self.favorite_connections.insert(index);
+                let mut info_traffic = self.info_traffic.lock().unwrap();
+                let connection = info_traffic.map.get_index_mut(index).unwrap().1;
+                connection.is_favorite = true;
+            }
+            Message::UnSaveConnection(index) => {
+                self.favorite_connections.remove(&index);
+                let mut info_traffic = self.info_traffic.lock().unwrap();
+                let connection = info_traffic.map.get_index_mut(index).unwrap().1;
+                connection.is_favorite = false;
+            }
         }
         Command::none()
     }

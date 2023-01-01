@@ -4,7 +4,7 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Radio, Row, Scrollable, Text};
+use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use thousands::Separable;
@@ -263,20 +263,47 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                 for key_val in &sniffer.runtime_data.borrow().report_vec {
                     let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
                     let flag = get_flag(&key_val.1.country);
-                    scroll_report = scroll_report.push(
-                        Row::new()
-                            .push(
-                                Text::new(format!(
-                                    "{}{}",
-                                    key_val.0.print_gui(),
-                                    key_val.1.print_gui()
-                                ))
-                                .style(iced::theme::Text::Color(entry_color))
-                                .font(COURIER_PRIME_BOLD),
+                    let entry_row = Row::new()
+                        .push(
+                            Text::new(format!(
+                                "{}{}",
+                                key_val.0.print_gui(),
+                                key_val.1.print_gui()
+                            ))
+                            .style(iced::theme::Text::Color(entry_color))
+                            .font(COURIER_PRIME_BOLD),
+                        )
+                        .push(flag)
+                        .push(Text::new("   ").font(font))
+                        .push(
+                            button(
+                                Text::new("Save".to_string())
+                                    .horizontal_alignment(Horizontal::Center)
+                                    .vertical_alignment(Vertical::Center),
                             )
-                            .push(flag)
-                            .push(Text::new("   ").font(font)),
-                    );
+                            .padding(10)
+                            .height(Length::Units(20))
+                            .width(Length::Units(20))
+                            .style(StyleTuple(sniffer.style, ElementType::Standard).into())
+                            .on_press(if key_val.1.is_favorite {
+                                Message::UnSaveConnection(key_val.1.index)
+                            } else {
+                                Message::SaveConnection(key_val.1.index)
+                            }),
+                        );
+                    scroll_report =
+                        scroll_report.push(Container::new(entry_row).style(<StyleTuple as Into<
+                            iced::theme::Container,
+                        >>::into(
+                            StyleTuple(
+                                sniffer.style,
+                                if key_val.1.is_favorite {
+                                    ElementType::BorderedRound
+                                } else {
+                                    ElementType::Standard
+                                },
+                            ),
+                        )));
                 }
                 col_report =
                     col_report.push(Scrollable::new(scroll_report).style(<StyleTuple as Into<
