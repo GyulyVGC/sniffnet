@@ -29,6 +29,8 @@ pub struct InfoTraffic {
     pub addresses_last_interval: HashSet<usize>,
     /// Map of the application layer protocols with their packet count
     pub app_protocols: HashMap<AppProtocol, u128>,
+    /// Collection of indexes of the favorite connections
+    pub favorite_connections: HashSet<usize>,
 }
 
 impl InfoTraffic {
@@ -44,6 +46,7 @@ impl InfoTraffic {
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
             app_protocols: HashMap::new(),
+            favorite_connections: HashSet::new(),
         }
     }
 }

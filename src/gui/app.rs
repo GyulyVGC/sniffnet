@@ -212,16 +212,28 @@ impl Application for Sniffer {
                 self.waiting = ".".repeat(self.waiting.len() + 1);
             }
             Message::SaveConnection(index) => {
-                self.favorite_connections.insert(index);
                 let mut info_traffic = self.info_traffic.lock().unwrap();
-                let connection = info_traffic.map.get_index_mut(index).unwrap().1;
-                connection.is_favorite = true;
+                info_traffic.favorite_connections.insert(index);
+                let key_val = info_traffic.map.get_index_mut(index).unwrap();
+                key_val.1.is_favorite = true;
+                drop(info_traffic);
+                update_report_data(
+                    self.runtime_data.borrow_mut(),
+                    &self.info_traffic,
+                    self.report_type,
+                );
             }
             Message::UnSaveConnection(index) => {
-                self.favorite_connections.remove(&index);
                 let mut info_traffic = self.info_traffic.lock().unwrap();
-                let connection = info_traffic.map.get_index_mut(index).unwrap().1;
-                connection.is_favorite = false;
+                info_traffic.favorite_connections.remove(&index);
+                let key_val = info_traffic.map.get_index_mut(index).unwrap();
+                key_val.1.is_favorite = false;
+                drop(info_traffic);
+                update_report_data(
+                    self.runtime_data.borrow_mut(),
+                    &self.info_traffic,
+                    self.report_type,
+                );
             }
         }
         Command::none()

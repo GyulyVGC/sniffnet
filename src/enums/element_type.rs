@@ -6,4 +6,6 @@ pub enum ElementType {
     BorderedRound,
     TabActive,
     TabInactive,
+    Starred,
+    NotStarred,
 }

@@ -225,3 +225,11 @@ pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
 pub const HEIGHT_HEADER: u16 = 2;
 pub const HEIGHT_BODY: u16 = 12;
 pub const HEIGHT_FOOTER: u16 = 1;
+
+// stars yellow colors
+pub const STARRED: Color = Color {
+    r: 245.0 / 255.0,
+    g: 193.0 / 255.0,
+    b: 39.0 / 255.0,
+    a: 1.0,
+};

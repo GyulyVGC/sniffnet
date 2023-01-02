@@ -2,7 +2,6 @@
 //! to share data among the different threads.
 
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
@@ -39,6 +38,4 @@ pub struct Sniffer {
     pub traffic_chart: TrafficChart,
     /// Report type to be displayed
     pub report_type: ReportType,
-    /// Collection of indexes of the favorite connections
-    pub favorite_connections: HashSet<usize>,
 }

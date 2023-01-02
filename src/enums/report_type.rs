@@ -5,4 +5,5 @@ pub enum ReportType {
     MostRecent,
     MostPackets,
     MostBytes,
+    Favorites,
 }
