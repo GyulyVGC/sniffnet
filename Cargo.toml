@@ -36,3 +36,4 @@ db_ip = { version = "0.3.7", default_features = false, features = ["ipv4", "ipv6
 confy = "0.5.1"
 serde = { version = "1.0.152", default_features = false, features = ["derive"] }
 rodio = { version = "0.16.0", default_features = false, features = ["mp3"] }
+dns-lookup = "1.0.8"

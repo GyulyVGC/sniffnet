@@ -8,6 +8,7 @@ use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use thousands::Separable;
+//use dns_lookup::lookup_addr;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
@@ -159,6 +160,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     //.padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
+                    //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
                     .push(Text::new(get_active_filters_string(&sniffer.filters.clone())).font(font))
                     .push(Text::new(" "))
                     .push(
@@ -295,12 +297,13 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                             button(
                                 Text::new('X'.to_string())
                                     .font(ICONS)
+                                    .size(14)
                                     .horizontal_alignment(Horizontal::Center)
                                     .vertical_alignment(Vertical::Center),
                             )
                             .padding(0)
-                            .height(Length::Units(20))
-                            .width(Length::Units(20))
+                            .height(Length::Units(16))
+                            .width(Length::Units(16))
                             .style(
                                 StyleTuple(
                                     sniffer.style,
