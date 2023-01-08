@@ -1,5 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
-
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/211192693-21a5dc79-c7bd-4eb7-8c80-4d954d28b9e2.png" width="100%"/></a></p>
 
 <hr>
 
