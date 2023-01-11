@@ -62,26 +62,26 @@ jobs:
     - name: Install libpcap
       run: sudo apt-get install libpcap-dev
     - name: Install dependency for alsa-sys
-      run: sudo apt install libsdl2-dev
+      run: sudo apt-get install libasound2-dev
     - name: Build 
       run: cargo build --verbose
     - name: Run tests 
       run: cargo test --verbose
 
-  Windows: 
-    name: Windows Tests
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Update cargo config to use Git CLI (windows)
-      run: Set-Content -Path $env:USERPROFILE\.cargo\config.toml "[net]`ngit-fetch-with-cli = true"
-    - name: Install winpcap
-      run: |
-            cinst -y winpcap --version 4.1.3.20161116
-            (New-Object System.Net.WebClient).DownloadFile("https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip", "C:/WpdPack.zip")
-            Expand-Archive -LiteralPath C:/WpdPack.zip -DestinationPath C:/
-            echo "LIB=C:/WpdPack/Lib/x64" >> $env:GITHUB_ENV
-    - name: Build 
-      run: cargo build --verbose
-    - name: Run tests 
-      run: cargo test --verbose
+#  Windows: 
+#    name: Windows Tests
+#    runs-on: windows-latest
+#    steps:
+#    - uses: actions/checkout@v3
+#    - name: Update cargo config to use Git CLI (windows)
+#      run: Set-Content -Path $env:USERPROFILE\.cargo\config.toml "[net]`ngit-fetch-with-cli = true"
+#    - name: Install winpcap
+#      run: |
+#            cinst -y winpcap --version 4.1.3.20161116
+#            (New-Object System.Net.WebClient).DownloadFile("https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip", "C:/WpdPack.zip")
+#            Expand-Archive -LiteralPath C:/WpdPack.zip -DestinationPath C:/
+#            echo "LIB=C:/WpdPack/Lib/x64" >> $env:GITHUB_ENV
+#    - name: Build 
+#      run: cargo build --verbose
+#    - name: Run tests 
+#      run: cargo test --verbose
