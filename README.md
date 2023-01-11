@@ -2,43 +2,74 @@
 
 <hr>
 
+<p align="center">
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?&logo=rust"/></a>
+&nbsp;
+<a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet"/></a>
+&nbsp;
+<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
+</p>
+
 <p align="center"> Application to comfortably monitor your network traffic </p>
 <p align="center"> Multithreaded, cross-platform, reliable </p>
-
-<p align="center">
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
-&nbsp;
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet?color=orange&label=crate%20downloads&logo=rust"/></a>
-</p>
-
-<p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
-&nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet/releases"><img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=blue&logo=github"/></a>
-</p>
-
 
 <hr>
 
 <p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967647-ef77cf89-20b0-49e3-a10d-0d4fe1da7752.gif" width="85%"/></p>
 
 <div align="center">
-<p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
+<p>Sniffnet is a simple yet insightful application to analyse your network traffic 
 in a straightforward and appealing way </p>
 </div>
 
 <hr>
 
 
-## Install and Run
+## Installation
 
-If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with: 
+You can install Sniffnet in one of the following ways:
+
+<details>
+
+  <summary>from Crates.io&emsp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
+
+  Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine;
+  in this case, the application binary can be installed with: 
+  
 ```sh
 cargo install sniffnet
 ```
+    
+</details>
 
-Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
 
+<details>
+
+  <summary>from GitHub releases&emsp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
+
+  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
+  
+  Choose between a Windows installer, a DEB package, or a MacOS disk image (depending on your operating system).
+    
+</details>
+
+
+<details>
+
+  <summary>from Homebrew&emsp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
+
+  You can install Sniffnet's brew package with:
+  
+  ```sh
+brew install sniffnet
+```
+    
+</details>
+
+
+## Required dependencies
+
+Depending on your operating system, you may need to install some dependencies to run Sniffnet:
 
 <details>
 
@@ -171,7 +202,7 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 Most of the errors that can occur are likely due to your system missing required `pcap` dependencies,
 necessary to correctly analyze a network adapter. 
 
-Check the [Install and Run](#install-and-run) section for instructions on how to proceed.
+Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
 For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
 
