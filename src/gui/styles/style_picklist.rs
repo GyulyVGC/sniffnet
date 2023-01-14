@@ -38,11 +38,11 @@ impl pick_list::StyleSheet for StyleTuple {
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
+            handle_color: colors.text_body,
             background: Background::Color(colors.buttons),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
             border_color: colors.secondary,
-            icon_size: 0.5,
         }
     }
 
@@ -51,11 +51,11 @@ impl pick_list::StyleSheet for StyleTuple {
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
+            handle_color: colors.text_body,
             background: Background::Color(colors.primary),
             border_radius: 0.0,
             border_width: BORDER_WIDTH,
             border_color: colors.secondary,
-            icon_size: 0.5,
         }
     }
 }
