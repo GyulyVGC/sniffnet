@@ -4,6 +4,7 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Properties;
 use iced::widget::{button, Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
@@ -324,17 +325,19 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                         .push(Text::new("   ").font(font));
                     scroll_report = scroll_report.push(entry_row);
                 }
-                col_report =
-                    col_report.push(Scrollable::new(scroll_report).style(<StyleTuple as Into<
-                        iced::theme::Scrollable,
-                    >>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
-                    )));
+                col_report = col_report.push(
+                    Scrollable::new(scroll_report)
+                        .horizontal_scroll(Properties::new())
+                        .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                            StyleTuple(sniffer.style, ElementType::Standard),
+                        )),
+                );
 
                 let row_report = Row::new().push(
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
+                        .align_x(Horizontal::Center)
                         .style(<StyleTuple as Into<iced::theme::Container>>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
