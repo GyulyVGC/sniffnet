@@ -41,7 +41,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
         // NO pcap error detected
 
         let tabs = get_tabs(
-            &["Overview", "Inspect", "Prova prova Try try"],
+            &["Overview", "Inspect", "Notifications"],
             &[Message::TickInit, Message::Reset, Message::Reset],
             "Overview",
             sniffer.style,
