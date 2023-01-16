@@ -3,9 +3,7 @@
 use crate::enums::element_type::ElementType;
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    BORDER_BUTTON_RADIUS, BORDER_WIDTH, BORDER_WIDTH_TABS, STARRED,
-};
+use crate::utility::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH, STARRED};
 use iced::widget::button;
 use iced::{Background, Color, Vector};
 
@@ -31,9 +29,7 @@ impl button::StyleSheet for StyleTuple {
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => {
-                    BORDER_WIDTH_TABS
-                }
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
                 StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 0.0,
                 _ => BORDER_WIDTH,
             },
@@ -42,10 +38,7 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::Starred) => Color::BLACK,
                 _ => colors.text_body,
             },
-            border_color: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => colors.buttons,
-                _ => colors.secondary,
-            },
+            border_color: colors.secondary,
         }
     }
 

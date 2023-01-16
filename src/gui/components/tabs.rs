@@ -3,13 +3,14 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE};
+use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
 use crate::StyleType;
-use iced::widget::{button, Button, Row, Text};
+use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Length};
 
 pub fn get_tabs(
     labels: &[&str],
+    icons: &[&str],
     actions: &[Message],
     active: &str,
     style: StyleType,
@@ -22,6 +23,7 @@ pub fn get_tabs(
         let active = label.eq(&active);
         tabs = tabs.push(new_tab(
             (*label).to_string(),
+            icons.get(i).unwrap().to_string(),
             actions.get(i).unwrap().clone(),
             active,
             style,
@@ -32,29 +34,43 @@ pub fn get_tabs(
 
 fn new_tab(
     label: String,
+    icon: String,
     action: Message,
     active: bool,
     style: StyleType,
 ) -> Button<'static, Message> {
-    button(
-        Text::new(label)
-            .font(get_font(style))
-            .size(FONT_SIZE_SUBTITLE)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .height(Length::Units(30))
-    .width(Length::FillPortion(1))
-    .style(
-        StyleTuple(
-            style,
-            if active {
-                ElementType::TabActive
-            } else {
-                ElementType::TabInactive
-            },
+    let content = Row::new()
+        .align_items(Alignment::Center)
+        .push(horizontal_space(Length::FillPortion(1)))
+        .push(
+            Text::new(icon)
+                .font(ICONS)
+                .size(15)
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
         )
-        .into(),
-    )
-    .on_press(action)
+        .push(
+            Text::new(label)
+                .font(get_font(style))
+                .size(FONT_SIZE_SUBTITLE)
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        )
+        .push(horizontal_space(Length::FillPortion(1)));
+
+    button(content)
+        .height(Length::Units(35))
+        .width(Length::FillPortion(1))
+        .style(
+            StyleTuple(
+                style,
+                if active {
+                    ElementType::TabActive
+                } else {
+                    ElementType::TabInactive
+                },
+            )
+            .into(),
+        )
+        .on_press(action)
 }

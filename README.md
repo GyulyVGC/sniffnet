@@ -29,7 +29,7 @@ You can install Sniffnet in one of the following ways:
 
 <details>
 
-  <summary>from Crates.io&emsp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
+  <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
 
   Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
   In this case, the application binary can be installed with: 
@@ -43,7 +43,7 @@ cargo install sniffnet
 
 <details>
 
-  <summary>from GitHub releases&emsp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
+  <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose between a Windows installer, a DEB package, or a MacOS disk image (depending on your operating system).
@@ -53,7 +53,7 @@ cargo install sniffnet
 
 <details>
 
-  <summary>from Homebrew&emsp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
+  <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
 
   You can install Sniffnet's brew package with:
   

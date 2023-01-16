@@ -2,7 +2,10 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
-use iced::widget::{button, Button, Column, Container, PickList, Radio, Row, Scrollable, Text};
+use iced::widget::{
+    button, horizontal_space, vertical_space, Button, Column, Container, PickList, Radio, Row,
+    Scrollable, Text,
+};
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
 use pcap::Device;
@@ -11,7 +14,9 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY};
+use crate::utility::style_constants::{
+    get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
+};
 use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the body of gui initial page
@@ -19,8 +24,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
     let col_adapter = get_col_adapter(sniffer, font);
-
-    let col_space = Column::new().width(FillPortion(1));
 
     let ip_active = sniffer.filters.ip;
     let col_ip_radio = Column::new()
@@ -177,7 +180,15 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(col_app),
         );
 
-    let body = Row::new().push(col_adapter).push(col_space).push(filters);
+    let body = Column::new()
+        .push(vertical_space(Length::FillPortion(1)))
+        .push(
+            Row::new()
+                .height(Length::FillPortion(40))
+                .push(col_adapter)
+                .push(horizontal_space(Length::FillPortion(1)))
+                .push(filters),
+        );
 
     Container::new(body)
         .height(FillPortion(HEIGHT_BODY))
@@ -187,18 +198,31 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 }
 
 pub fn get_button_start(style: StyleType, font: Font) -> Button<'static, Message> {
-    button(
-        Text::new("Run!")
-            .font(font)
-            .size(FONT_SIZE_TITLE)
-            .vertical_alignment(alignment::Vertical::Center)
-            .horizontal_alignment(alignment::Horizontal::Center),
-    )
-    .padding(10)
-    .height(Length::Units(80))
-    .width(Length::Units(160))
-    .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::Start)
+    let content = Row::new()
+        .align_items(Alignment::Center)
+        .push(horizontal_space(Length::FillPortion(1)))
+        .push(
+            Text::new("S ")
+                .font(ICONS)
+                .size(FONT_SIZE_SUBTITLE)
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        )
+        .push(
+            Text::new("Run!")
+                .font(font)
+                .size(FONT_SIZE_TITLE)
+                .vertical_alignment(alignment::Vertical::Center)
+                .horizontal_alignment(alignment::Horizontal::Center),
+        )
+        .push(horizontal_space(Length::FillPortion(1)));
+
+    button(content)
+        .padding(10)
+        .height(Length::Units(80))
+        .width(Length::Units(160))
+        .style(StyleTuple(style, ElementType::Standard).into())
+        .on_press(Message::Start)
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
