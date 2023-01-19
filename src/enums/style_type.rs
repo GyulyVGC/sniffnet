@@ -1,13 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 /// Used to specify the kind of style of the application
-#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
 pub enum StyleType {
     Night,
     Day,
-    Try,
-    Almond,
-    Red,
+    DeepSea,
+    MonAmour,
 }
 
 // impl Clone for StyleType {

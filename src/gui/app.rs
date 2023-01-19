@@ -2,7 +2,7 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
-use iced::widget::Column;
+use iced::widget::{Column, Container, Row};
 use iced::{executor, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::cell::RefCell;
@@ -14,9 +14,10 @@ use crate::enums::message::Message;
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
-use crate::gui::components::modals::{get_modal, Modal};
+use crate::gui::components::modals::{get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::run_page::run_page;
+use crate::gui::pages::settings::settings_appearance_page;
 use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -25,7 +26,8 @@ use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::sounds::play_sound;
-use crate::{InfoTraffic, RunTimeData, StyleType};
+use crate::utility::style_constants::get_font;
+use crate::{InfoTraffic, RunTimeData};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -193,16 +195,8 @@ impl Application for Sniffer {
                 self.pcap_error = None;
                 self.update(Message::HideModal);
             }
-            Message::Style => {
-                play_sound();
-                let current_style = self.style;
-                self.style = match current_style {
-                    StyleType::Night => StyleType::Day,
-                    StyleType::Day => StyleType::Try,
-                    StyleType::Try => StyleType::Almond,
-                    StyleType::Almond => StyleType::Red,
-                    StyleType::Red => StyleType::Night,
-                };
+            Message::Style(style) => {
+                self.style = style;
                 self.traffic_chart.change_colors(self.style);
                 let cfg = Config { style: self.style };
                 confy::store("sniffnet", None, cfg).unwrap();
@@ -237,8 +231,8 @@ impl Application for Sniffer {
                     self.report_type,
                 );
             }
-            Message::AskConfirmation => {
-                self.overlay = Some("exit");
+            Message::ShowModal(overlay) => {
+                self.overlay = Some(overlay);
             }
             Message::HideModal => {
                 self.overlay = None;
@@ -271,7 +265,13 @@ impl Application for Sniffer {
         if self.overlay.is_none() {
             content.into()
         } else {
-            Modal::new(content, get_modal(self.overlay.unwrap(), style))
+            let overlay = match self.overlay.unwrap() {
+                "exit" => get_exit_overlay(style, get_font(style)),
+                "settings_appearance" => settings_appearance_page(self),
+                _ => Container::new(Row::new()),
+            };
+
+            Modal::new(content, overlay)
                 .on_blur(Message::HideModal)
                 .into()
         }

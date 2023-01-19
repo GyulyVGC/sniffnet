@@ -1,4 +1,4 @@
-use crate::{AppProtocol, ChartType, IpVersion, ReportType, TransProtocol};
+use crate::{AppProtocol, ChartType, IpVersion, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -32,11 +32,11 @@ pub enum Message {
     /// Stop sniffing process and return to initial page
     Reset,
     /// Change application style (day or night)
-    Style,
+    Style(StyleType),
     /// Manage waiting time
     Waiting,
-    /// Ask reset confirmation generating an overlay
-    AskConfirmation,
+    /// Displays an overlay
+    ShowModal(&'static str),
     /// Hides the current overlayed modal
     HideModal,
 }

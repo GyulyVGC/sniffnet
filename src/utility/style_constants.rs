@@ -135,38 +135,6 @@ pub const RED_STYLE: Colors = Colors {
     round_borders: Color::BLACK,
 };
 
-// almond theme
-const PRIMARY_ALMOND: Color = Color {
-    r: 139.0 / 255.0,
-    g: 126.0 / 255.0,
-    b: 116.0 / 255.0,
-    a: 1.0,
-};
-const SECONDARY_ALMOND: Color = Color {
-    r: 54.0 / 255.0,
-    g: 39.0 / 255.0,
-    b: 6.0 / 255.0,
-    a: 1.0,
-};
-const BUTTONS_ALMOND: Color = OUTGOING_ALMOND;
-const INCOMING_ALMOND: Color = SECONDARY_ALMOND;
-const OUTGOING_ALMOND: Color = Color {
-    r: 241.0 / 255.0,
-    g: 211.0 / 255.0,
-    b: 179.0 / 255.0,
-    a: 1.0,
-};
-pub const ALMOND_STYLE: Colors = Colors {
-    primary: PRIMARY_ALMOND,
-    secondary: SECONDARY_ALMOND,
-    buttons: BUTTONS_ALMOND,
-    incoming: INCOMING_ALMOND,
-    outgoing: OUTGOING_ALMOND,
-    text_headers: Color::WHITE,
-    text_body: Color::BLACK,
-    round_borders: SECONDARY_ALMOND,
-};
-
 // gui Text fonts
 pub const COURIER_PRIME: Font = Font::External {
     name: "CourierPrime",
@@ -207,6 +175,12 @@ pub const ICONS: Font = Font::External {
     name: "icons",
     bytes: include_bytes!("../../fonts/icons.ttf"),
 };
+
+// palettes pictures
+pub const YETI_DAY: &[u8] = include_bytes!("../../resources/palettes/YetiDay.png");
+pub const YETI_NIGHT: &[u8] = include_bytes!("../../resources/palettes/YetiNight.png");
+pub const DEEP_SEA: &[u8] = include_bytes!("../../resources/palettes/DeepSea.png");
+pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.png");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: u16 = 14;

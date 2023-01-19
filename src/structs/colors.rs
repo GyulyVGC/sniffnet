@@ -1,6 +1,6 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
-use crate::utility::style_constants::{ALMOND_STYLE, DAY_STYLE, NIGHT_STYLE, RED_STYLE, TRY_STYLE};
+use crate::utility::style_constants::{DAY_STYLE, NIGHT_STYLE, RED_STYLE, TRY_STYLE};
 use crate::StyleType;
 use iced::Color;
 use plotters::style::RGBColor;
@@ -37,9 +37,8 @@ pub fn get_colors(style: StyleType) -> Colors {
     match style {
         StyleType::Night => NIGHT_STYLE,
         StyleType::Day => DAY_STYLE,
-        StyleType::Try => TRY_STYLE,
-        StyleType::Almond => ALMOND_STYLE,
-        StyleType::Red => RED_STYLE,
+        StyleType::DeepSea => TRY_STYLE,
+        StyleType::MonAmour => RED_STYLE,
     }
 }
 

@@ -77,7 +77,7 @@ pub fn get_button_reset(style: StyleType, all_packets: u128) -> Button<'static, 
     .on_press(if all_packets == 0 {
         Message::Reset
     } else {
-        Message::AskConfirmation
+        Message::ShowModal("exit")
     })
 }
 
@@ -93,5 +93,5 @@ pub fn get_button_style(style: StyleType) -> Button<'static, Message> {
     .height(Length::Units(40))
     .width(Length::Units(60))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::Style)
+    .on_press(Message::ShowModal("settings_appearance"))
 }

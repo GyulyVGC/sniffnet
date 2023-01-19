@@ -1,7 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::get_font;
 use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text};
@@ -13,15 +12,7 @@ use iced_native::{
     Point, Rectangle, Shell, Size, Widget,
 };
 
-pub fn get_modal(overlay: &str, style: StyleType) -> Container<'static, Message> {
-    let font = get_font(style);
-    match overlay {
-        "exit" => get_exit_overlay(style, font),
-        _ => Container::new(Row::new()),
-    }
-}
-
-fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
+pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
     let row_buttons = Row::new()
         .push(
             button(
