@@ -104,6 +104,7 @@ pub fn main() -> iced::Result {
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(runtime_data2, style),
             report_type: ReportType::MostRecent,
+            overlay: None,
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

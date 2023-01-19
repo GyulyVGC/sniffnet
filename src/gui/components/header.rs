@@ -10,7 +10,11 @@ use iced::widget::{button, Button, Container, Row, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 
-pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Message> {
+pub fn get_header(
+    style: StyleType,
+    back_button: bool,
+    all_packets: u128,
+) -> Container<'static, Message> {
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
@@ -22,7 +26,7 @@ pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Mes
             .width(Length::Fill)
             .align_items(Alignment::Center)
             .push(if back_button {
-                Container::new(get_button_reset(style))
+                Container::new(get_button_reset(style, all_packets))
                     .width(FillPortion(1))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center)
@@ -58,7 +62,7 @@ pub fn get_header(style: StyleType, back_button: bool) -> Container<'static, Mes
     ))
 }
 
-pub fn get_button_reset(style: StyleType) -> Button<'static, Message> {
+pub fn get_button_reset(style: StyleType, all_packets: u128) -> Button<'static, Message> {
     button(
         Text::new('C'.to_string())
             .font(ICONS)
@@ -70,7 +74,11 @@ pub fn get_button_reset(style: StyleType) -> Button<'static, Message> {
     .height(Length::Units(40))
     .width(Length::Units(60))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::Reset)
+    .on_press(if all_packets == 0 {
+        Message::Reset
+    } else {
+        Message::AskConfirmation
+    })
 }
 
 pub fn get_button_style(style: StyleType) -> Button<'static, Message> {

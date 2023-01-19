@@ -38,7 +38,10 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::Starred) => Color::BLACK,
                 _ => colors.text_body,
             },
-            border_color: colors.secondary,
+            border_color: match self {
+                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
+                _ => colors.secondary,
+            },
         }
     }
 
@@ -60,6 +63,7 @@ impl button::StyleSheet for StyleTuple {
             },
             border_color: match self {
                 StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => colors.buttons,
+                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
                 _ => colors.secondary,
             },
             text_color: match self {

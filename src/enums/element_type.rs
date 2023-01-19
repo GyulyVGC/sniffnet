@@ -8,4 +8,5 @@ pub enum ElementType {
     TabInactive,
     Starred,
     NotStarred,
+    Alert,
 }

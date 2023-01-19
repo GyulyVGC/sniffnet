@@ -35,4 +35,8 @@ pub enum Message {
     Style,
     /// Manage waiting time
     Waiting,
+    /// Ask reset confirmation generating an overlay
+    AskConfirmation,
+    /// Hides the current overlayed modal
+    HideModal,
 }

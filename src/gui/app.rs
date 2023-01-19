@@ -14,6 +14,7 @@ use crate::enums::message::Message;
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
+use crate::gui::components::modals::{get_modal, Modal};
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::run_page::run_page;
 use crate::structs::config::Config;
@@ -190,6 +191,7 @@ impl Application for Sniffer {
                 *self.status_pair.0.lock().unwrap() = Status::Init;
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
+                self.update(Message::HideModal);
             }
             Message::Style => {
                 play_sound();
@@ -235,6 +237,12 @@ impl Application for Sniffer {
                     self.report_type,
                 );
             }
+            Message::AskConfirmation => {
+                self.overlay = Some("exit");
+            }
+            Message::HideModal => {
+                self.overlay = None;
+            }
         }
         Command::none()
     }
@@ -244,8 +252,10 @@ impl Application for Sniffer {
         let style = self.style;
 
         let header = match status {
-            Status::Init => get_header(style, false),
-            Status::Running => get_header(style, true),
+            Status::Init => get_header(style, false, 0),
+            Status::Running => {
+                get_header(style, true, self.info_traffic.lock().unwrap().all_packets)
+            }
         };
 
         let body = match status {
@@ -253,11 +263,18 @@ impl Application for Sniffer {
             Status::Running => run_page(self),
         };
 
-        Column::new()
+        let content = Column::new()
             .push(header)
             .push(body)
-            .push(get_footer(style))
-            .into()
+            .push(get_footer(style));
+
+        if self.overlay.is_none() {
+            content.into()
+        } else {
+            Modal::new(content, get_modal(self.overlay.unwrap(), style))
+                .on_blur(Message::HideModal)
+                .into()
+        }
     }
 
     fn subscription(&self) -> Subscription<Message> {

@@ -3103,6 +3103,7 @@ dependencies = [
  "dns-lookup",
  "etherparse",
  "iced",
+ "iced_native",
  "indexmap",
  "pcap",
  "plotters",

@@ -1,11 +1,10 @@
 //! Module defining the `Sniffer` struct, which trace gui's component statuses and permits
 //! to share data among the different threads.
 
+use pcap::Device;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
-
-use pcap::Device;
 
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
@@ -38,4 +37,6 @@ pub struct Sniffer {
     pub traffic_chart: TrafficChart,
     /// Report type to be displayed
     pub report_type: ReportType,
+    /// Currently displayed overlay; None if no overlay is displayed
+    pub overlay: Option<&'static str>,
 }
