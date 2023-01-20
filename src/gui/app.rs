@@ -17,7 +17,9 @@ use crate::gui::components::header::get_header;
 use crate::gui::components::modals::{get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::run_page::run_page;
-use crate::gui::pages::settings::settings_appearance_page;
+use crate::gui::pages::settings::{
+    settings_appearance_page, settings_language_page, settings_notifications_page,
+};
 use crate::structs::config::Config;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -267,7 +269,9 @@ impl Application for Sniffer {
         } else {
             let overlay = match self.overlay.unwrap() {
                 "exit" => get_exit_overlay(style, get_font(style)),
+                "settings_notifications" => settings_notifications_page(self),
                 "settings_appearance" => settings_appearance_page(self),
+                "settings_language" => settings_language_page(self),
                 _ => Container::new(Row::new()),
             };
 

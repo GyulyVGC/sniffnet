@@ -26,6 +26,7 @@ impl button::StyleSheet for StyleTuple {
             })),
             border_radius: match self {
                 StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
+                StyleTuple(_, ElementType::BorderedRound) => 12.0,
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
@@ -55,14 +56,18 @@ impl button::StyleSheet for StyleTuple {
             })),
             border_radius: match self {
                 StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
+                StyleTuple(_, ElementType::BorderedRound) => 12.0,
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 0.0,
+                StyleTuple(
+                    _,
+                    ElementType::Starred | ElementType::NotStarred | ElementType::TabActive,
+                ) => 0.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => colors.buttons,
+                StyleTuple(_, ElementType::TabInactive) => colors.buttons,
                 StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
                 _ => colors.secondary,
             },

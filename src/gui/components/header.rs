@@ -28,11 +28,9 @@ pub fn get_header(
             .push(if back_button {
                 Container::new(get_button_reset(style, all_packets))
                     .width(FillPortion(1))
-                    .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             } else {
                 Container::new(Row::new())
-                    .width(FillPortion(1))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             })
@@ -93,5 +91,5 @@ pub fn get_button_style(style: StyleType) -> Button<'static, Message> {
     .height(Length::Units(40))
     .width(Length::Units(60))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal("settings_appearance"))
+    .on_press(Message::ShowModal("settings_notifications"))
 }

@@ -1,6 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
+use crate::utility::style_constants::{COURIER_PRIME_BOLD, FONT_SIZE_TITLE, NOTOSANS_BOLD};
 use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text};
@@ -13,49 +14,73 @@ use iced_native::{
 };
 
 pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
-    let row_buttons = Row::new()
-        .push(
-            button(
-                Text::new("Quit")
-                    .font(font)
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center),
-            )
-            .padding(5)
-            .height(Length::Units(30))
-            .width(Length::Units(80))
-            .style(StyleTuple(style, ElementType::Alert).into())
-            .on_press(Message::Reset),
+    let row_buttons = Row::new().push(
+        button(
+            Text::new("Yes")
+                .font(font)
+                .vertical_alignment(Vertical::Center)
+                .horizontal_alignment(Horizontal::Center),
         )
-        .push(horizontal_space(Length::Units(20)))
-        .push(
-            button(
-                Text::new("Cancel")
-                    .font(font)
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center),
-            )
-            .padding(5)
-            .height(Length::Units(30))
-            .width(Length::Units(80))
-            .style(StyleTuple(style, ElementType::Standard).into())
-            .on_press(Message::HideModal),
-        );
+        .padding(5)
+        .height(Length::Units(40))
+        .width(Length::Units(80))
+        .style(StyleTuple(style, ElementType::Alert).into())
+        .on_press(Message::Reset),
+    );
 
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
+        .push(get_modal_header(style))
+        .push(vertical_space(Length::Units(20)))
         .push(Text::new("Are you sure you want to quit this analysis?").font(font))
         .push(vertical_space(Length::Units(20)))
         .push(row_buttons);
 
     Container::new(content)
-        .padding(10)
-        .height(Length::Units(100))
+        .height(Length::Units(150))
         .width(Length::Units(450))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Alert),
+            StyleTuple(style, ElementType::Standard),
         ))
+}
+
+fn get_modal_header(style: StyleType) -> Container<'static, Message> {
+    Container::new(
+        Row::new()
+            .push(horizontal_space(Length::FillPortion(1)))
+            .push(
+                Text::new("Quit analysis")
+                    .font(COURIER_PRIME_BOLD)
+                    .size(FONT_SIZE_TITLE)
+                    .width(Length::FillPortion(6))
+                    .horizontal_alignment(Horizontal::Center),
+            )
+            .push(
+                Container::new(
+                    button(
+                        Text::new("x")
+                            .font(NOTOSANS_BOLD)
+                            .horizontal_alignment(Horizontal::Center)
+                            .size(15),
+                    )
+                    .padding(2)
+                    .height(Length::Units(20))
+                    .width(Length::Units(20))
+                    .style(StyleTuple(style, ElementType::Standard).into())
+                    .on_press(Message::HideModal),
+                )
+                .width(Length::FillPortion(1))
+                .align_x(Horizontal::Center),
+            ),
+    )
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .height(Length::Units(40))
+    .width(Length::Fill)
+    .style(<StyleTuple as Into<iced::theme::Container>>::into(
+        StyleTuple(style, ElementType::Headers),
+    ))
 }
 
 /// A widget that centers a modal element over some base element
@@ -245,7 +270,7 @@ where
                 border_color: Color::TRANSPARENT,
             },
             Color {
-                a: 0.80,
+                a: 0.8, // background opacity
                 ..Color::BLACK
             },
         );
