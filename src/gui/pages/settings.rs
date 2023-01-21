@@ -22,7 +22,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(get_settings_header(sniffer.style))
         .push(get_tabs(
             &["Notifications", "Appearance", "Language"],
-            &["A ", "A ", "A "],
+            &["7 ", "b ", "c "],
             &[
                 Message::TickInit,
                 Message::ShowModal("settings_appearance"),
@@ -55,7 +55,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
         .push(get_settings_header(sniffer.style))
         .push(get_tabs(
             &["Notifications", "Appearance", "Language"],
-            &["A ", "A ", "A "],
+            &["7 ", "b ", "c "],
             &[
                 Message::ShowModal("settings_notifications"),
                 Message::TickInit,
@@ -125,7 +125,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(get_settings_header(sniffer.style))
         .push(get_tabs(
             &["Notifications", "Appearance", "Language"],
-            &["A ", "A ", "A "],
+            &["7 ", "b ", "c "],
             &[
                 Message::ShowModal("settings_notifications"),
                 Message::ShowModal("settings_appearance"),
@@ -197,7 +197,7 @@ fn get_settings_header(style: StyleType) -> Container<'static, Message> {
                     .height(Length::Units(20))
                     .width(Length::Units(20))
                     .style(StyleTuple(style, ElementType::Standard).into())
-                    .on_press(Message::HideModal),
+                    .on_press(Message::HideModal(true)),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),

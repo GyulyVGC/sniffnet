@@ -3,12 +3,13 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{HEIGHT_HEADER, ICONS};
+use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, HEIGHT_HEADER, ICONS};
 use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Button, Container, Row, Text};
 use iced::Length::FillPortion;
-use iced::{Alignment, Length};
+use iced::{alignment, Alignment, Length};
+use iced_native::widget::horizontal_space;
 
 pub fn get_header(
     style: StyleType,
@@ -50,7 +51,8 @@ pub fn get_header(
                 Container::new(get_button_style(style))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center),
-            ),
+            )
+            .push(horizontal_space(Length::Units(15))),
     )
     .height(FillPortion(HEIGHT_HEADER))
     .align_y(Vertical::Center)
@@ -80,16 +82,28 @@ pub fn get_button_reset(style: StyleType, all_packets: u128) -> Button<'static, 
 }
 
 pub fn get_button_style(style: StyleType) -> Button<'static, Message> {
-    button(
-        Text::new('K'.to_string())
-            .font(ICONS)
-            .width(Length::Units(25))
-            .horizontal_alignment(Horizontal::Center)
-            .size(20),
-    )
-    .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
-    .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal("settings_notifications"))
+    let content = Row::new()
+        .align_items(Alignment::Center)
+        .push(horizontal_space(Length::FillPortion(1)))
+        .push(
+            Text::new("a ")
+                .font(ICONS)
+                .size(FONT_SIZE_SUBTITLE)
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        )
+        .push(
+            Text::new("Settings")
+                .font(get_font(style))
+                .size(FONT_SIZE_SUBTITLE)
+                .vertical_alignment(alignment::Vertical::Center)
+                .horizontal_alignment(alignment::Horizontal::Center),
+        );
+
+    button(content)
+        .padding(10)
+        .height(Length::Units(40))
+        .width(Length::Units(200))
+        .style(StyleTuple(style, ElementType::Standard).into())
+        .on_press(Message::ShowModal("settings_notifications"))
 }

@@ -25,11 +25,11 @@ use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
+use crate::utility::manage_notifications::notify;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
-use crate::utility::sounds::play_sound;
 use crate::utility::style_constants::get_font;
-use crate::{InfoTraffic, RunTimeData};
+use crate::{InfoTraffic, Notifications, RunTimeData};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -53,11 +53,8 @@ impl Application for Sniffer {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::TickInit => {
-                //play_sound();
-            }
+            Message::TickInit => {}
             Message::TickRun => {
-                //play_sound();
                 let info_traffic_lock = self.info_traffic.lock().unwrap();
                 self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
@@ -78,6 +75,7 @@ impl Application for Sniffer {
                     self.runtime_data.borrow_mut().app_protocols =
                         info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
+                    notify(self.runtime_data.borrow(), self.notifications);
                     update_charts_data(self.runtime_data.borrow_mut());
                     update_report_data(
                         self.runtime_data.borrow_mut(),
@@ -87,7 +85,6 @@ impl Application for Sniffer {
                 }
             }
             Message::AdapterSelection(name) => {
-                play_sound();
                 for dev in Device::list().expect("Error retrieving device list\r\n") {
                     if dev.name.eq(&name) {
                         self.device = dev;
@@ -96,23 +93,18 @@ impl Application for Sniffer {
                 }
             }
             Message::IpVersionSelection(version) => {
-                play_sound();
                 self.filters.ip = version;
             }
             Message::TransportProtocolSelection(protocol) => {
-                play_sound();
                 self.filters.transport = protocol;
             }
             Message::AppProtocolSelection(protocol) => {
-                play_sound();
                 self.filters.application = protocol;
             }
             Message::ChartSelection(what_to_display) => {
-                play_sound();
                 self.traffic_chart.change_kind(what_to_display);
             }
             Message::ReportSelection(what_to_display) => {
-                play_sound();
                 if what_to_display.ne(&self.report_type) {
                     self.report_type = what_to_display;
                     update_report_data(
@@ -124,7 +116,6 @@ impl Application for Sniffer {
             }
             /*
             Message::OpenReport => {
-                play_sound();
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
                     .arg(r".\sniffnet_report\report.txt")
@@ -143,7 +134,6 @@ impl Application for Sniffer {
                     .unwrap();
             }*/
             Message::OpenGithub => {
-                play_sound();
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
                     .arg("https://github.com/GyulyVGC/sniffnet")
@@ -161,7 +151,6 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::Start => {
-                play_sound();
                 let device = self.device.clone();
                 let (pcap_error, cap) = get_capture_result(&device);
                 self.pcap_error = pcap_error.clone();
@@ -191,17 +180,14 @@ impl Application for Sniffer {
                 }
             }
             Message::Reset => {
-                play_sound();
                 *self.status_pair.0.lock().unwrap() = Status::Init;
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
-                self.update(Message::HideModal);
+                self.update(Message::HideModal(false));
             }
             Message::Style(style) => {
                 self.style = style;
                 self.traffic_chart.change_colors(self.style);
-                let cfg = Config { style: self.style };
-                confy::store("sniffnet", None, cfg).unwrap();
             }
             Message::Waiting => {
                 if self.waiting.len() > 2 {
@@ -236,8 +222,17 @@ impl Application for Sniffer {
             Message::ShowModal(overlay) => {
                 self.overlay = Some(overlay);
             }
-            Message::HideModal => {
+            Message::HideModal(save_config) => {
                 self.overlay = None;
+                if save_config {
+                    let store = Config {
+                        style: self.style,
+                        notifications: Notifications {
+                            packets_threshold: Some(1000),
+                        },
+                    };
+                    confy::store("sniffnet", None, store).unwrap();
+                }
             }
         }
         Command::none()
@@ -267,16 +262,16 @@ impl Application for Sniffer {
         if self.overlay.is_none() {
             content.into()
         } else {
-            let overlay = match self.overlay.unwrap() {
-                "exit" => get_exit_overlay(style, get_font(style)),
-                "settings_notifications" => settings_notifications_page(self),
-                "settings_appearance" => settings_appearance_page(self),
-                "settings_language" => settings_language_page(self),
-                _ => Container::new(Row::new()),
+            let (overlay, save_config) = match self.overlay.unwrap() {
+                "exit" => (get_exit_overlay(style, get_font(style)), false),
+                "settings_notifications" => (settings_notifications_page(self), true),
+                "settings_appearance" => (settings_appearance_page(self), true),
+                "settings_language" => (settings_language_page(self), true),
+                _ => (Container::new(Row::new()), false),
             };
 
             Modal::new(content, overlay)
-                .on_blur(Message::HideModal)
+                .on_blur(Message::HideModal(save_config))
                 .into()
         }
     }

@@ -43,7 +43,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
 
         let tabs = get_tabs(
             &["Overview", "Inspect", "Notifications"],
-            &["6 ", "5 ", "7 "],
+            &["d ", "5 ", "7 "],
             &[Message::TickInit, Message::Reset, Message::Reset],
             "Overview",
             sniffer.style,

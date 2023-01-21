@@ -9,12 +9,6 @@ pub enum StyleType {
     MonAmour,
 }
 
-// impl Clone for StyleType {
-//     fn clone(&self) -> Self {
-//         *self
-//     }
-// }
-
 impl ::std::default::Default for StyleType {
     fn default() -> Self {
         Self::Night

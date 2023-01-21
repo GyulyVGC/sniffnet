@@ -22,6 +22,7 @@ use crate::structs::colors::get_colors;
 use crate::structs::config::Config;
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
+use crate::structs::notifications::Notifications;
 use crate::structs::runtime_data::RunTimeData;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -76,7 +77,17 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    let style = confy::load::<Config>("sniffnet", None).unwrap().style;
+    let config_result = confy::load::<Config>("sniffnet", None);
+    if config_result.is_err() {
+        let store = Config {
+            style: StyleType::default(),
+            notifications: Notifications::default(),
+        };
+        confy::store("sniffnet", None, store).unwrap();
+    }
+    let config = config_result.unwrap();
+    let style = config.style;
+    let notifications = config.notifications;
 
     Sniffer::run(Settings {
         id: None,
@@ -105,6 +116,7 @@ pub fn main() -> iced::Result {
             traffic_chart: TrafficChart::new(runtime_data2, style),
             report_type: ReportType::MostRecent,
             overlay: None,
+            notifications,
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

@@ -4,6 +4,7 @@ pub mod config;
 pub mod filters;
 pub mod info_address_port_pair;
 pub mod info_traffic;
+pub mod notifications;
 pub mod runtime_data;
 pub mod sniffer;
 pub mod style_tuple;

@@ -68,7 +68,7 @@ fn get_modal_header(style: StyleType) -> Container<'static, Message> {
                     .height(Length::Units(20))
                     .width(Length::Units(20))
                     .style(StyleTuple(style, ElementType::Standard).into())
-                    .on_press(Message::HideModal),
+                    .on_press(Message::HideModal(false)),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),

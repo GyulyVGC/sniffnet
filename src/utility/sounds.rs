@@ -1,7 +1,7 @@
 use rodio::{Decoder, OutputStream, Sink};
 use std::thread;
 
-pub const SOUND: &[u8] = include_bytes!("../../resources/sounds/click.mp3");
+pub const SOUND: &[u8] = include_bytes!("../../resources/sounds/clearly.mp3");
 
 pub fn play_sound() {
     thread::Builder::new()

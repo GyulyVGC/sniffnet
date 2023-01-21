@@ -37,6 +37,6 @@ pub enum Message {
     Waiting,
     /// Displays an overlay
     ShowModal(&'static str),
-    /// Hides the current overlayed modal
-    HideModal,
+    /// Hides the current overlay modal; if true is passed, config file is updated
+    HideModal(bool),
 }

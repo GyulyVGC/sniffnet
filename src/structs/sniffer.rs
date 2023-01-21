@@ -9,6 +9,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use crate::enums::report_type::ReportType;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
+use crate::structs::notifications::Notifications;
 use crate::{InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
@@ -39,4 +40,6 @@ pub struct Sniffer {
     pub report_type: ReportType,
     /// Currently displayed overlay; None if no overlay is displayed
     pub overlay: Option<&'static str>,
+    /// Contains the notifications configuration set by the user
+    pub notifications: Notifications,
 }
