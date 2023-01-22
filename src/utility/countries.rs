@@ -22,7 +22,7 @@ pub fn get_country_code(
     }
 }
 
-const FLAGS_WIDTH: u16 = 13;
+const FLAGS_WIDTH: u16 = 15;
 
 pub const AD: &[u8] =
     include_bytes!("../../resources/countries_flags/png-16/andorra-16x16-32921.png");
@@ -749,6 +749,6 @@ pub fn get_flag(country: &str) -> Image {
         "ZA" => Image::new(Handle::from_memory(Vec::from(ZA))).width(Length::Units(FLAGS_WIDTH)),
         "ZM" => Image::new(Handle::from_memory(Vec::from(ZM))).width(Length::Units(FLAGS_WIDTH)),
         "ZW" => Image::new(Handle::from_memory(Vec::from(ZW))).width(Length::Units(FLAGS_WIDTH)),
-        _ => Image::new(Handle::from_memory(Vec::from(UNKNOWN))).width(Length::Units(14)),
+        _ => Image::new(Handle::from_memory(Vec::from(UNKNOWN))).width(Length::Units(15)),
     }
 }

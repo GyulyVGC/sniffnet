@@ -1,7 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{COURIER_PRIME_BOLD, FONT_SIZE_TITLE, NOTOSANS_BOLD};
+use crate::utility::style_constants::{FONT_SIZE_TITLE, INCONSOLATA_BOLD};
 use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text};
@@ -51,7 +51,7 @@ fn get_modal_header(style: StyleType) -> Container<'static, Message> {
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new("Quit analysis")
-                    .font(COURIER_PRIME_BOLD)
+                    .font(INCONSOLATA_BOLD)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
@@ -60,7 +60,7 @@ fn get_modal_header(style: StyleType) -> Container<'static, Message> {
                 Container::new(
                     button(
                         Text::new("x")
-                            .font(NOTOSANS_BOLD)
+                            .font(INCONSOLATA_BOLD)
                             .horizontal_alignment(Horizontal::Center)
                             .size(15),
                     )

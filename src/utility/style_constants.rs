@@ -136,39 +136,21 @@ pub const RED_STYLE: Colors = Colors {
 };
 
 // gui Text fonts
-pub const COURIER_PRIME: Font = Font::External {
-    name: "CourierPrime",
-    bytes: include_bytes!("../../fonts/CourierPrime.ttf"),
+pub const INCONSOLATA: Font = Font::External {
+    name: "inconsolata_regular",
+    bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
 };
-pub const COURIER_PRIME_BOLD: Font = Font::External {
-    name: "CourierPrimeBold",
-    bytes: include_bytes!("../../fonts/CourierPrimeBold.ttf"),
-};
-pub const COURIER_PRIME_ITALIC: Font = Font::External {
-    name: "CourierPrimeItalic",
-    bytes: include_bytes!("../../fonts/CourierPrimeItalic.ttf"),
-};
-pub const COURIER_PRIME_BOLD_ITALIC: Font = Font::External {
-    name: "CourierPrimeBoldItalic",
-    bytes: include_bytes!("../../fonts/CourierPrimeBoldItalic.ttf"),
+pub const INCONSOLATA_BOLD: Font = Font::External {
+    name: "inconsolata_bold",
+    bytes: include_bytes!("../../fonts/inconsolata-bold.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
-        RGBColor(255, 255, 255) => COURIER_PRIME,
-        _ => COURIER_PRIME_BOLD,
+        RGBColor(255, 255, 255) => INCONSOLATA,
+        _ => INCONSOLATA_BOLD,
     }
 }
-
-// gui charts fonts
-pub const NOTOSANS: Font = Font::External {
-    name: "Notosans",
-    bytes: include_bytes!("../../fonts/notosans-regular.ttf"),
-};
-pub const NOTOSANS_BOLD: Font = Font::External {
-    name: "NotosansBold",
-    bytes: include_bytes!("../../fonts/notosans-bold.ttf"),
-};
 
 //font to display icons
 pub const ICONS: Font = Font::External {
@@ -183,10 +165,10 @@ pub const DEEP_SEA: &[u8] = include_bytes!("../../resources/palettes/DeepSea.png
 pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.png");
 
 // font sizes
-pub const FONT_SIZE_FOOTER: u16 = 14;
-pub const FONT_SIZE_BODY: u16 = 16;
-pub const FONT_SIZE_SUBTITLE: u16 = 19;
-pub const FONT_SIZE_TITLE: u16 = 22;
+pub const FONT_SIZE_FOOTER: u16 = 15;
+pub const FONT_SIZE_BODY: u16 = 18;
+pub const FONT_SIZE_SUBTITLE: u16 = 22;
+pub const FONT_SIZE_TITLE: u16 = 24;
 
 // border styles
 pub const BORDER_WIDTH: f32 = 2.0;

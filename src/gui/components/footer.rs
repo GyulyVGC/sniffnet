@@ -7,8 +7,7 @@ use crate::structs::colors::{get_colors, to_rgb_color};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::get_formatted_strings::APP_VERSION;
 use crate::utility::style_constants::{
-    get_font, COURIER_PRIME_BOLD_ITALIC, COURIER_PRIME_ITALIC, FONT_SIZE_FOOTER, HEIGHT_FOOTER,
-    ICONS,
+    get_font, FONT_SIZE_FOOTER, HEIGHT_FOOTER, ICONS, INCONSOLATA, INCONSOLATA_BOLD,
 };
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Button, Container, Row, Text};
@@ -19,8 +18,8 @@ use plotters::prelude::RGBColor;
 pub fn get_footer(style: StyleType) -> Container<'static, Message> {
     let font = get_font(style);
     let font_footer = match to_rgb_color(get_colors(style).text_headers) {
-        RGBColor(255, 255, 255) => COURIER_PRIME_ITALIC,
-        _ => COURIER_PRIME_BOLD_ITALIC,
+        RGBColor(255, 255, 255) => INCONSOLATA,
+        _ => INCONSOLATA_BOLD,
     };
 
     let footer_row = Row::new()

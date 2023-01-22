@@ -22,7 +22,7 @@ use crate::utility::get_formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
 use crate::utility::style_constants::{
-    get_font, COURIER_PRIME_BOLD, FONT_SIZE_SUBTITLE, HEIGHT_BODY, ICONS,
+    get_font, FONT_SIZE_SUBTITLE, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD,
 };
 use crate::{AppProtocol, ChartType, ReportType};
 
@@ -284,6 +284,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                     let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
                     let flag = get_flag(&key_val.1.country);
                     let entry_row = Row::new()
+                        .align_items(Alignment::Center)
                         .push(
                             Text::new(format!(
                                 "{}{}",
@@ -291,7 +292,7 @@ pub fn run_page(sniffer: &Sniffer) -> Container<Message> {
                                 key_val.1.print_gui()
                             ))
                             .style(iced::theme::Text::Color(entry_color))
-                            .font(COURIER_PRIME_BOLD),
+                            .font(INCONSOLATA_BOLD),
                         )
                         .push(flag)
                         .push(Text::new("  ").font(font))

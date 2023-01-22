@@ -3,8 +3,8 @@ use crate::enums::message::Message;
 use crate::gui::components::tabs::get_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    get_font, COURIER_PRIME_BOLD, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR,
-    NOTOSANS_BOLD, YETI_DAY, YETI_NIGHT,
+    get_font, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, INCONSOLATA_BOLD, MON_AMOUR, YETI_DAY,
+    YETI_NIGHT,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
@@ -180,7 +180,7 @@ fn get_settings_header(style: StyleType) -> Container<'static, Message> {
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new("Settings")
-                    .font(COURIER_PRIME_BOLD)
+                    .font(INCONSOLATA_BOLD)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
@@ -189,7 +189,7 @@ fn get_settings_header(style: StyleType) -> Container<'static, Message> {
                 Container::new(
                     button(
                         Text::new("x")
-                            .font(NOTOSANS_BOLD)
+                            .font(INCONSOLATA_BOLD)
                             .horizontal_alignment(Horizontal::Center)
                             .size(15),
                     )

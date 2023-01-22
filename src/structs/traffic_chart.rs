@@ -13,7 +13,7 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use crate::enums::message::Message;
 use crate::structs::colors::to_rgb_color;
 use crate::utility::style_constants::{
-    CHARTS_LINE_BORDER, COLOR_CHART_MIX, NOTOSANS, NOTOSANS_BOLD,
+    CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA, INCONSOLATA_BOLD,
 };
 use crate::{get_colors, ChartType, RunTimeData, StyleType};
 
@@ -44,8 +44,8 @@ impl TrafficChart {
         Container::new(
             Column::new().push(
                 ChartWidget::new(self).resolve_font(move |_, _| match color_font {
-                    RGBColor(255, 255, 255) => NOTOSANS, // if white non-bold
-                    _ => NOTOSANS_BOLD,
+                    RGBColor(255, 255, 255) => INCONSOLATA, // if white non-bold
+                    _ => INCONSOLATA_BOLD,
                 }),
             ),
         )
@@ -96,7 +96,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .label_style(("notosans", 13).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| match bytes {
                         0..=999 | -999..=-1 => {
                             format!("{bytes}")
@@ -169,7 +169,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .label_style(("notosans", 13).into_font().color(&self.color_font))
                     .draw()
                     .unwrap();
                 chart
