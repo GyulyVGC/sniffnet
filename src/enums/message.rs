@@ -1,3 +1,5 @@
+use crate::enums::overlays::Overlays;
+use crate::enums::running_page::RunningPage;
 use crate::{AppProtocol, ChartType, IpVersion, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
@@ -36,7 +38,9 @@ pub enum Message {
     /// Manage waiting time
     Waiting,
     /// Displays an overlay
-    ShowModal(&'static str),
+    ShowModal(Overlays),
     /// Hides the current overlay modal; if true is passed, config file is updated
     HideModal(bool),
+    /// Permits to change the current running page
+    ChangeRunningPage(RunningPage),
 }

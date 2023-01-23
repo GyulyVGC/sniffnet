@@ -2,7 +2,7 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
-use iced::widget::{Column, Container, Row};
+use iced::widget::Column;
 use iced::{executor, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::cell::RefCell;
@@ -11,12 +11,16 @@ use std::thread;
 use std::time::Duration;
 
 use crate::enums::message::Message;
+use crate::enums::overlays::Overlays;
+use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
 use crate::gui::components::modals::{get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
-use crate::gui::pages::run_page::run_page;
+use crate::gui::pages::inspect_page::inspect_page;
+use crate::gui::pages::notifications_page::notifications_page;
+use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings::{
     settings_appearance_page, settings_language_page, settings_notifications_page,
 };
@@ -29,7 +33,7 @@ use crate::utility::manage_notifications::notify;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
-use crate::{InfoTraffic, Notifications, RunTimeData};
+use crate::{InfoTraffic, Notifications, ReportType, RunTimeData};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -181,8 +185,10 @@ impl Application for Sniffer {
             }
             Message::Reset => {
                 *self.status_pair.0.lock().unwrap() = Status::Init;
+                self.running_page = RunningPage::Overview;
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
+                self.report_type = ReportType::MostRecent;
                 self.update(Message::HideModal(false));
             }
             Message::Style(style) => {
@@ -234,6 +240,9 @@ impl Application for Sniffer {
                     confy::store("sniffnet", None, store).unwrap();
                 }
             }
+            Message::ChangeRunningPage(running_page) => {
+                self.running_page = running_page;
+            }
         }
         Command::none()
     }
@@ -251,7 +260,11 @@ impl Application for Sniffer {
 
         let body = match status {
             Status::Init => initial_page(self),
-            Status::Running => run_page(self),
+            Status::Running => match self.running_page {
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            },
         };
 
         let content = Column::new()
@@ -263,11 +276,10 @@ impl Application for Sniffer {
             content.into()
         } else {
             let (overlay, save_config) = match self.overlay.unwrap() {
-                "exit" => (get_exit_overlay(style, get_font(style)), false),
-                "settings_notifications" => (settings_notifications_page(self), true),
-                "settings_appearance" => (settings_appearance_page(self), true),
-                "settings_language" => (settings_language_page(self), true),
-                _ => (Container::new(Row::new()), false),
+                Overlays::Alert => (get_exit_overlay(style, get_font(style)), false),
+                Overlays::SettingsNotifications => (settings_notifications_page(self), true),
+                Overlays::SettingsAppearance => (settings_appearance_page(self), true),
+                Overlays::SettingsLanguage => (settings_language_page(self), true),
             };
 
             Modal::new(content, overlay)

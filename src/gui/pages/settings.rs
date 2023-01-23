@@ -1,5 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
+use crate::enums::overlays::Overlays;
 use crate::gui::components::tabs::get_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
@@ -25,8 +26,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             &["7 ", "b ", "c "],
             &[
                 Message::TickInit,
-                Message::ShowModal("settings_appearance"),
-                Message::ShowModal("settings_language"),
+                Message::ShowModal(Overlays::SettingsAppearance),
+                Message::ShowModal(Overlays::SettingsLanguage),
             ],
             "Notifications",
             sniffer.style,
@@ -57,9 +58,9 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
             &["Notifications", "Appearance", "Language"],
             &["7 ", "b ", "c "],
             &[
-                Message::ShowModal("settings_notifications"),
+                Message::ShowModal(Overlays::SettingsNotifications),
                 Message::TickInit,
-                Message::ShowModal("settings_language"),
+                Message::ShowModal(Overlays::SettingsLanguage),
             ],
             "Appearance",
             sniffer.style,
@@ -127,8 +128,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
             &["Notifications", "Appearance", "Language"],
             &["7 ", "b ", "c "],
             &[
-                Message::ShowModal("settings_notifications"),
-                Message::ShowModal("settings_appearance"),
+                Message::ShowModal(Overlays::SettingsNotifications),
+                Message::ShowModal(Overlays::SettingsAppearance),
                 Message::TickInit,
             ],
             "Language",

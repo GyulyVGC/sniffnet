@@ -2,6 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
+use crate::enums::overlays::Overlays;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, HEIGHT_HEADER, ICONS};
 use crate::StyleType;
@@ -77,7 +78,7 @@ pub fn get_button_reset(style: StyleType, all_packets: u128) -> Button<'static, 
     .on_press(if all_packets == 0 {
         Message::Reset
     } else {
-        Message::ShowModal("exit")
+        Message::ShowModal(Overlays::Alert)
     })
 }
 
@@ -105,5 +106,5 @@ pub fn get_button_style(style: StyleType) -> Button<'static, Message> {
         .height(Length::Units(40))
         .width(Length::Units(200))
         .style(StyleTuple(style, ElementType::Standard).into())
-        .on_press(Message::ShowModal("settings_notifications"))
+        .on_press(Message::ShowModal(Overlays::SettingsNotifications))
 }

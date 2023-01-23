@@ -15,6 +15,7 @@ use crate::enums::app_protocol::AppProtocol;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
 use crate::enums::report_type::ReportType;
+use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
@@ -117,6 +118,7 @@ pub fn main() -> iced::Result {
             report_type: ReportType::MostRecent,
             overlay: None,
             notifications,
+            running_page: RunningPage::Overview,
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,
