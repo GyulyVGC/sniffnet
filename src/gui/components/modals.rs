@@ -4,10 +4,10 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{FONT_SIZE_TITLE, INCONSOLATA_BOLD};
 use crate::StyleType;
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Text, horizontal_space, vertical_space, button};
-use iced::{Font, mouse, Color, Element, Event, Length, Point, Rectangle, Size, event};
-use iced_native::{Clipboard, layout, Layout, renderer, Shell, Widget, overlay};
+use iced::widget::{button, horizontal_space, vertical_space, Column, Container, Row, Text};
+use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size};
 use iced_native::widget::{self, Tree};
+use iced_native::{layout, overlay, renderer, Clipboard, Layout, Shell, Widget};
 
 pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
     let row_buttons = Row::new().push(

@@ -7,7 +7,7 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, HEIGHT_HEADER, ICONS};
 use crate::StyleType;
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{horizontal_space, button, Button, Container, Row, Text};
+use iced::widget::{button, horizontal_space, Button, Container, Row, Text};
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Length};
 

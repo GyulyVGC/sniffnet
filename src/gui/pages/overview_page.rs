@@ -5,7 +5,7 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
-use iced::widget::{vertical_space, button, Column, Container, Radio, Row, Scrollable, Text};
+use iced::widget::{button, vertical_space, Column, Container, Radio, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use thousands::Separable;

@@ -10,7 +10,10 @@ use crate::utility::style_constants::{
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{image::Handle, Button, button, horizontal_space, vertical_space, Column, Container, Image, Row, Text};
+use iced::widget::{
+    button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image, Row,
+    Text,
+};
 use iced::{Alignment, Length};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
