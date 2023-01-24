@@ -3,15 +3,11 @@ use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{FONT_SIZE_TITLE, INCONSOLATA_BOLD};
 use crate::StyleType;
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Text};
-use iced::Font;
-use iced_native::alignment::Alignment;
-use iced_native::widget::{self, button, horizontal_space, vertical_space, Tree};
-use iced_native::{
-    event, layout, mouse, overlay, renderer, Clipboard, Color, Element, Event, Layout, Length,
-    Point, Rectangle, Shell, Size, Widget,
-};
+use iced::alignment::{Alignment, Horizontal, Vertical};
+use iced::widget::{Column, Container, Row, Text, horizontal_space, vertical_space, button};
+use iced::{Font, mouse, Color, Element, Event, Length, Point, Rectangle, Size, event};
+use iced_native::{Clipboard, layout, Layout, renderer, Shell, Widget, overlay};
+use iced_native::widget::{self, Tree};
 
 pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
     let row_buttons = Row::new().push(

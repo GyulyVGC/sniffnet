@@ -10,10 +10,8 @@ use crate::utility::style_constants::{
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Button, Column, Container, Image, Row, Text};
+use iced::widget::{image::Handle, Button, button, horizontal_space, vertical_space, Column, Container, Image, Row, Text};
 use iced::{Alignment, Length};
-use iced_native::image::Handle;
-use iced_native::widget::{button, horizontal_space, vertical_space};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);

@@ -6,3 +6,4 @@ pub mod manage_packets;
 pub mod manage_report_data;
 pub mod sounds;
 pub mod style_constants;
+pub mod translations;

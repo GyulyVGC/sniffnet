@@ -13,7 +13,7 @@ Multithreaded, cross-platform, reliable
 
 <hr>
 
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967647-ef77cf89-20b0-49e3-a10d-0d4fe1da7752.gif" width="85%"/></p>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/214157000-7bed4159-121f-4137-ba85-05c5704f1797.mp4"/>
 
 <div align="center">
 <p>Sniffnet is a simple yet insightful application to analyse your network traffic 

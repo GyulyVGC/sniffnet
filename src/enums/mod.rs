@@ -3,7 +3,6 @@ pub mod chart_type;
 pub mod element_type;
 pub mod ip_version;
 pub mod message;
-pub mod my_button;
 pub mod overlays;
 pub mod report_type;
 pub mod running_page;
