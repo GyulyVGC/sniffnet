@@ -1,45 +1,72 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/211192693-21a5dc79-c7bd-4eb7-8c80-4d954d28b9e2.png" width="100%"/></a></p>
 
+<p align="center"> 
+<a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
+&nbsp;
+<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?&logo=rust&color=blue"/></a> <br>
+</p>
+
+<p align="center"> 
+Application to comfortably monitor your network traffic <br>
+Multithreaded, cross-platform, reliable
+</p>
 
 <hr>
 
-<p align="center"> Application to comfortably monitor your network traffic </p>
-<p align="center"> Multithreaded, cross-platform, reliable </p>
-
-<p align="center">
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?color=orange&logo=rust"/></a>
-&nbsp;
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/d/sniffnet?color=orange&label=crate%20downloads&logo=rust"/></a>
-</p>
-
-<p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://img.shields.io/github/stars/gyulyvgc/sniffnet?logo=github"/></a>
-&nbsp;
-<a href="https://github.com/GyulyVGC/sniffnet/releases"><img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=blue&logo=github"/></a>
-</p>
-
-
-<hr>
-
-<p align="center"><img alt="" src="resources/sniffnet_run_example.gif" width="85%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/214415884-43ed8cce-8705-42f2-a403-0b0eed9d3362.gif" width="85%"/></p>
 
 <div align="center">
-<p>Sniffnet is a simple yet insightful application to let you have a glance into your network traffic 
+<p>Sniffnet is a simple yet insightful application to analyse your network traffic 
 in a straightforward and appealing way </p>
 </div>
 
 <hr>
 
 
-## Install and Run
+## Installation
 
-If you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine, the application binary can be installed with: 
+You can install Sniffnet in one of the following ways:
+
+<details>
+
+  <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
+
+  Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
+  In this case, the application binary can be installed with: 
+
 ```sh
 cargo install sniffnet
 ```
+    
+</details>
 
-Otherwise, you can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases).
 
+<details>
+
+  <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
+
+  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
+  Choose between a Windows installer, a DEB package, or a MacOS disk image (depending on your operating system).
+    
+</details>
+
+
+<details>
+
+  <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
+
+  You can install Sniffnet's brew package with:
+  
+  ```sh
+brew install sniffnet
+```
+    
+</details>
+
+
+## Required dependencies
+
+Depending on your operating system, you may need to install some dependencies to run Sniffnet:
 
 <details>
 
@@ -93,19 +120,19 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 ## Features
 
 - choose a network adapter to inspect
-<p align="center"><img alt="" src="resources/adapters_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967942-1ee5d1b2-222e-46ee-bad7-e9aa63492628.png" width="50%"/></p>
 
 - select filters to apply to the observed traffic
-<p align="center"><img alt="" src="resources/filters_view.png" width="60%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968099-a68f32c4-c077-4f82-be2c-1cf88ce5522d.png" width="60%"/></p>
   
 - view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-<p align="center"><img alt="" src="resources/charts_view.png" width="80%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968195-f979f1b4-b737-4ece-8433-cf539d140eb4.png" width="80%"/></p>
 
 - view overall statistics about the filtered traffic
-<p align="center"><img alt="" src="resources/packets_view.png" width="50%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968251-b331a2b7-14df-45ab-aafd-20d93d9156bf.png" width="50%"/></p>
 
 - view most relevant connections (most recent, most packets, most bytes)
-<p align="center"><img alt="" src="resources/report_view.png" width="95%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967785-ff98bc0a-f3e8-44ad-bafe-4b9a46344f74.png" width="95%"/></p>
 
 - save complete textual report with detailed information for each connection:
   * source and destination IP addresses
@@ -170,9 +197,8 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 ### Missing dependencies
 
 Most of the errors that can occur are likely due to your system missing required `pcap` dependencies,
-necessary to correctly analyze a network adapter. 
-
-Check the [Install and Run](#install-and-run) section for instructions on how to proceed.
+necessary to correctly analyze a network adapter. <br>
+Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
 For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
 
@@ -181,8 +207,7 @@ Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com
 ### Installers incompatibilities
 
 If you have problems after having installed Sniffnet through the provided installers,
-it could be due to your OS not being compatible with the pre-built binaries I generated for you.
-
+it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
 Reach me out, and I'll try to generate an installer for your specific operating system.
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
@@ -194,8 +219,7 @@ Reach me out, and I'll try to generate an installer for your specific operating 
 
 Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) 
 
-Sniffnet is also open to design contributions: 
-
+Sniffnet is also open to design contributions: <br>
 [![contribute.design](https://contribute.design/api/shield/GyulyVGC/sniffnet)](https://contribute.design/GyulyVGC/sniffnet)
 
 
