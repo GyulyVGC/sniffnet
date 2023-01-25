@@ -14,6 +14,7 @@ use utility::style_constants::FONT_SIZE_BODY;
 use crate::enums::app_protocol::AppProtocol;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
+use crate::enums::language::Language;
 use crate::enums::report_type::ReportType;
 use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
@@ -82,6 +83,7 @@ pub fn main() -> iced::Result {
     if config_result.is_err() {
         let store = Config {
             style: StyleType::default(),
+            language: Language::default(),
             notifications: Notifications::default(),
         };
         confy::store("sniffnet", None, store).unwrap();
@@ -89,6 +91,7 @@ pub fn main() -> iced::Result {
     let config = config_result.unwrap();
     let style = config.style;
     let notifications = config.notifications;
+    let language = config.language;
 
     Sniffer::run(Settings {
         id: None,
@@ -119,6 +122,7 @@ pub fn main() -> iced::Result {
             overlay: None,
             notifications,
             running_page: RunningPage::Overview,
+            language,
         },
         default_font: None,
         default_text_size: FONT_SIZE_BODY,

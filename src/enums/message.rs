@@ -1,6 +1,6 @@
 use crate::enums::overlays::Overlays;
 use crate::enums::running_page::RunningPage;
-use crate::{AppProtocol, ChartType, IpVersion, ReportType, StyleType, TransProtocol};
+use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -43,4 +43,6 @@ pub enum Message {
     HideModal(bool),
     /// Permits to change the current running page
     ChangeRunningPage(RunningPage),
+    /// Select language
+    LanguageSelection(Language),
 }

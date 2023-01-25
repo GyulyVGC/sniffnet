@@ -17,6 +17,7 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
 };
+use crate::utility::translations::choose_adapters_translation;
 use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
 
 /// Computes the body of gui initial page
@@ -265,7 +266,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         .height(Length::Fill)
         .width(FillPortion(4))
         .push(
-            Text::new("Select network adapter to inspect")
+            choose_adapters_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_TITLE),
         )

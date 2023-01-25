@@ -236,12 +236,16 @@ impl Application for Sniffer {
                         notifications: Notifications {
                             packets_threshold: Some(1000),
                         },
+                        language: self.language,
                     };
                     confy::store("sniffnet", None, store).unwrap();
                 }
             }
             Message::ChangeRunningPage(running_page) => {
                 self.running_page = running_page;
+            }
+            Message::LanguageSelection(language) => {
+                self.language = language;
             }
         }
         Command::none()

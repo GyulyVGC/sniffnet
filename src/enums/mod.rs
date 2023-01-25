@@ -2,6 +2,7 @@ pub mod app_protocol;
 pub mod chart_type;
 pub mod element_type;
 pub mod ip_version;
+pub mod language;
 pub mod message;
 pub mod overlays;
 pub mod report_type;

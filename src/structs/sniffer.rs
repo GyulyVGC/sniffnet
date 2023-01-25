@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
+use crate::enums::language::Language;
 use crate::enums::overlays::Overlays;
 use crate::enums::report_type::ReportType;
 use crate::enums::running_page::RunningPage;
@@ -46,4 +47,6 @@ pub struct Sniffer {
     pub notifications: Notifications,
     /// Defines the current running page
     pub running_page: RunningPage,
+    /// Language used in the GUI
+    pub language: Language,
 }
