@@ -295,8 +295,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
         let error_text = Text::new(format!(
             "An error occurred! \n\n\
-                                                    {}",
-            err_string
+                                                    {err_string}"
         ))
         .horizontal_alignment(Horizontal::Center)
         .font(font);
