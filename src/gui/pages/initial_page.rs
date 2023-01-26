@@ -12,13 +12,14 @@ use pcap::Device;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
+use crate::gui::components::radios::{ip_version_radios, transport_protocol_radios};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
 };
 use crate::utility::translations::choose_adapters_translation;
-use crate::{AppProtocol, IpVersion, StyleType, TransProtocol};
+use crate::{AppProtocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
@@ -27,112 +28,14 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let col_adapter = get_col_adapter(sniffer, font);
 
     let ip_active = sniffer.filters.ip;
-    let col_ip_radio = Column::new()
-        .spacing(10)
-        .push(Text::new("IP version").font(font).size(FONT_SIZE_SUBTITLE))
-        .push(
-            Radio::new(
-                IpVersion::IPv4,
-                "IPv4",
-                Some(ip_active),
-                Message::IpVersionSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Radio::new(
-                IpVersion::IPv6,
-                "IPv6",
-                Some(ip_active),
-                Message::IpVersionSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Radio::new(
-                IpVersion::Other,
-                "both",
-                Some(ip_active),
-                Message::IpVersionSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        );
+    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style);
     let col_ip = Column::new()
         .spacing(10)
         .width(FillPortion(1))
         .push(col_ip_radio);
 
     let transport_active = sniffer.filters.transport;
-    let col_transport_radio = Column::new()
-        .spacing(10)
-        .push(
-            Text::new("Transport protocol")
-                .font(font)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(
-            Radio::new(
-                TransProtocol::TCP,
-                "TCP",
-                Some(transport_active),
-                Message::TransportProtocolSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Radio::new(
-                TransProtocol::UDP,
-                "UDP",
-                Some(transport_active),
-                Message::TransportProtocolSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Radio::new(
-                TransProtocol::Other,
-                "both",
-                Some(transport_active),
-                Message::TransportProtocolSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        );
+    let col_transport_radio = transport_protocol_radios(transport_active, font, sniffer.style);
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)

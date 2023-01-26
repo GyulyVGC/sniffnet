@@ -576,7 +576,9 @@ pub fn get_flag(country: &str) -> Image {
         "FO" => Image::new(Handle::from_memory(Vec::from(FO))).width(Length::Units(FLAGS_WIDTH)),
         "FR" => Image::new(Handle::from_memory(Vec::from(FR))).width(Length::Units(FLAGS_WIDTH)),
         "GA" => Image::new(Handle::from_memory(Vec::from(GA))).width(Length::Units(FLAGS_WIDTH)),
-        "GB" => Image::new(Handle::from_memory(Vec::from(GB))).width(Length::Units(FLAGS_WIDTH)),
+        "GB" | "EN" => {
+            Image::new(Handle::from_memory(Vec::from(GB))).width(Length::Units(FLAGS_WIDTH))
+        }
         "GD" => Image::new(Handle::from_memory(Vec::from(GD))).width(Length::Units(FLAGS_WIDTH)),
         "GE" => Image::new(Handle::from_memory(Vec::from(GE))).width(Length::Units(FLAGS_WIDTH)),
         "GF" => Image::new(Handle::from_memory(Vec::from(GF))).width(Length::Units(FLAGS_WIDTH)),

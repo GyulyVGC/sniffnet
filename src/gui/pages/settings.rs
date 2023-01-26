@@ -1,6 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlays::Overlays;
+use crate::gui::components::radios::language_radios;
 use crate::gui::components::tabs::get_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
@@ -8,11 +9,11 @@ use crate::utility::style_constants::{
     YETI_NIGHT,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
-use crate::{Language, Sniffer, StyleType};
+use crate::{Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
-    button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image,
-    Radio, Row, Text,
+    button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image, Row,
+    Text,
 };
 use iced::{Alignment, Length};
 
@@ -123,43 +124,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
     let language_active = sniffer.language;
-    let col_language_radio = Column::new()
-        .spacing(10)
-        // .push(
-        //     Text::new("Transport protocol")
-        //         .font(font)
-        //         .size(FONT_SIZE_SUBTITLE),
-        // )
-        .push(
-            Radio::new(
-                Language::EN,
-                "English",
-                Some(language_active),
-                Message::LanguageSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Radio::new(
-                Language::IT,
-                "Italiano",
-                Some(language_active),
-                Message::LanguageSelection,
-            )
-            .width(Length::Fill)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        );
+    let col_language_radio = language_radios(language_active, font, sniffer.style);
 
     let content = Column::new()
         .align_items(Alignment::Center)

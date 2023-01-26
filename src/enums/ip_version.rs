@@ -13,6 +13,14 @@ pub enum IpVersion {
 
 impl fmt::Display for IpVersion {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{self:?}")
+        if self.eq(&IpVersion::Other) {
+            write!(f, "both")
+        } else {
+            write!(f, "{self:?}")
+        }
     }
+}
+
+impl IpVersion {
+    pub(crate) const ALL: [IpVersion; 3] = [IpVersion::IPv4, IpVersion::IPv6, IpVersion::Other];
 }

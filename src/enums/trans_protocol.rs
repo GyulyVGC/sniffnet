@@ -14,6 +14,15 @@ pub enum TransProtocol {
 
 impl fmt::Display for TransProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{self:?}")
+        if self.eq(&TransProtocol::Other) {
+            write!(f, "both")
+        } else {
+            write!(f, "{self:?}")
+        }
     }
+}
+
+impl TransProtocol {
+    pub(crate) const ALL: [TransProtocol; 3] =
+        [TransProtocol::TCP, TransProtocol::UDP, TransProtocol::Other];
 }
