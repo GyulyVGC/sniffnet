@@ -13,14 +13,18 @@ pub enum IpVersion {
 
 impl fmt::Display for IpVersion {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.eq(&IpVersion::Other) {
-            write!(f, "both")
-        } else {
-            write!(f, "{self:?}")
-        }
+        write!(f, "{self:?}")
     }
 }
 
 impl IpVersion {
     pub(crate) const ALL: [IpVersion; 3] = [IpVersion::IPv4, IpVersion::IPv6, IpVersion::Other];
+
+    pub fn get_radio_label(&self) -> &str {
+        match self {
+            IpVersion::IPv4 => "IPv4",
+            IpVersion::IPv6 => "IPv6",
+            IpVersion::Other => "both",
+        }
+    }
 }

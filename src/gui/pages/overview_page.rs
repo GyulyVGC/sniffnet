@@ -5,7 +5,7 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
-use iced::widget::{button, vertical_space, Column, Container, Radio, Row, Scrollable, Text};
+use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use thousands::Separable;
@@ -13,6 +13,7 @@ use thousands::Separable;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
+use crate::gui::components::radios::{chart_radios, report_radios};
 use crate::gui::components::tabs::get_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
@@ -21,10 +22,8 @@ use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
-use crate::utility::style_constants::{
-    get_font, FONT_SIZE_SUBTITLE, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD,
-};
-use crate::{AppProtocol, ChartType, ReportType, RunningPage};
+use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD};
+use crate::{AppProtocol, ReportType, RunningPage};
 
 /// Computes the body of gui run page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -116,48 +115,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
-                let row_radio_chart =
-                    Row::new()
-                        .padding(15)
-                        .spacing(10)
-                        .push(
-                            Text::new("Traffic rate:    ")
-                                .size(FONT_SIZE_SUBTITLE)
-                                .font(font),
-                        )
-                        .push(
-                            Radio::new(
-                                ChartType::Packets,
-                                "packets per second",
-                                Some(active_radio_chart),
-                                Message::ChartSelection,
-                            )
-                            .width(Length::Units(220))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .push(
-                            Radio::new(
-                                ChartType::Bytes,
-                                "bytes per second",
-                                Some(active_radio_chart),
-                                Message::ChartSelection,
-                            )
-                            .width(Length::Units(220))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        );
-
+                let row_radio_chart = chart_radios(active_radio_chart, font, sniffer.style);
                 let col_chart = Container::new(
                     Column::new()
                         .push(row_radio_chart)
@@ -212,78 +170,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 }
 
                 let active_radio_report = sniffer.report_type;
-                let row_radio_report =
-                    Row::new()
-                        .padding(10)
-                        .push(
-                            Text::new("Relevant connections:    ")
-                                .size(FONT_SIZE_SUBTITLE)
-                                .font(font),
-                        )
-                        .push(
-                            Radio::new(
-                                ReportType::MostRecent,
-                                "most recent",
-                                Some(active_radio_report),
-                                Message::ReportSelection,
-                            )
-                            .width(Length::Units(200))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .push(
-                            Radio::new(
-                                ReportType::MostPackets,
-                                "most packets",
-                                Some(active_radio_report),
-                                Message::ReportSelection,
-                            )
-                            .width(Length::Units(200))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .push(
-                            Radio::new(
-                                ReportType::MostBytes,
-                                "most bytes",
-                                Some(active_radio_report),
-                                Message::ReportSelection,
-                            )
-                            .width(Length::Units(200))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .push(
-                            Radio::new(
-                                ReportType::Favorites,
-                                "favorites",
-                                Some(active_radio_report),
-                                Message::ReportSelection,
-                            )
-                            .width(Length::Units(200))
-                            .font(font)
-                            .size(15)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        );
+                let row_radio_report = report_radios(active_radio_report, font, sniffer.style);
 
                 let mut col_report = Column::new().height(Length::Fill).push(row_radio_report);
 

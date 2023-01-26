@@ -3,9 +3,10 @@ use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
-use crate::{IpVersion, Language, StyleType, TransProtocol};
+use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
+use iced_native::widget::horizontal_space;
 
 pub fn ip_version_radios(
     active: IpVersion,
@@ -19,7 +20,7 @@ pub fn ip_version_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.to_string(),
+                option.get_radio_label(),
                 Some(active),
                 Message::IpVersionSelection,
             )
@@ -49,7 +50,7 @@ pub fn transport_protocol_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.to_string(),
+                option.get_radio_label(),
                 Some(active),
                 Message::TransportProtocolSelection,
             )
@@ -74,7 +75,7 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
                 .push(
                     Radio::new(
                         option,
-                        option.to_string(),
+                        option.get_radio_label(),
                         Some(active),
                         Message::LanguageSelection,
                     )
@@ -89,5 +90,68 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
                 .push(get_flag(&format!("{:?}", option))),
         )
     }
+    ret_val
+}
+
+pub fn chart_radios(active: ChartType, font: Font, style: StyleType) -> Row<'static, Message> {
+    let mut ret_val = Row::new()
+        .padding(15)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(
+            Text::new("Traffic rate:")
+                .font(font)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(horizontal_space(Length::Units(10)));
+    for option in ChartType::ALL {
+        ret_val = ret_val.push(
+            Radio::new(
+                option,
+                option.get_radio_label(),
+                Some(active),
+                Message::ChartSelection,
+            )
+            .width(Length::Units(220))
+            .font(font)
+            .size(15)
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                style,
+                ElementType::Standard,
+            ))),
+        )
+    }
+    ret_val
+}
+
+pub fn report_radios(active: ReportType, font: Font, style: StyleType) -> Row<'static, Message> {
+    let mut ret_val = Row::new()
+        .padding(15)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(
+            Text::new("Relevant connections:")
+                .font(font)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(horizontal_space(Length::Units(10)));
+    for option in ReportType::ALL {
+        ret_val = ret_val.push(
+            Radio::new(
+                option,
+                option.get_radio_label(),
+                Some(active),
+                Message::ReportSelection,
+            )
+            .width(Length::Units(160))
+            .font(font)
+            .size(15)
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                style,
+                ElementType::Standard,
+            ))),
+        )
+    }
+    ret_val = ret_val.push(horizontal_space(Length::Units(120)));
     ret_val
 }

@@ -14,15 +14,19 @@ pub enum TransProtocol {
 
 impl fmt::Display for TransProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.eq(&TransProtocol::Other) {
-            write!(f, "both")
-        } else {
-            write!(f, "{self:?}")
-        }
+        write!(f, "{self:?}")
     }
 }
 
 impl TransProtocol {
     pub(crate) const ALL: [TransProtocol; 3] =
         [TransProtocol::TCP, TransProtocol::UDP, TransProtocol::Other];
+
+    pub fn get_radio_label(&self) -> &str {
+        match self {
+            TransProtocol::TCP => "TCP",
+            TransProtocol::UDP => "UDP",
+            TransProtocol::Other => "both",
+        }
+    }
 }
