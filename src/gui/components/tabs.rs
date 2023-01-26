@@ -23,7 +23,7 @@ pub fn get_tabs(
         let active = label.eq(&active);
         tabs = tabs.push(new_tab(
             (*label).to_string(),
-            icons.get(i).unwrap().to_string(),
+            (*icons.get(i).unwrap()).to_string(),
             actions.get(i).unwrap().clone(),
             active,
             style,

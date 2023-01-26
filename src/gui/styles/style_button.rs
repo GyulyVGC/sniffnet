@@ -33,8 +33,13 @@ impl button::StyleSheet for StyleTuple {
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 0.0,
+                StyleTuple(
+                    _,
+                    ElementType::TabActive
+                    | ElementType::TabInactive
+                    | ElementType::Starred
+                    | ElementType::NotStarred,
+                ) => 0.0,
                 _ => BORDER_WIDTH,
             },
             shadow_offset: Vector::new(0.0, 0.0),

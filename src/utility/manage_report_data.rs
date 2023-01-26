@@ -29,7 +29,7 @@ pub fn update_report_data(
                 sorted_vec
                     .sort_by(|&(_, a), &(_, b)| b.transmitted_bytes.cmp(&a.transmitted_bytes));
             }
-            _ => {}
+            ReportType::Favorites => {}
         }
 
         let n_entry = min(sorted_vec.len(), 15);

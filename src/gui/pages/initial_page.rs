@@ -140,7 +140,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{}\n", name));
+                dev_str.push_str(&format!("{name}\n"));
                 dev_str.push_str(&description);
             }
         }

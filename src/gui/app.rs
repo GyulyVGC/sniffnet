@@ -79,7 +79,7 @@ impl Application for Sniffer {
                     self.runtime_data.borrow_mut().app_protocols =
                         info_traffic_lock.app_protocols.clone();
                     drop(info_traffic_lock);
-                    notify(self.runtime_data.borrow(), self.notifications);
+                    notify(&self.runtime_data.borrow(), self.notifications);
                     update_charts_data(self.runtime_data.borrow_mut());
                     update_report_data(
                         self.runtime_data.borrow_mut(),

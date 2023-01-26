@@ -31,7 +31,7 @@ pub fn ip_version_radios(
                 style,
                 ElementType::Standard,
             ))),
-        )
+        );
     }
     ret_val
 }
@@ -61,7 +61,7 @@ pub fn transport_protocol_radios(
                 style,
                 ElementType::Standard,
             ))),
-        )
+        );
     }
     ret_val
 }
@@ -87,8 +87,8 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
                         ElementType::Standard,
                     ))),
                 )
-                .push(get_flag(&format!("{:?}", option))),
-        )
+                .push(get_flag(&format!("{option:?}"))),
+        );
     }
     ret_val
 }
@@ -119,7 +119,7 @@ pub fn chart_radios(active: ChartType, font: Font, style: StyleType) -> Row<'sta
                 style,
                 ElementType::Standard,
             ))),
-        )
+        );
     }
     ret_val
 }
@@ -150,7 +150,7 @@ pub fn report_radios(active: ReportType, font: Font, style: StyleType) -> Row<'s
                 style,
                 ElementType::Standard,
             ))),
-        )
+        );
     }
     ret_val = ret_val.push(horizontal_space(Length::Units(120)));
     ret_val
