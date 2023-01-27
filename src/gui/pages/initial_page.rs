@@ -18,8 +18,11 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
 };
-use crate::utility::translations::choose_adapters_translation;
-use crate::{AppProtocol, StyleType};
+use crate::utility::translations::{
+    address_translation, addresses_translation, application_protocol_translation,
+    choose_adapters_translation, select_filters_translation, start_translation,
+};
+use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
@@ -28,21 +31,22 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let col_adapter = get_col_adapter(sniffer, font);
 
     let ip_active = sniffer.filters.ip;
-    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style);
+    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style, sniffer.language);
     let col_ip = Column::new()
         .spacing(10)
         .width(FillPortion(1))
         .push(col_ip_radio);
 
     let transport_active = sniffer.filters.transport;
-    let col_transport_radio = transport_protocol_radios(transport_active, font, sniffer.style);
+    let col_transport_radio =
+        transport_protocol_radios(transport_active, font, sniffer.style, sniffer.language);
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
         .width(FillPortion(2))
         .push(col_transport_radio)
         .push(Row::new().height(FillPortion(2)))
-        .push(get_button_start(sniffer.style, font))
+        .push(get_button_start(sniffer.style, font, sniffer.language))
         .push(Row::new().height(FillPortion(1)));
 
     let app_active = sniffer.filters.application;
@@ -59,7 +63,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(2))
         .spacing(10)
         .push(
-            Text::new("Application protocol")
+            application_protocol_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -71,7 +75,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(15)
         .push(
             Row::new().push(
-                Text::new("Select filters to be applied on network traffic")
+                select_filters_translation(sniffer.language)
                     .font(font)
                     .size(FONT_SIZE_TITLE),
             ),
@@ -101,7 +105,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-pub fn get_button_start(style: StyleType, font: Font) -> Button<'static, Message> {
+pub fn get_button_start(
+    style: StyleType,
+    font: Font,
+    language: Language,
+) -> Button<'static, Message> {
     let content = Row::new()
         .align_items(Alignment::Center)
         .push(horizontal_space(Length::FillPortion(1)))
@@ -113,7 +121,7 @@ pub fn get_button_start(style: StyleType, font: Font) -> Button<'static, Message
                 .vertical_alignment(alignment::Vertical::Center),
         )
         .push(
-            Text::new("Run!")
+            start_translation(language)
                 .font(font)
                 .size(FONT_SIZE_TITLE)
                 .vertical_alignment(alignment::Vertical::Center)
@@ -148,10 +156,10 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         match num_addresses {
             0 => {}
             1 => {
-                dev_str.push_str("\nAddress:");
+                dev_str.push_str(address_translation(sniffer.language));
             }
             _ => {
-                dev_str.push_str("\nAddresses:");
+                dev_str.push_str(addresses_translation(sniffer.language));
             }
         }
 

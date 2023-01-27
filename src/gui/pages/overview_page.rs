@@ -115,7 +115,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
-                let row_radio_chart = chart_radios(active_radio_chart, font, sniffer.style);
+                let row_radio_chart =
+                    chart_radios(active_radio_chart, font, sniffer.style, sniffer.language);
                 let col_chart = Container::new(
                     Column::new()
                         .push(row_radio_chart)
@@ -170,7 +171,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 }
 
                 let active_radio_report = sniffer.report_type;
-                let row_radio_report = report_radios(active_radio_report, font, sniffer.style);
+                let row_radio_report =
+                    report_radios(active_radio_report, font, sniffer.style, sniffer.language);
 
                 let mut col_report = Column::new().height(Length::Fill).push(row_radio_report);
 

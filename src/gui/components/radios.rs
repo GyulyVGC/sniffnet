@@ -3,8 +3,12 @@ use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
+use crate::utility::translations::{
+    ip_version_translation, relevant_connections_translation, traffic_rate_translation,
+    transport_protocol_translation,
+};
 use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
-use iced::widget::{Column, Radio, Row, Text};
+use iced::widget::{Column, Radio, Row};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
 
@@ -12,10 +16,13 @@ pub fn ip_version_radios(
     active: IpVersion,
     font: Font,
     style: StyleType,
+    language: Language,
 ) -> Column<'static, Message> {
-    let mut ret_val = Column::new()
-        .spacing(10)
-        .push(Text::new("IP version").font(font).size(FONT_SIZE_SUBTITLE));
+    let mut ret_val = Column::new().spacing(10).push(
+        ip_version_translation(language)
+            .font(font)
+            .size(FONT_SIZE_SUBTITLE),
+    );
     for option in IpVersion::ALL {
         ret_val = ret_val.push(
             Radio::new(
@@ -40,9 +47,10 @@ pub fn transport_protocol_radios(
     active: TransProtocol,
     font: Font,
     style: StyleType,
+    language: Language,
 ) -> Column<'static, Message> {
     let mut ret_val = Column::new().spacing(10).push(
-        Text::new("Transport protocol")
+        transport_protocol_translation(language)
             .font(font)
             .size(FONT_SIZE_SUBTITLE),
     );
@@ -93,13 +101,18 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
     ret_val
 }
 
-pub fn chart_radios(active: ChartType, font: Font, style: StyleType) -> Row<'static, Message> {
+pub fn chart_radios(
+    active: ChartType,
+    font: Font,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .padding(15)
         .spacing(10)
         .align_items(Alignment::Center)
         .push(
-            Text::new("Traffic rate:")
+            traffic_rate_translation(language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -124,13 +137,18 @@ pub fn chart_radios(active: ChartType, font: Font, style: StyleType) -> Row<'sta
     ret_val
 }
 
-pub fn report_radios(active: ReportType, font: Font, style: StyleType) -> Row<'static, Message> {
+pub fn report_radios(
+    active: ReportType,
+    font: Font,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .padding(15)
         .spacing(10)
         .align_items(Alignment::Center)
         .push(
-            Text::new("Relevant connections:")
+            relevant_connections_translation(language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
