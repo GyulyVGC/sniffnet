@@ -15,7 +15,8 @@ use crate::structs::colors::to_rgb_color;
 use crate::utility::style_constants::{
     CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA, INCONSOLATA_BOLD,
 };
-use crate::{get_colors, ChartType, RunTimeData, StyleType};
+use crate::utility::translations::{incoming_translation, outgoing_translation};
+use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -25,10 +26,15 @@ pub struct TrafficChart {
     color_outgoing: RGBColor,
     color_font: RGBColor,
     pub chart_type: ChartType,
+    pub language: Language,
 }
 
 impl TrafficChart {
-    pub fn new(charts_data: Rc<RefCell<RunTimeData>>, style: StyleType) -> Self {
+    pub fn new(
+        charts_data: Rc<RefCell<RunTimeData>>,
+        style: StyleType,
+        language: Language,
+    ) -> Self {
         TrafficChart {
             charts_data,
             color_mix: COLOR_CHART_MIX,
@@ -36,6 +42,7 @@ impl TrafficChart {
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
             chart_type: ChartType::Packets,
+            language,
         }
     }
 
@@ -56,6 +63,10 @@ impl TrafficChart {
 
     pub fn change_kind(&mut self, kind: ChartType) {
         self.chart_type = kind;
+    }
+
+    pub fn change_language(&mut self, language: Language) {
+        self.language = language;
     }
 
     pub fn change_colors(&mut self, style: StyleType) {
@@ -125,7 +136,7 @@ impl Chart<Message> for TrafficChart {
                         ),
                     )
                     .expect("Error drawing graph")
-                    .label("Incoming")
+                    .label(incoming_translation(self.language))
                     .legend(move |(x, y)| {
                         Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
                     });
@@ -141,7 +152,7 @@ impl Chart<Message> for TrafficChart {
                         ),
                     )
                     .expect("Error drawing graph")
-                    .label("Outgoing")
+                    .label(outgoing_translation(self.language))
                     .legend(move |(x, y)| {
                         Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
                     });
@@ -184,7 +195,7 @@ impl Chart<Message> for TrafficChart {
                         ),
                     )
                     .expect("Error drawing graph")
-                    .label("Incoming")
+                    .label(incoming_translation(self.language))
                     .legend(move |(x, y)| {
                         Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
                     });
@@ -200,7 +211,7 @@ impl Chart<Message> for TrafficChart {
                         ),
                     )
                     .expect("Error drawing graph")
-                    .label("Outgoing")
+                    .label(outgoing_translation(self.language))
                     .legend(move |(x, y)| {
                         Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
                     });

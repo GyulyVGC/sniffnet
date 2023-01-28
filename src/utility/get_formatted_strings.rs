@@ -6,7 +6,8 @@ use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::filters::Filters;
-use crate::{get_colors, AppProtocol, IpVersion, StyleType, TransProtocol};
+use crate::utility::translations::{active_filters_translation, none_translation};
+use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -21,14 +22,18 @@ pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
 }
 
 /// Computes the String representing the active filters
-pub fn get_active_filters_string(filters: &Filters) -> String {
+pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
     if filters.ip.eq(&IpVersion::Other)
         && filters.application.eq(&AppProtocol::Other)
         && filters.transport.eq(&TransProtocol::Other)
     {
-        "Active filters:\n   none".to_string()
+        format!(
+            "{}\n   {}",
+            active_filters_translation(language),
+            none_translation(language)
+        )
     } else {
-        let mut ret_val = "Active filters:".to_string();
+        let mut ret_val = active_filters_translation(language).to_string();
         if filters.ip.ne(&IpVersion::Other) {
             ret_val.push_str(&format!("\n   {}", filters.ip));
         }
@@ -43,8 +48,8 @@ pub fn get_active_filters_string(filters: &Filters) -> String {
 }
 
 /// Computes the String representing the active filters, without line breaks
-pub fn get_active_filters_string_nobr(filters: &Filters) -> String {
-    let mut ret_val = "Active filters:".to_string();
+pub fn get_active_filters_string_nobr(filters: &Filters, language: Language) -> String {
+    let mut ret_val = active_filters_translation(language).to_string();
     if filters.ip.ne(&IpVersion::Other) {
         ret_val.push_str(&format!(" {}", filters.ip));
     }

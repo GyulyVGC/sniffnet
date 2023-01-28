@@ -186,3 +186,171 @@ pub fn error_translation(language: Language, error: String) -> Text<'static> {
         ),
     })
 }
+
+pub fn both_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "both",
+        Language::IT => "entrambi",
+    }
+}
+
+// pub fn all_protocols_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "All protocols",
+//         Language::IT => "Tutti i protocolli",
+//     }
+// }
+
+pub fn packets_chart_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "packets per second",
+        Language::IT => "pacchetti al secondo",
+    }
+}
+
+pub fn bytes_chart_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "bytes per second",
+        Language::IT => "byte al secondo",
+    }
+}
+
+pub fn recent_report_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "most recent",
+        Language::IT => "più recenti",
+    }
+}
+
+pub fn packets_report_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "most packets",
+        Language::IT => "più pacchetti",
+    }
+}
+
+pub fn bytes_report_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "most bytes",
+        Language::IT => "più byte",
+    }
+}
+
+pub fn favorite_report_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "favorites",
+        Language::IT => "preferiti",
+    }
+}
+
+pub fn notifications_title_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => "Customize your notifications",
+        Language::IT => "Personalizza le tue notifiche",
+    })
+}
+
+pub fn appearance_title_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => "Choose your favorite theme",
+        Language::IT => "Scegli il tuo tema preferito",
+    })
+}
+
+pub fn languages_title_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => "Select your language",
+        Language::IT => "Seleziona la lingua",
+    })
+}
+
+pub fn active_filters_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Active filters:",
+        Language::IT => "Filtri attivi:",
+    }
+}
+
+pub fn none_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "none",
+        Language::IT => "nessuno",
+    }
+}
+
+pub fn yeti_night_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Sniffnet's original dark theme",
+        Language::IT => "Il tema scuro originale di Sniffnet",
+    }
+}
+
+pub fn yeti_day_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Sniffnet's original light theme",
+        Language::IT => "Il tema chiaro originale di Sniffnet",
+    }
+}
+
+pub fn deep_sea_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "To dive into network traffic",
+        Language::IT => "Per immergersi nel traffico di rete",
+    }
+}
+
+pub fn mon_amour_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Lovely theme made for dreamers",
+        Language::IT => "Tema incantevole fatto per i sognatori",
+    }
+}
+
+pub fn incoming_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Incoming",
+        Language::IT => "In entrata",
+    }
+}
+
+pub fn outgoing_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Outgoing",
+        Language::IT => "In uscita",
+    }
+}
+
+pub fn notifications_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Notifications",
+        Language::IT => "Notifiche",
+    }
+}
+
+pub fn appearance_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Appearance",
+        Language::IT => "Estetica",
+    }
+}
+
+pub fn language_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Language",
+        Language::IT => "Lingua",
+    }
+}
+
+pub fn overview_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Overview",
+        Language::IT => "Panoramica",
+    }
+}
+
+pub fn inspect_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Inspect",
+        Language::IT => "Ispeziona",
+    }
+}

@@ -162,7 +162,8 @@ impl Application for Sniffer {
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
                 self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
-                self.traffic_chart = TrafficChart::new(self.runtime_data.clone(), self.style);
+                self.traffic_chart =
+                    TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
 
                 if pcap_error.is_none() {
                     // no pcap error
@@ -246,6 +247,7 @@ impl Application for Sniffer {
             }
             Message::LanguageSelection(language) => {
                 self.language = language;
+                self.traffic_chart.change_language(language);
             }
         }
         Command::none()

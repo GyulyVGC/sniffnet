@@ -117,7 +117,7 @@ pub fn main() -> iced::Result {
             pcap_error,
             style,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(runtime_data2, style),
+            traffic_chart: TrafficChart::new(runtime_data2, style, language),
             report_type: ReportType::MostRecent,
             overlay: None,
             notifications,

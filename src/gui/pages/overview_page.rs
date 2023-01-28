@@ -14,7 +14,7 @@ use thousands::Separable;
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::gui::components::radios::{chart_radios, report_radios};
-use crate::gui::components::tabs::get_tabs;
+use crate::gui::components::tabs::get_pages_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
@@ -45,16 +45,21 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
 
-        let tabs = get_tabs(
-            &["Overview", "Inspect", "Notifications"],
+        let tabs = get_pages_tabs(
+            &[
+                RunningPage::Overview,
+                RunningPage::Inspect,
+                RunningPage::Notifications,
+            ],
             &["d ", "5 ", "7 "],
             &[
                 Message::TickInit,
                 Message::ChangeRunningPage(RunningPage::Inspect),
                 Message::ChangeRunningPage(RunningPage::Notifications),
             ],
-            "Overview",
+            RunningPage::Overview,
             sniffer.style,
+            sniffer.language,
         );
 
         let observed = sniffer.runtime_data.borrow().all_packets;
@@ -103,7 +108,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 let tot_packets_text = some_observed_translation(
                     sniffer.language,
                     observed.separate_with_spaces(),
-                    get_active_filters_string_nobr(&sniffer.filters.clone()),
+                    get_active_filters_string_nobr(&sniffer.filters.clone(), sniffer.language),
                 )
                 .horizontal_alignment(Horizontal::Center)
                 .font(font);
@@ -142,7 +147,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
                     //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
-                    .push(Text::new(get_active_filters_string(&sniffer.filters.clone())).font(font))
+                    .push(
+                        Text::new(get_active_filters_string(
+                            &sniffer.filters.clone(),
+                            sniffer.language,
+                        ))
+                        .font(font),
+                    )
                     .push(Text::new(" "))
                     .push(
                         filtered_packets_translation(

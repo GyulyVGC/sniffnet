@@ -1,4 +1,6 @@
 #![allow(clippy::upper_case_acronyms)]
+use crate::utility::translations::both_translation;
+use crate::Language;
 use std::fmt;
 
 /// Enum representing the possible observed values of transport layer protocol.
@@ -22,11 +24,11 @@ impl TransProtocol {
     pub(crate) const ALL: [TransProtocol; 3] =
         [TransProtocol::TCP, TransProtocol::UDP, TransProtocol::Other];
 
-    pub fn get_radio_label(&self) -> &str {
+    pub fn get_radio_label(&self, language: Language) -> &str {
         match self {
             TransProtocol::TCP => "TCP",
             TransProtocol::UDP => "UDP",
-            TransProtocol::Other => "both",
+            TransProtocol::Other => both_translation(language),
         }
     }
 }

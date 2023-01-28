@@ -27,11 +27,11 @@ pub fn ip_version_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.get_radio_label(),
+                option.get_radio_label(language),
                 Some(active),
                 Message::IpVersionSelection,
             )
-            .width(Length::Units(80))
+            //.width(Length::Units(80))
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -58,7 +58,7 @@ pub fn transport_protocol_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.get_radio_label(),
+                option.get_radio_label(language),
                 Some(active),
                 Message::TransportProtocolSelection,
             )
@@ -121,7 +121,7 @@ pub fn chart_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.get_radio_label(),
+                option.get_radio_label(language),
                 Some(active),
                 Message::ChartSelection,
             )
@@ -157,7 +157,7 @@ pub fn report_radios(
         ret_val = ret_val.push(
             Radio::new(
                 option,
-                option.get_radio_label(),
+                option.get_radio_label(language),
                 Some(active),
                 Message::ReportSelection,
             )

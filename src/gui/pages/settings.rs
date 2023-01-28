@@ -2,14 +2,19 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlays::Overlays;
 use crate::gui::components::radios::language_radios;
-use crate::gui::components::tabs::get_tabs;
+use crate::gui::components::tabs::get_settings_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, INCONSOLATA_BOLD, MON_AMOUR, YETI_DAY,
     YETI_NIGHT,
 };
+use crate::utility::translations::{
+    appearance_title_translation, deep_sea_translation, languages_title_translation,
+    mon_amour_translation, notifications_title_translation, settings_translation,
+    yeti_day_translation, yeti_night_translation,
+};
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
-use crate::{Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image, Row,
@@ -22,21 +27,26 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(get_settings_header(sniffer.style))
-        .push(get_tabs(
-            &["Notifications", "Appearance", "Language"],
+        .push(get_settings_header(sniffer.style, sniffer.language))
+        .push(get_settings_tabs(
+            &[
+                Overlays::SettingsNotifications,
+                Overlays::SettingsAppearance,
+                Overlays::SettingsLanguage,
+            ],
             &["7 ", "b ", "c "],
             &[
                 Message::TickInit,
                 Message::ShowModal(Overlays::SettingsAppearance),
                 Message::ShowModal(Overlays::SettingsLanguage),
             ],
-            "Notifications",
+            Overlays::SettingsNotifications,
             sniffer.style,
+            sniffer.language,
         ))
         .push(vertical_space(Length::Units(15)))
         .push(
-            Text::new("Customize your notifications")
+            notifications_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -55,21 +65,26 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(get_settings_header(sniffer.style))
-        .push(get_tabs(
-            &["Notifications", "Appearance", "Language"],
+        .push(get_settings_header(sniffer.style, sniffer.language))
+        .push(get_settings_tabs(
+            &[
+                Overlays::SettingsNotifications,
+                Overlays::SettingsAppearance,
+                Overlays::SettingsLanguage,
+            ],
             &["7 ", "b ", "c "],
             &[
                 Message::ShowModal(Overlays::SettingsNotifications),
                 Message::TickInit,
                 Message::ShowModal(Overlays::SettingsLanguage),
             ],
-            "Appearance",
+            Overlays::SettingsAppearance,
             sniffer.style,
+            sniffer.language,
         ))
         .push(vertical_space(Length::Units(15)))
         .push(
-            Text::new("Choose your favorite theme")
+            appearance_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -80,7 +95,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     sniffer.style,
                     YETI_NIGHT,
                     "Yeti Night".to_string(),
-                    "Sniffnet's original dark theme".to_string(),
+                    yeti_night_translation(sniffer.language).to_string(),
                     Night,
                 ))
                 .push(horizontal_space(Length::Units(33)))
@@ -88,7 +103,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     sniffer.style,
                     YETI_DAY,
                     "Yeti Day".to_string(),
-                    "Sniffnet's original light theme".to_string(),
+                    yeti_day_translation(sniffer.language).to_string(),
                     Day,
                 )),
         )
@@ -99,7 +114,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     sniffer.style,
                     DEEP_SEA,
                     "Deep Sea".to_string(),
-                    "To dive into network traffic".to_string(),
+                    deep_sea_translation(sniffer.language).to_string(),
                     DeepSea,
                 ))
                 .push(horizontal_space(Length::Units(33)))
@@ -107,7 +122,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     sniffer.style,
                     MON_AMOUR,
                     "Mon Amour".to_string(),
-                    "Lovely theme made for dreamers".to_string(),
+                    mon_amour_translation(sniffer.language).to_string(),
                     MonAmour,
                 )),
         );
@@ -129,21 +144,26 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(get_settings_header(sniffer.style))
-        .push(get_tabs(
-            &["Notifications", "Appearance", "Language"],
+        .push(get_settings_header(sniffer.style, sniffer.language))
+        .push(get_settings_tabs(
+            &[
+                Overlays::SettingsNotifications,
+                Overlays::SettingsAppearance,
+                Overlays::SettingsLanguage,
+            ],
             &["7 ", "b ", "c "],
             &[
                 Message::ShowModal(Overlays::SettingsNotifications),
                 Message::ShowModal(Overlays::SettingsAppearance),
                 Message::TickInit,
             ],
-            "Language",
+            Overlays::SettingsLanguage,
             sniffer.style,
+            sniffer.language,
         ))
         .push(vertical_space(Length::Units(15)))
         .push(
-            Text::new("Select your language")
+            languages_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -182,12 +202,12 @@ fn get_palette_container(
         .on_press(Message::Style(on_press))
 }
 
-fn get_settings_header(style: StyleType) -> Container<'static, Message> {
+fn get_settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
-                Text::new("Settings")
+                settings_translation(language)
                     .font(INCONSOLATA_BOLD)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))

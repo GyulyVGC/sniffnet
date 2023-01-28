@@ -2,18 +2,20 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
+use crate::enums::overlays::Overlays;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
-use crate::StyleType;
+use crate::{Language, RunningPage, StyleType};
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Length};
 
-pub fn get_tabs(
-    labels: &[&str],
+pub fn get_settings_tabs(
+    labels: &[Overlays; 3],
     icons: &[&str],
     actions: &[Message],
-    active: &str,
+    active: Overlays,
     style: StyleType,
+    language: Language,
 ) -> Row<'static, Message> {
     let mut tabs = Row::new()
         .width(Length::Fill)
@@ -22,7 +24,32 @@ pub fn get_tabs(
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);
         tabs = tabs.push(new_tab(
-            (*label).to_string(),
+            (*label).get_tab_label(language).to_string(),
+            (*icons.get(i).unwrap()).to_string(),
+            actions.get(i).unwrap().clone(),
+            active,
+            style,
+        ));
+    }
+    tabs
+}
+
+pub fn get_pages_tabs(
+    labels: &[RunningPage; 3],
+    icons: &[&str],
+    actions: &[Message],
+    active: RunningPage,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
+    let mut tabs = Row::new()
+        .width(Length::Fill)
+        .align_items(Alignment::Center);
+
+    for (i, label) in labels.iter().enumerate() {
+        let active = label.eq(&active);
+        tabs = tabs.push(new_tab(
+            (*label).get_tab_label(language).to_string(),
             (*icons.get(i).unwrap()).to_string(),
             actions.get(i).unwrap().clone(),
             active,
