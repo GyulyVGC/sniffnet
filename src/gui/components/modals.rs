@@ -2,17 +2,24 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{FONT_SIZE_TITLE, INCONSOLATA_BOLD};
-use crate::StyleType;
+use crate::utility::translations::{
+    ask_quit_translation, quit_analysis_translation, yes_translation,
+};
+use crate::{Language, StyleType};
 use iced::alignment::{Alignment, Horizontal, Vertical};
 use iced::widget::{button, horizontal_space, vertical_space, Column, Container, Row, Text};
 use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size};
 use iced_native::widget::{self, Tree};
 use iced_native::{layout, overlay, renderer, Clipboard, Layout, Shell, Widget};
 
-pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Message> {
+pub fn get_exit_overlay(
+    style: StyleType,
+    font: Font,
+    language: Language,
+) -> Container<'static, Message> {
     let row_buttons = Row::new().push(
         button(
-            Text::new("Yes")
+            yes_translation(language)
                 .font(font)
                 .vertical_alignment(Vertical::Center)
                 .horizontal_alignment(Horizontal::Center),
@@ -27,9 +34,9 @@ pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Mess
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(get_modal_header(style))
+        .push(get_modal_header(style, language))
         .push(vertical_space(Length::Units(20)))
-        .push(Text::new("Are you sure you want to quit this analysis?").font(font))
+        .push(ask_quit_translation(language).font(font))
         .push(vertical_space(Length::Units(20)))
         .push(row_buttons);
 
@@ -41,12 +48,12 @@ pub fn get_exit_overlay(style: StyleType, font: Font) -> Container<'static, Mess
         ))
 }
 
-fn get_modal_header(style: StyleType) -> Container<'static, Message> {
+fn get_modal_header(style: StyleType, language: Language) -> Container<'static, Message> {
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
-                Text::new("Quit analysis")
+                quit_analysis_translation(language)
                     .font(INCONSOLATA_BOLD)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))

@@ -23,6 +23,11 @@ use crate::utility::get_formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
 };
 use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD};
+use crate::utility::translations::{
+    error_translation, filtered_application_translation, filtered_bytes_translation,
+    filtered_packets_translation, no_addresses_translation, no_favorites_translation,
+    some_observed_translation, waiting_translation,
+};
 use crate::{AppProtocol, ReportType, RunningPage};
 
 /// Computes the body of gui run page
@@ -67,19 +72,21 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
                 let adapter_name = sniffer.device.name.clone();
                 let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
-                    (Text::new('T'.to_string()).font(ICONS).size(60),
-                     Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
-                                                              Network adapter: {adapter_name}\n\n\
-                                                              If you are sure you are connected to the internet, try choosing a different adapter."))
-                         .horizontal_alignment(Horizontal::Center)
-                         .font(font))
+                    (
+                        Text::new('T'.to_string()).font(ICONS).size(60),
+                        no_addresses_translation(sniffer.language, adapter_name)
+                            .horizontal_alignment(Horizontal::Center)
+                            .font(font),
+                    )
                 } else {
-                    (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
-                     Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
-                                                              Network adapter: {adapter_name}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the correct adapter?"))
-                         .horizontal_alignment(Horizontal::Center)
-                         .font(font))
+                    (
+                        Text::new(sniffer.waiting.len().to_string())
+                            .font(ICONS)
+                            .size(60),
+                        waiting_translation(sniffer.language, adapter_name)
+                            .horizontal_alignment(Horizontal::Center)
+                            .font(font),
+                    )
                 };
                 body = body
                     .push(Row::new().height(FillPortion(1)))
@@ -93,12 +100,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
 
-                let tot_packets_text = Text::new(format!("Total intercepted packets: {}\n\n\
-                                                    Filtered packets: 0\n\n\
-                                                    Some packets have been intercepted, but still none has been selected according to the filters you specified...\n\n{}",
-                                                         observed.separate_with_spaces(), get_active_filters_string_nobr(&sniffer.filters.clone())))
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font);
+                let tot_packets_text = some_observed_translation(
+                    sniffer.language,
+                    observed.separate_with_spaces(),
+                    get_active_filters_string_nobr(&sniffer.filters.clone()),
+                )
+                .horizontal_alignment(Horizontal::Center)
+                .font(font);
 
                 body = body
                     .push(Row::new().height(FillPortion(1)))
@@ -137,26 +145,26 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(Text::new(get_active_filters_string(&sniffer.filters.clone())).font(font))
                     .push(Text::new(" "))
                     .push(
-                        Text::new(format!(
-                            "Filtered packets:\n   {} ({} of the total)",
+                        filtered_packets_translation(
+                            sniffer.language,
                             filtered.separate_with_spaces(),
-                            get_percentage_string(observed, filtered)
-                        ))
+                            get_percentage_string(observed, filtered),
+                        )
                         .font(font),
                     )
                     .push(Text::new(" "))
                     .push(
-                        Text::new(format!(
-                            "Filtered bytes:\n   {} ({} of the total)",
+                        filtered_bytes_translation(
+                            sniffer.language,
                             filtered_bytes_string,
-                            get_percentage_string(observed_bytes, filtered_bytes)
-                        ))
+                            get_percentage_string(observed_bytes, filtered_bytes),
+                        )
                         .font(font),
                     );
                 if sniffer.filters.application.eq(&AppProtocol::Other) {
                     col_packets = col_packets
                         .push(Text::new(" "))
-                        .push(Text::new("Filtered packets per application protocol:").font(font))
+                        .push(filtered_application_translation(sniffer.language).font(font))
                         .push(
                             Scrollable::new(
                                 Text::new(get_app_count_string(&app_protocols, filtered as u128))
@@ -179,16 +187,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 if sniffer.report_type.eq(&ReportType::Favorites)
                     && sniffer.runtime_data.borrow().report_vec.is_empty()
                 {
-                    col_report = col_report
-                        .align_items(Alignment::Center)
-                        .push(
-                        Text::new(
-                            "Nothing to show at the moment.\n\
-                    To add a connection to your favorites, click on the star symbol near the connection.",
-                        )
-                        .height(Length::Fill)
-                        .horizontal_alignment(Horizontal::Center)
-                        .vertical_alignment(Vertical::Center),
+                    col_report = col_report.align_items(Alignment::Center).push(
+                        no_favorites_translation(sniffer.language)
+                            .height(Length::Fill)
+                            .horizontal_alignment(Horizontal::Center)
+                            .vertical_alignment(Vertical::Center),
                     );
                 } else {
                     col_report = col_report
@@ -295,12 +298,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         // pcap threw an ERROR!
         let err_string = sniffer.pcap_error.clone().unwrap();
 
-        let error_text = Text::new(format!(
-            "An error occurred! \n\n\
-                                                    {err_string}"
-        ))
-        .horizontal_alignment(Horizontal::Center)
-        .font(font);
+        let error_text = error_translation(sniffer.language, err_string)
+            .horizontal_alignment(Horizontal::Center)
+            .font(font);
 
         body = body
             .push(Row::new().height(FillPortion(1)))

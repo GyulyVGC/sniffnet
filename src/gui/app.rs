@@ -256,10 +256,13 @@ impl Application for Sniffer {
         let style = self.style;
 
         let header = match status {
-            Status::Init => get_header(style, false, 0),
-            Status::Running => {
-                get_header(style, true, self.info_traffic.lock().unwrap().all_packets)
-            }
+            Status::Init => get_header(style, false, 0, self.language),
+            Status::Running => get_header(
+                style,
+                true,
+                self.info_traffic.lock().unwrap().all_packets,
+                self.language,
+            ),
         };
 
         let body = match status {
@@ -280,7 +283,10 @@ impl Application for Sniffer {
             content.into()
         } else {
             let (overlay, save_config) = match self.overlay.unwrap() {
-                Overlays::Alert => (get_exit_overlay(style, get_font(style)), false),
+                Overlays::Alert => (
+                    get_exit_overlay(style, get_font(style), self.language),
+                    false,
+                ),
                 Overlays::SettingsNotifications => (settings_notifications_page(self), true),
                 Overlays::SettingsAppearance => (settings_appearance_page(self), true),
                 Overlays::SettingsLanguage => (settings_language_page(self), true),
