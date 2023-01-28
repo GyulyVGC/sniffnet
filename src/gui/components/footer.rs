@@ -10,9 +10,10 @@ use crate::utility::style_constants::{
     get_font, FONT_SIZE_FOOTER, HEIGHT_FOOTER, ICONS, INCONSOLATA, INCONSOLATA_BOLD,
 };
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, Button, Container, Row, Text};
+use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
+use iced_native::widget::tooltip::Position;
 use plotters::prelude::RGBColor;
 
 pub fn get_footer(style: StyleType) -> Container<'static, Message> {
@@ -42,8 +43,8 @@ pub fn get_footer(style: StyleType) -> Container<'static, Message> {
         ))
 }
 
-pub fn get_button_github(style: StyleType) -> Button<'static, Message> {
-    button(
+pub fn get_button_github(style: StyleType) -> iced::widget::Tooltip<'static, Message> {
+    let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
             .size(24)
@@ -53,5 +54,11 @@ pub fn get_button_github(style: StyleType) -> Button<'static, Message> {
     .height(Length::Units(35))
     .width(Length::Units(35))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::OpenGithub)
+    .on_press(Message::OpenGithub);
+
+    Tooltip::new(content, "GitHub", Position::FollowCursor)
+        .font(get_font(style))
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }

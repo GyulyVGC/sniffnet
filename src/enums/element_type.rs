@@ -9,4 +9,5 @@ pub enum ElementType {
     Starred,
     NotStarred,
     Alert,
+    Tooltip,
 }

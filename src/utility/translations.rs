@@ -354,3 +354,17 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::IT => "Ispeziona",
     }
 }
+
+// pub fn save_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Save",
+//         Language::IT => "Salva",
+//     }
+// }
+
+// pub fn unknown_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Unknown",
+//         Language::IT => "Sconosciuto",
+//     }
+// }

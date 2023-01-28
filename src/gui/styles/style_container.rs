@@ -32,10 +32,12 @@ impl iced::widget::container::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::BorderedRound | ElementType::Alert) => {
                     BORDER_ROUNDED_RADIUS
                 }
+                StyleTuple(_, ElementType::Tooltip) => 7.0,
                 _ => 0.0,
             },
             border_width: match self {
                 StyleTuple(_, ElementType::Standard | ElementType::Headers) => 0.0,
+                StyleTuple(_, ElementType::Tooltip) => 1.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
