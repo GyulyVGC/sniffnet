@@ -22,11 +22,11 @@ pub fn select_filters_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn start_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => "Run!",
+pub fn start_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Start!",
         Language::IT => "Avvia!",
-    })
+    }
 }
 
 pub fn address_translation(language: Language) -> &'static str {
@@ -71,11 +71,11 @@ pub fn relevant_connections_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn settings_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
+pub fn settings_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => "Settings",
         Language::IT => "Impostazioni",
-    })
+    }
 }
 
 pub fn yes_translation(language: Language) -> Text<'static> {
@@ -92,11 +92,18 @@ pub fn ask_quit_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn quit_analysis_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
+pub fn quit_analysis_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => "Quit analysis",
         Language::IT => "Interrompi analisi",
-    })
+    }
+}
+
+pub fn hide_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Hide",
+        Language::IT => "Nascondi",
+    }
 }
 
 pub fn no_addresses_translation(language: Language, adapter: String) -> Text<'static> {

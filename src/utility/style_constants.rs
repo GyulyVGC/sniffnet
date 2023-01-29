@@ -136,10 +136,10 @@ pub const RED_STYLE: Colors = Colors {
 };
 
 // gui Text fonts
-pub const INCONSOLATA: Font = Font::External {
-    name: "inconsolata_regular",
-    bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
-};
+// pub const INCONSOLATA: Font = Font::External {
+//     name: "inconsolata_regular",
+//     bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
+// };
 pub const INCONSOLATA_BOLD: Font = Font::External {
     name: "inconsolata_bold",
     bytes: include_bytes!("../../fonts/inconsolata-bold.ttf"),
@@ -147,7 +147,14 @@ pub const INCONSOLATA_BOLD: Font = Font::External {
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
-        RGBColor(255, 255, 255) => INCONSOLATA,
+        RGBColor(255, 255, 255) => Font::Default,
+        _ => INCONSOLATA_BOLD,
+    }
+}
+
+pub fn get_font_headers(style: StyleType) -> Font {
+    match to_rgb_color(get_colors(style).text_headers) {
+        RGBColor(255, 255, 255) => Font::Default,
         _ => INCONSOLATA_BOLD,
     }
 }

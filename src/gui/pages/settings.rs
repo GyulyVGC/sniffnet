@@ -5,22 +5,23 @@ use crate::gui::components::radios::language_radios;
 use crate::gui::components::tabs::get_settings_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    get_font, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, INCONSOLATA_BOLD, MON_AMOUR, YETI_DAY,
+    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR, YETI_DAY,
     YETI_NIGHT,
 };
 use crate::utility::translations::{
-    appearance_title_translation, deep_sea_translation, languages_title_translation,
-    mon_amour_translation, notifications_title_translation, settings_translation,
-    yeti_day_translation, yeti_night_translation,
+    appearance_title_translation, deep_sea_translation, hide_translation,
+    languages_title_translation, mon_amour_translation, notifications_title_translation,
+    settings_translation, yeti_day_translation, yeti_night_translation,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image, Row,
-    Text,
+    Text, Tooltip,
 };
 use iced::{Alignment, Length};
+use iced_native::widget::tooltip::Position;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -167,7 +168,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Units(10)))
+        .push(vertical_space(Length::Units(20)))
         .push(col_language_radio);
 
     Container::new(content)
@@ -207,25 +208,33 @@ fn get_settings_header(style: StyleType, language: Language) -> Container<'stati
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
-                settings_translation(language)
-                    .font(INCONSOLATA_BOLD)
+                Text::new(settings_translation(language))
+                    .font(get_font_headers(style))
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
             )
             .push(
                 Container::new(
-                    button(
-                        Text::new("x")
-                            .font(INCONSOLATA_BOLD)
-                            .horizontal_alignment(Horizontal::Center)
-                            .size(15),
+                    Tooltip::new(
+                        button(
+                            Text::new("x")
+                                .font(get_font(style))
+                                .horizontal_alignment(Horizontal::Center)
+                                .size(15),
+                        )
+                        .padding(2)
+                        .height(Length::Units(20))
+                        .width(Length::Units(20))
+                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .on_press(Message::HideModal(false)),
+                        hide_translation(language),
+                        Position::Right,
                     )
-                    .padding(2)
-                    .height(Length::Units(20))
-                    .width(Length::Units(20))
-                    .style(StyleTuple(style, ElementType::Standard).into())
-                    .on_press(Message::HideModal(true)),
+                    .font(get_font(style))
+                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                        StyleTuple(style, ElementType::Tooltip),
+                    )),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),

@@ -6,15 +6,13 @@ use std::rc::Rc;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
-use iced::Element;
+use iced::{Element, Font};
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
 use crate::structs::colors::to_rgb_color;
-use crate::utility::style_constants::{
-    CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA, INCONSOLATA_BOLD,
-};
+use crate::utility::style_constants::{CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA_BOLD};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 
@@ -51,7 +49,7 @@ impl TrafficChart {
         Container::new(
             Column::new().push(
                 ChartWidget::new(self).resolve_font(move |_, _| match color_font {
-                    RGBColor(255, 255, 255) => INCONSOLATA, // if white non-bold
+                    RGBColor(255, 255, 255) => Font::Default, // if white non-bold
                     _ => INCONSOLATA_BOLD,
                 }),
             ),

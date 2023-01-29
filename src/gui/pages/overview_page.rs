@@ -94,12 +94,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     )
                 };
                 body = body
-                    .push(Row::new().height(FillPortion(1)))
+                    .push(vertical_space(Length::FillPortion(1)))
                     .push(icon_text)
                     .push(vertical_space(Length::Units(15)))
                     .push(nothing_to_see_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(Row::new().height(FillPortion(2)));
+                    .push(vertical_space(Length::FillPortion(2)));
             }
 
             (observed, 0) => {
@@ -114,12 +114,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font);
 
                 body = body
-                    .push(Row::new().height(FillPortion(1)))
+                    .push(vertical_space(Length::FillPortion(1)))
                     .push(Text::new('V'.to_string()).font(ICONS).size(60))
                     .push(vertical_space(Length::Units(15)))
                     .push(tot_packets_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(Row::new().height(FillPortion(2)));
+                    .push(vertical_space(Length::FillPortion(2)));
             }
 
             (observed, filtered) => {
@@ -193,14 +193,19 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 let row_radio_report =
                     report_radios(active_radio_report, font, sniffer.style, sniffer.language);
 
-                let mut col_report = Column::new().height(Length::Fill).push(row_radio_report);
+                let mut col_report = Column::new()
+                    .height(Length::Fill)
+                    .width(Length::Fill)
+                    .push(row_radio_report);
 
                 if sniffer.report_type.eq(&ReportType::Favorites)
                     && sniffer.runtime_data.borrow().report_vec.is_empty()
                 {
-                    col_report = col_report.align_items(Alignment::Center).push(
+                    col_report = col_report.push(
                         no_favorites_translation(sniffer.language)
+                            .font(font)
                             .height(Length::Fill)
+                            .width(Length::Fill)
                             .horizontal_alignment(Horizontal::Center)
                             .vertical_alignment(Vertical::Center),
                     );
@@ -273,7 +278,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
-                        .align_x(Horizontal::Center)
+                        .width(Length::Units(1100))
                         .style(<StyleTuple as Into<iced::theme::Container>>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
@@ -314,12 +319,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             .font(font);
 
         body = body
-            .push(Row::new().height(FillPortion(1)))
+            .push(vertical_space(Length::FillPortion(1)))
             .push(Text::new('U'.to_string()).font(ICONS).size(60))
             .push(vertical_space(Length::Units(15)))
             .push(error_text)
             .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(Row::new().height(FillPortion(2)));
+            .push(vertical_space(Length::FillPortion(2)));
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))

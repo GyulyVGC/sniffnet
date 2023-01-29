@@ -3,11 +3,12 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use iced::widget::{
-    button, horizontal_space, vertical_space, Button, Column, Container, PickList, Radio, Row,
-    Scrollable, Text,
+    button, horizontal_space, vertical_space, Column, Container, PickList, Radio, Row, Scrollable,
+    Text, Tooltip,
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
+use iced_native::widget::tooltip::Position;
 use pcap::Device;
 
 use crate::enums::element_type::ElementType;
@@ -45,9 +46,9 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(10)
         .width(FillPortion(2))
         .push(col_transport_radio)
-        .push(Row::new().height(FillPortion(2)))
-        .push(get_button_start(sniffer.style, font, sniffer.language))
-        .push(Row::new().height(FillPortion(1)));
+        .push(vertical_space(Length::FillPortion(2)))
+        .push(get_button_start(sniffer.style, sniffer.language))
+        .push(vertical_space(Length::FillPortion(1)));
 
     let app_active = sniffer.filters.application;
     let picklist_app = PickList::new(
@@ -60,7 +61,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         StyleTuple(sniffer.style, ElementType::Standard),
     ));
     let col_app = Column::new()
-        .width(FillPortion(2))
+        .width(FillPortion(1))
         .spacing(10)
         .push(
             application_protocol_translation(sniffer.language)
@@ -82,21 +83,19 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         )
         .push(
             Row::new()
+                .spacing(10)
                 .height(FillPortion(3))
                 .push(col_ip)
                 .push(col_transport)
                 .push(col_app),
         );
 
-    let body = Column::new()
-        .push(vertical_space(Length::FillPortion(1)))
-        .push(
-            Row::new()
-                .height(Length::FillPortion(40))
-                .push(col_adapter)
-                .push(horizontal_space(Length::FillPortion(1)))
-                .push(filters),
-        );
+    let body = Column::new().push(vertical_space(Length::Units(5))).push(
+        Row::new()
+            .push(col_adapter)
+            .push(horizontal_space(Length::Units(30)))
+            .push(filters),
+    );
 
     Container::new(body)
         .height(FillPortion(HEIGHT_BODY))
@@ -105,36 +104,26 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-pub fn get_button_start(
-    style: StyleType,
-    font: Font,
-    language: Language,
-) -> Button<'static, Message> {
-    let content = Row::new()
-        .align_items(Alignment::Center)
-        .push(horizontal_space(Length::FillPortion(1)))
-        .push(
-            Text::new("S ")
-                .font(ICONS)
-                .size(FONT_SIZE_SUBTITLE)
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
-        )
-        .push(
-            start_translation(language)
-                .font(font)
-                .size(FONT_SIZE_TITLE)
-                .vertical_alignment(alignment::Vertical::Center)
-                .horizontal_alignment(alignment::Horizontal::Center),
-        )
-        .push(horizontal_space(Length::FillPortion(1)));
+pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+    let content = button(
+        Text::new("S")
+            .font(ICONS)
+            .size(FONT_SIZE_TITLE)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .padding(10)
+    .height(Length::Units(80))
+    .width(Length::Units(160))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::Start);
 
-    button(content)
-        .padding(10)
-        .height(Length::Units(80))
-        .width(Length::Units(160))
-        .style(StyleTuple(style, ElementType::Standard).into())
-        .on_press(Message::Start)
+    Tooltip::new(content, start_translation(language), Position::Top)
+        .gap(5)
+        .font(get_font(style))
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {

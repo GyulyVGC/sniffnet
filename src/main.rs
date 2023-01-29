@@ -124,7 +124,7 @@ pub fn main() -> iced::Result {
             running_page: RunningPage::Overview,
             language,
         },
-        default_font: None,
+        default_font: Some(include_bytes!("../fonts/inconsolata-regular.ttf")),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,
         antialiasing: false,

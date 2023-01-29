@@ -1,14 +1,17 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{FONT_SIZE_TITLE, INCONSOLATA_BOLD};
+use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::utility::translations::{
-    ask_quit_translation, quit_analysis_translation, yes_translation,
+    ask_quit_translation, hide_translation, quit_analysis_translation, yes_translation,
 };
 use crate::{Language, StyleType};
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::{button, horizontal_space, vertical_space, Column, Container, Row, Text};
+use iced::widget::{
+    button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
+};
 use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size};
+use iced_native::widget::tooltip::Position;
 use iced_native::widget::{self, Tree};
 use iced_native::{layout, overlay, renderer, Clipboard, Layout, Shell, Widget};
 
@@ -53,25 +56,33 @@ fn get_modal_header(style: StyleType, language: Language) -> Container<'static, 
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
-                quit_analysis_translation(language)
-                    .font(INCONSOLATA_BOLD)
+                Text::new(quit_analysis_translation(language))
+                    .font(get_font_headers(style))
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
             )
             .push(
                 Container::new(
-                    button(
-                        Text::new("x")
-                            .font(INCONSOLATA_BOLD)
-                            .horizontal_alignment(Horizontal::Center)
-                            .size(15),
+                    Tooltip::new(
+                        button(
+                            Text::new("x")
+                                .font(get_font(style))
+                                .horizontal_alignment(Horizontal::Center)
+                                .size(15),
+                        )
+                        .padding(2)
+                        .height(Length::Units(20))
+                        .width(Length::Units(20))
+                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .on_press(Message::HideModal(false)),
+                        hide_translation(language),
+                        Position::Right,
                     )
-                    .padding(2)
-                    .height(Length::Units(20))
-                    .width(Length::Units(20))
-                    .style(StyleTuple(style, ElementType::Standard).into())
-                    .on_press(Message::HideModal(false)),
+                    .font(get_font(style))
+                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                        StyleTuple(style, ElementType::Tooltip),
+                    )),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
