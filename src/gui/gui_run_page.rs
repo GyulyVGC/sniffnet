@@ -145,13 +145,13 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
                 {
                     (Text::new(sniffer.waiting.len().to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic has been observed yet. Waiting for network packets...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              Are you sure you are connected to the internet and you have selected the right adapter?", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              Are you sure you are connected to the internet and you have selected the right adapter?")).font(font))
                 } else {
                     (Text::new('T'.to_string()).font(ICONS).size(60),
                      Text::new(format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
-                                                              Network adapter: {}\n\n\
-                                                              If you are sure you are connected to the internet, try choosing a different adapter.", adapter_name)).font(font))
+                                                              Network adapter: {adapter_name}\n\n\
+                                                              If you are sure you are connected to the internet, try choosing a different adapter.")).font(font))
                 };
                 body = body
                     .push(Row::new().height(Length::FillPortion(1)))
@@ -410,8 +410,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         let error_text = Text::new(format!(
             "An error occurred! \n\n\
-                                                    {}",
-            err_string
+                                                    {err_string}",
         ))
         .font(font);
 
@@ -438,7 +437,7 @@ pub fn run_page(sniffer: &mut Sniffer) -> Column<Message> {
     let footer_row = Row::new()
         .align_items(Alignment::Center)
         .push(
-            Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION))
+            Text::new(format!("Sniffnet {APP_VERSION} - by Giuliano Bellini "))
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         )

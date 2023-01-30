@@ -129,8 +129,7 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
         let spaces_string_2 = " ".to_string().repeat(10 - percentage_string.len());
 
         ret_val.push_str(&format!(
-            "   {}:{}{}{}{}  \n",
-            app_proto_string, spaces_string_1, num_string, spaces_string_2, percentage_string
+            "   {app_proto_string}:{spaces_string_1}{num_string}{spaces_string_2}{percentage_string}  \n",
         ));
     }
     ret_val
@@ -163,9 +162,9 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
 
     if !multiple_transmitted.is_empty() {
         // with multiple
-        format!("{:.1} {}B", n, multiple_transmitted)
+        format!("{n:.1} {multiple_transmitted}B")
     } else {
         // no multiple
-        format!("{}  B", n)
+        format!("{n}  B")
     }
 }
