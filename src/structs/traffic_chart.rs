@@ -89,7 +89,7 @@ impl Chart<Message> for TrafficChart {
                     .label_style(("notosans", 15).into_font().color(&self.font_color))
                     .y_label_formatter(&|bytes| match bytes {
                         0..=999 | -999..=-1 => {
-                            format!("{}", bytes)
+                            format!("{bytes}")
                         }
                         1000..=999_999 | -999_999..=-1000 => {
                             format!("{:.1} {}", *bytes as f64 / 1_000_f64, "k")

@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - '*'
+  workflow_call:
+    secrets:
+      NPCAP_OEM_URL:
+        required: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,7 +19,7 @@ env:
 jobs:
   fmt:
     name: Rustfmt
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -31,7 +35,7 @@ jobs:
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -48,20 +52,47 @@ jobs:
     name: Mac Tests
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v3
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
 
-  Linux: 
+  Linux:
     name: Linux Tests
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - name: Install libpcap
+        run: sudo apt-get install libpcap-dev
+      - name: Install dependency for alsa-sys
+        run: sudo apt-get install libasound2-dev
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+
+  Windows:
+    name: Windows Tests
+    runs-on: windows-latest
+    steps:
     - uses: actions/checkout@v3
-    - name: Install libpcap
-      run: sudo apt-get install libpcap-dev
-    - name: Build 
+    - name: Install npcap sdk
+      run: |
+            Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
+            Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
+            echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
+    - name: Install npcap dll
+          # Secrets are not passed to workflows that are triggered by a pull request from a fork.
+          # https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
+      if: github.event_name != 'pull_request'
+      run: |
+            $OEM_URL = ConvertTo-SecureString "${{ secrets.NPCAP_OEM_URL }}" -AsPlainText -Force
+            Invoke-WebRequest -Uri $OEM_URL -OutFile C:/npcap-oem.exe
+            C:/npcap-oem.exe /S
+    - name: Build
+      if: github.event_name != 'pull_request'
       run: cargo build --verbose
-    - name: Run tests 
+    - name: Run tests
+      if: github.event_name != 'pull_request'
       run: cargo test --verbose

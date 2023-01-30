@@ -113,7 +113,7 @@ impl fmt::Display for AppProtocol {
         if self.eq(&AppProtocol::Other) {
             write!(f, "All protocols")
         } else {
-            write!(f, "{:?}", self)
+            write!(f, "{self:?}")
         }
     }
 }

@@ -105,7 +105,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{}\n", name));
+                dev_str.push_str(&format!("{name}\n"));
                 dev_str.push_str(&description);
             }
         }
@@ -122,7 +122,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n    {}", address_string));
+            dev_str.push_str(&format!("\n    {address_string}"));
         }
         dev_str.push_str("\n ");
         dev_str_list.push((name, dev_str));
@@ -329,7 +329,7 @@ pub fn initial_page(sniffer: &mut Sniffer) -> Column<Message> {
     let footer_row = Row::new()
         .align_items(Alignment::Center)
         .push(
-            Text::new(format!("Sniffnet {} - by Giuliano Bellini ", APP_VERSION))
+            Text::new(format!("Sniffnet {APP_VERSION} - by Giuliano Bellini "))
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         )
