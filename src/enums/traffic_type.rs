@@ -7,6 +7,8 @@ pub enum TrafficType {
     Outgoing,
     /// Multicast traffic (from remote address to multicast address)
     Multicast,
+    /// Multicast traffic (from remote address to broadcast address)
+    Broadcast,
     /// Not identified
     Other,
 }

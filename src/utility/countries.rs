@@ -10,8 +10,8 @@ pub fn get_country_code(
     key: &AddressPortPair,
 ) -> String {
     let address_to_lookup = match traffic_type {
-        TrafficType::Incoming | TrafficType::Multicast => &key.address1,
-        _ => &key.address2,
+        TrafficType::Outgoing => &key.address2,
+        _ => &key.address1,
     };
 
     let country_code = db.get(&address_to_lookup.parse().unwrap());

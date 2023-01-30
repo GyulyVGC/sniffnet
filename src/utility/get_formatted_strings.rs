@@ -64,10 +64,10 @@ pub fn get_active_filters_string_nobr(filters: &Filters, language: Language) -> 
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
 pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Color {
-    if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
-        get_colors(style).incoming
-    } else {
+    if traffic_type == TrafficType::Outgoing {
         get_colors(style).outgoing
+    } else {
+        get_colors(style).incoming
     }
 }
 

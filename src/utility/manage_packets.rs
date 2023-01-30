@@ -157,6 +157,31 @@ pub fn is_multicast_address(address: &str) -> bool {
     ret_val
 }
 
+/// Determines if the input address is a broadcast address or not.
+///
+/// # Arguments
+///
+/// * `address` - string representing an IPv4 or IPv6 network address.
+pub fn is_broadcast_address(address: &str) -> bool {
+    let mut ret_val = false;
+    if !address.contains(':') {
+        //IPv4 address
+        let groups: Vec<u8> = address
+            .split('.')
+            .map(|str| str.parse::<u8>().unwrap())
+            .collect();
+        if *groups.first().unwrap() == 255
+            && *groups.get(1).unwrap() == 255
+            && *groups.get(2).unwrap() == 255
+            && *groups.get(3).unwrap() == 255
+        {
+            ret_val = true;
+        }
+        // still missing a check for directed broadcast!
+    }
+    ret_val
+}
+
 /// Determines if the capture opening resolves into an Error
 pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Active>>) {
     let cap_result = Capture::from_device(&*device.name)

@@ -10,7 +10,8 @@ use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
 use crate::utility::manage_packets::{
-    analyze_network_header, analyze_transport_header, is_multicast_address, modify_or_insert_in_map,
+    analyze_network_header, analyze_transport_header, is_broadcast_address, is_multicast_address,
+    modify_or_insert_in_map,
 };
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
@@ -102,6 +103,8 @@ pub fn parse_packets_loop(
                             traffic_type = TrafficType::Incoming;
                         } else if is_multicast_address(&address2) {
                             traffic_type = TrafficType::Multicast;
+                        } else if is_broadcast_address(&address2) {
+                            traffic_type = TrafficType::Broadcast;
                         }
 
                         let key: AddressPortPair = AddressPortPair::new(
@@ -148,16 +151,14 @@ pub fn parse_packets_loop(
                                 .and_modify(|n| *n += 1)
                                 .or_insert(1);
 
-                            if traffic_type == TrafficType::Incoming
-                                || traffic_type == TrafficType::Multicast
-                            {
-                                //increment number of received packets and bytes
-                                info_traffic.tot_received_packets += 1;
-                                info_traffic.tot_received_bytes += exchanged_bytes;
-                            } else {
+                            if traffic_type == TrafficType::Outgoing {
                                 //increment number of sent packets and bytes
                                 info_traffic.tot_sent_packets += 1;
                                 info_traffic.tot_sent_bytes += exchanged_bytes;
+                            } else {
+                                //increment number of received packets and bytes
+                                info_traffic.tot_received_packets += 1;
+                                info_traffic.tot_received_bytes += exchanged_bytes;
                             }
                         }
                     }
