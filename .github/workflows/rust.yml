@@ -83,8 +83,8 @@ jobs:
             Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
             echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
     - name: Install npcap dll
-          # Secrets are not passed to workflows that are triggered by a pull request from a fork.
-          # https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
+      # Secrets are not passed to workflows that are triggered by a pull request from a fork.
+      # https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
       if: github.event_name != 'pull_request'
       run: |
             Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
