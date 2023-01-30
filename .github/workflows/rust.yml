@@ -87,8 +87,7 @@ jobs:
           # https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
       if: github.event_name != 'pull_request'
       run: |
-            $OEM_URL = ConvertTo-SecureString "${{ secrets.NPCAP_OEM_URL }}" -AsPlainText -Force
-            Invoke-WebRequest -Uri $OEM_URL -OutFile C:/npcap-oem.exe
+            Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
             C:/npcap-oem.exe /S
     - name: Build
       if: github.event_name != 'pull_request'
