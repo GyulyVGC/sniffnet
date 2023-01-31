@@ -13,7 +13,7 @@ use pcap::Device;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::components::radios::{ip_version_radios, transport_protocol_radios};
+use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{

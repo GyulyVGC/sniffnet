@@ -1,8 +1,8 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::overlays::Overlays;
-use crate::gui::components::radios::language_radios;
-use crate::gui::components::tabs::get_settings_tabs;
+use crate::enums::overlay::Overlay;
+use crate::gui::components::radio::language_radios;
+use crate::gui::components::tab::get_settings_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR, YETI_DAY,
@@ -30,18 +30,18 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
-            &[
-                Overlays::SettingsNotifications,
-                Overlays::SettingsAppearance,
-                Overlays::SettingsLanguage,
+            [
+                Overlay::SettingsNotifications,
+                Overlay::SettingsAppearance,
+                Overlay::SettingsLanguage,
             ],
             &["7 ", "b ", "c "],
             &[
                 Message::TickInit,
-                Message::ShowModal(Overlays::SettingsAppearance),
-                Message::ShowModal(Overlays::SettingsLanguage),
+                Message::ShowModal(Overlay::SettingsAppearance),
+                Message::ShowModal(Overlay::SettingsLanguage),
             ],
-            Overlays::SettingsNotifications,
+            Overlay::SettingsNotifications,
             sniffer.style,
             sniffer.language,
         ))
@@ -68,18 +68,18 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
-            &[
-                Overlays::SettingsNotifications,
-                Overlays::SettingsAppearance,
-                Overlays::SettingsLanguage,
+            [
+                Overlay::SettingsNotifications,
+                Overlay::SettingsAppearance,
+                Overlay::SettingsLanguage,
             ],
             &["7 ", "b ", "c "],
             &[
-                Message::ShowModal(Overlays::SettingsNotifications),
+                Message::ShowModal(Overlay::SettingsNotifications),
                 Message::TickInit,
-                Message::ShowModal(Overlays::SettingsLanguage),
+                Message::ShowModal(Overlay::SettingsLanguage),
             ],
-            Overlays::SettingsAppearance,
+            Overlay::SettingsAppearance,
             sniffer.style,
             sniffer.language,
         ))
@@ -147,18 +147,18 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
-            &[
-                Overlays::SettingsNotifications,
-                Overlays::SettingsAppearance,
-                Overlays::SettingsLanguage,
+            [
+                Overlay::SettingsNotifications,
+                Overlay::SettingsAppearance,
+                Overlay::SettingsLanguage,
             ],
             &["7 ", "b ", "c "],
             &[
-                Message::ShowModal(Overlays::SettingsNotifications),
-                Message::ShowModal(Overlays::SettingsAppearance),
+                Message::ShowModal(Overlay::SettingsNotifications),
+                Message::ShowModal(Overlay::SettingsAppearance),
                 Message::TickInit,
             ],
-            Overlays::SettingsLanguage,
+            Overlay::SettingsLanguage,
             sniffer.style,
             sniffer.language,
         ))

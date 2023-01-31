@@ -14,7 +14,7 @@ use plotters::style::RGBColor;
 /// - `incoming` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
-pub struct Colors {
+pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
     pub primary: Color,
     /// Secondary color of the GUI (header, footer, buttons' borders, radio selection)
@@ -33,7 +33,7 @@ pub struct Colors {
     pub round_borders: Color,
 }
 
-pub fn get_colors(style: StyleType) -> Colors {
+pub fn get_colors(style: StyleType) -> Palette {
     match style {
         StyleType::Night => NIGHT_STYLE,
         StyleType::Day => DAY_STYLE,
@@ -50,7 +50,7 @@ pub fn to_rgb_color(color: Color) -> RGBColor {
     )
 }
 
-impl Default for Colors {
+impl Default for Palette {
     fn default() -> Self {
         get_colors(StyleType::Night)
     }

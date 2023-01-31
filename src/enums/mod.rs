@@ -4,7 +4,7 @@ pub mod element_type;
 pub mod ip_version;
 pub mod language;
 pub mod message;
-pub mod overlays;
+pub mod overlay;
 pub mod report_type;
 pub mod running_page;
 pub mod status;

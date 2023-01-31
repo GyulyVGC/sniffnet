@@ -4,7 +4,7 @@ use crate::{get_colors, StyleType};
 use iced::{Color, Font};
 use plotters::style::RGBColor;
 
-use crate::structs::colors::{to_rgb_color, Colors};
+use crate::structs::palette::{to_rgb_color, Palette};
 
 pub const COLOR_CHART_MIX: f64 = 1.0;
 
@@ -27,7 +27,7 @@ const BUTTONS_NIGHT: Color = Color {
     b: 0.1,
     a: 1.0,
 };
-pub const NIGHT_STYLE: Colors = Colors {
+pub const NIGHT_STYLE: Palette = Palette {
     primary: PRIMARY_NIGHT,
     secondary: SECONDARY_NIGHT,
     buttons: BUTTONS_NIGHT,
@@ -52,7 +52,7 @@ const BUTTONS_DAY: Color = Color {
     b: 0.8,
     a: 1.0,
 };
-pub const DAY_STYLE: Colors = Colors {
+pub const DAY_STYLE: Palette = Palette {
     primary: PRIMARY_DAY,
     secondary: SECONDARY_DAY,
     buttons: BUTTONS_DAY,
@@ -88,7 +88,7 @@ const OUTGOING_TRY: Color = Color {
     b: 195.0 / 255.0,
     a: 1.0,
 };
-pub const TRY_STYLE: Colors = Colors {
+pub const TRY_STYLE: Palette = Palette {
     primary: PRIMARY_TRY,
     secondary: SECONDARY_TRY,
     buttons: BUTTONS_TRY,
@@ -124,7 +124,7 @@ const OUTGOING_RED: Color = Color {
     b: 105.0 / 255.0,
     a: 1.0,
 };
-pub const RED_STYLE: Colors = Colors {
+pub const RED_STYLE: Palette = Palette {
     primary: PRIMARY_RED,
     secondary: SECONDARY_RED,
     buttons: BUTTONS_RED,

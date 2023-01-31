@@ -1,6 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::components::tabs::get_pages_tabs;
+use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::HEIGHT_BODY;
 use crate::{RunningPage, Sniffer};
@@ -21,7 +21,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     let mut tab_and_body = Column::new().height(FillPortion(HEIGHT_BODY));
 
     let tabs = get_pages_tabs(
-        &[
+        [
             RunningPage::Overview,
             RunningPage::Inspect,
             RunningPage::Notifications,

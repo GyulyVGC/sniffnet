@@ -13,8 +13,8 @@ use thousands::Separable;
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::gui::components::radios::{chart_radios, report_radios};
-use crate::gui::components::tabs::get_pages_tabs;
+use crate::gui::components::radio::{chart_radios, report_radios};
+use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
@@ -46,7 +46,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         // NO pcap error detected
 
         let tabs = get_pages_tabs(
-            &[
+            [
                 RunningPage::Overview,
                 RunningPage::Inspect,
                 RunningPage::Notifications,
@@ -79,7 +79,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
                     (
                         Text::new('T'.to_string()).font(ICONS).size(60),
-                        no_addresses_translation(sniffer.language, adapter_name)
+                        no_addresses_translation(sniffer.language, &adapter_name)
                             .horizontal_alignment(Horizontal::Center)
                             .font(font),
                     )
@@ -88,7 +88,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         Text::new(sniffer.waiting.len().to_string())
                             .font(ICONS)
                             .size(60),
-                        waiting_translation(sniffer.language, adapter_name)
+                        waiting_translation(sniffer.language, &adapter_name)
                             .horizontal_alignment(Horizontal::Center)
                             .font(font),
                     )
@@ -107,8 +107,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
                 let tot_packets_text = some_observed_translation(
                     sniffer.language,
-                    observed.separate_with_spaces(),
-                    get_active_filters_string_nobr(&sniffer.filters.clone(), sniffer.language),
+                    &observed.separate_with_spaces(),
+                    &get_active_filters_string_nobr(&sniffer.filters.clone(), sniffer.language),
                 )
                 .horizontal_alignment(Horizontal::Center)
                 .font(font);
@@ -158,8 +158,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(
                         filtered_packets_translation(
                             sniffer.language,
-                            filtered.separate_with_spaces(),
-                            get_percentage_string(observed, filtered),
+                            &filtered.separate_with_spaces(),
+                            &get_percentage_string(observed, filtered),
                         )
                         .font(font),
                     )
@@ -167,8 +167,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(
                         filtered_bytes_translation(
                             sniffer.language,
-                            filtered_bytes_string,
-                            get_percentage_string(observed_bytes, filtered_bytes),
+                            &filtered_bytes_string,
+                            &get_percentage_string(observed_bytes, filtered_bytes),
                         )
                         .font(font),
                     );
@@ -314,7 +314,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         // pcap threw an ERROR!
         let err_string = sniffer.pcap_error.clone().unwrap();
 
-        let error_text = error_translation(sniffer.language, err_string)
+        let error_text = error_translation(sniffer.language, &err_string)
             .horizontal_alignment(Horizontal::Center)
             .font(font);
 

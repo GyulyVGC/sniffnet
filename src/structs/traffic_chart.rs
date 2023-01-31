@@ -11,7 +11,7 @@ use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
-use crate::structs::colors::to_rgb_color;
+use crate::structs::palette::to_rgb_color;
 use crate::utility::style_constants::{CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA_BOLD};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};

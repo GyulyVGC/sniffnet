@@ -5,7 +5,7 @@ use crate::Language;
 
 /// This enum defines the current running page.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-pub enum Overlays {
+pub enum Overlay {
     /// Settings Notifications page.
     SettingsNotifications,
     /// Settings Appearance page.
@@ -16,13 +16,13 @@ pub enum Overlays {
     Alert,
 }
 
-impl Overlays {
+impl Overlay {
     pub fn get_tab_label(&self, language: Language) -> &str {
         match self {
-            Overlays::SettingsNotifications => notifications_translation(language),
-            Overlays::SettingsAppearance => appearance_translation(language),
-            Overlays::SettingsLanguage => language_translation(language),
-            _ => "",
+            Overlay::SettingsNotifications => notifications_translation(language),
+            Overlay::SettingsAppearance => appearance_translation(language),
+            Overlay::SettingsLanguage => language_translation(language),
+            Overlay::Alert => "",
         }
     }
 }

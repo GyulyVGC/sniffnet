@@ -106,7 +106,7 @@ pub fn hide_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn no_addresses_translation(language: Language, adapter: String) -> Text<'static> {
+pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                  Network adapter: {adapter}\n\n\
@@ -117,7 +117,7 @@ pub fn no_addresses_translation(language: Language, adapter: String) -> Text<'st
     })
 }
 
-pub fn waiting_translation(language: Language, adapter: String) -> Text<'static> {
+pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                  Network adapter: {adapter}\n\n\
@@ -130,8 +130,8 @@ pub fn waiting_translation(language: Language, adapter: String) -> Text<'static>
 
 pub fn some_observed_translation(
     language: Language,
-    observed: String,
-    filters: String,
+    observed: &str,
+    filters: &str,
 ) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("Total intercepted packets: {observed}\n\n\
@@ -145,8 +145,8 @@ pub fn some_observed_translation(
 
 pub fn filtered_packets_translation(
     language: Language,
-    filtered: String,
-    percentage: String,
+    filtered: &str,
+    percentage: &str,
 ) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("Filtered packets:\n   {filtered} ({percentage} of the total)"),
@@ -156,8 +156,8 @@ pub fn filtered_packets_translation(
 
 pub fn filtered_bytes_translation(
     language: Language,
-    filtered: String,
-    percentage: String,
+    filtered: &str,
+    percentage: &str,
 ) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("Filtered bytes:\n   {filtered} ({percentage} of the total)"),
@@ -181,7 +181,7 @@ pub fn no_favorites_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn error_translation(language: Language, error: String) -> Text<'static> {
+pub fn error_translation(language: Language, error: &str) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!(
             "An error occurred! \n\n\

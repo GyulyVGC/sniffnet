@@ -11,12 +11,12 @@ use std::thread;
 use std::time::Duration;
 
 use crate::enums::message::Message;
-use crate::enums::overlays::Overlays;
+use crate::enums::overlay::Overlay;
 use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
-use crate::gui::components::modals::{get_exit_overlay, Modal};
+use crate::gui::components::modal::{get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
@@ -285,13 +285,13 @@ impl Application for Sniffer {
             content.into()
         } else {
             let (overlay, save_config) = match self.overlay.unwrap() {
-                Overlays::Alert => (
+                Overlay::Alert => (
                     get_exit_overlay(style, get_font(style), self.language),
                     false,
                 ),
-                Overlays::SettingsNotifications => (settings_notifications_page(self), true),
-                Overlays::SettingsAppearance => (settings_appearance_page(self), true),
-                Overlays::SettingsLanguage => (settings_language_page(self), true),
+                Overlay::SettingsNotifications => (settings_notifications_page(self), true),
+                Overlay::SettingsAppearance => (settings_appearance_page(self), true),
+                Overlay::SettingsLanguage => (settings_language_page(self), true),
             };
 
             Modal::new(content, overlay)
