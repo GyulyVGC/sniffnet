@@ -81,11 +81,13 @@ pub fn main() -> iced::Result {
 
     let config_result = confy::load::<Config>("sniffnet", None);
     if config_result.is_err() {
+        // it happens when changing the Config struct fields during development
         let store = Config {
             style: StyleType::default(),
             language: Language::default(),
             notifications: Notifications::default(),
         };
+        println!("Updating config file...");
         confy::store("sniffnet", None, store).unwrap();
     }
     let config = config_result.unwrap();

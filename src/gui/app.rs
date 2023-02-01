@@ -13,6 +13,7 @@ use std::time::Duration;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
 use crate::enums::running_page::RunningPage;
+use crate::enums::sound::play_sound;
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
@@ -235,7 +236,9 @@ impl Application for Sniffer {
                     let store = Config {
                         style: self.style,
                         notifications: Notifications {
-                            packets_threshold: Some(1000),
+                            packets_notification: self.notifications.packets_notification,
+                            bytes_notification: self.notifications.bytes_notification,
+                            on_favorite_notification: self.notifications.on_favorite_notification,
                         },
                         language: self.language,
                     };
@@ -248,6 +251,24 @@ impl Application for Sniffer {
             Message::LanguageSelection(language) => {
                 self.language = language;
                 self.traffic_chart.change_language(language);
+            }
+            Message::UpdatePacketsNotification(value, emit_sound) => {
+                if emit_sound {
+                    play_sound(value.sound);
+                }
+                self.notifications.packets_notification = value;
+            }
+            Message::UpdateBytesNotification(value, emit_sound) => {
+                if emit_sound {
+                    play_sound(value.sound);
+                }
+                self.notifications.bytes_notification = value;
+            }
+            Message::UpdateFavoriteNotification(value, emit_sound) => {
+                if emit_sound {
+                    play_sound(value.sound);
+                }
+                self.notifications.on_favorite_notification = value;
             }
         }
         Command::none()

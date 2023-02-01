@@ -362,16 +362,23 @@ pub fn inspect_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn save_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Save",
-//         Language::IT => "Salva",
-//     }
-// }
+pub fn packets_threshold_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Notify when a packets per second threshold is exceeded",
+        Language::IT => "Notifica quando una soglia di pacchetti al secondo è superata",
+    }
+}
 
-// pub fn unknown_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Unknown",
-//         Language::IT => "Sconosciuto",
-//     }
-// }
+pub fn threshold_translation(language: Language, value: String) -> String {
+    match language {
+        Language::EN => format!("Threshold: {value}"),
+        Language::IT => format!("Soglia: {value}"),
+    }
+}
+
+pub fn sound_translation(language: Language) -> String {
+    match language {
+        Language::EN => format!("Sound:"),
+        Language::IT => format!("Suono:"),
+    }
+}

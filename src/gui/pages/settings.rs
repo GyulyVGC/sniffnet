@@ -1,32 +1,35 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
-use crate::gui::components::radio::language_radios;
+use crate::gui::components::radio::{language_radios, sound_radios};
 use crate::gui::components::tab::get_settings_tabs;
+use crate::structs::notifications::ThresholdNotification;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR, YETI_DAY,
-    YETI_NIGHT,
+    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR,
+    YETI_DAY, YETI_NIGHT,
 };
 use crate::utility::translations::{
     appearance_title_translation, deep_sea_translation, hide_translation,
     languages_title_translation, mon_amour_translation, notifications_title_translation,
-    settings_translation, yeti_day_translation, yeti_night_translation,
+    packets_threshold_translation, settings_translation, threshold_translation,
+    yeti_day_translation, yeti_night_translation,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
-    button, horizontal_space, image::Handle, vertical_space, Button, Column, Container, Image, Row,
-    Text, Tooltip,
+    button, horizontal_space, image::Handle, vertical_space, Button, Checkbox, Column, Container,
+    Image, Row, Text, Tooltip,
 };
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
+use iced_native::widget::Slider;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let content = Column::new()
-        .align_items(Alignment::Center)
+        //.align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
@@ -49,9 +52,16 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_SUBTITLE)
+                .width(Length::Fill)
+                .horizontal_alignment(Horizontal::Center),
         )
-        .push(vertical_space(Length::Units(10)));
+        .push(vertical_space(Length::Units(10)))
+        .push(get_packets_threshold_notify(
+            sniffer.notifications.packets_notification,
+            sniffer.language,
+            sniffer.style,
+        ));
 
     Container::new(content)
         .height(Length::Units(400))
@@ -177,6 +187,99 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn get_packets_threshold_notify(
+    packets_notification: ThresholdNotification,
+    language: Language,
+    style: StyleType,
+) -> Column<'static, Message> {
+    let checkbox = Checkbox::new(
+        packets_threshold_translation(language),
+        packets_notification.threshold.is_some(),
+        move |toggled| {
+            if toggled {
+                Message::UpdatePacketsNotification(
+                    ThresholdNotification {
+                        threshold: Some(packets_notification.previous_threshold),
+                        ..packets_notification
+                    },
+                    false,
+                )
+            } else {
+                Message::UpdatePacketsNotification(
+                    ThresholdNotification {
+                        threshold: None,
+                        ..packets_notification
+                    },
+                    false,
+                )
+            }
+        },
+    )
+    .size(18)
+    .font(get_font(style))
+    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
+        StyleTuple(style, ElementType::Standard),
+    ));
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if packets_notification.threshold.is_none() {
+        Column::new().padding(15).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Length::Fill)
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
+                )),
+        )
+    } else {
+        let value = format!("{:>4}", packets_notification.threshold.unwrap());
+        let slider_row = Row::new()
+            .push(horizontal_space(Length::Units(50)))
+            .push(Text::new(threshold_translation(language, value)).font(get_font(style)))
+            .push(horizontal_space(Length::Units(30)))
+            .push(
+                Slider::new(
+                    0..=5000,
+                    packets_notification.threshold.unwrap(),
+                    move |value| {
+                        Message::UpdatePacketsNotification(
+                            ThresholdNotification {
+                                threshold: Some(value),
+                                previous_threshold: value,
+                                ..packets_notification
+                            },
+                            false,
+                        )
+                    },
+                )
+                .step(10)
+                .width(Length::Units(400))
+                .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
+                    style,
+                    ElementType::Standard,
+                ))),
+            );
+        let sound_row = Row::new().push(horizontal_space(Length::Units(50)))
+            .push(sound_radios(
+                packets_notification,
+                get_font(style),
+                style,
+                language,
+                Message::UpdatePacketsNotification,
+            ));
+        ret_val = ret_val.push(slider_row).push(sound_row);
+        Column::new().padding(15).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Length::Fill)
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
+                )),
+        )
+    }
 }
 
 fn get_palette_container(
