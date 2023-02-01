@@ -9,12 +9,7 @@ use crate::utility::style_constants::{
     get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR,
     YETI_DAY, YETI_NIGHT,
 };
-use crate::utility::translations::{
-    appearance_title_translation, deep_sea_translation, hide_translation,
-    languages_title_translation, mon_amour_translation, notifications_title_translation,
-    packets_threshold_translation, settings_translation, threshold_translation,
-    yeti_day_translation, yeti_night_translation,
-};
+use crate::utility::translations::{appearance_title_translation, bytes_threshold_translation, deep_sea_translation, hide_translation, languages_title_translation, mon_amour_translation, notifications_title_translation, packets_threshold_translation, settings_translation, threshold_translation, yeti_day_translation, yeti_night_translation};
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
@@ -25,11 +20,13 @@ use iced::widget::{
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::Slider;
+use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
+    let packets_threshold = sniffer.notifications.packets_notification.threshold;
+    let bytes_threshold = sniffer.notifications.bytes_notification.threshold;
     let content = Column::new()
-        //.align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
@@ -57,10 +54,35 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .horizontal_alignment(Horizontal::Center),
         )
         .push(vertical_space(Length::Units(10)))
-        .push(get_packets_threshold_notify(
+        .push(get_threshold_notify(
             sniffer.notifications.packets_notification,
             sniffer.language,
             sniffer.style,
+            packets_threshold_translation(sniffer.language).to_string(),
+            if packets_threshold.is_some() {
+                Some(format!("{:>4}", packets_threshold.unwrap()))
+            }
+            else {
+                None
+            },
+            5_000,
+            10,
+            Message::UpdatePacketsNotification
+        ))
+        .push(get_threshold_notify(
+            sniffer.notifications.bytes_notification,
+            sniffer.language,
+            sniffer.style,
+            bytes_threshold_translation(sniffer.language).to_string(),
+            if bytes_threshold.is_some() {
+                Some(format!("{:>8}", get_formatted_bytes_string(bytes_threshold.unwrap() as u128)))
+            }
+            else {
+                None
+            },
+            50_000_000,
+            100_000,
+            Message::UpdateBytesNotification
         ));
 
     Container::new(content)
@@ -189,28 +211,33 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-fn get_packets_threshold_notify(
-    packets_notification: ThresholdNotification,
+fn get_threshold_notify(
+    threshold_notification: ThresholdNotification,
     language: Language,
     style: StyleType,
+    checkbox_label: String,
+    threshold_label: Option<String>,
+    upper_bound: u32,
+    step: u32,
+    message: fn(ThresholdNotification, bool) -> Message
 ) -> Column<'static, Message> {
     let checkbox = Checkbox::new(
-        packets_threshold_translation(language),
-        packets_notification.threshold.is_some(),
+        checkbox_label,
+        threshold_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                Message::UpdatePacketsNotification(
+                message(
                     ThresholdNotification {
-                        threshold: Some(packets_notification.previous_threshold),
-                        ..packets_notification
+                        threshold: Some(threshold_notification.previous_threshold),
+                        ..threshold_notification
                     },
                     false,
                 )
             } else {
-                Message::UpdatePacketsNotification(
+                message(
                     ThresholdNotification {
                         threshold: None,
-                        ..packets_notification
+                        ..threshold_notification
                     },
                     false,
                 )
@@ -223,10 +250,12 @@ fn get_packets_threshold_notify(
         StyleTuple(style, ElementType::Standard),
     ));
 
-    let mut ret_val = Column::new().spacing(10).push(checkbox);
+    let mut ret_val = Column::new().spacing(5).push(checkbox);
 
-    if packets_notification.threshold.is_none() {
-        Column::new().padding(15).push(
+    if threshold_notification.threshold.is_none() {
+        Column::new()
+            .padding(5)
+            .push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Length::Fill)
@@ -235,27 +264,26 @@ fn get_packets_threshold_notify(
                 )),
         )
     } else {
-        let value = format!("{:>4}", packets_notification.threshold.unwrap());
         let slider_row = Row::new()
             .push(horizontal_space(Length::Units(50)))
-            .push(Text::new(threshold_translation(language, value)).font(get_font(style)))
+            .push(Text::new(threshold_translation(language, threshold_label.unwrap())).font(get_font(style)))
             .push(horizontal_space(Length::Units(30)))
             .push(
                 Slider::new(
-                    0..=5000,
-                    packets_notification.threshold.unwrap(),
+                    0..=upper_bound,
+                    threshold_notification.threshold.unwrap(),
                     move |value| {
-                        Message::UpdatePacketsNotification(
+                        message(
                             ThresholdNotification {
                                 threshold: Some(value),
                                 previous_threshold: value,
-                                ..packets_notification
+                                ..threshold_notification
                             },
                             false,
                         )
                     },
                 )
-                .step(10)
+                .step(step)
                 .width(Length::Units(400))
                 .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                     style,
@@ -264,14 +292,14 @@ fn get_packets_threshold_notify(
             );
         let sound_row = Row::new().push(horizontal_space(Length::Units(50)))
             .push(sound_radios(
-                packets_notification,
+                threshold_notification,
                 get_font(style),
                 style,
                 language,
-                Message::UpdatePacketsNotification,
+                message,
             ));
         ret_val = ret_val.push(slider_row).push(sound_row);
-        Column::new().padding(15).push(
+        Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Length::Fill)

@@ -20,7 +20,7 @@ impl std::default::Default for Notifications {
             bytes_notification: ThresholdNotification {
                 threshold: None,
                 sound: Sound::Pop,
-                previous_threshold: 100_000,
+                previous_threshold: 5_000_000,
             },
             on_favorite_notification: FavoriteNotifications {
                 notify_on_favorite: false,
