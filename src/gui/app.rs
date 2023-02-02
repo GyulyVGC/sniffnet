@@ -34,7 +34,7 @@ use crate::utility::manage_notifications::notify;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
-use crate::{InfoTraffic, Notifications, ReportType, RunTimeData};
+use crate::{InfoTraffic, ReportType, RunTimeData};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -60,7 +60,7 @@ impl Application for Sniffer {
         match message {
             Message::TickInit => {}
             Message::TickRun => {
-                let info_traffic_lock = self.info_traffic.lock().unwrap();
+                let mut info_traffic_lock = self.info_traffic.lock().unwrap();
                 self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
@@ -79,6 +79,11 @@ impl Application for Sniffer {
                         info_traffic_lock.tot_sent_bytes as i128;
                     self.runtime_data.borrow_mut().app_protocols =
                         info_traffic_lock.app_protocols.clone();
+                    self.runtime_data
+                        .borrow_mut()
+                        .favorite_featured_last_interval =
+                        info_traffic_lock.favorite_featured_last_interval;
+                    info_traffic_lock.favorite_featured_last_interval = false;
                     drop(info_traffic_lock);
                     notify(&self.runtime_data.borrow(), self.notifications);
                     update_charts_data(self.runtime_data.borrow_mut());
@@ -235,11 +240,7 @@ impl Application for Sniffer {
                 if save_config {
                     let store = Config {
                         style: self.style,
-                        notifications: Notifications {
-                            packets_notification: self.notifications.packets_notification,
-                            bytes_notification: self.notifications.bytes_notification,
-                            on_favorite_notification: self.notifications.on_favorite_notification,
-                        },
+                        notifications: self.notifications,
                         language: self.language,
                     };
                     confy::store("sniffnet", None, store).unwrap();

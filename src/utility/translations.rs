@@ -376,6 +376,15 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn favorite_notification_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Notify me when new data are exchanged from my favorites connections",
+        Language::IT => {
+            "Notificami quando nuovi dati sono scambiati dalle mie connessioni preferite"
+        }
+    }
+}
+
 pub fn threshold_translation(language: Language, value: String) -> String {
     match language {
         Language::EN => format!("Threshold: {value}"),
@@ -385,7 +394,7 @@ pub fn threshold_translation(language: Language, value: String) -> String {
 
 pub fn sound_translation(language: Language) -> &'static str {
     match language {
-        Language::EN =>"Sound:",
+        Language::EN => "Sound:",
         Language::IT => "Suono:",
     }
 }

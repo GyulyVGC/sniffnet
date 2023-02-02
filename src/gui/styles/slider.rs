@@ -32,7 +32,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> iced_native::widget::slider::Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.primary),
+            rail_colors: (colors.secondary, colors.secondary),
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,
@@ -45,7 +45,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn dragging(&self, _: &Self::Style) -> iced_native::widget::slider::Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.primary),
+            rail_colors: (colors.secondary, colors.secondary),
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,

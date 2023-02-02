@@ -1,15 +1,23 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
-use crate::gui::components::radio::{language_radios, sound_radios};
-use crate::gui::components::tab::get_settings_tabs;
-use crate::structs::notifications::ThresholdNotification;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR,
-    YETI_DAY, YETI_NIGHT,
+use crate::gui::components::radio::{
+    language_radios, sound_favorite_radios, sound_threshold_radios,
 };
-use crate::utility::translations::{appearance_title_translation, bytes_threshold_translation, deep_sea_translation, hide_translation, languages_title_translation, mon_amour_translation, notifications_title_translation, packets_threshold_translation, settings_translation, threshold_translation, yeti_day_translation, yeti_night_translation};
+use crate::gui::components::tab::get_settings_tabs;
+use crate::structs::notifications::{FavoriteNotifications, ThresholdNotification};
+use crate::structs::style_tuple::StyleTuple;
+use crate::utility::get_formatted_strings::get_formatted_bytes_string;
+use crate::utility::style_constants::{
+    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR, YETI_DAY,
+    YETI_NIGHT,
+};
+use crate::utility::translations::{
+    appearance_title_translation, bytes_threshold_translation, deep_sea_translation,
+    favorite_notification_translation, hide_translation, languages_title_translation,
+    mon_amour_translation, notifications_title_translation, packets_threshold_translation,
+    settings_translation, threshold_translation, yeti_day_translation, yeti_night_translation,
+};
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
@@ -20,7 +28,6 @@ use iced::widget::{
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::Slider;
-use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -61,13 +68,11 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             packets_threshold_translation(sniffer.language).to_string(),
             if packets_threshold.is_some() {
                 Some(format!("{:>4}", packets_threshold.unwrap()))
-            }
-            else {
+            } else {
                 None
             },
             5_000,
-            10,
-            Message::UpdatePacketsNotification
+            Message::UpdatePacketsNotification,
         ))
         .push(get_threshold_notify(
             sniffer.notifications.bytes_notification,
@@ -75,14 +80,20 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             bytes_threshold_translation(sniffer.language).to_string(),
             if bytes_threshold.is_some() {
-                Some(format!("{:>8}", get_formatted_bytes_string(bytes_threshold.unwrap() as u128)))
-            }
-            else {
+                Some(format!(
+                    "{:>8}",
+                    get_formatted_bytes_string(bytes_threshold.unwrap() as u128)
+                ))
+            } else {
                 None
             },
             50_000_000,
-            100_000,
-            Message::UpdateBytesNotification
+            Message::UpdateBytesNotification,
+        ))
+        .push(get_favorite_notify(
+            sniffer.notifications.on_favorite_notification,
+            sniffer.language,
+            sniffer.style,
         ));
 
     Container::new(content)
@@ -218,8 +229,7 @@ fn get_threshold_notify(
     checkbox_label: String,
     threshold_label: Option<String>,
     upper_bound: u32,
-    step: u32,
-    message: fn(ThresholdNotification, bool) -> Message
+    message: fn(ThresholdNotification, bool) -> Message,
 ) -> Column<'static, Message> {
     let checkbox = Checkbox::new(
         checkbox_label,
@@ -253,9 +263,7 @@ fn get_threshold_notify(
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if threshold_notification.threshold.is_none() {
-        Column::new()
-            .padding(5)
-            .push(
+        Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Length::Fill)
@@ -266,7 +274,10 @@ fn get_threshold_notify(
     } else {
         let slider_row = Row::new()
             .push(horizontal_space(Length::Units(50)))
-            .push(Text::new(threshold_translation(language, threshold_label.unwrap())).font(get_font(style)))
+            .push(
+                Text::new(threshold_translation(language, threshold_label.unwrap()))
+                    .font(get_font(style)),
+            )
             .push(horizontal_space(Length::Units(30)))
             .push(
                 Slider::new(
@@ -283,22 +294,91 @@ fn get_threshold_notify(
                         )
                     },
                 )
-                .step(step)
+                .step(10)
                 .width(Length::Units(400))
                 .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                     style,
                     ElementType::Standard,
                 ))),
             );
-        let sound_row = Row::new().push(horizontal_space(Length::Units(50)))
-            .push(sound_radios(
-                threshold_notification,
-                get_font(style),
-                style,
-                language,
-                message,
-            ));
+        let sound_row =
+            Row::new()
+                .push(horizontal_space(Length::Units(50)))
+                .push(sound_threshold_radios(
+                    threshold_notification,
+                    get_font(style),
+                    style,
+                    language,
+                    message,
+                ));
         ret_val = ret_val.push(slider_row).push(sound_row);
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Length::Fill)
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
+                )),
+        )
+    }
+}
+
+fn get_favorite_notify(
+    favorite_notification: FavoriteNotifications,
+    language: Language,
+    style: StyleType,
+) -> Column<'static, Message> {
+    let checkbox = Checkbox::new(
+        favorite_notification_translation(language),
+        favorite_notification.notify_on_favorite,
+        move |toggled| {
+            if toggled {
+                Message::UpdateFavoriteNotification(
+                    FavoriteNotifications {
+                        notify_on_favorite: true,
+                        ..favorite_notification
+                    },
+                    false,
+                )
+            } else {
+                Message::UpdateFavoriteNotification(
+                    FavoriteNotifications {
+                        notify_on_favorite: false,
+                        ..favorite_notification
+                    },
+                    false,
+                )
+            }
+        },
+    )
+    .size(18)
+    .font(get_font(style))
+    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
+        StyleTuple(style, ElementType::Standard),
+    ));
+
+    let mut ret_val = Column::new().spacing(5).push(checkbox);
+
+    if !favorite_notification.notify_on_favorite {
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Length::Fill)
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
+                )),
+        )
+    } else {
+        let sound_row =
+            Row::new()
+                .push(horizontal_space(Length::Units(50)))
+                .push(sound_favorite_radios(
+                    favorite_notification,
+                    get_font(style),
+                    style,
+                    language,
+                ));
+        ret_val = ret_val.push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)

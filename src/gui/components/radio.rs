@@ -1,7 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::sound::Sound;
-use crate::structs::notifications::ThresholdNotification;
+use crate::structs::notifications::{FavoriteNotifications, ThresholdNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
@@ -101,7 +101,7 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
     ret_val
 }
 
-pub fn sound_radios(
+pub fn sound_threshold_radios(
     threshold_notification: ThresholdNotification,
     font: Font,
     style: StyleType,
@@ -122,6 +122,42 @@ pub fn sound_radios(
                         ThresholdNotification {
                             sound: value,
                             ..threshold_notification
+                        },
+                        value.ne(&Sound::None),
+                    )
+                },
+            )
+            .font(font)
+            .size(15)
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                style,
+                ElementType::Standard,
+            ))),
+        );
+    }
+    ret_val
+}
+
+pub fn sound_favorite_radios(
+    favorite_notification: FavoriteNotifications,
+    font: Font,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
+    let mut ret_val = Row::new()
+        .spacing(20)
+        .push(Text::new(sound_translation(language)).font(font));
+    for option in Sound::ALL {
+        ret_val = ret_val.push(
+            Radio::new(
+                option,
+                option.get_radio_label(language),
+                Some(favorite_notification.sound),
+                |value| {
+                    Message::UpdateFavoriteNotification(
+                        FavoriteNotifications {
+                            sound: value,
+                            ..favorite_notification
                         },
                         value.ne(&Sound::None),
                     )

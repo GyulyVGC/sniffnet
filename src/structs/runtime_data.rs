@@ -48,6 +48,8 @@ pub struct RunTimeData {
     pub min_sent_packets: i128,
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i128,
+    /// Flag to determine if data were exchanged from favorites in the last interval of time
+    pub favorite_featured_last_interval: bool,
     /// Current time interval number
     pub ticks: u128,
 }
@@ -76,6 +78,7 @@ impl RunTimeData {
             max_received_bytes: 0,
             min_sent_packets: 0,
             max_received_packets: 0,
+            favorite_featured_last_interval: false,
             ticks: 0,
         }
     }

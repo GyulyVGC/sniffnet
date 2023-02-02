@@ -31,6 +31,8 @@ pub struct InfoTraffic {
     pub app_protocols: HashMap<AppProtocol, u128>,
     /// Collection of indexes of the favorite connections
     pub favorite_connections: HashSet<usize>,
+    /// Flag to determine if data were exchanged from favorites in the last interval of time
+    pub favorite_featured_last_interval: bool,
 }
 
 impl InfoTraffic {
@@ -47,6 +49,7 @@ impl InfoTraffic {
             addresses_last_interval: HashSet::new(),
             app_protocols: HashMap::new(),
             favorite_connections: HashSet::new(),
+            favorite_featured_last_interval: false,
         }
     }
 }

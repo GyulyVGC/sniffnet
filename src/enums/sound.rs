@@ -1,10 +1,10 @@
 use crate::enums::sound::Sound::{Bubble, Pop, Tic};
+use crate::utility::translations::none_translation;
+use crate::Language;
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::thread;
-use crate::Language;
-use crate::utility::translations::none_translation;
 
 /// Enum representing the possible notification sounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -12,7 +12,7 @@ pub enum Sound {
     Bubble,
     Pop,
     Tic,
-    None
+    None,
 }
 
 pub const BUBBLE: &[u8] = include_bytes!("../../resources/sounds/clearly.mp3");
@@ -34,7 +34,7 @@ impl Sound {
             Bubble => BUBBLE,
             Pop => POP,
             Tic => TIC,
-            Sound::None => &[]
+            Sound::None => &[],
         }
     }
 

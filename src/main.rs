@@ -23,7 +23,6 @@ use crate::enums::trans_protocol::TransProtocol;
 use crate::structs::config::Config;
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
-use crate::structs::notifications::Notifications;
 use crate::structs::palette::get_colors;
 use crate::structs::runtime_data::RunTimeData;
 use crate::structs::sniffer::Sniffer;
@@ -79,16 +78,11 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    let config_result = confy::load::<Config>("sniffnet", None);
+    let mut config_result = confy::load::<Config>("sniffnet", None);
     if config_result.is_err() {
         // it happens when changing the Config struct fields during development
-        let store = Config {
-            style: StyleType::default(),
-            language: Language::default(),
-            notifications: Notifications::default(),
-        };
-        println!("Updating config file...");
-        confy::store("sniffnet", None, store).unwrap();
+        confy::store("sniffnet", None, Config::default()).unwrap();
+        config_result = confy::load::<Config>("sniffnet", None);
     }
     let config = config_result.unwrap();
     let style = config.style;

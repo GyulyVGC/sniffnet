@@ -40,15 +40,19 @@ pub fn notify(runtime_data: &Ref<RunTimeData>, notifications: Notifications) {
         }
     }
     // from favorites
-    if notifications.on_favorite_notification.notify_on_favorite {
-        // qui andrà condizione: sono arrivati nuovi pacchi da favorite connections?
-        if true {
-            //log this notification
-            // ...
-            if !already_emitted_sound && notifications.on_favorite_notification.sound.ne(&Sound::None) {
-                // emit sound
-                play_sound(notifications.on_favorite_notification.sound);
-            }
+    if notifications.on_favorite_notification.notify_on_favorite
+        && runtime_data.favorite_featured_last_interval
+    {
+        //log this notification
+        // ...
+        if !already_emitted_sound
+            && notifications
+                .on_favorite_notification
+                .sound
+                .ne(&Sound::None)
+        {
+            // emit sound
+            play_sound(notifications.on_favorite_notification.sound);
         }
     }
 }
