@@ -383,7 +383,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn threshold_translation(language: Language, value: String) -> String {
+pub fn threshold_translation(language: Language, value: &str) -> String {
     match language {
         Language::EN => format!("Threshold: {value}"),
         Language::IT => format!("Soglia: {value}"),

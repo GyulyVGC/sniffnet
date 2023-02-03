@@ -35,13 +35,13 @@ pub fn analyze_network_header(
                 .replace(']', "")
                 .replace(',', ".")
                 .replace(' ', "");
-            *exchanged_bytes = ipv4header.payload_len as u128;
+            *exchanged_bytes = u128::from(ipv4header.payload_len);
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
             *network_protocol = IpVersion::IPv6;
             *address1 = ipv6_from_long_dec_to_short_hex(ipv6header.source);
             *address2 = ipv6_from_long_dec_to_short_hex(ipv6header.destination);
-            *exchanged_bytes = ipv6header.payload_length as u128;
+            *exchanged_bytes = u128::from(ipv6header.payload_length);
         }
         _ => {
             *skip_packet = true;

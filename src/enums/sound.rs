@@ -64,7 +64,7 @@ pub fn play_sound(sound: Sound, volume: u8) {
             // Decode that sound file into a source
             let source = Decoder::new(data).unwrap();
             // Play the sound directly on the device
-            sink.set_volume(volume as f32 / 200.0); // set the desired volume
+            sink.set_volume(f32::from(volume) / 200.0); // set the desired volume
             sink.append(source);
             // The sound plays in a separate thread. This call will block the current thread until the sink
             // has finished playing all its queued sounds.

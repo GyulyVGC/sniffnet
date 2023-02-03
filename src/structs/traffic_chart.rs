@@ -1,7 +1,6 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display charts in GUI run page
 
 use std::cell::RefCell;
-use std::cmp::max;
 use std::rc::Rc;
 
 use iced::alignment::{Horizontal, Vertical};
@@ -84,7 +83,11 @@ impl Chart<Message> for TrafficChart {
             return;
         }
         let tot_seconds = self.charts_data.borrow().ticks - 1;
-        let first_time_displayed = max(0, self.charts_data.borrow().ticks as i128 - 30) as u128;
+        let first_time_displayed = if self.charts_data.borrow().ticks > 30 {
+            self.charts_data.borrow().ticks - 30
+        } else {
+            0
+        };
 
         let color_incoming = self.color_incoming;
         let color_outgoing = self.color_outgoing;
@@ -106,18 +109,21 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 13).into_font().color(&self.color_font))
-                    .y_label_formatter(&|bytes| match bytes {
-                        0..=999 | -999..=-1 => {
-                            format!("{bytes}")
-                        }
-                        1000..=999_999 | -999_999..=-1000 => {
-                            format!("{:.1} {}", *bytes as f64 / 1_000_f64, "k")
-                        }
-                        1_000_000..=999_999_999 | -999_999_999..=-1_000_000 => {
-                            format!("{:.1} {}", *bytes as f64 / 1_000_000_f64, "M")
-                        }
-                        _ => {
-                            format!("{:.1} {}", *bytes as f64 / 1_000_000_000_f64, "G")
+                    .y_label_formatter(&|bytes| {
+                        let bytes_abs = bytes.abs();
+                        match bytes_abs {
+                            0..=999 => {
+                                format!("{bytes_abs}")
+                            }
+                            1000..=999_999 => {
+                                format!("{:.1} {}", bytes_abs as f32 / 1_000_f32, "k")
+                            }
+                            1_000_000..=999_999_999 => {
+                                format!("{:.1} {}", bytes_abs as f32 / 1_000_000_f32, "M")
+                            }
+                            _ => {
+                                format!("{:.1} {}", bytes_abs as f32 / 1_000_000_000_f32, "G")
+                            }
                         }
                     })
                     .draw()
@@ -179,6 +185,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 13).into_font().color(&self.color_font))
+                    .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
                     .unwrap();
                 chart

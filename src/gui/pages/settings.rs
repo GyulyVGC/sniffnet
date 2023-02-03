@@ -90,7 +90,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         if bytes_threshold.is_some() {
                             Some(format!(
                                 "{:>8}",
-                                get_formatted_bytes_string(bytes_threshold.unwrap() as u128)
+                                get_formatted_bytes_string(u128::from(bytes_threshold.unwrap()))
                             ))
                         } else {
                             None
@@ -295,7 +295,7 @@ fn get_threshold_notify(
         let slider_row = Row::new()
             .push(horizontal_space(Length::Units(50)))
             .push(
-                Text::new(threshold_translation(language, threshold_label.unwrap()))
+                Text::new(threshold_translation(language, &threshold_label.unwrap()))
                     .font(get_font(style)),
             )
             .push(horizontal_space(Length::Units(30)))
@@ -382,16 +382,7 @@ fn get_favorite_notify(
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
-    if !favorite_notification.notify_on_favorite {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(Length::Units(650))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
-                )),
-        )
-    } else {
+    if favorite_notification.notify_on_favorite {
         let sound_row =
             Row::new()
                 .push(horizontal_space(Length::Units(50)))
@@ -404,6 +395,15 @@ fn get_favorite_notify(
         ret_val = ret_val
             .push(vertical_space(Length::Units(5)))
             .push(sound_row);
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Length::Units(650))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
+                )),
+        )
+    } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)

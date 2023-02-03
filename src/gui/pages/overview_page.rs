@@ -69,7 +69,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         let filtered_bytes = sniffer.runtime_data.borrow().tot_sent_bytes
             + sniffer.runtime_data.borrow().tot_received_bytes;
         let app_protocols = sniffer.runtime_data.borrow().app_protocols.clone();
-        let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes as u128);
+        let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -178,7 +178,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         .push(filtered_application_translation(sniffer.language).font(font))
                         .push(
                             Scrollable::new(
-                                Text::new(get_app_count_string(&app_protocols, filtered as u128))
+                                Text::new(get_app_count_string(&app_protocols, filtered))
                                     .font(font),
                             )
                             .style(<StyleTuple as Into<

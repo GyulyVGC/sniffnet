@@ -7,11 +7,11 @@ pub fn notify(runtime_data: &Ref<RunTimeData>, notifications: Notifications) {
     let mut already_emitted_sound = false;
     // packets threshold
     if notifications.packets_notification.threshold.is_some() {
-        let sent_packets_entry = runtime_data.tot_sent_packets_prev - runtime_data.tot_sent_packets;
+        let sent_packets_entry = runtime_data.tot_sent_packets - runtime_data.tot_sent_packets_prev;
         let received_packets_entry =
             runtime_data.tot_received_packets - runtime_data.tot_received_packets_prev;
-        if received_packets_entry - sent_packets_entry
-            > notifications.packets_notification.threshold.unwrap() as i128
+        if received_packets_entry + sent_packets_entry
+            > u128::from(notifications.packets_notification.threshold.unwrap())
         {
             // log this notification
             // ...
@@ -30,8 +30,8 @@ pub fn notify(runtime_data: &Ref<RunTimeData>, notifications: Notifications) {
         let sent_bytes_entry = runtime_data.tot_sent_bytes_prev - runtime_data.tot_sent_bytes;
         let received_bytes_entry =
             runtime_data.tot_received_bytes - runtime_data.tot_received_bytes_prev;
-        if received_bytes_entry - sent_bytes_entry
-            > notifications.bytes_notification.threshold.unwrap() as i128
+        if received_bytes_entry + sent_bytes_entry
+            > u128::from(notifications.bytes_notification.threshold.unwrap())
         {
             //log this notification
             // ...

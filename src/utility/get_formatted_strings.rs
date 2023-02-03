@@ -13,7 +13,7 @@ use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtoc
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Computes the String representing the percentage of filtered bytes/packets
-pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
+pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
     if format!("{:.1}", 100.0 * (filtered) as f32 / observed as f32).eq("0.0") {
         "<0.1%".to_string()
     } else {

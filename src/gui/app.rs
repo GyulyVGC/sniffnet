@@ -68,15 +68,15 @@ impl Application for Sniffer {
                     self.update(Message::Waiting);
                 } else {
                     self.runtime_data.borrow_mut().tot_sent_packets =
-                        info_traffic_lock.tot_sent_packets as i128;
+                        info_traffic_lock.tot_sent_packets;
                     self.runtime_data.borrow_mut().tot_received_packets =
-                        info_traffic_lock.tot_received_packets as i128;
+                        info_traffic_lock.tot_received_packets;
                     self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
                     self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
                     self.runtime_data.borrow_mut().tot_received_bytes =
-                        info_traffic_lock.tot_received_bytes as i128;
+                        info_traffic_lock.tot_received_bytes;
                     self.runtime_data.borrow_mut().tot_sent_bytes =
-                        info_traffic_lock.tot_sent_bytes as i128;
+                        info_traffic_lock.tot_sent_bytes;
                     self.runtime_data.borrow_mut().app_protocols =
                         info_traffic_lock.app_protocols.clone();
                     self.runtime_data
