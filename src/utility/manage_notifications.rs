@@ -27,7 +27,7 @@ pub fn notify(runtime_data: &Ref<RunTimeData>, notifications: Notifications) {
     }
     // bytes threshold
     if notifications.bytes_notification.threshold.is_some() {
-        let sent_bytes_entry = runtime_data.tot_sent_bytes_prev - runtime_data.tot_sent_bytes;
+        let sent_bytes_entry = runtime_data.tot_sent_bytes - runtime_data.tot_sent_bytes_prev;
         let received_bytes_entry =
             runtime_data.tot_received_bytes - runtime_data.tot_received_bytes_prev;
         if received_bytes_entry + sent_bytes_entry
