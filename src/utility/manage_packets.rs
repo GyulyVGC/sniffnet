@@ -198,7 +198,7 @@ pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Ac
         .open();
     if cap_result.is_err() {
         let err_string = cap_result.err().unwrap().to_string();
-        (Option::Some(err_string), None)
+        (Some(err_string), None)
     } else {
         (None, cap_result.ok())
     }
@@ -222,14 +222,14 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     //from hex to dec, paying attention to the correct number of digits
     let mut ipv6_hex = String::new();
     for i in 0..=15 {
-        //pari: primo byte del gruppo
+        //even: first byte of the group
         if i % 2 == 0 {
             if *ipv6_long.get(i).unwrap() == 0 {
                 continue;
             }
             ipv6_hex.push_str(&format!("{:x}", ipv6_long.get(i).unwrap()));
         }
-        //dispari: secondo byte del gruppo
+        //odd: second byte of the group
         else if *ipv6_long.get(i - 1).unwrap() == 0 {
             ipv6_hex.push_str(&format!("{:x}:", ipv6_long.get(i).unwrap()));
         } else {

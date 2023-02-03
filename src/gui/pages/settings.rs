@@ -9,8 +9,8 @@ use crate::structs::notifications::{FavoriteNotification, ThresholdNotification}
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 use crate::utility::style_constants::{
-    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, MON_AMOUR, YETI_DAY,
-    YETI_NIGHT,
+    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS, MON_AMOUR,
+    YETI_DAY, YETI_NIGHT,
 };
 use crate::utility::translations::{
     appearance_title_translation, bytes_threshold_translation, deep_sea_translation,
@@ -26,6 +26,7 @@ use iced::widget::{
     button, horizontal_space, image::Handle, vertical_space, Button, Checkbox, Column, Container,
     Image, Row, Scrollable, Text, Tooltip,
 };
+use iced::Length::Units;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{Slider, VerticalSlider};
@@ -53,7 +54,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Length::Units(15)))
+        .push(vertical_space(Units(15)))
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
@@ -61,14 +62,14 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
         )
-        .push(vertical_space(Length::Units(5)));
+        .push(vertical_space(Units(5)));
 
     let notification_volume_row = Row::new()
         .width(Length::Fill)
         .push(
             Scrollable::new(
                 Column::new()
-                    .width(Length::Units(670))
+                    .width(Units(670))
                     .push(get_threshold_notify(
                         sniffer.notifications.packets_notification,
                         sniffer.language,
@@ -117,8 +118,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     content = content.push(notification_volume_row);
 
     Container::new(content)
-        .height(Length::Units(400))
-        .width(Length::Units(800))
+        .height(Units(400))
+        .width(Units(800))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
@@ -146,13 +147,13 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Length::Units(15)))
+        .push(vertical_space(Units(15)))
         .push(
             appearance_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Units(10)))
+        .push(vertical_space(Units(10)))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -162,7 +163,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     yeti_night_translation(sniffer.language).to_string(),
                     Night,
                 ))
-                .push(horizontal_space(Length::Units(33)))
+                .push(horizontal_space(Units(33)))
                 .push(get_palette_container(
                     sniffer.style,
                     YETI_DAY,
@@ -171,7 +172,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     Day,
                 )),
         )
-        .push(vertical_space(Length::Units(10)))
+        .push(vertical_space(Units(10)))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -181,7 +182,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                     deep_sea_translation(sniffer.language).to_string(),
                     DeepSea,
                 ))
-                .push(horizontal_space(Length::Units(33)))
+                .push(horizontal_space(Units(33)))
                 .push(get_palette_container(
                     sniffer.style,
                     MON_AMOUR,
@@ -192,8 +193,8 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
         );
 
     Container::new(content)
-        .height(Length::Units(400))
-        .width(Length::Units(800))
+        .height(Units(400))
+        .width(Units(800))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
@@ -225,18 +226,18 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Length::Units(15)))
+        .push(vertical_space(Units(15)))
         .push(
             languages_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Units(20)))
         .push(col_language_radio);
 
     Container::new(content)
-        .height(Length::Units(400))
-        .width(Length::Units(800))
+        .height(Units(400))
+        .width(Units(800))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
@@ -283,22 +284,22 @@ fn get_threshold_notify(
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if threshold_notification.threshold.is_none() {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(Length::Units(650))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+                    style,
+                    ElementType::BorderedRound,
                 )),
-        )
+            ))
     } else {
         let slider_row = Row::new()
-            .push(horizontal_space(Length::Units(50)))
+            .push(horizontal_space(Units(50)))
             .push(
                 Text::new(threshold_translation(language, &threshold_label.unwrap()))
                     .font(get_font(style)),
             )
-            .push(horizontal_space(Length::Units(30)))
+            .push(horizontal_space(Units(30)))
             .push(
                 Slider::new(
                     0..=upper_bound,
@@ -315,34 +316,33 @@ fn get_threshold_notify(
                     },
                 )
                 .step(10)
-                .width(Length::Units(400))
+                .width(Units(400))
                 .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                     style,
                     ElementType::Standard,
                 ))),
             );
-        let sound_row =
-            Row::new()
-                .push(horizontal_space(Length::Units(50)))
-                .push(sound_threshold_radios(
-                    threshold_notification,
-                    get_font(style),
-                    style,
-                    language,
-                    message,
-                ));
+        let sound_row = Row::new()
+            .push(horizontal_space(Units(50)))
+            .push(sound_threshold_radios(
+                threshold_notification,
+                get_font(style),
+                style,
+                language,
+                message,
+            ));
         ret_val = ret_val
-            .push(vertical_space(Length::Units(5)))
+            .push(vertical_space(Units(5)))
             .push(slider_row)
             .push(sound_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(Length::Units(650))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+                    style,
+                    ElementType::BorderedRound,
                 )),
-        )
+            ))
     }
 }
 
@@ -383,35 +383,32 @@ fn get_favorite_notify(
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
-        let sound_row =
-            Row::new()
-                .push(horizontal_space(Length::Units(50)))
-                .push(sound_favorite_radios(
-                    favorite_notification,
-                    get_font(style),
+        let sound_row = Row::new()
+            .push(horizontal_space(Units(50)))
+            .push(sound_favorite_radios(
+                favorite_notification,
+                get_font(style),
+                style,
+                language,
+            ));
+        ret_val = ret_val.push(vertical_space(Units(5))).push(sound_row);
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
-                    language,
-                ));
-        ret_val = ret_val
-            .push(vertical_space(Length::Units(5)))
-            .push(sound_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(Length::Units(650))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                    ElementType::BorderedRound,
                 )),
-        )
+            ))
     } else {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(Length::Units(650))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+                    style,
+                    ElementType::BorderedRound,
                 )),
-        )
+            ))
     }
 }
 
@@ -424,11 +421,22 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
             .push(
                 VerticalSlider::new(0..=100, volume, Message::ChangeVolume)
                     .step(5)
-                    .height(Length::Units(150))
+                    .height(Units(150))
                     .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                         style,
                         ElementType::Standard,
                     ))),
+            )
+            .push(
+                Text::new(if volume == 0 {
+                    'Y'.to_string()
+                } else {
+                    'Z'.to_string()
+                })
+                .height(Units(30))
+                .vertical_alignment(Vertical::Center)
+                .size(18 + u16::from(volume) * 12 / 100)
+                .font(ICONS),
             )
             .push(Text::new(volume_translation(language, volume)).font(get_font(style))),
     )
@@ -451,12 +459,12 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Length::Units(300)))
+        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Units(300)))
         .push(Text::new(description).font(font));
 
     Button::new(content)
-        .height(Length::Units(130))
-        .width(Length::Units(350))
+        .height(Units(130))
+        .width(Units(350))
         .padding(10)
         .style(StyleTuple(style, ElementType::BorderedRound).into())
         .on_press(Message::Style(on_press))
@@ -483,8 +491,8 @@ fn get_settings_header(style: StyleType, language: Language) -> Container<'stati
                                 .size(15),
                         )
                         .padding(2)
-                        .height(Length::Units(20))
-                        .width(Length::Units(20))
+                        .height(Units(20))
+                        .width(Units(20))
                         .style(StyleTuple(style, ElementType::Standard).into())
                         .on_press(Message::HideModal(false)),
                         hide_translation(language),
@@ -501,7 +509,7 @@ fn get_settings_header(style: StyleType, language: Language) -> Container<'stati
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Length::Units(40))
+    .height(Units(40))
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),

@@ -9,7 +9,7 @@ pub enum Language {
     IT,
 }
 
-impl ::std::default::Default for Language {
+impl Default for Language {
     fn default() -> Self {
         Self::EN
     }

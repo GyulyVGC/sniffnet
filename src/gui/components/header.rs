@@ -10,7 +10,7 @@ use crate::{Language, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, horizontal_space, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Length};
+use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 
 pub fn get_header(
@@ -102,8 +102,8 @@ pub fn get_button_settings(style: StyleType, language: Language) -> Tooltip<'sta
     let content = button(
         Text::new("a")
             .font(ICONS)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
     )
     .padding(10)
     .height(Length::Units(40))

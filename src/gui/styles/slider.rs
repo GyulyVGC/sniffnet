@@ -16,7 +16,7 @@ impl From<StyleTuple> for iced::theme::Slider {
 impl iced::widget::slider::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
-    fn active(&self, _: &Self::Style) -> iced_native::widget::slider::Appearance {
+    fn active(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
             rail_colors: (colors.secondary, colors.primary),
@@ -29,7 +29,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
         }
     }
 
-    fn hovered(&self, _: &Self::Style) -> iced_native::widget::slider::Appearance {
+    fn hovered(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
             rail_colors: (colors.secondary, colors.secondary),
@@ -42,7 +42,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
         }
     }
 
-    fn dragging(&self, _: &Self::Style) -> iced_native::widget::slider::Appearance {
+    fn dragging(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
             rail_colors: (colors.secondary, colors.secondary),

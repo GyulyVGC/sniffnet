@@ -46,9 +46,9 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(10)
         .width(FillPortion(2))
         .push(col_transport_radio)
-        .push(vertical_space(Length::FillPortion(2)))
+        .push(vertical_space(FillPortion(2)))
         .push(get_button_start(sniffer.style, sniffer.language))
-        .push(vertical_space(Length::FillPortion(1)));
+        .push(vertical_space(FillPortion(1)));
 
     let app_active = sniffer.filters.application;
     let picklist_app = PickList::new(

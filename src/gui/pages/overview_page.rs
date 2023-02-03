@@ -94,12 +94,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     )
                 };
                 body = body
-                    .push(vertical_space(Length::FillPortion(1)))
+                    .push(vertical_space(FillPortion(1)))
                     .push(icon_text)
                     .push(vertical_space(Length::Units(15)))
                     .push(nothing_to_see_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(Length::FillPortion(2)));
+                    .push(vertical_space(FillPortion(2)));
             }
 
             (observed, 0) => {
@@ -114,12 +114,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font);
 
                 body = body
-                    .push(vertical_space(Length::FillPortion(1)))
+                    .push(vertical_space(FillPortion(1)))
                     .push(Text::new('V'.to_string()).font(ICONS).size(60))
                     .push(vertical_space(Length::Units(15)))
                     .push(tot_packets_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(Length::FillPortion(2)));
+                    .push(vertical_space(FillPortion(2)));
             }
 
             (observed, filtered) => {
@@ -319,12 +319,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             .font(font);
 
         body = body
-            .push(vertical_space(Length::FillPortion(1)))
+            .push(vertical_space(FillPortion(1)))
             .push(Text::new('U'.to_string()).font(ICONS).size(60))
             .push(vertical_space(Length::Units(15)))
             .push(error_text)
             .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(vertical_space(Length::FillPortion(2)));
+            .push(vertical_space(FillPortion(2)));
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))

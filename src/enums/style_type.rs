@@ -9,7 +9,7 @@ pub enum StyleType {
     MonAmour,
 }
 
-impl ::std::default::Default for StyleType {
+impl Default for StyleType {
     fn default() -> Self {
         Self::Night
     }

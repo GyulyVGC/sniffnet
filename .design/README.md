@@ -50,7 +50,7 @@ All users with a decent amount of technological knowledge. Typical users' age ra
 
 ### Design files
 
-> Since I do not have a design team at hand – most of my product does not have any Design files and you'll be forced to browse through the product itself and propose improvements.
+> Since I do not have a design team at hand – most of my product does not have any Design files, and you'll be forced to browse through the product itself and propose improvements.
 
 ## 💅 Design relevant materials
 

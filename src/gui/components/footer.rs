@@ -38,7 +38,7 @@ pub fn get_footer(style: StyleType) -> Container<'static, Message> {
         ))
 }
 
-pub fn get_button_github(style: StyleType) -> iced::widget::Tooltip<'static, Message> {
+pub fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)

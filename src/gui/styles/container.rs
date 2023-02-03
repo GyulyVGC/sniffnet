@@ -20,11 +20,11 @@ impl iced::widget::container::StyleSheet for StyleTuple {
     fn appearance(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            text_color: Option::Some(match self {
+            text_color: Some(match self {
                 StyleTuple(_, ElementType::Headers) => colors.text_headers,
                 _ => colors.text_body,
             }),
-            background: Option::Some(Background::Color(match self {
+            background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Headers) => colors.secondary,
                 _ => colors.primary,
             })),

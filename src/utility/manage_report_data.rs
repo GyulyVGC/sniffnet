@@ -11,7 +11,7 @@ pub fn update_report_data(
     report_type: ReportType,
 ) {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    runtime_data.report_vec = std::vec::Vec::default();
+    runtime_data.report_vec = Vec::default();
 
     if report_type.ne(&ReportType::Favorites) {
         let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> =

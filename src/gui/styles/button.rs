@@ -57,7 +57,7 @@ impl button::StyleSheet for StyleTuple {
 
     fn hovered(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
-        iced::widget::button::Appearance {
+        button::Appearance {
             shadow_offset: Vector::new(2.0, 2.0),
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Starred) => STARRED,

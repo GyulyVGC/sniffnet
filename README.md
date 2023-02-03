@@ -46,7 +46,7 @@ cargo install sniffnet
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
-  Choose between a Windows installer, a DEB package, or a MacOS disk image (depending on your operating system).
+  Choose between a Windows installer, a DEB package, or a macOS disk image (depending on your operating system).
     
 </details>
 

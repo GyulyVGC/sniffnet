@@ -40,16 +40,16 @@ impl Sound {
 
     pub fn get_radio_label(&self, language: Language) -> &str {
         match self {
-            Sound::Bubble => "Bubble",
-            Sound::Pop => "Pop",
-            Sound::Tic => "Tic",
+            Bubble => "Bubble",
+            Pop => "Pop",
+            Tic => "Tic",
             Sound::None => none_translation(language),
         }
     }
 }
 
 pub fn play_sound(sound: Sound, volume: u8) {
-    if sound.eq(&Sound::None) {
+    if sound.eq(&Sound::None) || volume == 0 {
         return;
     }
     let mp3_sound = sound.mp3_sound();

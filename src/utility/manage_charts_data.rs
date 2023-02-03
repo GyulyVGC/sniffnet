@@ -22,7 +22,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data.sent_bytes.push_back((
         tot_seconds,
-        -<u128 as std::convert::TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
+        -<u128 as TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
     ));
     charts_data.min_sent_bytes = get_min(&charts_data.sent_bytes.clone());
     charts_data.tot_sent_bytes_prev = charts_data.tot_sent_bytes;
@@ -42,7 +42,7 @@ pub fn update_charts_data(mut charts_data: RefMut<RunTimeData>) {
     }
     charts_data.sent_packets.push_back((
         tot_seconds,
-        -<u128 as std::convert::TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
+        -<u128 as TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
     ));
     charts_data.min_sent_packets = get_min(&charts_data.sent_packets.clone());
     charts_data.tot_sent_packets_prev = charts_data.tot_sent_packets;

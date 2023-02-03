@@ -10,7 +10,7 @@ pub struct Notifications {
     pub favorite_notification: FavoriteNotification,
 }
 
-impl std::default::Default for Notifications {
+impl Default for Notifications {
     fn default() -> Self {
         Notifications {
             volume: 60,
