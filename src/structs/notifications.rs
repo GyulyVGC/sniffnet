@@ -4,14 +4,16 @@ use serde::{Deserialize, Serialize};
 /// Used to contain the notifications configuration set by the user
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 pub struct Notifications {
+    pub volume: u8,
     pub packets_notification: ThresholdNotification,
     pub bytes_notification: ThresholdNotification,
-    pub on_favorite_notification: FavoriteNotifications,
+    pub favorite_notification: FavoriteNotification,
 }
 
 impl std::default::Default for Notifications {
     fn default() -> Self {
         Notifications {
+            volume: 60,
             packets_notification: ThresholdNotification {
                 threshold: None,
                 sound: Sound::Bubble,
@@ -22,7 +24,7 @@ impl std::default::Default for Notifications {
                 sound: Sound::Pop,
                 previous_threshold: 5_000_000,
             },
-            on_favorite_notification: FavoriteNotifications {
+            favorite_notification: FavoriteNotification {
                 notify_on_favorite: false,
                 sound: Sound::Tic,
             },
@@ -41,7 +43,7 @@ pub struct ThresholdNotification {
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
-pub struct FavoriteNotifications {
+pub struct FavoriteNotification {
     /// Flag to determine if this notification is enabled
     pub notify_on_favorite: bool,
     /// The sound to emit

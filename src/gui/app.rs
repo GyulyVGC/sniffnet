@@ -13,7 +13,7 @@ use std::time::Duration;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
 use crate::enums::running_page::RunningPage;
-use crate::enums::sound::play_sound;
+use crate::enums::sound::{play_sound, Sound};
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
@@ -255,21 +255,25 @@ impl Application for Sniffer {
             }
             Message::UpdatePacketsNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound);
+                    play_sound(value.sound, self.notifications.volume);
                 }
                 self.notifications.packets_notification = value;
             }
             Message::UpdateBytesNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound);
+                    play_sound(value.sound, self.notifications.volume);
                 }
                 self.notifications.bytes_notification = value;
             }
             Message::UpdateFavoriteNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound);
+                    play_sound(value.sound, self.notifications.volume);
                 }
-                self.notifications.on_favorite_notification = value;
+                self.notifications.favorite_notification = value;
+            }
+            Message::ChangeVolume(volume) => {
+                play_sound(Sound::Pop, volume);
+                self.notifications.volume = volume;
             }
         }
         Command::none()

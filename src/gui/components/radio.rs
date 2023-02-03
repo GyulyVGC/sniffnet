@@ -1,7 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::sound::Sound;
-use crate::structs::notifications::{FavoriteNotifications, ThresholdNotification};
+use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
@@ -139,7 +139,7 @@ pub fn sound_threshold_radios(
 }
 
 pub fn sound_favorite_radios(
-    favorite_notification: FavoriteNotifications,
+    favorite_notification: FavoriteNotification,
     font: Font,
     style: StyleType,
     language: Language,
@@ -155,7 +155,7 @@ pub fn sound_favorite_radios(
                 Some(favorite_notification.sound),
                 |value| {
                     Message::UpdateFavoriteNotification(
-                        FavoriteNotifications {
+                        FavoriteNotification {
                             sound: value,
                             ..favorite_notification
                         },

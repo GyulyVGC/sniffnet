@@ -1,6 +1,6 @@
 use crate::enums::overlay::Overlay;
 use crate::enums::running_page::RunningPage;
-use crate::structs::notifications::{FavoriteNotifications, ThresholdNotification};
+use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
@@ -51,5 +51,7 @@ pub enum Message {
     /// Set packets notification
     UpdateBytesNotification(ThresholdNotification, bool),
     /// Set packets notification
-    UpdateFavoriteNotification(FavoriteNotifications, bool),
+    UpdateFavoriteNotification(FavoriteNotification, bool),
+    /// Set notifications volume
+    ChangeVolume(u8),
 }

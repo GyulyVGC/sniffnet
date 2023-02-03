@@ -5,7 +5,7 @@ use crate::gui::components::radio::{
     language_radios, sound_favorite_radios, sound_threshold_radios,
 };
 use crate::gui::components::tab::get_settings_tabs;
-use crate::structs::notifications::{FavoriteNotifications, ThresholdNotification};
+use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 use crate::utility::style_constants::{
@@ -16,24 +16,25 @@ use crate::utility::translations::{
     appearance_title_translation, bytes_threshold_translation, deep_sea_translation,
     favorite_notification_translation, hide_translation, languages_title_translation,
     mon_amour_translation, notifications_title_translation, packets_threshold_translation,
-    settings_translation, threshold_translation, yeti_day_translation, yeti_night_translation,
+    settings_translation, threshold_translation, volume_translation, yeti_day_translation,
+    yeti_night_translation,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, image::Handle, vertical_space, Button, Checkbox, Column, Container,
-    Image, Row, Text, Tooltip,
+    Image, Row, Scrollable, Text, Tooltip,
 };
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
-use iced_native::widget::Slider;
+use iced_native::widget::{Slider, VerticalSlider};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let packets_threshold = sniffer.notifications.packets_notification.threshold;
     let bytes_threshold = sniffer.notifications.bytes_notification.threshold;
-    let content = Column::new()
+    let mut content = Column::new()
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
@@ -60,41 +61,60 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
         )
-        .push(vertical_space(Length::Units(10)))
-        .push(get_threshold_notify(
-            sniffer.notifications.packets_notification,
+        .push(vertical_space(Length::Units(5)));
+
+    let notification_volume_row = Row::new()
+        .width(Length::Fill)
+        .push(
+            Scrollable::new(
+                Column::new()
+                    .width(Length::Units(670))
+                    .push(get_threshold_notify(
+                        sniffer.notifications.packets_notification,
+                        sniffer.language,
+                        sniffer.style,
+                        packets_threshold_translation(sniffer.language).to_string(),
+                        if packets_threshold.is_some() {
+                            Some(format!("{:>4}", packets_threshold.unwrap()))
+                        } else {
+                            None
+                        },
+                        5_000,
+                        Message::UpdatePacketsNotification,
+                    ))
+                    .push(get_threshold_notify(
+                        sniffer.notifications.bytes_notification,
+                        sniffer.language,
+                        sniffer.style,
+                        bytes_threshold_translation(sniffer.language).to_string(),
+                        if bytes_threshold.is_some() {
+                            Some(format!(
+                                "{:>8}",
+                                get_formatted_bytes_string(bytes_threshold.unwrap() as u128)
+                            ))
+                        } else {
+                            None
+                        },
+                        50_000_000,
+                        Message::UpdateBytesNotification,
+                    ))
+                    .push(get_favorite_notify(
+                        sniffer.notifications.favorite_notification,
+                        sniffer.language,
+                        sniffer.style,
+                    )),
+            )
+            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
+        )
+        .push(volume_slider(
             sniffer.language,
             sniffer.style,
-            packets_threshold_translation(sniffer.language).to_string(),
-            if packets_threshold.is_some() {
-                Some(format!("{:>4}", packets_threshold.unwrap()))
-            } else {
-                None
-            },
-            5_000,
-            Message::UpdatePacketsNotification,
-        ))
-        .push(get_threshold_notify(
-            sniffer.notifications.bytes_notification,
-            sniffer.language,
-            sniffer.style,
-            bytes_threshold_translation(sniffer.language).to_string(),
-            if bytes_threshold.is_some() {
-                Some(format!(
-                    "{:>8}",
-                    get_formatted_bytes_string(bytes_threshold.unwrap() as u128)
-                ))
-            } else {
-                None
-            },
-            50_000_000,
-            Message::UpdateBytesNotification,
-        ))
-        .push(get_favorite_notify(
-            sniffer.notifications.on_favorite_notification,
-            sniffer.language,
-            sniffer.style,
+            sniffer.notifications.volume,
         ));
+
+    content = content.push(notification_volume_row);
 
     Container::new(content)
         .height(Length::Units(400))
@@ -266,7 +286,7 @@ fn get_threshold_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Length::Fill)
+                .width(Length::Units(650))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(style, ElementType::BorderedRound),
                 )),
@@ -311,11 +331,14 @@ fn get_threshold_notify(
                     language,
                     message,
                 ));
-        ret_val = ret_val.push(slider_row).push(sound_row);
+        ret_val = ret_val
+            .push(vertical_space(Length::Units(5)))
+            .push(slider_row)
+            .push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Length::Fill)
+                .width(Length::Units(650))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(style, ElementType::BorderedRound),
                 )),
@@ -324,7 +347,7 @@ fn get_threshold_notify(
 }
 
 fn get_favorite_notify(
-    favorite_notification: FavoriteNotifications,
+    favorite_notification: FavoriteNotification,
     language: Language,
     style: StyleType,
 ) -> Column<'static, Message> {
@@ -334,7 +357,7 @@ fn get_favorite_notify(
         move |toggled| {
             if toggled {
                 Message::UpdateFavoriteNotification(
-                    FavoriteNotifications {
+                    FavoriteNotification {
                         notify_on_favorite: true,
                         ..favorite_notification
                     },
@@ -342,7 +365,7 @@ fn get_favorite_notify(
                 )
             } else {
                 Message::UpdateFavoriteNotification(
-                    FavoriteNotifications {
+                    FavoriteNotification {
                         notify_on_favorite: false,
                         ..favorite_notification
                     },
@@ -363,7 +386,7 @@ fn get_favorite_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Length::Fill)
+                .width(Length::Units(650))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(style, ElementType::BorderedRound),
                 )),
@@ -378,16 +401,41 @@ fn get_favorite_notify(
                     style,
                     language,
                 ));
-        ret_val = ret_val.push(sound_row);
+        ret_val = ret_val
+            .push(vertical_space(Length::Units(5)))
+            .push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Length::Fill)
+                .width(Length::Units(650))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(style, ElementType::BorderedRound),
                 )),
         )
     }
+}
+
+fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {
+    Container::new(
+        Column::new()
+            .spacing(10)
+            .width(Length::Fill)
+            .align_items(Alignment::Center)
+            .push(
+                VerticalSlider::new(0..=100, volume, Message::ChangeVolume)
+                    .step(5)
+                    .height(Length::Units(150))
+                    .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
+                        style,
+                        ElementType::Standard,
+                    ))),
+            )
+            .push(Text::new(volume_translation(language, volume)).font(get_font(style))),
+    )
+    .width(Length::Fill)
+    .height(Length::Fill)
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
 }
 
 fn get_palette_container(

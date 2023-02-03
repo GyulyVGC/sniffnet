@@ -48,7 +48,10 @@ impl Sound {
     }
 }
 
-pub fn play_sound(sound: Sound) {
+pub fn play_sound(sound: Sound, volume: u8) {
+    if sound.eq(&Sound::None) {
+        return;
+    }
     let mp3_sound = sound.mp3_sound();
     thread::Builder::new()
         .name("thread_play_sound".to_string())
@@ -61,7 +64,7 @@ pub fn play_sound(sound: Sound) {
             // Decode that sound file into a source
             let source = Decoder::new(data).unwrap();
             // Play the sound directly on the device
-            sink.set_volume(0.1);
+            sink.set_volume(volume as f32 / 200.0); // set the desired volume
             sink.append(source);
             // The sound plays in a separate thread. This call will block the current thread until the sink
             // has finished playing all its queued sounds.
