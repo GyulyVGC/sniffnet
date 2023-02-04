@@ -7,7 +7,6 @@ use crate::gui::components::radio::{
 use crate::gui::components::tab::get_settings_tabs;
 use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 use crate::utility::style_constants::{
     get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS, MON_AMOUR,
     YETI_DAY, YETI_NIGHT,
@@ -24,7 +23,7 @@ use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, image::Handle, vertical_space, Button, Checkbox, Column, Container,
-    Image, Row, Scrollable, Text, Tooltip,
+    Image, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::Length::Units;
 use iced::{Alignment, Length};
@@ -33,8 +32,6 @@ use iced_native::widget::{Slider, VerticalSlider};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
-    let packets_threshold = sniffer.notifications.packets_notification.threshold;
-    let bytes_threshold = sniffer.notifications.bytes_notification.threshold;
     let mut content = Column::new()
         .width(Length::Fill)
         .push(get_settings_header(sniffer.style, sniffer.language))
@@ -75,12 +72,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.language,
                         sniffer.style,
                         packets_threshold_translation(sniffer.language).to_string(),
-                        if packets_threshold.is_some() {
-                            Some(format!("{:>4}", packets_threshold.unwrap()))
-                        } else {
-                            None
-                        },
-                        5_000,
+                        10_000,
                         Message::UpdatePacketsNotification,
                     ))
                     .push(get_threshold_notify(
@@ -88,15 +80,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.language,
                         sniffer.style,
                         bytes_threshold_translation(sniffer.language).to_string(),
-                        if bytes_threshold.is_some() {
-                            Some(format!(
-                                "{:>8}",
-                                get_formatted_bytes_string(u128::from(bytes_threshold.unwrap()))
-                            ))
-                        } else {
-                            None
-                        },
-                        50_000_000,
+                        1_000_000_000,
                         Message::UpdateBytesNotification,
                     ))
                     .push(get_favorite_notify(
@@ -248,7 +232,6 @@ fn get_threshold_notify(
     language: Language,
     style: StyleType,
     checkbox_label: String,
-    threshold_label: Option<String>,
     upper_bound: u32,
     message: fn(ThresholdNotification, bool) -> Message,
 ) -> Column<'static, Message> {
@@ -295,33 +278,12 @@ fn get_threshold_notify(
     } else {
         let slider_row = Row::new()
             .push(horizontal_space(Units(50)))
-            .push(
-                Text::new(threshold_translation(language, &threshold_label.unwrap()))
-                    .font(get_font(style)),
-            )
-            .push(horizontal_space(Units(30)))
-            .push(
-                Slider::new(
-                    0..=upper_bound,
-                    threshold_notification.threshold.unwrap(),
-                    move |value| {
-                        message(
-                            ThresholdNotification {
-                                threshold: Some(value),
-                                previous_threshold: value,
-                                ..threshold_notification
-                            },
-                            false,
-                        )
-                    },
-                )
-                .step(10)
-                .width(Units(400))
-                .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
-                    style,
-                    ElementType::Standard,
-                ))),
-            );
+            .push(Text::new(threshold_translation(language)).font(get_font(style)))
+            .push(if upper_bound > 1_000_000 {
+                logarithmic_threshold_slider(threshold_notification, upper_bound, style, message)
+            } else {
+                input_group_packets(threshold_notification, style, message)
+            });
         let sound_row = Row::new()
             .push(horizontal_space(Units(50)))
             .push(sound_threshold_radios(
@@ -410,6 +372,82 @@ fn get_favorite_notify(
                 )),
             ))
     }
+}
+
+fn input_group_packets(
+    threshold_notification: ThresholdNotification,
+    style: StyleType,
+    message: fn(ThresholdNotification, bool) -> Message,
+) -> Container<'static, Message> {
+    let curr_threshold_str = &threshold_notification.threshold.unwrap().to_string();
+    Container::new(
+        TextInput::new(
+            "0",
+            if curr_threshold_str == "0" {
+                ""
+            } else {
+                curr_threshold_str
+            },
+            move |value| {
+                let new_threshold = if value.is_empty() {
+                    0
+                } else {
+                    value
+                        .parse()
+                        .unwrap_or(threshold_notification.previous_threshold)
+                };
+                message(
+                    ThresholdNotification {
+                        threshold: Some(new_threshold),
+                        previous_threshold: new_threshold,
+                        ..threshold_notification
+                    },
+                    false,
+                )
+            },
+        )
+        .padding(1)
+        .font(get_font(style))
+        .width(Length::Units(100))
+        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+            StyleTuple(style, ElementType::Standard),
+        )),
+    )
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+}
+
+fn logarithmic_threshold_slider(
+    threshold_notification: ThresholdNotification,
+    upper_bound: u32,
+    style: StyleType,
+    message: fn(ThresholdNotification, bool) -> Message,
+) -> Container<'static, Message> {
+    let lower_exponent = 10.0_f32.log2();
+    let upper_exponent = (upper_bound as f32).log2();
+    Container::new(
+        Slider::new(
+            lower_exponent..=upper_exponent,
+            (threshold_notification.threshold.unwrap() as f32).log2(),
+            move |value| {
+                message(
+                    ThresholdNotification {
+                        threshold: Some((2.0_f32.powf(value)) as u32),
+                        previous_threshold: (2.0_f32.powf(value)) as u32,
+                        ..threshold_notification
+                    },
+                    false,
+                )
+            },
+        )
+        .width(Units(400))
+        .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
+            style,
+            ElementType::Standard,
+        ))),
+    )
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
 }
 
 fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {

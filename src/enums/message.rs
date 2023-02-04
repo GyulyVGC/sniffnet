@@ -27,7 +27,7 @@ pub enum Message {
     /// Un-saves the given connection into the favorites
     UnSaveConnection(usize),
     /// Open Sniffnet's complete textual report
-    //OpenReport,
+    OpenReport,
     /// Open Sniffnet's GitHub page
     OpenGithub,
     /// Start sniffing packets

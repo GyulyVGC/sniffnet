@@ -1,5 +1,5 @@
 use crate::utility::translations::{
-    appearance_translation, language_translation, notifications_translation,
+    language_translation, notifications_translation, style_translation,
 };
 use crate::Language;
 
@@ -20,7 +20,7 @@ impl Overlay {
     pub fn get_tab_label(&self, language: Language) -> &str {
         match self {
             Overlay::SettingsNotifications => notifications_translation(language),
-            Overlay::SettingsAppearance => appearance_translation(language),
+            Overlay::SettingsAppearance => style_translation(language),
             Overlay::SettingsLanguage => language_translation(language),
             Overlay::Alert => "",
         }

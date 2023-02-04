@@ -16,7 +16,7 @@ impl Default for Notifications {
             volume: 60,
             packets_notification: ThresholdNotification {
                 threshold: None,
-                sound: Sound::Bubble,
+                sound: Sound::Gulp,
                 previous_threshold: 500,
             },
             bytes_notification: ThresholdNotification {
@@ -26,7 +26,7 @@ impl Default for Notifications {
             },
             favorite_notification: FavoriteNotification {
                 notify_on_favorite: false,
-                sound: Sound::Tic,
+                sound: Sound::Swhoosh,
             },
         }
     }

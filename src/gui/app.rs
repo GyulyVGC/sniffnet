@@ -124,7 +124,6 @@ impl Application for Sniffer {
                     );
                 }
             }
-            /*
             Message::OpenReport => {
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
@@ -142,7 +141,7 @@ impl Application for Sniffer {
                     .arg("./sniffnet_report/report.txt")
                     .spawn()
                     .unwrap();
-            }*/
+            }
             Message::OpenGithub => {
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")

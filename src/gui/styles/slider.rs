@@ -1,4 +1,4 @@
-//! Checkbox style
+//! Slider style
 
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;

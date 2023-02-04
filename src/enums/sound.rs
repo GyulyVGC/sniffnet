@@ -1,4 +1,4 @@
-use crate::enums::sound::Sound::{Bubble, Pop, Tic};
+use crate::enums::sound::Sound::{Gulp, Pop, Swhoosh};
 use crate::utility::translations::none_translation;
 use crate::Language;
 use rodio::{Decoder, OutputStream, Sink};
@@ -9,15 +9,15 @@ use std::thread;
 /// Enum representing the possible notification sounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Sound {
-    Bubble,
+    Gulp,
     Pop,
-    Tic,
+    Swhoosh,
     None,
 }
 
-pub const BUBBLE: &[u8] = include_bytes!("../../resources/sounds/clearly.mp3");
+pub const GULP: &[u8] = include_bytes!("../../resources/sounds/gulp.mp3");
 pub const POP: &[u8] = include_bytes!("../../resources/sounds/pop.mp3");
-pub const TIC: &[u8] = include_bytes!("../../resources/sounds/click.mp3");
+pub const SWHOOSH: &[u8] = include_bytes!("../../resources/sounds/swhoosh.mp3");
 
 impl fmt::Display for Sound {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -27,22 +27,22 @@ impl fmt::Display for Sound {
 
 /// Defines a constant to be used in the picklist in gui notifications page
 impl Sound {
-    pub(crate) const ALL: [Sound; 4] = [Bubble, Pop, Tic, Sound::None];
+    pub(crate) const ALL: [Sound; 4] = [Gulp, Pop, Swhoosh, Sound::None];
 
     fn mp3_sound(self) -> &'static [u8] {
         match self {
-            Bubble => BUBBLE,
+            Gulp => GULP,
             Pop => POP,
-            Tic => TIC,
+            Swhoosh => SWHOOSH,
             Sound::None => &[],
         }
     }
 
     pub fn get_radio_label(&self, language: Language) -> &str {
         match self {
-            Bubble => "Bubble",
+            Gulp => "Gulp",
             Pop => "Pop",
-            Tic => "Tic",
+            Swhoosh => "Swhoosh",
             Sound::None => none_translation(language),
         }
     }

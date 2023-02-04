@@ -5,9 +5,10 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
-use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text};
+use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Length};
+use iced::{alignment, Alignment, Length};
+use iced_native::widget::tooltip::Position;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
@@ -26,7 +27,7 @@ use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_
 use crate::utility::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
-    some_observed_translation, waiting_translation,
+    open_report_translation, some_observed_translation, waiting_translation,
 };
 use crate::{AppProtocol, ReportType, RunningPage};
 
@@ -312,11 +313,41 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                             ),
                     )
                     .push(
-                        Column::new()
-                            .align_items(Alignment::Center)
-                            .height(FillPortion(2))
-                            .width(Length::Fill)
-                            .push(row_report),
+                        Container::new(
+                            Row::new()
+                                .spacing(15)
+                                .align_items(Alignment::Center)
+                                .width(Length::Fill)
+                                .push(row_report)
+                                .push(
+                                    Tooltip::new(
+                                        button(
+                                            Text::new('8'.to_string())
+                                                .font(ICONS)
+                                                .horizontal_alignment(alignment::Horizontal::Center)
+                                                .vertical_alignment(alignment::Vertical::Center),
+                                        )
+                                        .padding(10)
+                                        .height(Length::Units(50))
+                                        .width(Length::Units(75))
+                                        .style(
+                                            StyleTuple(sniffer.style, ElementType::Standard).into(),
+                                        )
+                                        .on_press(Message::OpenReport),
+                                        open_report_translation(sniffer.language),
+                                        Position::Top,
+                                    )
+                                    .gap(5)
+                                    .font(get_font(sniffer.style))
+                                    .style(
+                                        <StyleTuple as Into<iced::theme::Container>>::into(
+                                            StyleTuple(sniffer.style, ElementType::Tooltip),
+                                        ),
+                                    ),
+                                ),
+                        )
+                        .align_x(Horizontal::Center)
+                        .height(FillPortion(2)),
                     );
             }
         }

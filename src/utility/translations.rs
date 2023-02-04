@@ -334,10 +334,10 @@ pub fn notifications_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn appearance_translation(language: Language) -> &'static str {
+pub fn style_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Appearance",
-        Language::IT => "Estetica",
+        Language::EN => "Style",
+        Language::IT => "Stile",
     }
 }
 
@@ -383,10 +383,10 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn threshold_translation(language: Language, value: &str) -> String {
+pub fn threshold_translation(language: Language) -> String {
     match language {
-        Language::EN => format!("Threshold: {value}"),
-        Language::IT => format!("Soglia: {value}"),
+        Language::EN => "Threshold: ".to_string(),
+        Language::IT => "Soglia: ".to_string(),
     }
 }
 
@@ -401,5 +401,12 @@ pub fn sound_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Sound:",
         Language::IT => "Suono:",
+    }
+}
+
+pub fn open_report_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Open full report",
+        Language::IT => "Apri report completo",
     }
 }
