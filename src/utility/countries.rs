@@ -4,7 +4,7 @@ use iced::widget::{image::Handle, Image};
 use iced::Length;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
-pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../country_db/GeoLite2-Country.mmdb");
+pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
 pub fn get_country_code(
     traffic_type: TrafficType,
@@ -25,10 +25,10 @@ pub fn get_country_code(
             }
         }
     }
-    "//".to_string()
+    "".to_string()
 }
 
-const FLAGS_WIDTH: u16 = 15;
+pub const FLAGS_WIDTH: u16 = 15;
 
 pub const AD: &[u8] =
     include_bytes!("../../resources/countries_flags/png-16/andorra-16x16-32921.png");

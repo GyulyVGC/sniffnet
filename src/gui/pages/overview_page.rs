@@ -17,7 +17,7 @@ use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag;
+use crate::utility::countries::{get_flag, FLAGS_WIDTH};
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string,
@@ -218,20 +218,30 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     for key_val in &sniffer.runtime_data.borrow().report_vec {
                         let entry_color =
                             get_connection_color(key_val.1.traffic_type, sniffer.style);
-                        let flag = get_flag(&key_val.1.country);
-                        let entry_row = Row::new()
-                            .align_items(Alignment::Center)
-                            .push(
-                                Text::new(format!(
-                                    "{}{}",
-                                    key_val.0.print_gui(),
-                                    key_val.1.print_gui()
-                                ))
-                                .style(iced::theme::Text::Color(entry_color))
-                                .font(INCONSOLATA_BOLD),
-                            )
-                            .push(flag)
-                            .push(Text::new("  ").font(font))
+                        let mut entry_row = Row::new().align_items(Alignment::Center).push(
+                            Text::new(format!(
+                                "{}{}",
+                                key_val.0.print_gui(),
+                                key_val.1.print_gui()
+                            ))
+                            .style(iced::theme::Text::Color(entry_color))
+                            .font(INCONSOLATA_BOLD),
+                        );
+                        if key_val.1.country.is_empty() {
+                            entry_row = entry_row
+                                .push(
+                                    Text::new("?")
+                                        .width(Length::Units(FLAGS_WIDTH))
+                                        .style(iced::theme::Text::Color(entry_color))
+                                        .font(INCONSOLATA_BOLD),
+                                )
+                                .push(Text::new("    "));
+                        } else {
+                            entry_row = entry_row
+                                .push(get_flag(&key_val.1.country))
+                                .push(Text::new("  "));
+                        }
+                        entry_row = entry_row
                             .push(
                                 button(
                                     Text::new('X'.to_string())
