@@ -1,8 +1,8 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
-use db_ip::{CountryCode, DbIpDatabase};
 use etherparse::{IpHeader, TransportHeader};
+use maxminddb::Reader;
 use pcap::{Active, Capture, Device};
 
 use crate::enums::app_protocol::from_port_to_application_protocol;
@@ -91,7 +91,7 @@ pub fn modify_or_insert_in_map(
     exchanged_bytes: u128,
     traffic_type: TrafficType,
     application_protocol: AppProtocol,
-    db: &DbIpDatabase<CountryCode>,
+    country_db_reader: &Reader<&[u8]>,
 ) {
     let now = Local::now();
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
@@ -102,7 +102,7 @@ pub fn modify_or_insert_in_map(
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
     let country = if index == len {
         // first occurrence of key => retrieve country code
-        get_country_code(db, traffic_type, &key)
+        get_country_code(traffic_type, &key, country_db_reader)
     } else {
         // this key already occurred
         String::new()

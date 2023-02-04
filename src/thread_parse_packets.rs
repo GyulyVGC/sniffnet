@@ -9,6 +9,7 @@ use pcap::{Active, Capture, Device};
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
+use crate::utility::countries::COUNTRY_MMDB;
 use crate::utility::manage_packets::{
     analyze_network_header, analyze_transport_header, is_broadcast_address, is_multicast_address,
     modify_or_insert_in_map,
@@ -45,7 +46,7 @@ pub fn parse_packets_loop(
     let mut skip_packet;
     let mut reported_packet;
 
-    let db = db_ip::include_country_code_database!();
+    let country_db_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
 
     loop {
         match cap.next_packet() {
@@ -130,7 +131,7 @@ pub fn parse_packets_loop(
                                 exchanged_bytes,
                                 traffic_type,
                                 application_protocol,
-                                &db,
+                                &country_db_reader,
                             );
                             reported_packet = true;
                             // }

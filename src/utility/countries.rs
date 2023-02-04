@@ -1,25 +1,31 @@
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
-use db_ip::{CountryCode, DbIpDatabase};
 use iced::widget::{image::Handle, Image};
 use iced::Length;
+use maxminddb::{geoip2, MaxMindDBError, Reader};
+
+pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../country_db/GeoLite2-Country.mmdb");
 
 pub fn get_country_code(
-    db: &DbIpDatabase<CountryCode>,
     traffic_type: TrafficType,
     key: &AddressPortPair,
+    country_db_reader: &Reader<&[u8]>,
 ) -> String {
     let address_to_lookup = match traffic_type {
         TrafficType::Outgoing => &key.address2,
         _ => &key.address1,
     };
 
-    let country_code = db.get(&address_to_lookup.parse().unwrap());
-    if let Some(value) = country_code {
-        value.to_string().replace("ZZ", "//")
-    } else {
-        "//".to_string()
+    let country_result: Result<geoip2::Country, MaxMindDBError> =
+        country_db_reader.lookup(address_to_lookup.parse().unwrap());
+    if let Ok(res1) = country_result {
+        if let Some(res2) = res1.country {
+            if let Some(res3) = res2.iso_code {
+                return res3.to_string().replace("ZZ", "//");
+            }
+        }
     }
+    "//".to_string()
 }
 
 const FLAGS_WIDTH: u16 = 15;
