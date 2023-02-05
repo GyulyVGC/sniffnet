@@ -64,7 +64,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(1))
         .spacing(10)
         .push(
-            application_protocol_translation(sniffer.language)
+            Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )

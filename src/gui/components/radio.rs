@@ -51,7 +51,7 @@ pub fn transport_protocol_radios(
     language: Language,
 ) -> Column<'static, Message> {
     let mut ret_val = Column::new().spacing(10).push(
-        transport_protocol_translation(language)
+        Text::new(transport_protocol_translation(language))
             .font(font)
             .size(FONT_SIZE_SUBTITLE),
     );

@@ -107,6 +107,7 @@ pub fn modify_or_insert_in_map(
         // this key already occurred
         String::new()
     };
+    let is_already_featured = info_traffic.favorite_featured_last_interval.is_some();
     let mut update_favorite_featured = false;
     info_traffic
         .map
@@ -115,7 +116,7 @@ pub fn modify_or_insert_in_map(
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = now;
-            if info.is_favorite {
+            if info.is_favorite && !is_already_featured {
                 update_favorite_featured = true;
             }
         })
@@ -133,7 +134,8 @@ pub fn modify_or_insert_in_map(
         });
     info_traffic.addresses_last_interval.insert(index);
     if update_favorite_featured {
-        info_traffic.favorite_featured_last_interval = Some(key);
+        let info = info_traffic.map.get(&key).unwrap().clone();
+        info_traffic.favorite_featured_last_interval = Some((key, info));
     }
 }
 

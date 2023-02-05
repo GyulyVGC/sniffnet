@@ -50,7 +50,7 @@ pub struct RunTimeData {
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
     /// Flag to determine if data were exchanged from favorites in the last interval of time
-    pub favorite_featured_last_interval: Option<AddressPortPair>,
+    pub favorite_featured_last_interval: Option<(AddressPortPair, InfoAddressPortPair)>,
     /// Log of the received notifications
     pub logged_notifications: VecDeque<LoggedNotification>,
     /// Current time interval number

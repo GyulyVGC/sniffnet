@@ -30,7 +30,7 @@ use iced::widget::{
 use iced::Length::Units;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
-use iced_native::widget::VerticalSlider;
+use iced_native::widget::{Slider, VerticalSlider};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -63,12 +63,18 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         )
         .push(vertical_space(Units(5)));
 
-    let notification_volume_row = Row::new()
+    let volume_notification_col = Column::new()
+        .align_items(Alignment::Center)
         .width(Length::Fill)
+        .push(volume_slider(
+            sniffer.language,
+            sniffer.style,
+            sniffer.notifications.volume,
+        ))
         .push(
             Scrollable::new(
                 Column::new()
-                    .width(Units(670))
+                    .width(Units(720))
                     .push(get_packets_notify(
                         sniffer.notifications.packets_notification,
                         sniffer.language,
@@ -88,14 +94,9 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
                 StyleTuple(sniffer.style, ElementType::Standard),
             )),
-        )
-        .push(volume_slider(
-            sniffer.language,
-            sniffer.style,
-            sniffer.notifications.volume,
-        ));
+        );
 
-    content = content.push(notification_volume_row);
+    content = content.push(volume_notification_col);
 
     Container::new(content)
         .height(Units(400))
@@ -269,7 +270,7 @@ fn get_packets_notify(
     if packets_notification.threshold.is_none() {
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -295,7 +296,7 @@ fn get_packets_notify(
             .push(sound_row);
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -343,7 +344,7 @@ fn get_bytes_notify(
     if bytes_notification.threshold.is_none() {
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -369,7 +370,7 @@ fn get_bytes_notify(
             .push(sound_row);
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -426,7 +427,7 @@ fn get_favorite_notify(
         ret_val = ret_val.push(vertical_space(Units(5))).push(sound_row);
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -435,7 +436,7 @@ fn get_favorite_notify(
     } else {
         Column::new()
             .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
                 <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
                     style,
                     ElementType::BorderedRound,
@@ -585,33 +586,38 @@ fn input_group_bytes(
 fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {
     Container::new(
         Column::new()
-            .spacing(10)
-            .width(Length::Fill)
+            .spacing(5)
             .align_items(Alignment::Center)
-            .push(
-                VerticalSlider::new(0..=100, volume, Message::ChangeVolume)
+            .push(Text::new(volume_translation(language, volume)).font(get_font(style))
+            )
+            .push(Row::new().push(
+                Text::new(
+                    'Y'.to_string())
+                    .width(Units(30))
+                    .vertical_alignment(Vertical::Center)
+                    .size(20)
+                    .font(ICONS),
+            ).push(
+                Slider::new(0..=100, volume, Message::ChangeVolume)
                     .step(5)
-                    .height(Units(150))
+                    .width(Units(200))
                     .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                         style,
                         ElementType::Standard,
                     ))),
             )
-            .push(
-                Text::new(if volume == 0 {
-                    'Y'.to_string()
-                } else {
-                    'Z'.to_string()
-                })
-                .height(Units(30))
-                .vertical_alignment(Vertical::Center)
-                .size(18 + u16::from(volume) * 12 / 100)
-                .font(ICONS),
-            )
-            .push(Text::new(volume_translation(language, volume)).font(get_font(style))),
+                .push(horizontal_space(Length::Units(10)))
+                .push(
+                    Text::new(
+                        'Z'.to_string())
+                        .vertical_alignment(Vertical::Center)
+                        .size(20)
+                        .font(ICONS),
+                ))
     )
+        .padding(5)
     .width(Length::Fill)
-    .height(Length::Fill)
+    .height(Length::Units(60))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }

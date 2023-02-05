@@ -1,4 +1,6 @@
-use crate::enums::logged_notification::LoggedNotification;
+use crate::enums::logged_notification::{
+    BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
+};
 use crate::enums::sound::{play_sound, Sound};
 use crate::structs::notifications::Notifications;
 use crate::RunTimeData;
@@ -21,10 +23,12 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
             }
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::PacketsThresholdExceeded {
-                    notification: notifications.packets_notification,
-                    incoming: received_packets_entry.try_into().unwrap(),
-                    outgoing: sent_packets_entry.try_into().unwrap(),
-                    timestamp: Local::now().to_string().get(0..19).unwrap().to_string(),
+                    0: PacketsThresholdExceeded {
+                        notification: notifications.packets_notification,
+                        incoming: received_packets_entry.try_into().unwrap(),
+                        outgoing: sent_packets_entry.try_into().unwrap(),
+                        timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                    },
                 },
             );
             if notifications.packets_notification.sound.ne(&Sound::None) {
@@ -51,10 +55,12 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
             }
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::BytesThresholdExceeded {
-                    notification: notifications.bytes_notification,
-                    incoming: received_bytes_entry.try_into().unwrap(),
-                    outgoing: sent_bytes_entry.try_into().unwrap(),
-                    timestamp: Local::now().to_string().get(0..19).unwrap().to_string(),
+                    0: BytesThresholdExceeded {
+                        notification: notifications.bytes_notification,
+                        incoming: received_bytes_entry.try_into().unwrap(),
+                        outgoing: sent_bytes_entry.try_into().unwrap(),
+                        timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                    },
                 },
             );
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
@@ -80,9 +86,11 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
         runtime_data
             .logged_notifications
             .push_front(LoggedNotification::FavoriteTransmitted {
-                notification: notifications.favorite_notification,
-                connection: favorite_featured,
-                timestamp: Local::now().to_string().get(0..19).unwrap().to_string(),
+                0: FavoriteTransmitted {
+                    notification: notifications.favorite_notification,
+                    connection: favorite_featured,
+                    timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                },
             });
         if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
             // emit sound

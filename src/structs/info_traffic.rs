@@ -32,7 +32,7 @@ pub struct InfoTraffic {
     /// Collection of indexes of the favorite connections
     pub favorite_connections: HashSet<usize>,
     /// Flag to determine if data were exchanged from favorites in the last interval of time
-    pub favorite_featured_last_interval: Option<AddressPortPair>,
+    pub favorite_featured_last_interval: Option<(AddressPortPair, InfoAddressPortPair)>,
 }
 
 impl InfoTraffic {

@@ -1,29 +1,38 @@
 use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 
 /// Enum representing the possible observed values of IP protocol version.
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LoggedNotification {
     /// Packets threshold exceeded
-    PacketsThresholdExceeded {
-        notification: PacketsNotification,
-        incoming: u32,
-        outgoing: u32,
-        timestamp: String,
-    },
+    PacketsThresholdExceeded(PacketsThresholdExceeded),
     /// Byte threshold exceeded
-    BytesThresholdExceeded {
-        notification: BytesNotification,
-        incoming: u32,
-        outgoing: u32,
-        timestamp: String,
-    },
+    BytesThresholdExceeded(BytesThresholdExceeded),
     /// Favorite connection exchanged data
-    FavoriteTransmitted {
-        notification: FavoriteNotification,
-        connection: AddressPortPair,
-        timestamp: String,
-    },
+    FavoriteTransmitted(FavoriteTransmitted),
+}
+
+#[derive(Clone)]
+pub struct PacketsThresholdExceeded {
+    pub(crate) notification: PacketsNotification,
+    pub(crate) incoming: u32,
+    pub(crate) outgoing: u32,
+    pub(crate) timestamp: String,
+}
+
+#[derive(Clone)]
+pub struct BytesThresholdExceeded {
+    pub(crate) notification: BytesNotification,
+    pub(crate) incoming: u32,
+    pub(crate) outgoing: u32,
+    pub(crate) timestamp: String,
+}
+
+#[derive(Clone)]
+pub struct FavoriteTransmitted {
+    pub(crate) notification: FavoriteNotification,
+    pub(crate) connection: (AddressPortPair, InfoAddressPortPair),
+    pub(crate) timestamp: String,
 }
 
 // impl fmt::Display for LoggedNotification {

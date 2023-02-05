@@ -8,11 +8,11 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn application_protocol_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
+pub fn application_protocol_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => "Application protocol",
         Language::IT => "Protocollo applicativo",
-    })
+    }
 }
 
 pub fn select_filters_translation(language: Language) -> Text<'static> {
@@ -50,11 +50,11 @@ pub fn ip_version_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn transport_protocol_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
+pub fn transport_protocol_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => "Transport protocol",
         Language::IT => "Protocollo di trasporto",
-    })
+    }
 }
 
 pub fn traffic_rate_translation(language: Language) -> Text<'static> {
@@ -406,8 +406,8 @@ pub fn threshold_translation(language: Language) -> String {
 
 pub fn volume_translation(language: Language, value: u8) -> String {
     match language {
-        Language::EN => format!("Volume: {value}%"),
-        Language::IT => format!("Volume: {value}%"),
+        Language::EN => format!("Volume: {:^3}%", value),
+        Language::IT => format!("Volume: {:^3}%", value),
     }
 }
 
@@ -422,5 +422,41 @@ pub fn open_report_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Open full report",
         Language::IT => "Apri report completo",
+    }
+}
+
+pub fn bytes_exceeded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Bytes threshold exceeded!",
+        Language::IT => "Soglia di Byte superata!",
+    }
+}
+
+pub fn bytes_exceeded_value_translation(language: Language, value: String) -> String {
+    let trimmed_value = value.trim();
+    match language {
+        Language::EN => format!("{trimmed_value} bytes have been exchanged"),
+        Language::IT => format!("{trimmed_value} byte sono stati scambiati"),
+    }
+}
+
+pub fn packets_exceeded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Packets threshold exceeded!",
+        Language::IT => "Soglia di pacchetti superata!",
+    }
+}
+
+pub fn packets_exceeded_value_translation(language: Language, value: u32) -> String {
+    match language {
+        Language::EN => format!("{value} packets have been exchanged"),
+        Language::IT => format!("{value} pacchetti sono stati scambiati"),
+    }
+}
+
+pub fn favorite_transmitted_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "New data exchanged from favorites!",
+        Language::IT => "Nuovi dati scambiati dai preferiti!",
     }
 }
