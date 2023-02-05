@@ -107,16 +107,16 @@ pub fn modify_or_insert_in_map(
         // this key already occurred
         String::new()
     };
-    let mut favorite_featured_last_interval = info_traffic.favorite_featured_last_interval;
+    let mut update_favorite_featured = false;
     info_traffic
         .map
-        .entry(key)
+        .entry(key.clone())
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = now;
             if info.is_favorite {
-                favorite_featured_last_interval = true;
+                update_favorite_featured = true;
             }
         })
         .or_insert(InfoAddressPortPair {
@@ -132,7 +132,9 @@ pub fn modify_or_insert_in_map(
             is_favorite: false,
         });
     info_traffic.addresses_last_interval.insert(index);
-    info_traffic.favorite_featured_last_interval = favorite_featured_last_interval;
+    if update_favorite_featured {
+        info_traffic.favorite_featured_last_interval = Some(key);
+    }
 }
 
 /// Determines if the input address is a multicast address or not.

@@ -30,7 +30,7 @@ use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
 use crate::utility::manage_charts_data::update_charts_data;
-use crate::utility::manage_notifications::notify;
+use crate::utility::manage_notifications::notify_and_log;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
@@ -82,10 +82,10 @@ impl Application for Sniffer {
                     self.runtime_data
                         .borrow_mut()
                         .favorite_featured_last_interval =
-                        info_traffic_lock.favorite_featured_last_interval;
-                    info_traffic_lock.favorite_featured_last_interval = false;
+                        info_traffic_lock.favorite_featured_last_interval.clone();
+                    info_traffic_lock.favorite_featured_last_interval = None;
                     drop(info_traffic_lock);
-                    notify(&self.runtime_data.borrow(), self.notifications);
+                    notify_and_log(self.runtime_data.borrow_mut(), self.notifications);
                     update_charts_data(self.runtime_data.borrow_mut());
                     update_report_data(
                         self.runtime_data.borrow_mut(),

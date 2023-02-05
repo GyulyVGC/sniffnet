@@ -4,6 +4,7 @@ pub mod chart_type;
 pub mod element_type;
 pub mod ip_version;
 pub mod language;
+pub mod logged_notification;
 pub mod message;
 pub mod overlay;
 pub mod report_type;

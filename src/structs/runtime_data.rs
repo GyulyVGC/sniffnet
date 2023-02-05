@@ -2,6 +2,7 @@
 //!
 use std::collections::{HashMap, VecDeque};
 
+use crate::enums::logged_notification::LoggedNotification;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
@@ -49,7 +50,9 @@ pub struct RunTimeData {
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
     /// Flag to determine if data were exchanged from favorites in the last interval of time
-    pub favorite_featured_last_interval: bool,
+    pub favorite_featured_last_interval: Option<AddressPortPair>,
+    /// Log of the received notifications
+    pub logged_notifications: VecDeque<LoggedNotification>,
     /// Current time interval number
     pub ticks: u32,
 }
@@ -78,7 +81,8 @@ impl RunTimeData {
             max_received_bytes: 0,
             min_sent_packets: 0,
             max_received_packets: 0,
-            favorite_featured_last_interval: false,
+            favorite_featured_last_interval: None,
+            logged_notifications: VecDeque::default(),
             ticks: 0,
         }
     }
