@@ -29,7 +29,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         &["d ", "7 "],
         &[
             Message::ChangeRunningPage(RunningPage::Overview),
-           // Message::ChangeRunningPage(RunningPage::Inspect),
+            // Message::ChangeRunningPage(RunningPage::Inspect),
             Message::TickInit,
         ],
         RunningPage::Notifications,

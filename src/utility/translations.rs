@@ -385,7 +385,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 
 pub fn specify_multiples_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "; you can specify 'K', 'M' and 'G'",
+        Language::EN => "; you can also specify 'K', 'M' and 'G'",
         Language::IT => "; puoi anche specificare 'K', 'M' e 'G'",
     }
 }

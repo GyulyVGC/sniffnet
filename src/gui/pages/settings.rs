@@ -3,10 +3,11 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
 use crate::gui::components::radio::{
-    language_radios, sound_favorite_radios, sound_threshold_radios,
+    language_radios, sound_bytes_threshold_radios, sound_favorite_radios,
+    sound_packets_threshold_radios,
 };
 use crate::gui::components::tab::get_settings_tabs;
-use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
+use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
     get_font, get_font_headers, DEEP_SEA, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
@@ -68,23 +69,15 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             Scrollable::new(
                 Column::new()
                     .width(Units(670))
-                    .push(get_threshold_notify(
+                    .push(get_packets_notify(
                         sniffer.notifications.packets_notification,
-                        sniffer.byte_threshold_multiple,
                         sniffer.language,
                         sniffer.style,
-                        packets_threshold_translation(sniffer.language).to_string(),
-                        10_000,
-                        Message::UpdatePacketsNotification,
                     ))
-                    .push(get_threshold_notify(
+                    .push(get_bytes_notify(
                         sniffer.notifications.bytes_notification,
-                        sniffer.byte_threshold_multiple,
                         sniffer.language,
                         sniffer.style,
-                        bytes_threshold_translation(sniffer.language).to_string(),
-                        1_000_000_000,
-                        Message::UpdateBytesNotification,
                     ))
                     .push(get_favorite_notify(
                         sniffer.notifications.favorite_notification,
@@ -222,10 +215,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Units(20)))
         .push(col_language_radio)
         .push(vertical_space(Units(30)))
-        .push(Text::new("Support for more languages will come with the next releases.\n\n\
+        .push(Container::new(Text::new("Support for more languages will come with the next releases.\n\n\
         If you want to help me translating the app in your native language, give a look at Sniffnet issues on GitHub.")
-            .width(Length::Units(300))
-            .font(font));
+            .width(Length::Units(450))
+            .font(font)).padding(10).style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::BorderedRound),
+        )));
 
     Container::new(content)
         .height(Units(400))
@@ -235,36 +230,30 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-fn get_threshold_notify(
-    threshold_notification: ThresholdNotification,
-    byte_multiple: ByteMultiple,
+fn get_packets_notify(
+    packets_notification: PacketsNotification,
     language: Language,
     style: StyleType,
-    checkbox_label: String,
-    upper_bound: u32,
-    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Column<'static, Message> {
     let checkbox = Checkbox::new(
-        checkbox_label,
-        threshold_notification.threshold.is_some(),
+        packets_threshold_translation(language),
+        packets_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                message(
-                    ThresholdNotification {
-                        threshold: Some(threshold_notification.previous_threshold),
-                        ..threshold_notification
+                Message::UpdatePacketsNotification(
+                    PacketsNotification {
+                        threshold: Some(packets_notification.previous_threshold),
+                        ..packets_notification
                     },
                     false,
-                    byte_multiple,
                 )
             } else {
-                message(
-                    ThresholdNotification {
+                Message::UpdatePacketsNotification(
+                    PacketsNotification {
                         threshold: None,
-                        ..threshold_notification
+                        ..packets_notification
                     },
                     false,
-                    byte_multiple,
                 )
             }
         },
@@ -277,7 +266,7 @@ fn get_threshold_notify(
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
-    if threshold_notification.threshold.is_none() {
+    if packets_notification.threshold.is_none() {
         Column::new()
             .padding(5)
             .push(Container::new(ret_val).padding(10).width(Units(650)).style(
@@ -290,27 +279,90 @@ fn get_threshold_notify(
         let input_row = Row::new()
             .push(horizontal_space(Units(50)))
             .push(Text::new(threshold_translation(language)).font(get_font(style)))
-            .push(if upper_bound > 1_000_000 {
-                input_group_bytes(
-                    threshold_notification,
-                    byte_multiple,
+            .push(input_group_packets(packets_notification, style, language));
+        let sound_row =
+            Row::new()
+                .push(horizontal_space(Units(50)))
+                .push(sound_packets_threshold_radios(
+                    packets_notification,
+                    get_font(style),
                     style,
                     language,
-                    message,
+                ));
+        ret_val = ret_val
+            .push(vertical_space(Units(5)))
+            .push(input_row)
+            .push(sound_row);
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+                    style,
+                    ElementType::BorderedRound,
+                )),
+            ))
+    }
+}
+
+fn get_bytes_notify(
+    bytes_notification: BytesNotification,
+    language: Language,
+    style: StyleType,
+) -> Column<'static, Message> {
+    let checkbox = Checkbox::new(
+        bytes_threshold_translation(language),
+        bytes_notification.threshold.is_some(),
+        move |toggled| {
+            if toggled {
+                Message::UpdateBytesNotification(
+                    BytesNotification {
+                        threshold: Some(bytes_notification.previous_threshold),
+                        ..bytes_notification
+                    },
+                    false,
                 )
             } else {
-                input_group_packets(threshold_notification, style, language, message)
-            });
-        let sound_row = Row::new()
+                Message::UpdateBytesNotification(
+                    BytesNotification {
+                        threshold: None,
+                        ..bytes_notification
+                    },
+                    false,
+                )
+            }
+        },
+    )
+    .size(18)
+    .font(get_font(style))
+    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
+        StyleTuple(style, ElementType::Standard),
+    ));
+
+    let mut ret_val = Column::new().spacing(5).push(checkbox);
+
+    if bytes_notification.threshold.is_none() {
+        Column::new()
+            .padding(5)
+            .push(Container::new(ret_val).padding(10).width(Units(650)).style(
+                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+                    style,
+                    ElementType::BorderedRound,
+                )),
+            ))
+    } else {
+        let input_row = Row::new()
             .push(horizontal_space(Units(50)))
-            .push(sound_threshold_radios(
-                threshold_notification,
-                get_font(style),
-                style,
-                language,
-                byte_multiple,
-                message,
-            ));
+            .push(Text::new(threshold_translation(language)).font(get_font(style)))
+            .push(input_group_bytes(bytes_notification, style, language));
+        let sound_row =
+            Row::new()
+                .push(horizontal_space(Units(50)))
+                .push(sound_bytes_threshold_radios(
+                    bytes_notification,
+                    get_font(style),
+                    style,
+                    language,
+                ));
         ret_val = ret_val
             .push(vertical_space(Units(5)))
             .push(input_row)
@@ -393,12 +445,11 @@ fn get_favorite_notify(
 }
 
 fn input_group_packets(
-    threshold_notification: ThresholdNotification,
+    packets_notification: PacketsNotification,
     style: StyleType,
     language: Language,
-    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Container<'static, Message> {
-    let curr_threshold_str = &threshold_notification.threshold.unwrap().to_string();
+    let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
         .spacing(10)
         .push(
@@ -415,16 +466,15 @@ fn input_group_packets(
                     } else {
                         value
                             .parse()
-                            .unwrap_or(threshold_notification.previous_threshold)
+                            .unwrap_or(packets_notification.previous_threshold)
                     };
-                    message(
-                        ThresholdNotification {
+                    Message::UpdatePacketsNotification(
+                        PacketsNotification {
                             threshold: Some(new_threshold),
                             previous_threshold: new_threshold,
-                            ..threshold_notification
+                            ..packets_notification
                         },
                         false,
-                        ByteMultiple::B,
                     )
                 },
             )
@@ -447,17 +497,16 @@ fn input_group_packets(
 }
 
 fn input_group_bytes(
-    threshold_notification: ThresholdNotification,
-    byte_multiple: ByteMultiple,
+    bytes_notification: BytesNotification,
     style: StyleType,
     language: Language,
-    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Container<'static, Message> {
     let mut info_str = per_second_translation(language).to_string();
     info_str.push_str(specify_multiples_translation(language));
-    let mut curr_threshold_str =
-        (threshold_notification.threshold.unwrap() / byte_multiple.get_multiplier()).to_string();
-    curr_threshold_str.push_str(byte_multiple.get_char());
+    let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
+        / bytes_notification.byte_multiple.get_multiplier())
+    .to_string();
+    curr_threshold_str.push_str(bytes_notification.byte_multiple.get_char());
     let input_row = Row::new()
         .spacing(10)
         .push(
@@ -480,38 +529,38 @@ fn input_group_bytes(
                     {
                         // no multiple
                         value
-                            .parse::<u32>()
-                            .unwrap_or(threshold_notification.previous_threshold)
+                            .parse::<u64>()
+                            .unwrap_or(bytes_notification.previous_threshold)
                     } else {
                         // multiple
                         let last_char = value.chars().last().unwrap();
                         byte_multiple_inserted = from_char_to_multiple(last_char);
                         let without_multiple = value[0..value.len() - 1].to_string();
-                        if without_multiple.parse::<u32>().is_ok()
-                            && TryInto::<u32>::try_into(
-                                without_multiple.parse::<u64>().unwrap()
-                                    * u64::from(byte_multiple_inserted.get_multiplier()),
+                        if without_multiple.parse::<u64>().is_ok()
+                            && TryInto::<u64>::try_into(
+                                without_multiple.parse::<u128>().unwrap()
+                                    * u128::from(byte_multiple_inserted.get_multiplier()),
                             )
                             .is_ok()
                         {
-                            without_multiple.parse::<u32>().unwrap()
+                            without_multiple.parse::<u64>().unwrap()
                                 * byte_multiple_inserted.get_multiplier()
                         } else if without_multiple.is_empty() {
                             byte_multiple_inserted = ByteMultiple::B;
                             0
                         } else {
-                            byte_multiple_inserted = byte_multiple;
-                            threshold_notification.previous_threshold
+                            byte_multiple_inserted = bytes_notification.byte_multiple;
+                            bytes_notification.previous_threshold
                         }
                     };
-                    message(
-                        ThresholdNotification {
+                    Message::UpdateBytesNotification(
+                        BytesNotification {
                             threshold: Some(new_threshold),
                             previous_threshold: new_threshold,
-                            ..threshold_notification
+                            byte_multiple: byte_multiple_inserted,
+                            ..bytes_notification
                         },
                         false,
-                        byte_multiple_inserted,
                     )
                 },
             )

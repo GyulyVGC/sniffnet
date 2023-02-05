@@ -1,7 +1,6 @@
-use crate::enums::byte_multiple::ByteMultiple;
 use crate::enums::overlay::Overlay;
 use crate::enums::running_page::RunningPage;
-use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
+use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
@@ -48,9 +47,9 @@ pub enum Message {
     /// Select language
     LanguageSelection(Language),
     /// Set packets notification
-    UpdatePacketsNotification(ThresholdNotification, bool, ByteMultiple),
+    UpdatePacketsNotification(PacketsNotification, bool),
     /// Set packets notification
-    UpdateBytesNotification(ThresholdNotification, bool, ByteMultiple),
+    UpdateBytesNotification(BytesNotification, bool),
     /// Set packets notification
     UpdateFavoriteNotification(FavoriteNotification, bool),
     /// Set notifications volume

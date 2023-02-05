@@ -1,7 +1,7 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::sound::Sound;
-use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
+use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
@@ -9,7 +9,7 @@ use crate::utility::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
     traffic_rate_translation, transport_protocol_translation,
 };
-use crate::{ByteMultiple, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
+use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
@@ -101,13 +101,11 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
     ret_val
 }
 
-pub fn sound_threshold_radios(
-    threshold_notification: ThresholdNotification,
+pub fn sound_packets_threshold_radios(
+    packets_notification: PacketsNotification,
     font: Font,
     style: StyleType,
     language: Language,
-    byte_multiple: ByteMultiple,
-    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .spacing(20)
@@ -117,15 +115,50 @@ pub fn sound_threshold_radios(
             Radio::new(
                 option,
                 option.get_radio_label(language),
-                Some(threshold_notification.sound),
+                Some(packets_notification.sound),
                 |value| {
-                    message(
-                        ThresholdNotification {
+                    Message::UpdatePacketsNotification(
+                        PacketsNotification {
                             sound: value,
-                            ..threshold_notification
+                            ..packets_notification
                         },
                         value.ne(&Sound::None),
-                        byte_multiple,
+                    )
+                },
+            )
+            .font(font)
+            .size(15)
+            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                style,
+                ElementType::Standard,
+            ))),
+        );
+    }
+    ret_val
+}
+
+pub fn sound_bytes_threshold_radios(
+    bytes_notification: BytesNotification,
+    font: Font,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
+    let mut ret_val = Row::new()
+        .spacing(20)
+        .push(Text::new(sound_translation(language)).font(font));
+    for option in Sound::ALL {
+        ret_val = ret_val.push(
+            Radio::new(
+                option,
+                option.get_radio_label(language),
+                Some(bytes_notification.sound),
+                |value| {
+                    Message::UpdateBytesNotification(
+                        BytesNotification {
+                            sound: value,
+                            ..bytes_notification
+                        },
+                        value.ne(&Sound::None),
                     )
                 },
             )
@@ -244,32 +277,3 @@ pub fn report_radios(
     ret_val = ret_val.push(horizontal_space(Length::Units(120)));
     ret_val
 }
-
-// pub fn byte_multiple_radios(
-//     active: ByteMultiple,
-//     font: Font,
-//     style: StyleType,
-// ) -> Row<'static, Message> {
-//     let mut ret_val = Row::new()
-//         .padding(0)
-//         .spacing(10)
-//         .align_items(Alignment::Center);
-//     for option in ByteMultiple::ALL {
-//         ret_val = ret_val.push(
-//             Radio::new(
-//                 option,
-//                 option.to_string(),
-//                 Some(active),
-//                 Message::ByteThresholdMultipleSelection,
-//             )
-//             .spacing(3)
-//             .font(font)
-//             .size(13)
-//             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-//                 style,
-//                 ElementType::Standard,
-//             ))),
-//         );
-//     }
-//     ret_val
-// }

@@ -1,8 +1,9 @@
 use crate::enums::byte_multiple::ByteMultiple::{B, GB, KB, MB};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Enum representing the possible observed values of IP protocol version.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ByteMultiple {
     /// A Byte
     B,
@@ -23,7 +24,7 @@ impl fmt::Display for ByteMultiple {
 impl ByteMultiple {
     // pub(crate) const ALL: [ByteMultiple; 4] = [B, KB, MB, GB];
 
-    pub fn get_multiplier(self) -> u32 {
+    pub fn get_multiplier(self) -> u64 {
         match self {
             B => 1,
             KB => 1_000,

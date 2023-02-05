@@ -1,6 +1,4 @@
-use crate::utility::translations::{
-    notifications_translation, overview_translation,
-};
+use crate::utility::translations::{notifications_translation, overview_translation};
 use crate::Language;
 
 /// This enum defines the current running page.

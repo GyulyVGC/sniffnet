@@ -118,7 +118,6 @@ pub fn main() -> iced::Result {
             report_type: ReportType::MostRecent,
             overlay: None,
             notifications,
-            byte_threshold_multiple: ByteMultiple::B,
             running_page: RunningPage::Overview,
             language,
         },
