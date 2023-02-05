@@ -19,7 +19,7 @@ use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
 use crate::gui::components::modal::{get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
-use crate::gui::pages::inspect_page::inspect_page;
+// use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings::{
@@ -297,7 +297,7 @@ impl Application for Sniffer {
             Status::Init => initial_page(self),
             Status::Running => match self.running_page {
                 RunningPage::Overview => overview_page(self),
-                RunningPage::Inspect => inspect_page(self),
+                // RunningPage::Inspect => inspect_page(self),
                 RunningPage::Notifications => notifications_page(self),
             },
         };

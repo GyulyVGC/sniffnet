@@ -23,13 +23,13 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let tabs = get_pages_tabs(
         [
             RunningPage::Overview,
-            RunningPage::Inspect,
+            //RunningPage::Inspect,
             RunningPage::Notifications,
         ],
-        &["d ", "5 ", "7 "],
+        &["d ", "7 "],
         &[
             Message::ChangeRunningPage(RunningPage::Overview),
-            Message::ChangeRunningPage(RunningPage::Inspect),
+           // Message::ChangeRunningPage(RunningPage::Inspect),
             Message::TickInit,
         ],
         RunningPage::Notifications,
