@@ -1,3 +1,4 @@
+use crate::enums::byte_multiple::{from_char_to_multiple, ByteMultiple};
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlay::Overlay;
@@ -8,15 +9,15 @@ use crate::gui::components::tab::get_settings_tabs;
 use crate::structs::notifications::{FavoriteNotification, ThresholdNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS, MON_AMOUR,
-    YETI_DAY, YETI_NIGHT,
+    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
+    ICONS, MON_AMOUR, YETI_DAY, YETI_NIGHT,
 };
 use crate::utility::translations::{
     appearance_title_translation, bytes_threshold_translation, deep_sea_translation,
     favorite_notification_translation, hide_translation, languages_title_translation,
     mon_amour_translation, notifications_title_translation, packets_threshold_translation,
-    settings_translation, threshold_translation, volume_translation, yeti_day_translation,
-    yeti_night_translation,
+    per_second_translation, settings_translation, specify_multiples_translation,
+    threshold_translation, volume_translation, yeti_day_translation, yeti_night_translation,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
@@ -28,7 +29,7 @@ use iced::widget::{
 use iced::Length::Units;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
-use iced_native::widget::{Slider, VerticalSlider};
+use iced_native::widget::VerticalSlider;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -41,7 +42,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 Overlay::SettingsAppearance,
                 Overlay::SettingsLanguage,
             ],
-            &["7 ", "b ", "c "],
+            &["7 ", "K ", "c "],
             &[
                 Message::TickInit,
                 Message::ShowModal(Overlay::SettingsAppearance),
@@ -69,6 +70,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                     .width(Units(670))
                     .push(get_threshold_notify(
                         sniffer.notifications.packets_notification,
+                        sniffer.byte_threshold_multiple,
                         sniffer.language,
                         sniffer.style,
                         packets_threshold_translation(sniffer.language).to_string(),
@@ -77,6 +79,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                     ))
                     .push(get_threshold_notify(
                         sniffer.notifications.bytes_notification,
+                        sniffer.byte_threshold_multiple,
                         sniffer.language,
                         sniffer.style,
                         bytes_threshold_translation(sniffer.language).to_string(),
@@ -121,7 +124,7 @@ pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
                 Overlay::SettingsAppearance,
                 Overlay::SettingsLanguage,
             ],
-            &["7 ", "b ", "c "],
+            &["7 ", "K ", "c "],
             &[
                 Message::ShowModal(Overlay::SettingsNotifications),
                 Message::TickInit,
@@ -200,7 +203,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Overlay::SettingsAppearance,
                 Overlay::SettingsLanguage,
             ],
-            &["7 ", "b ", "c "],
+            &["7 ", "K ", "c "],
             &[
                 Message::ShowModal(Overlay::SettingsNotifications),
                 Message::ShowModal(Overlay::SettingsAppearance),
@@ -217,7 +220,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(vertical_space(Units(20)))
-        .push(col_language_radio);
+        .push(col_language_radio)
+        .push(vertical_space(Units(30)))
+        .push(Text::new("Support for more languages will come with the next releases.\n\n\
+        If you want to help me translating the app in your native language, give a look at Sniffnet issues on GitHub.")
+            .width(Length::Units(300))
+            .font(font));
 
     Container::new(content)
         .height(Units(400))
@@ -229,11 +237,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
 
 fn get_threshold_notify(
     threshold_notification: ThresholdNotification,
+    byte_multiple: ByteMultiple,
     language: Language,
     style: StyleType,
     checkbox_label: String,
     upper_bound: u32,
-    message: fn(ThresholdNotification, bool) -> Message,
+    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Column<'static, Message> {
     let checkbox = Checkbox::new(
         checkbox_label,
@@ -246,6 +255,7 @@ fn get_threshold_notify(
                         ..threshold_notification
                     },
                     false,
+                    byte_multiple,
                 )
             } else {
                 message(
@@ -254,6 +264,7 @@ fn get_threshold_notify(
                         ..threshold_notification
                     },
                     false,
+                    byte_multiple,
                 )
             }
         },
@@ -276,13 +287,19 @@ fn get_threshold_notify(
                 )),
             ))
     } else {
-        let slider_row = Row::new()
+        let input_row = Row::new()
             .push(horizontal_space(Units(50)))
             .push(Text::new(threshold_translation(language)).font(get_font(style)))
             .push(if upper_bound > 1_000_000 {
-                logarithmic_threshold_slider(threshold_notification, upper_bound, style, message)
+                input_group_bytes(
+                    threshold_notification,
+                    byte_multiple,
+                    style,
+                    language,
+                    message,
+                )
             } else {
-                input_group_packets(threshold_notification, style, message)
+                input_group_packets(threshold_notification, style, language, message)
             });
         let sound_row = Row::new()
             .push(horizontal_space(Units(50)))
@@ -291,11 +308,12 @@ fn get_threshold_notify(
                 get_font(style),
                 style,
                 language,
+                byte_multiple,
                 message,
             ));
         ret_val = ret_val
             .push(vertical_space(Units(5)))
-            .push(slider_row)
+            .push(input_row)
             .push(sound_row);
         Column::new()
             .padding(5)
@@ -377,77 +395,142 @@ fn get_favorite_notify(
 fn input_group_packets(
     threshold_notification: ThresholdNotification,
     style: StyleType,
-    message: fn(ThresholdNotification, bool) -> Message,
+    language: Language,
+    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Container<'static, Message> {
     let curr_threshold_str = &threshold_notification.threshold.unwrap().to_string();
-    Container::new(
-        TextInput::new(
-            "0",
-            if curr_threshold_str == "0" {
-                ""
-            } else {
-                curr_threshold_str
-            },
-            move |value| {
-                let new_threshold = if value.is_empty() {
-                    0
+    let input_row = Row::new()
+        .spacing(10)
+        .push(
+            TextInput::new(
+                "0",
+                if curr_threshold_str == "0" {
+                    ""
                 } else {
-                    value
-                        .parse()
-                        .unwrap_or(threshold_notification.previous_threshold)
-                };
-                message(
-                    ThresholdNotification {
-                        threshold: Some(new_threshold),
-                        previous_threshold: new_threshold,
-                        ..threshold_notification
-                    },
-                    false,
-                )
-            },
+                    curr_threshold_str
+                },
+                move |value| {
+                    let new_threshold = if value.is_empty() {
+                        0
+                    } else {
+                        value
+                            .parse()
+                            .unwrap_or(threshold_notification.previous_threshold)
+                    };
+                    message(
+                        ThresholdNotification {
+                            threshold: Some(new_threshold),
+                            previous_threshold: new_threshold,
+                            ..threshold_notification
+                        },
+                        false,
+                        ByteMultiple::B,
+                    )
+                },
+            )
+            .padding(1)
+            .font(get_font(style))
+            .width(Length::Units(100))
+            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+                StyleTuple(style, ElementType::Standard),
+            )),
         )
-        .padding(1)
-        .font(get_font(style))
-        .width(Length::Units(100))
-        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-            StyleTuple(style, ElementType::Standard),
-        )),
-    )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+        .push(
+            Text::new(per_second_translation(language))
+                .font(get_font(style))
+                .vertical_alignment(Vertical::Center)
+                .size(FONT_SIZE_FOOTER),
+        );
+    Container::new(input_row)
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
 }
 
-fn logarithmic_threshold_slider(
+fn input_group_bytes(
     threshold_notification: ThresholdNotification,
-    upper_bound: u32,
+    byte_multiple: ByteMultiple,
     style: StyleType,
-    message: fn(ThresholdNotification, bool) -> Message,
+    language: Language,
+    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Container<'static, Message> {
-    let lower_exponent = 10.0_f32.log2();
-    let upper_exponent = (upper_bound as f32).log2();
-    Container::new(
-        Slider::new(
-            lower_exponent..=upper_exponent,
-            (threshold_notification.threshold.unwrap() as f32).log2(),
-            move |value| {
-                message(
-                    ThresholdNotification {
-                        threshold: Some((2.0_f32.powf(value)) as u32),
-                        previous_threshold: (2.0_f32.powf(value)) as u32,
-                        ..threshold_notification
-                    },
-                    false,
-                )
-            },
+    let mut info_str = per_second_translation(language).to_string();
+    info_str.push_str(specify_multiples_translation(language));
+    let mut curr_threshold_str =
+        (threshold_notification.threshold.unwrap() / byte_multiple.get_multiplier()).to_string();
+    curr_threshold_str.push_str(byte_multiple.get_char());
+    let input_row = Row::new()
+        .spacing(10)
+        .push(
+            TextInput::new(
+                "0",
+                if curr_threshold_str == "0" {
+                    ""
+                } else {
+                    &curr_threshold_str
+                },
+                move |value| {
+                    let mut byte_multiple_inserted = ByteMultiple::B;
+                    let new_threshold = if value.is_empty() {
+                        0
+                    } else if !value
+                        .chars()
+                        .map(char::is_numeric)
+                        .collect::<Vec<bool>>()
+                        .contains(&false)
+                    {
+                        // no multiple
+                        value
+                            .parse::<u32>()
+                            .unwrap_or(threshold_notification.previous_threshold)
+                    } else {
+                        // multiple
+                        let last_char = value.chars().last().unwrap();
+                        byte_multiple_inserted = from_char_to_multiple(last_char);
+                        let without_multiple = value[0..value.len() - 1].to_string();
+                        if without_multiple.parse::<u32>().is_ok()
+                            && TryInto::<u32>::try_into(
+                                without_multiple.parse::<u64>().unwrap()
+                                    * u64::from(byte_multiple_inserted.get_multiplier()),
+                            )
+                            .is_ok()
+                        {
+                            without_multiple.parse::<u32>().unwrap()
+                                * byte_multiple_inserted.get_multiplier()
+                        } else if without_multiple.is_empty() {
+                            byte_multiple_inserted = ByteMultiple::B;
+                            0
+                        } else {
+                            byte_multiple_inserted = byte_multiple;
+                            threshold_notification.previous_threshold
+                        }
+                    };
+                    message(
+                        ThresholdNotification {
+                            threshold: Some(new_threshold),
+                            previous_threshold: new_threshold,
+                            ..threshold_notification
+                        },
+                        false,
+                        byte_multiple_inserted,
+                    )
+                },
+            )
+            .padding(1)
+            .font(get_font(style))
+            .width(Length::Units(100))
+            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+                StyleTuple(style, ElementType::Standard),
+            )),
         )
-        .width(Units(400))
-        .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
-            style,
-            ElementType::Standard,
-        ))),
-    )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+        .push(
+            Text::new(info_str)
+                .font(get_font(style))
+                .vertical_alignment(Vertical::Center)
+                .size(FONT_SIZE_FOOTER),
+        );
+    Container::new(input_row)
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
 }
 
 fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {

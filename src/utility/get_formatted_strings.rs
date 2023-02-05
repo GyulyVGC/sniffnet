@@ -139,7 +139,7 @@ pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets:
     ret_val
 }
 
-/// Returns a String representing a quantity of bytes with their proper multiple (kB, MB, GB, TB)
+/// Returns a String representing a quantity of bytes with their proper multiple (KB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
     let mut multiple_transmitted = String::new();
     let mut n = bytes as f32;
@@ -148,7 +148,7 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         0..=999 => {}
         1_000..=999_999 => {
             n /= 1000_f32;
-            multiple_transmitted.push('k');
+            multiple_transmitted.push('K');
         } // kilo
         1_000_000..=999_999_999 => {
             n /= 1_000_000_f32;
@@ -166,9 +166,9 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
 
     if multiple_transmitted.is_empty() {
         // no multiple
-        format!("{n}  B")
+        format!("{n}   ")
     } else {
         // with multiple
-        format!("{n:.1} {multiple_transmitted}B")
+        format!("{n:.1} {multiple_transmitted} ")
     }
 }

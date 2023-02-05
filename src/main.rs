@@ -12,6 +12,7 @@ use pcap::Device;
 use utility::style_constants::FONT_SIZE_BODY;
 
 use crate::enums::app_protocol::AppProtocol;
+use crate::enums::byte_multiple::ByteMultiple;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
 use crate::enums::language::Language;
@@ -80,7 +81,7 @@ pub fn main() -> iced::Result {
 
     let mut config_result = confy::load::<Config>("sniffnet", None);
     if config_result.is_err() {
-        // it happens when changing the Config struct fields during development
+        // it happens when changing the Config struct fields during development or after new releases
         confy::store("sniffnet", None, Config::default()).unwrap();
         config_result = confy::load::<Config>("sniffnet", None);
     }
@@ -117,6 +118,7 @@ pub fn main() -> iced::Result {
             report_type: ReportType::MostRecent,
             overlay: None,
             notifications,
+            byte_threshold_multiple: ByteMultiple::B,
             running_page: RunningPage::Overview,
             language,
         },

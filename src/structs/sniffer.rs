@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
+use crate::enums::byte_multiple::ByteMultiple;
 use crate::enums::language::Language;
 use crate::enums::overlay::Overlay;
 use crate::enums::report_type::ReportType;
@@ -45,6 +46,8 @@ pub struct Sniffer {
     pub overlay: Option<Overlay>,
     /// Contains the notifications configuration set by the user
     pub notifications: Notifications,
+    /// Byte multiple related to Bytes threshold
+    pub byte_threshold_multiple: ByteMultiple,
     /// Defines the current running page
     pub running_page: RunningPage,
     /// Language used in the GUI

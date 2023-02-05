@@ -1,4 +1,5 @@
 pub mod app_protocol;
+pub mod byte_multiple;
 pub mod chart_type;
 pub mod element_type;
 pub mod ip_version;

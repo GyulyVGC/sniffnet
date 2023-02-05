@@ -25,7 +25,7 @@ pub fn get_country_code(
             }
         }
     }
-    "".to_string()
+    String::new()
 }
 
 pub const FLAGS_WIDTH: u16 = 15;

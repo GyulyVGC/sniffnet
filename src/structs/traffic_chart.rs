@@ -116,7 +116,7 @@ impl Chart<Message> for TrafficChart {
                                 format!("{bytes_abs}")
                             }
                             1000..=999_999 => {
-                                format!("{:.1} {}", bytes_abs as f32 / 1_000_f32, "k")
+                                format!("{:.1} {}", bytes_abs as f32 / 1_000_f32, "K")
                             }
                             1_000_000..=999_999_999 => {
                                 format!("{:.1} {}", bytes_abs as f32 / 1_000_000_f32, "M")

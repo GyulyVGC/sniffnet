@@ -364,15 +364,29 @@ pub fn inspect_translation(language: Language) -> &'static str {
 
 pub fn packets_threshold_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Notify me when a packets per second threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di pacchetti al secondo è superata",
+        Language::EN => "Notify me when a packets threshold is exceeded",
+        Language::IT => "Notificami quando una soglia di pacchetti è superata",
     }
 }
 
 pub fn bytes_threshold_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Notify me when a bytes per second threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di byte al secondo è superata",
+        Language::EN => "Notify me when a bytes threshold is exceeded",
+        Language::IT => "Notificami quando una soglia di byte è superata",
+    }
+}
+
+pub fn per_second_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "(per second)",
+        Language::IT => "(al secondo)",
+    }
+}
+
+pub fn specify_multiples_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "; you can specify 'K', 'M' and 'G'",
+        Language::IT => "; puoi anche specificare 'K', 'M' e 'G'",
     }
 }
 

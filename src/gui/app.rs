@@ -252,17 +252,18 @@ impl Application for Sniffer {
                 self.language = language;
                 self.traffic_chart.change_language(language);
             }
-            Message::UpdatePacketsNotification(value, emit_sound) => {
+            Message::UpdatePacketsNotification(value, emit_sound, _byte_multiple) => {
                 if emit_sound {
                     play_sound(value.sound, self.notifications.volume);
                 }
                 self.notifications.packets_notification = value;
             }
-            Message::UpdateBytesNotification(value, emit_sound) => {
+            Message::UpdateBytesNotification(value, emit_sound, byte_multiple) => {
                 if emit_sound {
                     play_sound(value.sound, self.notifications.volume);
                 }
                 self.notifications.bytes_notification = value;
+                self.byte_threshold_multiple = byte_multiple;
             }
             Message::UpdateFavoriteNotification(value, emit_sound) => {
                 if emit_sound {

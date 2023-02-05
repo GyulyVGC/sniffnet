@@ -9,7 +9,7 @@ use crate::utility::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
     traffic_rate_translation, transport_protocol_translation,
 };
-use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
+use crate::{ByteMultiple, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
@@ -106,7 +106,8 @@ pub fn sound_threshold_radios(
     font: Font,
     style: StyleType,
     language: Language,
-    message: fn(ThresholdNotification, bool) -> Message,
+    byte_multiple: ByteMultiple,
+    message: fn(ThresholdNotification, bool, ByteMultiple) -> Message,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .spacing(20)
@@ -124,6 +125,7 @@ pub fn sound_threshold_radios(
                             ..threshold_notification
                         },
                         value.ne(&Sound::None),
+                        byte_multiple,
                     )
                 },
             )
@@ -242,3 +244,32 @@ pub fn report_radios(
     ret_val = ret_val.push(horizontal_space(Length::Units(120)));
     ret_val
 }
+
+// pub fn byte_multiple_radios(
+//     active: ByteMultiple,
+//     font: Font,
+//     style: StyleType,
+// ) -> Row<'static, Message> {
+//     let mut ret_val = Row::new()
+//         .padding(0)
+//         .spacing(10)
+//         .align_items(Alignment::Center);
+//     for option in ByteMultiple::ALL {
+//         ret_val = ret_val.push(
+//             Radio::new(
+//                 option,
+//                 option.to_string(),
+//                 Some(active),
+//                 Message::ByteThresholdMultipleSelection,
+//             )
+//             .spacing(3)
+//             .font(font)
+//             .size(13)
+//             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+//                 style,
+//                 ElementType::Standard,
+//             ))),
+//         );
+//     }
+//     ret_val
+// }
