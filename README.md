@@ -15,10 +15,13 @@ Multithreaded, cross-platform, reliable
 
 <p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/214415884-43ed8cce-8705-42f2-a403-0b0eed9d3362.gif" width="85%"/></p>
 
-<div align="center">
-<p>Sniffnet is a simple yet insightful application to analyse your network traffic 
-in a straightforward and appealing way </p>
-</div>
+> Sniffnet is a simple yet insightful application to analyse your network traffic 
+in a straightforward and appealing way
+
+<p align="center"> 
+Application translated in: 🇬🇧 - 🇮🇹 <br>
+More languages will be supported in the upcoming releases
+</p>
 
 <hr>
 
@@ -101,6 +104,12 @@ sudo apt-get install libpcap-dev
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
 
+Most Linux system also need this dependency (required to build the library used to play sounds):
+
+```sh
+sudo apt-get install libasound2-dev
+```
+
 Depending on your Linux environment you may also need `libfontconfig`:
 
 ```sh
@@ -143,6 +152,17 @@ sudo apt-get install libfontconfig libfontconfig1-dev
   * amount of exchanged packets and bytes
   * initial and final timestamp of information exchange
   
+
+## IP Geolocation
+
+  Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
+
+  > The MMDB (MaxMind database) format has been developed especially for IP lookup. It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently. If you want the best performance on your IP lookups for use in a production environment, you should use the MMDB format files.
+  
+  This format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
+
+  Sometimes it is not possible to determine the location of an IP address; this is most likely due to the address being a private IP address.
+
 
 ## Supported application layer protocols
 
@@ -203,6 +223,12 @@ necessary to correctly analyze a network adapter. <br>
 Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
 For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
+
+Note that most Linux system also need this dependency (required to build the library used to play sounds):
+
+```sh
+sudo apt-get install libasound2-dev
+```
 
 Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
 

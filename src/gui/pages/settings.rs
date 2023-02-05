@@ -30,7 +30,7 @@ use iced::widget::{
 use iced::Length::Units;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
-use iced_native::widget::{Slider, VerticalSlider};
+use iced_native::widget::Slider;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -522,12 +522,7 @@ fn input_group_bytes(
                     let mut byte_multiple_inserted = ByteMultiple::B;
                     let new_threshold = if value.is_empty() {
                         0
-                    } else if !value
-                        .chars()
-                        .map(char::is_numeric)
-                        .collect::<Vec<bool>>()
-                        .contains(&false)
-                    {
+                    } else if !value.chars().map(char::is_numeric).any(|x| !x) {
                         // no multiple
                         value
                             .parse::<u64>()
@@ -588,34 +583,35 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
         Column::new()
             .spacing(5)
             .align_items(Alignment::Center)
-            .push(Text::new(volume_translation(language, volume)).font(get_font(style))
-            )
-            .push(Row::new().push(
-                Text::new(
-                    'Y'.to_string())
-                    .width(Units(30))
-                    .vertical_alignment(Vertical::Center)
-                    .size(20)
-                    .font(ICONS),
-            ).push(
-                Slider::new(0..=100, volume, Message::ChangeVolume)
-                    .step(5)
-                    .width(Units(200))
-                    .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
-                        style,
-                        ElementType::Standard,
-                    ))),
-            )
-                .push(horizontal_space(Length::Units(10)))
-                .push(
-                    Text::new(
-                        'Z'.to_string())
-                        .vertical_alignment(Vertical::Center)
-                        .size(20)
-                        .font(ICONS),
-                ))
+            .push(Text::new(volume_translation(language, volume)).font(get_font(style)))
+            .push(
+                Row::new()
+                    .push(
+                        Text::new('Y'.to_string())
+                            .width(Units(30))
+                            .vertical_alignment(Vertical::Center)
+                            .size(20)
+                            .font(ICONS),
+                    )
+                    .push(
+                        Slider::new(0..=100, volume, Message::ChangeVolume)
+                            .step(5)
+                            .width(Units(200))
+                            .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
+                                style,
+                                ElementType::Standard,
+                            ))),
+                    )
+                    .push(horizontal_space(Length::Units(10)))
+                    .push(
+                        Text::new('Z'.to_string())
+                            .vertical_alignment(Vertical::Center)
+                            .size(20)
+                            .font(ICONS),
+                    ),
+            ),
     )
-        .padding(5)
+    .padding(5)
     .width(Length::Fill)
     .height(Length::Units(60))
     .align_x(Horizontal::Center)

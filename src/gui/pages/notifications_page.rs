@@ -3,19 +3,23 @@ use crate::enums::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::enums::message::Message;
+use crate::enums::traffic_type::TrafficType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::get_formatted_strings::{get_connection_color, get_formatted_bytes_string};
-use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD};
-use crate::utility::translations::{application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation, favorite_transmitted_translation, incoming_translation, outgoing_translation, packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation, threshold_translation, transport_protocol_translation};
+use crate::utility::countries::get_flag;
+use crate::utility::get_formatted_strings::get_formatted_bytes_string;
+use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS};
+use crate::utility::translations::{
+    application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation,
+    favorite_transmitted_translation, incoming_translation, outgoing_translation,
+    packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation,
+    threshold_translation,
+};
 use crate::{Language, RunningPage, Sniffer, StyleType};
-use iced::alignment::Horizontal;
 use iced::widget::{Column, Container, Row, Scrollable, Text};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
-use iced_native::widget::{horizontal_space, vertical_space};
-use crate::enums::traffic_type::TrafficType;
-use crate::utility::countries::get_flag;
+use iced_native::widget::vertical_space;
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
@@ -107,7 +111,7 @@ fn packets_notification_log(
             .previous_threshold
             .to_string(),
     );
-    threshold_str.push_str( &format!(" {}", per_second_translation(language)));
+    threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
@@ -173,7 +177,7 @@ fn bytes_notification_log(
         " {}",
         logged_notification.notification.byte_multiple.get_char()
     ));
-    threshold_str.push_str( &format!(" {}", per_second_translation(language)));
+    threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
@@ -186,7 +190,7 @@ fn bytes_notification_log(
     outgoing_str.push_str(&get_formatted_bytes_string(u128::from(
         logged_notification.outgoing,
     )));
-    let mut content = Row::new()
+    let content = Row::new()
         .spacing(30)
         .push(Text::new("f").font(ICONS).size(80))
         .push(
@@ -241,21 +245,22 @@ fn favorite_notification_log(
         ": {:?}",
         logged_notification.connection.1.app_protocol
     ));
-    let mut row_src_flag =
-        Row::new().align_items(Alignment::Center).spacing(5)
-            .push(Text::new(src_str).font(font));
-    let mut row_dst_flag =
-        Row::new().align_items(Alignment::Center).spacing(5)
-            .push(Text::new(dst_str).font(font));
+    let mut row_src_flag = Row::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(src_str).font(font));
+    let mut row_dst_flag = Row::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(dst_str).font(font));
     if !country.is_empty() {
         if traffic_type.eq(&TrafficType::Outgoing) {
             row_dst_flag = row_dst_flag.push(get_flag(&country));
-        }
-        else {
+        } else {
             row_src_flag = row_src_flag.push(get_flag(&country));
         }
     }
-    let mut content = Row::new()
+    let content = Row::new()
         .spacing(30)
         .push(Text::new("g").font(ICONS).size(80))
         .push(
