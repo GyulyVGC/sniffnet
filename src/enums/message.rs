@@ -1,4 +1,4 @@
-use crate::enums::overlay::Overlay;
+use crate::enums::overlay::MyOverlay;
 use crate::enums::running_page::RunningPage;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
@@ -39,7 +39,7 @@ pub enum Message {
     /// Manage waiting time
     Waiting,
     /// Displays an overlay
-    ShowModal(Overlay),
+    ShowModal(MyOverlay),
     /// Hides the current overlay modal; if true is passed, config file is updated
     HideModal(bool),
     /// Permits to change the current running page
@@ -52,6 +52,8 @@ pub enum Message {
     UpdateBytesNotification(BytesNotification, bool),
     /// Set packets notification
     UpdateFavoriteNotification(FavoriteNotification, bool),
+    /// Clear all received notifications
+    ClearAllNotifications,
     /// Set notifications volume
     ChangeVolume(u8),
 }

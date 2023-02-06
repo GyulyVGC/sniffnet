@@ -6,18 +6,19 @@ use iced::widget::Column;
 use iced::{executor, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
 use crate::enums::message::Message;
-use crate::enums::overlay::Overlay;
+use crate::enums::overlay::MyOverlay;
 use crate::enums::running_page::RunningPage;
 use crate::enums::sound::{play_sound, Sound};
 use crate::enums::status::Status;
 use crate::gui::components::footer::get_footer;
 use crate::gui::components::header::get_header;
-use crate::gui::components::modal::{get_exit_overlay, Modal};
+use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
 // use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
@@ -92,6 +93,12 @@ impl Application for Sniffer {
                         &self.info_traffic,
                         self.report_type,
                     );
+                    // waiting notifications
+                    if self.running_page.eq(&RunningPage::Notifications)
+                        && self.runtime_data.borrow().logged_notifications.is_empty()
+                    {
+                        self.update(Message::Waiting);
+                    }
                 }
             }
             Message::AdapterSelection(name) => {
@@ -274,6 +281,10 @@ impl Application for Sniffer {
                 play_sound(Sound::Pop, volume);
                 self.notifications.volume = volume;
             }
+            Message::ClearAllNotifications => {
+                self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
+                self.update(Message::HideModal(false));
+            }
         }
         Command::none()
     }
@@ -310,13 +321,17 @@ impl Application for Sniffer {
             content.into()
         } else {
             let (overlay, save_config) = match self.overlay.unwrap() {
-                Overlay::Alert => (
+                MyOverlay::Quit => (
                     get_exit_overlay(style, get_font(style), self.language),
                     false,
                 ),
-                Overlay::SettingsNotifications => (settings_notifications_page(self), true),
-                Overlay::SettingsAppearance => (settings_appearance_page(self), true),
-                Overlay::SettingsLanguage => (settings_language_page(self), true),
+                MyOverlay::ClearAll => (
+                    get_clear_all_overlay(style, get_font(style), self.language),
+                    false,
+                ),
+                MyOverlay::SettingsNotifications => (settings_notifications_page(self), true),
+                MyOverlay::SettingsAppearance => (settings_appearance_page(self), true),
+                MyOverlay::SettingsLanguage => (settings_language_page(self), true),
             };
 
             Modal::new(content, overlay)

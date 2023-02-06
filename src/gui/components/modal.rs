@@ -3,7 +3,8 @@ use crate::enums::message::Message;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::utility::translations::{
-    ask_quit_translation, hide_translation, quit_analysis_translation, yes_translation,
+    ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
+    quit_analysis_translation, yes_translation,
 };
 use crate::{Language, StyleType};
 use iced::alignment::{Alignment, Horizontal, Vertical};
@@ -37,7 +38,11 @@ pub fn get_exit_overlay(
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(get_modal_header(style, language))
+        .push(get_modal_header(
+            style,
+            language,
+            quit_analysis_translation(language),
+        ))
         .push(vertical_space(Length::Units(20)))
         .push(ask_quit_translation(language).font(font))
         .push(vertical_space(Length::Units(20)))
@@ -51,12 +56,56 @@ pub fn get_exit_overlay(
         ))
 }
 
-fn get_modal_header(style: StyleType, language: Language) -> Container<'static, Message> {
+pub fn get_clear_all_overlay(
+    style: StyleType,
+    font: Font,
+    language: Language,
+) -> Container<'static, Message> {
+    let row_buttons = Row::new().push(
+        button(
+            yes_translation(language)
+                .font(font)
+                .vertical_alignment(Vertical::Center)
+                .horizontal_alignment(Horizontal::Center),
+        )
+        .padding(5)
+        .height(Length::Units(40))
+        .width(Length::Units(80))
+        .style(StyleTuple(style, ElementType::Alert).into())
+        .on_press(Message::ClearAllNotifications),
+    );
+
+    let content = Column::new()
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(get_modal_header(
+            style,
+            language,
+            clear_all_translation(language),
+        ))
+        .push(vertical_space(Length::Units(20)))
+        .push(ask_clear_all_translation(language).font(font))
+        .push(vertical_space(Length::Units(20)))
+        .push(row_buttons);
+
+    Container::new(content)
+        .height(Length::Units(150))
+        .width(Length::Units(450))
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Standard),
+        ))
+}
+
+fn get_modal_header(
+    style: StyleType,
+    language: Language,
+    title: String,
+) -> Container<'static, Message> {
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
-                Text::new(quit_analysis_translation(language))
+                Text::new(title)
                     .font(get_font_headers(style))
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))

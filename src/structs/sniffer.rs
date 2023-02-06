@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
 use crate::enums::language::Language;
-use crate::enums::overlay::Overlay;
+use crate::enums::overlay::MyOverlay;
 use crate::enums::report_type::ReportType;
 use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
@@ -42,7 +42,7 @@ pub struct Sniffer {
     /// Report type to be displayed
     pub report_type: ReportType,
     /// Currently displayed overlay; None if no overlay is displayed
-    pub overlay: Option<Overlay>,
+    pub overlay: Option<MyOverlay>,
     /// Contains the notifications configuration set by the user
     pub notifications: Notifications,
     /// Defines the current running page

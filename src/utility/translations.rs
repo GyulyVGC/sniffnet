@@ -92,10 +92,24 @@ pub fn ask_quit_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn quit_analysis_translation(language: Language) -> &'static str {
+pub fn quit_analysis_translation(language: Language) -> String {
     match language {
-        Language::EN => "Quit analysis",
-        Language::IT => "Interrompi analisi",
+        Language::EN => "Quit analysis".to_string(),
+        Language::IT => "Interrompi analisi".to_string(),
+    }
+}
+
+pub fn ask_clear_all_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => "Are you sure you want to clear notifications?",
+        Language::IT => "Sei sicuro di voler eliminare le notifiche?",
+    })
+}
+
+pub fn clear_all_translation(language: Language) -> String {
+    match language {
+        Language::EN => "Clear all".to_string(),
+        Language::IT => "Elimina tutte".to_string(),
     }
 }
 
@@ -406,8 +420,8 @@ pub fn threshold_translation(language: Language) -> String {
 
 pub fn volume_translation(language: Language, value: u8) -> String {
     match language {
-        Language::EN => format!("Volume: {:^3}%", value),
-        Language::IT => format!("Volume: {:^3}%", value),
+        Language::EN => format!("Volume: {value:^3}%"),
+        Language::IT => format!("Volume: {value:^3}%"),
     }
 }
 
@@ -432,7 +446,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_exceeded_value_translation(language: Language, value: String) -> String {
+pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> String {
     let trimmed_value = value.trim();
     match language {
         Language::EN => format!("{trimmed_value} bytes have been exchanged"),
@@ -458,5 +472,36 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "New data exchanged from favorites!",
         Language::IT => "Nuovi dati scambiati dai preferiti!",
+    }
+}
+
+pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => "You haven't enabled notifications yet!\n\n\
+                                 After you will enable them, this page will display a log of your notifications\n\n\
+                                 You can enable notifications from settings:",
+        Language::IT => "Non hai ancora abilitato le notifiche!\n\n\
+                                Dopo che le avrai abilitate, questa pagina mostrerà una collezione delle tue notifiche\n\n\
+                                Puoi abilitare le notifiche dalle impostazioni:",
+    })
+}
+
+pub fn no_notifications_received_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => {
+            "Nothing to see at the moment...\n\n\
+                                 When you will receive a notification, it will be displayed here"
+        }
+        Language::IT => {
+            "Nulla da vedere al momento...\n\n\
+                                Quando riceverai una notifica, essa verrà mostrata qui"
+        }
+    })
+}
+
+pub fn only_last_30_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Only the last 30 notifications are displayed",
+        Language::IT => "Solo le ultime 30 notifiche sono mostrate",
     }
 }

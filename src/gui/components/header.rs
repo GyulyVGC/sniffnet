@@ -2,7 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::overlay::Overlay;
+use crate::enums::overlay::MyOverlay;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, HEIGHT_HEADER, ICONS};
 use crate::utility::translations::{quit_analysis_translation, settings_translation};
@@ -84,7 +84,7 @@ pub fn get_button_reset(
     .on_press(if all_packets == 0 {
         Message::Reset
     } else {
-        Message::ShowModal(Overlay::Alert)
+        Message::ShowModal(MyOverlay::Quit)
     });
 
     Tooltip::new(
@@ -109,7 +109,7 @@ pub fn get_button_settings(style: StyleType, language: Language) -> Tooltip<'sta
     .height(Length::Units(40))
     .width(Length::Units(60))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal(Overlay::SettingsNotifications));
+    .on_press(Message::ShowModal(MyOverlay::SettingsNotifications));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))
