@@ -132,14 +132,14 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
 ## Features
 
-- choose a network adapter to inspect
-- select filters to apply to the observed traffic
-- view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-- set custom notifications to inform you when defined network events occur (data rate exceeded a specified threshold, or new data have been exchanged from your favorite connections)
-- view overall statistics about the filtered traffic
-- view most relevant connections in real time (most recent, most packets, most bytes, favorites)
-- get information about the country of the remote address (IP Geolocation)
-- save complete textual report with detailed information for each connection:
+- 💻 choose a network adapter to inspect
+- 🏷️ select filters to apply to the observed traffic
+- 📈 view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
+- 🔉 set custom notifications to inform you when defined network events occur (data rate exceeded a specified threshold, or new data have been exchanged from your favorite connections)
+- 📖 view overall statistics about the filtered traffic
+- ⭐ view most relevant connections in real time (most recent, most packets, most bytes, favorites)
+- 🌍 get information about the country of the remote address (IP Geolocation)
+- 📁 save complete textual report with detailed information for each connection:
   * source and destination IP addresses
   * source and destination ports
   * carried protocols

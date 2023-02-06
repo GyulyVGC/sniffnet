@@ -32,7 +32,7 @@ with many additional functionalities planned for the future releases.
 1. Check out open [issues](https://github.com/gyulyvgc/sniffnet/issues) here on GitHub (we label them with `design: 💅required`)
 2. Feel free to open an issue on your own if you find something you would like to contribute to the project and use the `design: 💡idea` label for it.
 3. Clone the public Figma files if available or create new ones and share them publicly
-4. Add your contributions to an issue and I promise I will review your contribution carefully and foster discussions
+4. Add your contributions to an issue, and I promise I will review your contribution carefully and foster discussions
 
 **We encourage you to:**
 
