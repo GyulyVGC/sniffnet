@@ -2,7 +2,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.1.0] - 2023-xx-xx
+## [1.1.0] - 2023-02-07
 
 - Added Custom Notifications to inform the user when defined network events occur:
   * data intensity exceeded a defined packets per second rate
