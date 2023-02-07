@@ -9,7 +9,7 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
-include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
+include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md", "resources/countries_flags/**/*", "resources/DB/GeoLite2-Country.mmdb", "resources/palettes/*", "fonts/*", "resources/sounds/*"]
 
 
 [package.metadata.bundle]
