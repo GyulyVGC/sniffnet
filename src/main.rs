@@ -1,22 +1,30 @@
 //! Module containing the entry point of application execution.
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
 use iced::window::Position;
-use iced::{button, pick_list, scrollable, window, Application, Settings};
+use iced::{window, Application, Settings};
 use pcap::Device;
 
-use gui::style::{StyleType, FONT_SIZE_BODY};
+use utility::style_constants::FONT_SIZE_BODY;
 
 use crate::enums::app_protocol::AppProtocol;
+use crate::enums::byte_multiple::ByteMultiple;
 use crate::enums::chart_type::ChartType;
 use crate::enums::ip_version::IpVersion;
+use crate::enums::language::Language;
 use crate::enums::report_type::ReportType;
+use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
+use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
+use crate::structs::config::Config;
 use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
+use crate::structs::palette::get_colors;
 use crate::structs::runtime_data::RunTimeData;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -39,22 +47,22 @@ pub fn main() -> iced::Result {
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
-    let runtime_data1 = Arc::new(Mutex::new(RunTimeData::new()));
-    let runtime_data2 = runtime_data1.clone();
-
     //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
-    let found_device = Arc::new(Mutex::new(Device::lookup().unwrap().unwrap()));
+    let found_device = Device::lookup().unwrap().unwrap();
 
-    let pcap_error = Arc::new(Mutex::new(None)); // None means no error
+    let pcap_error = None; // None means no error
 
-    let filters = Arc::new(Mutex::new(Filters {
+    let runtime_data1 = Rc::new(RefCell::new(RunTimeData::new()));
+    let runtime_data2 = runtime_data1.clone();
+
+    let filters = Filters {
         ip: IpVersion::Other,
         transport: TransProtocol::Other,
         application: AppProtocol::Other,
-    }));
+    };
 
     // to kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -67,17 +75,29 @@ pub fn main() -> iced::Result {
     thread::Builder::new()
         .name("thread_write_report".to_string())
         .spawn(move || {
-            sleep_and_write_report_loop(current_capture_id2, mutex_map2, status_pair2);
+            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
         })
         .unwrap();
+
+    let mut config_result = confy::load::<Config>("sniffnet", None);
+    if config_result.is_err() {
+        // it happens when changing the Config struct fields during development or after new releases
+        confy::store("sniffnet", None, Config::default()).unwrap();
+        config_result = confy::load::<Config>("sniffnet", None);
+    }
+    let config = config_result.unwrap();
+    let style = config.style;
+    let notifications = config.notifications;
+    let language = config.language;
 
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
             size: (1190, 670), // start size
             position: Position::Centered,
-            min_size: Some((1190, 500)), // min size allowed
+            min_size: Some((1190, 600)), // min size allowed
             max_size: None,
+            visible: true,
             resizable: true,
             decorations: true,
             transparent: false,
@@ -92,24 +112,18 @@ pub fn main() -> iced::Result {
             filters,
             status_pair: status_pair1,
             pcap_error,
-            start: button::State::new(),
-            reset: button::State::new(),
-            mode: button::State::new(),
-            report: button::State::new(),
-            git: button::State::new(),
-            app: pick_list::State::new(),
-            scroll_adapters: scrollable::State::new(),
-            scroll_packets: scrollable::State::new(),
-            scroll_report: scrollable::State::new(),
-            style: StyleType::Night,
-            waiting: String::new(),
-            traffic_chart: TrafficChart::new(runtime_data2),
-            chart_type: ChartType::Packets,
+            style,
+            waiting: ".".to_string(),
+            traffic_chart: TrafficChart::new(runtime_data2, style, language),
             report_type: ReportType::MostRecent,
+            overlay: None,
+            notifications,
+            running_page: RunningPage::Overview,
+            language,
         },
-        default_font: None,
+        default_font: Some(include_bytes!("../fonts/inconsolata-regular.ttf")),
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: false,
+        text_multithreading: true,
         antialiasing: false,
         exit_on_close_request: true,
         try_opengles_first: false,

@@ -3,6 +3,7 @@
 use crate::{AppProtocol, IpVersion, TransProtocol};
 
 /// Possible filters applicable to network traffic
+#[derive(Clone)]
 pub struct Filters {
     /// Internet Protocol version
     pub ip: IpVersion,

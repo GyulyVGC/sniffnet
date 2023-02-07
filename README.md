@@ -13,12 +13,17 @@ Multithreaded, cross-platform, reliable
 
 <hr>
 
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/214415884-43ed8cce-8705-42f2-a403-0b0eed9d3362.gif" width="85%"/></p>
+<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/216971624-9f456f4d-a8dc-44fb-8047-11cc882537ed.png" width="100%"/></p>
 
-<div align="center">
-<p>Sniffnet is a simple yet insightful application to analyse your network traffic 
-in a straightforward and appealing way </p>
-</div>
+<p align="center">
+<img alt="" src="https://user-images.githubusercontent.com/100347457/216972254-10d0c9fd-34eb-43f4-94dd-61e882bcc364.png" width="49%"/>
+<img alt="" src="https://user-images.githubusercontent.com/100347457/216972251-41a413e5-89f7-4c8c-b41b-a291470cba59.png" width="49%"/>
+</p>
+
+<p align="center"> 
+Application translated in: 🇬🇧 - 🇮🇹 <br>
+More languages will be supported in the upcoming releases
+</p>
 
 <hr>
 
@@ -46,11 +51,12 @@ cargo install sniffnet
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
-  Choose between a Windows installer, a DEB package, or a MacOS disk image (depending on your operating system).
+  Choose between a Windows installer, a DEB package, or a macOS disk image (depending on your operating system).
     
 </details>
 
 
+<!--
 <details>
 
   <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
@@ -62,6 +68,7 @@ brew install sniffnet
 ```
     
 </details>
+-->
 
 
 ## Required dependencies
@@ -99,6 +106,12 @@ sudo apt-get install libpcap-dev
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
 
+Most Linux system also need this dependency (required to build the library used to play sounds):
+
+```sh
+sudo apt-get install libasound2-dev
+```
+
 Depending on your Linux environment you may also need `libfontconfig`:
 
 ```sh
@@ -119,28 +132,37 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
 ## Features
 
-- choose a network adapter to inspect
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967942-1ee5d1b2-222e-46ee-bad7-e9aa63492628.png" width="50%"/></p>
-
-- select filters to apply to the observed traffic
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968099-a68f32c4-c077-4f82-be2c-1cf88ce5522d.png" width="60%"/></p>
-  
-- view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968195-f979f1b4-b737-4ece-8433-cf539d140eb4.png" width="80%"/></p>
-
-- view overall statistics about the filtered traffic
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205968251-b331a2b7-14df-45ab-aafd-20d93d9156bf.png" width="50%"/></p>
-
-- view most relevant connections (most recent, most packets, most bytes)
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/205967785-ff98bc0a-f3e8-44ad-bafe-4b9a46344f74.png" width="95%"/></p>
-
-- save complete textual report with detailed information for each connection:
+- 💻 choose a network adapter to inspect
+- 🏷️ select filters to apply to the observed traffic
+- 📈 view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
+- 🔉 set custom notifications to inform you when defined network events occur (data rate exceeded a specified threshold, or new data have been exchanged from your favorite connections)
+- 📖 view overall statistics about the filtered traffic
+- ⭐ view most relevant connections in real time (most recent, most packets, most bytes, favorites)
+- 🌍 get information about the country of the remote address (IP Geolocation)
+- 📁 save complete textual report with detailed information for each connection:
   * source and destination IP addresses
   * source and destination ports
   * carried protocols
   * amount of exchanged packets and bytes
   * initial and final timestamp of information exchange
+- ... and more!
   
+
+## IP Geolocation
+
+<details>
+
+  <summary>See details</summary>
+
+  Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
+
+  > The MMDB (MaxMind database) format has been developed especially for IP lookup. It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently. If you want the best performance on your IP lookups for use in a production environment, you should use the MMDB format files.
+  
+  This format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
+
+  Sometimes it is not possible to determine the location of an IP address; this is most likely due to the address being a private IP address.
+
+</details>
 
 ## Supported application layer protocols
 
@@ -201,6 +223,12 @@ necessary to correctly analyze a network adapter. <br>
 Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
 For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
+
+Note that most Linux system also need this dependency (required to build the library used to play sounds):
+
+```sh
+sudo apt-get install libasound2-dev
+```
 
 Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
 

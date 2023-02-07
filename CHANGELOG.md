@@ -2,6 +2,27 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [1.1.0] - 2023-02-07
+
+- Added Custom Notifications to inform the user when defined network events occur:
+  * data intensity exceeded a defined packets per second rate
+  * data intensity exceeded a defined bytes per second rate
+  * new data are exchanged from one of the favorite connections
+- Added Settings pages to configure the state of the application (persistently stored in a configuration file):
+  * customise notifications
+  * choose between 4 different application styles
+  * set the application language (this release introduces the Italian language 🇮🇹, and more languages will be supported soon)
+- Added Geolocation of the remote IP addresses (consult the README for more information)
+- Implemented the possibility of marking a group of connections as favorites and added favorites view to the report
+- Added modal to ask the user for confirmation before leaving the current analysis
+- Added Tooltips to help the user better understand the function of some buttons
+- Partially implemented support for broadcast IP addresses (still missing IPv4 directed broadcast)
+- The application window is now maximized after start
+- All the GUI text fonts have been replaced with 'Inconsolata'
+- Fixed issue [#48](https://github.com/GyulyVGC/sniffnet/issues/48) adding a horizontal scrollable to the report view
+
+
+
 ## [1.0.1] - 2022-11-30
 
 - Substituted command `open` with command `xdg-open` on Linux systems to solve the problem described in issues [#13](https://github.com/GyulyVGC/sniffnet/issues/13) and [#23](https://github.com/GyulyVGC/sniffnet/issues/23)

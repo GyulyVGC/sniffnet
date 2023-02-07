@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
 
 # How can you contribute to the Sniffnet project?
 

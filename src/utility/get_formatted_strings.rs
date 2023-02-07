@@ -1,17 +1,19 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
 use iced::Color;
 use thousands::Separable;
 
 use crate::enums::traffic_type::TrafficType;
-use crate::gui::style::{SPECIAL_DAY, SPECIAL_NIGHT};
 use crate::structs::filters::Filters;
-use crate::{AppProtocol, IpVersion, TransProtocol};
+use crate::utility::translations::{active_filters_translation, none_translation};
+use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtocol};
+
+/// Application version number (to be displayed in gui footer)
+pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Computes the String representing the percentage of filtered bytes/packets
-pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
+pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
     if format!("{:.1}", 100.0 * (filtered) as f32 / observed as f32).eq("0.0") {
         "<0.1%".to_string()
     } else {
@@ -20,50 +22,52 @@ pub fn get_percentage_string(observed: u128, filtered: i128) -> String {
 }
 
 /// Computes the String representing the active filters
-pub fn get_active_filters_string(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-    if filters_lock.ip.eq(&IpVersion::Other)
-        && filters_lock.application.eq(&AppProtocol::Other)
-        && filters_lock.transport.eq(&TransProtocol::Other)
+pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
+    if filters.ip.eq(&IpVersion::Other)
+        && filters.application.eq(&AppProtocol::Other)
+        && filters.transport.eq(&TransProtocol::Other)
     {
-        "Active filters:\n   none".to_string()
+        format!(
+            "{}\n   {}",
+            active_filters_translation(language),
+            none_translation(language)
+        )
     } else {
-        let mut ret_val = "Active filters:".to_string();
-        if filters_lock.ip.ne(&IpVersion::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.ip));
+        let mut ret_val = active_filters_translation(language).to_string();
+        if filters.ip.ne(&IpVersion::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.ip));
         }
-        if filters_lock.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.transport));
+        if filters.transport.ne(&TransProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.transport));
         }
-        if filters_lock.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters_lock.application));
+        if filters.application.ne(&AppProtocol::Other) {
+            ret_val.push_str(&format!("\n   {}", filters.application));
         }
         ret_val
     }
 }
 
 /// Computes the String representing the active filters, without line breaks
-pub fn get_active_filters_string_nobr(filters: Arc<Mutex<Filters>>) -> String {
-    let filters_lock = filters.lock().unwrap();
-    let mut ret_val = "Active filters:".to_string();
-    if filters_lock.ip.ne(&IpVersion::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.ip));
+pub fn get_active_filters_string_nobr(filters: &Filters, language: Language) -> String {
+    let mut ret_val = active_filters_translation(language).to_string();
+    if filters.ip.ne(&IpVersion::Other) {
+        ret_val.push_str(&format!(" {}", filters.ip));
     }
-    if filters_lock.transport.ne(&TransProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.transport));
+    if filters.transport.ne(&TransProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.transport));
     }
-    if filters_lock.application.ne(&AppProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters_lock.application));
+    if filters.application.ne(&AppProtocol::Other) {
+        ret_val.push_str(&format!(" {}", filters.application));
     }
     ret_val
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_type: TrafficType) -> Color {
-    if traffic_type == TrafficType::Incoming || traffic_type == TrafficType::Multicast {
-        SPECIAL_NIGHT
+pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Color {
+    if traffic_type == TrafficType::Outgoing {
+        get_colors(style).outgoing
     } else {
-        SPECIAL_DAY
+        get_colors(style).incoming
     }
 }
 
@@ -76,8 +80,8 @@ pub fn get_connection_color(traffic_type: TrafficType) -> Color {
 /// * `app_count` - Map of app layer protocols with the relative sniffed packets count
 ///
 /// * `tot_packets` - Total number of sniffed packets
-pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
-    let mut ret_val = "".to_string();
+pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
+    let mut ret_val = String::new();
 
     if app_count.is_empty() {
         return ret_val;
@@ -135,16 +139,16 @@ pub fn get_app_count_string(app_count: HashMap<AppProtocol, u128>, tot_packets: 
     ret_val
 }
 
-/// Returns a String representing a quantity of bytes with their proper multiple (kB, MB, GB, TB)
+/// Returns a String representing a quantity of bytes with their proper multiple (KB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
-    let mut multiple_transmitted = "".to_string();
+    let mut multiple_transmitted = String::new();
     let mut n = bytes as f32;
 
     match bytes {
         0..=999 => {}
         1_000..=999_999 => {
             n /= 1000_f32;
-            multiple_transmitted.push('k');
+            multiple_transmitted.push('K');
         } // kilo
         1_000_000..=999_999_999 => {
             n /= 1_000_000_f32;
@@ -160,11 +164,11 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         } // tera
     }
 
-    if !multiple_transmitted.is_empty() {
-        // with multiple
-        format!("{n:.1} {multiple_transmitted}B")
-    } else {
+    if multiple_transmitted.is_empty() {
         // no multiple
-        format!("{n}  B")
+        format!("{n}   ")
+    } else {
+        // with multiple
+        format!("{n:.1} {multiple_transmitted} ")
     }
 }

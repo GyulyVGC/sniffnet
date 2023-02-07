@@ -1,5 +1,5 @@
 <div align="center">
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="../resources/header_repository.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
   <h1>Design Guidelines & Resources</h1>
   <p>A collection of design contribution guidelines and resources for Sniffnet.</p>
 </div>
@@ -32,7 +32,7 @@ with many additional functionalities planned for the future releases.
 1. Check out open [issues](https://github.com/gyulyvgc/sniffnet/issues) here on GitHub (we label them with `design: 💅required`)
 2. Feel free to open an issue on your own if you find something you would like to contribute to the project and use the `design: 💡idea` label for it.
 3. Clone the public Figma files if available or create new ones and share them publicly
-4. Add your contributions to an issue and I promise I will review your contribution carefully and foster discussions
+4. Add your contributions to an issue, and I promise I will review your contribution carefully and foster discussions
 
 **We encourage you to:**
 
@@ -50,7 +50,7 @@ All users with a decent amount of technological knowledge. Typical users' age ra
 
 ### Design files
 
-> Since I do not have a design team at hand – most of my product does not have any Design files and you'll be forced to browse through the product itself and propose improvements.
+> Since I do not have a design team at hand – most of my product does not have any Design files, and you'll be forced to browse through the product itself and propose improvements.
 
 ## 💅 Design relevant materials
 
@@ -66,7 +66,7 @@ For info on the used RGB colors, I suggest you to give a look at the file [style
 
 ### Logos
 
-You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources)
+You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/logos)
 
 ## 🎓 License
 

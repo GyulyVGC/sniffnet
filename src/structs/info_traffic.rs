@@ -29,10 +29,14 @@ pub struct InfoTraffic {
     pub addresses_last_interval: HashSet<usize>,
     /// Map of the application layer protocols with their packet count
     pub app_protocols: HashMap<AppProtocol, u128>,
+    /// Collection of indexes of the favorite connections
+    pub favorite_connections: HashSet<usize>,
+    /// Flag to determine if data were exchanged from favorites in the last interval of time
+    pub favorite_featured_last_interval: Option<(AddressPortPair, InfoAddressPortPair)>,
 }
 
 impl InfoTraffic {
-    /// Constructs a new InfoTraffic element.
+    /// Constructs a new `InfoTraffic` element.
     pub fn new() -> Self {
         InfoTraffic {
             tot_received_bytes: 0,
@@ -44,6 +48,8 @@ impl InfoTraffic {
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
             app_protocols: HashMap::new(),
+            favorite_connections: HashSet::new(),
+            favorite_featured_last_interval: None,
         }
     }
 }

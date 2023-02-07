@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.0.1"
+version = "1.1.0"
 authors = ["Giuliano Bellini"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -9,12 +9,13 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "parser"]
 categories = ["command-line-utilities", "concurrency", "network-programming"]
+include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
 
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
-icon = ["./resources/icon.ico"]
+icon = ["./resources/logos/icon.ico"]
 
 
 [profile.release]
@@ -24,11 +25,15 @@ lto = true
 
 [dependencies]
 pcap = "1.0.0"
-etherparse = "0.12.0"
-chrono = "0.4.22"
+etherparse = "0.13.0"
+chrono = { version = "0.4.23", default_features = false, features = ["clock"] }
 thousands = "0.2.0"
-plotters = "0.3.4"
-indexmap = "1.9.1"
-plotters-iced = "0.3.3"
-iced = { version = "0.4.2", features = ["tokio"] }
-iced_style = "0.4.0"
+indexmap = "1.9.2"
+plotters = { version = "0.3.4", default_features = false, features = ["area_series"] }
+iced = { version = "0.7.0", features = ["tokio", "image"] }
+iced_native = "0.8.0"
+plotters-iced = "0.6.0"
+maxminddb = "0.23.0"
+confy = "0.5.1"
+serde = { version = "1.0.152", default_features = false, features = ["derive"] }
+rodio = { version = "0.16.0", default_features = false, features = ["mp3"] }

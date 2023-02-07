@@ -4,37 +4,37 @@
 use std::sync::{Arc, Mutex};
 
 use etherparse::PacketHeaders;
-use pcap::{Capture, Device};
+use pcap::{Active, Capture, Device};
 
 use crate::enums::traffic_type::TrafficType;
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::filters::Filters;
+use crate::utility::countries::COUNTRY_MMDB;
 use crate::utility::manage_packets::{
-    analyze_network_header, analyze_transport_header, is_multicast_address, modify_or_insert_in_map,
+    analyze_network_header, analyze_transport_header, is_broadcast_address, is_multicast_address,
+    modify_or_insert_in_map,
 };
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets_loop(
-    current_capture_id: Arc<Mutex<u16>>,
-    device: Arc<Mutex<Device>>,
-    filters: Arc<Mutex<Filters>>,
-    info_traffic_mutex: Arc<Mutex<InfoTraffic>>,
-    pcap_error: Arc<Mutex<Option<String>>>,
+    current_capture_id: &Arc<Mutex<u16>>,
+    device: Device,
+    mut cap: Capture<Active>,
+    filters: &Filters,
+    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let mut my_interface_addresses = Vec::new();
-    for address in device.lock().unwrap().clone().addresses {
+    for address in device.addresses {
         my_interface_addresses.push(address.addr.to_string());
     }
 
-    let filtri = filters.lock().unwrap();
-    let network_layer_filter = filtri.ip;
-    let transport_layer_filter = filtri.transport;
-    let app_layer_filter = filtri.application;
-    drop(filtri);
+    let network_layer_filter = filters.ip;
+    let transport_layer_filter = filters.transport;
+    let app_layer_filter = filters.application;
 
     let mut port1 = 0;
     let mut port2 = 0;
@@ -46,18 +46,7 @@ pub fn parse_packets_loop(
     let mut skip_packet;
     let mut reported_packet;
 
-    let cap_result = Capture::from_device(&*device.lock().unwrap().name)
-        .expect("Capture initialization error\n\r")
-        .promisc(true)
-        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
-        .immediate_mode(true) //parse packets ASAP!
-        .open();
-    if cap_result.is_err() {
-        let err_string = cap_result.err().unwrap().to_string();
-        *pcap_error.lock().unwrap() = Option::Some(err_string);
-        return;
-    }
-    let mut cap = cap_result.unwrap();
+    let country_db_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
 
     loop {
         match cap.next_packet() {
@@ -76,8 +65,8 @@ pub fn parse_packets_loop(
                         continue;
                     }
                     Ok(value) => {
-                        let mut address1 = "".to_string();
-                        let mut address2 = "".to_string();
+                        let mut address1 = String::new();
+                        let mut address2 = String::new();
                         network_protocol = IpVersion::Other;
                         transport_protocol = TransProtocol::Other;
                         application_protocol = AppProtocol::Other;
@@ -115,6 +104,8 @@ pub fn parse_packets_loop(
                             traffic_type = TrafficType::Incoming;
                         } else if is_multicast_address(&address2) {
                             traffic_type = TrafficType::Multicast;
+                        } else if is_broadcast_address(&address2) {
+                            traffic_type = TrafficType::Broadcast;
                         }
 
                         let key: AddressPortPair = AddressPortPair::new(
@@ -135,11 +126,12 @@ pub fn parse_packets_loop(
                             // if (port1 >= lowest_port && port1 <= highest_port)
                             //     || (port2 >= lowest_port && port2 <= highest_port) {
                             modify_or_insert_in_map(
-                                info_traffic_mutex.clone(),
+                                info_traffic_mutex,
                                 key,
                                 exchanged_bytes,
                                 traffic_type,
                                 application_protocol,
+                                &country_db_reader,
                             );
                             reported_packet = true;
                             // }
@@ -160,16 +152,14 @@ pub fn parse_packets_loop(
                                 .and_modify(|n| *n += 1)
                                 .or_insert(1);
 
-                            if traffic_type == TrafficType::Incoming
-                                || traffic_type == TrafficType::Multicast
-                            {
-                                //increment number of received packets and bytes
-                                info_traffic.tot_received_packets += 1;
-                                info_traffic.tot_received_bytes += exchanged_bytes;
-                            } else {
+                            if traffic_type == TrafficType::Outgoing {
                                 //increment number of sent packets and bytes
                                 info_traffic.tot_sent_packets += 1;
                                 info_traffic.tot_sent_bytes += exchanged_bytes;
+                            } else {
+                                //increment number of received packets and bytes
+                                info_traffic.tot_received_packets += 1;
+                                info_traffic.tot_received_bytes += exchanged_bytes;
                             }
                         }
                     }
