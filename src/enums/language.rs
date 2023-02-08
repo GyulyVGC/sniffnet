@@ -7,6 +7,8 @@ pub enum Language {
     EN,
     /// Italian.
     IT,
+    /// French.
+    FR,
 }
 
 impl Default for Language {
@@ -16,12 +18,13 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const ALL: [Language; 2] = [Language::EN, Language::IT];
+    pub(crate) const ALL: [Language; 3] = [Language::EN, Language::IT, Language::FR];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
             Language::EN => "English",
             Language::IT => "Italiano",
+            Language::FR => "Français",
         }
     }
 }
