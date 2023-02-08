@@ -1,4 +1,3 @@
-use crate::enums::byte_multiple::{from_char_to_multiple, ByteMultiple};
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::overlay::MyOverlay;
@@ -388,23 +387,14 @@ fn get_favorite_notify(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
         move |toggled| {
-            if toggled {
-                Message::UpdateFavoriteNotification(
-                    FavoriteNotification {
-                        notify_on_favorite: true,
-                        ..favorite_notification
-                    },
-                    false,
-                )
-            } else {
-                Message::UpdateFavoriteNotification(
-                    FavoriteNotification {
-                        notify_on_favorite: false,
-                        ..favorite_notification
-                    },
-                    false,
-                )
-            }
+            Message::UpdateFavoriteNotification(
+                if toggled {
+                    FavoriteNotification::on(favorite_notification.sound)
+                } else {
+                    FavoriteNotification::off(favorite_notification.sound)
+                },
+                false,
+            )
         },
     )
     .size(18)
@@ -462,21 +452,9 @@ fn input_group_packets(
                     curr_threshold_str
                 },
                 move |value| {
-                    let new_threshold = if value.is_empty() {
-                        0
-                    } else {
-                        value
-                            .parse()
-                            .unwrap_or(packets_notification.previous_threshold)
-                    };
-                    Message::UpdatePacketsNotification(
-                        PacketsNotification {
-                            threshold: Some(new_threshold),
-                            previous_threshold: new_threshold,
-                            ..packets_notification
-                        },
-                        false,
-                    )
+                    let packets_notification =
+                        PacketsNotification::from(&value, Some(packets_notification));
+                    Message::UpdatePacketsNotification(packets_notification, false)
                 },
             )
             .padding(1)
@@ -519,45 +497,9 @@ fn input_group_bytes(
                     &curr_threshold_str
                 },
                 move |value| {
-                    let mut byte_multiple_inserted = ByteMultiple::B;
-                    let new_threshold = if value.is_empty() {
-                        0
-                    } else if !value.chars().map(char::is_numeric).any(|x| !x) {
-                        // no multiple
-                        value
-                            .parse::<u64>()
-                            .unwrap_or(bytes_notification.previous_threshold)
-                    } else {
-                        // multiple
-                        let last_char = value.chars().last().unwrap();
-                        byte_multiple_inserted = from_char_to_multiple(last_char);
-                        let without_multiple = value[0..value.len() - 1].to_string();
-                        if without_multiple.parse::<u64>().is_ok()
-                            && TryInto::<u64>::try_into(
-                                without_multiple.parse::<u128>().unwrap()
-                                    * u128::from(byte_multiple_inserted.get_multiplier()),
-                            )
-                            .is_ok()
-                        {
-                            without_multiple.parse::<u64>().unwrap()
-                                * byte_multiple_inserted.get_multiplier()
-                        } else if without_multiple.is_empty() {
-                            byte_multiple_inserted = ByteMultiple::B;
-                            0
-                        } else {
-                            byte_multiple_inserted = bytes_notification.byte_multiple;
-                            bytes_notification.previous_threshold
-                        }
-                    };
-                    Message::UpdateBytesNotification(
-                        BytesNotification {
-                            threshold: Some(new_threshold),
-                            previous_threshold: new_threshold,
-                            byte_multiple: byte_multiple_inserted,
-                            ..bytes_notification
-                        },
-                        false,
-                    )
+                    let bytes_notification =
+                        BytesNotification::from(&value, Some(bytes_notification));
+                    Message::UpdateBytesNotification(bytes_notification, false)
                 },
             )
             .padding(1)

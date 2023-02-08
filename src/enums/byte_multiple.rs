@@ -51,3 +51,22 @@ pub fn from_char_to_multiple(ch: char) -> ByteMultiple {
         _ => ByteMultiple::B,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_interpret_suffix_correctly() {
+        assert_eq!(from_char_to_multiple('B'), ByteMultiple::B);
+        assert_eq!(from_char_to_multiple('k'), ByteMultiple::KB);
+        assert_eq!(from_char_to_multiple('M'), ByteMultiple::MB);
+        assert_eq!(from_char_to_multiple('g'), ByteMultiple::GB);
+    }
+
+    #[test]
+    fn test_interpret_unknown_suffix_correctly() {
+        assert_eq!(from_char_to_multiple('T'), ByteMultiple::B);
+        assert_eq!(from_char_to_multiple('p'), ByteMultiple::B);
+    }
+}
