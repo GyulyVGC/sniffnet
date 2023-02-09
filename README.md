@@ -20,10 +20,12 @@ Multithreaded, cross-platform, reliable
 <img alt="" src="https://user-images.githubusercontent.com/100347457/216972251-41a413e5-89f7-4c8c-b41b-a291470cba59.png" width="49%"/>
 </p>
 
-<p align="center"> 
+<div align="center">
+
 Application translated in: 🇬🇧 - 🇮🇹 <br>
-More languages will be supported in the upcoming releases
-</p>
+[More languages will be supported in the upcoming releases](https://github.com/GyulyVGC/sniffnet/issues/60)
+
+</div>
 
 <hr>
 
