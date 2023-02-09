@@ -369,12 +369,12 @@ pub fn overview_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn inspect_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Inspect",
-//         Language::IT => "Ispeziona",
-//     }
-// }
+pub fn inspect_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Inspect",
+        Language::IT => "Ispeziona",
+    }
+}
 
 pub fn packets_threshold_translation(language: Language) -> &'static str {
     match language {
