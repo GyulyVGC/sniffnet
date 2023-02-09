@@ -58,7 +58,6 @@ cargo install sniffnet
 </details>
 
 
-<!--
 <details>
 
   <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
@@ -70,7 +69,6 @@ brew install sniffnet
 ```
     
 </details>
--->
 
 
 ## Required dependencies
