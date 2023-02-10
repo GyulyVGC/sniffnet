@@ -3,7 +3,7 @@
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
 use iced::widget::Column;
-use iced::{executor, Application, Command, Element, Subscription, Theme};
+use iced::{executor, window, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -285,6 +285,9 @@ impl Application for Sniffer {
                 self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
                 self.update(Message::HideModal(false));
             }
+            Message::Exit => {
+                return window::close();
+            }
         }
         Command::none()
     }
@@ -336,13 +339,25 @@ impl Application for Sniffer {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        match *self.status_pair.0.lock().unwrap() {
+        let quit_keys_subscription = iced_native::subscription::events_with(|event, _| {
+            if let iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                key_code: iced_native::keyboard::KeyCode::Q,
+                modifiers: iced_native::keyboard::Modifiers::CTRL,
+            }) = event
+            {
+                Some(Message::Exit)
+            } else {
+                None
+            }
+        });
+        let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
             }
             Status::Init => {
                 iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit)
             }
-        }
+        };
+        Subscription::batch([quit_keys_subscription, time_subscription])
     }
 }

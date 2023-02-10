@@ -56,4 +56,6 @@ pub enum Message {
     ClearAllNotifications,
     /// Set notifications volume
     ChangeVolume(u8),
+    /// Quits the app. Used when Ctrl+Q keys are pressed.
+    Exit,
 }
