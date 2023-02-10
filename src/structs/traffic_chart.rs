@@ -11,7 +11,7 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
 use crate::structs::palette::to_rgb_color;
-use crate::utility::style_constants::{CHARTS_LINE_BORDER, COLOR_CHART_MIX, INCONSOLATA_BOLD};
+use crate::utility::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER, INCONSOLATA_BOLD};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 
@@ -34,7 +34,7 @@ impl TrafficChart {
     ) -> Self {
         TrafficChart {
             charts_data,
-            color_mix: COLOR_CHART_MIX,
+            color_mix: get_color_mix_chart(style),
             color_incoming: to_rgb_color(get_colors(style).incoming),
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
@@ -70,6 +70,7 @@ impl TrafficChart {
         self.color_font = to_rgb_color(get_colors(style).text_body);
         self.color_incoming = to_rgb_color(get_colors(style).incoming);
         self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
+        self.color_mix = get_color_mix_chart(style);
     }
 }
 

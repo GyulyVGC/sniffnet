@@ -7,7 +7,7 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
 use crate::{Language, RunningPage, StyleType};
 use iced::widget::{button, horizontal_space, Button, Row, Text};
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Font, Length};
 
 pub fn get_settings_tabs(
     labels: [MyOverlay; 3],
@@ -17,6 +17,7 @@ pub fn get_settings_tabs(
     style: StyleType,
     language: Language,
 ) -> Row<'static, Message> {
+    let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Center);
@@ -29,6 +30,7 @@ pub fn get_settings_tabs(
             actions.get(i).unwrap().clone(),
             active,
             style,
+            font,
         ));
     }
     tabs
@@ -42,6 +44,7 @@ pub fn get_pages_tabs(
     style: StyleType,
     language: Language,
 ) -> Row<'static, Message> {
+    let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Center);
@@ -54,6 +57,7 @@ pub fn get_pages_tabs(
             actions.get(i).unwrap().clone(),
             active,
             style,
+            font,
         ));
     }
     tabs
@@ -65,6 +69,7 @@ fn new_tab(
     action: Message,
     active: bool,
     style: StyleType,
+    font: Font,
 ) -> Button<'static, Message> {
     let content = Row::new()
         .align_items(Alignment::Center)
@@ -78,7 +83,7 @@ fn new_tab(
         )
         .push(
             Text::new(label)
-                .font(get_font(style))
+                .font(font)
                 .size(FONT_SIZE_SUBTITLE)
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),

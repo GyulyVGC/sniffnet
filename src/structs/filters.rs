@@ -12,3 +12,13 @@ pub struct Filters {
     /// Application layer protocol
     pub application: AppProtocol,
 }
+
+impl Default for Filters {
+    fn default() -> Self {
+        Self {
+            ip: IpVersion::Other,
+            transport: TransProtocol::Other,
+            application: AppProtocol::Other,
+        }
+    }
+}

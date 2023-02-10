@@ -338,7 +338,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                         Position::Top,
                                     )
                                     .gap(5)
-                                    .font(get_font(sniffer.style))
+                                    .font(font)
                                     .style(
                                         <StyleTuple as Into<iced::theme::Container>>::into(
                                             StyleTuple(sniffer.style, ElementType::Tooltip),

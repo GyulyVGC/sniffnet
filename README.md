@@ -53,7 +53,12 @@ cargo install sniffnet
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
-  Choose between a Windows installer, a DEB package, or a macOS disk image (depending on your operating system).
+  Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
+  Here for your convenience you can find the direct link to the downloads:
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_Windows.msi) (7.3 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_MacOS.dmg) (6.5 MB)
+  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_Linux.deb) (5.2 MB)
+
     
 </details>
 
@@ -62,7 +67,7 @@ cargo install sniffnet
 
   <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
 
-  You can install Sniffnet's brew package with:
+  You can install Sniffnet's Homebrew package with:
   
   ```sh
 brew install sniffnet
@@ -132,13 +137,14 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
 ## Features
 
-- 💻 choose a network adapter to inspect
-- 🏷️ select filters to apply to the observed traffic
+- 💻 choose a network adapter of your PC to inspect
+- 🏷️ select a set of filters to apply to the observed traffic
+- 📖 view overall statistics about your Internet traffic
 - 📈 view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
 - 🔉 set custom notifications to inform you when defined network events occur (data rate exceeded a specified threshold, or new data have been exchanged from your favorite connections)
-- 📖 view overall statistics about the filtered traffic
 - ⭐ view most relevant connections in real time (most recent, most packets, most bytes, favorites)
-- 🌍 get information about the country of the remote address (IP Geolocation)
+- 🌍 get information about the country of the remote network addresses (IP Geolocation)
+- 🎨 choose the style that fits you the most from 4 different available themes 
 - 📁 save complete textual report with detailed information for each connection:
   * source and destination IP addresses
   * source and destination ports
@@ -153,6 +159,8 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 <details>
 
   <summary>See details</summary>
+
+  <br>
 
   Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
 

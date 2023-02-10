@@ -101,6 +101,7 @@ fn get_modal_header(
     language: Language,
     title: String,
 ) -> Container<'static, Message> {
+    let font = get_font(style);
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -116,7 +117,7 @@ fn get_modal_header(
                     Tooltip::new(
                         button(
                             Text::new("x")
-                                .font(get_font(style))
+                                .font(font)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
@@ -128,7 +129,7 @@ fn get_modal_header(
                         hide_translation(language),
                         Position::Right,
                     )
-                    .font(get_font(style))
+                    .font(font)
                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
                         StyleTuple(style, ElementType::Tooltip),
                     )),

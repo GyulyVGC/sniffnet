@@ -6,8 +6,6 @@ use plotters::style::RGBColor;
 
 use crate::structs::palette::{to_rgb_color, Palette};
 
-pub const COLOR_CHART_MIX: f64 = 1.0;
-
 // night theme
 const PRIMARY_NIGHT: Color = Color {
     r: 0.2,
@@ -156,6 +154,15 @@ pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => Font::Default,
         _ => INCONSOLATA_BOLD,
+    }
+}
+
+pub fn get_color_mix_chart(style: StyleType) -> f64 {
+    match style {
+        StyleType::Night => 0.3,
+        StyleType::Day => 0.8,
+        StyleType::DeepSea => 0.3,
+        StyleType::MonAmour => 0.8,
     }
 }
 

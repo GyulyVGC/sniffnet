@@ -7,7 +7,6 @@ use std::{panic, process, thread};
 
 use iced::window::Position;
 use iced::{window, Application, Settings};
-use pcap::Device;
 
 use utility::style_constants::FONT_SIZE_BODY;
 
@@ -22,7 +21,6 @@ use crate::enums::status::Status;
 use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
 use crate::structs::config::Config;
-use crate::structs::filters::Filters;
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::palette::get_colors;
 use crate::structs::runtime_data::RunTimeData;
@@ -39,7 +37,7 @@ mod utility;
 
 /// Entry point of application execution
 ///
-/// It initialized shared variables and gui parameters
+/// It initializes shared variables and gui parameters
 pub fn main() -> iced::Result {
     let current_capture_id1 = Arc::new(Mutex::new(0));
     let current_capture_id2 = current_capture_id1.clone();
@@ -51,18 +49,7 @@ pub fn main() -> iced::Result {
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
-    let found_device = Device::lookup().unwrap().unwrap();
-
-    let pcap_error = None; // None means no error
-
-    let runtime_data1 = Rc::new(RefCell::new(RunTimeData::new()));
-    let runtime_data2 = runtime_data1.clone();
-
-    let filters = Filters {
-        ip: IpVersion::Other,
-        transport: TransProtocol::Other,
-        application: AppProtocol::Other,
-    };
+    let runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
 
     // to kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -86,9 +73,6 @@ pub fn main() -> iced::Result {
         config_result = confy::load::<Config>("sniffnet", None);
     }
     let config = config_result.unwrap();
-    let style = config.style;
-    let notifications = config.notifications;
-    let language = config.language;
 
     Sniffer::run(Settings {
         id: None,
@@ -104,23 +88,13 @@ pub fn main() -> iced::Result {
             always_on_top: false,
             icon: None,
         },
-        flags: Sniffer {
-            current_capture_id: current_capture_id1,
-            info_traffic: mutex_map1,
-            runtime_data: runtime_data1,
-            device: found_device,
-            filters,
-            status_pair: status_pair1,
-            pcap_error,
-            style,
-            waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(runtime_data2, style, language),
-            report_type: ReportType::MostRecent,
-            overlay: None,
-            notifications,
-            running_page: RunningPage::Overview,
-            language,
-        },
+        flags: Sniffer::new(
+            current_capture_id1,
+            mutex_map1,
+            runtime_data,
+            status_pair1,
+            &config,
+        ),
         default_font: Some(include_bytes!("../fonts/inconsolata-regular.ttf")),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,

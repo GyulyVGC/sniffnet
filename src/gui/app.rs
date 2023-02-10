@@ -292,6 +292,7 @@ impl Application for Sniffer {
     fn view(&self) -> Element<Message> {
         let status = *self.status_pair.0.lock().unwrap();
         let style = self.style;
+        let font = get_font(style);
 
         let header = match status {
             Status::Init => get_header(style, false, 0, self.language),
@@ -321,14 +322,8 @@ impl Application for Sniffer {
             content.into()
         } else {
             let (overlay, save_config) = match self.overlay.unwrap() {
-                MyOverlay::Quit => (
-                    get_exit_overlay(style, get_font(style), self.language),
-                    false,
-                ),
-                MyOverlay::ClearAll => (
-                    get_clear_all_overlay(style, get_font(style), self.language),
-                    false,
-                ),
+                MyOverlay::Quit => (get_exit_overlay(style, font, self.language), false),
+                MyOverlay::ClearAll => (get_clear_all_overlay(style, font, self.language), false),
                 MyOverlay::SettingsNotifications => (settings_notifications_page(self), true),
                 MyOverlay::SettingsAppearance => (settings_appearance_page(self), true),
                 MyOverlay::SettingsLanguage => (settings_language_page(self), true),

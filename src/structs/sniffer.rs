@@ -13,7 +13,7 @@ use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
 use crate::structs::notifications::Notifications;
-use crate::{InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{Config, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///
@@ -49,4 +49,32 @@ pub struct Sniffer {
     pub running_page: RunningPage,
     /// Language used in the GUI
     pub language: Language,
+}
+
+impl Sniffer {
+    pub fn new(
+        current_capture_id: Arc<Mutex<u16>>,
+        info_traffic: Arc<Mutex<InfoTraffic>>,
+        runtime_data: Rc<RefCell<RunTimeData>>,
+        status_pair: Arc<(Mutex<Status>, Condvar)>,
+        config: &Config,
+    ) -> Self {
+        Self {
+            current_capture_id,
+            info_traffic,
+            status_pair,
+            runtime_data: runtime_data.clone(),
+            device: Device::lookup().unwrap().unwrap(),
+            filters: Filters::default(),
+            pcap_error: None,
+            style: config.style,
+            waiting: ".".to_string(),
+            traffic_chart: TrafficChart::new(runtime_data, config.style, config.language),
+            report_type: ReportType::MostRecent,
+            overlay: None,
+            notifications: config.notifications,
+            running_page: RunningPage::Overview,
+            language: config.language,
+        }
+    }
 }

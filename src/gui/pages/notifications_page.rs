@@ -29,6 +29,7 @@ use iced_native::widget::{button, vertical_space};
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let notifications = sniffer.notifications;
+    let font = get_font(sniffer.style);
 
     let mut body = Column::new()
         .width(Length::Units(830))
@@ -80,7 +81,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .push(
                 no_notifications_set_translation(sniffer.language)
                     .horizontal_alignment(Horizontal::Center)
-                    .font(get_font(sniffer.style)),
+                    .font(font),
             )
             .push(get_button_settings(sniffer.style, sniffer.language))
             .push(vertical_space(FillPortion(2)));
@@ -101,13 +102,9 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .push(
                 no_notifications_received_translation(sniffer.language)
                     .horizontal_alignment(Horizontal::Center)
-                    .font(get_font(sniffer.style)),
+                    .font(font),
             )
-            .push(
-                Text::new(sniffer.waiting.clone())
-                    .font(get_font(sniffer.style))
-                    .size(50),
-            )
+            .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
     } else {
@@ -143,8 +140,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                     if sniffer.runtime_data.borrow().logged_notifications.len() < 30 {
                         Text::new("")
                     } else {
-                        Text::new(only_last_30_translation(sniffer.language))
-                            .font(get_font(sniffer.style))
+                        Text::new(only_last_30_translation(sniffer.language)).font(font)
                     },
                 )
                 .width(Length::FillPortion(1))
@@ -205,7 +201,7 @@ fn packets_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
@@ -286,7 +282,7 @@ fn bytes_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
@@ -367,7 +363,7 @@ fn favorite_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
