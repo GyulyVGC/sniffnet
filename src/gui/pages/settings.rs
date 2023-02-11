@@ -642,7 +642,7 @@ fn get_palette_container(
 
     Button::new(content)
         .height(Units(130))
-        .width(Units(350))
+        .width(Units(360))
         .padding(10)
         .style(StyleTuple(style, ElementType::BorderedRound).into())
         .on_press(Message::Style(on_press))

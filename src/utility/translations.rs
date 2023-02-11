@@ -621,7 +621,6 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::IT => "Nuovi dati scambiati dai preferiti!",
         Language::FR => "Nouvel échange de donnée depuis un favori!",
         Language::ES => "¡Nuevos datos intercambiados de favoritos!",
-
     }
 }
 
