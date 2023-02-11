@@ -235,7 +235,7 @@ fn packets_notification_log(
     Container::new(content)
         .height(Length::Units(120))
         .width(Length::Units(800))
-        .padding(20)
+        .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -318,7 +318,7 @@ fn bytes_notification_log(
     Container::new(content)
         .height(Length::Units(120))
         .width(Length::Units(800))
-        .padding(20)
+        .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -391,7 +391,7 @@ fn favorite_notification_log(
     Container::new(content)
         .height(Length::Units(120))
         .width(Length::Units(800))
-        .padding(20)
+        .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
