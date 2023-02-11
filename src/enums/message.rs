@@ -48,9 +48,9 @@ pub enum Message {
     LanguageSelection(Language),
     /// Set packets notification
     UpdatePacketsNotification(PacketsNotification, bool),
-    /// Set packets notification
+    /// Set bytes notification
     UpdateBytesNotification(BytesNotification, bool),
-    /// Set packets notification
+    /// Set favorite notification
     UpdateFavoriteNotification(FavoriteNotification, bool),
     /// Clear all received notifications
     ClearAllNotifications,
