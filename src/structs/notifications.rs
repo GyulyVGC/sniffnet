@@ -93,9 +93,7 @@ impl BytesNotification {
             0
         } else if !value.trim().chars().map(char::is_numeric).any(|x| !x) {
             // no multiple
-            value
-                .parse::<u64>()
-                .unwrap_or(default.previous_threshold)
+            value.parse::<u64>().unwrap_or(default.previous_threshold)
         } else {
             // multiple
             let last_char = value.chars().last().unwrap();
@@ -108,8 +106,7 @@ impl BytesNotification {
                 )
                 .is_ok()
             {
-                without_multiple.parse::<u64>().unwrap()
-                    * byte_multiple_inserted.get_multiplier()
+                without_multiple.parse::<u64>().unwrap() * byte_multiple_inserted.get_multiplier()
             } else if without_multiple.is_empty() {
                 byte_multiple_inserted = ByteMultiple::B;
                 0
