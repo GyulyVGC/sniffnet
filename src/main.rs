@@ -37,7 +37,7 @@ mod utility;
 
 /// Entry point of application execution
 ///
-/// It initializes shared variables and gui parameters
+/// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
     let current_capture_id1 = Arc::new(Mutex::new(0));
     let current_capture_id2 = current_capture_id1.clone();
@@ -45,7 +45,6 @@ pub fn main() -> iced::Result {
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     let mutex_map2 = mutex_map1.clone();
 
-    //shared tuple containing the application status and the relative condition variable
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
 
