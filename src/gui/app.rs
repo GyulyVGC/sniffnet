@@ -12,7 +12,7 @@ use std::thread;
 use std::time::Duration;
 
 use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::enums::running_page::RunningPage;
 use crate::enums::sound::{play_sound, Sound};
 use crate::enums::status::Status;
@@ -242,8 +242,11 @@ impl Application for Sniffer {
                 self.overlay = Some(overlay);
             }
             Message::HideModal(save_config) => {
+                let last_opened = self.overlay;
                 self.overlay = None;
                 if save_config {
+                    // closed a setting page
+                    self.last_opened_setting = last_opened.unwrap();
                     let store = Config {
                         style: self.style,
                         notifications: self.notifications,
@@ -298,12 +301,13 @@ impl Application for Sniffer {
         let font = get_font(style);
 
         let header = match status {
-            Status::Init => get_header(style, false, 0, self.language),
+            Status::Init => get_header(style, false, 0, self.language, self.last_opened_setting),
             Status::Running => get_header(
                 style,
                 true,
                 self.info_traffic.lock().unwrap().all_packets,
                 self.language,
+                self.last_opened_setting,
             ),
         };
 

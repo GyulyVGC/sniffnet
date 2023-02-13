@@ -6,7 +6,7 @@ pub mod ip_version;
 pub mod language;
 pub mod logged_notification;
 pub mod message;
-pub mod overlay;
+pub mod my_overlay;
 pub mod report_type;
 pub mod running_page;
 pub mod sound;

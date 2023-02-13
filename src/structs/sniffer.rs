@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
 use crate::enums::language::Language;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::enums::report_type::ReportType;
 use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
@@ -43,6 +43,8 @@ pub struct Sniffer {
     pub report_type: ReportType,
     /// Currently displayed overlay; None if no overlay is displayed
     pub overlay: Option<MyOverlay>,
+    /// Remembers the last opened setting page
+    pub last_opened_setting: MyOverlay,
     /// Contains the notifications configuration set by the user
     pub notifications: Notifications,
     /// Defines the current running page
@@ -72,6 +74,7 @@ impl Sniffer {
             traffic_chart: TrafficChart::new(runtime_data, config.style, config.language),
             report_type: ReportType::MostRecent,
             overlay: None,
+            last_opened_setting: MyOverlay::SettingsNotifications,
             notifications: config.notifications,
             running_page: RunningPage::Overview,
             language: config.language,

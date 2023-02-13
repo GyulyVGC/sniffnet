@@ -2,7 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, HEIGHT_HEADER, ICONS};
 use crate::utility::translations::{quit_analysis_translation, settings_translation};
@@ -18,6 +18,7 @@ pub fn get_header(
     back_button: bool,
     all_packets: u128,
     language: Language,
+    last_opened_setting: MyOverlay,
 ) -> Container<'static, Message> {
     let logo = Text::new('A'.to_string())
         .font(ICONS)
@@ -51,7 +52,7 @@ pub fn get_header(
                 .align_x(Horizontal::Center),
             )
             .push(
-                Container::new(get_button_settings(style, language))
+                Container::new(get_button_settings(style, language, last_opened_setting))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center),
             )
@@ -98,7 +99,11 @@ pub fn get_button_reset(
     ))
 }
 
-pub fn get_button_settings(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+pub fn get_button_settings(
+    style: StyleType,
+    language: Language,
+    open_overlay: MyOverlay,
+) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("a")
             .font(ICONS)
@@ -109,7 +114,7 @@ pub fn get_button_settings(style: StyleType, language: Language) -> Tooltip<'sta
     .height(Length::Units(40))
     .width(Length::Units(60))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal(MyOverlay::SettingsNotifications));
+    .on_press(Message::ShowModal(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))

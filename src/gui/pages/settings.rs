@@ -1,6 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::gui::components::radio::{
     language_radios, sound_bytes_threshold_radios, sound_favorite_radios,
     sound_packets_threshold_radios,
@@ -615,7 +615,7 @@ fn get_settings_header(style: StyleType, language: Language) -> Container<'stati
                         .height(Units(20))
                         .width(Units(20))
                         .style(StyleTuple(style, ElementType::Standard).into())
-                        .on_press(Message::HideModal(false)),
+                        .on_press(Message::HideModal(true)),
                         hide_translation(language),
                         Position::Right,
                     )

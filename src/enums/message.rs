@@ -1,4 +1,4 @@
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::enums::running_page::RunningPage;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
@@ -34,7 +34,7 @@ pub enum Message {
     Start,
     /// Stop sniffing process and return to initial page
     Reset,
-    /// Change application style (day or night)
+    /// Change application style
     Style(StyleType),
     /// Manage waiting time
     Waiting,

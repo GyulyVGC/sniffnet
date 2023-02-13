@@ -3,7 +3,7 @@ use crate::enums::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::enums::traffic_type::TrafficType;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
@@ -83,7 +83,11 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                     .horizontal_alignment(Horizontal::Center)
                     .font(font),
             )
-            .push(get_button_settings(sniffer.style, sniffer.language))
+            .push(get_button_settings(
+                sniffer.style,
+                sniffer.language,
+                MyOverlay::SettingsNotifications,
+            ))
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
     } else if sniffer

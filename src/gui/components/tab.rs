@@ -2,7 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
+use crate::enums::my_overlay::MyOverlay;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
 use crate::{Language, RunningPage, StyleType};
