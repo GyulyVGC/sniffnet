@@ -26,7 +26,7 @@ use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings::{
     settings_appearance_page, settings_language_page, settings_notifications_page,
 };
-use crate::structs::config::Config;
+use crate::structs::configs::ConfigSettings;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
@@ -35,7 +35,7 @@ use crate::utility::manage_notifications::notify_and_log;
 use crate::utility::manage_packets::get_capture_result;
 use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
-use crate::{InfoTraffic, ReportType, RunTimeData};
+use crate::{ConfigDevice, InfoTraffic, ReportType, RunTimeData};
 
 /// Update period when app is running
 pub const PERIOD_RUNNING: u64 = 1000;
@@ -98,6 +98,18 @@ impl Application for Sniffer {
                         && self.runtime_data.borrow().logged_notifications.is_empty()
                     {
                         self.update(Message::Waiting);
+                    }
+                    // update ConfigDevice stored if different from last sniffed device
+                    if self.device.name.ne(&self.last_device_sniffed.name) {
+                        self.last_device_sniffed = self.device.clone();
+                        confy::store(
+                            "sniffnet",
+                            "device",
+                            ConfigDevice {
+                                device_name: self.device.name.clone(),
+                            },
+                        )
+                        .unwrap_or(());
                     }
                 }
             }
@@ -247,12 +259,12 @@ impl Application for Sniffer {
                 if save_config {
                     // closed a setting page
                     self.last_opened_setting = last_opened.unwrap();
-                    let store = Config {
+                    let store = ConfigSettings {
                         style: self.style,
                         notifications: self.notifications,
                         language: self.language,
                     };
-                    confy::store("sniffnet", None, store).unwrap();
+                    confy::store("sniffnet", "settings", store).unwrap_or(());
                 }
             }
             Message::ChangeRunningPage(running_page) => {

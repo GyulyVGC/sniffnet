@@ -20,7 +20,7 @@ use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::enums::style_type::StyleType;
 use crate::enums::trans_protocol::TransProtocol;
-use crate::structs::config::Config;
+use crate::structs::configs::{ConfigDevice, ConfigSettings};
 use crate::structs::info_traffic::InfoTraffic;
 use crate::structs::palette::get_colors;
 use crate::structs::runtime_data::RunTimeData;
@@ -65,13 +65,19 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    let mut config_result = confy::load::<Config>("sniffnet", None);
-    if config_result.is_err() {
-        // it happens when changing the Config struct fields during development or after new releases
-        confy::store("sniffnet", None, Config::default()).unwrap();
-        config_result = confy::load::<Config>("sniffnet", None);
+    let config_settings_result = confy::load::<ConfigSettings>("sniffnet", "settings");
+    if config_settings_result.is_err() {
+        // it happens when changing the ConfigSettings struct fields during development or after new releases
+        confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
     }
-    let config = config_result.unwrap();
+    let config_settings = config_settings_result.unwrap_or(ConfigSettings::default());
+
+    let config_device_result = confy::load::<ConfigDevice>("sniffnet", "device");
+    if config_device_result.is_err() {
+        // it happens when changing the ConfigDevice struct fields during development or after new releases
+        confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
+    }
+    let config_device = config_device_result.unwrap_or(ConfigDevice::default());
 
     Sniffer::run(Settings {
         id: None,
@@ -92,7 +98,8 @@ pub fn main() -> iced::Result {
             mutex_map1,
             runtime_data,
             status_pair1,
-            &config,
+            &config_settings,
+            &config_device,
         ),
         default_font: Some(include_bytes!("../fonts/inconsolata-regular.ttf")),
         default_text_size: FONT_SIZE_BODY,

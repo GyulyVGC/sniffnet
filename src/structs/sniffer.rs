@@ -13,7 +13,7 @@ use crate::enums::running_page::RunningPage;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
 use crate::structs::notifications::Notifications;
-use crate::{Config, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///
@@ -29,6 +29,8 @@ pub struct Sniffer {
     pub runtime_data: Rc<RefCell<RunTimeData>>,
     /// Network adapter to be analyzed
     pub device: Device,
+    /// Last network adapter for which packets were observed; saved into config file
+    pub last_device_sniffed: Device,
     /// Active filters on the observed traffic
     pub filters: Filters,
     /// Signals if a pcap error occurred
@@ -59,25 +61,31 @@ impl Sniffer {
         info_traffic: Arc<Mutex<InfoTraffic>>,
         runtime_data: Rc<RefCell<RunTimeData>>,
         status_pair: Arc<(Mutex<Status>, Condvar)>,
-        config: &Config,
+        config_settings: &ConfigSettings,
+        config_device: &ConfigDevice,
     ) -> Self {
         Self {
             current_capture_id,
             info_traffic,
             status_pair,
             runtime_data: runtime_data.clone(),
-            device: Device::lookup().unwrap().unwrap(),
+            device: config_device.to_pcap_device(),
+            last_device_sniffed: config_device.to_pcap_device(),
             filters: Filters::default(),
             pcap_error: None,
-            style: config.style,
+            style: config_settings.style,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(runtime_data, config.style, config.language),
+            traffic_chart: TrafficChart::new(
+                runtime_data,
+                config_settings.style,
+                config_settings.language,
+            ),
             report_type: ReportType::MostRecent,
             overlay: None,
             last_opened_setting: MyOverlay::SettingsNotifications,
-            notifications: config.notifications,
+            notifications: config_settings.notifications,
             running_page: RunningPage::Overview,
-            language: config.language,
+            language: config_settings.language,
         }
     }
 }

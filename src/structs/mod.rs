@@ -1,5 +1,5 @@
 pub mod address_port_pair;
-pub mod config;
+pub mod configs;
 pub mod filters;
 pub mod info_address_port_pair;
 pub mod info_traffic;
