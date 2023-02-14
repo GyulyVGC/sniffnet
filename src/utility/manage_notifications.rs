@@ -1,7 +1,7 @@
 use crate::enums::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
-use crate::enums::sound::{play_sound, Sound};
+use crate::enums::sound::{play, Sound};
 use crate::structs::notifications::Notifications;
 use crate::RunTimeData;
 use chrono::Local;
@@ -31,7 +31,7 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
             );
             if notifications.packets_notification.sound.ne(&Sound::None) {
                 // emit sound
-                play_sound(
+                play(
                     notifications.packets_notification.sound,
                     notifications.volume,
                 );
@@ -61,7 +61,7 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
             );
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
                 // emit sound
-                play_sound(notifications.bytes_notification.sound, notifications.volume);
+                play(notifications.bytes_notification.sound, notifications.volume);
                 already_emitted_sound = true;
             }
         }
@@ -89,7 +89,7 @@ pub fn notify_and_log(mut runtime_data: RefMut<RunTimeData>, notifications: Noti
             ));
         if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
             // emit sound
-            play_sound(
+            play(
                 notifications.favorite_notification.sound,
                 notifications.volume,
             );

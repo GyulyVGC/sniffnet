@@ -159,10 +159,8 @@ pub fn get_font_headers(style: StyleType) -> Font {
 
 pub fn get_color_mix_chart(style: StyleType) -> f64 {
     match style {
-        StyleType::Night => 0.3,
-        StyleType::Day => 0.8,
-        StyleType::DeepSea => 0.3,
-        StyleType::MonAmour => 0.8,
+        StyleType::Night | StyleType::DeepSea => 0.3,
+        StyleType::Day | StyleType::MonAmour => 0.8,
     }
 }
 

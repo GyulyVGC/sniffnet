@@ -14,15 +14,15 @@ use std::time::Duration;
 use crate::enums::message::Message;
 use crate::enums::my_overlay::MyOverlay;
 use crate::enums::running_page::RunningPage;
-use crate::enums::sound::{play_sound, Sound};
+use crate::enums::sound::{play, Sound};
 use crate::enums::status::Status;
-use crate::gui::components::footer::get_footer;
-use crate::gui::components::header::get_header;
+use crate::gui::components::footer::footer;
+use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
-use crate::gui::pages::initial_page::initial_page;
+use crate::gui::pages::initial::initial_page;
 // use crate::gui::pages::inspect_page::inspect_page;
-use crate::gui::pages::notifications_page::notifications_page;
-use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::notifications::notifications_page;
+use crate::gui::pages::overview::overview_page;
 use crate::gui::pages::settings::{
     settings_appearance_page, settings_language_page, settings_notifications_page,
 };
@@ -276,24 +276,24 @@ impl Application for Sniffer {
             }
             Message::UpdatePacketsNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound, self.notifications.volume);
+                    play(value.sound, self.notifications.volume);
                 }
                 self.notifications.packets_notification = value;
             }
             Message::UpdateBytesNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound, self.notifications.volume);
+                    play(value.sound, self.notifications.volume);
                 }
                 self.notifications.bytes_notification = value;
             }
             Message::UpdateFavoriteNotification(value, emit_sound) => {
                 if emit_sound {
-                    play_sound(value.sound, self.notifications.volume);
+                    play(value.sound, self.notifications.volume);
                 }
                 self.notifications.favorite_notification = value;
             }
             Message::ChangeVolume(volume) => {
-                play_sound(Sound::Pop, volume);
+                play(Sound::Pop, volume);
                 self.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
@@ -313,8 +313,8 @@ impl Application for Sniffer {
         let font = get_font(style);
 
         let header = match status {
-            Status::Init => get_header(style, false, 0, self.language, self.last_opened_setting),
-            Status::Running => get_header(
+            Status::Init => header(style, false, 0, self.language, self.last_opened_setting),
+            Status::Running => header(
                 style,
                 true,
                 self.info_traffic.lock().unwrap().all_packets,
@@ -332,10 +332,7 @@ impl Application for Sniffer {
             },
         };
 
-        let content = Column::new()
-            .push(header)
-            .push(body)
-            .push(get_footer(style));
+        let content = Column::new().push(header).push(body).push(footer(style));
 
         if self.overlay.is_none() {
             content.into()

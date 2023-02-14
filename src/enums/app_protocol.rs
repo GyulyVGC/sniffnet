@@ -111,7 +111,7 @@ pub fn from_port_to_application_protocol(port: u16) -> AppProtocol {
 impl fmt::Display for AppProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.eq(&AppProtocol::Other) {
-            write!(f, "All protocols")
+            write!(f, "-")
         } else {
             write!(f, "{self:?}")
         }
@@ -190,6 +190,6 @@ mod tests {
     #[test]
     fn app_protocol_display_other() {
         let test_str = AppProtocol::Other.to_string();
-        assert_eq!(test_str, "All protocols");
+        assert_eq!(test_str, "-");
     }
 }

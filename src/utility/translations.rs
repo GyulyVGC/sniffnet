@@ -296,6 +296,15 @@ pub fn both_translation(language: Language) -> &'static str {
 //     }
 // }
 
+pub fn all_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "All",
+        Language::IT => "Tutti",
+        Language::FR => "Tous",
+        Language::ES => "Todos",
+    }
+}
+
 pub fn packets_chart_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "packets per second",
@@ -451,18 +460,16 @@ pub fn outgoing_translation(language: Language) -> &'static str {
 
 pub fn notifications_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Notifications",
+        Language::EN | Language::FR => "Notifications",
         Language::IT => "Notifiche",
-        Language::FR => "Notifications",
         Language::ES => "Notificaciones",
     }
 }
 
 pub fn style_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Style",
+        Language::EN | Language::FR => "Style",
         Language::IT => "Stile",
-        Language::FR => "Style",
         Language::ES => "Estilo",
     }
 }

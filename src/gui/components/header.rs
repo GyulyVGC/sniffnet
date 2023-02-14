@@ -13,7 +13,7 @@ use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 
-pub fn get_header(
+pub fn header(
     style: StyleType,
     back_button: bool,
     all_packets: u128,

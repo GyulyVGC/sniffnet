@@ -20,7 +20,7 @@ use crate::utility::style_constants::{
     get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
 };
 use crate::utility::translations::{
-    address_translation, addresses_translation, application_protocol_translation,
+    address_translation, addresses_translation, all_translation, application_protocol_translation,
     choose_adapters_translation, select_filters_translation, start_translation,
 };
 use crate::{AppProtocol, Language, StyleType};
@@ -50,12 +50,17 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .push(get_button_start(sniffer.style, sniffer.language))
         .push(vertical_space(FillPortion(1)));
 
-    let app_active = sniffer.filters.application;
+    let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
+        Some(sniffer.filters.application)
+    } else {
+        None
+    };
     let picklist_app = PickList::new(
         &AppProtocol::ALL[..],
-        Some(app_active),
+        app_active,
         Message::AppProtocolSelection,
     )
+    .placeholder(all_translation(sniffer.language))
     .font(font)
     .style(<StyleTuple as Into<iced::theme::PickList>>::into(
         StyleTuple(sniffer.style, ElementType::Standard),

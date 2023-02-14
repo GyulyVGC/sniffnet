@@ -14,7 +14,7 @@ use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 
-pub fn get_footer(style: StyleType) -> Container<'static, Message> {
+pub fn footer(style: StyleType) -> Container<'static, Message> {
     let font = get_font(style);
     let font_footer = get_font_headers(style);
 

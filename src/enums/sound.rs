@@ -48,7 +48,7 @@ impl Sound {
     }
 }
 
-pub fn play_sound(sound: Sound, volume: u8) {
+pub fn play(sound: Sound, volume: u8) {
     if sound.eq(&Sound::None) || volume == 0 {
         return;
     }
