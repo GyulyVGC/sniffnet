@@ -58,13 +58,6 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    thread::Builder::new()
-        .name("thread_write_report".to_string())
-        .spawn(move || {
-            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
-        })
-        .unwrap();
-
     let config_settings_result = confy::load::<ConfigSettings>("sniffnet", "settings");
     if config_settings_result.is_err() {
         // it happens when changing the ConfigSettings struct fields during development or after new releases
@@ -78,6 +71,13 @@ pub fn main() -> iced::Result {
         confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
     }
     let config_device = config_device_result.unwrap_or(ConfigDevice::default());
+
+    thread::Builder::new()
+        .name("thread_write_report".to_string())
+        .spawn(move || {
+            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
+        })
+        .unwrap();
 
     Sniffer::run(Settings {
         id: None,

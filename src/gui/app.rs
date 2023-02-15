@@ -30,6 +30,7 @@ use crate::structs::configs::ConfigSettings;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_parse_packets::parse_packets_loop;
+use crate::utility::get_formatted_strings::get_report_path;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_notifications::notify_and_log;
 use crate::utility::manage_packets::get_capture_result;
@@ -100,8 +101,8 @@ impl Application for Sniffer {
                         self.update(Message::Waiting);
                     }
                     // update ConfigDevice stored if different from last sniffed device
-                    if self.device.name.ne(&self.last_device_sniffed.name) {
-                        self.last_device_sniffed = self.device.clone();
+                    if self.device.name.ne(&self.last_device_name_sniffed) {
+                        self.last_device_name_sniffed = self.device.name.clone();
                         confy::store(
                             "sniffnet",
                             "device",
@@ -144,20 +145,21 @@ impl Application for Sniffer {
                 }
             }
             Message::OpenReport => {
+                let report_path = get_report_path();
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
-                    .arg(r".\sniffnet_report\report.txt")
+                    .arg(report_path)
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "macos")]
                 std::process::Command::new("open")
                     .arg("-t")
-                    .arg("./sniffnet_report/report.txt")
+                    .arg(report_path)
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "linux")]
                 std::process::Command::new("xdg-open")
-                    .arg("./sniffnet_report/report.txt")
+                    .arg(report_path)
                     .spawn()
                     .unwrap();
             }

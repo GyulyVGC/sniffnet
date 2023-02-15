@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use iced::Color;
 use thousands::Separable;
@@ -179,5 +180,17 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
     } else {
         // with multiple
         format!("{n:.1} {multiple_transmitted} ")
+    }
+}
+
+pub fn get_report_path() -> PathBuf {
+    if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
+        config_path.pop();
+        config_path.push("report.txt");
+        config_path
+    } else {
+        let mut report_path = PathBuf::from(std::env::var_os("HOME").unwrap());
+        report_path.push("sniffnet_report.txt");
+        report_path
     }
 }

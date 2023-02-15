@@ -4,10 +4,11 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufWriter, Seek, SeekFrom, Write};
 use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
 use std::time::Duration;
-use std::{fs, thread};
 
 use crate::enums::status::Status;
+use crate::utility::get_formatted_strings::get_report_path;
 use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it sleeps for 1 second and then
@@ -19,15 +20,7 @@ pub fn sleep_and_write_report_loop(
 ) {
     let cvar = &status_pair.1;
 
-    #[cfg(target_os = "macos")]
-    std::env::set_current_dir(std::env::var("HOME").unwrap()).unwrap();
-
-    if fs::create_dir("./sniffnet_report").is_err() {
-        fs::remove_dir_all("./sniffnet_report").unwrap();
-        fs::create_dir("./sniffnet_report").unwrap();
-    }
-
-    let path_report = "./sniffnet_report/report.txt".to_string();
+    let path_report = get_report_path();
 
     let mut capture_id = *current_capture_id.lock().unwrap();
 

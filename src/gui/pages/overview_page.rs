@@ -144,7 +144,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 ));
 
                 let mut col_packets = Column::new()
-                    //.padding(10)
                     //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
                     //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
                     //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))

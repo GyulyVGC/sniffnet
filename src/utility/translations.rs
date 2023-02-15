@@ -1,4 +1,5 @@
 use crate::enums::language::Language;
+use crate::utility::get_formatted_strings::get_report_path;
 use iced::widget::Text;
 
 pub fn choose_adapters_translation(language: Language) -> Text<'static> {
@@ -571,13 +572,16 @@ pub fn sound_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn open_report_translation(language: Language) -> &'static str {
-    match language {
+pub fn open_report_translation(language: Language) -> String {
+    let open_report = match language {
         Language::EN => "Open full report",
         Language::IT => "Apri report completo",
         Language::FR => "Ouvrir le rapport complet",
         Language::ES => "Abrir el informe completo",
-    }
+    };
+    let mut ret_val = String::from(open_report);
+    ret_val.push_str(&format!("\n({:?})", get_report_path()));
+    ret_val
 }
 
 pub fn bytes_exceeded_translation(language: Language) -> &'static str {

@@ -29,8 +29,8 @@ pub struct Sniffer {
     pub runtime_data: Rc<RefCell<RunTimeData>>,
     /// Network adapter to be analyzed
     pub device: Device,
-    /// Last network adapter for which packets were observed; saved into config file
-    pub last_device_sniffed: Device,
+    /// Last network adapter name for which packets were observed; saved into config file
+    pub last_device_name_sniffed: String,
     /// Active filters on the observed traffic
     pub filters: Filters,
     /// Signals if a pcap error occurred
@@ -70,7 +70,7 @@ impl Sniffer {
             status_pair,
             runtime_data: runtime_data.clone(),
             device: config_device.to_pcap_device(),
-            last_device_sniffed: config_device.to_pcap_device(),
+            last_device_name_sniffed: config_device.device_name.clone(),
             filters: Filters::default(),
             pcap_error: None,
             style: config_settings.style,
