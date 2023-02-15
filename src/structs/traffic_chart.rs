@@ -112,18 +112,20 @@ impl Chart<Message> for TrafficChart {
                     .label_style(("notosans", 13).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| {
                         let bytes_abs = bytes.abs();
+                        #[allow(clippy::cast_precision_loss)]
+                        let bytes_abs_float = bytes_abs as f32;
                         match bytes_abs {
                             0..=999 => {
                                 format!("{bytes_abs}")
                             }
                             1000..=999_999 => {
-                                format!("{:.1} {}", bytes_abs as f32 / 1_000_f32, "K")
+                                format!("{:.1} {}", bytes_abs_float / 1_000_f32, "K")
                             }
                             1_000_000..=999_999_999 => {
-                                format!("{:.1} {}", bytes_abs as f32 / 1_000_000_f32, "M")
+                                format!("{:.1} {}", bytes_abs_float / 1_000_000_f32, "M")
                             }
                             _ => {
-                                format!("{:.1} {}", bytes_abs as f32 / 1_000_000_000_f32, "G")
+                                format!("{:.1} {}", bytes_abs_float / 1_000_000_000_f32, "G")
                             }
                         }
                     })

@@ -19,13 +19,13 @@ use crate::enums::status::Status;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
-use crate::gui::pages::initial::initial_page;
+use crate::gui::pages::initial_page::initial_page;
 // use crate::gui::pages::inspect_page::inspect_page;
-use crate::gui::pages::notifications::notifications_page;
-use crate::gui::pages::overview::overview_page;
-use crate::gui::pages::settings::{
-    settings_appearance_page, settings_language_page, settings_notifications_page,
-};
+use crate::gui::pages::notifications_page::notifications_page;
+use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::settings_language_page::settings_language_page;
+use crate::gui::pages::settings_notifications_page::settings_notifications_page;
+use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::structs::configs::ConfigSettings;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
@@ -341,7 +341,7 @@ impl Application for Sniffer {
                 MyOverlay::Quit => (get_exit_overlay(style, font, self.language), false),
                 MyOverlay::ClearAll => (get_clear_all_overlay(style, font, self.language), false),
                 MyOverlay::SettingsNotifications => (settings_notifications_page(self), true),
-                MyOverlay::SettingsAppearance => (settings_appearance_page(self), true),
+                MyOverlay::SettingsAppearance => (settings_style_page(self), true),
                 MyOverlay::SettingsLanguage => (settings_language_page(self), true),
             };
 

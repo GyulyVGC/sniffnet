@@ -61,73 +61,73 @@ pub const DAY_STYLE: Palette = Palette {
     round_borders: Color::BLACK,
 };
 
-// try theme
-const PRIMARY_TRY: Color = Color {
+// deep sea theme
+const PRIMARY_DEEP_SEA: Color = Color {
     r: 28.0 / 255.0,
     g: 49.0 / 255.0,
     b: 94.0 / 255.0,
     a: 1.0,
 };
-const SECONDARY_TRY: Color = Color {
+const SECONDARY_DEEP_SEA: Color = Color {
     r: 34.0 / 255.0,
     g: 124.0 / 255.0,
     b: 112.0 / 255.0,
     a: 1.0,
 };
-const BUTTONS_TRY: Color = Color {
+const BUTTONS_DEEP_SEA: Color = Color {
     r: 48.0 / 255.0,
     g: 71.0 / 255.0,
     b: 94.0 / 255.0,
     a: 1.0,
 };
-const OUTGOING_TRY: Color = Color {
+const OUTGOING_DEEP_SEA: Color = Color {
     r: 230.0 / 255.0,
     g: 226.0 / 255.0,
     b: 195.0 / 255.0,
     a: 1.0,
 };
-pub const TRY_STYLE: Palette = Palette {
-    primary: PRIMARY_TRY,
-    secondary: SECONDARY_TRY,
-    buttons: BUTTONS_TRY,
-    incoming: SECONDARY_TRY,
-    outgoing: OUTGOING_TRY,
+pub const DEEP_SEA_STYLE: Palette = Palette {
+    primary: PRIMARY_DEEP_SEA,
+    secondary: SECONDARY_DEEP_SEA,
+    buttons: BUTTONS_DEEP_SEA,
+    incoming: SECONDARY_DEEP_SEA,
+    outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
     round_borders: Color::BLACK,
 };
 
-// red theme
-const SECONDARY_RED: Color = Color {
+// mon amour theme
+const SECONDARY_MON_AMOUR: Color = Color {
     r: 127.0 / 255.0,
     g: 102.0 / 255.0,
     b: 157.0 / 255.0,
     a: 1.0,
 };
-const PRIMARY_RED: Color = Color {
+const PRIMARY_MON_AMOUR: Color = Color {
     r: 245.0 / 255.0,
     g: 245.0 / 255.0,
     b: 220.0 / 255.0,
     a: 1.0,
 };
-const BUTTONS_RED: Color = Color {
+const BUTTONS_MON_AMOUR: Color = Color {
     r: 222.0 / 255.0,
     g: 186.0 / 255.0,
     b: 206.0 / 255.0,
     a: 1.0,
 };
-const OUTGOING_RED: Color = Color {
+const OUTGOING_MON_AMOUR: Color = Color {
     r: 90.0 / 255.0,
     g: 164.0 / 255.0,
     b: 105.0 / 255.0,
     a: 1.0,
 };
-pub const RED_STYLE: Palette = Palette {
-    primary: PRIMARY_RED,
-    secondary: SECONDARY_RED,
-    buttons: BUTTONS_RED,
-    incoming: SECONDARY_RED,
-    outgoing: OUTGOING_RED,
+pub const MON_AMOUR_STYLE: Palette = Palette {
+    primary: PRIMARY_MON_AMOUR,
+    secondary: SECONDARY_MON_AMOUR,
+    buttons: BUTTONS_MON_AMOUR,
+    incoming: SECONDARY_MON_AMOUR,
+    outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
     round_borders: Color::BLACK,

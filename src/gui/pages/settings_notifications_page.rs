@@ -2,29 +2,24 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::my_overlay::MyOverlay;
 use crate::gui::components::radio::{
-    language_radios, sound_bytes_threshold_radios, sound_favorite_radios,
-    sound_packets_threshold_radios,
+    sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
 };
 use crate::gui::components::tab::get_settings_tabs;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{
-    get_font, get_font_headers, DEEP_SEA, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
-    ICONS, MON_AMOUR, YETI_DAY, YETI_NIGHT,
+    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
 };
 use crate::utility::translations::{
-    appearance_title_translation, bytes_threshold_translation, deep_sea_translation,
-    favorite_notification_translation, hide_translation, languages_title_translation,
-    mon_amour_translation, notifications_title_translation, packets_threshold_translation,
-    per_second_translation, settings_translation, specify_multiples_translation,
-    threshold_translation, volume_translation, yeti_day_translation, yeti_night_translation,
+    bytes_threshold_translation, favorite_notification_translation, hide_translation,
+    notifications_title_translation, packets_threshold_translation, per_second_translation,
+    settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
 };
-use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
-    button, horizontal_space, image::Handle, vertical_space, Button, Checkbox, Column, Container,
-    Image, Row, Scrollable, Text, TextInput, Tooltip,
+    button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
+    TextInput, Tooltip,
 };
 use iced::Length::Units;
 use iced::{Alignment, Length};
@@ -35,7 +30,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let mut content = Column::new()
         .width(Length::Fill)
-        .push(get_settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
             [
                 MyOverlay::SettingsNotifications,
@@ -96,131 +91,6 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         );
 
     content = content.push(volume_notification_col);
-
-    Container::new(content)
-        .height(Units(400))
-        .width(Units(800))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ))
-}
-
-pub fn settings_appearance_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
-    let content = Column::new()
-        .align_items(Alignment::Center)
-        .width(Length::Fill)
-        .push(get_settings_header(sniffer.style, sniffer.language))
-        .push(get_settings_tabs(
-            [
-                MyOverlay::SettingsNotifications,
-                MyOverlay::SettingsAppearance,
-                MyOverlay::SettingsLanguage,
-            ],
-            &["7 ", "K ", "c "],
-            &[
-                Message::ShowModal(MyOverlay::SettingsNotifications),
-                Message::TickInit,
-                Message::ShowModal(MyOverlay::SettingsLanguage),
-            ],
-            MyOverlay::SettingsAppearance,
-            sniffer.style,
-            sniffer.language,
-        ))
-        .push(vertical_space(Units(15)))
-        .push(
-            appearance_title_translation(sniffer.language)
-                .font(font)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(vertical_space(Units(10)))
-        .push(
-            Row::new()
-                .push(get_palette_container(
-                    sniffer.style,
-                    YETI_NIGHT,
-                    "Yeti Night".to_string(),
-                    yeti_night_translation(sniffer.language).to_string(),
-                    Night,
-                ))
-                .push(horizontal_space(Units(33)))
-                .push(get_palette_container(
-                    sniffer.style,
-                    YETI_DAY,
-                    "Yeti Day".to_string(),
-                    yeti_day_translation(sniffer.language).to_string(),
-                    Day,
-                )),
-        )
-        .push(vertical_space(Units(10)))
-        .push(
-            Row::new()
-                .push(get_palette_container(
-                    sniffer.style,
-                    DEEP_SEA,
-                    "Deep Sea".to_string(),
-                    deep_sea_translation(sniffer.language).to_string(),
-                    DeepSea,
-                ))
-                .push(horizontal_space(Units(33)))
-                .push(get_palette_container(
-                    sniffer.style,
-                    MON_AMOUR,
-                    "Mon Amour".to_string(),
-                    mon_amour_translation(sniffer.language).to_string(),
-                    MonAmour,
-                )),
-        );
-
-    Container::new(content)
-        .height(Units(400))
-        .width(Units(800))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ))
-}
-
-pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
-
-    let language_active = sniffer.language;
-    let col_language_radio = language_radios(language_active, font, sniffer.style);
-
-    let content = Column::new()
-        .align_items(Alignment::Center)
-        .width(Length::Fill)
-        .push(get_settings_header(sniffer.style, sniffer.language))
-        .push(get_settings_tabs(
-            [
-                MyOverlay::SettingsNotifications,
-                MyOverlay::SettingsAppearance,
-                MyOverlay::SettingsLanguage,
-            ],
-            &["7 ", "K ", "c "],
-            &[
-                Message::ShowModal(MyOverlay::SettingsNotifications),
-                Message::ShowModal(MyOverlay::SettingsAppearance),
-                Message::TickInit,
-            ],
-            MyOverlay::SettingsLanguage,
-            sniffer.style,
-            sniffer.language,
-        ))
-        .push(vertical_space(Units(15)))
-        .push(
-            languages_title_translation(sniffer.language)
-                .font(font)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(vertical_space(Units(20)))
-        .push(col_language_radio)
-        .push(vertical_space(Units(30)))
-        .push(Container::new(Text::new("Support for more languages will come with the next releases.\n\n\
-        If you want to help me translating the app in your native language, give a look at Sniffnet issues on GitHub.")
-            .width(Length::Units(450))
-            .font(font)).padding(10).style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::BorderedRound),
-        )));
 
     Container::new(content)
         .height(Units(400))
@@ -566,31 +436,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
     .align_y(Vertical::Center)
 }
 
-fn get_palette_container(
-    style: StyleType,
-    picture: &[u8],
-    name: String,
-    description: String,
-    on_press: StyleType,
-) -> Button<'static, Message> {
-    let font = get_font(style);
-    let content = Column::new()
-        .width(Length::Fill)
-        .align_items(Alignment::Center)
-        .spacing(5)
-        .push(Text::new(name).font(font))
-        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Units(300)))
-        .push(Text::new(description).font(font));
-
-    Button::new(content)
-        .height(Units(130))
-        .width(Units(360))
-        .padding(10)
-        .style(StyleTuple(style, ElementType::BorderedRound).into())
-        .on_press(Message::Style(on_press))
-}
-
-fn get_settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
+pub fn settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
     Container::new(
         Row::new()

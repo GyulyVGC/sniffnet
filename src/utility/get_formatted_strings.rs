@@ -14,10 +14,14 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
-    if format!("{:.1}", 100.0 * (filtered) as f32 / observed as f32).eq("0.0") {
+    #[allow(clippy::cast_precision_loss)]
+    let filtered_float = filtered as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let observed_float = observed as f32;
+    if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
         "<0.1%".to_string()
     } else {
-        format!("{:.1}%", 100.0 * (filtered) as f32 / observed as f32)
+        format!("{:.1}%", 100.0 * filtered_float / observed_float)
     }
 }
 
@@ -119,12 +123,16 @@ pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets:
 
         let num_string = entry.1.separate_with_spaces().to_string();
 
-        let percentage_string =
-            if format!("{:.1}", 100.0 * (*entry.1) as f32 / tot_packets as f32).eq("0.0") {
-                "(<0.1%)".to_string()
-            } else {
-                format!("({:.1}%)", 100.0 * (*entry.1) as f32 / tot_packets as f32)
-            };
+        #[allow(clippy::cast_precision_loss)]
+        let num_app_float = *entry.1 as f32;
+        #[allow(clippy::cast_precision_loss)]
+        let num_tot_float = tot_packets as f32;
+        let percentage_string = if format!("{:.1}", 100.0 * num_app_float / num_tot_float).eq("0.0")
+        {
+            "(<0.1%)".to_string()
+        } else {
+            format!("({:.1}%)", 100.0 * num_app_float / num_tot_float)
+        };
 
         //to align digits
         let spaces_string_1 = " "
@@ -142,6 +150,7 @@ pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets:
 /// Returns a String representing a quantity of bytes with their proper multiple (KB, MB, GB, TB)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
     let mut multiple_transmitted = String::new();
+    #[allow(clippy::cast_precision_loss)]
     let mut n = bytes as f32;
 
     match bytes {

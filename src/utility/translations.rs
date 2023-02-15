@@ -557,9 +557,7 @@ pub fn threshold_translation(language: Language) -> String {
 
 pub fn volume_translation(language: Language, value: u8) -> String {
     match language {
-        Language::EN => format!("Volume: {value:^3}%"),
-        Language::IT => format!("Volume: {value:^3}%"),
-        Language::FR => format!("Volume: {value:^3}%"),
+        Language::EN | Language::IT | Language::FR => format!("Volume: {value:^3}%"),
         Language::ES => format!("Volumen: {value:^3}%"),
     }
 }
