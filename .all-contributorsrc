@@ -43,6 +43,15 @@
         "test",
         "translation"
       ]
+    },
+    {
+      "login": "AmadeusGraves",
+      "name": "AmadeusGraves",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18572939?v=4",
+      "profile": "https://github.com/AmadeusGraves",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 10,
