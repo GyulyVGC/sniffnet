@@ -269,8 +269,9 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
 <table>
   <tbody>
     <tr>
-       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Crirock"><img src="https://avatars.githubusercontent.com/u/101053125?v=4?s=100" width="100px;" alt="Cristiano"/><br /><sub><b>Cristiano</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Code">💻</a> <a href="#ideas-Crirock" title="Ideas, Planning, & Feedback">🤔</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/colin99d"><img src="https://avatars.githubusercontent.com/u/72827203?v=4?s=100" width="100px;" alt="Colin Delahunty"/><br /><sub><b>Colin Delahunty</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=colin99d" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Crirock"><img src="https://avatars.githubusercontent.com/u/101053125?v=4?s=60" width="60px;" alt="Cristiano"/><br /><sub><b>Cristiano</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Code">💻</a> <a href="#ideas-Crirock" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/colin99d"><img src="https://avatars.githubusercontent.com/u/72827203?v=4?s=60" width="60px;" alt="Colin Delahunty"/><br /><sub><b>Colin Delahunty</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=colin99d" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/acolombier"><img src="https://avatars.githubusercontent.com/u/7086688?v=4?s=60" width="60px;" alt="Antoine Colombier"/><br /><sub><b>Antoine Colombier</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Tests">⚠️</a> <a href="#translation-acolombier" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
