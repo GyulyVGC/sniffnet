@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "Crirock",
+      "name": "Cristiano",
+      "avatar_url": "https://avatars.githubusercontent.com/u/101053125?v=4",
+      "profile": "https://github.com/Crirock",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "sniffnet",
+  "projectOwner": "GyulyVGC"
+}
