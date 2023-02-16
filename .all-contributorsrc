@@ -24,6 +24,16 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "acolombier",
+      "name": "Antoine Colombier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7086688?v=4",
+      "profile": "https://github.com/acolombier",
+      "contributions": [
+        "test",
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 10,
