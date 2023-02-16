@@ -2,7 +2,7 @@
   "files": [
     "README.md"
   ],
-  "imageSize": 100,
+  "imageSize": 60,
   "commit": false,
   "commitConvention": "angular",
   "contributors": [
@@ -15,12 +15,22 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "colin99d",
+      "name": "Colin Delahunty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72827203?v=4",
+      "profile": "https://github.com/colin99d",
+      "contributions": [
+        "test"
+      ]
     }
   ],
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 10,
   "skipCi": true,
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "sniffnet",
-  "projectOwner": "GyulyVGC"
+  "projectOwner": "GyulyVGC",
+  "linkToUsage": false
 }
