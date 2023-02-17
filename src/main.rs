@@ -101,7 +101,7 @@ pub fn main() -> iced::Result {
             &config_settings,
             &config_device,
         ),
-        default_font: Some(include_bytes!("../fonts/inconsolata-regular.ttf")),
+        default_font: Some(include_bytes!("../resources/fonts/inconsolata-regular.ttf")),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,
         antialiasing: false,

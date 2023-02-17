@@ -58,7 +58,7 @@ Here is a list of design relevant information and materials:
 
 ### Fonts
 
-I'm using `Inconsolata`. The fonts I used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/fonts).
+I'm using `Inconsolata`. The fonts I used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
 
 ### Colors
 

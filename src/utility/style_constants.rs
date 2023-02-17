@@ -140,7 +140,7 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
 // };
 pub const INCONSOLATA_BOLD: Font = Font::External {
     name: "inconsolata_bold",
-    bytes: include_bytes!("../../fonts/inconsolata-bold.ttf"),
+    bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
@@ -167,7 +167,7 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 //font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../../fonts/icons.ttf"),
+    bytes: include_bytes!("../../resources/fonts/icons.ttf"),
 };
 
 // palettes pictures

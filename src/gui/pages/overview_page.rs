@@ -21,7 +21,7 @@ use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::{get_flag, FLAGS_WIDTH};
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string,
+    get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
 };
 use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD};
 use crate::utility::translations::{
@@ -294,6 +294,14 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         )),
                 );
 
+                let open_report_translation = open_report_translation(sniffer.language);
+                let report_path = get_report_path().to_string_lossy().to_string();
+                let open_report_tooltip = format!(
+                    "{:^len$}\n{report_path}",
+                    open_report_translation,
+                    len = report_path.len()
+                );
+
                 body = body
                     .push(
                         Row::new()
@@ -333,7 +341,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                             StyleTuple(sniffer.style, ElementType::Standard).into(),
                                         )
                                         .on_press(Message::OpenReport),
-                                        open_report_translation(sniffer.language),
+                                        open_report_tooltip,
                                         Position::Top,
                                     )
                                     .gap(5)

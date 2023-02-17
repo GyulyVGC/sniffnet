@@ -26,6 +26,7 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             }),
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Headers) => colors.secondary,
+                StyleTuple(_, ElementType::Tooltip) => colors.buttons,
                 _ => colors.primary,
             })),
             border_radius: match self {
