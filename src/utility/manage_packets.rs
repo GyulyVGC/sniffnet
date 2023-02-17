@@ -107,17 +107,17 @@ pub fn modify_or_insert_in_map(
         // this key already occurred
         String::new()
     };
-    let is_already_featured = info_traffic.favorite_featured_last_interval.is_some();
-    let mut update_favorite_featured = false;
+    let is_already_featured = info_traffic.favorites_last_interval.contains(&index);
+    let mut update_favorites_featured = false;
     info_traffic
         .map
-        .entry(key.clone())
+        .entry(key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = now;
             if info.is_favorite && !is_already_featured {
-                update_favorite_featured = true;
+                update_favorites_featured = true;
             }
         })
         .or_insert(InfoAddressPortPair {
@@ -133,9 +133,8 @@ pub fn modify_or_insert_in_map(
             is_favorite: false,
         });
     info_traffic.addresses_last_interval.insert(index);
-    if update_favorite_featured {
-        let info = info_traffic.map.get(&key).unwrap().clone();
-        info_traffic.favorite_featured_last_interval = Some((key, info));
+    if update_favorites_featured {
+        info_traffic.favorites_last_interval.insert(index);
     }
 }
 

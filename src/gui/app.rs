@@ -6,7 +6,7 @@ use iced::widget::Column;
 use iced::{executor, window, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
 use std::cell::RefCell;
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
@@ -81,13 +81,15 @@ impl Application for Sniffer {
                         info_traffic_lock.tot_sent_bytes;
                     self.runtime_data.borrow_mut().app_protocols =
                         info_traffic_lock.app_protocols.clone();
-                    self.runtime_data
-                        .borrow_mut()
-                        .favorite_featured_last_interval =
-                        info_traffic_lock.favorite_featured_last_interval.clone();
-                    info_traffic_lock.favorite_featured_last_interval = None;
+                    self.runtime_data.borrow_mut().favorites_last_interval =
+                        info_traffic_lock.favorites_last_interval.clone();
+                    info_traffic_lock.favorites_last_interval = HashSet::new();
                     drop(info_traffic_lock);
-                    notify_and_log(self.runtime_data.borrow_mut(), self.notifications);
+                    notify_and_log(
+                        self.runtime_data.borrow_mut(),
+                        self.notifications,
+                        &self.info_traffic.clone(),
+                    );
                     update_charts_data(self.runtime_data.borrow_mut());
                     update_report_data(
                         self.runtime_data.borrow_mut(),

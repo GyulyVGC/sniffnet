@@ -1,6 +1,6 @@
 //! Module defining the `RunTimeData` struct, useful to to generate charts and to display statistics about network traffic
 //!
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::enums::logged_notification::LoggedNotification;
 use crate::structs::address_port_pair::AddressPortPair;
@@ -49,8 +49,8 @@ pub struct RunTimeData {
     pub min_sent_packets: i64,
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
-    /// Flag to determine if data were exchanged from favorites in the last interval of time
-    pub favorite_featured_last_interval: Option<(AddressPortPair, InfoAddressPortPair)>,
+    /// Collection of favorite connections that exchanged data in the last interval
+    pub favorites_last_interval: HashSet<usize>,
     /// Log of the received notifications
     pub logged_notifications: VecDeque<LoggedNotification>,
     /// Current time interval number
@@ -81,7 +81,7 @@ impl RunTimeData {
             max_received_bytes: 0,
             min_sent_packets: 0,
             max_received_packets: 0,
-            favorite_featured_last_interval: None,
+            favorites_last_interval: HashSet::new(),
             logged_notifications: VecDeque::default(),
             ticks: 0,
         }
