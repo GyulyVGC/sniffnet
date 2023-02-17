@@ -259,17 +259,24 @@ Sniffnet is also open to design contributions: <br>
 [![contribute.design](https://contribute.design/api/shield/GyulyVGC/sniffnet)](https://contribute.design/GyulyVGC/sniffnet)
 --->
 
-<hr>
-
-<div align="center">
-
 ## Acknowledgements
 
-A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet!
+A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table align="center">
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Crirock"><img src="https://avatars.githubusercontent.com/u/101053125?v=4?s=60" width="60px;" alt="Cristiano"/><br /><sub><b>Cristiano</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Code">💻</a> <a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/acolombier"><img src="https://avatars.githubusercontent.com/u/7086688?v=4?s=60" width="60px;" alt="Antoine Colombier"/><br /><sub><b>Antoine Colombier</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Tests">⚠️</a> <a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/colin99d"><img src="https://avatars.githubusercontent.com/u/72827203?v=4?s=60" width="60px;" alt="Colin Delahunty"/><br /><sub><b>Colin Delahunty</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=colin99d" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/AmadeusGraves"><img src="https://avatars.githubusercontent.com/u/18572939?v=4?s=60" width="60px;" alt="AmadeusGraves"/><br /><sub><b>AmadeusGraves</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=amadeusgraves" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Charpy"><img src="https://avatars.githubusercontent.com/u/4827568?v=4?s=60" width="60px;" alt="Charpy"/><br /><sub><b>Charpy</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=charpy" title="Translation">🌍</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
@@ -278,10 +285,8 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
 
 The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 
-<a href="https://github.com/iced-rs/iced"><img alt="" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="50%"/></a>
+<p align="center"><a href="https://github.com/iced-rs/iced"><img alt="" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="50%"/></a></p>
 
 Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
 
-<a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://reporoster.com/stars/dark/GyulyVGC/sniffnet" width="70%"/></a>
-
-</div>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://reporoster.com/stars/dark/GyulyVGC/sniffnet"/></a></p>

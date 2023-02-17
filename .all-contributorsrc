@@ -1,0 +1,64 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 60,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "Crirock",
+      "name": "Cristiano",
+      "avatar_url": "https://avatars.githubusercontent.com/u/101053125?v=4",
+      "profile": "https://github.com/Crirock",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "acolombier",
+      "name": "Antoine Colombier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7086688?v=4",
+      "profile": "https://github.com/acolombier",
+      "contributions": [
+        "test",
+        "translation"
+      ]
+    },
+    {
+      "login": "colin99d",
+      "name": "Colin Delahunty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72827203?v=4",
+      "profile": "https://github.com/colin99d",
+      "contributions": [
+        "test"
+      ]
+    },
+    {
+      "login": "AmadeusGraves",
+      "name": "AmadeusGraves",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18572939?v=4",
+      "profile": "https://github.com/AmadeusGraves",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Charpy",
+      "name": "Charpy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4827568?v=4",
+      "profile": "https://github.com/Charpy",
+      "contributions": [
+        "translation"
+      ]
+    }
+  ],
+  "contributorsPerLine": 10,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "sniffnet",
+  "projectOwner": "GyulyVGC",
+  "linkToUsage": false
+}
