@@ -266,14 +266,15 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-<table align="center">
+<table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="10%"><a href="https://github.com/Crirock"><img src="https://avatars.githubusercontent.com/u/101053125?v=4?s=60" width="60px;" alt="Cristiano"/><br /><sub><b>Cristiano</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Code">💻</a> <a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Ideas, Planning, & Feedback">🤔</a></td>
-      <td align="center" valign="top" width="10%"><a href="https://github.com/acolombier"><img src="https://avatars.githubusercontent.com/u/7086688?v=4?s=60" width="60px;" alt="Antoine Colombier"/><br /><sub><b>Antoine Colombier</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Tests">⚠️</a> <a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Crirock"><img src="https://avatars.githubusercontent.com/u/101053125?v=4?s=60" width="60px;" alt="Cristiano"/><br /><sub><b>Cristiano</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=Crirock" title="Code">💻</a> <a href="#ideas-Crirock" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/acolombier"><img src="https://avatars.githubusercontent.com/u/7086688?v=4?s=60" width="60px;" alt="Antoine Colombier"/><br /><sub><b>Antoine Colombier</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=acolombier" title="Tests">⚠️</a> <a href="#translation-acolombier" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="10%"><a href="https://github.com/colin99d"><img src="https://avatars.githubusercontent.com/u/72827203?v=4?s=60" width="60px;" alt="Colin Delahunty"/><br /><sub><b>Colin Delahunty</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=colin99d" title="Tests">⚠️</a></td>
-      <td align="center" valign="top" width="10%"><a href="https://github.com/AmadeusGraves"><img src="https://avatars.githubusercontent.com/u/18572939?v=4?s=60" width="60px;" alt="AmadeusGraves"/><br /><sub><b>AmadeusGraves</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=amadeusgraves" title="Translation">🌍</a></td>
-      <td align="center" valign="top" width="10%"><a href="https://github.com/Charpy"><img src="https://avatars.githubusercontent.com/u/4827568?v=4?s=60" width="60px;" alt="Charpy"/><br /><sub><b>Charpy</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=charpy" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/AmadeusGraves"><img src="https://avatars.githubusercontent.com/u/18572939?v=4?s=60" width="60px;" alt="AmadeusGraves"/><br /><sub><b>AmadeusGraves</b></sub></a><br /><a href="#translation-AmadeusGraves" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Charpy"><img src="https://avatars.githubusercontent.com/u/4827568?v=4?s=60" width="60px;" alt="Charpy"/><br /><sub><b>Charpy</b></sub></a><br /><a href="#translation-Charpy" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/Kiruyuto"><img src="https://avatars.githubusercontent.com/u/80201134?v=4?s=60" width="60px;" alt="Hubert"/><br /><sub><b>Hubert</b></sub></a><br /><a href="#translation-Kiruyuto" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
