@@ -1,6 +1,6 @@
 use crate::structs::address_port_pair::AddressPortPair;
 use crate::structs::info_address_port_pair::InfoAddressPortPair;
-use crate::structs::notifications::{BytesNotification, PacketsNotification};
+use crate::ByteMultiple;
 
 /// Enum representing the possible observed values of IP protocol version.
 pub enum LoggedNotification {
@@ -14,7 +14,7 @@ pub enum LoggedNotification {
 
 #[derive(Clone)]
 pub struct PacketsThresholdExceeded {
-    pub(crate) notification: PacketsNotification,
+    pub(crate) threshold: u32,
     pub(crate) incoming: u32,
     pub(crate) outgoing: u32,
     pub(crate) timestamp: String,
@@ -22,7 +22,8 @@ pub struct PacketsThresholdExceeded {
 
 #[derive(Clone)]
 pub struct BytesThresholdExceeded {
-    pub(crate) notification: BytesNotification,
+    pub(crate) threshold: u64,
+    pub(crate) byte_multiple: ByteMultiple,
     pub(crate) incoming: u32,
     pub(crate) outgoing: u32,
     pub(crate) timestamp: String,

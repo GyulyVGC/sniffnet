@@ -28,7 +28,7 @@ pub fn notify_and_log(
             }
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::PacketsThresholdExceeded(PacketsThresholdExceeded {
-                    notification: notifications.packets_notification,
+                    threshold: notifications.packets_notification.previous_threshold,
                     incoming: received_packets_entry.try_into().unwrap(),
                     outgoing: sent_packets_entry.try_into().unwrap(),
                     timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
@@ -58,7 +58,8 @@ pub fn notify_and_log(
             }
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::BytesThresholdExceeded(BytesThresholdExceeded {
-                    notification: notifications.bytes_notification,
+                    threshold: notifications.bytes_notification.previous_threshold,
+                    byte_multiple: notifications.bytes_notification.byte_multiple,
                     incoming: received_bytes_entry.try_into().unwrap(),
                     outgoing: sent_bytes_entry.try_into().unwrap(),
                     timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
