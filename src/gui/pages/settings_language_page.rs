@@ -50,7 +50,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Units(30)))
         .push(Container::new(Text::new("Support for more languages will come with the next releases.\n\n\
         If you want to help me translating the app in your native language, give a look at Sniffnet issues on GitHub.")
-            .width(Length::Units(450))
+            .width(Length::Units(600))
             .font(font)).padding(10).style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::BorderedRound),
         )));
