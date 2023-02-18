@@ -607,7 +607,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         Language::IT => "Notificami quando nuovi dati sono scambiati dai miei preferiti",
         Language::FR => "Notifiez-moi lorsque des données sont échangées depuis mes favoris",
         Language::ES => "Notificarme cuando se intercambien nuevos datos de mis favoritos",
-        Language::PL => "Powiadom mnie, gdy nowe dane z moich ulubionych zostaną wymienione ",
+        Language::PL => "Powiadom mnie, gdy nowe dane z moich ulubionych zostaną wymienione",
     }
 }
 
