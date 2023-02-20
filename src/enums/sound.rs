@@ -7,7 +7,7 @@ use std::fmt;
 use std::thread;
 
 /// Enum representing the possible notification sounds.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Sound {
     Gulp,
     Pop,

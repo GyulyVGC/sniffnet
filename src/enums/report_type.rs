@@ -7,7 +7,7 @@ use crate::utility::translations::{
 use crate::Language;
 
 /// Enum representing the possible kinds of displayed relevant connections.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReportType {
     MostRecent,
     MostPackets,

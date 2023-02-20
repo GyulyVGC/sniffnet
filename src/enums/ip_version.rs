@@ -3,7 +3,7 @@ use crate::Language;
 use std::fmt;
 
 /// Enum representing the possible observed values of IP protocol version.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IpVersion {
     /// Internet Protocol version 4
     IPv4,

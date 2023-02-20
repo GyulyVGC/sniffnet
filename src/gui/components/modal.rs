@@ -21,19 +21,7 @@ pub fn get_exit_overlay(
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
-    let row_buttons = Row::new().push(
-        button(
-            yes_translation(language)
-                .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center),
-        )
-        .padding(5)
-        .height(Length::Units(40))
-        .width(Length::Units(80))
-        .style(StyleTuple(style, ElementType::Alert).into())
-        .on_press(Message::Reset),
-    );
+    let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -61,19 +49,7 @@ pub fn get_clear_all_overlay(
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
-    let row_buttons = Row::new().push(
-        button(
-            yes_translation(language)
-                .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center),
-        )
-        .padding(5)
-        .height(Length::Units(40))
-        .width(Length::Units(80))
-        .style(StyleTuple(style, ElementType::Alert).into())
-        .on_press(Message::ClearAllNotifications),
-    );
+    let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -145,6 +121,27 @@ fn get_modal_header(
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
+}
+
+pub fn confirm_button_row(
+    language: Language,
+    font: Font,
+    style: StyleType,
+    message: Message,
+) -> Row<'static, Message> {
+    Row::new().push(
+        button(
+            yes_translation(language)
+                .font(font)
+                .vertical_alignment(Vertical::Center)
+                .horizontal_alignment(Horizontal::Center),
+        )
+        .padding(5)
+        .height(Length::Units(40))
+        .width(Length::Units(80))
+        .style(StyleTuple(style, ElementType::Alert).into())
+        .on_press(message),
+    )
 }
 
 /// A widget that centers a modal element over some base element

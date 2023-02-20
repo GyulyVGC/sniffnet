@@ -5,7 +5,7 @@ use std::fmt;
 use crate::TransProtocol;
 
 /// Struct representing a network address:port pair.
-#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct AddressPortPair {
     /// Network layer IPv4 or IPv6 source address.
     pub address1: String,
