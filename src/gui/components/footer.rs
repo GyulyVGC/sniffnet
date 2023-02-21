@@ -46,8 +46,8 @@ pub fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
-    .height(Length::Units(35))
-    .width(Length::Units(35))
+    .height(Length::Fixed(35.0))
+    .width(Length::Fixed(35.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::OpenGithub);
 

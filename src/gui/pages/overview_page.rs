@@ -97,7 +97,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 body = body
                     .push(vertical_space(FillPortion(1)))
                     .push(icon_text)
-                    .push(vertical_space(Length::Units(15)))
+                    .push(vertical_space(Length::Fixed(15.0)))
                     .push(nothing_to_see_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
                     .push(vertical_space(FillPortion(2)));
@@ -117,7 +117,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 body = body
                     .push(vertical_space(FillPortion(1)))
                     .push(Text::new('V'.to_string()).font(ICONS).size(60))
-                    .push(vertical_space(Length::Units(15)))
+                    .push(vertical_space(Length::Fixed(15.0)))
                     .push(tot_packets_text)
                     .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
                     .push(vertical_space(FillPortion(2)));
@@ -231,7 +231,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                             entry_row = entry_row
                                 .push(
                                     Text::new("?")
-                                        .width(Length::Units(FLAGS_WIDTH))
+                                        .width(Length::Fixed(FLAGS_WIDTH))
                                         .style(iced::theme::Text::Color(entry_color))
                                         .font(INCONSOLATA_BOLD),
                                 )
@@ -251,8 +251,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                         .vertical_alignment(Vertical::Center),
                                 )
                                 .padding(0)
-                                .height(Length::Units(16))
-                                .width(Length::Units(16))
+                                .height(Length::Fixed(16.0))
+                                .width(Length::Fixed(16.0))
                                 .style(
                                     StyleTuple(
                                         sniffer.style,
@@ -288,7 +288,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
-                        .width(Length::Units(1100))
+                        .width(Length::Fixed(1100.0))
                         .style(<StyleTuple as Into<iced::theme::Container>>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
@@ -335,8 +335,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                                 .vertical_alignment(alignment::Vertical::Center),
                                         )
                                         .padding(10)
-                                        .height(Length::Units(50))
-                                        .width(Length::Units(75))
+                                        .height(Length::Fixed(50.0))
+                                        .width(Length::Fixed(75.0))
                                         .style(
                                             StyleTuple(sniffer.style, ElementType::Standard).into(),
                                         )
@@ -369,7 +369,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         body = body
             .push(vertical_space(FillPortion(1)))
             .push(Text::new('U'.to_string()).font(ICONS).size(60))
-            .push(vertical_space(Length::Units(15)))
+            .push(vertical_space(Length::Fixed(15.0)))
             .push(error_text)
             .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
             .push(vertical_space(FillPortion(2)));

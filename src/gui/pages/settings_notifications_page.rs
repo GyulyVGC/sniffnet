@@ -21,7 +21,7 @@ use iced::widget::{
     button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
     TextInput, Tooltip,
 };
-use iced::Length::Units;
+use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::Slider;
@@ -47,7 +47,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Units(15)))
+        .push(vertical_space(Fixed(15.0)))
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
@@ -55,7 +55,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
         )
-        .push(vertical_space(Units(5)));
+        .push(vertical_space(Fixed(5.0)));
 
     let volume_notification_col = Column::new()
         .align_items(Alignment::Center)
@@ -68,7 +68,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             Scrollable::new(
                 Column::new()
-                    .width(Units(720))
+                    .width(Fixed(720.0))
                     .push(get_packets_notify(
                         sniffer.notifications.packets_notification,
                         sniffer.language,
@@ -93,8 +93,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     content = content.push(volume_notification_col);
 
     Container::new(content)
-        .height(Units(400))
-        .width(Units(800))
+        .height(Fixed(400.0))
+        .width(Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
@@ -138,22 +138,22 @@ fn get_packets_notify(
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if packets_notification.threshold.is_none() {
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     } else {
         let input_row = Row::new()
-            .push(horizontal_space(Units(50)))
+            .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(threshold_translation(language)).font(font))
             .push(input_group_packets(packets_notification, style, language));
         let sound_row =
             Row::new()
-                .push(horizontal_space(Units(50)))
+                .push(horizontal_space(Fixed(50.0)))
                 .push(sound_packets_threshold_radios(
                     packets_notification,
                     font,
@@ -161,17 +161,17 @@ fn get_packets_notify(
                     language,
                 ));
         ret_val = ret_val
-            .push(vertical_space(Units(5)))
+            .push(vertical_space(Fixed(5.0)))
             .push(input_row)
             .push(sound_row);
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     }
 }
 
@@ -213,22 +213,22 @@ fn get_bytes_notify(
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if bytes_notification.threshold.is_none() {
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     } else {
         let input_row = Row::new()
-            .push(horizontal_space(Units(50)))
+            .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(threshold_translation(language)).font(font))
             .push(input_group_bytes(bytes_notification, style, language));
         let sound_row =
             Row::new()
-                .push(horizontal_space(Units(50)))
+                .push(horizontal_space(Fixed(50.0)))
                 .push(sound_bytes_threshold_radios(
                     bytes_notification,
                     font,
@@ -236,17 +236,17 @@ fn get_bytes_notify(
                     language,
                 ));
         ret_val = ret_val
-            .push(vertical_space(Units(5)))
+            .push(vertical_space(Fixed(5.0)))
             .push(input_row)
             .push(sound_row);
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     }
 }
 
@@ -280,31 +280,31 @@ fn get_favorite_notify(
 
     if favorite_notification.notify_on_favorite {
         let sound_row = Row::new()
-            .push(horizontal_space(Units(50)))
+            .push(horizontal_space(Fixed(50.0)))
             .push(sound_favorite_radios(
                 favorite_notification,
                 font,
                 style,
                 language,
             ));
-        ret_val = ret_val.push(vertical_space(Units(5))).push(sound_row);
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        ret_val = ret_val.push(vertical_space(Fixed(5.0))).push(sound_row);
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     } else {
-        Column::new()
-            .padding(5)
-            .push(Container::new(ret_val).padding(10).width(Units(700)).style(
-                <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-                    style,
-                    ElementType::BorderedRound,
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(Fixed(700.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(style, ElementType::BorderedRound),
                 )),
-            ))
+        )
     }
 }
 
@@ -333,7 +333,7 @@ fn input_group_packets(
             )
             .padding(1)
             .font(font)
-            .width(Length::Units(100))
+            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
                 StyleTuple(style, ElementType::Standard),
             )),
@@ -379,7 +379,7 @@ fn input_group_bytes(
             )
             .padding(1)
             .font(font)
-            .width(Length::Units(100))
+            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
                 StyleTuple(style, ElementType::Standard),
             )),
@@ -406,7 +406,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
                 Row::new()
                     .push(
                         Text::new('Y'.to_string())
-                            .width(Units(30))
+                            .width(Fixed(30.0))
                             .vertical_alignment(Vertical::Center)
                             .size(20)
                             .font(ICONS),
@@ -414,13 +414,13 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
                     .push(
                         Slider::new(0..=100, volume, Message::ChangeVolume)
                             .step(5)
-                            .width(Units(200))
+                            .width(Fixed(200.0))
                             .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
                                 style,
                                 ElementType::Standard,
                             ))),
                     )
-                    .push(horizontal_space(Length::Units(10)))
+                    .push(horizontal_space(Length::Fixed(10.0)))
                     .push(
                         Text::new('Z'.to_string())
                             .vertical_alignment(Vertical::Center)
@@ -431,7 +431,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
     )
     .padding(5)
     .width(Length::Fill)
-    .height(Length::Units(60))
+    .height(Length::Fixed(60.0))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
@@ -458,8 +458,8 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
                                 .size(15),
                         )
                         .padding(2)
-                        .height(Units(20))
-                        .width(Units(20))
+                        .height(Fixed(20.0))
+                        .width(Fixed(20.0))
                         .style(StyleTuple(style, ElementType::Standard).into())
                         .on_press(Message::HideModal(true)),
                         hide_translation(language),
@@ -476,7 +476,7 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Units(40))
+    .height(Fixed(40.0))
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),

@@ -263,6 +263,8 @@ Sniffnet is also open to design contributions: <br>
 
 A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
+<div align="center">
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -283,6 +285,8 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
+</div>
 
 The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 

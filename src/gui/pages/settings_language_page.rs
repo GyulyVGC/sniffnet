@@ -9,7 +9,7 @@ use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE};
 use crate::utility::translations::languages_title_translation;
 use crate::Sniffer;
 use iced::widget::{Column, Container, Text};
-use iced::Length::Units;
+use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::vertical_space;
 
@@ -39,25 +39,25 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Units(15)))
+        .push(vertical_space(Fixed(15.0)))
         .push(
             languages_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Units(20)))
+        .push(vertical_space(Fixed(20.0)))
         .push(col_language_radio)
-        .push(vertical_space(Units(30)))
+        .push(vertical_space(Fixed(30.0)))
         .push(Container::new(Text::new("Support for more languages will come with the next releases.\n\n\
         If you want to help me translating the app in your native language, give a look at Sniffnet issues on GitHub.")
-            .width(Length::Units(600))
+            .width(Length::Fixed(600.0))
             .font(font)).padding(10).style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::BorderedRound),
         )));
 
     Container::new(content)
-        .height(Units(400))
-        .width(Units(800))
+        .height(Fixed(400.0))
+        .width(Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))

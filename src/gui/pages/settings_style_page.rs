@@ -14,7 +14,6 @@ use crate::utility::translations::{
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 use iced::widget::{Button, Column, Container, Image, Row, Text};
-use iced::Length::Units;
 use iced::{Alignment, Length};
 use iced_native::image::Handle;
 use iced_native::widget::{horizontal_space, vertical_space};
@@ -41,13 +40,13 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
             sniffer.style,
             sniffer.language,
         ))
-        .push(vertical_space(Units(15)))
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             appearance_title_translation(sniffer.language)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Units(10)))
+        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -57,7 +56,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     yeti_night_translation(sniffer.language).to_string(),
                     Night,
                 ))
-                .push(horizontal_space(Units(33)))
+                .push(horizontal_space(Length::Fixed(33.0)))
                 .push(get_palette_container(
                     sniffer.style,
                     YETI_DAY,
@@ -66,7 +65,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     Day,
                 )),
         )
-        .push(vertical_space(Units(10)))
+        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -76,7 +75,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     deep_sea_translation(sniffer.language).to_string(),
                     DeepSea,
                 ))
-                .push(horizontal_space(Units(33)))
+                .push(horizontal_space(Length::Fixed(33.0)))
                 .push(get_palette_container(
                     sniffer.style,
                     MON_AMOUR,
@@ -87,8 +86,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         );
 
     Container::new(content)
-        .height(Units(400))
-        .width(Units(800))
+        .height(Length::Fixed(400.0))
+        .width(Length::Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
@@ -107,12 +106,12 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Units(300)))
+        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Length::Fixed(300.0)))
         .push(Text::new(description).font(font));
 
     Button::new(content)
-        .height(Units(130))
-        .width(Units(360))
+        .height(Length::Fixed(130.0))
+        .width(Length::Fixed(360.0))
         .padding(10)
         .style(StyleTuple(style, ElementType::BorderedRound).into())
         .on_press(Message::Style(on_press))

@@ -91,7 +91,7 @@ fn new_tab(
         .push(horizontal_space(Length::FillPortion(1)));
 
     button(content)
-        .height(Length::Units(35))
+        .height(Length::Fixed(35.0))
         .width(Length::FillPortion(1))
         .style(
             StyleTuple(

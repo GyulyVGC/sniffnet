@@ -94,7 +94,7 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
                         ElementType::Standard,
                     ))),
                 )
-                .push(horizontal_space(Length::Units(5)))
+                .push(horizontal_space(Length::Fixed(5.0)))
                 .push(get_flag(&format!("{option:?}"))),
         );
     }
@@ -274,6 +274,6 @@ pub fn report_radios(
             ))),
         );
     }
-    ret_val = ret_val.push(horizontal_space(Length::Units(120)));
+    ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
     ret_val
 }

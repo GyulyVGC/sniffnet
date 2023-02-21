@@ -95,10 +95,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(col_app),
         );
 
-    let body = Column::new().push(vertical_space(Length::Units(5))).push(
+    let body = Column::new().push(vertical_space(Length::Fixed(5.0))).push(
         Row::new()
             .push(col_adapter)
-            .push(horizontal_space(Length::Units(30)))
+            .push(horizontal_space(Length::Fixed(30.0)))
             .push(filters),
     );
 
@@ -118,8 +118,8 @@ pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(80))
-    .width(Length::Units(160))
+    .height(Length::Fixed(80.0))
+    .width(Length::Fixed(160.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::Start);
 

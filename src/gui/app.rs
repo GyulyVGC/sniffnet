@@ -67,53 +67,51 @@ impl Application for Sniffer {
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
                     drop(info_traffic_lock);
-                    self.update(Message::Waiting);
-                } else {
-                    self.runtime_data.borrow_mut().tot_sent_packets =
-                        info_traffic_lock.tot_sent_packets;
-                    self.runtime_data.borrow_mut().tot_received_packets =
-                        info_traffic_lock.tot_received_packets;
-                    self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
-                    self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
-                    self.runtime_data.borrow_mut().tot_received_bytes =
-                        info_traffic_lock.tot_received_bytes;
-                    self.runtime_data.borrow_mut().tot_sent_bytes =
-                        info_traffic_lock.tot_sent_bytes;
-                    self.runtime_data.borrow_mut().app_protocols =
-                        info_traffic_lock.app_protocols.clone();
-                    self.runtime_data.borrow_mut().favorites_last_interval =
-                        info_traffic_lock.favorites_last_interval.clone();
-                    info_traffic_lock.favorites_last_interval = HashSet::new();
-                    drop(info_traffic_lock);
-                    notify_and_log(
-                        self.runtime_data.borrow_mut(),
-                        self.notifications,
-                        &self.info_traffic.clone(),
-                    );
-                    update_charts_data(self.runtime_data.borrow_mut());
-                    update_report_data(
-                        self.runtime_data.borrow_mut(),
-                        &self.info_traffic,
-                        self.report_type,
-                    );
-                    // waiting notifications
-                    if self.running_page.eq(&RunningPage::Notifications)
-                        && self.runtime_data.borrow().logged_notifications.is_empty()
-                    {
-                        self.update(Message::Waiting);
-                    }
-                    // update ConfigDevice stored if different from last sniffed device
-                    if self.device.name.ne(&self.last_device_name_sniffed) {
-                        self.last_device_name_sniffed = self.device.name.clone();
-                        confy::store(
-                            "sniffnet",
-                            "device",
-                            ConfigDevice {
-                                device_name: self.device.name.clone(),
-                            },
-                        )
-                        .unwrap_or(());
-                    }
+                    return self.update(Message::Waiting);
+                }
+                self.runtime_data.borrow_mut().tot_sent_packets =
+                    info_traffic_lock.tot_sent_packets;
+                self.runtime_data.borrow_mut().tot_received_packets =
+                    info_traffic_lock.tot_received_packets;
+                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
+                self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
+                self.runtime_data.borrow_mut().tot_received_bytes =
+                    info_traffic_lock.tot_received_bytes;
+                self.runtime_data.borrow_mut().tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
+                self.runtime_data.borrow_mut().app_protocols =
+                    info_traffic_lock.app_protocols.clone();
+                self.runtime_data.borrow_mut().favorites_last_interval =
+                    info_traffic_lock.favorites_last_interval.clone();
+                info_traffic_lock.favorites_last_interval = HashSet::new();
+                drop(info_traffic_lock);
+                notify_and_log(
+                    self.runtime_data.borrow_mut(),
+                    self.notifications,
+                    &self.info_traffic.clone(),
+                );
+                update_charts_data(self.runtime_data.borrow_mut());
+                update_report_data(
+                    self.runtime_data.borrow_mut(),
+                    &self.info_traffic,
+                    self.report_type,
+                );
+                // update ConfigDevice stored if different from last sniffed device
+                if self.device.name.ne(&self.last_device_name_sniffed) {
+                    self.last_device_name_sniffed = self.device.name.clone();
+                    confy::store(
+                        "sniffnet",
+                        "device",
+                        ConfigDevice {
+                            device_name: self.device.name.clone(),
+                        },
+                    )
+                    .unwrap_or(());
+                }
+                // waiting notifications
+                if self.running_page.eq(&RunningPage::Notifications)
+                    && self.runtime_data.borrow().logged_notifications.is_empty()
+                {
+                    return self.update(Message::Waiting);
                 }
             }
             Message::AdapterSelection(name) => {
@@ -218,7 +216,7 @@ impl Application for Sniffer {
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
                 self.report_type = ReportType::MostRecent;
-                self.update(Message::HideModal(false));
+                return self.update(Message::HideModal(false));
             }
             Message::Style(style) => {
                 self.style = style;
@@ -302,7 +300,7 @@ impl Application for Sniffer {
             }
             Message::ClearAllNotifications => {
                 self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
-                self.update(Message::HideModal(false));
+                return self.update(Message::HideModal(false));
             }
             Message::Exit => {
                 return window::close();

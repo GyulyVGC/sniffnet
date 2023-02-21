@@ -31,14 +31,14 @@ pub fn get_exit_overlay(
             language,
             quit_analysis_translation(language),
         ))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
         .push(ask_quit_translation(language).font(font))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Units(150))
-        .width(Length::Units(450))
+        .height(Length::Fixed(150.0))
+        .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
         ))
@@ -59,14 +59,14 @@ pub fn get_clear_all_overlay(
             language,
             clear_all_translation(language),
         ))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
         .push(ask_clear_all_translation(language).font(font))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Units(150))
-        .width(Length::Units(450))
+        .height(Length::Fixed(150.0))
+        .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
         ))
@@ -98,8 +98,8 @@ fn get_modal_header(
                                 .size(15),
                         )
                         .padding(2)
-                        .height(Length::Units(20))
-                        .width(Length::Units(20))
+                        .height(Length::Fixed(20.0))
+                        .width(Length::Fixed(20.0))
                         .style(StyleTuple(style, ElementType::Standard).into())
                         .on_press(Message::HideModal(false)),
                         hide_translation(language),
@@ -116,7 +116,7 @@ fn get_modal_header(
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Length::Units(40))
+    .height(Length::Fixed(40.0))
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
@@ -137,8 +137,8 @@ pub fn confirm_button_row(
                 .horizontal_alignment(Horizontal::Center),
         )
         .padding(5)
-        .height(Length::Units(40))
-        .width(Length::Units(80))
+        .height(Length::Fixed(40.0))
+        .width(Length::Fixed(80.0))
         .style(StyleTuple(style, ElementType::Alert).into())
         .on_press(message),
     )

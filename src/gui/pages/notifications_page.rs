@@ -32,7 +32,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
     let mut body = Column::new()
-        .width(Length::Units(830))
+        .width(Length::Fixed(830.0))
         .padding(5)
         .spacing(10)
         .align_items(Alignment::Center);
@@ -60,7 +60,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body
         .push(tabs)
-        .push(vertical_space(Length::Units(15)));
+        .push(vertical_space(Length::Fixed(15.0)));
 
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
@@ -77,7 +77,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .spacing(5)
             .align_items(Alignment::Center)
             .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Units(15)))
+            .push(vertical_space(Length::Fixed(15.0)))
             .push(
                 no_notifications_set_translation(sniffer.language)
                     .horizontal_alignment(Horizontal::Center)
@@ -102,7 +102,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .spacing(5)
             .align_items(Alignment::Center)
             .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Units(15)))
+            .push(vertical_space(Length::Fixed(15.0)))
             .push(
                 no_notifications_received_translation(sniffer.language)
                     .horizontal_alignment(Horizontal::Center)
@@ -208,7 +208,7 @@ fn packets_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .push(
                     Row::new()
                         .spacing(5)
@@ -232,8 +232,8 @@ fn packets_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
         .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
@@ -285,7 +285,7 @@ fn bytes_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .push(
                     Row::new()
                         .spacing(5)
@@ -311,8 +311,8 @@ fn bytes_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
         .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
@@ -365,7 +365,7 @@ fn favorite_notification_log(
         )
         .push(
             Column::new()
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .spacing(7)
                 .push(
                     Row::new()
@@ -384,8 +384,8 @@ fn favorite_notification_log(
                 .push(Text::new(app_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
         .padding(15)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
@@ -401,8 +401,8 @@ pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'st
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(50))
-    .width(Length::Units(75))
+    .height(Length::Fixed(50.0))
+    .width(Length::Fixed(75.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::ShowModal(MyOverlay::ClearAll));
 

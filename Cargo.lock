@@ -1301,9 +1301,9 @@ dependencies = [
 
 [[package]]
 name = "iced"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df71e87f8211b57a439d0764131d2c421a9195036dd4b6608033b05f2f16c196"
+checksum = "d11492d829f0035ed3fa9217faccf16e57a5612a74dc7c49822c6f6a5ab1b829"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1318,9 +1318,9 @@ dependencies = [
 
 [[package]]
 name = "iced_core"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ade666613eb8b621971a59cfae9e11ec051f32afc5ed4d8e8915d5abfaf2cee"
+checksum = "a571e43a4dea90e3a7a9f8bb40e4238d0847f9f9d862c87a6719e3e241dd6292"
 dependencies = [
  "bitflags",
  "instant",
@@ -1329,9 +1329,9 @@ dependencies = [
 
 [[package]]
 name = "iced_futures"
-version = "0.5.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cc3a9fd79b857228dde2a3e923a04ade4095abeda33248c6230e8c909749366"
+checksum = "215d51fa4f70dbb63775d7141243c4d98d4d525d8949695601f8fbac7dcbc04e"
 dependencies = [
  "futures",
  "log",
@@ -1342,9 +1342,9 @@ dependencies = [
 
 [[package]]
 name = "iced_glow"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95755f62fec2ec2c8f8bc2c0be5072b1d0dfed8db250686059ddcce5da530acf"
+checksum = "d237909aab71ad4b0f005784f9530d3b352eb95b3514bed1a6eb9fc019e9fe04"
 dependencies = [
  "bytemuck",
  "euclid",
@@ -1358,9 +1358,9 @@ dependencies = [
 
 [[package]]
 name = "iced_graphics"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54177b85fdae36a8a1a4f052a5c65c5006565dc27f1feead13eeeed10fd0975a"
+checksum = "d58ad90b769e97bd245946b03c4932f82841c8645a7cee47d99115c8b341e8aa"
 dependencies = [
  "bitflags",
  "bytemuck",
@@ -1377,9 +1377,9 @@ dependencies = [
 
 [[package]]
 name = "iced_native"
-version = "0.8.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79d57c8e8672e90c55d4f9f55511b03e5a74af9d296be9693e9c07cd9eed4563"
+checksum = "b9942cdcd78591e816aae558721942aa366b03ed7f3f964b51de23c68ec78be7"
 dependencies = [
  "iced_core",
  "iced_futures",
@@ -1391,9 +1391,9 @@ dependencies = [
 
 [[package]]
 name = "iced_style"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b992f5e1828c61af3661fc0e7bf141ef5284007a41fa6667c5e79d047a03daf4"
+checksum = "ad5eb9547d32b9ff9b019526657974112b86baab58b2b91b1624316b309700b6"
 dependencies = [
  "iced_core",
  "once_cell",
@@ -1402,9 +1402,9 @@ dependencies = [
 
 [[package]]
 name = "iced_wgpu"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4bb296363d1b18d4f57e1c69bb19591405e61d47764e43078bba31c6689fca5"
+checksum = "fbdcca29092b56f6715dfbc183796b627d3ead82883594e7d6babf5c76151c45"
 dependencies = [
  "bitflags",
  "bytemuck",
@@ -1423,9 +1423,9 @@ dependencies = [
 
 [[package]]
 name = "iced_winit"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d528f882781c5594cb3d2416fe18787b4364e0cdd39f03d077ccc0becac1f9bd"
+checksum = "8ef7747251a0b4a417589c5a8139d1858edf88d05566018a1a0b772d0229ef68"
 dependencies = [
  "iced_futures",
  "iced_graphics",
@@ -2315,8 +2315,7 @@ checksum = "193228616381fecdc1224c62e96946dfbc73ff4384fba576e052ff8c1bea8142"
 [[package]]
 name = "plotters-iced"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ae63a3ff1c23d2f3c9f67bb940494d64efd4e0ece410fe9ff01d8584b11ac6b"
+source = "git+https://github.com/GyulyVGC/plotters-iced#a36b41457ffa8f54b70fa9a00fee6cc5b174fcd2"
 dependencies = [
  "iced_graphics",
  "iced_native",

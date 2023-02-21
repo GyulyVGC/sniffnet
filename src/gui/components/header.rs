@@ -56,7 +56,7 @@ pub fn header(
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center),
             )
-            .push(horizontal_space(Length::Units(15))),
+            .push(horizontal_space(Length::Fixed(15.0))),
     )
     .height(FillPortion(HEIGHT_HEADER))
     .align_y(Vertical::Center)
@@ -79,8 +79,8 @@ pub fn get_button_reset(
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
+    .height(Length::Fixed(40.0))
+    .width(Length::Fixed(60.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(if all_packets == 0 {
         Message::Reset
@@ -111,8 +111,8 @@ pub fn get_button_settings(
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(40))
-    .width(Length::Units(60))
+    .height(Length::Fixed(40.0))
+    .width(Length::Fixed(60.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::ShowModal(open_overlay));
 
