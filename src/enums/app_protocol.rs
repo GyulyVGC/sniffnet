@@ -120,14 +120,6 @@ impl fmt::Display for AppProtocol {
 
 /// Defines a constant to be used in the picklist in gui initial page
 impl AppProtocol {
-    // pub fn get_picklist_label(&self, language: Language) -> String {
-    //     let display = format!("{self:?}").to_owned();
-    //     match self {
-    //         AppProtocol::Other => all_protocols_translation(language).to_string(),
-    //         _ => display
-    //     }
-    // }
-
     pub(crate) const ALL: [AppProtocol; 25] = [
         AppProtocol::Other,
         AppProtocol::BGP,

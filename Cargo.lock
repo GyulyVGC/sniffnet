@@ -2314,8 +2314,9 @@ checksum = "193228616381fecdc1224c62e96946dfbc73ff4384fba576e052ff8c1bea8142"
 
 [[package]]
 name = "plotters-iced"
-version = "0.6.0"
-source = "git+https://github.com/GyulyVGC/plotters-iced#a36b41457ffa8f54b70fa9a00fee6cc5b174fcd2"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc932e1abce0251e908cf30bde8e66c30db30753a30b1b72f64846824783e0bf"
 dependencies = [
  "iced_graphics",
  "iced_native",

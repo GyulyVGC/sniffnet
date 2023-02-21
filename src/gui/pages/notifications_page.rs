@@ -147,6 +147,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         Text::new(only_last_30_translation(sniffer.language)).font(font)
                     },
                 )
+                .padding(10)
                 .width(Length::FillPortion(1))
                 .height(Length::Fill)
                 .align_x(Horizontal::Center)

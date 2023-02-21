@@ -74,19 +74,25 @@ pub fn transport_protocol_radios(
     ret_val
 }
 
-pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column<'static, Message> {
+pub fn language_radios(
+    active: Language,
+    collection: &[Language],
+    font: Font,
+    style: StyleType,
+) -> Column<'static, Message> {
     let mut ret_val = Column::new().spacing(10);
-    for option in Language::ALL {
+    for option in collection {
         ret_val = ret_val.push(
             Row::new()
                 .align_items(Alignment::Center)
                 .push(
                     Radio::new(
-                        option,
+                        *option,
                         option.get_radio_label(),
                         Some(active),
                         Message::LanguageSelection,
                     )
+                    .spacing(7)
                     .font(font)
                     .size(15)
                     .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -126,6 +132,7 @@ pub fn sound_packets_threshold_radios(
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -162,6 +169,7 @@ pub fn sound_bytes_threshold_radios(
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -198,6 +206,7 @@ pub fn sound_favorite_radios(
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -232,6 +241,7 @@ pub fn chart_radios(
                 Some(active),
                 Message::ChartSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -266,6 +276,7 @@ pub fn report_radios(
                 Some(active),
                 Message::ReportSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
