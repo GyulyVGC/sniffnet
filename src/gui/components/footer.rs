@@ -21,7 +21,7 @@ pub fn footer(style: StyleType) -> Container<'static, Message> {
     let footer_row = Row::new()
         .align_items(Alignment::Center)
         .push(
-            Text::new(format!("Sniffnet {APP_VERSION} - by Giuliano Bellini "))
+            Text::new(format!("Sniffnet v{APP_VERSION} - by Giuliano Bellini "))
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         )

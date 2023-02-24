@@ -27,6 +27,7 @@ use crate::structs::runtime_data::RunTimeData;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_write_report::sleep_and_write_report_loop;
+use crate::utility::get_formatted_strings::print_cli_welcome_message;
 
 mod enums;
 mod gui;
@@ -78,6 +79,8 @@ pub fn main() -> iced::Result {
             sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
         })
         .unwrap();
+
+    print_cli_welcome_message();
 
     Sniffer::run(Settings {
         id: None,
