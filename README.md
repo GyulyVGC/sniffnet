@@ -11,6 +11,14 @@ Application to comfortably monitor your network traffic <br>
 Multithreaded, cross-platform, reliable
 </p>
 
+<div align="center">
+
+Graphical interface translated in:<br>
+🇬🇧 - 🇫🇷 - 🇪🇦 - 🇮🇹 - 🇵🇱 <br>
+[More languages will be supported in the upcoming releases](https://github.com/GyulyVGC/sniffnet/issues/60)
+
+</div>
+
 <hr>
 
 <p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/216971624-9f456f4d-a8dc-44fb-8047-11cc882537ed.png" width="100%"/></p>
@@ -19,13 +27,6 @@ Multithreaded, cross-platform, reliable
 <img alt="" src="https://user-images.githubusercontent.com/100347457/216972254-10d0c9fd-34eb-43f4-94dd-61e882bcc364.png" width="49%"/>
 <img alt="" src="https://user-images.githubusercontent.com/100347457/216972251-41a413e5-89f7-4c8c-b41b-a291470cba59.png" width="49%"/>
 </p>
-
-<div align="center">
-
-Application translated in: 🇬🇧 - 🇮🇹 <br>
-[More languages will be supported in the upcoming releases](https://github.com/GyulyVGC/sniffnet/issues/60)
-
-</div>
 
 <hr>
 
@@ -55,9 +56,9 @@ cargo install sniffnet
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_Windows.msi) (7.3 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_MacOS.dmg) (6.5 MB)
-  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.0/Sniffnet_Linux.deb) (5.2 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Windows.msi) (7.8 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_MacOS.dmg) (6.9 MB)
+  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Linux.deb) (5.6 MB)
 
     
 </details>

@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Giuliano Bellini"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -33,7 +33,6 @@ plotters = { version = "0.3.4", default_features = false, features = ["area_seri
 iced = { version = "0.8.0", features = ["tokio", "image"] }
 iced_native = "0.9.1"
 plotters-iced = "0.7.0"
-#plotters-iced = { git = "https://github.com/GyulyVGC/plotters-iced" }
 maxminddb = "0.23.0"
 confy = "0.5.1"
 serde = { version = "1.0.152", default_features = false, features = ["derive"] }
