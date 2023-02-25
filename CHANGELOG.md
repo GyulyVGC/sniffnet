@@ -2,7 +2,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.1.1] - UNRELEASED
+## [1.1.1] - 2023-02-25
 
 - Added new translations of the GUI!
   * French 🇫🇷 ([#64](https://github.com/GyulyVGC/sniffnet/pull/64) - [#67](https://github.com/GyulyVGC/sniffnet/pull/67))

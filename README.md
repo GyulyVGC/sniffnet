@@ -56,9 +56,9 @@ cargo install sniffnet
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Windows.msi) (7.3 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_MacOS.dmg) (6.5 MB)
-  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Linux.deb) (5.2 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Windows.msi) (7.8 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_MacOS.dmg) (6.9 MB)
+  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.1/Sniffnet_Linux.deb) (5.6 MB)
 
     
 </details>
