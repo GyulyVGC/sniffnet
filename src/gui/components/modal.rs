@@ -24,6 +24,7 @@ pub fn get_exit_overlay(
     let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
+        .padding(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -32,12 +33,15 @@ pub fn get_exit_overlay(
             quit_analysis_translation(language),
         ))
         .push(vertical_space(Length::Fixed(20.0)))
-        .push(ask_quit_translation(language).font(font))
-        .push(vertical_space(Length::Fixed(20.0)))
+        .push(
+            ask_quit_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Fixed(150.0))
+        .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
@@ -52,6 +56,7 @@ pub fn get_clear_all_overlay(
     let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
+        .padding(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -60,12 +65,15 @@ pub fn get_clear_all_overlay(
             clear_all_translation(language),
         ))
         .push(vertical_space(Length::Fixed(20.0)))
-        .push(ask_clear_all_translation(language).font(font))
-        .push(vertical_space(Length::Fixed(20.0)))
+        .push(
+            ask_clear_all_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Fixed(150.0))
+        .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
@@ -129,19 +137,22 @@ pub fn confirm_button_row(
     style: StyleType,
     message: Message,
 ) -> Row<'static, Message> {
-    Row::new().push(
-        button(
-            yes_translation(language)
-                .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center),
+    Row::new()
+        .height(Length::Fill)
+        .align_items(Alignment::Center)
+        .push(
+            button(
+                yes_translation(language)
+                    .font(font)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center),
+            )
+            .padding(5)
+            .height(Length::Fixed(40.0))
+            .width(Length::Fixed(80.0))
+            .style(StyleTuple(style, ElementType::Alert).into())
+            .on_press(message),
         )
-        .padding(5)
-        .height(Length::Fixed(40.0))
-        .width(Length::Fixed(80.0))
-        .style(StyleTuple(style, ElementType::Alert).into())
-        .on_press(message),
-    )
 }
 
 /// A widget that centers a modal element over some base element
