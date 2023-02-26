@@ -23,7 +23,7 @@ use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
 };
-use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, INCONSOLATA_BOLD, LXGW_MONO_LITE_BOLD};
+use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, LXGW_MONO_LITE_BOLD};
 use crate::utility::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,

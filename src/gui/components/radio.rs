@@ -35,8 +35,6 @@ pub fn ip_version_radios(
             )
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -67,8 +65,6 @@ pub fn transport_protocol_radios(
             )
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -98,8 +94,6 @@ pub fn language_radios(
                     )
                     .spacing(7)
                     .font(font)
-                    // fix Simplified Chinese display
-                    .width(Length::Fixed(100.0))
                     .size(15)
                     .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                         style,
@@ -141,8 +135,6 @@ pub fn sound_packets_threshold_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -180,8 +172,6 @@ pub fn sound_bytes_threshold_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -219,8 +209,6 @@ pub fn sound_favorite_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -256,8 +244,6 @@ pub fn chart_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,
@@ -293,8 +279,6 @@ pub fn report_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            // fix Simplified Chinese display
-            .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                 style,
                 ElementType::Standard,

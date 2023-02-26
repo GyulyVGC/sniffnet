@@ -11,7 +11,9 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
 use crate::structs::palette::to_rgb_color;
-use crate::utility::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER, INCONSOLATA_BOLD, LXGW_MONO_LITE_BOLD};
+use crate::utility::style_constants::{
+    get_color_mix_chart, CHARTS_LINE_BORDER, LXGW_MONO_LITE_BOLD,
+};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 

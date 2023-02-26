@@ -103,7 +103,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static> {
         Language::ES => "Tasa de tráfico:",
         Language::PL => "Prędkość ruchu:",
         Language::DE => "Daten Frequenz:",
-        Language::CN => "网络速率图",
+        Language::CN => "网络速率图:",
     })
 }
 

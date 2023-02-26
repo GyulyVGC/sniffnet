@@ -138,10 +138,10 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
 //     name: "inconsolata_regular",
 //     bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
 // };
-pub const INCONSOLATA_BOLD: Font = Font::External {
-    name: "inconsolata_bold",
-    bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
-};
+// pub const INCONSOLATA_BOLD: Font = Font::External {
+//     name: "inconsolata_bold",
+//     bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
+// };
 
 pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
     name: "lxgw_lite_bold",
@@ -182,10 +182,10 @@ pub const DEEP_SEA: &[u8] = include_bytes!("../../resources/palettes/DeepSea.png
 pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.png");
 
 // font sizes
-pub const FONT_SIZE_FOOTER: f32 = 15.0;
-pub const FONT_SIZE_BODY: f32 = 18.0;
-pub const FONT_SIZE_SUBTITLE: f32 = 22.0;
-pub const FONT_SIZE_TITLE: f32 = 24.0;
+pub const FONT_SIZE_FOOTER: f32 = 17.0;
+pub const FONT_SIZE_BODY: f32 = 20.0;
+pub const FONT_SIZE_SUBTITLE: f32 = 23.0;
+pub const FONT_SIZE_TITLE: f32 = 25.0;
 
 // border styles
 pub const BORDER_WIDTH: f32 = 2.0;
