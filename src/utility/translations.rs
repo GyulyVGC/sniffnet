@@ -36,12 +36,11 @@ pub fn select_filters_translation(language: Language) -> Text<'static> {
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Start!",
+        Language::EN | Language::DE => "Start!",
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
         Language::PL => "Rozpocznij!",
-        Language::DE => "Start!",
     }
 }
 
@@ -49,10 +48,9 @@ pub fn address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "\nAddress:",
         Language::IT => "\nIndirizzo:",
-        Language::FR => "\nAdresse:",
+        Language::FR | Language::DE => "\nAdresse:",
         Language::ES => "\nDirección:",
         Language::PL => "\nAdres:",
-        Language::DE => "\nAdresse:",
     }
 }
 
@@ -162,7 +160,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static> {
         Language::FR => "Êtes-vous sûr de vouloir effacer les notifications ?",
         Language::ES => "¿Seguro que quieres borrar las notificaciones?",
         Language::PL => "Czy na pewno chcesz wyczyścić powiadomienia?",
-        Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst)",
+        Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst?",
     })
 }
 
@@ -205,8 +203,8 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
         Language::PL => format!("Nie można zaobserwować żadnego ruchu, ponieważ wybrany adapter nie ma aktywnych adresów...\n\n\
                                  Adapter sieciowy: {adapter}\n\n\
                                  Jeśli jesteś pewien, że jesteś podłączony do internetu, spróbuj wybrać inny adapter."),
-        Language::DE => format!("Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n
-                                 Netzwerkadapter: {adapter}\n\n
+        Language::DE => format!("Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
+                                 Netzwerkadapter: {adapter}\n\n\
                                  Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."),
     })
 }
@@ -272,7 +270,7 @@ pub fn filtered_packets_translation(
         Language::FR => format!("Paquets filtrés:\n   {filtered} ({percentage} du total)"),
         Language::ES => format!("Paquetes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przefiltrowane pakiety:\n   {filtered} ({percentage} z całości)"),
-        Language::DE => format!("Gefilterte Pakete:\n   {filtered} ({percentage} der Gesamtzahl)")
+        Language::DE => format!("Gefilterte Pakete:\n   {filtered} ({percentage} der Gesamtzahl)"),
     })
 }
 
@@ -287,7 +285,7 @@ pub fn filtered_bytes_translation(
         Language::FR => format!("Octets filtrés:\n   {filtered} ({percentage} du total)"),
         Language::ES => format!("Bytes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przechwycone bajty:\n   {filtered} ({percentage} całości)"),
-        Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)")
+        Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)"),
     })
 }
 
@@ -314,7 +312,7 @@ pub fn no_favorites_translation(language: Language) -> Text<'static> {
                          Para añadir una conexión a sus favoritos, haga clic en el símbolo de la estrella situado junto a la conexión.",
         Language::PL => "Nie ma nic do pokazania w tej chwili.\n\
                          Aby dodać połączenie do ulubionych, kliknij na ikonę 'gwiazdki' obok połączenia.",
-        Language::DE => "Im Moment nichts zu zeigen. \n\
+        Language::DE => "Im Moment nichts zu zeigen.\n\
                          Um eine Verbindung zu deinen Favoriten hinzuzufügen, klick das auf das Stern-Symbol neben der Verbindung.",
     })
 }
@@ -672,7 +670,9 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         Language::FR => "Notifiez-moi lorsque des données sont échangées depuis mes favoris",
         Language::ES => "Notificarme cuando se intercambien nuevos datos de mis favoritos",
         Language::PL => "Powiadom mnie, gdy nowe dane z moich ulubionych zostaną wymienione",
-        Language::DE => "Benachrichtige mich, wenn neue Daten mit meinen Favoriten ausgetauscht werden",
+        Language::DE => {
+            "Benachrichtige mich, wenn neue Daten mit meinen Favoriten ausgetauscht werden"
+        }
     }
 }
 

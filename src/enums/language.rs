@@ -24,8 +24,8 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const COL1: [Language; 3] = [Language::EN, Language::FR, Language::ES];
-    pub(crate) const COL2: [Language; 3] = [Language::IT, Language::PL, Language::DE];
+    pub(crate) const COL1: [Language; 3] = [Language::EN, Language::ES, Language::FR];
+    pub(crate) const COL2: [Language; 3] = [Language::DE, Language::IT, Language::PL];
     pub fn get_radio_label(&self) -> &str {
         match self {
             Language::EN => "English",
