@@ -11,7 +11,7 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
 use crate::structs::palette::to_rgb_color;
-use crate::utility::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER, INCONSOLATA_BOLD};
+use crate::utility::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER, INCONSOLATA_BOLD, LXGW_MONO_LITE_BOLD};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 
@@ -49,7 +49,7 @@ impl TrafficChart {
             Column::new().push(
                 ChartWidget::new(self).resolve_font(move |_, _| match color_font {
                     RGBColor(255, 255, 255) => Font::Default, // if white non-bold
-                    _ => INCONSOLATA_BOLD,
+                    _ => LXGW_MONO_LITE_BOLD,
                 }),
             ),
         )

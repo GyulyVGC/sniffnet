@@ -143,17 +143,22 @@ pub const INCONSOLATA_BOLD: Font = Font::External {
     bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
 };
 
+pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
+    name: "lxgw_lite_bold",
+    bytes: include_bytes!("../../resources/fonts/LXGWWenKaiMonoLite-Bold.ttf"),
+};
+
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => INCONSOLATA_BOLD,
+        _ => LXGW_MONO_LITE_BOLD,
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => INCONSOLATA_BOLD,
+        _ => LXGW_MONO_LITE_BOLD,
     }
 }
 
