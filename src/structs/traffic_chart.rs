@@ -111,7 +111,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 13).into_font().color(&self.color_font))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| {
                         let bytes_abs = bytes.abs();
                         #[allow(clippy::cast_precision_loss)]
@@ -169,7 +169,7 @@ impl Chart<Message> for TrafficChart {
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.color_font))
+                    .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }
@@ -189,7 +189,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 13).into_font().color(&self.color_font))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
                     .unwrap();
@@ -229,7 +229,7 @@ impl Chart<Message> for TrafficChart {
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.color_font))
+                    .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }

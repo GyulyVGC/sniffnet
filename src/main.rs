@@ -105,7 +105,7 @@ pub fn main() -> iced::Result {
             &config_device,
         ),
         default_font: Some(include_bytes!(
-            "../resources/fonts/LXGWWenKaiMonoLite-Regular.ttf"
+            "../resources/fonts/subset/LXGWWenKaiMonoLite-Regular.subset.ttf"
         )),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,

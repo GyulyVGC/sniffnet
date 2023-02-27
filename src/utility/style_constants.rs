@@ -133,19 +133,9 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     round_borders: Color::BLACK,
 };
 
-// gui Text fonts
-// pub const INCONSOLATA: Font = Font::External {
-//     name: "inconsolata_regular",
-//     bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
-// };
-// pub const INCONSOLATA_BOLD: Font = Font::External {
-//     name: "inconsolata_bold",
-//     bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
-// };
-
 pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
     name: "lxgw_lite_bold",
-    bytes: include_bytes!("../../resources/fonts/LXGWWenKaiMonoLite-Bold.ttf"),
+    bytes: include_bytes!("../../resources/fonts/subset/LXGWWenKaiMonoLite-Bold.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
@@ -172,7 +162,7 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 //font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../../resources/fonts/icons.ttf"),
+    bytes: include_bytes!("../../resources/fonts/subset/icons.ttf"),
 };
 
 // palettes pictures
