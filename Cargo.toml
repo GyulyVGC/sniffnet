@@ -36,7 +36,7 @@ plotters-iced = "0.7.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
 serde = { version = "1.0.152", default_features = false, features = ["derive"] }
-rodio = { version = "0.17.0", default_features = false, features = ["mp3"] }
+rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
 
 [dev-dependencies]
 rstest = "0.16.0"
