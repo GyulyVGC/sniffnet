@@ -135,7 +135,7 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
 
 pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
     name: "lxgw_lite_bold",
-    bytes: include_bytes!("../../resources/fonts/subset/LXGWWenKaiMonoLite-Bold.ttf"),
+    bytes: include_bytes!("../../resources/fonts/subset/LXGWWenKaiMonoLite-Bold.subset.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
