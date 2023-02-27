@@ -133,27 +133,22 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     round_borders: Color::BLACK,
 };
 
-// gui Text fonts
-// pub const INCONSOLATA: Font = Font::External {
-//     name: "inconsolata_regular",
-//     bytes: include_bytes!("../../fonts/inconsolata-regular.ttf"),
-// };
-pub const INCONSOLATA_BOLD: Font = Font::External {
-    name: "inconsolata_bold",
-    bytes: include_bytes!("../../resources/fonts/inconsolata-bold.ttf"),
+pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
+    name: "lxgw_lite_bold",
+    bytes: include_bytes!("../../resources/fonts/subset/LXGWWenKaiMonoLite-Bold.subset.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => INCONSOLATA_BOLD,
+        _ => LXGW_MONO_LITE_BOLD,
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => INCONSOLATA_BOLD,
+        _ => LXGW_MONO_LITE_BOLD,
     }
 }
 
@@ -167,7 +162,7 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 //font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../../resources/fonts/icons.ttf"),
+    bytes: include_bytes!("../../resources/fonts/subset/icons.ttf"),
 };
 
 // palettes pictures
@@ -177,10 +172,10 @@ pub const DEEP_SEA: &[u8] = include_bytes!("../../resources/palettes/DeepSea.png
 pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.png");
 
 // font sizes
-pub const FONT_SIZE_FOOTER: f32 = 15.0;
-pub const FONT_SIZE_BODY: f32 = 18.0;
-pub const FONT_SIZE_SUBTITLE: f32 = 22.0;
-pub const FONT_SIZE_TITLE: f32 = 24.0;
+pub const FONT_SIZE_FOOTER: f32 = 17.0;
+pub const FONT_SIZE_BODY: f32 = 20.0;
+pub const FONT_SIZE_SUBTITLE: f32 = 23.0;
+pub const FONT_SIZE_TITLE: f32 = 25.0;
 
 // border styles
 pub const BORDER_WIDTH: f32 = 2.0;

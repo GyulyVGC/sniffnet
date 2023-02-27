@@ -112,7 +112,7 @@ fn get_palette_container(
     Button::new(content)
         .height(Length::Fixed(130.0))
         .width(Length::Fixed(360.0))
-        .padding(10)
+        .padding(5)
         .style(StyleTuple(style, ElementType::BorderedRound).into())
         .on_press(Message::Style(on_press))
 }
