@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/211192693-21a5dc79-c7bd-4eb7-8c80-4d954d28b9e2.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
 <p align="center"> 
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
@@ -21,11 +21,11 @@ Graphical interface translated in:<br>
 
 <hr>
 
-<p align="center"><img alt="" src="https://user-images.githubusercontent.com/100347457/216971624-9f456f4d-a8dc-44fb-8047-11cc882537ed.png" width="100%"/></p>
+<p align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></p>
 
 <p align="center">
-<img alt="" src="https://user-images.githubusercontent.com/100347457/216972254-10d0c9fd-34eb-43f4-94dd-61e882bcc364.png" width="49%"/>
-<img alt="" src="https://user-images.githubusercontent.com/100347457/216972251-41a413e5-89f7-4c8c-b41b-a291470cba59.png" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/settings_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
 </p>
 
 <hr>
