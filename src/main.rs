@@ -105,7 +105,7 @@ pub fn main() -> iced::Result {
             &config_device,
         ),
         default_font: Some(include_bytes!(
-            "../resources/fonts/subset/LXGWWenKaiMonoLite-Regular.subset.ttf"
+            "../resources/fonts/full/sarasa-mono-sc-regular.ttf"
         )),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,

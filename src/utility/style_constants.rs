@@ -134,8 +134,8 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
 };
 
 pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
-    name: "lxgw_lite_bold",
-    bytes: include_bytes!("../../resources/fonts/subset/LXGWWenKaiMonoLite-Bold.subset.ttf"),
+    name: "sarasa-mono-slab-sc",
+    bytes: include_bytes!("../../resources/fonts/full/sarasa-mono-sc-bold.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
@@ -173,7 +173,7 @@ pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.p
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 17.0;
-pub const FONT_SIZE_BODY: f32 = 20.0;
+pub const FONT_SIZE_BODY: f32 = 21.0;
 pub const FONT_SIZE_SUBTITLE: f32 = 23.0;
 pub const FONT_SIZE_TITLE: f32 = 25.0;
 
