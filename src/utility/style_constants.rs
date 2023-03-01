@@ -133,22 +133,22 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     round_borders: Color::BLACK,
 };
 
-pub const LXGW_MONO_LITE_BOLD: Font = Font::External {
-    name: "sarasa-mono-slab-sc",
-    bytes: include_bytes!("../../resources/fonts/full/sarasa-mono-sc-bold.ttf"),
+pub const SARASA_MONO_SC_BOLD: Font = Font::External {
+    name: "sarasa-mono-sc-bold",
+    bytes: include_bytes!("../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf"),
 };
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => LXGW_MONO_LITE_BOLD,
+        _ => SARASA_MONO_SC_BOLD,
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => Font::Default,
-        _ => LXGW_MONO_LITE_BOLD,
+        _ => SARASA_MONO_SC_BOLD,
     }
 }
 

@@ -193,6 +193,8 @@ fn packets_notification_log(
     outgoing_str.push_str(": ");
     outgoing_str.push_str(&logged_notification.outgoing.to_string());
     let content = Row::new()
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .spacing(30)
         .push(
             Tooltip::new(
@@ -235,7 +237,7 @@ fn packets_notification_log(
     Container::new(content)
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
-        .padding(15)
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -271,6 +273,8 @@ fn bytes_notification_log(
     )));
     let content = Row::new()
         .spacing(30)
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .push(
             Tooltip::new(
                 Text::new("f").font(ICONS).size(80),
@@ -314,7 +318,7 @@ fn bytes_notification_log(
     Container::new(content)
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
-        .padding(15)
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -352,6 +356,8 @@ fn favorite_notification_log(
     }
     let content = Row::new()
         .spacing(30)
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .push(
             Tooltip::new(
                 Text::new("g").font(ICONS).size(80),
@@ -387,7 +393,7 @@ fn favorite_notification_log(
     Container::new(content)
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
-        .padding(15)
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))

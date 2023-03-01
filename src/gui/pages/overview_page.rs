@@ -23,7 +23,7 @@ use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
 };
-use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, LXGW_MONO_LITE_BOLD};
+use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, SARASA_MONO_SC_BOLD};
 use crate::utility::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
@@ -225,7 +225,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 key_val.1.print_gui()
                             ))
                             .style(iced::theme::Text::Color(entry_color))
-                            .font(LXGW_MONO_LITE_BOLD),
+                            .font(SARASA_MONO_SC_BOLD),
                         );
                         if key_val.1.country.is_empty() {
                             entry_row = entry_row
@@ -233,7 +233,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     Text::new("?")
                                         .width(Length::Fixed(FLAGS_WIDTH))
                                         .style(iced::theme::Text::Color(entry_color))
-                                        .font(LXGW_MONO_LITE_BOLD),
+                                        .font(SARASA_MONO_SC_BOLD),
                                 )
                                 .push(Text::new("    "));
                         } else {
@@ -288,7 +288,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     Container::new(col_report)
                         .padding(5)
                         .height(Length::Fill)
-                        .width(Length::Fixed(1100.0))
+                        .width(Length::Fixed(1080.0))
                         .style(<StyleTuple as Into<iced::theme::Container>>::into(
                             StyleTuple(sniffer.style, ElementType::BorderedRound),
                         )),
