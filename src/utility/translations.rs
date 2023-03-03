@@ -739,7 +739,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         Language::DE => {
             "Benachrichtige mich, wenn neue Daten mit meinen Favoriten ausgetauscht werden"
         }
-        Language::UA => "Повідом мене, коли нбуде обмін даними з моїх улюблених ",
+        Language::UA => "Повідом мене, коли буде обмін даними з моїх улюблених",
     }
 }
 
@@ -873,7 +873,7 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
         Language::DE => "Benachrichtigungen wurden noch nicht aktiviert!\n\n\
                          Nachdem du sie aktiviert hast, wird diese Seite eine Liste deiner Benachrichtigungen anzeigen\n\n\
                          Du kannst die Benachrichtigungen in den Einstellungen aktivieren:",
-        Language::UA => "ПОвідомлення не активовані!\n\n\
+        Language::UA => "Повідомлення не активовані!\n\n\
                                  Після їх активації, на цій сторінці побачиш список своїх повідомлень\n\n\
                                  Можеш вимкнути повідомлення в налаштуваннях:",
     })
@@ -907,7 +907,7 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
         }
         Language::UA => {
             "Немає що показати в даний момент...\n\n\
-                                 КОли отримаєш повідомлення, побачиш його тут"
+                                 Коли отримаєш повідомлення, побачиш його тут"
         }
     })
 }
