@@ -279,6 +279,7 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
       <td align="center" valign="top" width="10%"><a href="https://github.com/Charpy"><img src="https://avatars.githubusercontent.com/u/4827568?v=4?s=60" width="60px;" alt="Charpy"/><br /><sub><b>Charpy</b></sub></a><br /><a href="#translation-Charpy" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="10%"><a href="https://github.com/Kiruyuto"><img src="https://avatars.githubusercontent.com/u/80201134?v=4?s=60" width="60px;" alt="Hubert"/><br /><sub><b>Hubert</b></sub></a><br /><a href="#translation-Kiruyuto" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="10%"><a href="https://github.com/luca3s"><img src="https://avatars.githubusercontent.com/u/41015240?v=4?s=60" width="60px;" alt="luca3s"/><br /><sub><b>luca3s</b></sub></a><br /><a href="#translation-luca3s" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/cxw620"><img src="https://avatars.githubusercontent.com/u/70561268?v=4?s=60" width="60px;" alt="陈寒彤"/><br /><sub><b>陈寒彤</b></sub></a><br /><a href="#translation-cxw620" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
