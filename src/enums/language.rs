@@ -15,6 +15,8 @@ pub enum Language {
     PL,
     /// German,
     DE,
+    /// Ukrainian
+    UA,
 }
 
 impl Default for Language {
@@ -34,6 +36,7 @@ impl Language {
             Language::ES => "Español",
             Language::PL => "Polski",
             Language::DE => "Deutsch",
+            Language::UA => "Українська"
         }
     }
 }
