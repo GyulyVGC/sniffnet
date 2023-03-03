@@ -11,7 +11,9 @@ use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::enums::message::Message;
 use crate::structs::palette::to_rgb_color;
-use crate::utility::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER, INCONSOLATA_BOLD};
+use crate::utility::style_constants::{
+    get_color_mix_chart, CHARTS_LINE_BORDER, SARASA_MONO_SC_BOLD,
+};
 use crate::utility::translations::{incoming_translation, outgoing_translation};
 use crate::{get_colors, ChartType, Language, RunTimeData, StyleType};
 
@@ -49,7 +51,7 @@ impl TrafficChart {
             Column::new().push(
                 ChartWidget::new(self).resolve_font(move |_, _| match color_font {
                     RGBColor(255, 255, 255) => Font::Default, // if white non-bold
-                    _ => INCONSOLATA_BOLD,
+                    _ => SARASA_MONO_SC_BOLD,
                 }),
             ),
         )
@@ -109,7 +111,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 13).into_font().color(&self.color_font))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| {
                         let bytes_abs = bytes.abs();
                         #[allow(clippy::cast_precision_loss)]
@@ -167,7 +169,7 @@ impl Chart<Message> for TrafficChart {
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.color_font))
+                    .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }
@@ -187,7 +189,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 13).into_font().color(&self.color_font))
+                    .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
                     .unwrap();
@@ -227,7 +229,7 @@ impl Chart<Message> for TrafficChart {
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
                     .border_style(BLACK)
-                    .label_font(("notosans", 15).into_font().color(&self.color_font))
+                    .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }

@@ -10,6 +10,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static> {
         Language::PL => "Wybierz adapter sieciowy do inspekcji",
         Language::DE => "Wähle einen Netzwerkadapter zum inspizieren aus",
         Language::UA => "Вибрати мережевий адаптер для інспекції",
+        Language::ZH => "选择需要监控的网络适配器",
     })
 }
 
@@ -22,6 +23,7 @@ pub fn application_protocol_translation(language: Language) -> &'static str {
         Language::PL => "Protokół aplikacji",
         Language::DE => "Anwendungs-Protokoll",
         Language::UA => "Протокол аплікації",
+        Language::ZH => "目标应用层协议",
     }
 }
 
@@ -34,6 +36,7 @@ pub fn select_filters_translation(language: Language) -> Text<'static> {
         Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
         Language::UA => "Вибрати фільтри, які мають бути застосовані до мережевого трафіку",
+        Language::ZH => "选择需要监控的目标",
     })
 }
 
@@ -45,6 +48,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::ES => "¡Empieza!",
         Language::PL => "Rozpocznij!",
         Language::UA => "Почати!",
+        Language::ZH => "开始!",
     }
 }
 
@@ -56,6 +60,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::ES => "\nDirección:",
         Language::PL => "\nAdres:",
         Language::UA => "\nАдреса",
+        Language::ZH => "\n网络地址:",
     }
 }
 
@@ -68,6 +73,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::PL => "\nAdresy:",
         Language::DE => "\nAdressen:",
         Language::UA => "\nАдреси!",
+        Language::ZH => "\n网络地址:",
     }
 }
 
@@ -80,6 +86,7 @@ pub fn ip_version_translation(language: Language) -> Text<'static> {
         Language::PL => "Wersja IP",
         Language::DE => "IP Version",
         Language::UA => "Версія IP",
+        Language::ZH => "目标IP协议版本",
     })
 }
 
@@ -92,6 +99,7 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::PL => "Protokół transportowy",
         Language::DE => "Netzwerkprotokoll",
         Language::UA => "Транспортний протокол",
+        Language::ZH => "目标传输协议",
     }
 }
 
@@ -104,6 +112,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static> {
         Language::PL => "Prędkość ruchu:",
         Language::DE => "Daten Frequenz:",
         Language::UA => "Швидкість руху",
+        Language::ZH => "网络速率图:",
     })
 }
 
@@ -116,6 +125,7 @@ pub fn relevant_connections_translation(language: Language) -> Text<'static> {
         Language::PL => "Istotne połączenia:",
         Language::DE => "Relevante Verbindungen:",
         Language::UA => "Важливі підключення",
+        Language::ZH => "连接详情:",
     })
 }
 
@@ -128,6 +138,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::PL => "Ustawienia",
         Language::DE => "Einstellungen",
         Language::UA => "Налаштування",
+        Language::ZH => "设置",
     }
 }
 
@@ -140,6 +151,7 @@ pub fn yes_translation(language: Language) -> Text<'static> {
         Language::PL => "Tak",
         Language::DE => "Ja",
         Language::UA => "Так",
+        Language::ZH => "是",
     })
 }
 
@@ -152,6 +164,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static> {
         Language::PL => "Czy na pewno chcesz zakończyć analizę?",
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
         Language::UA => "Чи справді хочеш закінчити аналіз?",
+        Language::ZH => "您确定退出当前监控吗?",
     })
 }
 
@@ -164,6 +177,7 @@ pub fn quit_analysis_translation(language: Language) -> String {
         Language::PL => "Zakończ analize".to_string(),
         Language::DE => "Analyse beenden".to_string(),
         Language::UA => "Закінчити аналіз".to_string(),
+        Language::ZH => "退出监控".to_string(),
     }
 }
 
@@ -176,6 +190,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static> {
         Language::PL => "Czy na pewno chcesz wyczyścić powiadomienia?",
         Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst?",
         Language::UA => "Чи справді хочеш видалити всі повідомлення?",
+        Language::ZH => "确定清除所有通知?",
     })
 }
 
@@ -188,6 +203,7 @@ pub fn clear_all_translation(language: Language) -> String {
         Language::PL => "Wyczyść wszystko".to_string(),
         Language::DE => "Alle leeren".to_string(),
         Language::UA => "Видалити все".to_string(),
+        Language::ZH => "清除所有".to_string(),
     }
 }
 
@@ -200,6 +216,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::PL => "Ukryj",
         Language::DE => "Verstecken",
         Language::UA => "Заховати",
+        Language::ZH => "隐藏",
     }
 }
 
@@ -226,6 +243,9 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
         Language::UA => format!("Не зафіксовано жодного мережевого трафіку тому що вибраний адаптер немає активних адрес ... \n\n\
                                  Мережквий адаптер: {adapter}\n\n\
                                  Якщо Ти впевнений, що підключений до інтернету, спробуй вибрати інший адаптер."),
+        Language::ZH => format!("您选择的网络适配器当前无活动网络......\n\n\
+                                网络适配器: {adapter}\n\n\
+                                如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."),
     })
 }
 
@@ -252,6 +272,9 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
         Language::UA => format!("Не зафіксовано жодного мережевого трафіку. Очікування на пакети...\n\n\
                                  Мережквий адаптер: {adapter}\n\n\
                                  Чи Ти дійсно підключений до інтернету і вибрав відповідний мережевий адаптер?"),
+        Language::ZH => format!("暂无流量数据. 等待网络活动中......\n\n\
+                                 网络适配器: {adapter}\n\n\
+                                 您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"),
     })
 }
 
@@ -282,6 +305,9 @@ pub fn some_observed_translation(
         Language::UA => format!("Сума перехоплених пакетів: {observed}\n\n\
                                  Відфільтровані пакеті: 0\n\n\
                                  Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів...\n\n{filters}"),
+        Language::ZH => format!("监测到的数据包总数: {observed}\n\n\
+                                 目标数据包总数: 0\n\n\
+                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......\n\n{filters}"),
     })
 }
 
@@ -297,8 +323,10 @@ pub fn filtered_packets_translation(
         Language::ES => format!("Paquetes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przefiltrowane pakiety:\n   {filtered} ({percentage} z całości)"),
         Language::DE => format!("Gefilterte Pakete:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UA => {
-            format!("Відфільтровані пакети:\n   {filtered} ({percentage} від загальної суми)")
+        Language::UA => 
+            format!("Відфільтровані пакети:\n   {filtered} ({percentage} від загальної суми)"),
+        Language::ZH => {
+            format!("目标数据包计数:\n   {filtered} (占所有数据包的 {percentage})")
         }
     })
 }
@@ -315,8 +343,10 @@ pub fn filtered_bytes_translation(
         Language::ES => format!("Bytes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przechwycone bajty:\n   {filtered} ({percentage} całości)"),
         Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UA => {
-            format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)")
+        Language::UA => 
+            format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)"),
+        Language::ZH => {
+            format!("目标网络流量计数:\n   {filtered} (占所有网络流量的 {percentage})")
         }
     })
 }
@@ -330,6 +360,7 @@ pub fn filtered_application_translation(language: Language) -> Text<'static> {
         Language::PL => "Przefiltrowane pakiety według protokołu aplikacji:",
         Language::DE => "Gefilterte Pakete je Anwendungs-Protokoll:",
         Language::UA => "Відфільтровані пакети протоколу аплікації/програми:",
+        Language::ZH => "按应用层协议分类的目标数据包计数:",
     })
 }
 
@@ -349,6 +380,8 @@ pub fn no_favorites_translation(language: Language) -> Text<'static> {
                          Um eine Verbindung zu deinen Favoriten hinzuzufügen, klick das auf das Stern-Symbol neben der Verbindung.",
         Language::UA => "Немає, що показати в цей момент.\n\
                          Щоб додати підключення до улюблених, натисни на іконку 'зірочки' біля підключення.",
+        Language::ZH => "收藏夹还是空的.\n\
+                         小贴士: 点击连接右侧的小星星即可收藏到这里哦.",
     })
 }
 
@@ -380,6 +413,9 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static> {
         ),
         Language::UA => format!(
             "Виступила помилка! \n\n\
+                                {error}"),
+        Language::ZH => format!(
+            "发生了一些错误! \n\n\
                                 {error}"
         ),
     })
@@ -394,6 +430,7 @@ pub fn both_translation(language: Language) -> &'static str {
         Language::PL => "oba",
         Language::DE => "beide",
         Language::UA => "обидва",
+        Language::ZH => "皆需",
     }
 }
 
@@ -417,6 +454,7 @@ pub fn all_translation(language: Language) -> &'static str {
         Language::PL => "Wszystkie",
         Language::DE => "Alle",
         Language::UA => "Усі",
+        Language::ZH => "所有",
     }
 }
 
@@ -429,6 +467,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::PL => "pakiety na sekundę",
         Language::DE => "Pakete pro Sekunde",
         Language::UA => "пакети на секунду",
+        Language::ZH => "数据包",
     }
 }
 
@@ -441,6 +480,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::PL => "bajty na sekundę",
         Language::DE => "Bytes pro Sekunde",
         Language::UA => "байти на секунду",
+        Language::ZH => "网络流量",
     }
 }
 
@@ -453,6 +493,7 @@ pub fn recent_report_translation(language: Language) -> &'static str {
         Language::PL => "najnowsze",
         Language::DE => "zuletzt",
         Language::UA => "найновіші",
+        Language::ZH => "按时间",
     }
 }
 
@@ -465,6 +506,7 @@ pub fn packets_report_translation(language: Language) -> &'static str {
         Language::PL => "najwięcej pakietów",
         Language::DE => "meiste Pakete",
         Language::UA => "найбільше пакетів",
+        Language::ZH => "按数据包",
     }
 }
 
@@ -477,6 +519,7 @@ pub fn bytes_report_translation(language: Language) -> &'static str {
         Language::PL => "najwięcej bajtów",
         Language::DE => "meiste Bytes",
         Language::UA => "найбільше байтів",
+        Language::ZH => "按流量",
     }
 }
 
@@ -489,6 +532,7 @@ pub fn favorite_report_translation(language: Language) -> &'static str {
         Language::PL => "ulubione",
         Language::DE => "Favoriten",
         Language::UA => "улюблені",
+        Language::ZH => "收藏夹",
     }
 }
 
@@ -501,6 +545,7 @@ pub fn notifications_title_translation(language: Language) -> Text<'static> {
         Language::PL => "Dostosuj powiadomienia",
         Language::DE => "Personalisier deine Benachrichtigungen",
         Language::UA => "Достосуй повідомлення",
+        Language::ZH => "自定义通知",
     })
 }
 
@@ -513,6 +558,7 @@ pub fn appearance_title_translation(language: Language) -> Text<'static> {
         Language::PL => "Wybierz swój ulubiony motyw",
         Language::DE => "Wähl dein Lieblingsdesign",
         Language::UA => "Вибери улюблену тему",
+        Language::ZH => "选择您喜欢的主题",
     })
 }
 
@@ -525,6 +571,7 @@ pub fn languages_title_translation(language: Language) -> Text<'static> {
         Language::PL => "Wybierz język",
         Language::DE => "Stell deine Sprache ein",
         Language::UA => "Вибери мову",
+        Language::ZH => "选择显示语言",
     })
 }
 
@@ -537,6 +584,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::PL => "Aktywne filtry:",
         Language::DE => "Aktive Filter:",
         Language::UA => "Активні фільтри",
+        Language::ZH => "活动的过滤器:",
     }
 }
 
@@ -549,6 +597,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::PL => "brak",
         Language::DE => "keine",
         Language::UA => "бракує",
+        Language::ZH => "无",
     }
 }
 
@@ -561,6 +610,7 @@ pub fn yeti_night_translation(language: Language) -> &'static str {
         Language::PL => "Oryginalny, ciemny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, dunkles Design",
         Language::UA => "Оригінальний, темний мотив Sniffnet",
+        Language::ZH => "Sniffnet暗黑",
     }
 }
 
@@ -573,6 +623,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::PL => "Oryginalny, jasny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, helles Design",
         Language::UA => "Оригінальний, світлий мотив Sniffnet",
+        Language::ZH => "Sniffnet浅色",
     }
 }
 
@@ -585,6 +636,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         Language::PL => "Aby zanurzyć się w ruchu sieciowym",
         Language::DE => "Um in den Netzwerkverkehr einzutauchen",
         Language::UA => "Оригінальний, темний мотив Sniffnet",
+        Language::ZH => "潜入网络活动的海洋",
     }
 }
 
@@ -597,6 +649,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::PL => "Uroczy motyw stworzony dla marzycieli",
         Language::DE => "Liebevolles Design für Träumer",
         Language::UA => "Прекрасна тема для мрійників",
+        Language::ZH => "梦想家的主题",
     }
 }
 
@@ -609,6 +662,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::PL => "Przychodzące",
         Language::DE => "Ankommend",
         Language::UA => "Вхідні",
+        Language::ZH => "入站",
     }
 }
 
@@ -621,6 +675,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::PL => "Wychodzące",
         Language::DE => "Ausgehend",
         Language::UA => "Вихідні",
+        Language::ZH => "出站",
     }
 }
 
@@ -632,6 +687,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::PL => "Powiadomienia",
         Language::DE => "Benachrichtigungen",
         Language::UA => "Повідомлення",
+        Language::ZH => "通知",
     }
 }
 
@@ -643,6 +699,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::PL => "Styl",
         Language::DE => "Stil",
         Language::UA => "Стиль",
+        Language::ZH => "主题",
     }
 }
 
@@ -655,6 +712,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::PL => "Język",
         Language::DE => "Sprache",
         Language::UA => "Мова",
+        Language::ZH => "语言",
     }
 }
 
@@ -667,6 +725,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::PL => "Przegląd",
         Language::DE => "Übersicht",
         Language::UA => "Огляд",
+        Language::ZH => "概览",
     }
 }
 
@@ -690,6 +749,7 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg pakietów",
         Language::DE => "Benachrichtige mich, wenn die Pakete eine Schwelle überschreiten",
         Language::UA => "Повідом мене про переліміт пакетів",
+        Language::ZH => "超过设定的数据包数量阈值时通知我",
     }
 }
 
@@ -702,6 +762,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg bajtów",
         Language::DE => "Benachrichtige mich, wenn die Bytes eine Schwelle überschreiten",
         Language::UA => "Повідом мене про переліміт байтів",
+        Language::ZH => "超过设定的网络流量阈值时通知我",
     }
 }
 
@@ -714,6 +775,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::PL => "(na sekundę)",
         Language::DE => "(pro Sekunde)",
         Language::UA => "(на секунду)",
+        Language::ZH => "(每秒) ",
     }
 }
 
@@ -726,6 +788,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::PL => "; możesz również określić 'K', 'M' i 'G'",
         Language::DE => "; du kannst auch 'K', 'M' und 'G' festlegen",
         Language::UA => "; можеш також вибрати 'K', 'M' i 'G'",
+        Language::ZH => "您可指定 'K', 'M', 'G'",
     }
 }
 
@@ -740,6 +803,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
             "Benachrichtige mich, wenn neue Daten mit meinen Favoriten ausgetauscht werden"
         }
         Language::UA => "Повідом мене, коли буде обмін даними з моїх улюблених",
+        Language::ZH => "收藏夹内的连接有新活动时通知我",
     }
 }
 
@@ -752,6 +816,7 @@ pub fn threshold_translation(language: Language) -> String {
         Language::PL => "Próg: ".to_string(),
         Language::DE => "Schwellenwert: ".to_string(),
         Language::UA => "Ліміт: ".to_string(),
+        Language::ZH => "阈值: ".to_string(),
     }
 }
 
@@ -762,6 +827,7 @@ pub fn volume_translation(language: Language, value: u8) -> String {
         Language::PL => format!("Głośność: {value:^3}%"),
         Language::DE => format!("Lautstärke: {value:^3}%"),
         Language::UA => format!("Гучність: {value:^3}%"),
+        Language::ZH => format!("通知音量: {value:^3}%"),
     }
 }
 
@@ -774,6 +840,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::PL => "Dźwięk:",
         Language::DE => "Ton:",
         Language::UA => "Звук:",
+        Language::ZH => "通知音:",
     }
 }
 
@@ -786,6 +853,7 @@ pub fn open_report_translation(language: Language) -> &'static str {
         Language::PL => "Otwórz pełny raport",
         Language::DE => "Kompletten Bericht öffnen",
         Language::UA => "Відкрий повний рапорт",
+        Language::ZH => "打开完整报告",
     }
 }
 
@@ -798,6 +866,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::PL => "Próg bajtów przekroczony!",
         Language::DE => "Byte-Schwellenwert überschritten!",
         Language::UA => "Ліміт байтів перевищено!",
+        Language::ZH => "达到设定的网络流量阈值!",
     }
 }
 
@@ -811,6 +880,7 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
         Language::PL => format!("Wymieniono {trimmed_value} bajtów"),
         Language::DE => format!("{trimmed_value} Bytes wurden ausgetauscht"),
         Language::UA => format!("{trimmed_value} байтів було обміняно"),
+        Language::ZH => format!("已交换字节 {trimmed_value}"),
     }
 }
 
@@ -823,6 +893,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::PL => "Próg pakietów przekroczony!",
         Language::DE => "Paket-Schwellenwert überschritten!",
         Language::UA => "Ліміт пакетів перевищено!",
+        Language::ZH => "达到设定的数据包数量阈值!",
     }
 }
 
@@ -838,6 +909,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         Language::PL => format!("Wymieniono {value} pakietów"),
         Language::DE => format!("{value} Pakete wurden ausgetauscht"),
         Language::UA => format!("Обміняно {value} пакетів"),
+        Language::ZH => format!("已交换数据包 {value}"),
     }
 }
 
@@ -850,6 +922,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::PL => "Nowe dane wymienione z ulubionych!",
         Language::DE => "Neue Daten mit den Favoriten ausgetauscht!",
         Language::UA => "Нові дані обміняно з улюблених!",
+        Language::ZH => "收藏夹内的连接有新活动!",
     }
 }
 
@@ -876,6 +949,9 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
         Language::UA => "Повідомлення не активовані!\n\n\
                                  Після їх активації, на цій сторінці побачиш список своїх повідомлень\n\n\
                                  Можеш вимкнути повідомлення в налаштуваннях:",
+        Language::ZH => "您还没有设定任何通知!\n\n\
+                                 启用它们后，此页面将显示您的通知日志\n\n\
+                                 您可以从设置中设定:",
     })
 }
 
@@ -909,6 +985,10 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
             "Немає що показати в даний момент...\n\n\
                                  Коли отримаєш повідомлення, побачиш його тут"
         }
+        Language::ZH => {
+            "还没有任何通知...\n\n\
+                                 当您收到通知时，它会显示在这里"
+        }
     })
 }
 
@@ -921,5 +1001,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::PL => "Wyświetlane jest tylko 30 ostatnich powiadomień",
         Language::DE => "Nur die letzten 30 Benachrichtigungen werden angezeigt",
         Language::UA => "Можеш побачити лише 30 останніх повідомлень",
+        Language::ZH => "仅显示最近 30 条通知",
     }
 }
