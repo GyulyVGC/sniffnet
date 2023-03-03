@@ -553,7 +553,7 @@ pub fn get_flag(country: &str) -> Image {
         "CK" => CK,
         "CL" => CL,
         "CM" => CM,
-        "CN" => CN,
+        "CN" | "ZH" => CN,
         "CO" => CO,
         "CR" => CR,
         "CU" => CU,
