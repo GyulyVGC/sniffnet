@@ -635,7 +635,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         Language::ES => "Para sumergirse en el tráfico de la red",
         Language::PL => "Aby zanurzyć się w ruchu sieciowym",
         Language::DE => "Um in den Netzwerkverkehr einzutauchen",
-        Language::UA => "Оригінальний, темний мотив Sniffnet",
+        Language::UA => "Проаналізувати мережевий рух",
         Language::ZH => "潜入网络活动的海洋",
     }
 }
