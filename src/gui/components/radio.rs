@@ -3,7 +3,7 @@ use crate::enums::message::Message;
 use crate::enums::sound::Sound;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag;
+use crate::utility::countries::get_flag_from_language_code;
 use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
 use crate::utility::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
@@ -101,7 +101,7 @@ pub fn language_radios(
                     ))),
                 )
                 .push(horizontal_space(Length::Fixed(5.0)))
-                .push(get_flag(&format!("{option:?}"))),
+                .push(get_flag_from_language_code(&format!("{option:?}"))),
         );
     }
     ret_val

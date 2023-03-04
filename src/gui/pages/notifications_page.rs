@@ -8,7 +8,7 @@ use crate::enums::traffic_type::TrafficType;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag;
+use crate::utility::countries::get_flag_from_country_code;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
 use crate::utility::style_constants::{get_font, FONT_SIZE_FOOTER, HEIGHT_BODY, ICONS};
 use crate::utility::translations::{
@@ -349,9 +349,9 @@ fn favorite_notification_log(
         .push(Text::new(dst_str).font(font));
     if !country.is_empty() {
         if traffic_type.eq(&TrafficType::Outgoing) {
-            row_dst_flag = row_dst_flag.push(get_flag(&country));
+            row_dst_flag = row_dst_flag.push(get_flag_from_country_code(&country));
         } else {
-            row_src_flag = row_src_flag.push(get_flag(&country));
+            row_src_flag = row_src_flag.push(get_flag_from_country_code(&country));
         }
     }
     let content = Row::new()

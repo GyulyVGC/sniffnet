@@ -504,7 +504,22 @@ pub const ZW: &[u8] =
     include_bytes!("../../resources/countries_flags/png-16/zimbabwe-16x16-33150.png");
 pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/png-16/question.png");
 
-pub fn get_flag(country: &str) -> Image {
+pub fn get_flag_from_language_code(language: &str) -> Image {
+    Image::new(Handle::from_memory(Vec::from(match language {
+        "ZH" => CN,
+        "DE" => DE,
+        "ES" => ES,
+        "FR" => FR,
+        "EN" => GB,
+        "IT" => IT,
+        "PL" => PL,
+        "UK" => UA,
+        _ => UNKNOWN,
+    })))
+    .width(Length::Fixed(FLAGS_WIDTH))
+}
+
+pub fn get_flag_from_country_code(country: &str) -> Image {
     Image::new(Handle::from_memory(Vec::from(match country {
         "AD" => AD,
         "AE" => AE,
@@ -553,7 +568,7 @@ pub fn get_flag(country: &str) -> Image {
         "CK" => CK,
         "CL" => CL,
         "CM" => CM,
-        "CN" | "ZH" => CN,
+        "CN" => CN,
         "CO" => CO,
         "CR" => CR,
         "CU" => CU,
@@ -582,7 +597,7 @@ pub fn get_flag(country: &str) -> Image {
         "FO" => FO,
         "FR" => FR,
         "GA" => GA,
-        "GB" | "EN" => GB,
+        "GB" => GB,
         "GD" => GD,
         "GE" => GE,
         "GF" => GF,
