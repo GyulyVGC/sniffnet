@@ -59,7 +59,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::FR | Language::DE => "\nAdresse:",
         Language::ES => "\nDirección:",
         Language::PL => "\nAdres:",
-        Language::UK => "\nАдреса",
+        Language::UK => "\nАдреса:",
         Language::ZH => "\n网络地址:",
     }
 }
