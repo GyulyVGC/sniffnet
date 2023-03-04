@@ -323,8 +323,9 @@ pub fn filtered_packets_translation(
         Language::ES => format!("Paquetes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przefiltrowane pakiety:\n   {filtered} ({percentage} z całości)"),
         Language::DE => format!("Gefilterte Pakete:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UA => 
-            format!("Відфільтровані пакети:\n   {filtered} ({percentage} від загальної суми)"),
+        Language::UA => {
+            format!("Відфільтровані пакети:\n   {filtered} ({percentage} від загальної суми)")
+        }
         Language::ZH => {
             format!("目标数据包计数:\n   {filtered} (占所有数据包的 {percentage})")
         }
@@ -343,8 +344,9 @@ pub fn filtered_bytes_translation(
         Language::ES => format!("Bytes filtrados:\n   {filtered} ({percentage} del total)"),
         Language::PL => format!("Przechwycone bajty:\n   {filtered} ({percentage} całości)"),
         Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UA => 
-            format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)"),
+        Language::UA => {
+            format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)")
+        }
         Language::ZH => {
             format!("目标网络流量计数:\n   {filtered} (占所有网络流量的 {percentage})")
         }
@@ -413,7 +415,8 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static> {
         ),
         Language::UA => format!(
             "Виступила помилка! \n\n\
-                                {error}"),
+                                {error}"
+        ),
         Language::ZH => format!(
             "发生了一些错误! \n\n\
                                 {error}"
