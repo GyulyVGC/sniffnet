@@ -18,7 +18,7 @@ use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::{get_flag, FLAGS_WIDTH};
+use crate::utility::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
@@ -238,7 +238,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 .push(Text::new("    "));
                         } else {
                             entry_row = entry_row
-                                .push(get_flag(&key_val.1.country))
+                                .push(get_flag_from_country_code(&key_val.1.country))
                                 .push(Text::new("  "));
                         }
                         entry_row = entry_row
