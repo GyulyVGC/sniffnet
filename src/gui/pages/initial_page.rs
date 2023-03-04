@@ -47,7 +47,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(2))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(get_button_start(sniffer.style, sniffer.language))
+        .push(button_start(sniffer.style, sniffer.language))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -109,7 +109,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+pub fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)
@@ -123,7 +123,9 @@ pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::Start);
 
-    Tooltip::new(content, start_translation(language), Position::Top)
+    let mut tooltip = start_translation(language).to_string();
+    tooltip.push_str(" [⏎]");
+    Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(

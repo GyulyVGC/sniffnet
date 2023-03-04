@@ -41,7 +41,7 @@ pub enum Message {
     /// Displays an overlay
     ShowModal(MyOverlay),
     /// Hides the current overlay modal; if true is passed, config file is updated
-    HideModal(bool),
+    HideModal,
     /// Permits to change the current running page
     ChangeRunningPage(RunningPage),
     /// Select language

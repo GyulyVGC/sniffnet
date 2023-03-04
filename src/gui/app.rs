@@ -181,33 +181,35 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::Start => {
-                let device = self.device.clone();
-                let (pcap_error, cap) = get_capture_result(&device);
-                self.pcap_error = pcap_error.clone();
-                *self.status_pair.0.lock().unwrap() = Status::Running;
-                let info_traffic_mutex = self.info_traffic.clone();
-                *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
-                self.traffic_chart =
-                    TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
+                if self.status_pair.0.lock().unwrap().eq(&Status::Init) && self.overlay.is_none() {
+                    let device = self.device.clone();
+                    let (pcap_error, cap) = get_capture_result(&device);
+                    self.pcap_error = pcap_error.clone();
+                    *self.status_pair.0.lock().unwrap() = Status::Running;
+                    let info_traffic_mutex = self.info_traffic.clone();
+                    *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
+                    self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
+                    self.traffic_chart =
+                        TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
 
-                if pcap_error.is_none() {
-                    // no pcap error
-                    let current_capture_id = self.current_capture_id.clone();
-                    let filters = self.filters.clone();
-                    self.status_pair.1.notify_all();
-                    thread::Builder::new()
-                        .name("thread_parse_packets".to_string())
-                        .spawn(move || {
-                            parse_packets_loop(
-                                &current_capture_id,
-                                device.clone(),
-                                cap.unwrap(),
-                                &filters,
-                                &info_traffic_mutex,
-                            );
-                        })
-                        .unwrap();
+                    if pcap_error.is_none() {
+                        // no pcap error
+                        let current_capture_id = self.current_capture_id.clone();
+                        let filters = self.filters.clone();
+                        self.status_pair.1.notify_all();
+                        thread::Builder::new()
+                            .name("thread_parse_packets".to_string())
+                            .spawn(move || {
+                                parse_packets_loop(
+                                    &current_capture_id,
+                                    device.clone(),
+                                    cap.unwrap(),
+                                    &filters,
+                                    &info_traffic_mutex,
+                                );
+                            })
+                            .unwrap();
+                    }
                 }
             }
             Message::Reset => {
@@ -216,7 +218,7 @@ impl Application for Sniffer {
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
                 self.report_type = ReportType::MostRecent;
-                return self.update(Message::HideModal(false));
+                return self.update(Message::HideModal);
             }
             Message::Style(style) => {
                 self.style = style;
@@ -255,18 +257,25 @@ impl Application for Sniffer {
             Message::ShowModal(overlay) => {
                 self.overlay = Some(overlay);
             }
-            Message::HideModal(save_config) => {
-                let last_opened = self.overlay;
-                self.overlay = None;
-                if save_config {
-                    // closed a setting page
-                    self.last_opened_setting = last_opened.unwrap();
-                    let store = ConfigSettings {
-                        style: self.style,
-                        notifications: self.notifications,
-                        language: self.language,
-                    };
-                    confy::store("sniffnet", "settings", store).unwrap_or(());
+            Message::HideModal => {
+                if self.overlay.is_some() {
+                    let last_opened = self.overlay.unwrap();
+                    self.overlay = None;
+                    match last_opened {
+                        MyOverlay::SettingsNotifications
+                        | MyOverlay::SettingsAppearance
+                        | MyOverlay::SettingsLanguage => {
+                            // closed a setting page
+                            self.last_opened_setting = last_opened;
+                            let store = ConfigSettings {
+                                style: self.style,
+                                notifications: self.notifications,
+                                language: self.language,
+                            };
+                            confy::store("sniffnet", "settings", store).unwrap_or(());
+                        }
+                        _ => {}
+                    }
                 }
             }
             Message::ChangeRunningPage(running_page) => {
@@ -300,7 +309,7 @@ impl Application for Sniffer {
             }
             Message::ClearAllNotifications => {
                 self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
-                return self.update(Message::HideModal(false));
+                return self.update(Message::HideModal);
             }
             Message::Exit => {
                 return window::close();
@@ -339,33 +348,42 @@ impl Application for Sniffer {
         if self.overlay.is_none() {
             content.into()
         } else {
-            let (overlay, save_config) = match self.overlay.unwrap() {
-                MyOverlay::Quit => (get_exit_overlay(style, font, self.language), false),
-                MyOverlay::ClearAll => (get_clear_all_overlay(style, font, self.language), false),
-                MyOverlay::SettingsNotifications => (settings_notifications_page(self), true),
-                MyOverlay::SettingsAppearance => (settings_style_page(self), true),
-                MyOverlay::SettingsLanguage => (settings_language_page(self), true),
+            let overlay = match self.overlay.unwrap() {
+                MyOverlay::Quit => get_exit_overlay(style, font, self.language),
+                MyOverlay::ClearAll => get_clear_all_overlay(style, font, self.language),
+                MyOverlay::SettingsNotifications => settings_notifications_page(self),
+                MyOverlay::SettingsAppearance => settings_style_page(self),
+                MyOverlay::SettingsLanguage => settings_language_page(self),
             };
 
             Modal::new(content, overlay)
-                .on_blur(Message::HideModal(save_config))
+                .on_blur(Message::HideModal)
                 .into()
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        let quit_keys_subscription = iced_native::subscription::events_with(|event, _| {
-            if let iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                key_code: iced_native::keyboard::KeyCode::Q,
-                modifiers: iced_native::keyboard::Modifiers::CTRL,
-            }) = event
-            {
-                Some(Message::Exit)
-            } else {
-                None
-            }
-        });
-        let time_subscription = match *self.status_pair.0.lock().unwrap() {
+        let status = *self.status_pair.0.lock().unwrap();
+        let hot_keys_subscription =
+            iced_native::subscription::events_with(|event, _| match event {
+                // ctrl+Q => exit
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Q,
+                    modifiers: iced_native::keyboard::Modifiers::CTRL,
+                }) => Some(Message::Exit),
+                // return => start
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Enter,
+                    ..
+                }) => Some(Message::Start),
+                // esc => close overlay
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Escape,
+                    ..
+                }) => Some(Message::HideModal),
+                _ => None,
+            });
+        let time_subscription = match status {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
             }
@@ -373,6 +391,6 @@ impl Application for Sniffer {
                 iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit)
             }
         };
-        Subscription::batch([quit_keys_subscription, time_subscription])
+        Subscription::batch([hot_keys_subscription, time_subscription])
     }
 }

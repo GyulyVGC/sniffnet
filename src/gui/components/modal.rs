@@ -86,6 +86,8 @@ fn get_modal_header(
     title: String,
 ) -> Container<'static, Message> {
     let font = get_font(style);
+    let mut tooltip = hide_translation(language).to_string();
+    tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -109,8 +111,8 @@ fn get_modal_header(
                         .height(Length::Fixed(20.0))
                         .width(Length::Fixed(20.0))
                         .style(StyleTuple(style, ElementType::Standard).into())
-                        .on_press(Message::HideModal(false)),
-                        hide_translation(language),
+                        .on_press(Message::HideModal),
+                        tooltip,
                         Position::Right,
                     )
                     .font(font)
