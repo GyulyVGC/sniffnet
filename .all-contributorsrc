@@ -79,6 +79,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "captain-yossarian",
+      "name": "yossarian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16646733?v=4",
+      "profile": "http://catchts.com",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 10,
