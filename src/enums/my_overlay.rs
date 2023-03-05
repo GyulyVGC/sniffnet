@@ -27,4 +27,13 @@ impl MyOverlay {
             MyOverlay::Quit | MyOverlay::ClearAll => "",
         }
     }
+
+    pub fn next(self) -> Self {
+        match self {
+            MyOverlay::SettingsNotifications => MyOverlay::SettingsAppearance,
+            MyOverlay::SettingsAppearance => MyOverlay::SettingsLanguage,
+            MyOverlay::SettingsLanguage => MyOverlay::SettingsNotifications,
+            _ => self,
+        }
+    }
 }

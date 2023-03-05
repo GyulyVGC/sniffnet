@@ -145,23 +145,25 @@ impl Application for Sniffer {
                 }
             }
             Message::OpenReport => {
-                let report_path = get_report_path();
-                #[cfg(target_os = "windows")]
-                std::process::Command::new("explorer")
-                    .arg(report_path)
-                    .spawn()
-                    .unwrap();
-                #[cfg(target_os = "macos")]
-                std::process::Command::new("open")
-                    .arg("-t")
-                    .arg(report_path)
-                    .spawn()
-                    .unwrap();
-                #[cfg(target_os = "linux")]
-                std::process::Command::new("xdg-open")
-                    .arg(report_path)
-                    .spawn()
-                    .unwrap();
+                if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
+                    let report_path = get_report_path();
+                    #[cfg(target_os = "windows")]
+                    std::process::Command::new("explorer")
+                        .arg(report_path)
+                        .spawn()
+                        .unwrap();
+                    #[cfg(target_os = "macos")]
+                    std::process::Command::new("open")
+                        .arg("-t")
+                        .arg(report_path)
+                        .spawn()
+                        .unwrap();
+                    #[cfg(target_os = "linux")]
+                    std::process::Command::new("xdg-open")
+                        .arg(report_path)
+                        .spawn()
+                        .unwrap();
+                }
             }
             Message::OpenGithub => {
                 #[cfg(target_os = "windows")]
@@ -314,6 +316,24 @@ impl Application for Sniffer {
             Message::Exit => {
                 return window::close();
             }
+            Message::SwitchPage => match (*self.status_pair.0.lock().unwrap(), self.overlay) {
+                (
+                    _,
+                    Some(
+                        MyOverlay::SettingsLanguage
+                        | MyOverlay::SettingsNotifications
+                        | MyOverlay::SettingsAppearance,
+                    ),
+                ) => {
+                    // Settings opened
+                    self.overlay = Some(self.overlay.unwrap().next());
+                }
+                (Status::Running, None) => {
+                    // Running with no overlays
+                    self.running_page = self.running_page.next();
+                }
+                (_, _) => {}
+            },
         }
         Command::none()
     }
@@ -369,7 +389,7 @@ impl Application for Sniffer {
                 // ctrl+Q => exit
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Q,
-                    modifiers: iced_native::keyboard::Modifiers::CTRL,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::Exit),
                 // return => start
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
@@ -381,6 +401,16 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::Escape,
                     ..
                 }) => Some(Message::HideModal),
+                // tab => switch page
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Tab,
+                    ..
+                }) => Some(Message::SwitchPage),
+                // ctrl+O => open full report
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::O,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
+                }) => Some(Message::OpenReport),
                 _ => None,
             });
         let time_subscription = match status {

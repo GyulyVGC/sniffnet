@@ -20,4 +20,11 @@ impl RunningPage {
             RunningPage::Notifications => notifications_translation(language),
         }
     }
+
+    pub fn next(self) -> Self {
+        match self {
+            RunningPage::Overview => RunningPage::Notifications,
+            RunningPage::Notifications => RunningPage::Overview,
+        }
+    }
 }

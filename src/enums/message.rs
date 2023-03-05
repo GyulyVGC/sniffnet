@@ -58,4 +58,6 @@ pub enum Message {
     ChangeVolume(u8),
     /// Quits the app. Used when Ctrl+Q keys are pressed.
     Exit,
+    /// Switch from a page to the next one when the tab key is pressed.
+    SwitchPage,
 }
