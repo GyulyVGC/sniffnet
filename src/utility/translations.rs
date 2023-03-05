@@ -11,6 +11,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static> {
         Language::DE => "Wähle einen Netzwerkadapter zum inspizieren aus",
         Language::UK => "Вибрати мережевий адаптер для інспекції",
         Language::ZH => "选择需要监控的网络适配器",
+        Language::NE => "Selecteer een netwerk adapter om te bekijken",
     })
 }
 
@@ -24,6 +25,7 @@ pub fn application_protocol_translation(language: Language) -> &'static str {
         Language::DE => "Anwendungs-Protokoll",
         Language::UK => "Протокол аплікації",
         Language::ZH => "目标应用层协议",
+        Language::NE => "Applicatie protocol",
     }
 }
 
@@ -37,12 +39,13 @@ pub fn select_filters_translation(language: Language) -> Text<'static> {
         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
         Language::UK => "Вибрати фільтри, які мають бути застосовані до мережевого трафіку",
         Language::ZH => "选择需要监控的目标",
+        Language::NE => "Selecteer filters om toe te passen op netwerk activiteit", // netwerkverkeer is the literal translation, but netwerk activiteit is clearer and also correct
     })
 }
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::DE => "Start!",
+        Language::EN | Language::DE | Language::NE => "Start!",
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
@@ -61,6 +64,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::PL => "\nAdres:",
         Language::UK => "\nАдреса:",
         Language::ZH => "\n网络地址:",
+        Language::NE => "\nAdres:",
     }
 }
 
@@ -74,6 +78,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::DE => "\nAdressen:",
         Language::UK => "\nАдреси:",
         Language::ZH => "\n网络地址:",
+        Language::NE => "\nAdressen:",
     }
 }
 
@@ -87,6 +92,7 @@ pub fn ip_version_translation(language: Language) -> Text<'static> {
         Language::DE => "IP Version",
         Language::UK => "Версія IP",
         Language::ZH => "目标IP协议版本",
+        Language::NE => "IP versie",
     })
 }
 
@@ -100,6 +106,7 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::DE => "Netzwerkprotokoll",
         Language::UK => "Транспортний протокол",
         Language::ZH => "目标传输协议",
+        Language::NE => "Transport protocol",
     }
 }
 
@@ -113,6 +120,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static> {
         Language::DE => "Daten Frequenz:",
         Language::UK => "Швидкість руху:",
         Language::ZH => "网络速率图:",
+        Language::NE => "Activiteit weergave:", // In the UI this fits better, Traffic rate literally translated is "Verkeersverhouding" but sounds weird.
     })
 }
 
@@ -126,6 +134,7 @@ pub fn relevant_connections_translation(language: Language) -> Text<'static> {
         Language::DE => "Relevante Verbindungen:",
         Language::UK => "Важливі підключення:",
         Language::ZH => "连接详情:",
+        Language::NE => "Relevante connecties:",
     })
 }
 
@@ -139,6 +148,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::DE => "Einstellungen",
         Language::UK => "Налаштування",
         Language::ZH => "设置",
+        Language::NE => "Instellingen",
     }
 }
 
@@ -149,9 +159,10 @@ pub fn yes_translation(language: Language) -> Text<'static> {
         Language::FR => "Oui",
         Language::ES => "Sí",
         Language::PL => "Tak",
-        Language::DE => "Ja",
+        Language::DE | Language::NE => "Ja",
         Language::UK => "Так",
         Language::ZH => "是",
+        
     })
 }
 
@@ -165,6 +176,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static> {
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
         Language::UK => "Чи справді хочеш закінчити аналіз?",
         Language::ZH => "您确定退出当前监控吗?",
+        Language::NE => "Weet je zeker dat je de analyse wil verlaten?",
     })
 }
 
@@ -178,6 +190,7 @@ pub fn quit_analysis_translation(language: Language) -> String {
         Language::DE => "Analyse beenden".to_string(),
         Language::UK => "Закінчити аналіз".to_string(),
         Language::ZH => "退出监控".to_string(),
+        Language::NE => "Verlaat analyse".to_string(),
     }
 }
 
@@ -191,6 +204,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static> {
         Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst?",
         Language::UK => "Чи справді хочеш видалити всі повідомлення?",
         Language::ZH => "确定清除所有通知?",
+        Language::NE => "Weet je zeker dat je de notificaties wil wissen?",
     })
 }
 
@@ -204,6 +218,7 @@ pub fn clear_all_translation(language: Language) -> String {
         Language::DE => "Alle leeren".to_string(),
         Language::UK => "Видалити все".to_string(),
         Language::ZH => "清除所有".to_string(),
+        Language::NE => "Wis alles".to_string(),
     }
 }
 
@@ -217,6 +232,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::DE => "Verstecken",
         Language::UK => "Заховати",
         Language::ZH => "隐藏",
+        Language::NE => "Verberg",
     }
 }
 
@@ -246,6 +262,9 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
         Language::ZH => format!("您选择的网络适配器当前无活动网络......\n\n\
                                 网络适配器: {adapter}\n\n\
                                 如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."),
+        Language::NE => format!("Geen activiteit kan worden bekeken omdat de geselecteerde apdapter geen actieve adressen kan vinden...\n\n\
+                                 Netwerk adapter: {adapter}\n\n\
+                                 Als je zeker weet dat je verbonden met het internet, probeer dan een andere adapter."),
     })
 }
 
@@ -275,6 +294,9 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
         Language::ZH => format!("暂无流量数据. 等待网络活动中......\n\n\
                                  网络适配器: {adapter}\n\n\
                                  您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"),
+        Language::NE => format!("Geen activiteit is gevonden tot dusver. Aan het wachten voor network activiteit...\n\n\
+                                 Netwerk adapter: {adapter}\n\n\
+                                 Ben je zeker dat je bent verbonden met het internet en de juiste adapter is geselecteerd?"),
     })
 }
 
@@ -308,6 +330,9 @@ pub fn some_observed_translation(
         Language::ZH => format!("监测到的数据包总数: {observed}\n\n\
                                  目标数据包总数: 0\n\n\
                                  当前已监测到一些数据包, 但其中并未包含您的目标数据包......\n\n{filters}"),
+        Language::NE => format!("Totaal onderschepte pakketten: {observed}\n\n\
+                                 Gefilterde pakketten: 0\n\n\
+                                 Sommige pakketten zijn onderschept, maar nog geen pakketten voldoen aan je ingestelde filters...\n\n{filters}"),
     })
 }
 
