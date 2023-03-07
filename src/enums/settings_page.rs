@@ -30,4 +30,12 @@ impl SettingsPage {
             SettingsPage::Language => SettingsPage::Notifications,
         }
     }
+
+    pub fn previous(self) -> Self {
+        match self {
+            SettingsPage::Notifications => SettingsPage::Language,
+            SettingsPage::Appearance => SettingsPage::Notifications,
+            SettingsPage::Language => SettingsPage::Appearance,
+        }
+    }
 }

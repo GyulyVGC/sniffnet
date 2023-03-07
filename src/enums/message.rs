@@ -65,8 +65,8 @@ pub enum Message {
     ChangeVolume(u8),
     /// Quits the app. Used when Ctrl+Q keys are pressed.
     Exit,
-    /// Switch from a page to the next one when the tab key is pressed.
-    SwitchPage,
+    /// Switch from a page to the next (previous) one if true (false), when the tab (shift+tab) key is pressed.
+    SwitchPage(bool),
     /// The enter (return) key has been pressed
     ReturnKeyPressed,
     /// The esc key has been pressed

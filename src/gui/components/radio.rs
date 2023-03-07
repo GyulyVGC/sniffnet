@@ -4,7 +4,7 @@ use crate::enums::sound::Sound;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag_from_language_code;
-use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
+use crate::utility::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::utility::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
     traffic_rate_translation, transport_protocol_translation,
@@ -226,13 +226,13 @@ pub fn chart_radios(
     language: Language,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
-        .padding(15)
+        .padding([10, 0, 15, 10])
         .spacing(20)
         .align_items(Alignment::Center)
         .push(
             traffic_rate_translation(language)
                 .font(font)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_TITLE),
         );
     for option in ChartType::ALL {
         ret_val = ret_val.push(
@@ -261,13 +261,13 @@ pub fn report_radios(
     language: Language,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
-        .padding(15)
+        .padding([10, 0, 15, 5])
         .spacing(20)
         .align_items(Alignment::Center)
         .push(
             relevant_connections_translation(language)
                 .font(font)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_TITLE),
         );
     for option in ReportType::ALL {
         ret_val = ret_val.push(

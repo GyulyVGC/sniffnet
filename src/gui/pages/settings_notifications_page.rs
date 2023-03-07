@@ -331,7 +331,7 @@ fn input_group_packets(
                     Message::UpdatePacketsNotification(packets_notification, false)
                 },
             )
-            .padding(1)
+            .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
@@ -377,7 +377,7 @@ fn input_group_bytes(
                     Message::UpdateBytesNotification(bytes_notification, false)
                 },
             )
-            .padding(1)
+            .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
             .style(<StyleTuple as Into<iced::theme::TextInput>>::into(

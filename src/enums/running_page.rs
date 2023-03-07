@@ -27,4 +27,11 @@ impl RunningPage {
             RunningPage::Notifications => RunningPage::Overview,
         }
     }
+
+    pub fn previous(self) -> Self {
+        match self {
+            RunningPage::Overview => RunningPage::Notifications,
+            RunningPage::Notifications => RunningPage::Overview,
+        }
+    }
 }

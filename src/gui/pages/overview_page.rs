@@ -6,7 +6,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
-use iced::Length::FillPortion;
+use iced::Length::{Fill, FillPortion};
 use iced::{alignment, Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use thousands::Separable;
@@ -137,7 +137,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         .push(row_radio_chart)
                         .push(sniffer.traffic_chart.view()),
                 )
-                .width(FillPortion(2))
+                .width(Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
@@ -212,8 +212,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     );
                 } else {
                     col_report = col_report
-                        .push(Text::new("     Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
-                        .push(Text::new("------------------------------------------------------------------------------------------------------------------------").font(font))
+                        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+                        .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
                     ;
                     let mut scroll_report = Column::new();
                     for key_val in &sniffer.runtime_data.borrow().report_vec {
@@ -221,7 +221,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                             get_connection_color(key_val.1.traffic_type, sniffer.style);
                         let mut entry_row = Row::new().align_items(Alignment::Center).push(
                             Text::new(format!(
-                                "{}{}",
+                                "  {}{}",
                                 key_val.0.print_gui(),
                                 key_val.1.print_gui()
                             ))
@@ -273,21 +273,23 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     },
                                 ),
                             )
-                            .push(Text::new("   ").font(font));
+                            .push(Text::new("  ").font(font));
                         scroll_report = scroll_report.push(entry_row);
                     }
                     col_report = col_report.push(
-                        Scrollable::new(scroll_report)
-                            .horizontal_scroll(Properties::new())
-                            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
+                        Container::new(
+                            Scrollable::new(scroll_report)
+                                .horizontal_scroll(Properties::new())
+                                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                                    StyleTuple(sniffer.style, ElementType::Standard),
+                                )),
+                        ), // .padding([0, 0, 0, 25])
                     );
                 };
 
                 let row_report = Row::new().push(
                     Container::new(col_report)
-                        .padding(5)
+                        .padding([0, 5, 5, 5])
                         .height(Length::Fill)
                         .width(Length::Fixed(1080.0))
                         .style(<StyleTuple as Into<iced::theme::Container>>::into(
@@ -313,8 +315,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(col_chart)
                             .push(
                                 Container::new(col_packets)
-                                    .width(FillPortion(1))
-                                    .padding(10)
+                                    .width(Length::Fixed(400.0))
+                                    .padding([10, 5, 5, 5])
                                     .height(Length::Fill)
                                     .align_x(Horizontal::Center)
                                     .style(<StyleTuple as Into<iced::theme::Container>>::into(

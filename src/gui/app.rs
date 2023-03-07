@@ -256,7 +256,7 @@ impl Application for Sniffer {
                 );
             }
             Message::ShowModal(modal) => {
-                if self.settings_page.is_none() {
+                if self.settings_page.is_none() && self.modal.is_none() {
                     self.modal = Some(modal);
                 }
             }
@@ -322,18 +322,26 @@ impl Application for Sniffer {
             Message::Exit => {
                 return window::close();
             }
-            Message::SwitchPage => match (
+            Message::SwitchPage(next) => match (
                 *self.status_pair.0.lock().unwrap(),
                 self.settings_page,
                 self.modal,
             ) {
                 (_, Some(_), None) => {
                     // Settings opened
-                    self.settings_page = Some(self.settings_page.unwrap().next());
+                    if next {
+                        self.settings_page = Some(self.settings_page.unwrap().next());
+                    } else {
+                        self.settings_page = Some(self.settings_page.unwrap().previous());
+                    }
                 }
                 (Status::Running, None, None) => {
                     // Running with no overlays
-                    self.running_page = self.running_page.next();
+                    if next {
+                        self.running_page = self.running_page.next();
+                    } else {
+                        self.running_page = self.running_page.previous();
+                    }
                 }
                 (_, _, _) => {}
             },
@@ -425,6 +433,8 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         let status = *self.status_pair.0.lock().unwrap();
+        const NO_MODIFIER: iced_native::keyboard::Modifiers =
+            iced_native::keyboard::Modifiers::empty();
         let hot_keys_subscription =
             iced_native::subscription::events_with(|event, _| match event {
                 // ctrl+Q => exit
@@ -442,11 +452,16 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::Escape,
                     ..
                 }) => Some(Message::EscKeyPressed),
-                // tab => switch page
+                // tab => switch to next page
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Tab,
-                    ..
-                }) => Some(Message::SwitchPage),
+                    modifiers: NO_MODIFIER,
+                }) => Some(Message::SwitchPage(true)),
+                // shift+tab => switch to previous page
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Tab,
+                    modifiers: iced_native::keyboard::Modifiers::SHIFT,
+                }) => Some(Message::SwitchPage(false)),
                 // ctrl+O => open full report
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::O,
