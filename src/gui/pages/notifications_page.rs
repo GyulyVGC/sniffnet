@@ -3,7 +3,8 @@ use crate::enums::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::enums::message::Message;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::my_modal::MyModal;
+use crate::enums::settings_page::SettingsPage;
 use crate::enums::traffic_type::TrafficType;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
@@ -86,7 +87,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .push(get_button_settings(
                 sniffer.style,
                 sniffer.language,
-                MyOverlay::SettingsNotifications,
+                SettingsPage::Notifications,
             ))
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
@@ -411,7 +412,7 @@ pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'st
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal(MyOverlay::ClearAll));
+    .on_press(Message::ShowModal(MyModal::ClearAll));
 
     Tooltip::new(content, clear_all_translation(language), Position::Top)
         .gap(5)

@@ -7,9 +7,10 @@ use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
 use crate::enums::language::Language;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::my_modal::MyModal;
 use crate::enums::report_type::ReportType;
 use crate::enums::running_page::RunningPage;
+use crate::enums::settings_page::SettingsPage;
 use crate::enums::status::Status;
 use crate::structs::filters::Filters;
 use crate::structs::notifications::Notifications;
@@ -43,10 +44,12 @@ pub struct Sniffer {
     pub traffic_chart: TrafficChart,
     /// Report type to be displayed
     pub report_type: ReportType,
-    /// Currently displayed overlay; None if no overlay is displayed
-    pub overlay: Option<MyOverlay>,
+    /// Currently displayed modal; None if no modal is displayed
+    pub modal: Option<MyModal>,
+    /// Currently displayed settings page; None if settings is closed
+    pub settings_page: Option<SettingsPage>,
     /// Remembers the last opened setting page
-    pub last_opened_setting: MyOverlay,
+    pub last_opened_setting: SettingsPage,
     /// Contains the notifications configuration set by the user
     pub notifications: Notifications,
     /// Defines the current running page
@@ -81,8 +84,9 @@ impl Sniffer {
                 config_settings.language,
             ),
             report_type: ReportType::MostRecent,
-            overlay: None,
-            last_opened_setting: MyOverlay::SettingsNotifications,
+            modal: None,
+            settings_page: None,
+            last_opened_setting: SettingsPage::Notifications,
             notifications: config_settings.notifications,
             running_page: RunningPage::Overview,
             language: config_settings.language,

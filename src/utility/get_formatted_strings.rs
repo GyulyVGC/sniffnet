@@ -220,3 +220,10 @@ pub fn print_cli_welcome_message() {
     "
     );
 }
+
+pub fn get_command_key() -> String {
+    #[cfg(target_os = "macos")]
+    return "⌘".to_string();
+    #[cfg(not(target_os = "macos"))]
+    return "ctrl".to_string();
+}

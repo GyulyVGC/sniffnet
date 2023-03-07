@@ -1,6 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::settings_page::SettingsPage;
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
 };
@@ -33,17 +33,17 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
             [
-                MyOverlay::SettingsNotifications,
-                MyOverlay::SettingsAppearance,
-                MyOverlay::SettingsLanguage,
+                SettingsPage::Notifications,
+                SettingsPage::Appearance,
+                SettingsPage::Language,
             ],
             &["7 ", "K ", "c "],
             &[
                 Message::TickInit,
-                Message::ShowModal(MyOverlay::SettingsAppearance),
-                Message::ShowModal(MyOverlay::SettingsLanguage),
+                Message::OpenSettings(SettingsPage::Appearance),
+                Message::OpenSettings(SettingsPage::Language),
             ],
-            MyOverlay::SettingsNotifications,
+            SettingsPage::Notifications,
             sniffer.style,
             sniffer.language,
         ))
@@ -463,7 +463,7 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
                         .style(StyleTuple(style, ElementType::Standard).into())
-                        .on_press(Message::HideModal),
+                        .on_press(Message::CloseSettings),
                         tooltip,
                         Position::Right,
                     )

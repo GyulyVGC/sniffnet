@@ -1,5 +1,6 @@
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::my_modal::MyModal;
 use crate::enums::running_page::RunningPage;
+use crate::enums::settings_page::SettingsPage;
 use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
@@ -38,10 +39,16 @@ pub enum Message {
     Style(StyleType),
     /// Manage waiting time
     Waiting,
-    /// Displays an overlay
-    ShowModal(MyOverlay),
-    /// Hides the current overlay modal; if true is passed, config file is updated
+    /// Displays a modal
+    ShowModal(MyModal),
+    /// Opens the specified settings page
+    OpenSettings(SettingsPage),
+    /// Opens the last opened settings page
+    OpenLastSettings,
+    /// Hides the current modal
     HideModal,
+    /// Hides the current setting page
+    CloseSettings,
     /// Permits to change the current running page
     ChangeRunningPage(RunningPage),
     /// Select language
@@ -60,4 +67,12 @@ pub enum Message {
     Exit,
     /// Switch from a page to the next one when the tab key is pressed.
     SwitchPage,
+    /// The enter (return) key has been pressed
+    ReturnKeyPressed,
+    /// The esc key has been pressed
+    EscKeyPressed,
+    /// The reset button has been pressed or the backspace key has been pressed while running
+    ResetButtonPressed,
+    /// Ctrl+D keys have been pressed
+    CtrlDPressed,
 }

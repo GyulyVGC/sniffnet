@@ -12,7 +12,7 @@ use std::thread;
 use std::time::Duration;
 
 use crate::enums::message::Message;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::my_modal::MyModal;
 use crate::enums::running_page::RunningPage;
 use crate::enums::sound::{play, Sound};
 use crate::enums::status::Status;
@@ -21,6 +21,7 @@ use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::pages::initial_page::initial_page;
 // use crate::gui::pages::inspect_page::inspect_page;
+use crate::enums::settings_page::SettingsPage;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_language_page::settings_language_page;
@@ -183,35 +184,33 @@ impl Application for Sniffer {
                     .unwrap();
             }
             Message::Start => {
-                if self.status_pair.0.lock().unwrap().eq(&Status::Init) && self.overlay.is_none() {
-                    let device = self.device.clone();
-                    let (pcap_error, cap) = get_capture_result(&device);
-                    self.pcap_error = pcap_error.clone();
-                    *self.status_pair.0.lock().unwrap() = Status::Running;
-                    let info_traffic_mutex = self.info_traffic.clone();
-                    *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                    self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
-                    self.traffic_chart =
-                        TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
+                let device = self.device.clone();
+                let (pcap_error, cap) = get_capture_result(&device);
+                self.pcap_error = pcap_error.clone();
+                *self.status_pair.0.lock().unwrap() = Status::Running;
+                let info_traffic_mutex = self.info_traffic.clone();
+                *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
+                self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
+                self.traffic_chart =
+                    TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
 
-                    if pcap_error.is_none() {
-                        // no pcap error
-                        let current_capture_id = self.current_capture_id.clone();
-                        let filters = self.filters.clone();
-                        self.status_pair.1.notify_all();
-                        thread::Builder::new()
-                            .name("thread_parse_packets".to_string())
-                            .spawn(move || {
-                                parse_packets_loop(
-                                    &current_capture_id,
-                                    device.clone(),
-                                    cap.unwrap(),
-                                    &filters,
-                                    &info_traffic_mutex,
-                                );
-                            })
-                            .unwrap();
-                    }
+                if pcap_error.is_none() {
+                    // no pcap error
+                    let current_capture_id = self.current_capture_id.clone();
+                    let filters = self.filters.clone();
+                    self.status_pair.1.notify_all();
+                    thread::Builder::new()
+                        .name("thread_parse_packets".to_string())
+                        .spawn(move || {
+                            parse_packets_loop(
+                                &current_capture_id,
+                                device.clone(),
+                                cap.unwrap(),
+                                &filters,
+                                &info_traffic_mutex,
+                            );
+                        })
+                        .unwrap();
                 }
             }
             Message::Reset => {
@@ -256,28 +255,35 @@ impl Application for Sniffer {
                     self.report_type,
                 );
             }
-            Message::ShowModal(overlay) => {
-                self.overlay = Some(overlay);
+            Message::ShowModal(modal) => {
+                if self.settings_page.is_none() {
+                    self.modal = Some(modal);
+                }
             }
             Message::HideModal => {
-                if self.overlay.is_some() {
-                    let last_opened = self.overlay.unwrap();
-                    self.overlay = None;
-                    match last_opened {
-                        MyOverlay::SettingsNotifications
-                        | MyOverlay::SettingsAppearance
-                        | MyOverlay::SettingsLanguage => {
-                            // closed a setting page
-                            self.last_opened_setting = last_opened;
-                            let store = ConfigSettings {
-                                style: self.style,
-                                notifications: self.notifications,
-                                language: self.language,
-                            };
-                            confy::store("sniffnet", "settings", store).unwrap_or(());
-                        }
-                        _ => {}
-                    }
+                self.modal = None;
+            }
+            Message::OpenSettings(settings_page) => {
+                if self.modal.is_none() {
+                    self.settings_page = Some(settings_page);
+                }
+            }
+            Message::OpenLastSettings => {
+                if self.modal.is_none() && self.settings_page.is_none() {
+                    self.settings_page = Some(self.last_opened_setting);
+                }
+            }
+            Message::CloseSettings => {
+                if self.settings_page.is_some() {
+                    let last_opened = self.settings_page.unwrap();
+                    self.settings_page = None;
+                    self.last_opened_setting = last_opened;
+                    let store = ConfigSettings {
+                        style: self.style,
+                        notifications: self.notifications,
+                        language: self.language,
+                    };
+                    confy::store("sniffnet", "settings", store).unwrap_or(());
                 }
             }
             Message::ChangeRunningPage(running_page) => {
@@ -316,24 +322,58 @@ impl Application for Sniffer {
             Message::Exit => {
                 return window::close();
             }
-            Message::SwitchPage => match (*self.status_pair.0.lock().unwrap(), self.overlay) {
-                (
-                    _,
-                    Some(
-                        MyOverlay::SettingsLanguage
-                        | MyOverlay::SettingsNotifications
-                        | MyOverlay::SettingsAppearance,
-                    ),
-                ) => {
+            Message::SwitchPage => match (
+                *self.status_pair.0.lock().unwrap(),
+                self.settings_page,
+                self.modal,
+            ) {
+                (_, Some(_), None) => {
                     // Settings opened
-                    self.overlay = Some(self.overlay.unwrap().next());
+                    self.settings_page = Some(self.settings_page.unwrap().next());
                 }
-                (Status::Running, None) => {
+                (Status::Running, None, None) => {
                     // Running with no overlays
                     self.running_page = self.running_page.next();
                 }
-                (_, _) => {}
+                (_, _, _) => {}
             },
+            Message::ReturnKeyPressed => {
+                if self.status_pair.0.lock().unwrap().eq(&Status::Init)
+                    && self.settings_page.is_none()
+                    && self.modal.is_none()
+                {
+                    return self.update(Message::Start);
+                } else if self.modal.eq(&Some(MyModal::Quit)) {
+                    return self.update(Message::Reset);
+                } else if self.modal.eq(&Some(MyModal::ClearAll)) {
+                    return self.update(Message::ClearAllNotifications);
+                }
+            }
+            Message::EscKeyPressed => {
+                if self.modal.is_some() {
+                    return self.update(Message::HideModal);
+                } else if self.settings_page.is_some() {
+                    return self.update(Message::CloseSettings);
+                }
+            }
+            Message::ResetButtonPressed => {
+                // also called when backspace key is pressed on a running state
+                if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
+                    return if self.info_traffic.lock().unwrap().all_packets == 0 {
+                        self.update(Message::Reset)
+                    } else {
+                        self.update(Message::ShowModal(MyModal::Quit))
+                    };
+                }
+            }
+            Message::CtrlDPressed => {
+                if self.status_pair.0.lock().unwrap().eq(&Status::Running)
+                    && self.running_page.eq(&RunningPage::Notifications)
+                    && !self.runtime_data.borrow().logged_notifications.is_empty()
+                {
+                    return self.update(Message::ShowModal(MyModal::ClearAll));
+                }
+            }
         }
         Command::none()
     }
@@ -344,14 +384,8 @@ impl Application for Sniffer {
         let font = get_font(style);
 
         let header = match status {
-            Status::Init => header(style, false, 0, self.language, self.last_opened_setting),
-            Status::Running => header(
-                style,
-                true,
-                self.info_traffic.lock().unwrap().all_packets,
-                self.language,
-                self.last_opened_setting,
-            ),
+            Status::Init => header(style, false, self.language, self.last_opened_setting),
+            Status::Running => header(style, true, self.language, self.last_opened_setting),
         };
 
         let body = match status {
@@ -365,19 +399,26 @@ impl Application for Sniffer {
 
         let content = Column::new().push(header).push(body).push(footer(style));
 
-        if self.overlay.is_none() {
+        if self.modal.is_none() && self.settings_page.is_none() {
             content.into()
-        } else {
-            let overlay = match self.overlay.unwrap() {
-                MyOverlay::Quit => get_exit_overlay(style, font, self.language),
-                MyOverlay::ClearAll => get_clear_all_overlay(style, font, self.language),
-                MyOverlay::SettingsNotifications => settings_notifications_page(self),
-                MyOverlay::SettingsAppearance => settings_style_page(self),
-                MyOverlay::SettingsLanguage => settings_language_page(self),
+        } else if self.modal.is_some() {
+            let overlay = match self.modal.unwrap() {
+                MyModal::Quit => get_exit_overlay(style, font, self.language),
+                MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
             };
 
             Modal::new(content, overlay)
                 .on_blur(Message::HideModal)
+                .into()
+        } else {
+            let overlay = match self.settings_page.unwrap() {
+                SettingsPage::Notifications => settings_notifications_page(self),
+                SettingsPage::Appearance => settings_style_page(self),
+                SettingsPage::Language => settings_language_page(self),
+            };
+
+            Modal::new(content, overlay)
+                .on_blur(Message::CloseSettings)
                 .into()
         }
     }
@@ -391,16 +432,16 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::Q,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::Exit),
-                // return => start
+                // return => return key pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Enter,
                     ..
-                }) => Some(Message::Start),
-                // esc => close overlay
+                }) => Some(Message::ReturnKeyPressed),
+                // esc => esc key pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Escape,
                     ..
-                }) => Some(Message::HideModal),
+                }) => Some(Message::EscKeyPressed),
                 // tab => switch page
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Tab,
@@ -411,6 +452,21 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::O,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::OpenReport),
+                // ctrl+S => open settings
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::S,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
+                }) => Some(Message::OpenLastSettings),
+                // backspace => reset button pressed
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Backspace,
+                    ..
+                }) => Some(Message::ResetButtonPressed),
+                // ctrl+D => ctrl+D keys pressed
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::D,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
+                }) => Some(Message::CtrlDPressed),
                 _ => None,
             });
         let time_subscription = match status {

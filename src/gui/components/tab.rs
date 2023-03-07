@@ -2,7 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::settings_page::SettingsPage;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
 use crate::{Language, RunningPage, StyleType};
@@ -10,10 +10,10 @@ use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
 
 pub fn get_settings_tabs(
-    labels: [MyOverlay; 3],
+    labels: [SettingsPage; 3],
     icons: &[&str],
     actions: &[Message],
-    active: MyOverlay,
+    active: SettingsPage,
     style: StyleType,
     language: Language,
 ) -> Row<'static, Message> {

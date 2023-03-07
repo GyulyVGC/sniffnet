@@ -1,6 +1,6 @@
 use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
-use crate::enums::my_overlay::MyOverlay;
+use crate::enums::settings_page::SettingsPage;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::structs::style_tuple::StyleTuple;
@@ -26,17 +26,17 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(settings_header(sniffer.style, sniffer.language))
         .push(get_settings_tabs(
             [
-                MyOverlay::SettingsNotifications,
-                MyOverlay::SettingsAppearance,
-                MyOverlay::SettingsLanguage,
+                SettingsPage::Notifications,
+                SettingsPage::Appearance,
+                SettingsPage::Language,
             ],
             &["7 ", "K ", "c "],
             &[
-                Message::ShowModal(MyOverlay::SettingsNotifications),
+                Message::OpenSettings(SettingsPage::Notifications),
                 Message::TickInit,
-                Message::ShowModal(MyOverlay::SettingsLanguage),
+                Message::OpenSettings(SettingsPage::Language),
             ],
-            MyOverlay::SettingsAppearance,
+            SettingsPage::Appearance,
             sniffer.style,
             sniffer.language,
         ))
