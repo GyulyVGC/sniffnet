@@ -432,7 +432,6 @@ impl Application for Sniffer {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        let status = *self.status_pair.0.lock().unwrap();
         const NO_MODIFIER: iced_native::keyboard::Modifiers =
             iced_native::keyboard::Modifiers::empty();
         let hot_keys_subscription =
@@ -484,7 +483,7 @@ impl Application for Sniffer {
                 }) => Some(Message::CtrlDPressed),
                 _ => None,
             });
-        let time_subscription = match status {
+        let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
             }

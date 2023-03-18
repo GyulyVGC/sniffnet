@@ -2,6 +2,18 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [1.1.2] - 2023-03-18
+
+- Added new translations of the GUI, bringing the total number of supported languages to 8!
+  * German 🇩🇪 ([#87](https://github.com/GyulyVGC/sniffnet/pull/87))
+  * Simplified Chinese 🇨🇳 ([#89](https://github.com/GyulyVGC/sniffnet/pull/89) - [#93](https://github.com/GyulyVGC/sniffnet/pull/93))
+  * Ukrainian 🇺🇦 ([#94](https://github.com/GyulyVGC/sniffnet/pull/94))
+- Added keyboard shortcuts to make the whole experience more enjoyable and efficient:
+  check out issue [#97](https://github.com/GyulyVGC/sniffnet/issues/97) to see all the available hotkeys or to suggest new ones!
+- Changed GUI font to `sarasa-gothic-mono` to support the introduction of Simplified Chinese language
+- Minor improvements to Overview page proportions and paddings
+
+
 ## [1.1.1] - 2023-02-25
 
 - Added new translations of the GUI!

@@ -123,8 +123,8 @@ pub fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Me
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::Start);
 
-    let mut tooltip = start_translation(language).to_string();
-    tooltip.push_str(" [⏎]");
+    let tooltip = start_translation(language).to_string();
+    //tooltip.push_str(" [⏎]");
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(get_font(style))

@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.1.1"
+version = "1.1.2"
 authors = ["Giuliano Bellini"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -21,6 +21,7 @@ icon = ["./resources/logos/icon.ico"]
 [profile.release]
 opt-level = 3
 lto = true
+strip = true
 
 
 [dependencies]

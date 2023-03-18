@@ -438,8 +438,8 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
 
 pub fn settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
-    let mut tooltip = hide_translation(language).to_string();
-    tooltip.push_str(" [esc]");
+    let tooltip = hide_translation(language).to_string();
+    //tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
