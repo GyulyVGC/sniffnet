@@ -219,6 +219,39 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 </details>
 
 
+## Keyboard shortcuts
+
+<details>
+
+  <summary>See details</summary>
+
+<br>
+
+Some keyboard shortcuts are available to improve the efficiency of use and the overall user experience.
+
+If you want to suggest a different key combination for one of the existing shortcuts or if you want to propose a new shortcut,
+give a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue. 
+
+The currently usable hotkeys are reported in the following:
+
+<div align="center">
+
+| Event | Shortcut keys |
+|--|--|
+| Quit the application | ctrl+Q (cmd+Q on macOS) |
+| Open full report | ctrl+O (cmd+O on macOS) |
+| Open settings | ctrl+S (cmd+S on macOS) |
+| Clear all notifications | ctrl+D (cmd+D on macOS) |
+| Start the analysis and confirm modal actions | enter |
+| Interrupt the ongoing analysis | backspace |
+| Close settings and modal popups | esc |
+| Switch from a tab to the next (or previous) one | tab (or shift+tab) |
+
+</div>
+
+</details>
+
+
 ## Troubleshooting
 
 <details>
