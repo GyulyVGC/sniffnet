@@ -466,9 +466,9 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::O,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::OpenReport),
-                // ctrl+S => open settings
+                // ctrl+, => open settings
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::S,
+                    key_code: iced_native::keyboard::KeyCode::Comma,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::OpenLastSettings),
                 // backspace => reset button pressed
