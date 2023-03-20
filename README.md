@@ -66,7 +66,7 @@ cargo install sniffnet
 
 <details>
 
-  <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dm/sniffnet?color=success&logo=homebrew"/></summary>
+  <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dy/sniffnet?color=success&logo=homebrew"/></summary>
 
   You can install Sniffnet's Homebrew package with:
   
@@ -295,7 +295,9 @@ Sniffnet is also open to design contributions: <br>
 
 ## Acknowledgements
 
-A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+- A special mention goes to Tiansheng Li ([@0x0177b11f](https://github.com/0x0177b11f)) for being [my first sponsor](https://github.com/sponsors/GyulyVGC) ever!
+
+- A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <div align="center">
 
@@ -325,10 +327,10 @@ A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/g
 
 </div>
 
-The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
+- The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 
 <p align="center"><a href="https://github.com/iced-rs/iced"><img alt="" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="50%"/></a></p>
 
-Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+- Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
 
 <p align="center"><a href="https://github.com/GyulyVGC/sniffnet/stargazers"><img alt="" src="https://reporoster.com/stars/dark/GyulyVGC/sniffnet"/></a></p>
