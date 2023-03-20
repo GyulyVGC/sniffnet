@@ -40,4 +40,4 @@ serde = { version = "1.0.157", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
 
 [dev-dependencies]
-rstest = "0.16.0"
+rstest = "0.17.0"
