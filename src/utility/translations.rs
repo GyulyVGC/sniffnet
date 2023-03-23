@@ -45,14 +45,13 @@ pub fn select_filters_translation(language: Language) -> Text<'static> {
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::DE => "Start!",
+        Language::EN | Language::DE | Language::RO => "Start!",
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
         Language::PL => "Rozpocznij!",
         Language::UK => "Почати!",
         Language::ZH => "开始!",
-        Language::RO => "Start!",
     }
 }
 
@@ -509,10 +508,10 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::FR => "paquets par seconde",
         Language::ES => "paquetes por segundo",
         Language::PL => "pakiety na sekundę",
-        Language::DE => "Pakete pro Sekunde",
+        Language::DE => "pakete pro Sekunde",
         Language::UK => "пакети на секунду",
-        Language::ZH => "所有",
-        Language::RO => "Pachete pe secundă",
+        Language::ZH => "数据包",
+        Language::RO => "pachete pe secundă",
     }
 }
 
@@ -523,7 +522,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::FR => "octets par seconde",
         Language::ES => "bytes por segundo",
         Language::PL => "bajty na sekundę",
-        Language::DE => "Bytes pro Sekunde",
+        Language::DE => "bytes pro Sekunde",
         Language::UK => "байти на секунду",
         Language::ZH => "网络流量",
         Language::RO => "octeți pe secundă",
@@ -759,10 +758,9 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::IT => "Stile",
         Language::ES => "Estilo",
         Language::PL => "Styl",
-        Language::DE => "Stil",
+        Language::DE | Language::RO => "Stil",
         Language::UK => "Стиль",
         Language::ZH => "主题",
-        Language::RO => "Stil",
     }
 }
 
@@ -843,7 +841,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::DE => "(pro Sekunde)",
         Language::UK => "(на секунду)",
         Language::ZH => "(每秒) ",
-        Language::RO => "(pe secundă) ",
+        Language::RO => "(pe secundă)",
     }
 }
 
@@ -857,7 +855,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::DE => "; du kannst auch 'K', 'M' und 'G' festlegen",
         Language::UK => "; можеш також вибрати 'K', 'M' i 'G'",
         Language::ZH => "您可指定 'K', 'M', 'G'",
-        Language::RO => "puteți specifica 'K', 'M', 'G'",
+        Language::RO => "; puteți specifica 'K', 'M', 'G'",
     }
 }
 
