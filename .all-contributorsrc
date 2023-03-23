@@ -1,8 +1,8 @@
 {
   "files": [
-    "README.md"
+    "CONTRIBUTORS.md"
   ],
-  "imageSize": 60,
+  "imageSize": 100,
   "commit": false,
   "commitConvention": "angular",
   "contributors": [
@@ -88,9 +88,18 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "ervinpopescu",
+      "name": "ervinpopescu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84532402?v=4",
+      "profile": "https://github.com/ervinpopescu",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
-  "contributorsPerLine": 10,
+  "contributorsPerLine": 7,
   "skipCi": true,
   "repoType": "github",
   "repoHost": "https://github.com",

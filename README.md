@@ -316,6 +316,7 @@ Sniffnet is also open to design contributions: <br>
       <td align="center" valign="top" width="10%"><a href="https://github.com/luca3s"><img src="https://avatars.githubusercontent.com/u/41015240?v=4?s=60" width="60px;" alt="luca3s"/><br /><sub><b>luca3s</b></sub></a><br /><a href="#translation-luca3s" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="10%"><a href="https://github.com/cxw620"><img src="https://avatars.githubusercontent.com/u/70561268?v=4?s=60" width="60px;" alt="陈寒彤"/><br /><sub><b>陈寒彤</b></sub></a><br /><a href="#translation-cxw620" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="10%"><a href="http://catchts.com"><img src="https://avatars.githubusercontent.com/u/16646733?v=4?s=60" width="60px;" alt="yossarian"/><br /><sub><b>yossarian</b></sub></a><br /><a href="#translation-captain-yossarian" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="10%"><a href="https://github.com/ervinpopescu"><img src="https://avatars.githubusercontent.com/u/84532402?v=4?s=60" width="60px;" alt="ervinpopescu"/><br /><sub><b>ervinpopescu</b></sub></a><br /><a href="#translation-ervinpopescu" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>
