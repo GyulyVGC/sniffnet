@@ -2,7 +2,7 @@
   "files": [
     "CONTRIBUTORS.md"
   ],
-  "imageSize": 60,
+  "imageSize": 100,
   "commit": false,
   "commitConvention": "angular",
   "contributors": [
