@@ -19,6 +19,8 @@ pub enum Language {
     UK,
     /// Simplified Chinese
     ZH,
+    /// Romanian
+    RO,
 }
 
 impl Default for Language {
@@ -40,6 +42,7 @@ impl Language {
             Language::DE => "Deutsch",
             Language::UK => "Українська",
             Language::ZH => "简体中文",
+            Language::RO => "Română",
         }
     }
 }
