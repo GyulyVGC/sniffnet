@@ -60,6 +60,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         app_active,
         Message::AppProtocolSelection,
     )
+    .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
     .font(font)
     .style(<StyleTuple as Into<iced::theme::PickList>>::into(

@@ -33,6 +33,7 @@ pub fn ip_version_radios(
                 Some(active),
                 Message::IpVersionSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -63,6 +64,7 @@ pub fn transport_protocol_radios(
                 Some(active),
                 Message::TransportProtocolSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(

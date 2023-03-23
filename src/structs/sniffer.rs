@@ -56,6 +56,8 @@ pub struct Sniffer {
     pub running_page: RunningPage,
     /// Language used in the GUI
     pub language: Language,
+    /// Number of unread notifications
+    pub unread_notifications: usize,
 }
 
 impl Sniffer {
@@ -90,6 +92,7 @@ impl Sniffer {
             notifications: config_settings.notifications,
             running_page: RunningPage::Overview,
             language: config_settings.language,
+            unread_notifications: 0,
         }
     }
 }

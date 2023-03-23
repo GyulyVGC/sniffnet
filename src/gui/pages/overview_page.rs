@@ -61,6 +61,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             RunningPage::Overview,
             sniffer.style,
             sniffer.language,
+            sniffer.unread_notifications,
         );
 
         let observed = sniffer.runtime_data.borrow().all_packets;

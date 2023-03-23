@@ -85,11 +85,14 @@ impl Application for Sniffer {
                     info_traffic_lock.favorites_last_interval.clone();
                 info_traffic_lock.favorites_last_interval = HashSet::new();
                 drop(info_traffic_lock);
-                notify_and_log(
+                let emitted_notifications = notify_and_log(
                     self.runtime_data.borrow_mut(),
                     self.notifications,
                     &self.info_traffic.clone(),
                 );
+                if self.running_page.ne(&RunningPage::Notifications) {
+                    self.unread_notifications += emitted_notifications;
+                }
                 update_charts_data(self.runtime_data.borrow_mut());
                 update_report_data(
                     self.runtime_data.borrow_mut(),
@@ -219,6 +222,7 @@ impl Application for Sniffer {
                 *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
                 self.pcap_error = None;
                 self.report_type = ReportType::MostRecent;
+                self.unread_notifications = 0;
                 return self.update(Message::HideModal);
             }
             Message::Style(style) => {
@@ -288,6 +292,9 @@ impl Application for Sniffer {
             }
             Message::ChangeRunningPage(running_page) => {
                 self.running_page = running_page;
+                if running_page.eq(&RunningPage::Notifications) {
+                    self.unread_notifications = 0;
+                }
             }
             Message::LanguageSelection(language) => {
                 self.language = language;
@@ -337,10 +344,14 @@ impl Application for Sniffer {
                 }
                 (Status::Running, None, None) => {
                     // Running with no overlays
-                    if next {
-                        self.running_page = self.running_page.next();
+                    let new_page = if next {
+                        self.running_page.next()
                     } else {
-                        self.running_page = self.running_page.previous();
+                        self.running_page.previous()
+                    };
+                    self.running_page = new_page;
+                    if new_page.eq(&RunningPage::Notifications) {
+                        self.unread_notifications = 0;
                     }
                 }
                 (_, _, _) => {}

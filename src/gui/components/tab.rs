@@ -4,7 +4,7 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::settings_page::SettingsPage;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, ICONS};
+use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
 use crate::{Language, RunningPage, StyleType};
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
@@ -31,6 +31,7 @@ pub fn get_settings_tabs(
             active,
             style,
             font,
+            None,
         ));
     }
     tabs
@@ -43,6 +44,7 @@ pub fn get_pages_tabs(
     active: RunningPage,
     style: StyleType,
     language: Language,
+    unread_notifications: usize,
 ) -> Row<'static, Message> {
     let font = get_font(style);
     let mut tabs = Row::new()
@@ -51,6 +53,11 @@ pub fn get_pages_tabs(
 
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);
+        let unread = if label.eq(&RunningPage::Notifications) {
+            Some(unread_notifications)
+        } else {
+            None
+        };
         tabs = tabs.push(new_tab(
             (*label).get_tab_label(language).to_string(),
             (*icons.get(i).unwrap()).to_string(),
@@ -58,6 +65,7 @@ pub fn get_pages_tabs(
             active,
             style,
             font,
+            unread,
         ));
     }
     tabs
@@ -70,8 +78,9 @@ fn new_tab(
     active: bool,
     style: StyleType,
     font: Font,
+    unread: Option<usize>,
 ) -> Button<'static, Message> {
-    let content = Row::new()
+    let mut content = Row::new()
         .align_items(Alignment::Center)
         .push(horizontal_space(Length::FillPortion(1)))
         .push(
@@ -87,8 +96,27 @@ fn new_tab(
                 .size(FONT_SIZE_SUBTITLE)
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
-        )
-        .push(horizontal_space(Length::FillPortion(1)));
+        );
+
+    if let Some(num) = unread {
+        if num > 0 {
+            let notifications_badge = button(
+                Text::new(num.to_string())
+                    .font(get_font_headers(style))
+                    .size(19)
+                    .horizontal_alignment(alignment::Horizontal::Center)
+                    .vertical_alignment(alignment::Vertical::Center),
+            )
+            .padding(4)
+            .height(Length::Fixed(20.0))
+            .style(StyleTuple(style, ElementType::Badge).into());
+            content = content
+                .push(horizontal_space(Length::Fixed(7.0)))
+                .push(notifications_badge);
+        }
+    }
+
+    content = content.push(horizontal_space(Length::FillPortion(1)));
 
     button(content)
         .height(Length::Fixed(35.0))

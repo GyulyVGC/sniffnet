@@ -8,12 +8,16 @@ use chrono::Local;
 use std::cell::RefMut;
 use std::sync::{Arc, Mutex};
 
+/// Checks if one or more notifications have to be emitted and logs them.
+///
+/// It returns the number of new notifications emitted
 pub fn notify_and_log(
     mut runtime_data: RefMut<RunTimeData>,
     notifications: Notifications,
     info_traffic: &Arc<Mutex<InfoTraffic>>,
-) {
+) -> usize {
     let mut already_emitted_sound = false;
+    let mut emitted_notifications = 0;
     // packets threshold
     if notifications.packets_notification.threshold.is_some() {
         let sent_packets_entry = runtime_data.tot_sent_packets - runtime_data.tot_sent_packets_prev;
@@ -23,6 +27,7 @@ pub fn notify_and_log(
             > u128::from(notifications.packets_notification.threshold.unwrap())
         {
             // log this notification
+            emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
                 runtime_data.logged_notifications.pop_back();
             }
@@ -53,6 +58,7 @@ pub fn notify_and_log(
             > u128::from(notifications.bytes_notification.threshold.unwrap())
         {
             //log this notification
+            emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
                 runtime_data.logged_notifications.pop_back();
             }
@@ -79,6 +85,7 @@ pub fn notify_and_log(
         let info_traffic_lock = info_traffic.lock().unwrap();
         for index in &runtime_data.favorites_last_interval.clone() {
             //log this notification
+            emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
                 runtime_data.logged_notifications.pop_back();
             }
@@ -102,4 +109,6 @@ pub fn notify_and_log(
             }
         }
     }
+
+    emitted_notifications
 }

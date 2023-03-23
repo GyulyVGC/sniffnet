@@ -238,14 +238,14 @@ The currently usable hotkeys are reported in the following:
 
 | Event | Shortcut keys |
 |--|--|
-| Quit the application | ctrl+Q (cmd+Q on macOS) |
-| Open full report | ctrl+O (cmd+O on macOS) |
-| Open settings | ctrl+S (cmd+S on macOS) |
-| Clear all notifications | ctrl+D (cmd+D on macOS) |
-| Start the analysis and confirm modal actions | enter |
-| Interrupt the ongoing analysis | backspace |
-| Close settings and modal popups | esc |
-| Switch from a tab to the next (or previous) one | tab (or shift+tab) |
+| Quit the application | `ctrl+Q` (`cmd+Q` on macOS) |
+| Open full report | `ctrl+O` (`cmd+O` on macOS) |
+| Open settings | `ctrl+S` (`cmd+S` on macOS) |
+| Clear all notifications | `ctrl+D` (`cmd+D` on macOS) |
+| Start the analysis and confirm modal actions | `enter` |
+| Interrupt the ongoing analysis | `backspace` |
+| Close settings and modal popups | `esc` |
+| Switch from a tab to the next (or previous) one | `tab` (or `shift+tab`) |
 
 </div>
 
@@ -295,7 +295,7 @@ Sniffnet is also open to design contributions: <br>
 
 ## Acknowledgements
 
-- A special mention goes to Tiansheng Li ([@0x0177b11f](https://github.com/0x0177b11f)) for being [my first sponsor](https://github.com/sponsors/GyulyVGC) ever!
+- A special mention goes to [Tiansheng Li](https://github.com/0x0177b11f) for being [my first sponsor](https://github.com/sponsors/GyulyVGC) ever!
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/graphs/contributors) of Sniffnet ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 

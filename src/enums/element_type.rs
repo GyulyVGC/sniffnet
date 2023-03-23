@@ -10,4 +10,5 @@ pub enum ElementType {
     NotStarred,
     Alert,
     Tooltip,
+    Badge,
 }

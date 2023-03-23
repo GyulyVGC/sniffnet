@@ -57,6 +57,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         RunningPage::Notifications,
         sniffer.style,
         sniffer.language,
+        sniffer.unread_notifications,
     );
 
     tab_and_body = tab_and_body
