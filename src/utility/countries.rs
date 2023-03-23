@@ -513,6 +513,7 @@ pub fn get_flag_from_language_code(language: &str) -> Image {
         "EN" => GB,
         "IT" => IT,
         "PL" => PL,
+        "RO" => RO,
         "UK" => UA,
         _ => UNKNOWN,
     })))

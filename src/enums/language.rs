@@ -19,6 +19,8 @@ pub enum Language {
     UK,
     /// Simplified Chinese
     ZH,
+    /// Romanian
+    RO,
 }
 
 impl Default for Language {
@@ -28,8 +30,14 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const COL1: [Language; 4] = [Language::EN, Language::ES, Language::IT, Language::UK];
-    pub(crate) const COL2: [Language; 4] = [Language::DE, Language::FR, Language::PL, Language::ZH];
+    pub(crate) const COL1: [Language; 5] = [
+        Language::EN,
+        Language::ES,
+        Language::IT,
+        Language::RO,
+        Language::ZH,
+    ];
+    pub(crate) const COL2: [Language; 4] = [Language::DE, Language::FR, Language::PL, Language::UK];
     pub fn get_radio_label(&self) -> &str {
         match self {
             Language::EN => "English",
@@ -40,6 +48,7 @@ impl Language {
             Language::DE => "Deutsch",
             Language::UK => "Українська",
             Language::ZH => "简体中文",
+            Language::RO => "Română",
         }
     }
 }
