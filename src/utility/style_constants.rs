@@ -172,7 +172,7 @@ pub const DEEP_SEA: &[u8] = include_bytes!("../../resources/palettes/DeepSea.png
 pub const MON_AMOUR: &[u8] = include_bytes!("../../resources/palettes/MonAmour.png");
 
 // font sizes
-pub const FONT_SIZE_FOOTER: f32 = 17.0;
+pub const FONT_SIZE_FOOTER: f32 = 18.0;
 pub const FONT_SIZE_BODY: f32 = 21.0;
 pub const FONT_SIZE_SUBTITLE: f32 = 23.0;
 pub const FONT_SIZE_TITLE: f32 = 25.0;
@@ -182,11 +182,6 @@ pub const BORDER_WIDTH: f32 = 2.0;
 pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
-
-// body proportions
-pub const HEIGHT_HEADER: u16 = 2;
-pub const HEIGHT_BODY: u16 = 12;
-pub const HEIGHT_FOOTER: u16 = 1;
 
 // stars yellow colors
 pub const STARRED: Color = Color {

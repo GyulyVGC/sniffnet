@@ -11,7 +11,7 @@ use crate::gui::components::tab::get_pages_tabs;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::get_flag_from_country_code;
 use crate::utility::get_formatted_strings::get_formatted_bytes_string;
-use crate::utility::style_constants::{get_font, FONT_SIZE_FOOTER, HEIGHT_BODY, ICONS};
+use crate::utility::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
 use crate::utility::translations::{
     application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation,
     clear_all_translation, favorite_transmitted_translation, incoming_translation,
@@ -40,7 +40,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
-        .height(FillPortion(HEIGHT_BODY));
+        .height(Length::Fill);
 
     let tabs = get_pages_tabs(
         [
@@ -171,7 +171,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     }
 
     Container::new(Column::new().push(tab_and_body))
-        .height(FillPortion(HEIGHT_BODY))
+        .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))

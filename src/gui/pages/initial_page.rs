@@ -16,9 +16,7 @@ use crate::enums::message::Message;
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
-};
+use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
 use crate::utility::translations::{
     address_translation, addresses_translation, all_translation, application_protocol_translation,
     choose_adapters_translation, select_filters_translation, start_translation,
@@ -103,11 +101,12 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .push(filters),
     );
 
-    Container::new(body)
-        .height(FillPortion(HEIGHT_BODY))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ))
+    Container::new(body).height(Length::Fill).style(
+        <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+            sniffer.style,
+            ElementType::Standard,
+        )),
+    )
 }
 
 pub fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {

@@ -4,7 +4,7 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::enums::settings_page::SettingsPage;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, HEIGHT_HEADER, ICONS};
+use crate::utility::style_constants::{get_font, ICONS};
 use crate::utility::translations::{quit_analysis_translation, settings_translation};
 use crate::{Language, StyleType};
 use iced::alignment::{Horizontal, Vertical};
@@ -22,7 +22,7 @@ pub fn header(
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
-        .size(95);
+        .size(100);
 
     Container::new(
         Row::new()
@@ -57,7 +57,7 @@ pub fn header(
             )
             .push(horizontal_space(Length::Fixed(15.0))),
     )
-    .height(FillPortion(HEIGHT_HEADER))
+    .height(Length::Fixed(95.0))
     .align_y(Vertical::Center)
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(

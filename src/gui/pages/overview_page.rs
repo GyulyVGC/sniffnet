@@ -23,7 +23,7 @@ use crate::utility::get_formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
     get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
 };
-use crate::utility::style_constants::{get_font, HEIGHT_BODY, ICONS, SARASA_MONO_SC_BOLD};
+use crate::utility::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
 use crate::utility::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
@@ -41,7 +41,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         .spacing(5)
         .align_items(Alignment::Center);
 
-    let mut tab_and_body = Column::new().height(FillPortion(HEIGHT_BODY));
+    let mut tab_and_body = Column::new().height(Length::Fill);
 
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
@@ -380,7 +380,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))
-        .height(FillPortion(HEIGHT_BODY))
+        .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
