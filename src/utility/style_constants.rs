@@ -33,7 +33,14 @@ pub const NIGHT_STYLE: Palette = Palette {
     outgoing: SECONDARY_DAY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
-    round_borders: Color::BLACK,
+    round_borders: Color {
+        a: 0.3,
+        ..Color::BLACK
+    },
+    round_containers: Color {
+        a: 0.2,
+        ..Color::BLACK
+    },
 };
 
 // day theme
@@ -58,7 +65,14 @@ pub const DAY_STYLE: Palette = Palette {
     outgoing: SECONDARY_NIGHT,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
-    round_borders: Color::BLACK,
+    round_borders: Color {
+        a: 0.25,
+        ..Color::BLACK
+    },
+    round_containers: Color {
+        a: 0.1,
+        ..Color::BLACK
+    },
 };
 
 // deep sea theme
@@ -94,7 +108,14 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
     outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
-    round_borders: Color::BLACK,
+    round_borders: Color {
+        a: 0.08,
+        ..SECONDARY_DEEP_SEA
+    },
+    round_containers: Color {
+        a: 0.03,
+        ..SECONDARY_DEEP_SEA
+    },
 };
 
 // mon amour theme
@@ -130,7 +151,14 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
-    round_borders: Color::BLACK,
+    round_borders: Color {
+        a: 0.5,
+        ..BUTTONS_MON_AMOUR
+    },
+    round_containers: Color {
+        a: 0.3,
+        ..BUTTONS_MON_AMOUR
+    },
 };
 
 pub const SARASA_MONO_SC_BOLD: Font = Font::External {

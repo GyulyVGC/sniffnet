@@ -31,6 +31,8 @@ pub struct Palette {
     pub text_body: Color,
     /// Color of round container borders and scrollbar borders
     pub round_borders: Color,
+    /// Color of round containers
+    pub round_containers: Color,
 }
 
 pub fn get_colors(style: StyleType) -> Palette {

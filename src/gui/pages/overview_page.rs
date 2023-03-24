@@ -37,8 +37,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     let mut body = Column::new()
         .width(Length::Fill)
-        .padding(5)
-        .spacing(5)
+        .padding(10)
+        .spacing(10)
         .align_items(Alignment::Center);
 
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -309,7 +309,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 body = body
                     .push(
                         Row::new()
-                            .spacing(5)
+                            .spacing(10)
                             .height(FillPortion(3))
                             .push(col_chart)
                             .push(

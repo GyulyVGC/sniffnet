@@ -21,12 +21,10 @@ impl button::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         button::Appearance {
             background: Some(Background::Color(match self {
-                StyleTuple(
-                    _,
-                    ElementType::TabActive | ElementType::NotStarred | ElementType::BorderedRound,
-                ) => colors.primary,
+                StyleTuple(_, ElementType::TabActive | ElementType::NotStarred) => colors.primary,
                 StyleTuple(_, ElementType::Starred) => STARRED,
                 StyleTuple(_, ElementType::Badge) => colors.secondary,
+                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
                 _ => colors.buttons,
             })),
             border_radius: match self {
@@ -53,7 +51,7 @@ impl button::StyleSheet for StyleTuple {
             },
             border_color: match self {
                 StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
-                StyleTuple(_, ElementType::BorderedRound) => Color::BLACK,
+                StyleTuple(_, ElementType::BorderedRound) => colors.round_borders,
                 _ => colors.secondary,
             },
         }

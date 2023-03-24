@@ -27,6 +27,7 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Headers) => colors.secondary,
                 StyleTuple(_, ElementType::Tooltip) => colors.buttons,
+                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
                 _ => colors.primary,
             })),
             border_radius: match self {
@@ -38,7 +39,8 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             },
             border_width: match self {
                 StyleTuple(_, ElementType::Standard | ElementType::Headers) => 0.0,
-                StyleTuple(_, ElementType::Tooltip) => 1.0,
+                StyleTuple(_, ElementType::Tooltip) => BORDER_WIDTH / 2.0,
+                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
