@@ -54,7 +54,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         None
     };
     let picklist_app = PickList::new(
-        &AppProtocol::ALL[..],
+        if app_active.is_some() {
+            &AppProtocol::ALL[..]
+        } else {
+            &AppProtocol::ALL[1..AppProtocol::ALL.len()]
+        },
         app_active,
         Message::AppProtocolSelection,
     )

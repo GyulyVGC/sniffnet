@@ -41,6 +41,7 @@ impl button::StyleSheet for StyleTuple {
                     | ElementType::NotStarred
                     | ElementType::Badge,
                 ) => 0.0,
+                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
             shadow_offset: Vector::new(0.0, 0.0),
