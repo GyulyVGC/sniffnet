@@ -118,8 +118,8 @@ impl fmt::Display for AppProtocol {
     }
 }
 
-/// Defines a constant to be used in the picklist in gui initial page
 impl AppProtocol {
+    /// Defines a constant to be used in the picklist in gui initial page
     pub(crate) const ALL: [AppProtocol; 25] = [
         AppProtocol::Other,
         AppProtocol::BGP,

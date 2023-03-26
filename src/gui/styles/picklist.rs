@@ -2,7 +2,7 @@
 
 use crate::get_colors;
 use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::utility::style_constants::BORDER_WIDTH;
 use iced::widget::pick_list;
 use iced::Background;
 use std::rc::Rc;
@@ -40,9 +40,9 @@ impl pick_list::StyleSheet for StyleTuple {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(colors.buttons),
-            border_radius: BORDER_ROUNDED_RADIUS,
+            border_radius: 0.0,
             border_width: BORDER_WIDTH,
-            border_color: colors.secondary,
+            border_color: colors.buttons,
         }
     }
 
@@ -53,7 +53,7 @@ impl pick_list::StyleSheet for StyleTuple {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(colors.primary),
-            border_radius: BORDER_ROUNDED_RADIUS,
+            border_radius: 0.0,
             border_width: BORDER_WIDTH,
             border_color: colors.secondary,
         }

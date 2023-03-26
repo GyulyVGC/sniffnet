@@ -57,7 +57,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         if app_active.is_some() {
             &AppProtocol::ALL[..]
         } else {
-            &AppProtocol::ALL[1..AppProtocol::ALL.len()]
+            &AppProtocol::ALL[1..]
         },
         app_active,
         Message::AppProtocolSelection,
@@ -65,9 +65,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
     .font(font)
-    .style(<StyleTuple as Into<iced::theme::PickList>>::into(
-        StyleTuple(sniffer.style, ElementType::Standard),
-    ));
+    .style(StyleTuple(sniffer.style, ElementType::Standard));
     let col_app = Column::new()
         .width(FillPortion(1))
         .spacing(10)

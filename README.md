@@ -165,7 +165,13 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
   Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
 
-  > The MMDB (MaxMind database) format has been developed especially for IP lookup. It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently. If you want the best performance on your IP lookups for use in a production environment, you should use the MMDB format files.
+  > The MMDB (MaxMind database) format has been developed especially for IP lookup.
+  > 
+  > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.
+  > 
+  > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
+  > 
+  > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
   
   This format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
 

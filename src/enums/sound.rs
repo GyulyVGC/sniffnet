@@ -25,7 +25,6 @@ impl fmt::Display for Sound {
     }
 }
 
-/// Defines a constant to be used in the picklist in gui notifications page
 impl Sound {
     pub(crate) const ALL: [Sound; 4] = [Gulp, Pop, Swhoosh, Sound::None];
 
