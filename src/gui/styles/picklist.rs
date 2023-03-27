@@ -21,7 +21,7 @@ impl iced::overlay::menu::StyleSheet for StyleTuple {
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(colors.buttons),
-            border_width: BORDER_WIDTH,
+            border_width: BORDER_WIDTH / 2.0,
             border_radius: 0.0,
             border_color: colors.secondary,
             selected_text_color: colors.text_body,

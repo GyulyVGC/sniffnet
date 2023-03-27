@@ -59,7 +59,7 @@ impl fmt::Display for InfoAddressPortPair {
         if self.very_long_address {
             write!(
                 f,
-                "{:^9}|{:>10}  |{:>10}  | {} | {} |",
+                "{:^9}|{:>10}  |{:>9}   | {} | {} |",
                 app_string,
                 self.transmitted_packets,
                 bytes_string,
@@ -69,7 +69,7 @@ impl fmt::Display for InfoAddressPortPair {
         } else {
             write!(
                 f,
-                "{:^9}|{:>10}  |{:>10}  | {} | {} |{}",
+                "{:^9}|{:>10}  |{:>9}   | {} | {} |{}",
                 app_string,
                 self.transmitted_packets,
                 bytes_string,

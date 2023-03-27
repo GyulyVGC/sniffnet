@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
 <p align="center"> 
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
@@ -19,7 +19,9 @@ Graphical interface translated in:<br>
 
 </div>
 
-<hr>
+<a href="#">
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
+</a>
 
 <p align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></p>
 
@@ -28,7 +30,9 @@ Graphical interface translated in:<br>
 <img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
 </p>
 
-<hr>
+<a href="#installation">
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
+</a>
 
 
 ## Installation
@@ -165,10 +169,8 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
   Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
 
-  > The MMDB (MaxMind database) format has been developed especially for IP lookup.
-  > 
-  > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.
-  > 
+  > The MMDB (MaxMind database) format has been developed especially for IP lookup.<br>
+  > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.<br>
   > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
   > 
   > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>

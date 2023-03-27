@@ -176,10 +176,10 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
 
     if multiple_transmitted.is_empty() {
         // no multiple
-        format!("{n}   ")
+        format!("{n}  ")
     } else {
         // with multiple
-        format!("{n:.1} {multiple_transmitted} ")
+        format!("{n:.1} {multiple_transmitted}")
     }
 }
 
