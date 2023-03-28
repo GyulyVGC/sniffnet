@@ -2,6 +2,7 @@
 
 use crate::enums::element_type::ElementType;
 use crate::get_colors;
+use crate::structs::palette::mix_colors;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH, STARRED};
 use iced::widget::button;
@@ -61,10 +62,11 @@ impl button::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
         button::Appearance {
-            shadow_offset: Vector::new(2.0, 2.0),
+            shadow_offset: Vector::new(0.0, 2.0),
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Starred) => STARRED,
-                _ => colors.primary,
+                StyleTuple(_, ElementType::TabActive) => colors.primary,
+                _ => mix_colors(colors.primary, colors.buttons),
             })),
             border_radius: match self {
                 StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
@@ -74,12 +76,14 @@ impl button::StyleSheet for StyleTuple {
             border_width: match self {
                 StyleTuple(
                     _,
-                    ElementType::Starred | ElementType::NotStarred | ElementType::TabActive,
+                    ElementType::Starred
+                    | ElementType::NotStarred
+                    | ElementType::TabActive
+                    | ElementType::TabInactive,
                 ) => 0.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::TabInactive) => colors.buttons,
                 StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
                 _ => colors.secondary,
             },

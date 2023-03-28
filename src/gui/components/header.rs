@@ -8,7 +8,7 @@ use crate::utility::style_constants::{get_font, ICONS};
 use crate::utility::translations::{quit_analysis_translation, settings_translation};
 use crate::{Language, StyleType};
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, horizontal_space, Container, Row, Text, Tooltip};
+use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
@@ -54,8 +54,7 @@ pub fn header(
                 Container::new(get_button_settings(style, language, last_opened_setting))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center),
-            )
-            .push(horizontal_space(Length::Fixed(15.0))),
+            ),
     )
     .height(Length::Fixed(95.0))
     .align_y(Vertical::Center)

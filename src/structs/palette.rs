@@ -64,6 +64,16 @@ pub fn to_rgb_color(color: Color) -> RGBColor {
     }
 }
 
+/// Returns the average of two colors; color intensity is fixed to 100%
+pub fn mix_colors(color_1: Color, color_2: Color) -> Color {
+    Color {
+        r: (color_1.r + color_2.r) / 2.0,
+        g: (color_1.g + color_2.g) / 2.0,
+        b: (color_1.b + color_2.b) / 2.0,
+        a: 1.0,
+    }
+}
+
 impl Default for Palette {
     fn default() -> Self {
         get_colors(StyleType::Night)
