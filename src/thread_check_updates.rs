@@ -1,5 +1,5 @@
 use crate::utility::get_formatted_strings::APP_VERSION;
-use reqwest::header::USER_AGENT;
+use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -10,7 +10,7 @@ struct AppVersion {
     name: String,
 }
 
-/// Call method to check if a newer release of Sniffnet is available on GitHub
+/// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
 pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Result<bool, String>>>) {
     let result = is_newer_release_available(6, 30);
@@ -26,6 +26,7 @@ fn is_newer_release_available(
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
         .header(USER_AGENT, format!("sniffnet/{APP_VERSION}"))
+        .header(ACCEPT, "application/vnd.github+json")
         .send();
 
     if let Ok(result) = response {

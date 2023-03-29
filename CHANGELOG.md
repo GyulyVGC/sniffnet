@@ -1,6 +1,18 @@
 # Change Log
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+
+- Added Romanian translation 🇷🇴
+- Added feature to warn you when a newer version of Sniffnet is available on GitHub 🆕
+- Added badge on tab bar to show unread notifications count
+- Started improving styles to create a more modern and minimal UI
+- Changed keyboard shortcut to open settings from `ctrl+S` to `ctrl+,`, as suggested in [#97](https://github.com/GyulyVGC/sniffnet/issues/97)
+- Fixed problem that was causing a switch to the initial page when back button was pressed with settings opened on running page and with no packets received
+- Fixed problem that was causing application logo to be partially hidden when resizing the window to a lower dimension
+- Show `-` option in app protocol picklist only when a filter is active
+- Fixed header alignment
+
 
 ## [1.1.2] - 2023-03-18
 

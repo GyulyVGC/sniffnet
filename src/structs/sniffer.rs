@@ -70,13 +70,13 @@ impl Sniffer {
         status_pair: Arc<(Mutex<Status>, Condvar)>,
         config_settings: &ConfigSettings,
         config_device: &ConfigDevice,
-        is_newer_release_available: Arc<Mutex<Result<bool, String>>>,
+        newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
             current_capture_id,
             info_traffic,
             status_pair,
-            newer_release_available: is_newer_release_available,
+            newer_release_available,
             runtime_data: runtime_data.clone(),
             device: config_device.to_pcap_device(),
             last_device_name_sniffed: config_device.device_name.clone(),
