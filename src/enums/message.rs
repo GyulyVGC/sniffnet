@@ -29,8 +29,8 @@ pub enum Message {
     UnSaveConnection(usize),
     /// Open Sniffnet's complete textual report
     OpenReport,
-    /// Open Sniffnet's GitHub page
-    OpenGithub,
+    /// Open Sniffnet's GitHub main page if true is passed, latest release page otherwise
+    OpenGithub(bool),
     /// Start sniffing packets
     Start,
     /// Stop sniffing process and return to initial page

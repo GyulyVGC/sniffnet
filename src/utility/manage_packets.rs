@@ -301,7 +301,7 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::utility::manage_packets::ipv6_from_long_dec_to_short_hex;
 
     #[test]

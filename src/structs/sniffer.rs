@@ -26,6 +26,8 @@ pub struct Sniffer {
     pub info_traffic: Arc<Mutex<InfoTraffic>>,
     /// Status of the application (init or running) and the associated condition variable
     pub status_pair: Arc<(Mutex<Status>, Condvar)>,
+    /// Reports if a newer release of the software is available on GitHub
+    pub newer_release_available: Arc<Mutex<Result<bool, String>>>,
     /// Traffic data displayed in GUI
     pub runtime_data: Rc<RefCell<RunTimeData>>,
     /// Network adapter to be analyzed
@@ -68,11 +70,13 @@ impl Sniffer {
         status_pair: Arc<(Mutex<Status>, Condvar)>,
         config_settings: &ConfigSettings,
         config_device: &ConfigDevice,
+        newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
             current_capture_id,
             info_traffic,
             status_pair,
+            newer_release_available,
             runtime_data: runtime_data.clone(),
             device: config_device.to_pcap_device(),
             last_device_name_sniffed: config_device.device_name.clone(),
