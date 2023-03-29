@@ -169,20 +169,22 @@ impl Application for Sniffer {
                         .unwrap();
                 }
             }
-            Message::OpenGithub => {
+            Message::OpenGithub(main_page) => {
+                let url = if main_page {
+                    "https://github.com/GyulyVGC/sniffnet"
+                } else {
+                    "https://github.com/GyulyVGC/sniffnet/releases/latest"
+                };
                 #[cfg(target_os = "windows")]
                 std::process::Command::new("explorer")
-                    .arg("https://github.com/GyulyVGC/sniffnet")
+                    .arg(url)
                     .spawn()
                     .unwrap();
                 #[cfg(target_os = "macos")]
-                std::process::Command::new("open")
-                    .arg("https://github.com/GyulyVGC/sniffnet")
-                    .spawn()
-                    .unwrap();
+                std::process::Command::new("open").arg(url).spawn().unwrap();
                 #[cfg(target_os = "linux")]
                 std::process::Command::new("xdg-open")
-                    .arg("https://github.com/GyulyVGC/sniffnet")
+                    .arg(url)
                     .spawn()
                     .unwrap();
             }
@@ -378,7 +380,9 @@ impl Application for Sniffer {
             Message::ResetButtonPressed => {
                 // also called when backspace key is pressed on a running state
                 if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
-                    return if self.info_traffic.lock().unwrap().all_packets == 0 {
+                    return if self.info_traffic.lock().unwrap().all_packets == 0
+                        && self.settings_page.is_none()
+                    {
                         self.update(Message::Reset)
                     } else {
                         self.update(Message::ShowModal(MyModal::Quit))
@@ -416,7 +420,11 @@ impl Application for Sniffer {
             },
         };
 
-        let content = Column::new().push(header).push(body).push(footer(style));
+        let content = Column::new().push(header).push(body).push(footer(
+            self.language,
+            style,
+            &self.newer_release_available.clone(),
+        ));
 
         if self.modal.is_none() && self.settings_page.is_none() {
             content.into()

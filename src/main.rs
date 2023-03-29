@@ -8,7 +8,7 @@ use std::{panic, process, thread};
 use iced::window::Position;
 use iced::{window, Application, Settings};
 
-use crate::check_updates::check_updates;
+use crate::thread_check_updates::set_newer_release_status;
 use utility::style_constants::FONT_SIZE_BODY;
 
 use crate::enums::app_protocol::AppProtocol;
@@ -30,10 +30,10 @@ use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::utility::get_formatted_strings::print_cli_welcome_message;
 
-mod check_updates;
 mod enums;
 mod gui;
 mod structs;
+mod thread_check_updates;
 mod thread_parse_packets;
 mod thread_write_report;
 mod utility;
@@ -50,6 +50,9 @@ pub fn main() -> iced::Result {
 
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
     let status_pair2 = status_pair1.clone();
+
+    let newer_release_available1 = Arc::new(Mutex::new(Err(String::new())));
+    let newer_release_available2 = newer_release_available1.clone();
 
     let runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
 
@@ -85,7 +88,7 @@ pub fn main() -> iced::Result {
     thread::Builder::new()
         .name("thread_check_updates".to_string())
         .spawn(move || {
-            check_updates();
+            set_newer_release_status(&newer_release_available2);
         })
         .unwrap();
 
@@ -112,6 +115,7 @@ pub fn main() -> iced::Result {
             status_pair1,
             &config_settings,
             &config_device,
+            newer_release_available1,
         ),
         default_font: Some(include_bytes!(
             "../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf"

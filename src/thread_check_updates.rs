@@ -1,6 +1,7 @@
 use crate::utility::get_formatted_strings::APP_VERSION;
 use reqwest::header::USER_AGENT;
 use serde::Deserialize;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -9,12 +10,15 @@ struct AppVersion {
     name: String,
 }
 
-pub fn check_updates() {
-    let _ = is_newer_version_available(6, 30);
+/// Call method to check if a newer release of Sniffnet is available on GitHub
+/// and updates application status accordingly
+pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Result<bool, String>>>) {
+    let result = is_newer_release_available(6, 30);
+    *newer_release_available.lock().unwrap() = result;
 }
 
-/// Checks if a newer version of Sniffnet is available on GitHub
-fn is_newer_version_available(
+/// Checks if a newer release of Sniffnet is available on GitHub
+fn is_newer_release_available(
     max_retries: u8,
     seconds_between_retries: u8,
 ) -> Result<bool, String> {
@@ -28,10 +32,20 @@ fn is_newer_version_available(
         let mut latest_version = result
             .json::<AppVersion>()
             .unwrap_or(AppVersion {
-                name: String::new(),
+                name: String::from(":-("),
             })
             .name;
-        if latest_version.len() == 6 {
+
+        // release name sample: v1.1.2
+        let latest_version_as_bytes = latest_version.as_bytes();
+        if latest_version.len() == 6
+            && latest_version.starts_with('v')
+            && char::from(latest_version_as_bytes[1]).is_numeric()
+            && char::from(latest_version_as_bytes[2]).eq(&'.')
+            && char::from(latest_version_as_bytes[3]).is_numeric()
+            && char::from(latest_version_as_bytes[4]).eq(&'.')
+            && char::from(latest_version_as_bytes[5]).is_numeric()
+        {
             latest_version.remove(0);
             return if latest_version.gt(&APP_VERSION.to_string()) {
                 Ok(true)
@@ -39,13 +53,13 @@ fn is_newer_version_available(
                 Ok(false)
             };
         }
-        Err("Cannot parse latest version name".to_string())
+        Err(format!("Cannot parse latest version name {latest_version}"))
     } else {
         let retries_left = max_retries - 1;
         if retries_left > 0 {
-            // sleep 30 seconds and retries the request
+            // sleep seconds_between_retries and retries the request
             thread::sleep(Duration::from_secs(u64::from(seconds_between_retries)));
-            is_newer_version_available(retries_left, seconds_between_retries)
+            is_newer_release_available(retries_left, seconds_between_retries)
         } else {
             Err(response.err().unwrap().to_string())
         }
@@ -58,7 +72,7 @@ mod tests {
 
     #[test]
     fn fetch_latest_release_from_github() {
-        let result = is_newer_version_available(6, 2);
+        let result = is_newer_release_available(6, 2);
         result.expect("Latest release request from GitHub error");
     }
 }

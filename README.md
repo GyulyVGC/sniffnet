@@ -205,8 +205,6 @@ sudo apt-get install libfontconfig libfontconfig1-dev
   The following table reports the port-to-service mappings used by Sniffnet,
   chosen from the most common assignments by IANA.
   
-  <br>
-  
 <div align="center">
 
 |Port number(s)|Application protocol  |  Description |
