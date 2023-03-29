@@ -20,7 +20,7 @@ Graphical interface translated in:<br>
 </div>
 
 <p>
-<a href="#">
+<a href="#x">
 <img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
 </a>
 </p>
@@ -33,7 +33,7 @@ Graphical interface translated in:<br>
 </div>
 
 <p>
-<a href="#installation">
+<a href="#x">
 <img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
 </a>
 </p>
@@ -42,19 +42,6 @@ Graphical interface translated in:<br>
 ## Installation
 
 You can install Sniffnet in one of the following ways:
-
-<details>
-
-  <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
-
-  Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
-  In this case, the application binary can be installed with: 
-
-```sh
-cargo install sniffnet
-```
-    
-</details>
 
 
 <details>
@@ -74,9 +61,23 @@ cargo install sniffnet
 
 <details>
 
-  <summary>from Homebrew&ensp;<img alt="" src="https://img.shields.io/homebrew/installs/dy/sniffnet?color=success&logo=homebrew"/></summary>
+  <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
 
-  You can install Sniffnet's Homebrew package with:
+Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
+In this case, the application binary can be installed with:
+
+```sh
+cargo install sniffnet
+```
+
+</details>
+
+
+<details>
+
+  <summary>from Homebrew</summary>
+
+  You can install [Sniffnet Homebrew package](https://github.com/Homebrew/homebrew-core/pkgs/container/core%2Fsniffnet) with:
   
   ```sh
 brew install sniffnet
@@ -181,7 +182,7 @@ sudo apt-get install libfontconfig libfontconfig1-dev
   
   This format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
 
-  Sometimes it is not possible to determine the location of an IP address; this is most likely due to the address being a private IP address.
+  Sometimes it is not possible to determine the location of an IP address (in this case the country will be marked as `?`); this is most likely due to the address being a private IP address.
 
 </details>
 
@@ -193,7 +194,16 @@ sudo apt-get install libfontconfig libfontconfig1-dev
   
   <br>
   
-  Please, note that application layer protocols are just inferred from the transport port numbers.
+  Application layer protocols are inferred from the transport port numbers,
+  following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
+
+  Please, remember that this is just a convention:
+  > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
+  > the official assignments of port numbers for specific uses. <br>
+  > However, many unofficial uses of well-known port numbers occur in practice.
+
+  The following table reports the port-to-service mappings used by Sniffnet,
+  chosen from the most common assignments by IANA.
   
   <br>
   
@@ -296,14 +306,6 @@ Reach me out, and I'll try to generate an installer for your specific operating 
 
 </details>
 
-<!---
-## Contribute
-
-Do you want to improve Sniffnet? Check [here](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) 
-
-Sniffnet is also open to design contributions: <br>
-[![contribute.design](https://contribute.design/api/shield/GyulyVGC/sniffnet)](https://contribute.design/GyulyVGC/sniffnet)
---->
 
 ## Acknowledgements
 

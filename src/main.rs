@@ -8,6 +8,7 @@ use std::{panic, process, thread};
 use iced::window::Position;
 use iced::{window, Application, Settings};
 
+use crate::check_updates::check_updates;
 use utility::style_constants::FONT_SIZE_BODY;
 
 use crate::enums::app_protocol::AppProtocol;
@@ -29,6 +30,7 @@ use crate::structs::traffic_chart::TrafficChart;
 use crate::thread_write_report::sleep_and_write_report_loop;
 use crate::utility::get_formatted_strings::print_cli_welcome_message;
 
+mod check_updates;
 mod enums;
 mod gui;
 mod structs;
@@ -77,6 +79,13 @@ pub fn main() -> iced::Result {
         .name("thread_write_report".to_string())
         .spawn(move || {
             sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
+        })
+        .unwrap();
+
+    thread::Builder::new()
+        .name("thread_check_updates".to_string())
+        .spawn(move || {
+            check_updates();
         })
         .unwrap();
 
