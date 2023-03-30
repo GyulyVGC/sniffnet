@@ -49,13 +49,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
-        let observed = sniffer.runtime_data.borrow().all_packets;
-        let filtered = sniffer.runtime_data.borrow().tot_sent_packets
-            + sniffer.runtime_data.borrow().tot_received_packets;
-        let observed_bytes = sniffer.runtime_data.borrow().all_bytes;
-        let filtered_bytes = sniffer.runtime_data.borrow().tot_sent_bytes
-            + sniffer.runtime_data.borrow().tot_received_bytes;
-        let app_protocols = sniffer.runtime_data.borrow().app_protocols.clone();
+        let observed = sniffer.runtime_data.all_packets;
+        let filtered =
+            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
+        let observed_bytes = sniffer.runtime_data.all_bytes;
+        let filtered_bytes =
+            sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+        let app_protocols = sniffer.runtime_data.app_protocols.clone();
         let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
 
         match (observed, filtered) {

@@ -1,7 +1,5 @@
 //! Module containing the entry point of application execution.
 
-use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
@@ -53,8 +51,6 @@ pub fn main() -> iced::Result {
 
     let newer_release_available1 = Arc::new(Mutex::new(Err(String::new())));
     let newer_release_available2 = newer_release_available1.clone();
-
-    let runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
 
     // to kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
@@ -111,7 +107,6 @@ pub fn main() -> iced::Result {
         flags: Sniffer::new(
             current_capture_id1,
             mutex_map1,
-            runtime_data,
             status_pair1,
             &config_settings,
             &config_device,

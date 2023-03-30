@@ -2,8 +2,6 @@
 //! to share data among the different threads.
 
 use pcap::Device;
-use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::{Arc, Condvar, Mutex};
 
 use crate::enums::language::Language;
@@ -29,7 +27,7 @@ pub struct Sniffer {
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Arc<Mutex<Result<bool, String>>>,
     /// Traffic data displayed in GUI
-    pub runtime_data: Rc<RefCell<RunTimeData>>,
+    pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed
     pub device: Device,
     /// Last network adapter name for which packets were observed; saved into config file
@@ -66,7 +64,6 @@ impl Sniffer {
     pub fn new(
         current_capture_id: Arc<Mutex<u16>>,
         info_traffic: Arc<Mutex<InfoTraffic>>,
-        runtime_data: Rc<RefCell<RunTimeData>>,
         status_pair: Arc<(Mutex<Status>, Condvar)>,
         config_settings: &ConfigSettings,
         config_device: &ConfigDevice,
@@ -77,7 +74,7 @@ impl Sniffer {
             info_traffic,
             status_pair,
             newer_release_available,
-            runtime_data,
+            runtime_data: RunTimeData::new(),
             device: config_device.to_pcap_device(),
             last_device_name_sniffed: config_device.device_name.clone(),
             filters: Filters::default(),

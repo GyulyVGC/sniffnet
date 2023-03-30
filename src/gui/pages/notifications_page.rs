@@ -67,11 +67,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
-        && sniffer
-            .runtime_data
-            .borrow()
-            .logged_notifications
-            .is_empty()
+        && sniffer.runtime_data.logged_notifications.is_empty()
     {
         body = body
             .width(Length::Fill)
@@ -92,12 +88,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             ))
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer
-        .runtime_data
-        .borrow()
-        .logged_notifications
-        .is_empty()
-    {
+    } else if sniffer.runtime_data.logged_notifications.is_empty() {
         body = body
             .width(Length::Fill)
             .padding(5)
@@ -114,7 +105,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
     } else {
-        for logged_notification in &sniffer.runtime_data.borrow().logged_notifications {
+        for logged_notification in &sniffer.runtime_data.logged_notifications {
             body = body.push(match logged_notification {
                 LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
                     packets_notification_log(
@@ -142,13 +133,11 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         let body_row = Row::new()
             .width(Length::Fill)
             .push(
-                Container::new(
-                    if sniffer.runtime_data.borrow().logged_notifications.len() < 30 {
-                        Text::new("")
-                    } else {
-                        Text::new(only_last_30_translation(sniffer.language)).font(font)
-                    },
-                )
+                Container::new(if sniffer.runtime_data.logged_notifications.len() < 30 {
+                    Text::new("")
+                } else {
+                    Text::new(only_last_30_translation(sniffer.language)).font(font)
+                })
                 .padding(10)
                 .width(Length::FillPortion(1))
                 .height(Length::Fill)

@@ -5,14 +5,13 @@ use crate::enums::sound::{play, Sound};
 use crate::structs::notifications::Notifications;
 use crate::{InfoTraffic, RunTimeData};
 use chrono::Local;
-use std::cell::RefMut;
 use std::sync::{Arc, Mutex};
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
-    mut runtime_data: RefMut<RunTimeData>,
+    runtime_data: &mut RunTimeData,
     notifications: Notifications,
     info_traffic: &Arc<Mutex<InfoTraffic>>,
 ) -> usize {

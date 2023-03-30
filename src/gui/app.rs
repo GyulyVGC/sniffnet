@@ -5,9 +5,7 @@
 use iced::widget::Column;
 use iced::{executor, window, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
-use std::cell::RefCell;
 use std::collections::{HashSet, VecDeque};
-use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
@@ -63,36 +61,32 @@ impl Application for Sniffer {
             Message::TickInit => {}
             Message::TickRun => {
                 let mut info_traffic_lock = self.info_traffic.lock().unwrap();
-                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
+                self.runtime_data.all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
                     drop(info_traffic_lock);
                     return self.update(Message::Waiting);
                 }
-                self.runtime_data.borrow_mut().tot_sent_packets =
-                    info_traffic_lock.tot_sent_packets;
-                self.runtime_data.borrow_mut().tot_received_packets =
-                    info_traffic_lock.tot_received_packets;
-                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
-                self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
-                self.runtime_data.borrow_mut().tot_received_bytes =
-                    info_traffic_lock.tot_received_bytes;
-                self.runtime_data.borrow_mut().tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
-                self.runtime_data.borrow_mut().app_protocols =
-                    info_traffic_lock.app_protocols.clone();
-                self.runtime_data.borrow_mut().favorites_last_interval =
+                self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets;
+                self.runtime_data.tot_received_packets = info_traffic_lock.tot_received_packets;
+                self.runtime_data.all_packets = info_traffic_lock.all_packets;
+                self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
+                self.runtime_data.tot_received_bytes = info_traffic_lock.tot_received_bytes;
+                self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
+                self.runtime_data.app_protocols = info_traffic_lock.app_protocols.clone();
+                self.runtime_data.favorites_last_interval =
                     info_traffic_lock.favorites_last_interval.clone();
                 info_traffic_lock.favorites_last_interval = HashSet::new();
                 drop(info_traffic_lock);
                 let emitted_notifications = notify_and_log(
-                    self.runtime_data.borrow_mut(),
+                    &mut self.runtime_data,
                     self.notifications,
                     &self.info_traffic.clone(),
                 );
                 if self.running_page.ne(&RunningPage::Notifications) {
                     self.unread_notifications += emitted_notifications;
                 }
-                update_charts_data(self.runtime_data.borrow_mut(), &mut self.traffic_chart);
+                update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
                 // update ConfigDevice stored if different from last sniffed device
                 if self.device.name.ne(&self.last_device_name_sniffed) {
                     self.last_device_name_sniffed = self.device.name.clone();
@@ -107,7 +101,7 @@ impl Application for Sniffer {
                 }
                 // waiting notifications
                 if self.running_page.eq(&RunningPage::Notifications)
-                    && self.runtime_data.borrow().logged_notifications.is_empty()
+                    && self.runtime_data.logged_notifications.is_empty()
                 {
                     return self.update(Message::Waiting);
                 }
@@ -184,7 +178,7 @@ impl Application for Sniffer {
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
+                self.runtime_data = RunTimeData::new();
                 self.traffic_chart = TrafficChart::new(self.style, self.language);
 
                 if pcap_error.is_none() {
@@ -303,7 +297,7 @@ impl Application for Sniffer {
                 self.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
-                self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
+                self.runtime_data.logged_notifications = VecDeque::new();
                 return self.update(Message::HideModal);
             }
             Message::Exit => {
@@ -370,7 +364,7 @@ impl Application for Sniffer {
             Message::CtrlDPressed => {
                 if self.status_pair.0.lock().unwrap().eq(&Status::Running)
                     && self.running_page.eq(&RunningPage::Notifications)
-                    && !self.runtime_data.borrow().logged_notifications.is_empty()
+                    && !self.runtime_data.logged_notifications.is_empty()
                 {
                     return self.update(Message::ShowModal(MyModal::ClearAll));
                 }
