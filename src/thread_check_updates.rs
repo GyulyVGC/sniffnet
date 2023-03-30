@@ -1,5 +1,4 @@
 use crate::utility::get_formatted_strings::APP_VERSION;
-use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -25,8 +24,9 @@ fn is_newer_release_available(
     let client = reqwest::blocking::Client::new();
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
-        .header(USER_AGENT, format!("sniffnet/{APP_VERSION}"))
-        .header(ACCEPT, "application/vnd.github+json")
+        .header("User-agent", "GyulyVGC")
+        .header("Accept", "application/vnd.github+json")
+        .header("X-GitHub-Api-Version", "2022-11-28")
         .send();
 
     if let Ok(result) = response {
