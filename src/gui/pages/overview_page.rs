@@ -35,7 +35,7 @@ use crate::utility::translations::{
 };
 use crate::{AppProtocol, ReportType, RunningPage};
 
-/// Computes the body of gui run page
+/// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
@@ -49,25 +49,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
-
-        let tabs = get_pages_tabs(
-            [
-                RunningPage::Overview,
-                //RunningPage::Inspect,
-                RunningPage::Notifications,
-            ],
-            &["d ", "7 "],
-            &[
-                Message::TickInit,
-                //Message::ChangeRunningPage(RunningPage::Inspect),
-                Message::ChangeRunningPage(RunningPage::Notifications),
-            ],
-            RunningPage::Overview,
-            sniffer.style,
-            sniffer.language,
-            sniffer.unread_notifications,
-        );
-
         let observed = sniffer.runtime_data.borrow().all_packets;
         let filtered = sniffer.runtime_data.borrow().tot_sent_packets
             + sniffer.runtime_data.borrow().tot_received_packets;
@@ -131,6 +112,23 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
 
+                let tabs = get_pages_tabs(
+                    [
+                        RunningPage::Overview,
+                        //RunningPage::Inspect,
+                        RunningPage::Notifications,
+                    ],
+                    &["d ", "7 "],
+                    &[
+                        Message::TickInit,
+                        //Message::ChangeRunningPage(RunningPage::Inspect),
+                        Message::ChangeRunningPage(RunningPage::Notifications),
+                    ],
+                    RunningPage::Overview,
+                    sniffer.style,
+                    sniffer.language,
+                    sniffer.unread_notifications,
+                );
                 tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
@@ -408,6 +406,7 @@ fn lazy_row_report(
                 .push(Text::new("  ").font(font));
             scroll_report = scroll_report.push(entry_row);
         }
+        drop(info_traffic_lock);
         col_report = col_report.push(Container::new(
             Scrollable::new(scroll_report)
                 .horizontal_scroll(Properties::new())

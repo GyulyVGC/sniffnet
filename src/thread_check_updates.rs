@@ -31,10 +31,18 @@ fn is_newer_release_available(
 
     if let Ok(result) = response {
         let result_json = result.json::<AppVersion>();
+
         #[cfg(test)]
         if result_json.is_err() {
-            println!("\n\nJSON result: {result_json:?}\n\n");
+            let response2 = client
+                .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
+                .header(USER_AGENT, format!("sniffnet/{APP_VERSION}"))
+                .header(ACCEPT, "application/vnd.github+json")
+                .send();
+            println!("\nResponse text: {:?}", response2.unwrap());
+            println!("JSON result: {result_json:?}\n");
         }
+
         let mut latest_version = result_json
             .unwrap_or(AppVersion {
                 name: String::from(":-("),

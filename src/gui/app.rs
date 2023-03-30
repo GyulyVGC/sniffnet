@@ -92,7 +92,7 @@ impl Application for Sniffer {
                 if self.running_page.ne(&RunningPage::Notifications) {
                     self.unread_notifications += emitted_notifications;
                 }
-                update_charts_data(self.runtime_data.borrow_mut());
+                update_charts_data(self.runtime_data.borrow_mut(), &mut self.traffic_chart);
                 // update ConfigDevice stored if different from last sniffed device
                 if self.device.name.ne(&self.last_device_name_sniffed) {
                     self.last_device_name_sniffed = self.device.name.clone();
@@ -185,8 +185,7 @@ impl Application for Sniffer {
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
                 self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
-                self.traffic_chart =
-                    TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
+                self.traffic_chart = TrafficChart::new(self.style, self.language);
 
                 if pcap_error.is_none() {
                     // no pcap error
