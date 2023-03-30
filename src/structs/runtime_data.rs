@@ -3,8 +3,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::enums::logged_notification::LoggedNotification;
-use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
 
 /// Struct containing useful data to generate charts and to display statistics about network traffic
@@ -23,8 +21,6 @@ pub struct RunTimeData {
     pub received_packets: VecDeque<(u32, i64)>,
     /// Application protocol with the respective number of filtered packets
     pub app_protocols: HashMap<AppProtocol, u128>,
-    /// Connection entries to be displayed in report column
-    pub report_vec: Vec<(AddressPortPair, InfoAddressPortPair)>,
     /// Total sent bytes filtered
     pub tot_sent_bytes: u128,
     /// Total received bytes filtered
@@ -68,7 +64,6 @@ impl RunTimeData {
             sent_packets: VecDeque::default(),
             received_packets: VecDeque::default(),
             app_protocols: HashMap::default(),
-            report_vec: Vec::default(),
             tot_sent_bytes: 0,
             tot_received_bytes: 0,
             tot_sent_packets: 0,

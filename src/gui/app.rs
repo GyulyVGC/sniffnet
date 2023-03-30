@@ -35,7 +35,6 @@ use crate::utility::get_formatted_strings::get_report_path;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_notifications::notify_and_log;
 use crate::utility::manage_packets::get_capture_result;
-use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
 use crate::{ConfigDevice, InfoTraffic, ReportType, RunTimeData};
 
@@ -94,11 +93,6 @@ impl Application for Sniffer {
                     self.unread_notifications += emitted_notifications;
                 }
                 update_charts_data(self.runtime_data.borrow_mut());
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
                 // update ConfigDevice stored if different from last sniffed device
                 if self.device.name.ne(&self.last_device_name_sniffed) {
                     self.last_device_name_sniffed = self.device.name.clone();
@@ -141,11 +135,6 @@ impl Application for Sniffer {
             Message::ReportSelection(what_to_display) => {
                 if what_to_display.ne(&self.report_type) {
                     self.report_type = what_to_display;
-                    update_report_data(
-                        self.runtime_data.borrow_mut(),
-                        &self.info_traffic,
-                        self.report_type,
-                    );
                 }
             }
             Message::OpenReport => {
@@ -243,11 +232,6 @@ impl Application for Sniffer {
                 let key_val = info_traffic.map.get_index_mut(index).unwrap();
                 key_val.1.is_favorite = true;
                 drop(info_traffic);
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
             }
             Message::UnSaveConnection(index) => {
                 let mut info_traffic = self.info_traffic.lock().unwrap();
@@ -255,11 +239,6 @@ impl Application for Sniffer {
                 let key_val = info_traffic.map.get_index_mut(index).unwrap();
                 key_val.1.is_favorite = false;
                 drop(info_traffic);
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
             }
             Message::ShowModal(modal) => {
                 if self.settings_page.is_none() && self.modal.is_none() {

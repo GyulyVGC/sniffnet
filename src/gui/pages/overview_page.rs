@@ -7,8 +7,10 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Font, Length};
+use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
+use std::cmp::min;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
@@ -16,6 +18,8 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
+use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::{get_flag_from_country_code, FLAGS_WIDTH};
@@ -191,111 +195,15 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 }
 
                 let active_radio_report = sniffer.report_type;
-                let row_radio_report =
-                    report_radios(active_radio_report, font, sniffer.style, sniffer.language);
-
-                let mut col_report = Column::new()
-                    .height(Length::Fill)
-                    .width(Length::Fill)
-                    .push(row_radio_report);
-
-                if sniffer.report_type.eq(&ReportType::Favorites)
-                    && sniffer.runtime_data.borrow().report_vec.is_empty()
-                {
-                    col_report = col_report.push(
-                        no_favorites_translation(sniffer.language)
-                            .font(font)
-                            .height(Length::Fill)
-                            .width(Length::Fill)
-                            .horizontal_alignment(Horizontal::Center)
-                            .vertical_alignment(Vertical::Center),
-                    );
-                } else {
-                    col_report = col_report
-                        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
-                        .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
-                    ;
-                    let mut scroll_report = Column::new();
-                    for key_val in &sniffer.runtime_data.borrow().report_vec {
-                        let entry_color =
-                            get_connection_color(key_val.1.traffic_type, sniffer.style);
-                        let mut entry_row = Row::new().align_items(Alignment::Center).push(
-                            Text::new(format!(
-                                "  {}{}",
-                                key_val.0.print_gui(),
-                                key_val.1.print_gui()
-                            ))
-                            .style(iced::theme::Text::Color(entry_color))
-                            .font(SARASA_MONO_SC_BOLD),
-                        );
-                        if key_val.1.country.is_empty() {
-                            entry_row = entry_row
-                                .push(
-                                    Text::new("?")
-                                        .width(Length::Fixed(FLAGS_WIDTH))
-                                        .style(iced::theme::Text::Color(entry_color))
-                                        .font(SARASA_MONO_SC_BOLD),
-                                )
-                                .push(Text::new("    "));
-                        } else {
-                            entry_row = entry_row
-                                .push(get_flag_from_country_code(&key_val.1.country))
-                                .push(Text::new("  "));
-                        }
-                        entry_row = entry_row
-                            .push(
-                                button(
-                                    Text::new('X'.to_string())
-                                        .font(ICONS)
-                                        .size(14)
-                                        .horizontal_alignment(Horizontal::Center)
-                                        .vertical_alignment(Vertical::Center),
-                                )
-                                .padding(0)
-                                .height(Length::Fixed(16.0))
-                                .width(Length::Fixed(16.0))
-                                .style(
-                                    StyleTuple(
-                                        sniffer.style,
-                                        if key_val.1.is_favorite {
-                                            ElementType::Starred
-                                        } else {
-                                            ElementType::NotStarred
-                                        },
-                                    )
-                                    .into(),
-                                )
-                                .on_press(
-                                    if key_val.1.is_favorite {
-                                        Message::UnSaveConnection(key_val.1.index)
-                                    } else {
-                                        Message::SaveConnection(key_val.1.index)
-                                    },
-                                ),
-                            )
-                            .push(Text::new("  ").font(font));
-                        scroll_report = scroll_report.push(entry_row);
-                    }
-                    col_report = col_report.push(
-                        Container::new(
-                            Scrollable::new(scroll_report)
-                                .horizontal_scroll(Properties::new())
-                                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                                    StyleTuple(sniffer.style, ElementType::Standard),
-                                )),
-                        ), // .padding([0, 0, 0, 25])
-                    );
-                };
-
-                let row_report = Row::new().push(
-                    Container::new(col_report)
-                        .padding([0, 5, 5, 5])
-                        .height(Length::Fill)
-                        .width(Length::Fixed(1080.0))
-                        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                        )),
-                );
+                let num_favorites = sniffer
+                    .info_traffic
+                    .lock()
+                    .unwrap()
+                    .favorite_connections
+                    .len();
+                let row_report = lazy((filtered, active_radio_report, num_favorites), move |_| {
+                    lazy_row_report(active_radio_report, num_favorites, font, sniffer)
+                });
 
                 let open_report_translation = open_report_translation(sniffer.language).to_string();
                 //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
@@ -384,4 +292,137 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn lazy_row_report(
+    active_radio_report: ReportType,
+    num_favorites: usize,
+    font: Font,
+    sniffer: &Sniffer,
+) -> Row<'static, Message> {
+    let row_radio_report =
+        report_radios(active_radio_report, font, sniffer.style, sniffer.language);
+    let mut col_report = Column::new()
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .push(row_radio_report);
+
+    if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
+        col_report = col_report.push(
+            no_favorites_translation(sniffer.language)
+                .font(font)
+                .height(Length::Fill)
+                .width(Length::Fill)
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        );
+    } else {
+        col_report = col_report
+                .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+                .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
+            ;
+        let mut scroll_report = Column::new();
+        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+
+        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
+        match sniffer.report_type {
+            ReportType::MostRecent => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec.sort_by(|&(_, a), &(_, b)| b.final_timestamp.cmp(&a.final_timestamp));
+            }
+            ReportType::MostPackets => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec
+                    .sort_by(|&(_, a), &(_, b)| b.transmitted_packets.cmp(&a.transmitted_packets));
+            }
+            ReportType::MostBytes => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec
+                    .sort_by(|&(_, a), &(_, b)| b.transmitted_bytes.cmp(&a.transmitted_bytes));
+            }
+            ReportType::Favorites => {
+                for index in &info_traffic_lock.favorite_connections {
+                    let key_val = info_traffic_lock.map.get_index(*index).unwrap();
+                    sorted_vec.push((key_val.0, key_val.1));
+                }
+            }
+        }
+
+        let n_entry = min(sorted_vec.len(), 15);
+
+        for i in 0..n_entry {
+            let key_val = *sorted_vec.get(i).unwrap();
+            let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
+            let mut entry_row = Row::new().align_items(Alignment::Center).push(
+                Text::new(format!(
+                    "  {}{}",
+                    key_val.0.print_gui(),
+                    key_val.1.print_gui()
+                ))
+                .style(iced::theme::Text::Color(entry_color))
+                .font(SARASA_MONO_SC_BOLD),
+            );
+            if key_val.1.country.is_empty() {
+                entry_row = entry_row
+                    .push(
+                        Text::new("?")
+                            .width(Length::Fixed(FLAGS_WIDTH))
+                            .style(iced::theme::Text::Color(entry_color))
+                            .font(SARASA_MONO_SC_BOLD),
+                    )
+                    .push(Text::new("    "));
+            } else {
+                entry_row = entry_row
+                    .push(get_flag_from_country_code(&key_val.1.country))
+                    .push(Text::new("  "));
+            }
+            entry_row = entry_row
+                .push(
+                    button(
+                        Text::new('X'.to_string())
+                            .font(ICONS)
+                            .size(14)
+                            .horizontal_alignment(Horizontal::Center)
+                            .vertical_alignment(Vertical::Center),
+                    )
+                    .padding(0)
+                    .height(Length::Fixed(16.0))
+                    .width(Length::Fixed(16.0))
+                    .style(
+                        StyleTuple(
+                            sniffer.style,
+                            if key_val.1.is_favorite {
+                                ElementType::Starred
+                            } else {
+                                ElementType::NotStarred
+                            },
+                        )
+                        .into(),
+                    )
+                    .on_press(if key_val.1.is_favorite {
+                        Message::UnSaveConnection(key_val.1.index)
+                    } else {
+                        Message::SaveConnection(key_val.1.index)
+                    }),
+                )
+                .push(Text::new("  ").font(font));
+            scroll_report = scroll_report.push(entry_row);
+        }
+        col_report = col_report.push(Container::new(
+            Scrollable::new(scroll_report)
+                .horizontal_scroll(Properties::new())
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+        ));
+    };
+    Row::new().push(
+        Container::new(col_report)
+            .padding([0, 5, 5, 5])
+            .height(Length::Fill)
+            .width(Length::Fixed(1080.0))
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(sniffer.style, ElementType::BorderedRound),
+            )),
+    )
 }

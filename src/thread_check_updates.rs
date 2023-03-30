@@ -30,12 +30,17 @@ fn is_newer_release_available(
         .send();
 
     if let Ok(result) = response {
-        let mut latest_version = result
-            .json::<AppVersion>()
+        let result_json = result.json::<AppVersion>();
+        #[cfg(test)]
+        if result_json.is_err() {
+            println!("\n\nJSON result: {result_json:?}\n\n");
+        }
+        let mut latest_version = result_json
             .unwrap_or(AppVersion {
                 name: String::from(":-("),
             })
             .name;
+        latest_version = latest_version.trim().to_string();
 
         // release name sample: v1.1.2
         let latest_version_as_bytes = latest_version.as_bytes();
