@@ -7,7 +7,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use std::cmp::min;
@@ -52,11 +52,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         let observed = sniffer.runtime_data.all_packets;
         let filtered =
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
-        let observed_bytes = sniffer.runtime_data.all_bytes;
-        let filtered_bytes =
-            sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-        let app_protocols = sniffer.info_traffic.lock().unwrap().app_protocols.clone();
-        let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -146,51 +141,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 ));
 
-                let mut col_packets = Column::new()
-                    //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-                    //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
-                    //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
-                    .push(
-                        Text::new(get_active_filters_string(
-                            &sniffer.filters.clone(),
-                            sniffer.language,
-                        ))
-                        .font(font),
-                    )
-                    .push(Text::new(" "))
-                    .push(
-                        filtered_packets_translation(
-                            sniffer.language,
-                            &filtered.separate_with_spaces(),
-                            &get_percentage_string(observed, filtered),
-                        )
-                        .font(font),
-                    )
-                    .push(Text::new(" "))
-                    .push(
-                        filtered_bytes_translation(
-                            sniffer.language,
-                            &filtered_bytes_string,
-                            &get_percentage_string(observed_bytes, filtered_bytes),
-                        )
-                        .font(font),
-                    );
-                if sniffer.filters.application.eq(&AppProtocol::Other) {
-                    col_packets = col_packets
-                        .push(Text::new(" "))
-                        .push(filtered_application_translation(sniffer.language).font(font))
-                        .push(
-                            Scrollable::new(
-                                Text::new(get_app_count_string(&app_protocols, filtered))
-                                    .font(font),
-                            )
-                            .style(<StyleTuple as Into<
-                                iced::theme::Scrollable,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        );
-                }
+                let col_packets = lazy((observed, sniffer.style, sniffer.language), move |_| {
+                    lazy_col_packets(observed, filtered, sniffer)
+                });
 
                 let active_radio_report = sniffer.report_type;
                 let num_favorites = sniffer
@@ -199,9 +152,16 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     .unwrap()
                     .favorite_connections
                     .len();
-                let row_report = lazy((filtered, active_radio_report, num_favorites), move |_| {
-                    lazy_row_report(active_radio_report, num_favorites, font, sniffer)
-                });
+                let row_report = lazy(
+                    (
+                        filtered,
+                        active_radio_report,
+                        num_favorites,
+                        sniffer.style,
+                        sniffer.language,
+                    ),
+                    move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
+                );
 
                 let open_report_translation = open_report_translation(sniffer.language).to_string();
                 //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
@@ -295,9 +255,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 fn lazy_row_report(
     active_radio_report: ReportType,
     num_favorites: usize,
-    font: Font,
     sniffer: &Sniffer,
 ) -> Row<'static, Message> {
+    let font = get_font(sniffer.style);
     let row_radio_report =
         report_radios(active_radio_report, font, sniffer.style, sniffer.language);
     let mut col_report = Column::new()
@@ -424,4 +384,57 @@ fn lazy_row_report(
                 StyleTuple(sniffer.style, ElementType::BorderedRound),
             )),
     )
+}
+
+fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column<'static, Message> {
+    let font = get_font(sniffer.style);
+    let filtered_bytes =
+        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let mut col_packets = Column::new()
+        //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
+        //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
+        //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
+        .push(
+            Text::new(get_active_filters_string(
+                &sniffer.filters.clone(),
+                sniffer.language,
+            ))
+            .font(font),
+        )
+        .push(Text::new(" "))
+        .push(
+            filtered_packets_translation(
+                sniffer.language,
+                &filtered.separate_with_spaces(),
+                &get_percentage_string(observed, filtered),
+            )
+            .font(font),
+        )
+        .push(Text::new(" "))
+        .push(
+            filtered_bytes_translation(
+                sniffer.language,
+                &get_formatted_bytes_string(filtered_bytes),
+                &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes),
+            )
+            .font(font),
+        );
+    if sniffer.filters.application.eq(&AppProtocol::Other) {
+        col_packets = col_packets
+            .push(Text::new(" "))
+            .push(filtered_application_translation(sniffer.language).font(font))
+            .push(
+                Scrollable::new(
+                    Text::new(get_app_count_string(
+                        &sniffer.info_traffic.lock().unwrap().app_protocols,
+                        filtered,
+                    ))
+                    .font(font),
+                )
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+            );
+    }
+    col_packets
 }

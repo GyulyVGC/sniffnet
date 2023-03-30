@@ -36,11 +36,8 @@ use crate::utility::manage_packets::get_capture_result;
 use crate::utility::style_constants::get_font;
 use crate::{ConfigDevice, InfoTraffic, ReportType, RunTimeData};
 
-/// Update period when app is running
-pub const PERIOD_RUNNING: u64 = 1000;
-//milliseconds
-/// Update period when app is in its initial state
-pub const PERIOD_INIT: u64 = 5000; //milliseconds
+/// Update period (milliseconds)
+pub const PERIOD_TICK: u64 = 1000;
 
 impl Application for Sniffer {
     type Executor = executor::Default;
@@ -472,10 +469,10 @@ impl Application for Sniffer {
             });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
+                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
             }
             Status::Init => {
-                iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit)
+                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
             }
         };
         Subscription::batch([hot_keys_subscription, time_subscription])
