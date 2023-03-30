@@ -36,8 +36,9 @@ fn is_newer_release_available(
         if result_json.is_err() {
             let response2 = client
                 .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
-                .header(USER_AGENT, format!("sniffnet/{APP_VERSION}"))
-                .header(ACCEPT, "application/vnd.github+json")
+                .header("User-agent", "GyulyVGC")
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
                 .send();
             println!("\nResponse text: {:?}", response2.unwrap());
             println!("JSON result: {result_json:?}\n");
