@@ -60,7 +60,7 @@ impl Application for Sniffer {
         match message {
             Message::TickInit => {}
             Message::TickRun => {
-                let mut info_traffic_lock = self.info_traffic.lock().unwrap();
+                let info_traffic_lock = self.info_traffic.lock().unwrap();
                 self.runtime_data.all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
@@ -69,20 +69,16 @@ impl Application for Sniffer {
                 }
                 self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets;
                 self.runtime_data.tot_received_packets = info_traffic_lock.tot_received_packets;
-                self.runtime_data.all_packets = info_traffic_lock.all_packets;
                 self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
                 self.runtime_data.tot_received_bytes = info_traffic_lock.tot_received_bytes;
                 self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
-                self.runtime_data.app_protocols = info_traffic_lock.app_protocols.clone();
-                self.runtime_data.favorites_last_interval =
-                    info_traffic_lock.favorites_last_interval.clone();
-                info_traffic_lock.favorites_last_interval = HashSet::new();
                 drop(info_traffic_lock);
                 let emitted_notifications = notify_and_log(
                     &mut self.runtime_data,
                     self.notifications,
                     &self.info_traffic.clone(),
                 );
+                self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
                 if self.running_page.ne(&RunningPage::Notifications) {
                     self.unread_notifications += emitted_notifications;
                 }

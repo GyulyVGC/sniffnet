@@ -55,7 +55,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         let observed_bytes = sniffer.runtime_data.all_bytes;
         let filtered_bytes =
             sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-        let app_protocols = sniffer.runtime_data.app_protocols.clone();
+        let app_protocols = sniffer.info_traffic.lock().unwrap().app_protocols.clone();
         let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
 
         match (observed, filtered) {
