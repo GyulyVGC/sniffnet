@@ -1,11 +1,11 @@
 //! GUI upper header
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::settings_page::SettingsPage;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, ICONS};
-use crate::utility::translations::{quit_analysis_translation, settings_translation};
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{get_font, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::{Language, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};

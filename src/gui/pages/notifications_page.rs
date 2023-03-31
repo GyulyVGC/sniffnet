@@ -1,24 +1,24 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::logged_notification::{
-    BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
-};
-use crate::enums::message::Message;
-use crate::enums::my_modal::MyModal;
-use crate::enums::settings_page::SettingsPage;
-use crate::enums::traffic_type::TrafficType;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag_from_country_code;
-use crate::utility::get_formatted_strings::get_formatted_bytes_string;
-use crate::utility::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
-use crate::utility::translations::{
+use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::networking::types::traffic_type::TrafficType;
+use crate::notifications::types::logged_notification::{
+    BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
+};
+use crate::translations::translations::{
     application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation,
     clear_all_translation, favorite_transmitted_translation, incoming_translation,
     no_notifications_received_translation, no_notifications_set_translation,
     only_last_30_translation, outgoing_translation, packets_exceeded_translation,
     packets_exceeded_value_translation, per_second_translation, threshold_translation,
 };
+use crate::utils::countries::get_flag_from_country_code;
+use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};

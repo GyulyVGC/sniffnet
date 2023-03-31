@@ -1,6 +1,6 @@
 #![allow(clippy::enum_variant_names)]
 
-use crate::utility::translations::{
+use crate::translations::translations::{
     bytes_report_translation, favorite_report_translation, packets_report_translation,
     recent_report_translation,
 };

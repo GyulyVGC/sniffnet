@@ -1,12 +1,12 @@
 //! GUI bottom footer
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::style_type::StyleType;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::get_formatted_strings::APP_VERSION;
-use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
-use crate::utility::translations_2::new_version_available_translation;
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::message::Message;
+use crate::translations::translations_2::new_version_available_translation;
+use crate::utils::formatted_strings::APP_VERSION;
 use crate::Language;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};

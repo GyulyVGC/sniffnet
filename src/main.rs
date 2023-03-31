@@ -6,35 +6,38 @@ use std::{panic, process, thread};
 use iced::window::Position;
 use iced::{window, Application, Settings};
 
-use crate::thread_check_updates::set_newer_release_status;
-use utility::style_constants::FONT_SIZE_BODY;
+use crate::secondary_threads::check_updates::set_newer_release_status;
+use gui::styles::style_constants::FONT_SIZE_BODY;
 
-use crate::enums::app_protocol::AppProtocol;
-use crate::enums::byte_multiple::ByteMultiple;
-use crate::enums::chart_type::ChartType;
-use crate::enums::ip_version::IpVersion;
-use crate::enums::language::Language;
 use crate::enums::report_type::ReportType;
-use crate::enums::running_page::RunningPage;
-use crate::enums::status::Status;
-use crate::enums::style_type::StyleType;
-use crate::enums::trans_protocol::TransProtocol;
-use crate::structs::configs::{ConfigDevice, ConfigSettings};
-use crate::structs::info_traffic::InfoTraffic;
-use crate::structs::palette::get_colors;
-use crate::structs::runtime_data::RunTimeData;
-use crate::structs::sniffer::Sniffer;
-use crate::structs::traffic_chart::TrafficChart;
-use crate::thread_write_report::sleep_and_write_report_loop;
-use crate::utility::get_formatted_strings::print_cli_welcome_message;
+use crate::gui::pages::types::running_page::RunningPage;
+use crate::secondary_threads::write_report::sleep_and_write_report_loop;
+use crate::utils::formatted_strings::print_cli_welcome_message;
+use chart::types::chart_type::ChartType;
+use chart::types::traffic_chart::TrafficChart;
+use configs::types::config_device::ConfigDevice;
+use configs::types::config_settings::ConfigSettings;
+use gui::styles::types::palette::get_colors;
+use gui::styles::types::style_type::StyleType;
+use gui::types::runtime_data::RunTimeData;
+use gui::types::sniffer::Sniffer;
+use gui::types::status::Status;
+use networking::types::app_protocol::AppProtocol;
+use networking::types::byte_multiple::ByteMultiple;
+use networking::types::info_traffic::InfoTraffic;
+use networking::types::ip_version::IpVersion;
+use networking::types::trans_protocol::TransProtocol;
+use translations::types::language::Language;
 
+mod chart;
+mod configs;
 mod enums;
 mod gui;
-mod structs;
-mod thread_check_updates;
-mod thread_parse_packets;
-mod thread_write_report;
-mod utility;
+mod networking;
+mod notifications;
+mod secondary_threads;
+mod translations;
+mod utils;
 
 /// Entry point of application execution
 ///
@@ -75,16 +78,16 @@ pub fn main() -> iced::Result {
     let config_device = config_device_result.unwrap_or(ConfigDevice::default());
 
     thread::Builder::new()
-        .name("thread_write_report".to_string())
+        .name("thread_check_updates".to_string())
         .spawn(move || {
-            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
+            set_newer_release_status(&newer_release_available2);
         })
         .unwrap();
 
     thread::Builder::new()
-        .name("thread_check_updates".to_string())
+        .name("thread_write_report".to_string())
         .spawn(move || {
-            set_newer_release_status(&newer_release_available2);
+            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
         })
         .unwrap();
 

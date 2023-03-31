@@ -1,9 +1,9 @@
 //! Containers style
 
-use crate::enums::element_type::ElementType;
 use crate::get_colors;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
 use iced::widget::container::Appearance;
 use iced::Theme;
 use iced::{Background, Color};

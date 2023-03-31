@@ -1,10 +1,10 @@
 //! Tab buttons to be used in the various pages just under the header
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::settings_page::SettingsPage;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};

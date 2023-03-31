@@ -1,6 +1,6 @@
 //! Module defining the run page of the application.
 //!
-//! It contains elements to display traffic statistics: charts, detailed connections data
+//! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
@@ -14,24 +14,24 @@ use std::cmp::min;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
-use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::InfoAddressPortPair;
-use crate::structs::sniffer::Sniffer;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::{get_flag_from_country_code, FLAGS_WIDTH};
-use crate::utility::get_formatted_strings::{
-    get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
-};
-use crate::utility::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
-use crate::utility::translations::{
+use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::translations::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
     open_report_translation, some_observed_translation, waiting_translation,
+};
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
+use crate::utils::formatted_strings::{
+    get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
+    get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
 };
 use crate::{AppProtocol, ReportType, RunningPage};
 

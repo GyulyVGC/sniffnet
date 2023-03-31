@@ -1,8 +1,8 @@
 //! Checkbox style
 
 use crate::get_colors;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::BORDER_WIDTH;
+use crate::gui::styles::style_constants::BORDER_WIDTH;
+use crate::gui::styles::types::style_tuple::StyleTuple;
 use iced::widget::checkbox::Appearance;
 use iced::Background;
 

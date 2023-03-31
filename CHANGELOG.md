@@ -7,7 +7,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added feature to warn you when a newer version of Sniffnet is available on GitHub 🆕 ([#118](https://github.com/GyulyVGC/sniffnet/pull/118))
 - Added badge on tab bar to show unread notifications count 🔉
 - Introduction of `lazy` widgets to improve the application efficiency ([#122](https://github.com/GyulyVGC/sniffnet/pull/122))
-- Aesthetic improvements to create a more modern and minimal UI ([#119](https://github.com/GyulyVGC/sniffnet/issue/119))
+- Aesthetic improvements to create a more modern and minimal UI ([#119](https://github.com/GyulyVGC/sniffnet/issues/119))
 - Changed keyboard shortcut to open settings from `ctrl+S` to `ctrl+,`, as suggested in [#97](https://github.com/GyulyVGC/sniffnet/issues/97)
 - Fixed problem that was causing a switch to the initial page when back button was pressed with settings opened on running page and with no packets received
 - Fixed problem that was causing application logo to be partially hidden when resizing the window to a lower dimension

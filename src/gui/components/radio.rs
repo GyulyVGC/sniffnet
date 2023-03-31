@@ -1,14 +1,16 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::sound::Sound;
-use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag_from_language_code;
-use crate::utility::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
-use crate::utility::translations::{
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::notifications::types::notifications::{
+    BytesNotification, FavoriteNotification, PacketsNotification,
+};
+use crate::notifications::types::sound::Sound;
+use crate::translations::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
     traffic_rate_translation, transport_protocol_translation,
 };
+use crate::utils::countries::get_flag_from_language_code;
 use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};

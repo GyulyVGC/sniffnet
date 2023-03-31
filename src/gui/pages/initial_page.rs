@@ -11,13 +11,13 @@ use iced::{alignment, Alignment, Font, Length};
 use iced_native::widget::tooltip::Position;
 use pcap::Device;
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
-use crate::structs::sniffer::Sniffer;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
-use crate::utility::translations::{
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::gui::types::sniffer::Sniffer;
+use crate::translations::translations::{
     address_translation, addresses_translation, all_translation, application_protocol_translation,
     choose_adapters_translation, select_filters_translation, start_translation,
 };

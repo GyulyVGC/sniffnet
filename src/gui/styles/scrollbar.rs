@@ -1,8 +1,8 @@
 //! Scrollbars style
 
 use crate::get_colors;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::types::style_tuple::StyleTuple;
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::Theme;
 use iced::{Background, Color};

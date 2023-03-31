@@ -2,7 +2,7 @@
 // use crate::enums::message::Message;
 // use crate::gui::components::tab::get_pages_tabs;
 // use crate::structs::style_tuple::StyleTuple;
-// use crate::utility::style_constants::HEIGHT_BODY;
+// use crate::utils::style_constants::HEIGHT_BODY;
 // use crate::{RunningPage, Sniffer};
 // use iced::widget::{Column, Container};
 // use iced::Length::FillPortion;

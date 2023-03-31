@@ -9,31 +9,31 @@ use std::collections::{HashSet, VecDeque};
 use std::thread;
 use std::time::Duration;
 
-use crate::enums::message::Message;
-use crate::enums::my_modal::MyModal;
-use crate::enums::running_page::RunningPage;
-use crate::enums::sound::{play, Sound};
-use crate::enums::status::Status;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
+use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::initial_page::initial_page;
+use crate::gui::pages::types::running_page::RunningPage;
+use crate::gui::types::message::Message;
+use crate::gui::types::status::Status;
+use crate::notifications::types::sound::{play, Sound};
 // use crate::gui::pages::inspect_page::inspect_page;
-use crate::enums::settings_page::SettingsPage;
+use crate::chart::manage_chart_data::update_charts_data;
+use crate::chart::types::traffic_chart::TrafficChart;
+use crate::configs::types::config_settings::ConfigSettings;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_language_page::settings_language_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
-use crate::structs::configs::ConfigSettings;
-use crate::structs::sniffer::Sniffer;
-use crate::structs::traffic_chart::TrafficChart;
-use crate::thread_parse_packets::parse_packets_loop;
-use crate::utility::get_formatted_strings::get_report_path;
-use crate::utility::manage_charts_data::update_charts_data;
-use crate::utility::manage_notifications::notify_and_log;
-use crate::utility::manage_packets::get_capture_result;
-use crate::utility::style_constants::get_font;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::get_font;
+use crate::gui::types::sniffer::Sniffer;
+use crate::networking::manage_packets::get_capture_result;
+use crate::notifications::notify_and_log::notify_and_log;
+use crate::secondary_threads::parse_packets::parse_packets;
+use crate::utils::formatted_strings::get_report_path;
 use crate::{ConfigDevice, InfoTraffic, ReportType, RunTimeData};
 
 /// Update period (milliseconds)
@@ -183,7 +183,7 @@ impl Application for Sniffer {
                     thread::Builder::new()
                         .name("thread_parse_packets".to_string())
                         .spawn(move || {
-                            parse_packets_loop(
+                            parse_packets(
                                 &current_capture_id,
                                 device.clone(),
                                 cap.unwrap(),

@@ -1,13 +1,13 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::settings_page::SettingsPage;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{
     get_font, DEEP_SEA, FONT_SIZE_SUBTITLE, MON_AMOUR, YETI_DAY, YETI_NIGHT,
 };
-use crate::utility::translations::{
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
     yeti_day_translation, yeti_night_translation,
 };

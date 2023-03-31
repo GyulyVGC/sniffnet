@@ -1,8 +1,8 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
-use crate::utility::translations::{
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::translations::translations::{
     ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
     quit_analysis_translation, yes_translation,
 };

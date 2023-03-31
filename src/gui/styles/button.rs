@@ -1,10 +1,10 @@
 //! Buttons style
 
-use crate::enums::element_type::ElementType;
 use crate::get_colors;
-use crate::structs::palette::mix_colors;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH, STARRED};
+use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH, STARRED};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::palette::mix_colors;
+use crate::gui::styles::types::style_tuple::StyleTuple;
 use iced::widget::button;
 use iced::widget::button::Appearance;
 use iced::{Background, Color, Vector};
