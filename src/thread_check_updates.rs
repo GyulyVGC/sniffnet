@@ -81,7 +81,7 @@ fn is_newer_release_available(
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
 

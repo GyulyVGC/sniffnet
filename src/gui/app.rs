@@ -76,6 +76,7 @@ impl Application for Sniffer {
                     &self.info_traffic.clone(),
                 );
                 self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
+                self.runtime_data.tot_emitted_notifications += emitted_notifications;
                 if self.running_page.ne(&RunningPage::Notifications) {
                     self.unread_notifications += emitted_notifications;
                 }

@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use crate::enums::logged_notification::LoggedNotification;
 
-/// Struct containing useful data to generate charts and to display statistics about network traffic
+/// Struct containing useful data to display statistics about network traffic and the relative notifications
 pub struct RunTimeData {
     /// Total number of bytes (filtered and not filtered)
     pub all_bytes: u128,
@@ -28,6 +28,8 @@ pub struct RunTimeData {
     pub tot_received_packets_prev: u128,
     /// Log of the received notifications
     pub logged_notifications: VecDeque<LoggedNotification>,
+    /// The total number of emitted notifications
+    pub tot_emitted_notifications: usize,
 }
 
 impl RunTimeData {
@@ -45,6 +47,7 @@ impl RunTimeData {
             tot_sent_packets_prev: 0,
             tot_received_packets_prev: 0,
             logged_notifications: VecDeque::default(),
+            tot_emitted_notifications: 0,
         }
     }
 }
