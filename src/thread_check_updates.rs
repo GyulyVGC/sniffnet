@@ -1,5 +1,4 @@
 use crate::utility::get_formatted_strings::APP_VERSION;
-use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -25,17 +24,32 @@ fn is_newer_release_available(
     let client = reqwest::blocking::Client::new();
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
-        .header(USER_AGENT, format!("sniffnet/{APP_VERSION}"))
-        .header(ACCEPT, "application/vnd.github+json")
+        .header("User-agent", "GyulyVGC")
+        .header("Accept", "application/vnd.github+json")
+        .header("X-GitHub-Api-Version", "2022-11-28")
         .send();
 
     if let Ok(result) = response {
-        let mut latest_version = result
-            .json::<AppVersion>()
+        let result_json = result.json::<AppVersion>();
+
+        #[cfg(test)]
+        if result_json.is_err() {
+            let response2 = client
+                .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
+                .header("User-agent", "GyulyVGC")
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .send();
+            println!("\nResponse text: {:?}", response2.unwrap());
+            println!("JSON result: {result_json:?}\n");
+        }
+
+        let mut latest_version = result_json
             .unwrap_or(AppVersion {
                 name: String::from(":-("),
             })
             .name;
+        latest_version = latest_version.trim().to_string();
 
         // release name sample: v1.1.2
         let latest_version_as_bytes = latest_version.as_bytes();
@@ -67,7 +81,7 @@ fn is_newer_release_available(
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
 

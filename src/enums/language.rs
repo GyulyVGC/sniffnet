@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// This enum defines the available languages.
-#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]
 pub enum Language {
     /// English (default language).
     EN,

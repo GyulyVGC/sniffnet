@@ -8,7 +8,9 @@ use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
 use iced::{alignment, Alignment, Length};
+use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
+use std::cmp::min;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
@@ -16,6 +18,8 @@ use crate::enums::element_type::ElementType;
 use crate::enums::message::Message;
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
+use crate::structs::address_port_pair::AddressPortPair;
+use crate::structs::info_address_port_pair::InfoAddressPortPair;
 use crate::structs::sniffer::Sniffer;
 use crate::structs::style_tuple::StyleTuple;
 use crate::utility::countries::{get_flag_from_country_code, FLAGS_WIDTH};
@@ -31,7 +35,7 @@ use crate::utility::translations::{
 };
 use crate::{AppProtocol, ReportType, RunningPage};
 
-/// Computes the body of gui run page
+/// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
@@ -45,33 +49,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
-
-        let tabs = get_pages_tabs(
-            [
-                RunningPage::Overview,
-                //RunningPage::Inspect,
-                RunningPage::Notifications,
-            ],
-            &["d ", "7 "],
-            &[
-                Message::TickInit,
-                //Message::ChangeRunningPage(RunningPage::Inspect),
-                Message::ChangeRunningPage(RunningPage::Notifications),
-            ],
-            RunningPage::Overview,
-            sniffer.style,
-            sniffer.language,
-            sniffer.unread_notifications,
-        );
-
-        let observed = sniffer.runtime_data.borrow().all_packets;
-        let filtered = sniffer.runtime_data.borrow().tot_sent_packets
-            + sniffer.runtime_data.borrow().tot_received_packets;
-        let observed_bytes = sniffer.runtime_data.borrow().all_bytes;
-        let filtered_bytes = sniffer.runtime_data.borrow().tot_sent_bytes
-            + sniffer.runtime_data.borrow().tot_received_bytes;
-        let app_protocols = sniffer.runtime_data.borrow().app_protocols.clone();
-        let filtered_bytes_string = get_formatted_bytes_string(filtered_bytes);
+        let observed = sniffer.runtime_data.all_packets;
+        let filtered =
+            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
 
         match (observed, filtered) {
             (0, 0) => {
@@ -127,6 +107,23 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
 
+                let tabs = get_pages_tabs(
+                    [
+                        RunningPage::Overview,
+                        //RunningPage::Inspect,
+                        RunningPage::Notifications,
+                    ],
+                    &["d ", "7 "],
+                    &[
+                        Message::TickInit,
+                        //Message::ChangeRunningPage(RunningPage::Inspect),
+                        Message::ChangeRunningPage(RunningPage::Notifications),
+                    ],
+                    RunningPage::Overview,
+                    sniffer.style,
+                    sniffer.language,
+                    sniffer.unread_notifications,
+                );
                 tab_and_body = tab_and_body.push(tabs);
 
                 let active_radio_chart = sniffer.traffic_chart.chart_type;
@@ -144,157 +141,26 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 ));
 
-                let mut col_packets = Column::new()
-                    //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-                    //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
-                    //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
-                    .push(
-                        Text::new(get_active_filters_string(
-                            &sniffer.filters.clone(),
-                            sniffer.language,
-                        ))
-                        .font(font),
-                    )
-                    .push(Text::new(" "))
-                    .push(
-                        filtered_packets_translation(
-                            sniffer.language,
-                            &filtered.separate_with_spaces(),
-                            &get_percentage_string(observed, filtered),
-                        )
-                        .font(font),
-                    )
-                    .push(Text::new(" "))
-                    .push(
-                        filtered_bytes_translation(
-                            sniffer.language,
-                            &filtered_bytes_string,
-                            &get_percentage_string(observed_bytes, filtered_bytes),
-                        )
-                        .font(font),
-                    );
-                if sniffer.filters.application.eq(&AppProtocol::Other) {
-                    col_packets = col_packets
-                        .push(Text::new(" "))
-                        .push(filtered_application_translation(sniffer.language).font(font))
-                        .push(
-                            Scrollable::new(
-                                Text::new(get_app_count_string(&app_protocols, filtered))
-                                    .font(font),
-                            )
-                            .style(<StyleTuple as Into<
-                                iced::theme::Scrollable,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        );
-                }
+                let col_packets = lazy((observed, sniffer.style, sniffer.language), move |_| {
+                    lazy_col_packets(observed, filtered, sniffer)
+                });
 
                 let active_radio_report = sniffer.report_type;
-                let row_radio_report =
-                    report_radios(active_radio_report, font, sniffer.style, sniffer.language);
-
-                let mut col_report = Column::new()
-                    .height(Length::Fill)
-                    .width(Length::Fill)
-                    .push(row_radio_report);
-
-                if sniffer.report_type.eq(&ReportType::Favorites)
-                    && sniffer.runtime_data.borrow().report_vec.is_empty()
-                {
-                    col_report = col_report.push(
-                        no_favorites_translation(sniffer.language)
-                            .font(font)
-                            .height(Length::Fill)
-                            .width(Length::Fill)
-                            .horizontal_alignment(Horizontal::Center)
-                            .vertical_alignment(Vertical::Center),
-                    );
-                } else {
-                    col_report = col_report
-                        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
-                        .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
-                    ;
-                    let mut scroll_report = Column::new();
-                    for key_val in &sniffer.runtime_data.borrow().report_vec {
-                        let entry_color =
-                            get_connection_color(key_val.1.traffic_type, sniffer.style);
-                        let mut entry_row = Row::new().align_items(Alignment::Center).push(
-                            Text::new(format!(
-                                "  {}{}",
-                                key_val.0.print_gui(),
-                                key_val.1.print_gui()
-                            ))
-                            .style(iced::theme::Text::Color(entry_color))
-                            .font(SARASA_MONO_SC_BOLD),
-                        );
-                        if key_val.1.country.is_empty() {
-                            entry_row = entry_row
-                                .push(
-                                    Text::new("?")
-                                        .width(Length::Fixed(FLAGS_WIDTH))
-                                        .style(iced::theme::Text::Color(entry_color))
-                                        .font(SARASA_MONO_SC_BOLD),
-                                )
-                                .push(Text::new("    "));
-                        } else {
-                            entry_row = entry_row
-                                .push(get_flag_from_country_code(&key_val.1.country))
-                                .push(Text::new("  "));
-                        }
-                        entry_row = entry_row
-                            .push(
-                                button(
-                                    Text::new('X'.to_string())
-                                        .font(ICONS)
-                                        .size(14)
-                                        .horizontal_alignment(Horizontal::Center)
-                                        .vertical_alignment(Vertical::Center),
-                                )
-                                .padding(0)
-                                .height(Length::Fixed(16.0))
-                                .width(Length::Fixed(16.0))
-                                .style(
-                                    StyleTuple(
-                                        sniffer.style,
-                                        if key_val.1.is_favorite {
-                                            ElementType::Starred
-                                        } else {
-                                            ElementType::NotStarred
-                                        },
-                                    )
-                                    .into(),
-                                )
-                                .on_press(
-                                    if key_val.1.is_favorite {
-                                        Message::UnSaveConnection(key_val.1.index)
-                                    } else {
-                                        Message::SaveConnection(key_val.1.index)
-                                    },
-                                ),
-                            )
-                            .push(Text::new("  ").font(font));
-                        scroll_report = scroll_report.push(entry_row);
-                    }
-                    col_report = col_report.push(
-                        Container::new(
-                            Scrollable::new(scroll_report)
-                                .horizontal_scroll(Properties::new())
-                                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                                    StyleTuple(sniffer.style, ElementType::Standard),
-                                )),
-                        ), // .padding([0, 0, 0, 25])
-                    );
-                };
-
-                let row_report = Row::new().push(
-                    Container::new(col_report)
-                        .padding([0, 5, 5, 5])
-                        .height(Length::Fill)
-                        .width(Length::Fixed(1080.0))
-                        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                        )),
+                let num_favorites = sniffer
+                    .info_traffic
+                    .lock()
+                    .unwrap()
+                    .favorite_connections
+                    .len();
+                let row_report = lazy(
+                    (
+                        filtered,
+                        active_radio_report,
+                        num_favorites,
+                        sniffer.style,
+                        sniffer.language,
+                    ),
+                    move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
                 );
 
                 let open_report_translation = open_report_translation(sniffer.language).to_string();
@@ -384,4 +250,191 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn lazy_row_report(
+    active_radio_report: ReportType,
+    num_favorites: usize,
+    sniffer: &Sniffer,
+) -> Row<'static, Message> {
+    let font = get_font(sniffer.style);
+    let row_radio_report =
+        report_radios(active_radio_report, font, sniffer.style, sniffer.language);
+    let mut col_report = Column::new()
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .push(row_radio_report);
+
+    if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
+        col_report = col_report.push(
+            no_favorites_translation(sniffer.language)
+                .font(font)
+                .height(Length::Fill)
+                .width(Length::Fill)
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        );
+    } else {
+        col_report = col_report
+                .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+                .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
+            ;
+        let mut scroll_report = Column::new();
+        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+
+        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
+        match sniffer.report_type {
+            ReportType::MostRecent => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec.sort_by(|&(_, a), &(_, b)| b.final_timestamp.cmp(&a.final_timestamp));
+            }
+            ReportType::MostPackets => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec
+                    .sort_by(|&(_, a), &(_, b)| b.transmitted_packets.cmp(&a.transmitted_packets));
+            }
+            ReportType::MostBytes => {
+                sorted_vec = info_traffic_lock.map.iter().collect();
+                sorted_vec
+                    .sort_by(|&(_, a), &(_, b)| b.transmitted_bytes.cmp(&a.transmitted_bytes));
+            }
+            ReportType::Favorites => {
+                for index in &info_traffic_lock.favorite_connections {
+                    let key_val = info_traffic_lock.map.get_index(*index).unwrap();
+                    sorted_vec.push((key_val.0, key_val.1));
+                }
+            }
+        }
+
+        let n_entry = min(sorted_vec.len(), 15);
+
+        for i in 0..n_entry {
+            let key_val = *sorted_vec.get(i).unwrap();
+            let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
+            let mut entry_row = Row::new().align_items(Alignment::Center).push(
+                Text::new(format!(
+                    "  {}{}",
+                    key_val.0.print_gui(),
+                    key_val.1.print_gui()
+                ))
+                .style(iced::theme::Text::Color(entry_color))
+                .font(SARASA_MONO_SC_BOLD),
+            );
+            if key_val.1.country.is_empty() {
+                entry_row = entry_row
+                    .push(
+                        Text::new("?")
+                            .width(Length::Fixed(FLAGS_WIDTH))
+                            .style(iced::theme::Text::Color(entry_color))
+                            .font(SARASA_MONO_SC_BOLD),
+                    )
+                    .push(Text::new("    "));
+            } else {
+                entry_row = entry_row
+                    .push(get_flag_from_country_code(&key_val.1.country))
+                    .push(Text::new("  "));
+            }
+            entry_row = entry_row
+                .push(
+                    button(
+                        Text::new('X'.to_string())
+                            .font(ICONS)
+                            .size(14)
+                            .horizontal_alignment(Horizontal::Center)
+                            .vertical_alignment(Vertical::Center),
+                    )
+                    .padding(0)
+                    .height(Length::Fixed(16.0))
+                    .width(Length::Fixed(16.0))
+                    .style(
+                        StyleTuple(
+                            sniffer.style,
+                            if key_val.1.is_favorite {
+                                ElementType::Starred
+                            } else {
+                                ElementType::NotStarred
+                            },
+                        )
+                        .into(),
+                    )
+                    .on_press(if key_val.1.is_favorite {
+                        Message::UnSaveConnection(key_val.1.index)
+                    } else {
+                        Message::SaveConnection(key_val.1.index)
+                    }),
+                )
+                .push(Text::new("  ").font(font));
+            scroll_report = scroll_report.push(entry_row);
+        }
+        drop(info_traffic_lock);
+        col_report = col_report.push(Container::new(
+            Scrollable::new(scroll_report)
+                .horizontal_scroll(Properties::new())
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+        ));
+    };
+    Row::new().push(
+        Container::new(col_report)
+            .padding([0, 5, 5, 5])
+            .height(Length::Fill)
+            .width(Length::Fixed(1080.0))
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(sniffer.style, ElementType::BorderedRound),
+            )),
+    )
+}
+
+fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column<'static, Message> {
+    let font = get_font(sniffer.style);
+    let filtered_bytes =
+        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let mut col_packets = Column::new()
+        //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
+        //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
+        //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
+        .push(
+            Text::new(get_active_filters_string(
+                &sniffer.filters.clone(),
+                sniffer.language,
+            ))
+            .font(font),
+        )
+        .push(Text::new(" "))
+        .push(
+            filtered_packets_translation(
+                sniffer.language,
+                &filtered.separate_with_spaces(),
+                &get_percentage_string(observed, filtered),
+            )
+            .font(font),
+        )
+        .push(Text::new(" "))
+        .push(
+            filtered_bytes_translation(
+                sniffer.language,
+                &get_formatted_bytes_string(filtered_bytes),
+                &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes),
+            )
+            .font(font),
+        );
+    if sniffer.filters.application.eq(&AppProtocol::Other) {
+        col_packets = col_packets
+            .push(Text::new(" "))
+            .push(filtered_application_translation(sniffer.language).font(font))
+            .push(
+                Scrollable::new(
+                    Text::new(get_app_count_string(
+                        &sniffer.info_traffic.lock().unwrap().app_protocols,
+                        filtered,
+                    ))
+                    .font(font),
+                )
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+            );
+    }
+    col_packets
 }

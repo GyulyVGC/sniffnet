@@ -5,14 +5,13 @@ use crate::enums::sound::{play, Sound};
 use crate::structs::notifications::Notifications;
 use crate::{InfoTraffic, RunTimeData};
 use chrono::Local;
-use std::cell::RefMut;
 use std::sync::{Arc, Mutex};
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
-    mut runtime_data: RefMut<RunTimeData>,
+    runtime_data: &mut RunTimeData,
     notifications: Notifications,
     info_traffic: &Arc<Mutex<InfoTraffic>>,
 ) -> usize {
@@ -80,10 +79,14 @@ pub fn notify_and_log(
     }
     // from favorites
     if notifications.favorite_notification.notify_on_favorite
-        && !runtime_data.favorites_last_interval.is_empty()
+        && !info_traffic
+            .lock()
+            .unwrap()
+            .favorites_last_interval
+            .is_empty()
     {
         let info_traffic_lock = info_traffic.lock().unwrap();
-        for index in &runtime_data.favorites_last_interval.clone() {
+        for index in &info_traffic_lock.favorites_last_interval.clone() {
             //log this notification
             emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
@@ -98,15 +101,14 @@ pub fn notify_and_log(
                         timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
                     },
                 ));
-            if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None)
-            {
-                // emit sound
-                play(
-                    notifications.favorite_notification.sound,
-                    notifications.volume,
-                );
-                already_emitted_sound = true;
-            }
+        }
+        drop(info_traffic_lock);
+        if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
+            // emit sound
+            play(
+                notifications.favorite_notification.sound,
+                notifications.volume,
+            );
         }
     }
 

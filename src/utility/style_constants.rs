@@ -109,7 +109,7 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
     round_borders: Color {
-        a: 0.08,
+        a: 0.1,
         ..SECONDARY_DEEP_SEA
     },
     round_containers: Color {

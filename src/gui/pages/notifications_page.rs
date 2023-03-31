@@ -24,6 +24,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
+use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, vertical_space};
 
@@ -67,11 +68,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
-        && sniffer
-            .runtime_data
-            .borrow()
-            .logged_notifications
-            .is_empty()
+        && sniffer.runtime_data.logged_notifications.is_empty()
     {
         body = body
             .width(Length::Fill)
@@ -92,12 +89,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             ))
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer
-        .runtime_data
-        .borrow()
-        .logged_notifications
-        .is_empty()
-    {
+    } else if sniffer.runtime_data.logged_notifications.is_empty() {
         body = body
             .width(Length::Fill)
             .padding(5)
@@ -114,41 +106,23 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             .push(vertical_space(FillPortion(2)));
         tab_and_body = tab_and_body.push(body);
     } else {
-        for logged_notification in &sniffer.runtime_data.borrow().logged_notifications {
-            body = body.push(match logged_notification {
-                LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
-                    packets_notification_log(
-                        packet_threshold_exceeded.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-                LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
-                    bytes_notification_log(
-                        byte_threshold_exceeded.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-                LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
-                    favorite_notification_log(
-                        favorite_transmitted.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-            });
-        }
+        let logged_notifications = lazy(
+            (
+                sniffer.runtime_data.tot_emitted_notifications,
+                sniffer.runtime_data.logged_notifications.len(),
+                sniffer.language,
+                sniffer.style,
+            ),
+            move |_| lazy_logged_notifications(sniffer),
+        );
         let body_row = Row::new()
             .width(Length::Fill)
             .push(
-                Container::new(
-                    if sniffer.runtime_data.borrow().logged_notifications.len() < 30 {
-                        Text::new("")
-                    } else {
-                        Text::new(only_last_30_translation(sniffer.language)).font(font)
-                    },
-                )
+                Container::new(if sniffer.runtime_data.logged_notifications.len() < 30 {
+                    Text::new("")
+                } else {
+                    Text::new(only_last_30_translation(sniffer.language)).font(font)
+                })
                 .padding(10)
                 .width(Length::FillPortion(1))
                 .height(Length::Fill)
@@ -156,9 +130,12 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .align_y(Vertical::Center),
             )
             .push(
-                Scrollable::new(body).style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
+                Scrollable::new(logged_notifications).style(<StyleTuple as Into<
+                    iced::theme::Scrollable,
+                >>::into(StyleTuple(
+                    sniffer.style,
+                    ElementType::Standard,
+                ))),
             )
             .push(
                 Container::new(get_button_clear_all(sniffer.style, sniffer.language))
@@ -421,4 +398,39 @@ pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'st
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
+}
+
+fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message> {
+    let mut ret_val = Column::new()
+        .width(Length::Fixed(830.0))
+        .padding(5)
+        .spacing(10)
+        .align_items(Alignment::Center);
+
+    for logged_notification in &sniffer.runtime_data.logged_notifications {
+        ret_val = ret_val.push(match logged_notification {
+            LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
+                packets_notification_log(
+                    packet_threshold_exceeded.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+            LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
+                bytes_notification_log(
+                    byte_threshold_exceeded.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+            LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
+                favorite_notification_log(
+                    favorite_transmitted.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+        });
+    }
+    ret_val
 }

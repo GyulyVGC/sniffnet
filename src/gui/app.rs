@@ -5,9 +5,7 @@
 use iced::widget::Column;
 use iced::{executor, window, Application, Command, Element, Subscription, Theme};
 use pcap::Device;
-use std::cell::RefCell;
 use std::collections::{HashSet, VecDeque};
-use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
@@ -35,15 +33,11 @@ use crate::utility::get_formatted_strings::get_report_path;
 use crate::utility::manage_charts_data::update_charts_data;
 use crate::utility::manage_notifications::notify_and_log;
 use crate::utility::manage_packets::get_capture_result;
-use crate::utility::manage_report_data::update_report_data;
 use crate::utility::style_constants::get_font;
 use crate::{ConfigDevice, InfoTraffic, ReportType, RunTimeData};
 
-/// Update period when app is running
-pub const PERIOD_RUNNING: u64 = 1000;
-//milliseconds
-/// Update period when app is in its initial state
-pub const PERIOD_INIT: u64 = 5000; //milliseconds
+/// Update period (milliseconds)
+pub const PERIOD_TICK: u64 = 1000;
 
 impl Application for Sniffer {
     type Executor = executor::Default;
@@ -63,42 +57,30 @@ impl Application for Sniffer {
         match message {
             Message::TickInit => {}
             Message::TickRun => {
-                let mut info_traffic_lock = self.info_traffic.lock().unwrap();
-                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
+                let info_traffic_lock = self.info_traffic.lock().unwrap();
+                self.runtime_data.all_packets = info_traffic_lock.all_packets;
                 if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0
                 {
                     drop(info_traffic_lock);
                     return self.update(Message::Waiting);
                 }
-                self.runtime_data.borrow_mut().tot_sent_packets =
-                    info_traffic_lock.tot_sent_packets;
-                self.runtime_data.borrow_mut().tot_received_packets =
-                    info_traffic_lock.tot_received_packets;
-                self.runtime_data.borrow_mut().all_packets = info_traffic_lock.all_packets;
-                self.runtime_data.borrow_mut().all_bytes = info_traffic_lock.all_bytes;
-                self.runtime_data.borrow_mut().tot_received_bytes =
-                    info_traffic_lock.tot_received_bytes;
-                self.runtime_data.borrow_mut().tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
-                self.runtime_data.borrow_mut().app_protocols =
-                    info_traffic_lock.app_protocols.clone();
-                self.runtime_data.borrow_mut().favorites_last_interval =
-                    info_traffic_lock.favorites_last_interval.clone();
-                info_traffic_lock.favorites_last_interval = HashSet::new();
+                self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets;
+                self.runtime_data.tot_received_packets = info_traffic_lock.tot_received_packets;
+                self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
+                self.runtime_data.tot_received_bytes = info_traffic_lock.tot_received_bytes;
+                self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
                 drop(info_traffic_lock);
                 let emitted_notifications = notify_and_log(
-                    self.runtime_data.borrow_mut(),
+                    &mut self.runtime_data,
                     self.notifications,
                     &self.info_traffic.clone(),
                 );
+                self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
+                self.runtime_data.tot_emitted_notifications += emitted_notifications;
                 if self.running_page.ne(&RunningPage::Notifications) {
                     self.unread_notifications += emitted_notifications;
                 }
-                update_charts_data(self.runtime_data.borrow_mut());
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
+                update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
                 // update ConfigDevice stored if different from last sniffed device
                 if self.device.name.ne(&self.last_device_name_sniffed) {
                     self.last_device_name_sniffed = self.device.name.clone();
@@ -113,7 +95,7 @@ impl Application for Sniffer {
                 }
                 // waiting notifications
                 if self.running_page.eq(&RunningPage::Notifications)
-                    && self.runtime_data.borrow().logged_notifications.is_empty()
+                    && self.runtime_data.logged_notifications.is_empty()
                 {
                     return self.update(Message::Waiting);
                 }
@@ -141,11 +123,6 @@ impl Application for Sniffer {
             Message::ReportSelection(what_to_display) => {
                 if what_to_display.ne(&self.report_type) {
                     self.report_type = what_to_display;
-                    update_report_data(
-                        self.runtime_data.borrow_mut(),
-                        &self.info_traffic,
-                        self.report_type,
-                    );
                 }
             }
             Message::OpenReport => {
@@ -195,9 +172,8 @@ impl Application for Sniffer {
                 *self.status_pair.0.lock().unwrap() = Status::Running;
                 let info_traffic_mutex = self.info_traffic.clone();
                 *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
-                self.runtime_data = Rc::new(RefCell::new(RunTimeData::new()));
-                self.traffic_chart =
-                    TrafficChart::new(self.runtime_data.clone(), self.style, self.language);
+                self.runtime_data = RunTimeData::new();
+                self.traffic_chart = TrafficChart::new(self.style, self.language);
 
                 if pcap_error.is_none() {
                     // no pcap error
@@ -243,11 +219,6 @@ impl Application for Sniffer {
                 let key_val = info_traffic.map.get_index_mut(index).unwrap();
                 key_val.1.is_favorite = true;
                 drop(info_traffic);
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
             }
             Message::UnSaveConnection(index) => {
                 let mut info_traffic = self.info_traffic.lock().unwrap();
@@ -255,11 +226,6 @@ impl Application for Sniffer {
                 let key_val = info_traffic.map.get_index_mut(index).unwrap();
                 key_val.1.is_favorite = false;
                 drop(info_traffic);
-                update_report_data(
-                    self.runtime_data.borrow_mut(),
-                    &self.info_traffic,
-                    self.report_type,
-                );
             }
             Message::ShowModal(modal) => {
                 if self.settings_page.is_none() && self.modal.is_none() {
@@ -325,7 +291,7 @@ impl Application for Sniffer {
                 self.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
-                self.runtime_data.borrow_mut().logged_notifications = VecDeque::new();
+                self.runtime_data.logged_notifications = VecDeque::new();
                 return self.update(Message::HideModal);
             }
             Message::Exit => {
@@ -392,7 +358,7 @@ impl Application for Sniffer {
             Message::CtrlDPressed => {
                 if self.status_pair.0.lock().unwrap().eq(&Status::Running)
                     && self.running_page.eq(&RunningPage::Notifications)
-                    && !self.runtime_data.borrow().logged_notifications.is_empty()
+                    && !self.runtime_data.logged_notifications.is_empty()
                 {
                     return self.update(Message::ShowModal(MyModal::ClearAll));
                 }
@@ -504,10 +470,10 @@ impl Application for Sniffer {
             });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_RUNNING)).map(|_| Message::TickRun)
+                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
             }
             Status::Init => {
-                iced::time::every(Duration::from_millis(PERIOD_INIT)).map(|_| Message::TickInit)
+                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
             }
         };
         Subscription::batch([hot_keys_subscription, time_subscription])
