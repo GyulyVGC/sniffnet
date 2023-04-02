@@ -23,6 +23,17 @@ impl Default for Notifications {
     }
 }
 
+/// Enum representing the possible notifications.
+#[derive(Debug, Clone)]
+pub enum Notification {
+    /// Packets notification
+    PacketsNotification(PacketsNotification),
+    /// Bytes notification
+    BytesNotification(BytesNotification),
+    /// Favorites notification
+    FavoriteNotification(FavoriteNotification),
+}
+
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 pub struct PacketsNotification {
     /// Threshold of received + sent bytes; if exceeded a notification is emitted

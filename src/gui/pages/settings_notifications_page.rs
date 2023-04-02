@@ -10,7 +10,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
-    BytesNotification, FavoriteNotification, PacketsNotification,
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
 };
 use crate::translations::translations::{
     bytes_threshold_translation, favorite_notification_translation, hide_translation,
@@ -113,19 +113,19 @@ fn get_packets_notify(
         packets_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                Message::UpdatePacketsNotification(
-                    PacketsNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::PacketsNotification(PacketsNotification {
                         threshold: Some(packets_notification.previous_threshold),
                         ..packets_notification
-                    },
+                    }),
                     false,
                 )
             } else {
-                Message::UpdatePacketsNotification(
-                    PacketsNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::PacketsNotification(PacketsNotification {
                         threshold: None,
                         ..packets_notification
-                    },
+                    }),
                     false,
                 )
             }
@@ -188,19 +188,19 @@ fn get_bytes_notify(
         bytes_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                Message::UpdateBytesNotification(
-                    BytesNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::BytesNotification(BytesNotification {
                         threshold: Some(bytes_notification.previous_threshold),
                         ..bytes_notification
-                    },
+                    }),
                     false,
                 )
             } else {
-                Message::UpdateBytesNotification(
-                    BytesNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::BytesNotification(BytesNotification {
                         threshold: None,
                         ..bytes_notification
-                    },
+                    }),
                     false,
                 )
             }
@@ -262,11 +262,15 @@ fn get_favorite_notify(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
         move |toggled| {
-            Message::UpdateFavoriteNotification(
+            Message::UpdateNotificationSettings(
                 if toggled {
-                    FavoriteNotification::on(favorite_notification.sound)
+                    Notification::FavoriteNotification(FavoriteNotification::on(
+                        favorite_notification.sound,
+                    ))
                 } else {
-                    FavoriteNotification::off(favorite_notification.sound)
+                    Notification::FavoriteNotification(FavoriteNotification::off(
+                        favorite_notification.sound,
+                    ))
                 },
                 false,
             )
@@ -330,7 +334,10 @@ fn input_group_packets(
                 move |value| {
                     let packets_notification =
                         PacketsNotification::from(&value, Some(packets_notification));
-                    Message::UpdatePacketsNotification(packets_notification, false)
+                    Message::UpdateNotificationSettings(
+                        Notification::PacketsNotification(packets_notification),
+                        false,
+                    )
                 },
             )
             .padding([0, 0, 0, 10])
@@ -376,7 +383,10 @@ fn input_group_bytes(
                 move |value| {
                     let bytes_notification =
                         BytesNotification::from(&value, Some(bytes_notification));
-                    Message::UpdateBytesNotification(bytes_notification, false)
+                    Message::UpdateNotificationSettings(
+                        Notification::BytesNotification(bytes_notification),
+                        false,
+                    )
                 },
             )
             .padding([0, 0, 0, 10])

@@ -10,7 +10,6 @@ use iced::Length::{Fill, FillPortion};
 use iced::{alignment, Alignment, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
-use std::cmp::min;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
@@ -21,17 +20,17 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::report::get_report_entries::get_report_entries;
 use crate::translations::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
-    open_report_translation, some_observed_translation, waiting_translation,
+    some_observed_translation, waiting_translation,
 };
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
+    get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
+    get_percentage_string,
 };
 use crate::{AppProtocol, ReportType, RunningPage};
 
@@ -163,15 +162,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
                 );
 
-                let open_report_translation = open_report_translation(sniffer.language).to_string();
-                //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
-                let report_path = get_report_path().to_string_lossy().to_string();
-                let open_report_tooltip = format!(
-                    "{:^len$}\n{report_path}",
-                    open_report_translation,
-                    len = report_path.len()
-                );
-
                 body = body
                     .push(
                         Row::new()
@@ -211,7 +201,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                             StyleTuple(sniffer.style, ElementType::Standard).into(),
                                         )
                                         .on_press(Message::OpenReport),
-                                        open_report_tooltip,
+                                        get_open_report_tooltip(sniffer.language),
                                         Position::Top,
                                     )
                                     .gap(5)
@@ -280,36 +270,8 @@ fn lazy_row_report(
                 .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
             ;
         let mut scroll_report = Column::new();
-        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-
-        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
-        match sniffer.report_type {
-            ReportType::MostRecent => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec.sort_by(|&(_, a), &(_, b)| b.final_timestamp.cmp(&a.final_timestamp));
-            }
-            ReportType::MostPackets => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec
-                    .sort_by(|&(_, a), &(_, b)| b.transmitted_packets.cmp(&a.transmitted_packets));
-            }
-            ReportType::MostBytes => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec
-                    .sort_by(|&(_, a), &(_, b)| b.transmitted_bytes.cmp(&a.transmitted_bytes));
-            }
-            ReportType::Favorites => {
-                for index in &info_traffic_lock.favorite_connections {
-                    let key_val = info_traffic_lock.map.get_index(*index).unwrap();
-                    sorted_vec.push((key_val.0, key_val.1));
-                }
-            }
-        }
-
-        let n_entry = min(sorted_vec.len(), 15);
-
-        for i in 0..n_entry {
-            let key_val = *sorted_vec.get(i).unwrap();
+        // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+        for key_val in get_report_entries(&sniffer.info_traffic.clone(), sniffer.report_type) {
             let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
             let mut entry_row = Row::new().align_items(Alignment::Center).push(
                 Text::new(format!(
@@ -357,16 +319,15 @@ fn lazy_row_report(
                         )
                         .into(),
                     )
-                    .on_press(if key_val.1.is_favorite {
-                        Message::UnSaveConnection(key_val.1.index)
-                    } else {
-                        Message::SaveConnection(key_val.1.index)
-                    }),
+                    .on_press(Message::AddOrRemoveFavorite(
+                        key_val.1.index,
+                        !key_val.1.is_favorite,
+                    )),
                 )
                 .push(Text::new("  ").font(font));
             scroll_report = scroll_report.push(entry_row);
         }
-        drop(info_traffic_lock);
+        // drop(info_traffic_lock);
         col_report = col_report.push(Container::new(
             Scrollable::new(scroll_report)
                 .horizontal_scroll(Properties::new())

@@ -3,7 +3,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
-    BytesNotification, FavoriteNotification, PacketsNotification,
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
@@ -128,11 +128,11 @@ pub fn sound_packets_threshold_radios(
                 option.get_radio_label(language),
                 Some(packets_notification.sound),
                 |value| {
-                    Message::UpdatePacketsNotification(
-                        PacketsNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::PacketsNotification(PacketsNotification {
                             sound: value,
                             ..packets_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
@@ -165,11 +165,11 @@ pub fn sound_bytes_threshold_radios(
                 option.get_radio_label(language),
                 Some(bytes_notification.sound),
                 |value| {
-                    Message::UpdateBytesNotification(
-                        BytesNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::BytesNotification(BytesNotification {
                             sound: value,
                             ..bytes_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
@@ -202,11 +202,11 @@ pub fn sound_favorite_radios(
                 option.get_radio_label(language),
                 Some(favorite_notification.sound),
                 |value| {
-                    Message::UpdateFavoriteNotification(
-                        FavoriteNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::FavoriteNotification(FavoriteNotification {
                             sound: value,
                             ..favorite_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },

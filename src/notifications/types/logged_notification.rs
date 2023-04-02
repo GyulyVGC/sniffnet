@@ -2,7 +2,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::ByteMultiple;
 
-/// Enum representing the possible observed values of IP protocol version.
+/// Enum representing the possible notification events.
 pub enum LoggedNotification {
     /// Packets threshold exceeded
     PacketsThresholdExceeded(PacketsThresholdExceeded),

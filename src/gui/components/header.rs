@@ -64,7 +64,7 @@ pub fn header(
     ))
 }
 
-pub fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('C'.to_string())
             .font(ICONS)

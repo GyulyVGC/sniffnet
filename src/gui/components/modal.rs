@@ -133,7 +133,7 @@ fn get_modal_header(
     ))
 }
 
-pub fn confirm_button_row(
+fn confirm_button_row(
     language: Language,
     font: Font,
     style: StyleType,

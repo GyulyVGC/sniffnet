@@ -7,7 +7,9 @@ use thousands::Separable;
 
 use crate::networking::types::filters::Filters;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::translations::translations::{active_filters_translation, none_translation};
+use crate::translations::translations::{
+    active_filters_translation, none_translation, open_report_translation,
+};
 use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
@@ -195,6 +197,17 @@ pub fn get_report_path() -> PathBuf {
     }
 }
 
+pub fn get_open_report_tooltip(language: Language) -> String {
+    let open_report_translation = open_report_translation(language).to_string();
+    //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
+    let report_path = get_report_path().to_string_lossy().to_string();
+    format!(
+        "{:^len$}\n{report_path}",
+        open_report_translation,
+        len = report_path.len()
+    )
+}
+
 pub fn print_cli_welcome_message() {
     print!(
         r"
@@ -220,10 +233,3 @@ pub fn print_cli_welcome_message() {
     "
     );
 }
-
-// pub fn get_command_key() -> String {
-//     #[cfg(target_os = "macos")]
-//     return "⌘".to_string();
-//     #[cfg(not(target_os = "macos"))]
-//     return "ctrl".to_string();
-// }

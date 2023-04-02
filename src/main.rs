@@ -9,9 +9,8 @@ use iced::{window, Application, Settings};
 use crate::secondary_threads::check_updates::set_newer_release_status;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 
-use crate::enums::report_type::ReportType;
 use crate::gui::pages::types::running_page::RunningPage;
-use crate::secondary_threads::write_report::sleep_and_write_report_loop;
+use crate::secondary_threads::write_report_file::sleep_and_write_report_loop;
 use crate::utils::formatted_strings::print_cli_welcome_message;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -27,14 +26,15 @@ use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::trans_protocol::TransProtocol;
+use report::types::report_type::ReportType;
 use translations::types::language::Language;
 
 mod chart;
 mod configs;
-mod enums;
 mod gui;
 mod networking;
 mod notifications;
+mod report;
 mod secondary_threads;
 mod translations;
 mod utils;

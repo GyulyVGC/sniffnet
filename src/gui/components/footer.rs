@@ -49,7 +49,7 @@ pub fn footer(
         ))
 }
 
-pub fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)

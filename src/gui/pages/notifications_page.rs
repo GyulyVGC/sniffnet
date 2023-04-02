@@ -378,7 +378,7 @@ fn favorite_notification_log(
         ))
 }
 
-pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('h'.to_string())
             .font(ICONS)

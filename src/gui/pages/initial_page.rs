@@ -111,7 +111,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     )
 }
 
-pub fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)

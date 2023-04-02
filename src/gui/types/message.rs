@@ -1,9 +1,7 @@
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::notifications::types::notifications::{
-    BytesNotification, FavoriteNotification, PacketsNotification,
-};
+use crate::notifications::types::notifications::Notification;
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 #[derive(Debug, Clone)]
@@ -25,10 +23,8 @@ pub enum Message {
     ChartSelection(ChartType),
     /// Select report type to be displayed
     ReportSelection(ReportType),
-    /// Saves the given connection into the favorites
-    SaveConnection(usize),
-    /// Un-saves the given connection into the favorites
-    UnSaveConnection(usize),
+    /// Adds or removes the given connection into/from the favorites
+    AddOrRemoveFavorite(usize, bool),
     /// Open Sniffnet's complete textual report
     OpenReport,
     /// Open Sniffnet's GitHub main page if true is passed, latest release page otherwise
@@ -56,11 +52,7 @@ pub enum Message {
     /// Select language
     LanguageSelection(Language),
     /// Set packets notification
-    UpdatePacketsNotification(PacketsNotification, bool),
-    /// Set bytes notification
-    UpdateBytesNotification(BytesNotification, bool),
-    /// Set favorite notification
-    UpdateFavoriteNotification(FavoriteNotification, bool),
+    UpdateNotificationSettings(Notification, bool),
     /// Clear all received notifications
     ClearAllNotifications,
     /// Set notifications volume
