@@ -107,15 +107,13 @@ impl Sniffer {
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::TickInit => {}
-            Message::TickRun => {
-                return self.refresh_data();
-            }
-            Message::AdapterSelection(name) => self.set_adapter(name),
+            Message::TickRun => return self.refresh_data(),
+            Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version) => self.filters.ip = version,
             Message::TransportProtocolSelection(protocol) => self.filters.transport = protocol,
             Message::AppProtocolSelection(protocol) => self.filters.application = protocol,
             Message::ChartSelection(what_to_display) => {
-                self.traffic_chart.change_kind(what_to_display)
+                self.traffic_chart.change_kind(what_to_display);
             }
             Message::ReportSelection(what_to_display) => self.report_type = what_to_display,
             Message::OpenReport => self.open_report_file(),
@@ -156,7 +154,7 @@ impl Sniffer {
                 self.traffic_chart.change_language(language);
             }
             Message::UpdateNotificationSettings(value, emit_sound) => {
-                self.update_notification_settings(value, emit_sound)
+                self.update_notification_settings(value, emit_sound);
             }
             Message::ChangeVolume(volume) => {
                 play(Sound::Pop, volume);
@@ -166,75 +164,12 @@ impl Sniffer {
                 self.runtime_data.logged_notifications = VecDeque::new();
                 return self.update(Message::HideModal);
             }
-            Message::Exit => {
-                return window::close();
-            }
-            Message::SwitchPage(next) => match (
-                *self.status_pair.0.lock().unwrap(),
-                self.settings_page,
-                self.modal,
-            ) {
-                (_, Some(_), None) => {
-                    // Settings opened
-                    if next {
-                        self.settings_page = Some(self.settings_page.unwrap().next());
-                    } else {
-                        self.settings_page = Some(self.settings_page.unwrap().previous());
-                    }
-                }
-                (Status::Running, None, None) => {
-                    // Running with no overlays
-                    let new_page = if next {
-                        self.running_page.next()
-                    } else {
-                        self.running_page.previous()
-                    };
-                    self.running_page = new_page;
-                    if new_page.eq(&RunningPage::Notifications) {
-                        self.unread_notifications = 0;
-                    }
-                }
-                (_, _, _) => {}
-            },
-            Message::ReturnKeyPressed => {
-                if self.status_pair.0.lock().unwrap().eq(&Status::Init)
-                    && self.settings_page.is_none()
-                    && self.modal.is_none()
-                {
-                    return self.update(Message::Start);
-                } else if self.modal.eq(&Some(MyModal::Quit)) {
-                    return self.update(Message::Reset);
-                } else if self.modal.eq(&Some(MyModal::ClearAll)) {
-                    return self.update(Message::ClearAllNotifications);
-                }
-            }
-            Message::EscKeyPressed => {
-                if self.modal.is_some() {
-                    return self.update(Message::HideModal);
-                } else if self.settings_page.is_some() {
-                    return self.update(Message::CloseSettings);
-                }
-            }
-            Message::ResetButtonPressed => {
-                // also called when backspace key is pressed on a running state
-                if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
-                    return if self.info_traffic.lock().unwrap().all_packets == 0
-                        && self.settings_page.is_none()
-                    {
-                        self.update(Message::Reset)
-                    } else {
-                        self.update(Message::ShowModal(MyModal::Quit))
-                    };
-                }
-            }
-            Message::CtrlDPressed => {
-                if self.status_pair.0.lock().unwrap().eq(&Status::Running)
-                    && self.running_page.eq(&RunningPage::Notifications)
-                    && !self.runtime_data.logged_notifications.is_empty()
-                {
-                    return self.update(Message::ShowModal(MyModal::ClearAll));
-                }
-            }
+            Message::Quit => return window::close(),
+            Message::SwitchPage(next) => self.switch_page(next),
+            Message::ReturnKeyPressed => return self.shortcut_return(),
+            Message::EscKeyPressed => return self.shortcut_esc(),
+            Message::ResetButtonPressed => return self.reset_button_pressed(),
+            Message::CtrlDPressed => return self.shortcut_ctrl_d(),
         }
         Command::none()
     }
@@ -366,7 +301,7 @@ impl Sniffer {
         self.update(Message::HideModal)
     }
 
-    fn set_adapter(&mut self, name: String) {
+    fn set_adapter(&mut self, name: &str) {
         for dev in Device::list().expect("Error retrieving device list\r\n") {
             if dev.name.eq(&name) {
                 self.device = dev;
@@ -409,15 +344,15 @@ impl Sniffer {
 
     fn update_notification_settings(&mut self, value: Notification, emit_sound: bool) {
         let sound = match value {
-            Notification::PacketsNotification(packets_notification) => {
+            Notification::Packets(packets_notification) => {
                 self.notifications.packets_notification = packets_notification;
                 packets_notification.sound
             }
-            Notification::BytesNotification(bytes_notification) => {
+            Notification::Bytes(bytes_notification) => {
                 self.notifications.bytes_notification = bytes_notification;
                 bytes_notification.sound
             }
-            Notification::FavoriteNotification(favorite_notification) => {
+            Notification::Favorite(favorite_notification) => {
                 self.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
             }
@@ -425,5 +360,81 @@ impl Sniffer {
         if emit_sound {
             play(sound, self.notifications.volume);
         }
+    }
+
+    fn switch_page(&mut self, next: bool) {
+        match (
+            *self.status_pair.0.lock().unwrap(),
+            self.settings_page,
+            self.modal,
+        ) {
+            (_, Some(current_setting), None) => {
+                // Settings opened
+                if next {
+                    self.settings_page = Some(current_setting.next());
+                } else {
+                    self.settings_page = Some(current_setting.previous());
+                }
+            }
+            (Status::Running, None, None) => {
+                // Running with no overlays
+                self.running_page = if next {
+                    self.running_page.next()
+                } else {
+                    self.running_page.previous()
+                };
+                if self.running_page.eq(&RunningPage::Notifications) {
+                    self.unread_notifications = 0;
+                }
+            }
+            (_, _, _) => {}
+        }
+    }
+
+    fn shortcut_return(&mut self) -> Command<Message> {
+        if self.status_pair.0.lock().unwrap().eq(&Status::Init)
+            && self.settings_page.is_none()
+            && self.modal.is_none()
+        {
+            return self.update(Message::Start);
+        } else if self.modal.eq(&Some(MyModal::Quit)) {
+            return self.update(Message::Reset);
+        } else if self.modal.eq(&Some(MyModal::ClearAll)) {
+            return self.update(Message::ClearAllNotifications);
+        }
+        Command::none()
+    }
+
+    fn shortcut_esc(&mut self) -> Command<Message> {
+        if self.modal.is_some() {
+            return self.update(Message::HideModal);
+        } else if self.settings_page.is_some() {
+            return self.update(Message::CloseSettings);
+        }
+        Command::none()
+    }
+
+    // also called when backspace key is pressed on a running state
+    fn reset_button_pressed(&mut self) -> Command<Message> {
+        if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
+            return if self.info_traffic.lock().unwrap().all_packets == 0
+                && self.settings_page.is_none()
+            {
+                self.update(Message::Reset)
+            } else {
+                self.update(Message::ShowModal(MyModal::Quit))
+            };
+        }
+        Command::none()
+    }
+
+    fn shortcut_ctrl_d(&mut self) -> Command<Message> {
+        if self.status_pair.0.lock().unwrap().eq(&Status::Running)
+            && self.running_page.eq(&RunningPage::Notifications)
+            && !self.runtime_data.logged_notifications.is_empty()
+        {
+            return self.update(Message::ShowModal(MyModal::ClearAll));
+        }
+        Command::none()
     }
 }

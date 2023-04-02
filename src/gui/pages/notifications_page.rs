@@ -23,7 +23,7 @@ use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Length};
+use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, vertical_space};
@@ -32,12 +32,6 @@ use iced_native::widget::{button, vertical_space};
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let notifications = sniffer.notifications;
     let font = get_font(sniffer.style);
-
-    let mut body = Column::new()
-        .width(Length::Fixed(830.0))
-        .padding(5)
-        .spacing(10)
-        .align_items(Alignment::Center);
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
@@ -70,40 +64,10 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         && !notifications.favorite_notification.notify_on_favorite
         && sniffer.runtime_data.logged_notifications.is_empty()
     {
-        body = body
-            .width(Length::Fill)
-            .padding(5)
-            .spacing(5)
-            .align_items(Alignment::Center)
-            .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Fixed(15.0)))
-            .push(
-                no_notifications_set_translation(sniffer.language)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font),
-            )
-            .push(get_button_settings(
-                sniffer.style,
-                sniffer.language,
-                SettingsPage::Notifications,
-            ))
-            .push(vertical_space(FillPortion(2)));
+        let body = body_no_notifications_set(sniffer.style, font, sniffer.language);
         tab_and_body = tab_and_body.push(body);
     } else if sniffer.runtime_data.logged_notifications.is_empty() {
-        body = body
-            .width(Length::Fill)
-            .padding(5)
-            .spacing(5)
-            .align_items(Alignment::Center)
-            .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Fixed(15.0)))
-            .push(
-                no_notifications_received_translation(sniffer.language)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font),
-            )
-            .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(vertical_space(FillPortion(2)));
+        let body = body_no_notifications_received(font, sniffer.language, &sniffer.waiting);
         tab_and_body = tab_and_body.push(body);
     } else {
         let logged_notifications = lazy(
@@ -152,6 +116,50 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn body_no_notifications_set(
+    style: StyleType,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message> {
+    Column::new()
+        .padding(5)
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(vertical_space(FillPortion(1)))
+        .push(
+            no_notifications_set_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+        .push(get_button_settings(
+            style,
+            language,
+            SettingsPage::Notifications,
+        ))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_no_notifications_received(
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    Column::new()
+        .padding(5)
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(vertical_space(FillPortion(1)))
+        .push(
+            no_notifications_received_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
 }
 
 fn packets_notification_log(

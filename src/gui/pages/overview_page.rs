@@ -7,9 +7,10 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
+use pcap::Device;
 use thousands::Separable;
 //use dns_lookup::lookup_addr;
 
@@ -20,6 +21,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::filters::Filters;
 use crate::report::get_report_entries::get_report_entries;
 use crate::translations::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
@@ -32,18 +34,13 @@ use crate::utils::formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
     get_percentage_string,
 };
-use crate::{AppProtocol, ReportType, RunningPage};
+use crate::{AppProtocol, Language, ReportType, RunningPage};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
-    let mut body = Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_items(Alignment::Center);
-
+    let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
     if sniffer.pcap_error.is_none() {
@@ -55,56 +52,28 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-
-                let adapter_name = sniffer.device.name.clone();
-                let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
-                    (
-                        Text::new('T'.to_string()).font(ICONS).size(60),
-                        no_addresses_translation(sniffer.language, &adapter_name)
-                            .horizontal_alignment(Horizontal::Center)
-                            .font(font),
-                    )
-                } else {
-                    (
-                        Text::new(sniffer.waiting.len().to_string())
-                            .font(ICONS)
-                            .size(60),
-                        waiting_translation(sniffer.language, &adapter_name)
-                            .horizontal_alignment(Horizontal::Center)
-                            .font(font),
-                    )
-                };
-                body = body
-                    .push(vertical_space(FillPortion(1)))
-                    .push(icon_text)
-                    .push(vertical_space(Length::Fixed(15.0)))
-                    .push(nothing_to_see_text)
-                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(FillPortion(2)));
+                body = body_no_packets(&sniffer.device, font, sniffer.language, &sniffer.waiting);
             }
 
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-
-                let tot_packets_text = some_observed_translation(
+                body = body_no_observed(
+                    &sniffer.filters,
+                    observed,
+                    font,
                     sniffer.language,
-                    &observed.separate_with_spaces(),
-                    &get_active_filters_string_nobr(&sniffer.filters.clone(), sniffer.language),
-                )
-                .horizontal_alignment(Horizontal::Center)
-                .font(font);
-
-                body = body
-                    .push(vertical_space(FillPortion(1)))
-                    .push(Text::new('V'.to_string()).font(ICONS).size(60))
-                    .push(vertical_space(Length::Fixed(15.0)))
-                    .push(tot_packets_text)
-                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(FillPortion(2)));
+                    &sniffer.waiting,
+                );
             }
 
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
+
+                let mut body = Column::new()
+                    .width(Length::Fill)
+                    .padding(10)
+                    .spacing(10)
+                    .align_items(Alignment::Center);
 
                 let tabs = get_pages_tabs(
                     [
@@ -240,6 +209,70 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn body_no_packets(
+    device: &Device,
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    let adapter_name = device.name.clone();
+    let (icon_text, nothing_to_see_text) = if device.addresses.is_empty() {
+        (
+            Text::new('T'.to_string()).font(ICONS).size(60),
+            no_addresses_translation(language, &adapter_name)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    } else {
+        (
+            Text::new(waiting.len().to_string()).font(ICONS).size(60),
+            waiting_translation(language, &adapter_name)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    };
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(icon_text)
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(nothing_to_see_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_no_observed(
+    filters: &Filters,
+    observed: u128,
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    let tot_packets_text = some_observed_translation(
+        language,
+        &observed.separate_with_spaces(),
+        &get_active_filters_string_nobr(filters, language),
+    )
+    .horizontal_alignment(Horizontal::Center)
+    .font(font);
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(Text::new('V'.to_string()).font(ICONS).size(60))
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(tot_packets_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
 }
 
 fn lazy_row_report(

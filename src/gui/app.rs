@@ -101,7 +101,7 @@ impl Application for Sniffer {
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Q,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::Exit),
+                }) => Some(Message::Quit),
                 // return => return key pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Enter,

@@ -114,7 +114,7 @@ fn get_packets_notify(
         move |toggled| {
             if toggled {
                 Message::UpdateNotificationSettings(
-                    Notification::PacketsNotification(PacketsNotification {
+                    Notification::Packets(PacketsNotification {
                         threshold: Some(packets_notification.previous_threshold),
                         ..packets_notification
                     }),
@@ -122,7 +122,7 @@ fn get_packets_notify(
                 )
             } else {
                 Message::UpdateNotificationSettings(
-                    Notification::PacketsNotification(PacketsNotification {
+                    Notification::Packets(PacketsNotification {
                         threshold: None,
                         ..packets_notification
                     }),
@@ -189,7 +189,7 @@ fn get_bytes_notify(
         move |toggled| {
             if toggled {
                 Message::UpdateNotificationSettings(
-                    Notification::BytesNotification(BytesNotification {
+                    Notification::Bytes(BytesNotification {
                         threshold: Some(bytes_notification.previous_threshold),
                         ..bytes_notification
                     }),
@@ -197,7 +197,7 @@ fn get_bytes_notify(
                 )
             } else {
                 Message::UpdateNotificationSettings(
-                    Notification::BytesNotification(BytesNotification {
+                    Notification::Bytes(BytesNotification {
                         threshold: None,
                         ..bytes_notification
                     }),
@@ -264,13 +264,9 @@ fn get_favorite_notify(
         move |toggled| {
             Message::UpdateNotificationSettings(
                 if toggled {
-                    Notification::FavoriteNotification(FavoriteNotification::on(
-                        favorite_notification.sound,
-                    ))
+                    Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
                 } else {
-                    Notification::FavoriteNotification(FavoriteNotification::off(
-                        favorite_notification.sound,
-                    ))
+                    Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
                 },
                 false,
             )
@@ -335,7 +331,7 @@ fn input_group_packets(
                     let packets_notification =
                         PacketsNotification::from(&value, Some(packets_notification));
                     Message::UpdateNotificationSettings(
-                        Notification::PacketsNotification(packets_notification),
+                        Notification::Packets(packets_notification),
                         false,
                     )
                 },
@@ -384,7 +380,7 @@ fn input_group_bytes(
                     let bytes_notification =
                         BytesNotification::from(&value, Some(bytes_notification));
                     Message::UpdateNotificationSettings(
-                        Notification::BytesNotification(bytes_notification),
+                        Notification::Bytes(bytes_notification),
                         false,
                     )
                 },

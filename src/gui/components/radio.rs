@@ -129,7 +129,7 @@ pub fn sound_packets_threshold_radios(
                 Some(packets_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
-                        Notification::PacketsNotification(PacketsNotification {
+                        Notification::Packets(PacketsNotification {
                             sound: value,
                             ..packets_notification
                         }),
@@ -166,7 +166,7 @@ pub fn sound_bytes_threshold_radios(
                 Some(bytes_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
-                        Notification::BytesNotification(BytesNotification {
+                        Notification::Bytes(BytesNotification {
                             sound: value,
                             ..bytes_notification
                         }),
@@ -203,7 +203,7 @@ pub fn sound_favorite_radios(
                 Some(favorite_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
-                        Notification::FavoriteNotification(FavoriteNotification {
+                        Notification::Favorite(FavoriteNotification {
                             sound: value,
                             ..favorite_notification
                         }),

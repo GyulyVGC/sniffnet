@@ -24,14 +24,14 @@ impl Default for Notifications {
 }
 
 /// Enum representing the possible notifications.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Notification {
     /// Packets notification
-    PacketsNotification(PacketsNotification),
+    Packets(PacketsNotification),
     /// Bytes notification
-    BytesNotification(BytesNotification),
+    Bytes(BytesNotification),
     /// Favorites notification
-    FavoriteNotification(FavoriteNotification),
+    Favorite(FavoriteNotification),
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
