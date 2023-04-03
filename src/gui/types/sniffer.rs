@@ -325,8 +325,9 @@ impl Sniffer {
         } else {
             info_traffic.favorite_connections.remove(&index);
         }
-        let key_val = info_traffic.map.get_index_mut(index).unwrap();
-        key_val.1.is_favorite = add;
+        if let Some(key_val) = info_traffic.map.get_index_mut(index) {
+            key_val.1.is_favorite = add;
+        }
         drop(info_traffic);
     }
 
@@ -437,5 +438,109 @@ impl Sniffer {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }
         Command::none()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::gui::types::message::Message;
+    use crate::{InfoTraffic, Sniffer, Status};
+    use std::collections::HashSet;
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn test_waiting_dots_update() {
+        #![allow(unused_must_use)]
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.waiting, ".".to_string());
+        sniffer.update(Message::Waiting);
+        assert_eq!(sniffer.waiting, "..".to_string());
+
+        sniffer.update(Message::Waiting);
+        assert_eq!(sniffer.waiting, "...".to_string());
+
+        sniffer.update(Message::Waiting);
+        assert_eq!(sniffer.waiting, ".".to_string());
+    }
+
+    #[test]
+    fn test_modify_favorite_connections() {
+        #![allow(unused_must_use)]
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+        // remove 1
+        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::new()
+        );
+        // remove 2
+        sniffer.update(Message::AddOrRemoveFavorite(2, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::new()
+        );
+        // add 2
+        sniffer.update(Message::AddOrRemoveFavorite(2, true));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([2])
+        );
+        // remove 1
+        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([2])
+        );
+        // add 2
+        sniffer.update(Message::AddOrRemoveFavorite(2, true));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([2])
+        );
+        // add 1
+        sniffer.update(Message::AddOrRemoveFavorite(1, true));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([1, 2])
+        );
+        // add 3
+        sniffer.update(Message::AddOrRemoveFavorite(3, true));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([1, 2, 3])
+        );
+        // remove 2
+        sniffer.update(Message::AddOrRemoveFavorite(2, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([1, 3])
+        );
+        // remove 3
+        sniffer.update(Message::AddOrRemoveFavorite(3, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::from([1])
+        );
+        // remove 1
+        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        assert_eq!(
+            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            HashSet::new()
+        );
     }
 }
