@@ -1,18 +1,19 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::settings_page::SettingsPage;
-use crate::gui::components::radio::language_radios;
-use crate::gui::components::tab::get_settings_tabs;
-use crate::gui::pages::settings_notifications_page::settings_header;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, FONT_SIZE_SUBTITLE};
-use crate::utility::translations::languages_title_translation;
-use crate::{Language, Sniffer};
 use iced::alignment::Horizontal;
 use iced::widget::{Column, Container, Row, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::vertical_space;
+
+use crate::gui::components::radio::language_radios;
+use crate::gui::components::tab::get_settings_tabs;
+use crate::gui::pages::settings_notifications_page::settings_header;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::translations::translations::languages_title_translation;
+use crate::{Language, Sniffer};
 
 pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);

@@ -1,21 +1,3 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::settings_page::SettingsPage;
-use crate::gui::components::radio::{
-    sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
-};
-use crate::gui::components::tab::get_settings_tabs;
-use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
-};
-use crate::utility::translations::{
-    bytes_threshold_translation, favorite_notification_translation, hide_translation,
-    notifications_title_translation, packets_threshold_translation, per_second_translation,
-    settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
-};
-use crate::{Language, Sniffer, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
@@ -25,6 +7,27 @@ use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::Slider;
+
+use crate::gui::components::radio::{
+    sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
+};
+use crate::gui::components::tab::get_settings_tabs;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{
+    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
+};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::notifications::types::notifications::{
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+};
+use crate::translations::translations::{
+    bytes_threshold_translation, favorite_notification_translation, hide_translation,
+    notifications_title_translation, packets_threshold_translation, per_second_translation,
+    settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
+};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -111,19 +114,19 @@ fn get_packets_notify(
         packets_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                Message::UpdatePacketsNotification(
-                    PacketsNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::Packets(PacketsNotification {
                         threshold: Some(packets_notification.previous_threshold),
                         ..packets_notification
-                    },
+                    }),
                     false,
                 )
             } else {
-                Message::UpdatePacketsNotification(
-                    PacketsNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::Packets(PacketsNotification {
                         threshold: None,
                         ..packets_notification
-                    },
+                    }),
                     false,
                 )
             }
@@ -186,19 +189,19 @@ fn get_bytes_notify(
         bytes_notification.threshold.is_some(),
         move |toggled| {
             if toggled {
-                Message::UpdateBytesNotification(
-                    BytesNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::Bytes(BytesNotification {
                         threshold: Some(bytes_notification.previous_threshold),
                         ..bytes_notification
-                    },
+                    }),
                     false,
                 )
             } else {
-                Message::UpdateBytesNotification(
-                    BytesNotification {
+                Message::UpdateNotificationSettings(
+                    Notification::Bytes(BytesNotification {
                         threshold: None,
                         ..bytes_notification
-                    },
+                    }),
                     false,
                 )
             }
@@ -260,11 +263,11 @@ fn get_favorite_notify(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
         move |toggled| {
-            Message::UpdateFavoriteNotification(
+            Message::UpdateNotificationSettings(
                 if toggled {
-                    FavoriteNotification::on(favorite_notification.sound)
+                    Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
                 } else {
-                    FavoriteNotification::off(favorite_notification.sound)
+                    Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
                 },
                 false,
             )
@@ -328,7 +331,10 @@ fn input_group_packets(
                 move |value| {
                     let packets_notification =
                         PacketsNotification::from(&value, Some(packets_notification));
-                    Message::UpdatePacketsNotification(packets_notification, false)
+                    Message::UpdateNotificationSettings(
+                        Notification::Packets(packets_notification),
+                        false,
+                    )
                 },
             )
             .padding([0, 0, 0, 10])
@@ -374,7 +380,10 @@ fn input_group_bytes(
                 move |value| {
                     let bytes_notification =
                         BytesNotification::from(&value, Some(bytes_notification));
-                    Message::UpdateBytesNotification(bytes_notification, false)
+                    Message::UpdateNotificationSettings(
+                        Notification::Bytes(bytes_notification),
+                        false,
+                    )
                 },
             )
             .padding([0, 0, 0, 10])

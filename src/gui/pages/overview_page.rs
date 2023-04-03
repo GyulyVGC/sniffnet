@@ -1,50 +1,47 @@
 //! Module defining the run page of the application.
 //!
-//! It contains elements to display traffic statistics: charts, detailed connections data
+//! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
-use iced::{alignment, Alignment, Length};
+use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
-use std::cmp::min;
+use pcap::Device;
 use thousands::Separable;
-//use dns_lookup::lookup_addr;
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
-use crate::structs::address_port_pair::AddressPortPair;
-use crate::structs::info_address_port_pair::InfoAddressPortPair;
-use crate::structs::sniffer::Sniffer;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::{get_flag_from_country_code, FLAGS_WIDTH};
-use crate::utility::get_formatted_strings::{
-    get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_percentage_string, get_report_path,
-};
-use crate::utility::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
-use crate::utility::translations::{
+use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::filters::Filters;
+use crate::report::get_report_entries::get_report_entries;
+use crate::translations::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
-    open_report_translation, some_observed_translation, waiting_translation,
+    some_observed_translation, waiting_translation,
 };
-use crate::{AppProtocol, ReportType, RunningPage};
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
+use crate::utils::formatted_strings::{
+    get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
+    get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
+    get_percentage_string,
+};
+use crate::{AppProtocol, Language, ReportType, RunningPage, StyleType};
+
+//use dns_lookup::lookup_addr;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
 
-    let mut body = Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_items(Alignment::Center);
-
+    let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
     if sniffer.pcap_error.is_none() {
@@ -56,57 +53,20 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-
-                let adapter_name = sniffer.device.name.clone();
-                let (icon_text, nothing_to_see_text) = if sniffer.device.addresses.is_empty() {
-                    (
-                        Text::new('T'.to_string()).font(ICONS).size(60),
-                        no_addresses_translation(sniffer.language, &adapter_name)
-                            .horizontal_alignment(Horizontal::Center)
-                            .font(font),
-                    )
-                } else {
-                    (
-                        Text::new(sniffer.waiting.len().to_string())
-                            .font(ICONS)
-                            .size(60),
-                        waiting_translation(sniffer.language, &adapter_name)
-                            .horizontal_alignment(Horizontal::Center)
-                            .font(font),
-                    )
-                };
-                body = body
-                    .push(vertical_space(FillPortion(1)))
-                    .push(icon_text)
-                    .push(vertical_space(Length::Fixed(15.0)))
-                    .push(nothing_to_see_text)
-                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(FillPortion(2)));
+                body = body_no_packets(&sniffer.device, font, sniffer.language, &sniffer.waiting);
             }
-
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-
-                let tot_packets_text = some_observed_translation(
+                body = body_no_observed(
+                    &sniffer.filters,
+                    observed,
+                    font,
                     sniffer.language,
-                    &observed.separate_with_spaces(),
-                    &get_active_filters_string_nobr(&sniffer.filters.clone(), sniffer.language),
-                )
-                .horizontal_alignment(Horizontal::Center)
-                .font(font);
-
-                body = body
-                    .push(vertical_space(FillPortion(1)))
-                    .push(Text::new('V'.to_string()).font(ICONS).size(60))
-                    .push(vertical_space(Length::Fixed(15.0)))
-                    .push(tot_packets_text)
-                    .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-                    .push(vertical_space(FillPortion(2)));
+                    &sniffer.waiting,
+                );
             }
-
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
-
                 let tabs = get_pages_tabs(
                     [
                         RunningPage::Overview,
@@ -126,9 +86,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let active_radio_chart = sniffer.traffic_chart.chart_type;
-                let row_radio_chart =
-                    chart_radios(active_radio_chart, font, sniffer.style, sniffer.language);
+                let row_radio_chart = chart_radios(
+                    sniffer.traffic_chart.chart_type,
+                    font,
+                    sniffer.style,
+                    sniffer.language,
+                );
                 let col_chart = Container::new(
                     Column::new()
                         .push(row_radio_chart)
@@ -163,16 +126,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
                 );
 
-                let open_report_translation = open_report_translation(sniffer.language).to_string();
-                //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
-                let report_path = get_report_path().to_string_lossy().to_string();
-                let open_report_tooltip = format!(
-                    "{:^len$}\n{report_path}",
-                    open_report_translation,
-                    len = report_path.len()
-                );
-
                 body = body
+                    .width(Length::Fill)
+                    .padding(10)
+                    .spacing(10)
+                    .align_items(Alignment::Center)
                     .push(
                         Row::new()
                             .spacing(10)
@@ -196,32 +154,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 .align_items(Alignment::Center)
                                 .width(Length::Fill)
                                 .push(row_report)
-                                .push(
-                                    Tooltip::new(
-                                        button(
-                                            Text::new('8'.to_string())
-                                                .font(ICONS)
-                                                .horizontal_alignment(alignment::Horizontal::Center)
-                                                .vertical_alignment(alignment::Vertical::Center),
-                                        )
-                                        .padding(10)
-                                        .height(Length::Fixed(50.0))
-                                        .width(Length::Fixed(75.0))
-                                        .style(
-                                            StyleTuple(sniffer.style, ElementType::Standard).into(),
-                                        )
-                                        .on_press(Message::OpenReport),
-                                        open_report_tooltip,
-                                        Position::Top,
-                                    )
-                                    .gap(5)
-                                    .font(font)
-                                    .style(
-                                        <StyleTuple as Into<iced::theme::Container>>::into(
-                                            StyleTuple(sniffer.style, ElementType::Tooltip),
-                                        ),
-                                    ),
-                                ),
+                                .push(get_button_open_report(
+                                    sniffer.style,
+                                    sniffer.language,
+                                    font,
+                                )),
                         )
                         .align_x(Horizontal::Center)
                         .height(FillPortion(2)),
@@ -230,19 +167,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         }
     } else {
         // pcap threw an ERROR!
-        let err_string = sniffer.pcap_error.clone().unwrap();
-
-        let error_text = error_translation(sniffer.language, &err_string)
-            .horizontal_alignment(Horizontal::Center)
-            .font(font);
-
-        body = body
-            .push(vertical_space(FillPortion(1)))
-            .push(Text::new('U'.to_string()).font(ICONS).size(60))
-            .push(vertical_space(Length::Fixed(15.0)))
-            .push(error_text)
-            .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(vertical_space(FillPortion(2)));
+        body = body_pcap_error(
+            sniffer.pcap_error.as_ref().unwrap(),
+            &sniffer.waiting,
+            sniffer.language,
+            font,
+        );
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))
@@ -250,6 +180,94 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn body_no_packets(
+    device: &Device,
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    let adapter_name = device.name.clone();
+    let (icon_text, nothing_to_see_text) = if device.addresses.is_empty() {
+        (
+            Text::new('T'.to_string()).font(ICONS).size(60),
+            no_addresses_translation(language, &adapter_name)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    } else {
+        (
+            Text::new(waiting.len().to_string()).font(ICONS).size(60),
+            waiting_translation(language, &adapter_name)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    };
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(icon_text)
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(nothing_to_see_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_no_observed(
+    filters: &Filters,
+    observed: u128,
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    let tot_packets_text = some_observed_translation(
+        language,
+        &observed.separate_with_spaces(),
+        &get_active_filters_string_nobr(filters, language),
+    )
+    .horizontal_alignment(Horizontal::Center)
+    .font(font);
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(Text::new('V'.to_string()).font(ICONS).size(60))
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(tot_packets_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_pcap_error(
+    pcap_error: &str,
+    waiting: &str,
+    language: Language,
+    font: Font,
+) -> Column<'static, Message> {
+    // let err_string = pcap_error.clone().unwrap();
+    let error_text = error_translation(language, pcap_error)
+        .horizontal_alignment(Horizontal::Center)
+        .font(font);
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(Text::new('U'.to_string()).font(ICONS).size(60))
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(error_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
 }
 
 fn lazy_row_report(
@@ -280,36 +298,8 @@ fn lazy_row_report(
                 .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
             ;
         let mut scroll_report = Column::new();
-        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-
-        let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
-        match sniffer.report_type {
-            ReportType::MostRecent => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec.sort_by(|&(_, a), &(_, b)| b.final_timestamp.cmp(&a.final_timestamp));
-            }
-            ReportType::MostPackets => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec
-                    .sort_by(|&(_, a), &(_, b)| b.transmitted_packets.cmp(&a.transmitted_packets));
-            }
-            ReportType::MostBytes => {
-                sorted_vec = info_traffic_lock.map.iter().collect();
-                sorted_vec
-                    .sort_by(|&(_, a), &(_, b)| b.transmitted_bytes.cmp(&a.transmitted_bytes));
-            }
-            ReportType::Favorites => {
-                for index in &info_traffic_lock.favorite_connections {
-                    let key_val = info_traffic_lock.map.get_index(*index).unwrap();
-                    sorted_vec.push((key_val.0, key_val.1));
-                }
-            }
-        }
-
-        let n_entry = min(sorted_vec.len(), 15);
-
-        for i in 0..n_entry {
-            let key_val = *sorted_vec.get(i).unwrap();
+        // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+        for key_val in get_report_entries(&sniffer.info_traffic.clone(), sniffer.report_type) {
             let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
             let mut entry_row = Row::new().align_items(Alignment::Center).push(
                 Text::new(format!(
@@ -357,16 +347,15 @@ fn lazy_row_report(
                         )
                         .into(),
                     )
-                    .on_press(if key_val.1.is_favorite {
-                        Message::UnSaveConnection(key_val.1.index)
-                    } else {
-                        Message::SaveConnection(key_val.1.index)
-                    }),
+                    .on_press(Message::AddOrRemoveFavorite(
+                        key_val.1.index,
+                        !key_val.1.is_favorite,
+                    )),
                 )
                 .push(Text::new("  ").font(font));
             scroll_report = scroll_report.push(entry_row);
         }
-        drop(info_traffic_lock);
+        // drop(info_traffic_lock);
         col_report = col_report.push(Container::new(
             Scrollable::new(scroll_report)
                 .horizontal_scroll(Properties::new())
@@ -437,4 +426,29 @@ fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column
             );
     }
     col_packets
+}
+
+fn get_button_open_report(
+    style: StyleType,
+    language: Language,
+    font: Font,
+) -> Tooltip<'static, Message> {
+    let content = button(
+        Text::new('8'.to_string())
+            .font(ICONS)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .padding(10)
+    .height(Length::Fixed(50.0))
+    .width(Length::Fixed(75.0))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::OpenReport);
+
+    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
+        .gap(5)
+        .font(font)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }

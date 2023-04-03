@@ -7,7 +7,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added feature to warn you when a newer version of Sniffnet is available on GitHub 🆕 ([#118](https://github.com/GyulyVGC/sniffnet/pull/118))
 - Added badge on tab bar to show unread notifications count 🔉
 - Introduction of `lazy` widgets to improve the application efficiency ([#122](https://github.com/GyulyVGC/sniffnet/pull/122))
-- Aesthetic improvements to create a more modern and minimal UI ([#119](https://github.com/GyulyVGC/sniffnet/issue/119))
+- Aesthetic improvements to create a more modern and minimal UI ([#119](https://github.com/GyulyVGC/sniffnet/issues/119))
 - Changed keyboard shortcut to open settings from `ctrl+S` to `ctrl+,`, as suggested in [#97](https://github.com/GyulyVGC/sniffnet/issues/97)
 - Fixed problem that was causing a switch to the initial page when back button was pressed with settings opened on running page and with no packets received
 - Fixed problem that was causing application logo to be partially hidden when resizing the window to a lower dimension
@@ -36,7 +36,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - The last successfully sniffed network adapter is now remembered on application closure, so that users don't have to manually select it again when restarting Sniffnet (implementing a feature requested in [#77](https://github.com/GyulyVGC/sniffnet/issues/77))
 - Implemented possibility to quit the application pressing crtl+Q keys, as requested in [#68](https://github.com/GyulyVGC/sniffnet/issues/68)
 - The last opened settings page is now remembered within a given session
-- Fixed bug that caused settings configuration not to be permanently saved across different sessions when closing settings from the 'x' button on the top right corner (fixes [#77](https://github.com/GyulyVGC/sniffnet/issues/77))
+- Fixed bug that caused settings configuration not to be permanently saved across different sessions when closing settings from the 'x' button in the top right corner (fixes [#77](https://github.com/GyulyVGC/sniffnet/issues/77))
 - Textual report is now saved in a fixed directory, instead of using the directory where the execution was started. The output is now saved in the same folder containing configuration files storing Sniffnet settings. The directory is automatically chosen by [confy](https://docs.rs/confy/0.5.1/confy/) depending on your architecture, and can be seen hovering on the "Open full report" button. (fixes [#51](https://github.com/GyulyVGC/sniffnet/issues/51))
 - When multiple favorite connections are featured per time interval, now it's possible to receive more than one favorite notification referred to the same timestamp
 - Fixed problem that was causing the Application Protocol picklist placeholder not being translated

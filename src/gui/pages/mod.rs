@@ -5,3 +5,4 @@ pub mod overview_page;
 pub mod settings_language_page;
 pub mod settings_notifications_page;
 pub mod settings_style_page;
+pub mod types;

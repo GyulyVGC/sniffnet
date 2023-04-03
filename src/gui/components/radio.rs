@@ -1,18 +1,21 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::sound::Sound;
-use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag_from_language_code;
-use crate::utility::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
-use crate::utility::translations::{
-    ip_version_translation, relevant_connections_translation, sound_translation,
-    traffic_rate_translation, transport_protocol_translation,
-};
-use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
+
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::notifications::types::notifications::{
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+};
+use crate::notifications::types::sound::Sound;
+use crate::translations::translations::{
+    ip_version_translation, relevant_connections_translation, sound_translation,
+    traffic_rate_translation, transport_protocol_translation,
+};
+use crate::utils::countries::get_flag_from_language_code;
+use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 pub fn ip_version_radios(
     active: IpVersion,
@@ -126,11 +129,11 @@ pub fn sound_packets_threshold_radios(
                 option.get_radio_label(language),
                 Some(packets_notification.sound),
                 |value| {
-                    Message::UpdatePacketsNotification(
-                        PacketsNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Packets(PacketsNotification {
                             sound: value,
                             ..packets_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
@@ -163,11 +166,11 @@ pub fn sound_bytes_threshold_radios(
                 option.get_radio_label(language),
                 Some(bytes_notification.sound),
                 |value| {
-                    Message::UpdateBytesNotification(
-                        BytesNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Bytes(BytesNotification {
                             sound: value,
                             ..bytes_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
@@ -200,11 +203,11 @@ pub fn sound_favorite_radios(
                 option.get_radio_label(language),
                 Some(favorite_notification.sound),
                 |value| {
-                    Message::UpdateFavoriteNotification(
-                        FavoriteNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Favorite(FavoriteNotification {
                             sound: value,
                             ..favorite_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
