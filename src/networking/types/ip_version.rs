@@ -1,6 +1,7 @@
+use std::fmt;
+
 use crate::translations::translations::both_translation;
 use crate::Language;
-use std::fmt;
 
 /// Enum representing the possible observed values of IP protocol version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

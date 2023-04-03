@@ -1,3 +1,7 @@
+use iced::widget::{Column, Radio, Row, Text};
+use iced::{Alignment, Font, Length};
+use iced_native::widget::horizontal_space;
+
 use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
@@ -12,9 +16,6 @@ use crate::translations::translations::{
 };
 use crate::utils::countries::get_flag_from_language_code;
 use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
-use iced::widget::{Column, Radio, Row, Text};
-use iced::{Alignment, Font, Length};
-use iced_native::widget::horizontal_space;
 
 pub fn ip_version_radios(
     active: IpVersion,

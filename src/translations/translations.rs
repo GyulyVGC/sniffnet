@@ -1,5 +1,6 @@
-use crate::translations::types::language::Language;
 use iced::widget::Text;
+
+use crate::translations::types::language::Language;
 
 pub fn choose_adapters_translation(language: Language) -> Text<'static> {
     Text::new(match language {

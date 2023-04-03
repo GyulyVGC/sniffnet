@@ -1,8 +1,9 @@
+use std::cmp::min;
+use std::sync::{Arc, Mutex};
+
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::{InfoTraffic, ReportType};
-use std::cmp::min;
-use std::sync::{Arc, Mutex};
 
 pub fn get_report_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,

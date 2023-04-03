@@ -2,27 +2,28 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
+use std::time::Duration;
+
 use iced::widget::Column;
 use iced::{executor, Application, Command, Element, Subscription, Theme};
-use std::time::Duration;
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::initial_page::initial_page;
-use crate::gui::pages::types::running_page::RunningPage;
-use crate::gui::types::message::Message;
-use crate::gui::types::status::Status;
 // use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_language_page::settings_language_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
+use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::get_font;
+use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::gui::types::status::Status;
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;

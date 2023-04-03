@@ -1,3 +1,8 @@
+use iced::widget::{Button, Column, Container, Image, Row, Text};
+use iced::{Alignment, Length};
+use iced_native::image::Handle;
+use iced_native::widget::{horizontal_space, vertical_space};
+
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -13,10 +18,6 @@ use crate::translations::translations::{
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
-use iced::widget::{Button, Column, Container, Image, Row, Text};
-use iced::{Alignment, Length};
-use iced_native::image::Handle;
-use iced_native::widget::{horizontal_space, vertical_space};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);

@@ -1,3 +1,9 @@
+use iced::alignment::Horizontal;
+use iced::widget::{Column, Container, Row, Text};
+use iced::Length::Fixed;
+use iced::{Alignment, Length};
+use iced_native::widget::vertical_space;
+
 use crate::gui::components::radio::language_radios;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -8,11 +14,6 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::translations::translations::languages_title_translation;
 use crate::{Language, Sniffer};
-use iced::alignment::Horizontal;
-use iced::widget::{Column, Container, Row, Text};
-use iced::Length::Fixed;
-use iced::{Alignment, Length};
-use iced_native::widget::vertical_space;
 
 pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);

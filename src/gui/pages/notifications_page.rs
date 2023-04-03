@@ -1,3 +1,11 @@
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::Length::FillPortion;
+use iced::{Alignment, Font, Length};
+use iced_lazy::lazy;
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::{button, vertical_space};
+
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -20,13 +28,6 @@ use crate::translations::translations::{
 use crate::utils::countries::get_flag_from_country_code;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
-use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length};
-use iced_lazy::lazy;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, vertical_space};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {

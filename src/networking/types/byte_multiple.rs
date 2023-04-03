@@ -1,6 +1,8 @@
-use crate::networking::types::byte_multiple::ByteMultiple::{B, GB, KB, MB};
-use serde::{Deserialize, Serialize};
 use std::fmt;
+
+use serde::{Deserialize, Serialize};
+
+use crate::networking::types::byte_multiple::ByteMultiple::{B, GB, KB, MB};
 
 /// Enum representing the possible observed values of IP protocol version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

@@ -1,3 +1,13 @@
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::{
+    button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
+    TextInput, Tooltip,
+};
+use iced::Length::Fixed;
+use iced::{Alignment, Length};
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::Slider;
+
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
 };
@@ -18,15 +28,6 @@ use crate::translations::translations::{
     settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
 };
 use crate::{Language, Sniffer, StyleType};
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{
-    button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
-    TextInput, Tooltip,
-};
-use iced::Length::Fixed;
-use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::Slider;
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);

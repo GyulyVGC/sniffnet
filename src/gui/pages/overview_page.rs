@@ -12,7 +12,6 @@ use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use pcap::Device;
 use thousands::Separable;
-//use dns_lookup::lookup_addr;
 
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
@@ -34,7 +33,9 @@ use crate::utils::formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
     get_percentage_string,
 };
-use crate::{AppProtocol, Language, ReportType, RunningPage};
+use crate::{AppProtocol, Language, ReportType, RunningPage, StyleType};
+
+//use dns_lookup::lookup_addr;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -54,7 +55,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 //no packets observed at all
                 body = body_no_packets(&sniffer.device, font, sniffer.language, &sniffer.waiting);
             }
-
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
                 body = body_no_observed(
@@ -65,16 +65,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     &sniffer.waiting,
                 );
             }
-
             (observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
-
-                let mut body = Column::new()
-                    .width(Length::Fill)
-                    .padding(10)
-                    .spacing(10)
-                    .align_items(Alignment::Center);
-
                 let tabs = get_pages_tabs(
                     [
                         RunningPage::Overview,
@@ -94,9 +86,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let active_radio_chart = sniffer.traffic_chart.chart_type;
-                let row_radio_chart =
-                    chart_radios(active_radio_chart, font, sniffer.style, sniffer.language);
+                let row_radio_chart = chart_radios(
+                    sniffer.traffic_chart.chart_type,
+                    font,
+                    sniffer.style,
+                    sniffer.language,
+                );
                 let col_chart = Container::new(
                     Column::new()
                         .push(row_radio_chart)
@@ -132,6 +127,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
 
                 body = body
+                    .width(Length::Fill)
+                    .padding(10)
+                    .spacing(10)
+                    .align_items(Alignment::Center)
                     .push(
                         Row::new()
                             .spacing(10)
@@ -155,32 +154,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 .align_items(Alignment::Center)
                                 .width(Length::Fill)
                                 .push(row_report)
-                                .push(
-                                    Tooltip::new(
-                                        button(
-                                            Text::new('8'.to_string())
-                                                .font(ICONS)
-                                                .horizontal_alignment(alignment::Horizontal::Center)
-                                                .vertical_alignment(alignment::Vertical::Center),
-                                        )
-                                        .padding(10)
-                                        .height(Length::Fixed(50.0))
-                                        .width(Length::Fixed(75.0))
-                                        .style(
-                                            StyleTuple(sniffer.style, ElementType::Standard).into(),
-                                        )
-                                        .on_press(Message::OpenReport),
-                                        get_open_report_tooltip(sniffer.language),
-                                        Position::Top,
-                                    )
-                                    .gap(5)
-                                    .font(font)
-                                    .style(
-                                        <StyleTuple as Into<iced::theme::Container>>::into(
-                                            StyleTuple(sniffer.style, ElementType::Tooltip),
-                                        ),
-                                    ),
-                                ),
+                                .push(get_button_open_report(
+                                    sniffer.style,
+                                    sniffer.language,
+                                    font,
+                                )),
                         )
                         .align_x(Horizontal::Center)
                         .height(FillPortion(2)),
@@ -189,19 +167,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         }
     } else {
         // pcap threw an ERROR!
-        let err_string = sniffer.pcap_error.clone().unwrap();
-
-        let error_text = error_translation(sniffer.language, &err_string)
-            .horizontal_alignment(Horizontal::Center)
-            .font(font);
-
-        body = body
-            .push(vertical_space(FillPortion(1)))
-            .push(Text::new('U'.to_string()).font(ICONS).size(60))
-            .push(vertical_space(Length::Fixed(15.0)))
-            .push(error_text)
-            .push(Text::new(sniffer.waiting.clone()).font(font).size(50))
-            .push(vertical_space(FillPortion(2)));
+        body = body_pcap_error(
+            sniffer.pcap_error.as_ref().unwrap(),
+            &sniffer.waiting,
+            sniffer.language,
+            font,
+        );
     }
 
     Container::new(Column::new().push(tab_and_body.push(body)))
@@ -271,6 +242,30 @@ fn body_no_observed(
         .push(Text::new('V'.to_string()).font(ICONS).size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(tot_packets_text)
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_pcap_error(
+    pcap_error: &str,
+    waiting: &str,
+    language: Language,
+    font: Font,
+) -> Column<'static, Message> {
+    // let err_string = pcap_error.clone().unwrap();
+    let error_text = error_translation(language, pcap_error)
+        .horizontal_alignment(Horizontal::Center)
+        .font(font);
+
+    Column::new()
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .push(vertical_space(FillPortion(1)))
+        .push(Text::new('U'.to_string()).font(ICONS).size(60))
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(error_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
@@ -431,4 +426,29 @@ fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column
             );
     }
     col_packets
+}
+
+fn get_button_open_report(
+    style: StyleType,
+    language: Language,
+    font: Font,
+) -> Tooltip<'static, Message> {
+    let content = button(
+        Text::new('8'.to_string())
+            .font(ICONS)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .padding(10)
+    .height(Length::Fixed(50.0))
+    .width(Length::Fixed(75.0))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::OpenReport);
+
+    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
+        .gap(5)
+        .font(font)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }

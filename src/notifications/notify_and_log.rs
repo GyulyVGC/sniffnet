@@ -1,11 +1,13 @@
+use std::sync::{Arc, Mutex};
+
+use chrono::Local;
+
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::notifications::types::notifications::Notifications;
 use crate::notifications::types::sound::{play, Sound};
 use crate::{InfoTraffic, RunTimeData};
-use chrono::Local;
-use std::sync::{Arc, Mutex};
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///

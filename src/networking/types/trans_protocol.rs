@@ -1,7 +1,9 @@
 #![allow(clippy::upper_case_acronyms)]
+
+use std::fmt;
+
 use crate::translations::translations::both_translation;
 use crate::Language;
-use std::fmt;
 
 /// Enum representing the possible observed values of transport layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

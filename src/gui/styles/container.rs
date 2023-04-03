@@ -1,12 +1,13 @@
 //! Containers style
 
+use iced::widget::container::Appearance;
+use iced::Theme;
+use iced::{Background, Color};
+
 use crate::get_colors;
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
-use iced::widget::container::Appearance;
-use iced::Theme;
-use iced::{Background, Color};
 
 impl From<StyleTuple> for iced::theme::Container {
     fn from(tuple: StyleTuple) -> Self {

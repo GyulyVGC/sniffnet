@@ -1,10 +1,12 @@
+use std::fmt;
+use std::thread;
+
+use rodio::{Decoder, OutputStream, Sink};
+use serde::{Deserialize, Serialize};
+
 use crate::notifications::types::sound::Sound::{Gulp, Pop, Swhoosh};
 use crate::translations::translations::none_translation;
 use crate::Language;
-use rodio::{Decoder, OutputStream, Sink};
-use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::thread;
 
 /// Enum representing the possible notification sounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

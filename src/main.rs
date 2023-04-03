@@ -6,16 +6,12 @@ use std::{panic, process, thread};
 use iced::window::Position;
 use iced::{window, Application, Settings};
 
-use crate::secondary_threads::check_updates::set_newer_release_status;
-use gui::styles::style_constants::FONT_SIZE_BODY;
-
-use crate::gui::pages::types::running_page::RunningPage;
-use crate::secondary_threads::write_report_file::sleep_and_write_report_loop;
-use crate::utils::formatted_strings::print_cli_welcome_message;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use configs::types::config_device::ConfigDevice;
 use configs::types::config_settings::ConfigSettings;
+use gui::pages::types::running_page::RunningPage;
+use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::palette::get_colors;
 use gui::styles::types::style_type::StyleType;
 use gui::types::runtime_data::RunTimeData;
@@ -27,7 +23,11 @@ use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::trans_protocol::TransProtocol;
 use report::types::report_type::ReportType;
+use secondary_threads::write_report_file::sleep_and_write_report_loop;
 use translations::types::language::Language;
+use utils::formatted_strings::print_cli_welcome_message;
+
+use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
 mod configs;

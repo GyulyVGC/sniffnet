@@ -1,12 +1,13 @@
 //! Module defining the `Sniffer` struct, which trace gui's component statuses and permits
 //! to share data among the different threads.
 
-use iced::window;
-use iced_native::Command;
-use pcap::Device;
 use std::collections::{HashSet, VecDeque};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
+
+use iced::window;
+use iced_native::Command;
+use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;

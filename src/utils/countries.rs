@@ -1,8 +1,9 @@
-use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::traffic_type::TrafficType;
 use iced::widget::{image::Handle, Image};
 use iced::Length;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
+
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::traffic_type::TrafficType;
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 

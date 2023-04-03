@@ -1,9 +1,10 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use chrono::{DateTime, Local};
 use std::fmt;
 use std::ops::Add;
+
+use chrono::{DateTime, Local};
 
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_formatted_bytes_string;

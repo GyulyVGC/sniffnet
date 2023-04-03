@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use crate::networking::types::byte_multiple::from_char_to_multiple;
 use crate::notifications::types::sound::Sound;
 use crate::ByteMultiple;
-use serde::{Deserialize, Serialize};
 
 /// Used to contain the notifications configuration set by the user
 #[derive(Clone, Serialize, Deserialize, Copy)]
@@ -173,8 +174,9 @@ impl FavoriteNotification {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use rstest::rstest;
+
+    use super::*;
 
     #[rstest]
     #[case("123", BytesNotification { 

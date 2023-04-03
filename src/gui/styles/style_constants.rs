@@ -1,10 +1,10 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
-use crate::{get_colors, StyleType};
 use iced::{Color, Font};
 use plotters::style::RGBColor;
 
 use crate::gui::styles::types::palette::{to_rgb_color, Palette};
+use crate::{get_colors, StyleType};
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {

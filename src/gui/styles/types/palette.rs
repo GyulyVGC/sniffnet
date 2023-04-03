@@ -1,11 +1,12 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
+use iced::Color;
+use plotters::style::RGBColor;
+
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
 use crate::StyleType;
-use iced::Color;
-use plotters::style::RGBColor;
 
 /// Set of colors to apply to GUI
 ///

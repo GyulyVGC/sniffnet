@@ -1,8 +1,10 @@
-use crate::utils::formatted_strings::APP_VERSION;
-use serde::Deserialize;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+
+use serde::Deserialize;
+
+use crate::utils::formatted_strings::APP_VERSION;
 
 #[derive(Deserialize, Debug)]
 struct AppVersion {
