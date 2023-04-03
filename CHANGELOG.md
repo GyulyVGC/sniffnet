@@ -12,6 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fixed problem that was causing a switch to the initial page when back button was pressed with settings opened on running page and with no packets received
 - Fixed problem that was causing application logo to be partially hidden when resizing the window to a lower dimension
 - Show `-` option in app protocol picklist only when a filter is active
+- Refactored and cleaned code modules ([#113](https://github.com/GyulyVGC/sniffnet/pull/123))
 - Fixed header alignment
 
 

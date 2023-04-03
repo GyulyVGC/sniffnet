@@ -37,10 +37,10 @@ pub struct TrafficChart {
     pub min_sent_packets: i64,
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
-    color_mix: f64,
-    color_incoming: RGBColor,
-    color_outgoing: RGBColor,
-    color_font: RGBColor,
+    pub color_mix: f64,
+    pub color_incoming: RGBColor,
+    pub color_outgoing: RGBColor,
+    pub color_font: RGBColor,
     pub chart_type: ChartType,
     pub language: Language,
 }
