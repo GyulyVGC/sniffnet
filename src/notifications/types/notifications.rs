@@ -191,7 +191,7 @@ mod tests {
     })]
     #[case(" 888 g", BytesNotification { 
         previous_threshold: 888_000_000_000, threshold: Some(888_000_000_000),byte_multiple: ByteMultiple::GB, ..BytesNotification::default() })]
-    fn test_can_instanciate_bytes_notification_from_string(
+    fn test_can_instantiate_bytes_notification_from_string(
         #[case] input: &str,
         #[case] expected: BytesNotification,
     ) {
@@ -220,7 +220,7 @@ mod tests {
     }
 
     #[test]
-    fn test_can_instanciate_favourite_notification() {
+    fn test_can_instantiate_favourite_notification() {
         assert_eq!(
             FavoriteNotification::on(Sound::Gulp),
             FavoriteNotification {
@@ -266,7 +266,7 @@ mod tests {
     #[case("foob@r", PacketsNotification { 
         threshold: Some(750),
         ..PacketsNotification::default() })]
-    fn test_can_instanciate_packet_notification_from_string(
+    fn test_can_instantiate_packet_notification_from_string(
         #[case] input: &str,
         #[case] expected: PacketsNotification,
     ) {

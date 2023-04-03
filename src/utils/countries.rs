@@ -522,6 +522,7 @@ pub fn get_flag_from_language_code(language: &str) -> Image {
 }
 
 pub fn get_flag_from_country_code(country: &str) -> Image {
+    #![allow(clippy::too_many_lines)]
     Image::new(Handle::from_memory(Vec::from(match country {
         "AD" => AD,
         "AE" => AE,

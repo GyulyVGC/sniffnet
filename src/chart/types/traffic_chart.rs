@@ -14,6 +14,7 @@ use crate::gui::styles::style_constants::{
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
+use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{get_colors, ChartType, Language, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
@@ -99,7 +100,11 @@ impl TrafficChart {
 impl Chart<Message> for TrafficChart {
     type State = ();
 
-    fn build_chart<DB: DrawingBackend>(&self, _state: &Self::State, mut chart: ChartBuilder<DB>) {
+    fn build_chart<DB: DrawingBackend>(
+        &self,
+        _state: &Self::State,
+        mut chart_builder: ChartBuilder<DB>,
+    ) {
         use plotters::prelude::*;
 
         if self.ticks == 0 {
@@ -111,40 +116,28 @@ impl Chart<Message> for TrafficChart {
         let color_incoming = self.color_incoming;
         let color_outgoing = self.color_outgoing;
 
+        chart_builder
+            .margin_right(30)
+            .set_label_area_size(LabelAreaPosition::Left, 60)
+            .set_label_area_size(LabelAreaPosition::Bottom, 50);
+
         match self.chart_type {
             ChartType::Bytes => {
                 //display bytes chart
-                let mut chart = chart
-                    .margin_right(30)
-                    .set_label_area_size(LabelAreaPosition::Left, 60)
-                    .set_label_area_size(LabelAreaPosition::Bottom, 50)
+                let mut chart = chart_builder
                     .build_cartesian_2d(
                         first_time_displayed..tot_seconds,
                         self.min_sent_bytes..self.max_received_bytes,
                     )
-                    .expect("Error drawing graph");
+                    .expect("Error drawing bytes chart");
 
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_label_formatter(&|bytes| {
-                        let bytes_abs = bytes.abs();
-                        #[allow(clippy::cast_precision_loss)]
-                        let bytes_abs_float = bytes_abs as f32;
-                        match bytes_abs {
-                            0..=999 => {
-                                format!("{bytes_abs}")
-                            }
-                            1000..=999_999 => {
-                                format!("{:.1} {}", bytes_abs_float / 1_000_f32, "K")
-                            }
-                            1_000_000..=999_999_999 => {
-                                format!("{:.1} {}", bytes_abs_float / 1_000_000_f32, "M")
-                            }
-                            _ => {
-                                format!("{:.1} {}", bytes_abs_float / 1_000_000_000_f32, "G")
-                            }
-                        }
+                        get_formatted_bytes_string(u128::from(bytes.unsigned_abs()))
+                            .trim()
+                            .to_string()
                     })
                     .draw()
                     .unwrap();
@@ -191,15 +184,12 @@ impl Chart<Message> for TrafficChart {
 
             ChartType::Packets => {
                 //display packets chart
-                let mut chart = chart
-                    .margin_right(30)
-                    .set_label_area_size(LabelAreaPosition::Left, 60)
-                    .set_label_area_size(LabelAreaPosition::Bottom, 50)
+                let mut chart = chart_builder
                     .build_cartesian_2d(
                         first_time_displayed..tot_seconds,
                         self.min_sent_packets..self.max_received_packets,
                     )
-                    .expect("Error drawing graph");
+                    .expect("Error drawing packets chart");
 
                 chart
                     .configure_mesh()
