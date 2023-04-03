@@ -93,7 +93,7 @@ pub fn language_radios(
                 .push(
                     Radio::new(
                         *option,
-                        format!("{} ({:?}", option.get_radio_label(), option),
+                        format!("{} ({:?})", option.get_radio_label(), option),
                         Some(active),
                         Message::LanguageSelection,
                     )
@@ -106,8 +106,7 @@ pub fn language_radios(
                     ))),
                 )
                 .push(horizontal_space(Length::Fixed(8.0)))
-                .push(get_flag_from_language_code(&format!("{option:?}")))
-                .push(Text::new(")").font(font)),
+                .push(get_flag_from_language_code(&format!("{option:?}"))),
         );
     }
     ret_val

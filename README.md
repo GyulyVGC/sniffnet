@@ -14,7 +14,7 @@ Multithreaded, cross-platform, reliable
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧 - 🇩🇪 - 🇪🇦 - 🇫🇷 - 🇮🇹 - 🇵🇱 - 🇺🇦 - 🇨🇳 <br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 [Would you like to add support for your native language?](https://github.com/GyulyVGC/sniffnet/issues/60)
 
 </div>
@@ -260,7 +260,7 @@ The currently usable hotkeys are reported in the following:
 |--|--|
 | Quit the application | `ctrl+Q` (`cmd+Q` on macOS) |
 | Open full report | `ctrl+O` (`cmd+O` on macOS) |
-| Open settings | `ctrl+S` (`cmd+S` on macOS) |
+| Open settings | `ctrl+,` (`cmd+,` on macOS) |
 | Clear all notifications | `ctrl+D` (`cmd+D` on macOS) |
 | Start the analysis and confirm modal actions | `enter` |
 | Interrupt the ongoing analysis | `backspace` |
