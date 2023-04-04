@@ -1,7 +1,7 @@
 # Change Log
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [1.1.3] - 2023-04-XX
+## [1.1.3] - 2023-04-04
 
 - Added Romanian translation 🇷🇴 ([#113](https://github.com/GyulyVGC/sniffnet/pull/113))
 - Added feature to warn you when a newer version of Sniffnet is available on GitHub 🆕 ([#118](https://github.com/GyulyVGC/sniffnet/pull/118))
