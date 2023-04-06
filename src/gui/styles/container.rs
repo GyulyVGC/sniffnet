@@ -1,12 +1,13 @@
 //! Containers style
 
-use crate::enums::element_type::ElementType;
-use crate::get_colors;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use iced::widget::container::Appearance;
 use iced::Theme;
 use iced::{Background, Color};
+
+use crate::get_colors;
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
 
 impl From<StyleTuple> for iced::theme::Container {
     fn from(tuple: StyleTuple) -> Self {
@@ -26,6 +27,8 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             }),
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Headers) => colors.secondary,
+                StyleTuple(_, ElementType::Tooltip) => colors.buttons,
+                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
                 _ => colors.primary,
             })),
             border_radius: match self {
@@ -37,7 +40,8 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             },
             border_width: match self {
                 StyleTuple(_, ElementType::Standard | ElementType::Headers) => 0.0,
-                StyleTuple(_, ElementType::Tooltip) => 1.0,
+                StyleTuple(_, ElementType::Tooltip) => BORDER_WIDTH / 2.0,
+                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {

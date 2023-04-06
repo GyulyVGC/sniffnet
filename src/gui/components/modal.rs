@@ -1,12 +1,3 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
-use crate::utility::translations::{
-    ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
-    quit_analysis_translation, yes_translation,
-};
-use crate::{Language, StyleType};
 use iced::alignment::{Alignment, Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
@@ -16,26 +7,25 @@ use iced_native::widget::tooltip::Position;
 use iced_native::widget::{self, Tree};
 use iced_native::{layout, overlay, renderer, Clipboard, Layout, Shell, Widget};
 
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::translations::translations::{
+    ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
+    quit_analysis_translation, yes_translation,
+};
+use crate::{Language, StyleType};
+
 pub fn get_exit_overlay(
     style: StyleType,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
-    let row_buttons = Row::new().push(
-        button(
-            yes_translation(language)
-                .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center),
-        )
-        .padding(5)
-        .height(Length::Units(40))
-        .width(Length::Units(80))
-        .style(StyleTuple(style, ElementType::Alert).into())
-        .on_press(Message::Reset),
-    );
+    let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
+        .padding(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -43,14 +33,17 @@ pub fn get_exit_overlay(
             language,
             quit_analysis_translation(language),
         ))
-        .push(vertical_space(Length::Units(20)))
-        .push(ask_quit_translation(language).font(font))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
+        .push(
+            ask_quit_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Units(150))
-        .width(Length::Units(450))
+        .height(Length::Fixed(160.0))
+        .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
         ))
@@ -61,21 +54,10 @@ pub fn get_clear_all_overlay(
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
-    let row_buttons = Row::new().push(
-        button(
-            yes_translation(language)
-                .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center),
-        )
-        .padding(5)
-        .height(Length::Units(40))
-        .width(Length::Units(80))
-        .style(StyleTuple(style, ElementType::Alert).into())
-        .on_press(Message::ClearAllNotifications),
-    );
+    let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
+        .padding(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -83,14 +65,17 @@ pub fn get_clear_all_overlay(
             language,
             clear_all_translation(language),
         ))
-        .push(vertical_space(Length::Units(20)))
-        .push(ask_clear_all_translation(language).font(font))
-        .push(vertical_space(Length::Units(20)))
+        .push(vertical_space(Length::Fixed(20.0)))
+        .push(
+            ask_clear_all_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Units(150))
-        .width(Length::Units(450))
+        .height(Length::Fixed(160.0))
+        .width(Length::Fixed(450.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Standard),
         ))
@@ -101,6 +86,9 @@ fn get_modal_header(
     language: Language,
     title: String,
 ) -> Container<'static, Message> {
+    let font = get_font(style);
+    let tooltip = hide_translation(language).to_string();
+    //tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -116,19 +104,19 @@ fn get_modal_header(
                     Tooltip::new(
                         button(
                             Text::new("x")
-                                .font(get_font(style))
+                                .font(font)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
                         .padding(2)
-                        .height(Length::Units(20))
-                        .width(Length::Units(20))
+                        .height(Length::Fixed(20.0))
+                        .width(Length::Fixed(20.0))
                         .style(StyleTuple(style, ElementType::Standard).into())
-                        .on_press(Message::HideModal(false)),
-                        hide_translation(language),
+                        .on_press(Message::HideModal),
+                        tooltip,
                         Position::Right,
                     )
-                    .font(get_font(style))
+                    .font(font)
                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
                         StyleTuple(style, ElementType::Tooltip),
                     )),
@@ -139,11 +127,35 @@ fn get_modal_header(
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Length::Units(40))
+    .height(Length::Fixed(40.0))
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
+}
+
+fn confirm_button_row(
+    language: Language,
+    font: Font,
+    style: StyleType,
+    message: Message,
+) -> Row<'static, Message> {
+    Row::new()
+        .height(Length::Fill)
+        .align_items(Alignment::Center)
+        .push(
+            button(
+                yes_translation(language)
+                    .font(font)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center),
+            )
+            .padding(5)
+            .height(Length::Fixed(40.0))
+            .width(Length::Fixed(80.0))
+            .style(StyleTuple(style, ElementType::Alert).into())
+            .on_press(message),
+        )
 }
 
 /// A widget that centers a modal element over some base element

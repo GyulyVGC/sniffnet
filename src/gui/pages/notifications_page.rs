@@ -1,44 +1,42 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::logged_notification::{
-    BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
-};
-use crate::enums::message::Message;
-use crate::enums::overlay::MyOverlay;
-use crate::enums::traffic_type::TrafficType;
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::Length::FillPortion;
+use iced::{Alignment, Font, Length};
+use iced_lazy::lazy;
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::{button, vertical_space};
+
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag;
-use crate::utility::get_formatted_strings::get_formatted_bytes_string;
-use crate::utility::style_constants::{get_font, FONT_SIZE_FOOTER, HEIGHT_BODY, ICONS};
-use crate::utility::translations::{
+use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::networking::types::traffic_type::TrafficType;
+use crate::notifications::types::logged_notification::{
+    BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
+};
+use crate::translations::translations::{
     application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation,
     clear_all_translation, favorite_transmitted_translation, incoming_translation,
     no_notifications_received_translation, no_notifications_set_translation,
     only_last_30_translation, outgoing_translation, packets_exceeded_translation,
     packets_exceeded_value_translation, per_second_translation, threshold_translation,
 };
+use crate::utils::countries::get_flag_from_country_code;
+use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
-use iced::Length::FillPortion;
-use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, vertical_space};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let notifications = sniffer.notifications;
-
-    let mut body = Column::new()
-        .width(Length::Units(830))
-        .padding(5)
-        .spacing(10)
-        .align_items(Alignment::Center);
+    let font = get_font(sniffer.style);
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
-        .height(FillPortion(HEIGHT_BODY));
+        .height(Length::Fill);
 
     let tabs = get_pages_tabs(
         [
@@ -55,107 +53,54 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
         RunningPage::Notifications,
         sniffer.style,
         sniffer.language,
+        sniffer.unread_notifications,
     );
 
     tab_and_body = tab_and_body
         .push(tabs)
-        .push(vertical_space(Length::Units(15)));
+        .push(vertical_space(Length::Fixed(15.0)));
 
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
-        && sniffer
-            .runtime_data
-            .borrow()
-            .logged_notifications
-            .is_empty()
+        && sniffer.runtime_data.logged_notifications.is_empty()
     {
-        body = body
-            .width(Length::Fill)
-            .padding(5)
-            .spacing(5)
-            .align_items(Alignment::Center)
-            .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Units(15)))
-            .push(
-                no_notifications_set_translation(sniffer.language)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(get_font(sniffer.style)),
-            )
-            .push(get_button_settings(sniffer.style, sniffer.language))
-            .push(vertical_space(FillPortion(2)));
+        let body = body_no_notifications_set(sniffer.style, font, sniffer.language);
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer
-        .runtime_data
-        .borrow()
-        .logged_notifications
-        .is_empty()
-    {
-        body = body
-            .width(Length::Fill)
-            .padding(5)
-            .spacing(5)
-            .align_items(Alignment::Center)
-            .push(vertical_space(FillPortion(1)))
-            .push(vertical_space(Length::Units(15)))
-            .push(
-                no_notifications_received_translation(sniffer.language)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(get_font(sniffer.style)),
-            )
-            .push(
-                Text::new(sniffer.waiting.clone())
-                    .font(get_font(sniffer.style))
-                    .size(50),
-            )
-            .push(vertical_space(FillPortion(2)));
+    } else if sniffer.runtime_data.logged_notifications.is_empty() {
+        let body = body_no_notifications_received(font, sniffer.language, &sniffer.waiting);
         tab_and_body = tab_and_body.push(body);
     } else {
-        for logged_notification in &sniffer.runtime_data.borrow().logged_notifications {
-            body = body.push(match logged_notification {
-                LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
-                    packets_notification_log(
-                        packet_threshold_exceeded.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-                LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
-                    bytes_notification_log(
-                        byte_threshold_exceeded.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-                LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
-                    favorite_notification_log(
-                        favorite_transmitted.clone(),
-                        sniffer.language,
-                        sniffer.style,
-                    )
-                }
-            });
-        }
+        let logged_notifications = lazy(
+            (
+                sniffer.runtime_data.tot_emitted_notifications,
+                sniffer.runtime_data.logged_notifications.len(),
+                sniffer.language,
+                sniffer.style,
+            ),
+            move |_| lazy_logged_notifications(sniffer),
+        );
         let body_row = Row::new()
             .width(Length::Fill)
             .push(
-                Container::new(
-                    if sniffer.runtime_data.borrow().logged_notifications.len() < 30 {
-                        Text::new("")
-                    } else {
-                        Text::new(only_last_30_translation(sniffer.language))
-                            .font(get_font(sniffer.style))
-                    },
-                )
+                Container::new(if sniffer.runtime_data.logged_notifications.len() < 30 {
+                    Text::new("")
+                } else {
+                    Text::new(only_last_30_translation(sniffer.language)).font(font)
+                })
+                .padding(10)
                 .width(Length::FillPortion(1))
                 .height(Length::Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center),
             )
             .push(
-                Scrollable::new(body).style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
+                Scrollable::new(logged_notifications).style(<StyleTuple as Into<
+                    iced::theme::Scrollable,
+                >>::into(StyleTuple(
+                    sniffer.style,
+                    ElementType::Standard,
+                ))),
             )
             .push(
                 Container::new(get_button_clear_all(sniffer.style, sniffer.language))
@@ -168,10 +113,54 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     }
 
     Container::new(Column::new().push(tab_and_body))
-        .height(FillPortion(HEIGHT_BODY))
+        .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn body_no_notifications_set(
+    style: StyleType,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message> {
+    Column::new()
+        .padding(5)
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(vertical_space(FillPortion(1)))
+        .push(
+            no_notifications_set_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+        .push(get_button_settings(
+            style,
+            language,
+            SettingsPage::Notifications,
+        ))
+        .push(vertical_space(FillPortion(2)))
+}
+
+fn body_no_notifications_received(
+    font: Font,
+    language: Language,
+    waiting: &str,
+) -> Column<'static, Message> {
+    Column::new()
+        .padding(5)
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(vertical_space(FillPortion(1)))
+        .push(
+            no_notifications_received_translation(language)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(vertical_space(FillPortion(2)))
 }
 
 fn packets_notification_log(
@@ -181,12 +170,7 @@ fn packets_notification_log(
 ) -> Container<'static, Message> {
     let font = get_font(style);
     let mut threshold_str = threshold_translation(language);
-    threshold_str.push_str(
-        &logged_notification
-            .notification
-            .previous_threshold
-            .to_string(),
-    );
+    threshold_str.push_str(&logged_notification.threshold.to_string());
     threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
@@ -197,6 +181,8 @@ fn packets_notification_log(
     outgoing_str.push_str(": ");
     outgoing_str.push_str(&logged_notification.outgoing.to_string());
     let content = Row::new()
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .spacing(30)
         .push(
             Tooltip::new(
@@ -205,7 +191,7 @@ fn packets_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
@@ -213,7 +199,7 @@ fn packets_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .push(
                     Row::new()
                         .spacing(5)
@@ -237,9 +223,9 @@ fn packets_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
-        .padding(20)
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -253,16 +239,12 @@ fn bytes_notification_log(
     let font = get_font(style);
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(
-        &(logged_notification.notification.previous_threshold
-            / logged_notification
-                .notification
-                .byte_multiple
-                .get_multiplier())
-        .to_string(),
+        &(logged_notification.threshold / logged_notification.byte_multiple.get_multiplier())
+            .to_string(),
     );
     threshold_str.push_str(&format!(
         " {}",
-        logged_notification.notification.byte_multiple.get_char()
+        logged_notification.byte_multiple.get_char()
     ));
     threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
@@ -279,6 +261,8 @@ fn bytes_notification_log(
     )));
     let content = Row::new()
         .spacing(30)
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .push(
             Tooltip::new(
                 Text::new("f").font(ICONS).size(80),
@@ -286,7 +270,7 @@ fn bytes_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
@@ -294,7 +278,7 @@ fn bytes_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .push(
                     Row::new()
                         .spacing(5)
@@ -320,9 +304,9 @@ fn bytes_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
-        .padding(20)
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
@@ -353,13 +337,15 @@ fn favorite_notification_log(
         .push(Text::new(dst_str).font(font));
     if !country.is_empty() {
         if traffic_type.eq(&TrafficType::Outgoing) {
-            row_dst_flag = row_dst_flag.push(get_flag(&country));
+            row_dst_flag = row_dst_flag.push(get_flag_from_country_code(&country));
         } else {
-            row_src_flag = row_src_flag.push(get_flag(&country));
+            row_src_flag = row_src_flag.push(get_flag_from_country_code(&country));
         }
     }
     let content = Row::new()
         .spacing(30)
+        .align_items(Alignment::Center)
+        .height(Length::Fill)
         .push(
             Tooltip::new(
                 Text::new("g").font(ICONS).size(80),
@@ -367,14 +353,14 @@ fn favorite_notification_log(
                 Position::Left,
             )
             .gap(5)
-            .font(get_font(style))
+            .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             )),
         )
         .push(
             Column::new()
-                .width(Length::Units(250))
+                .width(Length::Fixed(250.0))
                 .spacing(7)
                 .push(
                     Row::new()
@@ -393,15 +379,15 @@ fn favorite_notification_log(
                 .push(Text::new(app_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Units(120))
-        .width(Length::Units(800))
-        .padding(20)
+        .height(Length::Fixed(120.0))
+        .width(Length::Fixed(800.0))
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::BorderedRound),
         ))
 }
 
-pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('h'.to_string())
             .font(ICONS)
@@ -410,10 +396,10 @@ pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'st
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(50))
-    .width(Length::Units(75))
+    .height(Length::Fixed(50.0))
+    .width(Length::Fixed(75.0))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::ShowModal(MyOverlay::ClearAll));
+    .on_press(Message::ShowModal(MyModal::ClearAll));
 
     Tooltip::new(content, clear_all_translation(language), Position::Top)
         .gap(5)
@@ -421,4 +407,39 @@ pub fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'st
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
+}
+
+fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message> {
+    let mut ret_val = Column::new()
+        .width(Length::Fixed(830.0))
+        .padding(5)
+        .spacing(10)
+        .align_items(Alignment::Center);
+
+    for logged_notification in &sniffer.runtime_data.logged_notifications {
+        ret_val = ret_val.push(match logged_notification {
+            LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
+                packets_notification_log(
+                    packet_threshold_exceeded.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+            LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
+                bytes_notification_log(
+                    byte_threshold_exceeded.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+            LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
+                favorite_notification_log(
+                    favorite_transmitted.clone(),
+                    sniffer.language,
+                    sniffer.style,
+                )
+            }
+        });
+    }
+    ret_val
 }

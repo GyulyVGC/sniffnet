@@ -11,16 +11,14 @@ use iced::{alignment, Alignment, Font, Length};
 use iced_native::widget::tooltip::Position;
 use pcap::Device;
 
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
-use crate::structs::sniffer::Sniffer;
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::style_constants::{
-    get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, HEIGHT_BODY, ICONS,
-};
-use crate::utility::translations::{
-    address_translation, addresses_translation, application_protocol_translation,
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::gui::types::sniffer::Sniffer;
+use crate::translations::translations::{
+    address_translation, addresses_translation, all_translation, application_protocol_translation,
     choose_adapters_translation, select_filters_translation, start_translation,
 };
 use crate::{AppProtocol, Language, StyleType};
@@ -47,19 +45,27 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(2))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(get_button_start(sniffer.style, sniffer.language))
+        .push(button_start(sniffer.style, sniffer.language))
         .push(vertical_space(FillPortion(1)));
 
-    let app_active = sniffer.filters.application;
+    let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
+        Some(sniffer.filters.application)
+    } else {
+        None
+    };
     let picklist_app = PickList::new(
-        &AppProtocol::ALL[..],
-        Some(app_active),
+        if app_active.is_some() {
+            &AppProtocol::ALL[..]
+        } else {
+            &AppProtocol::ALL[1..]
+        },
+        app_active,
         Message::AppProtocolSelection,
     )
+    .padding([3, 7])
+    .placeholder(all_translation(sniffer.language))
     .font(font)
-    .style(<StyleTuple as Into<iced::theme::PickList>>::into(
-        StyleTuple(sniffer.style, ElementType::Standard),
-    ));
+    .style(StyleTuple(sniffer.style, ElementType::Standard));
     let col_app = Column::new()
         .width(FillPortion(1))
         .spacing(10)
@@ -90,21 +96,22 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(col_app),
         );
 
-    let body = Column::new().push(vertical_space(Length::Units(5))).push(
+    let body = Column::new().push(vertical_space(Length::Fixed(5.0))).push(
         Row::new()
             .push(col_adapter)
-            .push(horizontal_space(Length::Units(30)))
+            .push(horizontal_space(Length::Fixed(30.0)))
             .push(filters),
     );
 
-    Container::new(body)
-        .height(FillPortion(HEIGHT_BODY))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ))
+    Container::new(body).height(Length::Fill).style(
+        <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
+            sniffer.style,
+            ElementType::Standard,
+        )),
+    )
 }
 
-pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)
@@ -113,12 +120,14 @@ pub fn get_button_start(style: StyleType, language: Language) -> Tooltip<'static
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
-    .height(Length::Units(80))
-    .width(Length::Units(160))
+    .height(Length::Fixed(80.0))
+    .width(Length::Fixed(160.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::Start);
 
-    Tooltip::new(content, start_translation(language), Position::Top)
+    let tooltip = start_translation(language).to_string();
+    //tooltip.push_str(" [⏎]");
+    Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(

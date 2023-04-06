@@ -1,18 +1,21 @@
-use crate::enums::element_type::ElementType;
-use crate::enums::message::Message;
-use crate::enums::sound::Sound;
-use crate::structs::notifications::{BytesNotification, FavoriteNotification, PacketsNotification};
-use crate::structs::style_tuple::StyleTuple;
-use crate::utility::countries::get_flag;
-use crate::utility::style_constants::FONT_SIZE_SUBTITLE;
-use crate::utility::translations::{
-    ip_version_translation, relevant_connections_translation, sound_translation,
-    traffic_rate_translation, transport_protocol_translation,
-};
-use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
+
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::notifications::types::notifications::{
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+};
+use crate::notifications::types::sound::Sound;
+use crate::translations::translations::{
+    ip_version_translation, relevant_connections_translation, sound_translation,
+    traffic_rate_translation, transport_protocol_translation,
+};
+use crate::utils::countries::get_flag_from_language_code;
+use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
 pub fn ip_version_radios(
     active: IpVersion,
@@ -33,6 +36,7 @@ pub fn ip_version_radios(
                 Some(active),
                 Message::IpVersionSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -63,6 +67,7 @@ pub fn transport_protocol_radios(
                 Some(active),
                 Message::TransportProtocolSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -74,19 +79,25 @@ pub fn transport_protocol_radios(
     ret_val
 }
 
-pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column<'static, Message> {
+pub fn language_radios(
+    active: Language,
+    collection: &[Language],
+    font: Font,
+    style: StyleType,
+) -> Column<'static, Message> {
     let mut ret_val = Column::new().spacing(10);
-    for option in Language::ALL {
+    for option in collection {
         ret_val = ret_val.push(
             Row::new()
                 .align_items(Alignment::Center)
                 .push(
                     Radio::new(
-                        option,
-                        option.get_radio_label(),
+                        *option,
+                        format!("{} ({:?})", option.get_radio_label(), option),
                         Some(active),
                         Message::LanguageSelection,
                     )
+                    .spacing(7)
                     .font(font)
                     .size(15)
                     .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -94,8 +105,8 @@ pub fn language_radios(active: Language, font: Font, style: StyleType) -> Column
                         ElementType::Standard,
                     ))),
                 )
-                .push(horizontal_space(Length::Units(5)))
-                .push(get_flag(&format!("{option:?}"))),
+                .push(horizontal_space(Length::Fixed(8.0)))
+                .push(get_flag_from_language_code(&format!("{option:?}"))),
         );
     }
     ret_val
@@ -117,15 +128,16 @@ pub fn sound_packets_threshold_radios(
                 option.get_radio_label(language),
                 Some(packets_notification.sound),
                 |value| {
-                    Message::UpdatePacketsNotification(
-                        PacketsNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Packets(PacketsNotification {
                             sound: value,
                             ..packets_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -153,15 +165,16 @@ pub fn sound_bytes_threshold_radios(
                 option.get_radio_label(language),
                 Some(bytes_notification.sound),
                 |value| {
-                    Message::UpdateBytesNotification(
-                        BytesNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Bytes(BytesNotification {
                             sound: value,
                             ..bytes_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -189,15 +202,16 @@ pub fn sound_favorite_radios(
                 option.get_radio_label(language),
                 Some(favorite_notification.sound),
                 |value| {
-                    Message::UpdateFavoriteNotification(
-                        FavoriteNotification {
+                    Message::UpdateNotificationSettings(
+                        Notification::Favorite(FavoriteNotification {
                             sound: value,
                             ..favorite_notification
-                        },
+                        }),
                         value.ne(&Sound::None),
                     )
                 },
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -216,13 +230,13 @@ pub fn chart_radios(
     language: Language,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
-        .padding(15)
+        .padding([10, 0, 15, 10])
         .spacing(20)
         .align_items(Alignment::Center)
         .push(
             traffic_rate_translation(language)
                 .font(font)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_TITLE),
         );
     for option in ChartType::ALL {
         ret_val = ret_val.push(
@@ -232,6 +246,7 @@ pub fn chart_radios(
                 Some(active),
                 Message::ChartSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -250,13 +265,13 @@ pub fn report_radios(
     language: Language,
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
-        .padding(15)
+        .padding([10, 0, 15, 5])
         .spacing(20)
         .align_items(Alignment::Center)
         .push(
             relevant_connections_translation(language)
                 .font(font)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_TITLE),
         );
     for option in ReportType::ALL {
         ret_val = ret_val.push(
@@ -266,6 +281,7 @@ pub fn report_radios(
                 Some(active),
                 Message::ReportSelection,
             )
+            .spacing(7)
             .font(font)
             .size(15)
             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
@@ -274,6 +290,6 @@ pub fn report_radios(
             ))),
         );
     }
-    ret_val = ret_val.push(horizontal_space(Length::Units(120)));
+    ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
     ret_val
 }

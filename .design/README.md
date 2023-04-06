@@ -1,5 +1,5 @@
 <div align="center">
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://user-images.githubusercontent.com/100347457/205967236-e086d1df-a266-4127-8e73-c2cbb889c007.png" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/logo_repository.png?raw=true" width="100%"/></a></p>
   <h1>Design Guidelines & Resources</h1>
   <p>A collection of design contribution guidelines and resources for Sniffnet.</p>
 </div>
@@ -42,7 +42,7 @@ with many additional functionalities planned for the future releases.
 
 ## 🚀 Our Main Product
 
-Sniffnet can be downloaded [here](https://github.com/GyulyVGC/sniffnet/releases)
+Sniffnet can be downloaded from [here](https://github.com/GyulyVGC/sniffnet/releases)
 
 ### Target audience
 
@@ -58,11 +58,11 @@ Here is a list of design relevant information and materials:
 
 ### Fonts
 
-I'm using `Couries Sans` for everything except for the chart, for which I'm using `notosans`. The fonts I used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/fonts).
+I'm using `Inconsolata`. The fonts I used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
 
 ### Colors
 
-For info on the used RGB colors, I suggest you to give a look at the file [style.rs](https://github.com/GyulyVGC/sniffnet/blob/main/src/gui/style.rs#L58-L91)
+For info on the used RGB colors, I suggest you to give a look at the file [style.rs](https://github.com/GyulyVGC/sniffnet/blob/main/src/utility/style_constants.rs)
 
 ### Logos
 
