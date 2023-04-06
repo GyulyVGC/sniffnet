@@ -1,4 +1,5 @@
 use crate::translations::translations::{notifications_translation, overview_translation};
+use crate::translations::translations_2::inspect_translation;
 use crate::Language;
 
 /// This enum defines the current running page.
@@ -23,7 +24,8 @@ impl RunningPage {
 
     pub fn next(self) -> Self {
         match self {
-            RunningPage::Overview => RunningPage::Notifications,
+            RunningPage::Overview => RunningPage::Inspect,
+            RunningPage::Inspect => RunningPage::Notifications,
             RunningPage::Notifications => RunningPage::Overview,
         }
     }
@@ -31,7 +33,8 @@ impl RunningPage {
     pub fn previous(self) -> Self {
         match self {
             RunningPage::Overview => RunningPage::Notifications,
-            RunningPage::Notifications => RunningPage::Overview,
+            RunningPage::Inspect => RunningPage::Overview,
+            RunningPage::Notifications => RunningPage::Inspect,
         }
     }
 }

@@ -793,17 +793,6 @@ pub fn overview_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn inspect_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Inspect",
-//         Language::IT => "Ispeziona",
-//         Language::FR => "Inspecter",
-//         Language::ES => "Inspeccionar",
-//         Language::PL => "Sprawdź",
-//         Language::DE => "Überprüfen",
-//     }
-// }
-
 pub fn packets_threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when a packets threshold is exceeded",

@@ -8,3 +8,15 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         _ => "A newer version is available on GitHub",
     }
 }
+
+pub fn inspect_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Inspect",
+        Language::IT => "Ispeziona",
+        Language::FR => "Inspecter",
+        Language::ES => "Inspeccionar",
+        Language::PL => "Sprawdź",
+        Language::DE => "Überprüfen",
+        _ => "Inspect",
+    }
+}
