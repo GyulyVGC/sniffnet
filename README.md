@@ -72,6 +72,7 @@ cargo install sniffnet
 
 </details>
 
+<!---
 
 <details>
 
@@ -85,6 +86,7 @@ brew install sniffnet
     
 </details>
 
+--->
 
 ## Required dependencies
 
