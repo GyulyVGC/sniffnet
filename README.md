@@ -14,7 +14,7 @@ Multithreaded, cross-platform, reliable
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧 - 🇩🇪 - 🇪🇦 - 🇫🇷 - 🇮🇹 - 🇵🇱 - 🇺🇦 - 🇨🇳 <br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 [Would you like to add support for your native language?](https://github.com/GyulyVGC/sniffnet/issues/60)
 
 </div>
@@ -51,9 +51,9 @@ You can install Sniffnet in one of the following ways:
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.2/Sniffnet_Windows.msi) (7.5 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.2/Sniffnet_MacOS.dmg) (6.2 MB)
-  - [Linux .deb](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.2/Sniffnet_Linux.deb) (4.8 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_Windows.msi) (8.4 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_MacOS.dmg) (6.9 MB)
+  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_Linux.deb) (5.3 MB)
 
     
 </details>
@@ -72,6 +72,7 @@ cargo install sniffnet
 
 </details>
 
+<!---
 
 <details>
 
@@ -85,6 +86,7 @@ brew install sniffnet
     
 </details>
 
+--->
 
 ## Required dependencies
 
@@ -260,7 +262,7 @@ The currently usable hotkeys are reported in the following:
 |--|--|
 | Quit the application | `ctrl+Q` (`cmd+Q` on macOS) |
 | Open full report | `ctrl+O` (`cmd+O` on macOS) |
-| Open settings | `ctrl+S` (`cmd+S` on macOS) |
+| Open settings | `ctrl+,` (`cmd+,` on macOS) |
 | Clear all notifications | `ctrl+D` (`cmd+D` on macOS) |
 | Start the analysis and confirm modal actions | `enter` |
 | Interrupt the ongoing analysis | `backspace` |
