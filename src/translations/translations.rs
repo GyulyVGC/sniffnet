@@ -357,9 +357,6 @@ pub fn some_observed_translation(
         Language::RO => format!("Total pachete interceptate: {observed}\n\n\
                                 Pachete filtrate: 0\n\n\
                                 Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat...\n\n{filters}"),
-        Language::RO => format!("Total pachete interceptate: {observed}\n\n\
-                                Pachete filtrate: 0\n\n\
-                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat...\n\n{filters}"),
         Language::KO => format!("감지한 총 패킷: {observed}\n\n\
                                 필터링된 패킷: 0\n\n\
                                 일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다...\n\n{filters}"),
