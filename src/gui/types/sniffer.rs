@@ -443,14 +443,233 @@ impl Sniffer {
 
 #[cfg(test)]
 mod tests {
+    #![allow(unused_must_use)]
+
+    use crate::gui::styles::style_constants::get_color_mix_chart;
+    use crate::gui::styles::types::palette::to_rgb_color;
     use crate::gui::types::message::Message;
-    use crate::{InfoTraffic, Sniffer, Status};
+    use crate::{
+        get_colors, AppProtocol, ChartType, InfoTraffic, IpVersion, ReportType, Sniffer, Status,
+        StyleType, TransProtocol,
+    };
     use std::collections::HashSet;
     use std::sync::{Arc, Mutex};
 
     #[test]
+    fn test_correctly_update_ip_version() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.filters.ip, IpVersion::Other);
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6));
+        assert_eq!(sniffer.filters.ip, IpVersion::IPv6);
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4));
+        assert_eq!(sniffer.filters.ip, IpVersion::IPv4);
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4));
+        assert_eq!(sniffer.filters.ip, IpVersion::IPv4);
+        sniffer.update(Message::IpVersionSelection(IpVersion::Other));
+        assert_eq!(sniffer.filters.ip, IpVersion::Other);
+    }
+
+    #[test]
+    fn test_correctly_update_transport_protocol() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.filters.transport, TransProtocol::Other);
+        sniffer.update(Message::TransportProtocolSelection(TransProtocol::UDP));
+        assert_eq!(sniffer.filters.transport, TransProtocol::UDP);
+        sniffer.update(Message::TransportProtocolSelection(TransProtocol::UDP));
+        assert_eq!(sniffer.filters.transport, TransProtocol::UDP);
+        sniffer.update(Message::TransportProtocolSelection(TransProtocol::TCP));
+        assert_eq!(sniffer.filters.transport, TransProtocol::TCP);
+        sniffer.update(Message::TransportProtocolSelection(TransProtocol::Other));
+        assert_eq!(sniffer.filters.transport, TransProtocol::Other);
+    }
+
+    #[test]
+    fn test_correctly_update_application_protocol() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.filters.application, AppProtocol::Other);
+        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTPS));
+        assert_eq!(sniffer.filters.application, AppProtocol::HTTPS);
+        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTP));
+        assert_eq!(sniffer.filters.application, AppProtocol::HTTP);
+        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTP));
+        assert_eq!(sniffer.filters.application, AppProtocol::HTTP);
+        sniffer.update(Message::AppProtocolSelection(AppProtocol::XMPP));
+        assert_eq!(sniffer.filters.application, AppProtocol::XMPP);
+    }
+
+    #[test]
+    fn test_correctly_update_chart_kind() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
+        sniffer.update(Message::ChartSelection(ChartType::Bytes));
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
+        sniffer.update(Message::ChartSelection(ChartType::Bytes));
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
+        sniffer.update(Message::ChartSelection(ChartType::Packets));
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
+    }
+
+    #[test]
+    fn test_correctly_update_report_kind() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.report_type, ReportType::MostRecent);
+        sniffer.update(Message::ReportSelection(ReportType::MostBytes));
+        assert_eq!(sniffer.report_type, ReportType::MostBytes);
+        sniffer.update(Message::ReportSelection(ReportType::MostPackets));
+        assert_eq!(sniffer.report_type, ReportType::MostPackets);
+        sniffer.update(Message::ReportSelection(ReportType::MostPackets));
+        assert_eq!(sniffer.report_type, ReportType::MostPackets);
+        sniffer.update(Message::ReportSelection(ReportType::MostRecent));
+        assert_eq!(sniffer.report_type, ReportType::MostRecent);
+        sniffer.update(Message::ReportSelection(ReportType::Favorites));
+        assert_eq!(sniffer.report_type, ReportType::Favorites);
+    }
+
+    #[test]
+    fn test_correctly_update_style() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        sniffer.update(Message::Style(StyleType::MonAmour));
+        assert_eq!(sniffer.style, StyleType::MonAmour);
+        assert_eq!(
+            sniffer.traffic_chart.color_font,
+            to_rgb_color(get_colors(StyleType::MonAmour).text_body)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_outgoing,
+            to_rgb_color(get_colors(StyleType::MonAmour).outgoing)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_incoming,
+            to_rgb_color(get_colors(StyleType::MonAmour).secondary)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_mix,
+            get_color_mix_chart(StyleType::MonAmour)
+        );
+        sniffer.update(Message::Style(StyleType::Day));
+        assert_eq!(sniffer.style, StyleType::Day);
+        assert_eq!(
+            sniffer.traffic_chart.color_font,
+            to_rgb_color(get_colors(StyleType::Day).text_body)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_outgoing,
+            to_rgb_color(get_colors(StyleType::Day).outgoing)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_incoming,
+            to_rgb_color(get_colors(StyleType::Day).secondary)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_mix,
+            get_color_mix_chart(StyleType::Day)
+        );
+        sniffer.update(Message::Style(StyleType::Night));
+        assert_eq!(sniffer.style, StyleType::Night);
+        assert_eq!(
+            sniffer.traffic_chart.color_font,
+            to_rgb_color(get_colors(StyleType::Night).text_body)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_outgoing,
+            to_rgb_color(get_colors(StyleType::Night).outgoing)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_incoming,
+            to_rgb_color(get_colors(StyleType::Night).secondary)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_mix,
+            get_color_mix_chart(StyleType::Night)
+        );
+        sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.style, StyleType::DeepSea);
+        assert_eq!(
+            sniffer.traffic_chart.color_font,
+            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_outgoing,
+            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_incoming,
+            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_mix,
+            get_color_mix_chart(StyleType::DeepSea)
+        );
+        sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.style, StyleType::DeepSea);
+        assert_eq!(
+            sniffer.traffic_chart.color_font,
+            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_outgoing,
+            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_incoming,
+            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
+        );
+        assert_eq!(
+            sniffer.traffic_chart.color_mix,
+            get_color_mix_chart(StyleType::DeepSea)
+        );
+    }
+
+    #[test]
     fn test_waiting_dots_update() {
-        #![allow(unused_must_use)]
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
@@ -473,7 +692,6 @@ mod tests {
 
     #[test]
     fn test_modify_favorite_connections() {
-        #![allow(unused_must_use)]
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
