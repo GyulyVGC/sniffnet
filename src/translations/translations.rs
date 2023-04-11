@@ -29,7 +29,6 @@ pub fn application_protocol_translation(language: Language) -> &'static str {
         Language::ZH => "目标应用层协议",
         Language::RO => "Protocol aplicație",
         Language::KO => "어플리케이션 프로토콜",
-        
     }
 }
 
@@ -145,7 +144,7 @@ pub fn relevant_connections_translation(language: Language) -> Text<'static> {
         Language::UK => "Важливі підключення:",
         Language::ZH => "连接详情:",
         Language::RO => "Conexiuni relevante:",
-        Language::KO => "관련 연결",
+        Language::KO => "관련 연결:",
     })
 }
 
@@ -380,13 +379,13 @@ pub fn filtered_packets_translation(
         }
         Language::ZH => {
             format!("目标数据包计数:\n   {filtered} (占所有数据包的 {percentage})")
-        },
+        }
         Language::RO => {
             format!("Pachete filtrate:\n   {filtered} ({percentage} din total)")
-        },
+        }
         Language::KO => {
             format!("필터링된 패킷:\n   {filtered} ({percentage} 의 일부)")
-        },
+        }
     })
 }
 
@@ -404,16 +403,16 @@ pub fn filtered_bytes_translation(
         Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)"),
         Language::UK => {
             format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)")
-        },
+        }
         Language::ZH => {
             format!("目标网络流量计数:\n   {filtered} (占所有网络流量的 {percentage})")
-        },
+        }
         Language::RO => {
             format!("Octeți filtrați:\n   {filtered} ({percentage} din total)")
-        },
+        }
         Language::KO => {
             format!("필터링된 바이트:\n   {filtered} ({percentage} 의 일부)")
-        },
+        }
     })
 }
 
@@ -1061,7 +1060,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         Language::UK => format!("Обміняно {value} пакетів"),
         Language::ZH => format!("已交换数据包 {value}"),
         Language::RO => format!("au fost transferate {value} pachete"),
-        Language::KO => format!("패킷 {trimmed_value} 가 교환되었습니다"),
+        Language::KO => format!("패킷 {value} 가 교환되었습니다"),
     }
 }
 
