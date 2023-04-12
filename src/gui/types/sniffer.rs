@@ -445,14 +445,23 @@ impl Sniffer {
 mod tests {
     #![allow(unused_must_use)]
 
+    use crate::gui::components::types::my_modal::MyModal;
+    use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::style_constants::get_color_mix_chart;
     use crate::gui::styles::types::palette::to_rgb_color;
     use crate::gui::types::message::Message;
-    use crate::{
-        get_colors, AppProtocol, ChartType, InfoTraffic, IpVersion, ReportType, Sniffer, Status,
-        StyleType, TransProtocol,
+    use crate::notifications::types::logged_notification::{
+        LoggedNotification, PacketsThresholdExceeded,
     };
-    use std::collections::HashSet;
+    use crate::notifications::types::notifications::{
+        BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+    };
+    use crate::notifications::types::sound::Sound;
+    use crate::{
+        get_colors, AppProtocol, ByteMultiple, ChartType, InfoTraffic, IpVersion, Language,
+        ReportType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
+    };
+    use std::collections::{HashSet, VecDeque};
     use std::sync::{Arc, Mutex};
 
     #[test]
@@ -760,5 +769,376 @@ mod tests {
             sniffer.info_traffic.lock().unwrap().favorite_connections,
             HashSet::new()
         );
+    }
+
+    #[test]
+    fn test_show_and_hide_modal_and_settings() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        // open settings
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        // switch settings page
+        sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+        sniffer.update(Message::OpenSettings(SettingsPage::Language));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        // try opening modal with settings opened
+        sniffer.update(Message::ShowModal(MyModal::Quit));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        // close settings
+        sniffer.update(Message::CloseSettings);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Language);
+        // reopen settings
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Language);
+        // switch settings page
+        sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+        // close settings
+        sniffer.update(Message::CloseSettings);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+
+        // open clear all modal
+        sniffer.update(Message::ShowModal(MyModal::ClearAll));
+        assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // try opening settings with clear all modal opened
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // try opening quit modal with clear all modal opened
+        sniffer.update(Message::ShowModal(MyModal::Quit));
+        assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // close clear all modal
+        sniffer.update(Message::HideModal);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+
+        // open quit modal
+        sniffer.update(Message::ShowModal(MyModal::Quit));
+        assert_eq!(sniffer.modal, Some(MyModal::Quit));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // try opening settings with clear all modal opened
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.modal, Some(MyModal::Quit));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // try opening clear all modal with quit modal opened
+        sniffer.update(Message::ShowModal(MyModal::ClearAll));
+        assert_eq!(sniffer.modal, Some(MyModal::Quit));
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        // close quit modal
+        sniffer.update(Message::HideModal);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+    }
+
+    #[test]
+    fn test_correctly_update_language() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        assert_eq!(sniffer.language, Language::EN);
+        assert_eq!(sniffer.traffic_chart.language, Language::EN);
+        sniffer.update(Message::LanguageSelection(Language::IT));
+        assert_eq!(sniffer.language, Language::IT);
+        assert_eq!(sniffer.traffic_chart.language, Language::IT);
+        sniffer.update(Message::LanguageSelection(Language::IT));
+        assert_eq!(sniffer.language, Language::IT);
+        assert_eq!(sniffer.traffic_chart.language, Language::IT);
+        sniffer.update(Message::LanguageSelection(Language::ZH));
+        assert_eq!(sniffer.language, Language::ZH);
+        assert_eq!(sniffer.traffic_chart.language, Language::ZH);
+    }
+
+    #[test]
+    fn test_correctly_update_notification_settings() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        // initial default state
+        assert_eq!(sniffer.notifications.volume, 60);
+        assert_eq!(
+            sniffer.notifications.packets_notification,
+            PacketsNotification {
+                threshold: None,
+                sound: Sound::Gulp,
+                previous_threshold: 750
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.bytes_notification,
+            BytesNotification {
+                threshold: None,
+                byte_multiple: ByteMultiple::KB,
+                sound: Sound::Pop,
+                previous_threshold: 800000
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.favorite_notification,
+            FavoriteNotification {
+                notify_on_favorite: false,
+                sound: Sound::Swhoosh,
+            }
+        );
+        // change volume
+        sniffer.update(Message::ChangeVolume(95));
+        assert_eq!(sniffer.notifications.volume, 95);
+        assert_eq!(
+            sniffer.notifications.packets_notification,
+            PacketsNotification {
+                threshold: None,
+                sound: Sound::Gulp,
+                previous_threshold: 750
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.bytes_notification,
+            BytesNotification {
+                threshold: None,
+                byte_multiple: ByteMultiple::KB,
+                sound: Sound::Pop,
+                previous_threshold: 800000
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.favorite_notification,
+            FavoriteNotification {
+                notify_on_favorite: false,
+                sound: Sound::Swhoosh,
+            }
+        );
+        // change packets notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::Packets(PacketsNotification {
+                threshold: Some(1122),
+                sound: Sound::None,
+                previous_threshold: 1122,
+            }),
+            false,
+        ));
+        assert_eq!(sniffer.notifications.volume, 95);
+        assert_eq!(
+            sniffer.notifications.packets_notification,
+            PacketsNotification {
+                threshold: Some(1122),
+                sound: Sound::None,
+                previous_threshold: 1122
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.bytes_notification,
+            BytesNotification {
+                threshold: None,
+                byte_multiple: ByteMultiple::KB,
+                sound: Sound::Pop,
+                previous_threshold: 800000
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.favorite_notification,
+            FavoriteNotification {
+                notify_on_favorite: false,
+                sound: Sound::Swhoosh,
+            }
+        );
+        // change bytes notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::Bytes(BytesNotification {
+                threshold: Some(3),
+                byte_multiple: ByteMultiple::GB,
+                sound: Sound::None,
+                previous_threshold: 3,
+            }),
+            true,
+        ));
+        assert_eq!(sniffer.notifications.volume, 95);
+        assert_eq!(
+            sniffer.notifications.packets_notification,
+            PacketsNotification {
+                threshold: Some(1122),
+                sound: Sound::None,
+                previous_threshold: 1122
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.bytes_notification,
+            BytesNotification {
+                threshold: Some(3),
+                byte_multiple: ByteMultiple::GB,
+                sound: Sound::None,
+                previous_threshold: 3,
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.favorite_notification,
+            FavoriteNotification {
+                notify_on_favorite: false,
+                sound: Sound::Swhoosh,
+            }
+        );
+        // change favorite notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::Favorite(FavoriteNotification {
+                notify_on_favorite: true,
+                sound: Sound::Pop,
+            }),
+            true,
+        ));
+        assert_eq!(sniffer.notifications.volume, 95);
+        assert_eq!(
+            sniffer.notifications.packets_notification,
+            PacketsNotification {
+                threshold: Some(1122),
+                sound: Sound::None,
+                previous_threshold: 1122
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.bytes_notification,
+            BytesNotification {
+                threshold: Some(3),
+                byte_multiple: ByteMultiple::GB,
+                sound: Sound::None,
+                previous_threshold: 3,
+            }
+        );
+        assert_eq!(
+            sniffer.notifications.favorite_notification,
+            FavoriteNotification {
+                notify_on_favorite: true,
+                sound: Sound::Pop
+            }
+        );
+    }
+
+    #[test]
+    fn test_clear_all_notifications() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+        sniffer.runtime_data.logged_notifications =
+            VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
+                PacketsThresholdExceeded {
+                    threshold: 0,
+                    incoming: 0,
+                    outgoing: 0,
+                    timestamp: "".to_string(),
+                },
+            )]);
+
+        assert_eq!(sniffer.modal, None);
+        sniffer.update(Message::ShowModal(MyModal::ClearAll));
+        assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
+        assert_eq!(sniffer.runtime_data.logged_notifications.len(), 1);
+        sniffer.update(Message::ClearAllNotifications);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.runtime_data.logged_notifications.len(), 0);
+    }
+
+    #[test]
+    fn test_correctly_switch_running_and_notification_pages() {
+        let mut sniffer = Sniffer::new(
+            Arc::new(Mutex::new(0)),
+            Arc::new(Mutex::new(InfoTraffic::new())),
+            Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
+            &Default::default(),
+            Arc::new(Mutex::new(Err(String::new()))),
+        );
+
+        // initial status
+        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        // nothing changes
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        // switch settings
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        sniffer.update(Message::SwitchPage(false));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        sniffer.update(Message::CloseSettings);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        // change state to running
+        sniffer.update(Message::Start);
+        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Running);
+        assert_eq!(sniffer.settings_page, None);
+        assert_eq!(sniffer.modal, None);
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        // switch with closed setting => change running page
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.settings_page, None);
+        // switch with opened settings => change settings
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
     }
 }
