@@ -1110,7 +1110,7 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
                                  Puteți activa notificările din setări:",
         Language::KO => "아직 알림을 활성화하지 않았습니다!\n\n\
                                  활성화로 설정하면 이 페이지에 알림 로그가 표시됩니다\n\n\
-                                 You can enable notifications from settings:",
+                                 설정에서 알림을 활성화할 수 있습니다:",
     })
 }
 
