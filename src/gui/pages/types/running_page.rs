@@ -38,3 +38,20 @@ impl RunningPage {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::RunningPage;
+
+    #[test]
+    fn test_previous_running_page() {
+        assert_eq!(RunningPage::Overview.previous(), RunningPage::Notifications);
+        assert_eq!(RunningPage::Notifications.previous(), RunningPage::Overview);
+    }
+
+    #[test]
+    fn test_next_running_page() {
+        assert_eq!(RunningPage::Overview.next(), RunningPage::Notifications);
+        assert_eq!(RunningPage::Notifications.next(), RunningPage::Overview);
+    }
+}

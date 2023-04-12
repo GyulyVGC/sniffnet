@@ -298,7 +298,6 @@ fn lazy_row_report(
                 .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
             ;
         let mut scroll_report = Column::new();
-        // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
         for key_val in get_report_entries(&sniffer.info_traffic.clone(), sniffer.report_type) {
             let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
             let mut entry_row = Row::new().align_items(Alignment::Center).push(
@@ -355,7 +354,6 @@ fn lazy_row_report(
                 .push(Text::new("  ").font(font));
             scroll_report = scroll_report.push(entry_row);
         }
-        // drop(info_traffic_lock);
         col_report = col_report.push(Container::new(
             Scrollable::new(scroll_report)
                 .horizontal_scroll(Properties::new())
