@@ -97,6 +97,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "DocRAID",
+      "name": "Limdongju",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69478178?v=4",
+      "profile": "https://github.com/DocRAID",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
