@@ -23,6 +23,8 @@ pub enum Language {
     RO,
     /// Korean
     KO,
+    /// Portuguese
+    PT,
 }
 
 impl Default for Language {
@@ -59,6 +61,7 @@ impl Language {
             Language::ZH => "简体中文",
             Language::RO => "Română",
             Language::KO => "한국인",
+            Language::PT => "Português",
         }
     }
 }
