@@ -23,6 +23,9 @@ pub enum Language {
     RO,
     /// Korean
     KO,
+    #[allow(non_camel_case_types)]
+    /// Brazilian Portuguese
+    PT_BR,
 }
 
 impl Default for Language {
@@ -59,6 +62,7 @@ impl Language {
             Language::ZH => "简体中文",
             Language::RO => "Română",
             Language::KO => "한국인",
+            Language::PT_BR => "Português (Brasil)",
         }
     }
 }
