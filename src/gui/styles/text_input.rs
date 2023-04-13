@@ -73,7 +73,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
         text_input::StyleSheet::active(self, style)
     }
 
-    fn disabled_color(&self, style: &Self::Style) -> Color {
+    fn disabled_color(&self, _style: &Self::Style) -> Color {
         Color::BLACK
     }
 }
