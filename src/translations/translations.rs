@@ -14,7 +14,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static> {
         Language::ZH => "选择需要监控的网络适配器",
         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
         Language::KO => "검사할 네트워크 어댑터 선택",
-        Language::PT => "Selecione o adaptador de rede para inspecionar",
+        Language::PT => "Selecione o adaptador de rede a inspecionar",
     })
 }
 
@@ -106,7 +106,7 @@ pub fn ip_version_translation(language: Language) -> Text<'static> {
         Language::ZH => "目标IP协议版本",
         Language::RO => "Versiune IP",
         Language::KO => "IP 버전",
-        Language::PT => "Versão IP",
+        Language::PT => "Versão de IP",
     })
 }
 
@@ -304,7 +304,7 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
                                 인터넷이 연결되어있다면 다른 어댑터로 시도해보세요."),
         Language::PT => format!("Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
                                 Adaptador de rede: {adapter}\n\n\
-                                Se estiver certo de que está ligado à internet, tente escolher um adaptador diferente."),
+                                Se tiver a certeza que está ligado à internet, tente escolher um adaptador diferente."),
     })
 }
 
