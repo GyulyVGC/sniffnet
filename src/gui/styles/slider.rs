@@ -1,6 +1,6 @@
 //! Slider style
 
-use iced::widget::slider::Appearance;
+use iced::widget::slider::{Appearance, Rail};
 use iced_native::widget::slider::Handle;
 use iced_native::widget::vertical_slider::HandleShape;
 
@@ -20,12 +20,15 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn active(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.primary),
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.primary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
+            },
+            rail: Rail {
+                colors: (colors.secondary, colors.primary),
+                width: 2.,
             },
         }
     }
@@ -33,12 +36,15 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.secondary),
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
+            },
+            rail: Rail {
+                colors: (colors.secondary, colors.secondary),
+                width: 2.,
             },
         }
     }
@@ -46,12 +52,15 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn dragging(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.secondary),
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
+            },
+            rail: Rail {
+                colors: (colors.secondary, colors.secondary),
+                width: 2.,
             },
         }
     }

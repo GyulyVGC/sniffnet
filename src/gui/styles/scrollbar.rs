@@ -33,7 +33,7 @@ impl iced::widget::scrollable::StyleSheet for StyleTuple {
         }
     }
 
-    fn hovered(&self, _: &Self::Style) -> Scrollbar {
+    fn hovered(&self, _: &Self::Style, _: bool) -> Scrollbar {
         let colors = get_colors(self.0);
         Scrollbar {
             background: Some(Background::Color(colors.round_borders)),

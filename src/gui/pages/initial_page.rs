@@ -186,7 +186,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                     let name = &adapter.0;
                     scroll_adapters.push(
                         Container::new(
-                            Radio::new(name, &adapter.1, Some(&sniffer.device.name), |name| {
+                            Radio::new(&adapter.1, name, Some(&sniffer.device.name), |name| {
                                 Message::AdapterSelection(name.to_string())
                             })
                             .font(font)

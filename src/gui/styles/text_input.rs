@@ -22,6 +22,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.round_borders,
+            icon_color: colors.text_body,
         }
     }
 
@@ -32,6 +33,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,
+            icon_color: colors.text_body,
         }
     }
 
@@ -62,6 +64,26 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,
+            icon_color: colors.text_body,
+        }
+    }
+
+    fn disabled_color(&self, _style: &Self::Style) -> Color {
+        let color = get_colors(self.0).text_body;
+        Color {
+            a: if color.eq(&Color::BLACK) { 0.4 } else { 0.05 },
+            ..color
+        }
+    }
+
+    fn disabled(&self, _style: &Self::Style) -> Appearance {
+        let colors = get_colors(self.0);
+        Appearance {
+            background: Background::Color(colors.buttons),
+            border_radius: 0.0,
+            border_width: 1.0,
+            border_color: colors.round_borders,
+            icon_color: colors.text_body,
         }
     }
 }

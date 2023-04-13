@@ -106,6 +106,7 @@ pub fn main() -> iced::Result {
             transparent: false,
             always_on_top: false,
             icon: None,
+            ..Default::default()
         },
         flags: Sniffer::new(
             current_capture_id1,
