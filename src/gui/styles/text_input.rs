@@ -1,5 +1,6 @@
 //! Text Input style
 
+use iced::widget::text_input;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
@@ -22,6 +23,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.round_borders,
+            icon_color: colors.text_body,
         }
     }
 
@@ -32,6 +34,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,
+            icon_color: colors.text_body,
         }
     }
 
@@ -62,6 +65,15 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,
+            icon_color: colors.text_body,
         }
+    }
+
+    fn disabled(&self, style: &Self::Style) -> Appearance {
+        text_input::StyleSheet::active(self, style)
+    }
+
+    fn disabled_color(&self, style: &Self::Style) -> Color {
+        Color::BLACK
     }
 }

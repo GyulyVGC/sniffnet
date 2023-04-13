@@ -106,6 +106,11 @@ pub fn main() -> iced::Result {
             transparent: false,
             always_on_top: false,
             icon: None,
+            platform_specific: iced::window::PlatformSpecific {
+                title_hidden: true,
+                titlebar_transparent: true,
+                fullsize_content_view: true,
+            },
         },
         flags: Sniffer::new(
             current_capture_id1,
