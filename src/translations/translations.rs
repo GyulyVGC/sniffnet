@@ -69,12 +69,11 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::IT => "\nIndirizzo:",
         Language::FR | Language::DE => "\nAdresse:",
         Language::ES => "\nDirección:",
-        Language::PL => "\nAdres:",
+        Language::PL | Language::TR => "\nAdres:",
         Language::UK => "\nАдреса:",
         Language::ZH => "\n网络地址:",
         Language::RO => "\nAdresă:",
         Language::KO => "\n주소:",
-        Language::TR => "\nAdres:",
     }
 }
 
@@ -382,7 +381,7 @@ pub fn some_observed_translation(
         Language::KO => format!("감지한 총 패킷: {observed}\n\n\
                                 필터링된 패킷: 0\n\n\
                                 일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다...\n\n{filters}"),
-        Language::TR => format!("Toplam yakalanan paketler: {observerd}\n\n\
+        Language::TR => format!("Toplam yakalanan paketler: {observed}\n\n\
                                  Filterelenen paketler: 0\n\n\
                                  Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi...\n\n{filters}")
     })
@@ -412,7 +411,7 @@ pub fn filtered_packets_translation(
         Language::KO => {
             format!("필터링된 패킷:\n   {filtered} ({percentage} 의 일부)")
         }
-        Language::TR => format!("Filtrelenen paketler: \n  {filtered} toplamın ({percentage})"),
+        Language::TR => format!("Filtrelenen paketler:\n   {filtered} toplamın ({percentage})"),
     })
 }
 
@@ -735,7 +734,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::ZH => "活动的过滤器:",
         Language::RO => "Filtre active:",
         Language::KO => "활성화된 필터:",
-        Language::TR => "Aktif filtreler",
+        Language::TR => "Aktif filtreler:",
     }
 }
 
@@ -872,11 +871,10 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::IT => "Stile",
         Language::ES => "Estilo",
         Language::PL => "Styl",
-        Language::DE | Language::RO => "Stil",
+        Language::DE | Language::RO | Language::TR => "Stil",
         Language::UK => "Стиль",
         Language::ZH => "主题",
         Language::KO => "스타일",
-        Language::TR => "Stil",
     }
 }
 

@@ -23,10 +23,13 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         language_radios(language_active, &Language::COL1, font, sniffer.style);
     let col_language_radio_2 =
         language_radios(language_active, &Language::COL2, font, sniffer.style);
+    let col_language_radio_3 =
+        language_radios(language_active, &Language::COL3, font, sniffer.style);
     let row_language_radio = Row::new()
         .spacing(50)
         .push(col_language_radio_1)
-        .push(col_language_radio_2);
+        .push(col_language_radio_2)
+        .push(col_language_radio_3);
 
     let content = Column::new()
         .align_items(Alignment::Center)
