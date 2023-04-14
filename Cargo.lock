@@ -1448,11 +1448,11 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d11492d829f0035ed3fa9217faccf16e57a5612a74dc7c49822c6f6a5ab1b829"
 dependencies = [
- "iced_core",
+ "iced_core 0.8.0",
  "iced_futures",
  "iced_glow",
  "iced_graphics",
- "iced_native",
+ "iced_native 0.9.1",
  "iced_wgpu",
  "iced_winit",
  "image",
@@ -1464,6 +1464,17 @@ name = "iced_core"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a571e43a4dea90e3a7a9f8bb40e4238d0847f9f9d862c87a6719e3e241dd6292"
+dependencies = [
+ "bitflags",
+ "instant",
+ "palette",
+]
+
+[[package]]
+name = "iced_core"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11e1942e28dedee756cc27e67e7a838cdc1e59fb6bf9627ec9f709ab3b135782"
 dependencies = [
  "bitflags",
  "instant",
@@ -1495,7 +1506,7 @@ dependencies = [
  "glow_glyph",
  "glyph_brush",
  "iced_graphics",
- "iced_native",
+ "iced_native 0.9.1",
  "log",
 ]
 
@@ -1508,8 +1519,8 @@ dependencies = [
  "bitflags",
  "bytemuck",
  "glam",
- "iced_native",
- "iced_style",
+ "iced_native 0.9.1",
+ "iced_style 0.7.0",
  "image",
  "kamadak-exif",
  "log",
@@ -1524,7 +1535,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "370ffb291ff5609ca488a2596df98a049b2a4d572c621aa0b2c586694ca327cf"
 dependencies = [
- "iced_native",
+ "iced_native 0.9.1",
  "ouroboros",
 ]
 
@@ -1534,10 +1545,25 @@ version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9942cdcd78591e816aae558721942aa366b03ed7f3f964b51de23c68ec78be7"
 dependencies = [
- "iced_core",
+ "iced_core 0.8.0",
  "iced_futures",
- "iced_style",
+ "iced_style 0.7.0",
  "num-traits",
+ "twox-hash",
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "iced_native"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b3dd42731b43f1ee0a028af35abefbb756956d093552d0f92f678628e6384fe"
+dependencies = [
+ "iced_core 0.9.0",
+ "iced_futures",
+ "iced_style 0.8.0",
+ "num-traits",
+ "thiserror",
  "twox-hash",
  "unicode-segmentation",
 ]
@@ -1548,7 +1574,18 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad5eb9547d32b9ff9b019526657974112b86baab58b2b91b1624316b309700b6"
 dependencies = [
- "iced_core",
+ "iced_core 0.8.0",
+ "once_cell",
+ "palette",
+]
+
+[[package]]
+name = "iced_style"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e37333dc2991201140302cd0d4cea051bd37ca3671d5008ec85df86d232ff30"
+dependencies = [
+ "iced_core 0.9.0",
  "once_cell",
  "palette",
 ]
@@ -1567,7 +1604,7 @@ dependencies = [
  "glyph_brush",
  "guillotiere",
  "iced_graphics",
- "iced_native",
+ "iced_native 0.9.1",
  "log",
  "raw-window-handle 0.5.0",
  "wgpu",
@@ -1582,7 +1619,7 @@ checksum = "8ef7747251a0b4a417589c5a8139d1858edf88d05566018a1a0b772d0229ef68"
 dependencies = [
  "iced_futures",
  "iced_graphics",
- "iced_native",
+ "iced_native 0.9.1",
  "log",
  "thiserror",
  "web-sys",
@@ -2613,7 +2650,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc932e1abce0251e908cf30bde8e66c30db30753a30b1b72f64846824783e0bf"
 dependencies = [
  "iced_graphics",
- "iced_native",
+ "iced_native 0.9.1",
  "plotters",
  "plotters-backend",
 ]
@@ -3176,7 +3213,7 @@ dependencies = [
  "etherparse",
  "iced",
  "iced_lazy",
- "iced_native",
+ "iced_native 0.10.1",
  "indexmap",
  "maxminddb",
  "pcap",
