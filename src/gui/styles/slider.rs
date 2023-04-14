@@ -21,8 +21,8 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             rail: Rail {
-                colors: (colors.secondary, colors.primary),
-                width: 0.0,
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
@@ -37,8 +37,8 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             rail: Rail {
-                colors: (colors.secondary, colors.secondary),
-                width: 0.0,
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
@@ -53,8 +53,8 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             rail: Rail {
-                colors: (colors.secondary, colors.secondary),
-                width: 0.0,
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
