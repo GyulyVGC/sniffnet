@@ -20,6 +20,7 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ervinpopescu"><img src="https://avatars.githubusercontent.com/u/84532402?v=4?s=100" width="100px;" alt="ervinpopescu"/><br /><sub><b>ervinpopescu</b></sub></a><br /><a href="#translation-ervinpopescu" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/DocRAID"><img src="https://avatars.githubusercontent.com/u/69478178?v=4?s=100" width="100px;" alt="Limdongju"/><br /><sub><b>Limdongju</b></sub></a><br /><a href="#translation-DocRAID" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/fuzunspm"><img src="https://avatars.githubusercontent.com/u/12132746?v=4?s=100" width="100px;" alt="Hüseyin Fahri Uzun"/><br /><sub><b>Hüseyin Fahri Uzun</b></sub></a><br /><a href="#translation-fuzunspm" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jauderho"><img src="https://avatars.githubusercontent.com/u/13562?v=4?s=100" width="100px;" alt="Jauder Ho"/><br /><sub><b>Jauder Ho</b></sub></a><br /><a href="#infra-jauderho" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
   </tbody>
 </table>
