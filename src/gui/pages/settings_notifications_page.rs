@@ -328,15 +328,15 @@ fn input_group_packets(
                 } else {
                     curr_threshold_str
                 },
-                move |value| {
-                    let packets_notification =
-                        PacketsNotification::from(&value, Some(packets_notification));
-                    Message::UpdateNotificationSettings(
-                        Notification::Packets(packets_notification),
-                        false,
-                    )
-                },
             )
+            .on_input(move |value| {
+                let packets_notification =
+                    PacketsNotification::from(&value, Some(packets_notification));
+                Message::UpdateNotificationSettings(
+                    Notification::Packets(packets_notification),
+                    false,
+                )
+            })
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
@@ -377,15 +377,11 @@ fn input_group_bytes(
                 } else {
                     &curr_threshold_str
                 },
-                move |value| {
-                    let bytes_notification =
-                        BytesNotification::from(&value, Some(bytes_notification));
-                    Message::UpdateNotificationSettings(
-                        Notification::Bytes(bytes_notification),
-                        false,
-                    )
-                },
             )
+            .on_input(move |value| {
+                let bytes_notification = BytesNotification::from(&value, Some(bytes_notification));
+                Message::UpdateNotificationSettings(Notification::Bytes(bytes_notification), false)
+            })
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))

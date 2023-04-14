@@ -1,7 +1,7 @@
 //! Slider style
 
 use iced::widget::slider::Appearance;
-use iced_native::widget::slider::Handle;
+use iced_native::widget::slider::{Handle, Rail};
 use iced_native::widget::vertical_slider::HandleShape;
 
 use crate::get_colors;
@@ -20,7 +20,10 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn active(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.primary),
+            rail: Rail {
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
+            },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.primary,
@@ -33,7 +36,10 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.secondary),
+            rail: Rail {
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
+            },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,
@@ -46,7 +52,10 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     fn dragging(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            rail_colors: (colors.secondary, colors.secondary),
+            rail: Rail {
+                colors: (colors.secondary, colors.buttons),
+                width: 3.0,
+            },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 7.0 },
                 color: colors.secondary,
