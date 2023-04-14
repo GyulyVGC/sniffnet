@@ -3,7 +3,7 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, PickList, Radio, Row, Scrollable,
+    button, horizontal_space, vertical_space, Button, Column, Container, PickList, Row, Scrollable,
     Text, Tooltip,
 };
 use iced::Length::FillPortion;
@@ -138,7 +138,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
-        let mut dev_str = "\n".to_string();
+        let mut dev_str = String::new();
         let name = dev.name;
         match dev.desc {
             None => {
@@ -165,7 +165,6 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
             let address_string = addr.addr.to_string();
             dev_str.push_str(&format!("\n    {address_string}"));
         }
-        dev_str.push_str("\n ");
         dev_str_list.push((name, dev_str));
     }
 
@@ -183,27 +182,24 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
             Scrollable::new(dev_str_list.iter().fold(
                 Column::new().padding(13).spacing(5),
                 |scroll_adapters, adapter| {
-                    let name = &adapter.0;
+                    let name = adapter.0.clone();
+                    let description = adapter.1.clone();
                     scroll_adapters.push(
-                        Container::new(
-                            Radio::new(&adapter.1, name, Some(&sniffer.device.name), |name| {
-                                Message::AdapterSelection(name.to_string())
-                            })
-                            .font(font)
-                            .size(15)
+                        Button::new(Text::new(description).font(font))
+                            .padding([20, 30])
                             .width(Length::Fill)
-                            .style(<StyleTuple as Into<
-                                iced::theme::Radio,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Standard),
-                            )),
-                        )
-                        .padding(10)
-                        .style(<StyleTuple as Into<
-                            iced::theme::Container,
-                        >>::into(
-                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                        )),
+                            .style(
+                                StyleTuple(
+                                    sniffer.style,
+                                    if name == sniffer.device.name {
+                                        ElementType::BorderedRoundSelected
+                                    } else {
+                                        ElementType::BorderedRound
+                                    },
+                                )
+                                .into(),
+                            )
+                            .on_press(Message::AdapterSelection(name)),
                     )
                 },
             ))
