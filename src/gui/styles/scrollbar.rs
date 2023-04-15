@@ -33,7 +33,7 @@ impl iced::widget::scrollable::StyleSheet for StyleTuple {
         }
     }
 
-    fn hovered(&self, _: &Self::Style, _is_mouse_over_scrollbar: bool) -> Scrollbar {
+    fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let colors = get_colors(self.0);
         Scrollbar {
             background: Some(Background::Color(colors.round_borders)),
@@ -43,7 +43,11 @@ impl iced::widget::scrollable::StyleSheet for StyleTuple {
             scroller: Scroller {
                 color: colors.secondary,
                 border_radius: BORDER_ROUNDED_RADIUS,
-                border_width: BORDER_WIDTH * 1.5,
+                border_width: if is_mouse_over_scrollbar {
+                    BORDER_WIDTH * 1.25
+                } else {
+                    BORDER_WIDTH * 1.75
+                },
                 border_color: Color::TRANSPARENT,
             },
         }

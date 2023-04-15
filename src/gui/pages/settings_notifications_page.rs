@@ -425,9 +425,9 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
                                 ElementType::Standard,
                             ))),
                     )
-                    .push(horizontal_space(Length::Fixed(10.0)))
+                    .push(horizontal_space(Length::Fixed(15.0)))
                     .push(
-                        Text::new('Z'.to_string())
+                        Text::new("Z")
                             .vertical_alignment(Vertical::Center)
                             .size(20)
                             .font(ICONS),
