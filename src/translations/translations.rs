@@ -163,7 +163,7 @@ pub fn relevant_connections_translation(language: Language) -> Text<'static> {
         Language::RO => "Conexiuni relevante:",
         Language::KO => "관련 연결:",
         Language::TR => "İlgili bağlantılar:",
-        Language::RU => "Относящиеся подключения:",
+        Language::RU => "Важные подключения:",
     })
 }
 
@@ -783,7 +783,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::RO => "Filtre active:",
         Language::KO => "활성화된 필터:",
         Language::TR => "Aktif filtreler:",
-        Language::RU => "Выберите фильтры:",
+        Language::RU => "Выбранные фильтры:",
     }
 }
 
@@ -800,7 +800,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::RO => "niciunul",
         Language::KO => "없음",
         Language::TR => "hiç biri",
-        Language::RU => "ничего",
+        Language::RU => "не выбран",
     }
 }
 
@@ -851,7 +851,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         Language::RO => "Pentru a vă scufunda în traficul de rețea",
         Language::KO => "네트워크 트레픽으로 바로가기",
         Language::TR => "Ağ trafiğine dalmak",
-        Language::RU => "Анализировать сетевой трафик",
+        Language::RU => "Для погружения в сетевой трафик",
     }
 }
 
@@ -1331,6 +1331,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::RO => "Sunt afișate doar ultimele 30 de notificări",
         Language::KO => "최근 30개의 알림만 표시됩니다",
         Language::TR => "Sadece son 30 bildirim gösterilmektedir",
-        Language::RU => "Тут показываются только послдение 30 уведомлений",
+        Language::RU => "Тут показываются только последние 30 уведомлений",
     }
 }
