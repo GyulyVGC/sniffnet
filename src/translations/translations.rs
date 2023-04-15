@@ -438,7 +438,9 @@ pub fn filtered_packets_translation(
             format!("필터링된 패킷:\n   {filtered} ({percentage} 의 일부)")
         }
         Language::TR => format!("Filtrelenen paketler:\n   {filtered} toplamın ({percentage})"),
-        Language::RU => format!("Отфильтровано пакетов:\n   {filtered} ({percentage}% от общего числа)"),
+        Language::RU => {
+            format!("Отфильтровано пакетов:\n   {filtered} ({percentage}% от общего числа)")
+        }
     })
 }
 
@@ -467,7 +469,9 @@ pub fn filtered_bytes_translation(
             format!("필터링된 바이트:\n   {filtered} ({percentage} 의 일부)")
         }
         Language::TR => format!("Filtrelenen bayt:\n   {filtered} toplamın ({percentage})"),
-        Language::RU => format!("Отфильтровано байт:\n   {filtered} ({percentage}% от общего числа)"),
+        Language::RU => {
+            format!("Отфильтровано байт:\n   {filtered} ({percentage}% от общего числа)")
+        }
     })
 }
 
@@ -929,10 +933,9 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::ES => "Estilo",
         Language::PL => "Styl",
         Language::DE | Language::RO | Language::TR => "Stil",
-        Language::UK => "Стиль",
+        Language::UK | Language::RU => "Стиль",
         Language::ZH => "主题",
         Language::KO => "스타일",
-        Language::RU => "Стиль",
     }
 }
 
@@ -1109,12 +1112,11 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::ES => "Sonido:",
         Language::PL => "Dźwięk:",
         Language::DE => "Ton:",
-        Language::UK => "Звук:",
+        Language::UK | Language::RU => "Звук:",
         Language::ZH => "通知音:",
         Language::RO => "Sunet:",
         Language::KO => "사운드:",
         Language::TR => "Ses:",
-        Language::RU => "Звук:",
     }
 }
 
