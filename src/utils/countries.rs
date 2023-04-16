@@ -515,6 +515,7 @@ pub fn get_flag_from_language_code(language: &str) -> Image {
         "IT" => IT,
         "KO" => KR,
         "PL" => PL,
+        "PT" => PT,
         "RO" => RO,
         "RU" => RU,
         "TR" => TR,
