@@ -31,8 +31,8 @@ pub fn ip_version_radios(
     for option in IpVersion::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(active),
                 Message::IpVersionSelection,
             )
@@ -62,8 +62,8 @@ pub fn transport_protocol_radios(
     for option in TransProtocol::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(active),
                 Message::TransportProtocolSelection,
             )
@@ -92,8 +92,8 @@ pub fn language_radios(
                 .align_items(Alignment::Center)
                 .push(
                     Radio::new(
-                        *option,
                         format!("{} ({:?})", option.get_radio_label(), option),
+                        *option,
                         Some(active),
                         Message::LanguageSelection,
                     )
@@ -124,8 +124,8 @@ pub fn sound_packets_threshold_radios(
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(packets_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
@@ -161,8 +161,8 @@ pub fn sound_bytes_threshold_radios(
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(bytes_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
@@ -198,8 +198,8 @@ pub fn sound_favorite_radios(
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(favorite_notification.sound),
                 |value| {
                     Message::UpdateNotificationSettings(
@@ -241,8 +241,8 @@ pub fn chart_radios(
     for option in ChartType::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(active),
                 Message::ChartSelection,
             )
@@ -276,8 +276,8 @@ pub fn report_radios(
     for option in ReportType::ALL {
         ret_val = ret_val.push(
             Radio::new(
-                option,
                 option.get_radio_label(language),
+                option,
                 Some(active),
                 Message::ReportSelection,
             )

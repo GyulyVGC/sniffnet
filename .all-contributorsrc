@@ -106,6 +106,33 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "fuzunspm",
+      "name": "Hüseyin Fahri Uzun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12132746?v=4",
+      "profile": "https://github.com/fuzunspm",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "jauderho",
+      "name": "Jauder Ho",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13562?v=4",
+      "profile": "https://github.com/jauderho",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "amarao",
+      "name": "George Shuklin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/652496?v=4",
+      "profile": "https://github.com/amarao",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,

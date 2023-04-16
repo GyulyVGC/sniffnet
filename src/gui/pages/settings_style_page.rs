@@ -114,6 +114,16 @@ fn get_palette_container(
         .height(Length::Fixed(130.0))
         .width(Length::Fixed(360.0))
         .padding(5)
-        .style(StyleTuple(style, ElementType::BorderedRound).into())
+        .style(
+            StyleTuple(
+                style,
+                if on_press.eq(&style) {
+                    ElementType::BorderedRoundSelected
+                } else {
+                    ElementType::BorderedRound
+                },
+            )
+            .into(),
+        )
         .on_press(Message::Style(on_press))
 }
