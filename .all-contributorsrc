@@ -124,6 +124,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "amarao",
+      "name": "George Shuklin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/652496?v=4",
+      "profile": "https://github.com/amarao",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
