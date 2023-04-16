@@ -128,7 +128,7 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::EN => "Transport protocol",
         Language::IT => "Protocollo di trasporto",
         Language::FR => "Protocole de transport",
-        Language::ES => "Protocolo de transporte",
+        Language::ES | Language::PT => "Protocolo de transporte",
         Language::PL => "Protokół transportowy",
         Language::DE => "Netzwerkprotokoll",
         Language::UK => "Транспортний протокол",
@@ -137,7 +137,6 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::KO => "전송 프로토콜",
         Language::TR => "İletişim protokolü",
         Language::RU => "Транспортный протокол",
-        Language::PT => "Protocolo de transporte",
     }
 }
 
@@ -467,10 +466,9 @@ pub fn filtered_packets_translation(
         Language::RU => {
             format!("Отфильтровано пакетов:\n   {filtered} ({percentage}% от общего числа)")
         }
-        },
         Language::PT => {
             format!("Pacotes filtrados:\n   {filtered} ({percentage} do total)")
-        },
+        }
     })
 }
 
@@ -502,10 +500,9 @@ pub fn filtered_bytes_translation(
         Language::RU => {
             format!("Отфильтровано байт:\n   {filtered} ({percentage}% от общего числа)")
         }
-        },
         Language::PT => {
             format!("Bytes filtrados:\n   {filtered} ({percentage} do total)")
-        },
+        }
     })
 }
 
@@ -552,8 +549,7 @@ pub fn no_favorites_translation(language: Language) -> Text<'static> {
         Language::TR => "Şu an gösterecek bir şey yok.\n\
                          Favorilere bağlantı eklemek için, bağlantı yanındaki yıldız sembolüne tıklayınız.",
         Language::RU => "Нечего показать в настоящий момент.\n\
-                         Для добавления соединения в избранные, нажмите на символ звезды возле соединения."
-
+                         Для добавления соединения в избранные, нажмите на символ звезды возле соединения.",
         Language::PT => "Nada para mostrar de momento.\n\
                          Para adicionar uma conexão aos seus favoritos, clique na estrela perto da conexão.",
     })
@@ -621,7 +617,7 @@ pub fn both_translation(language: Language) -> &'static str {
         Language::EN => "both",
         Language::IT => "entrambi",
         Language::FR => "les deux",
-        Language::ES => "ambos",
+        Language::ES | Language::PT => "ambos",
         Language::PL => "oba",
         Language::DE => "beide",
         Language::UK => "обидва",
@@ -630,7 +626,6 @@ pub fn both_translation(language: Language) -> &'static str {
         Language::KO => "둘다",
         Language::TR => "ikiside",
         Language::RU => "оба",
-        Language::PT => "ambos",
     }
 }
 
@@ -651,7 +646,7 @@ pub fn all_translation(language: Language) -> &'static str {
         Language::EN => "All",
         Language::IT => "Tutti",
         Language::FR => "Tous",
-        Language::ES => "Todos",
+        Language::ES | Language::PT => "Todos",
         Language::PL => "Wszystkie",
         Language::DE => "Alle",
         Language::UK => "Усі",
@@ -660,7 +655,6 @@ pub fn all_translation(language: Language) -> &'static str {
         Language::KO => "모두",
         Language::TR => "Hepsi",
         Language::RU => "Всё",
-        Language::PT => "Todos",
     }
 }
 
@@ -687,7 +681,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::EN => "bytes per second",
         Language::IT => "byte al secondo",
         Language::FR => "octets par seconde",
-        Language::ES => "bytes por segundo",
+        Language::ES | Language::PT => "bytes por segundo",
         Language::PL => "bajty na sekundę",
         Language::DE => "bytes pro Sekunde",
         Language::UK => "байти на секунду",
@@ -696,7 +690,6 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::KO => "초당 바이트",
         Language::TR => "saniye başı bayt",
         Language::RU => "байтов в секунду",
-        Language::PT => "bytes por segundo",
     }
 }
 
@@ -759,7 +752,7 @@ pub fn favorite_report_translation(language: Language) -> &'static str {
         Language::EN => "favorites",
         Language::IT => "preferiti",
         Language::FR => "favoris",
-        Language::ES => "favoritos",
+        Language::ES | Language::PT => "favoritos",
         Language::PL => "ulubione",
         Language::DE => "Favoriten",
         Language::UK => "улюблені",
@@ -768,7 +761,6 @@ pub fn favorite_report_translation(language: Language) -> &'static str {
         Language::KO => "즐겨찾기",
         Language::TR => "favoriler",
         Language::RU => "избранное",
-        Language::PT => "favoritos",
     }
 }
 
@@ -885,7 +877,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::EN => "Sniffnet's original light theme",
         Language::IT => "Il tema chiaro originale di Sniffnet",
         Language::FR => "Thème original clair de Sniffnet",
-        Language::ES => "Tema claro original de Sniffnet",
+        Language::ES | Language::PT => "Tema claro original de Sniffnet",
         Language::PL => "Oryginalny, jasny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, helles Design",
         Language::UK => "Оригінальний, світлий мотив Sniffnet",
@@ -894,7 +886,6 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::KO => "Sniffnet의 기본 라이트테마",
         Language::TR => "Sniffnet'in orjinal açık teması",
         Language::RU => "Оригинальная светая тема Sniffnet'а",
-        Language::PT => "Tema claro original de Sniffnet",
     }
 }
 
@@ -991,13 +982,12 @@ pub fn style_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Style",
         Language::IT => "Stile",
-        Language::ES => "Estilo",
+        Language::ES | Language::PT => "Estilo",
         Language::PL => "Styl",
         Language::DE | Language::RO | Language::TR => "Stil",
         Language::UK | Language::RU => "Стиль",
         Language::ZH => "主题",
         Language::KO => "스타일",
-        Language::PT => "Estilo",
     }
 }
 
@@ -1090,7 +1080,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::EN => "(per second)",
         Language::IT => "(al secondo)",
         Language::FR => "(par seconde)",
-        Language::ES => "(por segundo)",
+        Language::ES | Language::PT => "(por segundo)",
         Language::PL => "(na sekundę)",
         Language::DE => "(pro Sekunde)",
         Language::UK => "(на секунду)",
@@ -1099,7 +1089,6 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::KO => "(초당)",
         Language::TR => "(her saniye)",
         Language::RU => "(в секунду)",
-        Language::PT => "(por segundo)",
     }
 }
 
@@ -1161,7 +1150,7 @@ pub fn threshold_translation(language: Language) -> String {
 
 pub fn volume_translation(language: Language, value: u8) -> String {
     match language {
-        Language::EN | Language::IT | Language::FR => format!("Volume: {value:^3}%"),
+        Language::EN | Language::IT | Language::FR | Language::PT => format!("Volume: {value:^3}%"),
         Language::ES => format!("Volumen: {value:^3}%"),
         Language::PL => format!("Głośność: {value:^3}%"),
         Language::DE => format!("Lautstärke: {value:^3}%"),
@@ -1171,7 +1160,6 @@ pub fn volume_translation(language: Language, value: u8) -> String {
         Language::KO => format!("볼륨: {value:^3}%"),
         Language::TR => format!("Ses: {value:^3}%"),
         Language::RU => format!("Объём: {value:^3}%"),
-        Language::PT => format!("Volume: {value:^3}%"),
     }
 }
 
@@ -1267,8 +1255,14 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
 
 pub fn packets_exceeded_value_translation(language: Language, value: u32) -> String {
     match language {
-        Language::EN => format!("{value} packets have been exchanged"),
-        Language::IT => format!("{value} pacchetti sono stati scambiati"),
+        Language::EN => match value {
+            1 => "1 packet has been exchanged".to_owned(),
+            npackets => format!("{npackets} packets have been exchanged"),
+        },
+        Language::IT => match value {
+            1 => "1 pacchetto è stato scambiato".to_owned(),
+            npackets => format!("{npackets} pacchetti sono stati scambiati"),
+        },
         Language::FR => match value {
             1 => "1 paquet a été échangé".to_owned(),
             npackets => format!("{npackets} paquets ont été échangés"),

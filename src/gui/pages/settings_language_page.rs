@@ -1,5 +1,4 @@
-use iced::alignment::Horizontal;
-use iced::widget::{Column, Container, Row, Text};
+use iced::widget::{Column, Container, Row};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::vertical_space;
@@ -57,24 +56,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(20.0)))
-        .push(row_language_radio)
         .push(vertical_space(Fixed(30.0)))
-        .push(
-            Container::new(
-                Text::new(
-                    "Would you like to add support for your native language?\n\n\
-        Give a look at Sniffnet issues on GitHub.",
-                )
-                .horizontal_alignment(Horizontal::Center)
-                .width(Length::Fixed(500.0))
-                .font(font),
-            )
-            .padding(10)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::BorderedRound),
-            )),
-        );
+        .push(row_language_radio);
 
     Container::new(content)
         .height(Fixed(400.0))
