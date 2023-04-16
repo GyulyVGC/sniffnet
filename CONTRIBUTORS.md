@@ -23,6 +23,9 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jauderho"><img src="https://avatars.githubusercontent.com/u/13562?v=4?s=100" width="100px;" alt="Jauder Ho"/><br /><sub><b>Jauder Ho</b></sub></a><br /><a href="#infra-jauderho" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/amarao"><img src="https://avatars.githubusercontent.com/u/652496?v=4?s=100" width="100px;" alt="George Shuklin"/><br /><sub><b>George Shuklin</b></sub></a><br /><a href="#translation-amarao" title="Translation">🌍</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/franciscoBSalgueiro"><img src="https://avatars.githubusercontent.com/u/92053465?v=4?s=100" width="100px;" alt="Francisco Salgueiro"/><br /><sub><b>Francisco Salgueiro</b></sub></a><br /><a href="#translation-franciscoBSalgueiro" title="Translation">🌍</a></td>
+    </tr>
   </tbody>
 </table>
 
