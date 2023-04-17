@@ -302,6 +302,13 @@ If you have problems after having installed Sniffnet through the provided instal
 it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
 Reach me out, and I'll try to generate an installer for your specific operating system.
 
+### Rendering problems
+
+In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
+may cause some problems that could prevent you from running Sniffnet. <br>
+In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
+branch, which uses the `glow` renderer.
+
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
 </details>
