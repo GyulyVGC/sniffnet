@@ -1,6 +1,20 @@
 # Change Log
 All Sniffnet releases with the relative changes are documented in this file.
 
+
+## [1.1.4] - UNRELEASED
+
+- Added new translations of the GUI:
+  * Portuguese 🇵🇹 ([#134](https://github.com/GyulyVGC/sniffnet/pull/134))
+  * Russian 🇷🇺 ([#151](https://github.com/GyulyVGC/sniffnet/pull/151))
+  * Korean 🇰🇷 ([#128](https://github.com/GyulyVGC/sniffnet/pull/128))
+  * Turkish 🇹🇷 ([#139](https://github.com/GyulyVGC/sniffnet/pull/139))
+  * ...the total number of supported languages is now 13 🎉
+- Changed adapter buttons format and improved volume slider layout (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more details or to give me further suggestions)
+- Scrollbars are now highlighted when hovering on the respective scrollable area
+- Fixed problem causing a crash on macOS when starting Sniffnet's Homebrew package or building from source in release mode ([#109](https://github.com/GyulyVGC/sniffnet/issues/109) - [#137](https://github.com/GyulyVGC/sniffnet/issues/137))
+
+
 ## [1.1.3] - 2023-04-04
 
 - Added Romanian translation 🇷🇴 ([#113](https://github.com/GyulyVGC/sniffnet/pull/113))

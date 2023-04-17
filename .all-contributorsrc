@@ -97,6 +97,60 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "DocRAID",
+      "name": "Limdongju",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69478178?v=4",
+      "profile": "https://github.com/DocRAID",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "fuzunspm",
+      "name": "Hüseyin Fahri Uzun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12132746?v=4",
+      "profile": "https://github.com/fuzunspm",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "jauderho",
+      "name": "Jauder Ho",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13562?v=4",
+      "profile": "https://github.com/jauderho",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "amarao",
+      "name": "George Shuklin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/652496?v=4",
+      "profile": "https://github.com/amarao",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "franciscoBSalgueiro",
+      "name": "Francisco Salgueiro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92053465?v=4",
+      "profile": "https://github.com/franciscoBSalgueiro",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "philclifford",
+      "name": "Phil Clifford",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8797027?v=4",
+      "profile": "https://hachyderm.io/@phil8o",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,

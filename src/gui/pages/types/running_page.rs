@@ -46,12 +46,14 @@ mod tests {
     #[test]
     fn test_previous_running_page() {
         assert_eq!(RunningPage::Overview.previous(), RunningPage::Notifications);
-        assert_eq!(RunningPage::Notifications.previous(), RunningPage::Overview);
+        assert_eq!(RunningPage::Notifications.previous(), RunningPage::Inspect);
+        assert_eq!(RunningPage::Inspect.previous(), RunningPage::Overview);
     }
 
     #[test]
     fn test_next_running_page() {
-        assert_eq!(RunningPage::Overview.next(), RunningPage::Notifications);
+        assert_eq!(RunningPage::Overview.next(), RunningPage::Inspect);
+        assert_eq!(RunningPage::Inspect.next(), RunningPage::Notifications);
         assert_eq!(RunningPage::Notifications.next(), RunningPage::Overview);
     }
 }

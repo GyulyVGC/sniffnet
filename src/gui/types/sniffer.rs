@@ -1131,14 +1131,14 @@ mod tests {
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         // switch with closed setting => change running page
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);
         // switch with opened settings => change settings
         sniffer.update(Message::OpenLastSettings);
-        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Notifications);
+        assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
     }
 }

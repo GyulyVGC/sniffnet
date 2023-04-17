@@ -4,6 +4,7 @@ pub enum ElementType {
     Standard,
     Headers,
     BorderedRound,
+    BorderedRoundSelected,
     TabActive,
     TabInactive,
     Starred,

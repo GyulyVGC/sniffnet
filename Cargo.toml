@@ -31,13 +31,13 @@ chrono = { version = "0.4.24", default_features = false, features = ["clock"] }
 thousands = "0.2.0"
 indexmap = "1.9.3"
 plotters = { version = "0.3.4", default_features = false, features = ["area_series"] }
-iced = { version = "0.8.0", features = ["tokio", "image"] }
-iced_native = "0.9.1"
-iced_lazy = "0.5.0"
-plotters-iced = "0.7.0"
+iced = { version = "0.9.0", features = ["tokio", "image"] }
+iced_native = "0.10.1"
+iced_lazy = "0.6.1"
+plotters-iced = "0.8.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
-serde = { version = "1.0.159", default_features = false, features = ["derive"] }
+serde = { version = "1.0.160", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
 reqwest = { version = "0.11.16", features = ["json", "blocking"] }
 
