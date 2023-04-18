@@ -2,7 +2,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.1.4] - 2023-04-xx
+## [1.1.4] - 2023-04-18
 
 - Added new translations of the GUI:
   * Portuguese 🇵🇹 ([#134](https://github.com/GyulyVGC/sniffnet/pull/134))
