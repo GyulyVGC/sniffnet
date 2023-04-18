@@ -1,4 +1,5 @@
 #![allow(clippy::match_same_arms)]
+
 use crate::Language;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {

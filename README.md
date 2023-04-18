@@ -14,7 +14,7 @@ Multithreaded, cross-platform, reliable
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 [Would you like to add support for your native language?](https://github.com/GyulyVGC/sniffnet/issues/60)
 
 </div>
@@ -51,9 +51,9 @@ You can install Sniffnet in one of the following ways:
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_Windows.msi) (8.4 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_MacOS.dmg) (6.9 MB)
-  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.3/Sniffnet_Linux.deb) (5.3 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_Windows.msi) (8.8 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_MacOS.dmg) (7.3 MB)
+  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_Linux.deb) (5.3 MB)
 
     
 </details>
