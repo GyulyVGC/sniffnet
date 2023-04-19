@@ -70,6 +70,8 @@ pub struct Sniffer {
     pub language: Language,
     /// Number of unread notifications
     pub unread_notifications: usize,
+    /// Search parameters of inspect page
+    pub search: String,
 }
 
 impl Sniffer {
@@ -102,6 +104,7 @@ impl Sniffer {
             running_page: RunningPage::Overview,
             language: config_settings.language,
             unread_notifications: 0,
+            search: String::new(),
         }
     }
 
@@ -171,6 +174,7 @@ impl Sniffer {
             Message::EscKeyPressed => return self.shortcut_esc(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
+            Message::Search(parameters) => self.search = parameters,
         }
         Command::none()
     }

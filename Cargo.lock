@@ -771,6 +771,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dns-lookup"
+version = "1.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53ecafc952c4528d9b51a458d1a8904b81783feff9fde08ab6ed2545ff396872"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "socket2",
+ "winapi",
+]
+
+[[package]]
 name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3255,10 +3267,11 @@ dependencies = [
 
 [[package]]
 name = "sniffnet"
-version = "1.1.3"
+version = "1.1.4"
 dependencies = [
  "chrono",
  "confy",
+ "dns-lookup",
  "etherparse",
  "iced",
  "iced_lazy",

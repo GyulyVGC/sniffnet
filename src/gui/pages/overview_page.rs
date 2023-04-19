@@ -35,8 +35,6 @@ use crate::utils::formatted_strings::{
 };
 use crate::{AppProtocol, Language, ReportType, RunningPage, StyleType};
 
-//use dns_lookup::lookup_addr;
-
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -380,7 +378,6 @@ fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column
     let mut col_packets = Column::new()
         //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
         //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
-        //.push(Text::new(lookup_addr(&"8.8.8.8".parse().unwrap()).unwrap()).font(font))
         .push(
             Text::new(get_active_filters_string(
                 &sniffer.filters.clone(),

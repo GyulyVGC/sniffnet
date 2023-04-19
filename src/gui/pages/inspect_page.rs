@@ -1,19 +1,26 @@
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::styles::style_constants::{get_font, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
-use crate::{RunningPage, Sniffer};
-use iced::widget::{Column, Container};
-use iced::{Alignment, Length};
+use crate::networking::types::traffic_type::TrafficType;
+use crate::report::get_report_entries::{get_report_entries, get_searched_entries};
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
+use crate::utils::formatted_strings::get_connection_color;
+use crate::{Language, RunningPage, Sniffer, StyleType};
+use dns_lookup::lookup_addr;
+use iced::widget::{Column, Container, Row, Scrollable, Text, TextInput};
+use iced::{Alignment, Font, Length};
+use iced_native::widget::scrollable::Properties;
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
-    //let font = get_font(sniffer.style);
+    let font = get_font(sniffer.style);
 
-    let body = Column::new()
+    let mut body = Column::new()
         .width(Length::Fill)
-        .padding(5)
-        .spacing(5)
+        .padding(10)
+        .spacing(10)
         .align_items(Alignment::Center);
 
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -38,9 +45,74 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
+    body = body.push(search_bar(sniffer));
+    let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
+    col_report = col_report
+        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+        .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
+    ;
+    let mut scroll_report = Column::new();
+    for key_val in get_searched_entries(&sniffer.info_traffic.clone(), sniffer.search.clone()) {
+        let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
+        let mut entry_row = Row::new().align_items(Alignment::Center).push(
+            Text::new(format!(
+                "  {}{}",
+                key_val.0.print_gui(),
+                key_val.1.print_gui()
+            ))
+            .style(iced::theme::Text::Color(entry_color))
+            .font(SARASA_MONO_SC_BOLD),
+        );
+        if key_val.1.country.is_empty() {
+            entry_row = entry_row
+                .push(
+                    Text::new("?")
+                        .width(Length::Fixed(FLAGS_WIDTH))
+                        .style(iced::theme::Text::Color(entry_color))
+                        .font(SARASA_MONO_SC_BOLD),
+                )
+                .push(Text::new("    "));
+        } else {
+            entry_row = entry_row
+                .push(get_flag_from_country_code(&key_val.1.country))
+                .push(Text::new("  "));
+        }
+        //     let address_to_lookup = match key_val.1.traffic_type {
+        //         TrafficType::Outgoing => &key_val.0.address2,
+        //         _ => &key_val.0.address1,
+        //     };
+        // entry_row = entry_row.push(
+        //             Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font)
+        //         );
+        scroll_report = scroll_report.push(entry_row);
+    }
+    col_report = col_report.push(Container::new(
+        Scrollable::new(scroll_report)
+            .horizontal_scroll(Properties::new())
+            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                StyleTuple(sniffer.style, ElementType::Standard),
+            )),
+    ));
+
+    body = body.push(col_report);
+
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(sniffer.style, ElementType::Standard),
         ))
+}
+
+fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
+    let font = get_font(sniffer.style);
+
+    let text_input = TextInput::new("AAA", &sniffer.search)
+        .on_input(move |value| Message::Search(value))
+        .padding([0, 0, 0, 10])
+        .font(font)
+        .width(Length::Fixed(100.0))
+        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+            StyleTuple(sniffer.style, ElementType::Standard),
+        ));
+    Container::new(text_input)
 }

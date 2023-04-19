@@ -39,3 +39,22 @@ pub fn get_report_entries(
         .map(|e| (e.0.clone(), e.1.clone()))
         .collect()
 }
+
+pub fn get_searched_entries(
+    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    search: String,
+) -> Vec<(AddressPortPair, InfoAddressPortPair)> {
+    let info_traffic_lock = info_traffic.lock().unwrap();
+    let mut searched_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
+    searched_vec = info_traffic_lock
+        .map
+        .iter()
+        .filter(|(key, value)| value.country == search)
+        .collect();
+
+    let n_entry = min(searched_vec.len(), 20);
+    searched_vec[0..n_entry]
+        .iter()
+        .map(|e| (e.0.clone(), e.1.clone()))
+        .collect()
+}
