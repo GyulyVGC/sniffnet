@@ -71,4 +71,6 @@ pub enum Message {
     CtrlDPressed,
     /// Update search parameters of inspect page
     Search(String),
+    /// Update page result number in inspect
+    UpdatePageNumber(i16)
 }

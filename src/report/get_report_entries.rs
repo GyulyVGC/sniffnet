@@ -40,21 +40,21 @@ pub fn get_report_entries(
         .collect()
 }
 
+/// Returns the indexes of the elements which satisfy the search constraints and belong to the given page,
+/// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     search: String,
-) -> Vec<(AddressPortPair, InfoAddressPortPair)> {
+    page_number: usize,
+) -> (Vec<usize>, usize) {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut searched_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
-    searched_vec = info_traffic_lock
+    let all_results: Vec<usize> = info_traffic_lock
         .map
         .iter()
         .filter(|(key, value)| value.country == search)
+        .map(|(key, value)| value.index)
         .collect();
+    let upper_bound = min(page_number * 15, all_results.len());
 
-    let n_entry = min(searched_vec.len(), 20);
-    searched_vec[0..n_entry]
-        .iter()
-        .map(|e| (e.0.clone(), e.1.clone()))
-        .collect()
+    (all_results[(page_number - 1) * 15 .. upper_bound].to_vec(), all_results.len())
 }

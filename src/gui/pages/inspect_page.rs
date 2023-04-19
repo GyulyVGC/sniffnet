@@ -1,5 +1,6 @@
+use std::cmp::min;
 use crate::gui::components::tab::get_pages_tabs;
-use crate::gui::styles::style_constants::{get_font, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -9,9 +10,11 @@ use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utils::formatted_strings::get_connection_color;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use dns_lookup::lookup_addr;
-use iced::widget::{Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{Alignment, Font, Length};
+use iced::widget::{Column, Container, Row, Scrollable, Text, TextInput, Tooltip};
+use iced::{Alignment, alignment, Font, Length};
+use iced_native::widget::button;
 use iced_native::widget::scrollable::Properties;
+use iced_native::widget::tooltip::Position;
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
@@ -52,7 +55,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
     ;
     let mut scroll_report = Column::new();
-    for key_val in get_searched_entries(&sniffer.info_traffic.clone(), sniffer.search.clone()) {
+    let (search_results, results_number) = get_searched_entries(&sniffer.info_traffic.clone(), sniffer.search.clone(), sniffer.page_number);
+    for index in &search_results {
+        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+        let key_val = info_traffic_lock.map.get_index(*index).unwrap();
         let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
         let mut entry_row = Row::new().align_items(Alignment::Center).push(
             Text::new(format!(
@@ -85,6 +91,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         //             Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font)
         //         );
         scroll_report = scroll_report.push(entry_row);
+        drop(info_traffic_lock);
     }
     col_report = col_report.push(Container::new(
         Scrollable::new(scroll_report)
@@ -94,7 +101,25 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             )),
     ));
 
-    body = body.push(col_report);
+    let start_entry_num = (sniffer.page_number - 1) * 15 + 1;
+    let end_entry_num = start_entry_num + search_results.len() - 1;
+    body = body.push(
+        Row::new().push(
+            Container::new(col_report)
+                .padding([10, 7, 7, 7])
+                .height(Length::Fixed(380.0))
+                .width(Length::Fixed(1050.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(sniffer.style, ElementType::BorderedRound),
+                )),
+        )
+    )
+        .push(
+            Row::new()
+                .push(get_button_change_page(sniffer.style, font, - 1))
+                .push(Text::new(format!("{}-{} / {}", start_entry_num, end_entry_num, results_number)))
+                .push(get_button_change_page(sniffer.style, font, 1))
+        );
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
@@ -115,4 +140,25 @@ fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
             StyleTuple(sniffer.style, ElementType::Standard),
         ));
     Container::new(text_input)
+}
+
+fn get_button_change_page(style: StyleType, font: Font, increment: i16) -> Tooltip<'static, Message> {
+         let content = button(
+            Text::new('8'.to_string())
+                .font(ICONS)
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        )
+            .padding(10)
+            .height(Length::Fixed(50.0))
+            .width(Length::Fixed(75.0))
+            .style(StyleTuple(style, ElementType::Standard).into())
+            .on_press(Message::UpdatePageNumber(increment));
+
+        Tooltip::new(content, "AAA", Position::Top)
+            .gap(5)
+            .font(font)
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(style, ElementType::Tooltip),
+            ))
 }
