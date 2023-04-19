@@ -380,13 +380,16 @@ impl Sniffer {
             }
             (Status::Running, None, None) => {
                 // Running with no overlays
-                self.running_page = if next {
-                    self.running_page.next()
-                } else {
-                    self.running_page.previous()
-                };
-                if self.running_page.eq(&RunningPage::Notifications) {
-                    self.unread_notifications = 0;
+                if self.runtime_data.tot_sent_packets + self.runtime_data.tot_received_packets > 0 {
+                    // Running with no overlays and some packets filtered
+                    self.running_page = if next {
+                        self.running_page.next()
+                    } else {
+                        self.running_page.previous()
+                    };
+                    if self.running_page.eq(&RunningPage::Notifications) {
+                        self.unread_notifications = 0;
+                    }
                 }
             }
             (_, _, _) => {}
@@ -1124,12 +1127,17 @@ mod tests {
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         // change state to running
-        sniffer.update(Message::Start);
+        *sniffer.status_pair.0.lock().unwrap() = Status::Running;
         assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Running);
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Overview);
-        // switch with closed setting => change running page
+        // switch with closed setting and no packets received => nothing changes
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.settings_page, None);
+        // switch with closed setting and some packets received => change running page
+        sniffer.runtime_data.tot_received_packets += 1;
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);
