@@ -2,7 +2,7 @@ use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
 
-use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, get_font};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -82,7 +82,6 @@ pub fn transport_protocol_radios(
 pub fn language_radios(
     active: Language,
     collection: &[Language],
-    font: Font,
     style: StyleType,
 ) -> Column<'static, Message> {
     let mut ret_val = Column::new().spacing(10);
@@ -92,13 +91,13 @@ pub fn language_radios(
                 .align_items(Alignment::Center)
                 .push(
                     Radio::new(
-                        format!("{} ({:?})", option.get_radio_label(), option),
+                        format!("{}", option.get_radio_label()),
                         *option,
                         Some(active),
                         Message::LanguageSelection,
                     )
                     .spacing(7)
-                    .font(font)
+                    .font(get_font(style, *option))
                     .size(15)
                     .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
                         style,

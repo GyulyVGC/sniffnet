@@ -32,7 +32,7 @@ use crate::{Language, RunningPage, Sniffer, StyleType};
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let notifications = sniffer.notifications;
-    let font = get_font(sniffer.style);
+    let font = get_font(sniffer.style, sniffer.language);
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
@@ -168,7 +168,7 @@ fn packets_notification_log(
     language: Language,
     style: StyleType,
 ) -> Container<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(style, language);
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(&logged_notification.threshold.to_string());
     threshold_str.push_str(&format!(" {}", per_second_translation(language)));
@@ -236,7 +236,7 @@ fn bytes_notification_log(
     language: Language,
     style: StyleType,
 ) -> Container<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(style, language);
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(
         &(logged_notification.threshold / logged_notification.byte_multiple.get_multiplier())
@@ -317,7 +317,7 @@ fn favorite_notification_log(
     language: Language,
     style: StyleType,
 ) -> Container<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(style, language);
     let traffic_type = logged_notification.connection.1.traffic_type;
     let country = logged_notification.connection.1.country;
     let src_str = format!("Src: {}", logged_notification.connection.0.address1);
@@ -403,7 +403,7 @@ fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static
 
     Tooltip::new(content, clear_all_translation(language), Position::Top)
         .gap(5)
-        .font(get_font(style))
+        .font(get_font(style, language))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))

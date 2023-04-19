@@ -8,6 +8,7 @@ use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
 use iced_native::widget::tooltip::Position;
 
+use crate::gui::styles::fonts;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
@@ -22,7 +23,7 @@ pub fn footer(
     style: StyleType,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message> {
-    let font_footer = get_font_headers(style);
+    let font_footer = get_font_headers(style, language);
 
     let release_details_row =
         get_release_details(language, style, font_footer, newer_release_available);
@@ -32,13 +33,28 @@ pub fn footer(
         .padding([0, 20])
         .align_items(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_github(style))
+        .push(get_button_github(style, language))
         .push(
-            Text::new("Made with ❤ by Giuliano Bellini")
+            Row::new()
                 .width(Length::FillPortion(1))
-                .horizontal_alignment(Horizontal::Right)
-                .size(FONT_SIZE_FOOTER)
-                .font(font_footer),
+                .push(
+                    Text::new("Made with ")
+                        .width(Length::FillPortion(1))
+                        .size(FONT_SIZE_FOOTER)
+                        .font(font_footer)
+                        .horizontal_alignment(Horizontal::Right)
+                )
+                .push(
+                    Text::new("❤")
+                        .width(Length::Fixed(14.0))
+                        .size(FONT_SIZE_FOOTER + 4.0)
+                        .font(fonts::NOTO_SANS_SYMBOLS)
+                )
+                .push(
+                    Text::new(" by Giuliano Bellini")
+                        .size(FONT_SIZE_FOOTER)
+                        .font(font_footer)
+                )
         );
 
     Container::new(footer_row)
@@ -51,7 +67,7 @@ pub fn footer(
         ))
 }
 
-fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_github(style: StyleType, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
@@ -65,7 +81,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     .on_press(Message::OpenGithub(true));
 
     Tooltip::new(content, "GitHub", Position::Top)
-        .font(get_font(style))
+        .font(get_font(style, language))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
@@ -106,7 +122,7 @@ fn get_release_details(
                 new_version_available_translation(language),
                 Position::Top,
             )
-            .font(get_font(style))
+            .font(get_font(style, language))
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
             ));

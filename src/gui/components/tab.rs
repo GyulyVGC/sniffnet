@@ -18,7 +18,7 @@ pub fn get_settings_tabs(
     style: StyleType,
     language: Language,
 ) -> Row<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(style, language);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Center);
@@ -31,6 +31,7 @@ pub fn get_settings_tabs(
             actions.get(i).unwrap().clone(),
             active,
             style,
+            language,
             font,
             None,
         ));
@@ -47,7 +48,7 @@ pub fn get_pages_tabs(
     language: Language,
     unread_notifications: usize,
 ) -> Row<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(style, language);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Center);
@@ -65,6 +66,7 @@ pub fn get_pages_tabs(
             actions.get(i).unwrap().clone(),
             active,
             style,
+            language,
             font,
             unread,
         ));
@@ -78,6 +80,7 @@ fn new_tab(
     action: Message,
     active: bool,
     style: StyleType,
+    language: Language,
     font: Font,
     unread: Option<usize>,
 ) -> Button<'static, Message> {
@@ -103,7 +106,7 @@ fn new_tab(
         if num > 0 {
             let notifications_badge = button(
                 Text::new(num.to_string())
-                    .font(get_font_headers(style))
+                    .font(get_font_headers(style, language))
                     .size(19)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),

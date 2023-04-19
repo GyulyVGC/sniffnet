@@ -1,3 +1,4 @@
+pub mod fonts;
 pub mod button;
 pub mod checkbox;
 pub mod container;

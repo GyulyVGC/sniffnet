@@ -15,15 +15,15 @@ use crate::translations::translations::languages_title_translation;
 use crate::{Language, Sniffer};
 
 pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(sniffer.style, sniffer.language);
 
     let language_active = sniffer.language;
     let col_language_radio_1 =
-        language_radios(language_active, &Language::COL1, font, sniffer.style);
+        language_radios(language_active, &Language::COL1, sniffer.style);
     let col_language_radio_2 =
-        language_radios(language_active, &Language::COL2, font, sniffer.style);
+        language_radios(language_active, &Language::COL2, sniffer.style);
     let col_language_radio_3 =
-        language_radios(language_active, &Language::COL3, font, sniffer.style);
+        language_radios(language_active, &Language::COL3, sniffer.style);
     let row_language_radio = Row::new()
         .spacing(50)
         .push(col_language_radio_1)

@@ -84,7 +84,7 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
         quit_analysis_translation(language),
         Position::Right,
     )
-    .font(get_font(style))
+    .font(get_font(style, language))
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Tooltip),
     ))
@@ -108,7 +108,7 @@ pub fn get_button_settings(
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
-        .font(get_font(style))
+        .font(get_font(style, language))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
