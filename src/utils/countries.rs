@@ -520,6 +520,7 @@ pub fn get_flag_from_language_code(language: &str) -> Image {
         "RU" => RU,
         "TR" => TR,
         "UK" => UA,
+        "FA" => IR,
         _ => UNKNOWN,
     })))
     .width(Length::Fixed(FLAGS_WIDTH))
