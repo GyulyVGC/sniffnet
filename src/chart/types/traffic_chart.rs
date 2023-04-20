@@ -8,13 +8,13 @@ use iced::Element;
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::fonts;
+use crate::gui::styles::fonts::get_language_font;
 use crate::gui::styles::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER};
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::formatted_strings::get_formatted_bytes_string;
-use crate::{font_selector, get_colors, ChartType, Language, StyleType};
+use crate::{get_colors, ChartType, Language, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -70,7 +70,7 @@ impl TrafficChart {
         let language = self.language;
         Container::new(
             Column::new().push(
-                ChartWidget::new(self).resolve_font(move |_, _| font_selector!(color_font, language)),
+                ChartWidget::new(self).resolve_font(move |_, _| get_language_font(color_font, language)),
             ),
         )
         .align_x(Horizontal::Left)

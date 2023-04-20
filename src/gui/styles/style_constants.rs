@@ -1,11 +1,10 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
 use iced::{Color, Font};
-use plotters::style::RGBColor;
 
-use crate::gui::styles::fonts;
+use crate::gui::styles::fonts::get_language_font;
 use crate::gui::styles::types::palette::{to_rgb_color, Palette};
-use crate::{font_selector, get_colors, StyleType};
+use crate::{get_colors, StyleType};
 use crate::translations::types::language::Language;
 
 // night theme
@@ -165,12 +164,12 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
 
 pub fn get_font(style: StyleType, language: Language) -> Font {
     let color_font = to_rgb_color(get_colors(style).text_body);
-    font_selector!(color_font, language)
+    get_language_font(color_font, language)
 }
 
 pub fn get_font_headers(style: StyleType, language: Language) -> Font {
     let color_font = to_rgb_color(get_colors(style).text_headers);
-    font_selector!(color_font, language)
+    get_language_font(color_font, language)
 }
 
 pub fn get_color_mix_chart(style: StyleType) -> f64 {

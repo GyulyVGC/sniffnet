@@ -9,7 +9,18 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
-include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md", "resources/countries_flags/**/*", "resources/DB/GeoLite2-Country.mmdb", "resources/palettes/*", "resources/fonts/subset/*", "resources/sounds/*"]
+include = [
+    "src/**/*",
+    "LICENSE-*",
+    "README.md",
+    "CHANGELOG.md",
+    "resources/countries_flags/**/*",
+    "resources/DB/GeoLite2-Country.mmdb",
+    "resources/palettes/*",
+    "resources/fonts/icons.ttf",
+    "resources/fonts/sarasa/subset/*",
+    "resources/sounds/*"
+]
 
 
 [package.metadata.bundle]
@@ -40,6 +51,8 @@ confy = "0.5.1"
 serde = { version = "1.0.160", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
 reqwest = { version = "0.11.16", features = ["json", "blocking"] }
+tokio = { version = "1.27.0", features = ["full"] }
+once_cell = "1.17.1"
 
 [dev-dependencies]
 rstest = "0.17.0"
