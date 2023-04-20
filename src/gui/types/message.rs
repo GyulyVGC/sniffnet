@@ -72,5 +72,5 @@ pub enum Message {
     /// Update search parameters of inspect page
     Search(String),
     /// Update page result number in inspect
-    UpdatePageNumber(i16)
+    UpdatePageNumber(bool),
 }

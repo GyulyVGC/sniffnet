@@ -107,7 +107,7 @@ impl Sniffer {
             language: config_settings.language,
             unread_notifications: 0,
             search: String::new(),
-            page_number: 1
+            page_number: 1,
         }
     }
 
@@ -177,11 +177,14 @@ impl Sniffer {
             Message::EscKeyPressed => return self.shortcut_esc(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
-            Message::Search(parameters) => self.search = parameters,
+            Message::Search(parameters) => {
+                self.page_number = 1;
+                self.search = parameters;
+            }
             Message::UpdatePageNumber(increment) => {
-                let new_page = self.page_number as i16 + increment;
+                let new_page = self.page_number as i16 + if increment { 1 } else { -1 };
                 self.page_number = new_page as usize;
-            },
+            }
         }
         Command::none()
     }

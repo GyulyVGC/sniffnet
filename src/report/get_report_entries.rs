@@ -56,5 +56,8 @@ pub fn get_searched_entries(
         .collect();
     let upper_bound = min(page_number * 15, all_results.len());
 
-    (all_results[(page_number - 1) * 15 .. upper_bound].to_vec(), all_results.len())
+    (
+        all_results[(page_number - 1) * 15..upper_bound].to_vec(),
+        all_results.len(),
+    )
 }
