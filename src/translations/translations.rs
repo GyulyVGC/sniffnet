@@ -315,7 +315,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::TR => "Gizle",
         Language::RU => "Скрыть",
         Language::PT => "Esconder",
-        Language::EL => "Κρύψε",
+        Language::EL => "Κλείσιμο",
     }
 }
 
@@ -1323,7 +1323,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::TR => "Paket eşik değeri aşıldı!",
         Language::RU => "Порог по числу пакетов превышен!",
         Language::PT => "Limite de pacotes excedido!",
-        Language::EL => "Το όριο των πακέτων ξεπεράσθηκε!",
+        Language::EL => "Το όριο των πακέτων ξεπεράστηκε!",
     }
 }
 
