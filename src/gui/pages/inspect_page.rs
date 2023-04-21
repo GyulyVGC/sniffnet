@@ -94,7 +94,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         // entry_row = entry_row.push(
         //             Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font)
         //         );
-        scroll_report = scroll_report.push(entry_row);
+        scroll_report = scroll_report.push(
+            button(entry_row)
+                .padding(2)
+                .on_press(Message::OpenLastSettings)
+                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+        );
         drop(info_traffic_lock);
     }
     col_report = col_report.push(Container::new(

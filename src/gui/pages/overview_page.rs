@@ -339,7 +339,7 @@ fn lazy_row_report(
                             if key_val.1.is_favorite {
                                 ElementType::Starred
                             } else {
-                                ElementType::NotStarred
+                                ElementType::Neutral
                             },
                         )
                         .into(),

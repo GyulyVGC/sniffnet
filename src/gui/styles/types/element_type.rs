@@ -8,7 +8,7 @@ pub enum ElementType {
     TabActive,
     TabInactive,
     Starred,
-    NotStarred,
+    Neutral,
     Alert,
     Tooltip,
     Badge,

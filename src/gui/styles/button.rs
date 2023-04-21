@@ -23,17 +23,18 @@ impl button::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         button::Appearance {
             background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::NotStarred) => colors.primary,
+                StyleTuple(_, ElementType::TabActive) => colors.primary,
                 StyleTuple(_, ElementType::Starred) => STARRED,
                 StyleTuple(_, ElementType::Badge) => colors.secondary,
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
+                StyleTuple(_, ElementType::Neutral) => Color::TRANSPARENT,
                 StyleTuple(_, ElementType::BorderedRoundSelected) => {
                     mix_colors(colors.primary, colors.buttons)
                 }
                 _ => colors.buttons,
             })),
             border_radius: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral) => 0.0,
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }
@@ -45,7 +46,7 @@ impl button::StyleSheet for StyleTuple {
                     ElementType::TabActive
                     | ElementType::TabInactive
                     | ElementType::Starred
-                    | ElementType::NotStarred
+                    | ElementType::Neutral
                     | ElementType::Badge,
                 ) => 0.0,
                 StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
@@ -75,7 +76,7 @@ impl button::StyleSheet for StyleTuple {
                 _ => mix_colors(colors.primary, colors.buttons),
             })),
             border_radius: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive) => 0.0,
+                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral) => 0.0,
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }
@@ -85,7 +86,7 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(
                     _,
                     ElementType::Starred
-                    | ElementType::NotStarred
+                    | ElementType::Neutral
                     | ElementType::TabActive
                     | ElementType::TabInactive
                     | ElementType::BorderedRound,
