@@ -407,7 +407,6 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
         Language::PT => format!("Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
                                 Adaptador de rede: {adapter}\n\n\
                                 Tem a certeza de que está ligado à internet e selecionou o adaptador correto?"),
-
         Language::EL => format!("Δεν έχει παρατηρηθεί κίνηση μέχρι στιγμής. Ανέμενε για πακέτα δικτύου...\n\n\
                                  Προσαρμογέας δικτύου: {adapter}\n\n\
                                  Είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο και ότι έχεις επιλέξει τον σωστό προσαρμογέα;"),
@@ -459,7 +458,6 @@ pub fn some_observed_translation(
         Language::PT => format!("Total de pacotes interceptados: {observed}\n\n\
                                 Pacotes filtrados: 0\n\n\
                                 Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados...\n\n{filters}"),
-
         Language::EL => format!("Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
                                  Φιλτραρισμένα πακέτα: 0\n\n\
                                  Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες...\n\n{filters}"),
@@ -584,7 +582,7 @@ pub fn no_favorites_translation(language: Language) -> Text<'static> {
         Language::PT => "Nada para mostrar de momento.\n\
                          Para adicionar uma conexão aos seus favoritos, clique na estrela perto da conexão.",
         Language::EL => "Δεν υπάρχει κάτι για απεικόνιση.\n\
-                         Για να προσθέσεις μια σύνδεση στα αγαπημένα σου, κλίκαρε στο σύμβολο με τον αστερίσκο δίπλα στη σύνδεση.",
+                         Για να προσθέσεις μια σύνδεση στα αγαπημένα σου, κλίκαρε στο σύμβολο με το αστέρι δίπλα στη σύνδεση.",
     })
 }
 
@@ -1170,7 +1168,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::TR => "; şunları da kullanabilirsin 'K', 'M' ve 'G'",
         Language::RU => "; Так же можно указать 'K', 'M' или 'G'",
         Language::PT => "; também pode especificar 'K', 'M' e 'G'",
-        Language::EL => "• μπορείς επίσης να διαλέξεις ένα από τα 'K', 'M' και 'G'",
+        Language::EL => "• μπορείς επίσης να καθορίσεις τα 'K', 'M' και 'G'",
     }
 }
 
@@ -1191,7 +1189,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         Language::TR => "Favorilerimde veri akışı olduğunda beni uyar",
         Language::RU => "Уведомить, если произошёл обмен данными в соединениях из избранного",
         Language::PT => "Notificar-me quando novos dados forem trocados dos meus favoritos",
-        Language::EL => "Ειδοποίησέ με όταν νέα δεδομένα έχουν εισαχθεί στα αγαπημένα μου",
+        Language::EL => "Ειδοποίησέ με όταν νέα δεδομένα έχουν ανταλλαγεί από τα αγαπημένα μου",
     }
 }
 
@@ -1374,7 +1372,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::TR => "Favorilerden yeni veri aktarıldı!",
         Language::RU => "Новый обмен данными в избранных соедиениях!",
         Language::PT => "Novos dados trocados dos favoritos!",
-        Language::EL => "Καινούρια δεδομένα έχουν εισαχθεί στα αγαπημένα!",
+        Language::EL => "Καινούρια δεδομένα έχουν ανταλλαγεί στα αγαπημένα!",
     }
 }
 
