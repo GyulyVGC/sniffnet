@@ -1212,7 +1212,7 @@ pub fn threshold_translation(language: Language) -> String {
         Language::TR => "Eşik: ".to_string(),
         Language::RU => "Порог: ".to_string(),
         Language::PT => "Limite: ".to_string(),
-        Language::EL => "Όριο: ".to_string(),
+        Language::EL => "όριο: ".to_string(),
     }
 }
 
