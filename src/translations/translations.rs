@@ -977,7 +977,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::TR => "Hayal perestler için yapılmış güzel tema",
         Language::RU => "Милая тема для мечтателей",
         Language::PT => "Tema encantador feito para sonhadores",
-        Language::EL => "Όμορφο θέμα φτιαγμένο για ονειροπόλους",
+        Language::EL => "Φτιαγμένο για ονειροπόλους",
     }
 }
 
