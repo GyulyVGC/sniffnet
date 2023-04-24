@@ -22,3 +22,11 @@ pub fn inspect_translation(language: Language) -> &'static str {
         _ => "Inspect",
     }
 }
+
+pub fn connection_details_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Connection details",
+        Language::IT => "Dettagli della connessione",
+        _ => "Connection details",
+    }
+}

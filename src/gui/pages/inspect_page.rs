@@ -1,4 +1,5 @@
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
@@ -86,18 +87,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(get_flag_from_country_code(&key_val.1.country))
                 .push(Text::new("  "));
         }
-        let address_to_lookup = match key_val.1.traffic_type {
-            TrafficType::Outgoing => &key_val.0.address2,
-            _ => &key_val.0.address1,
-        };
-        entry_row = entry_row
-            //.push(Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font))
-            .push(Text::new(key_val.1.asn.name.clone()).font(font))
-            .push(Text::new(format!("{}",key_val.1.asn.number)).font(font));
+        // entry_row = entry_row
+        //     //.push(Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font))
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)
-                .on_press(Message::OpenLastSettings)
+                .on_press(Message::ShowModal(MyModal::ConnectionDetails(
+                    key_val.1.index,
+                )))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
         drop(info_traffic_lock);
@@ -134,8 +131,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                     Container::new(horizontal_space(30.0))
                 })
                 .push(Text::new(format!(
-                    "Showing {}-{} of {} total results",
-                    start_entry_num, end_entry_num, results_number
+                    "Showing {start_entry_num}-{end_entry_num} of {results_number} total results",
                 )))
                 .push(
                     if sniffer.page_number < f32::ceil(results_number as f32 / 15.0) as usize {
@@ -157,7 +153,7 @@ fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
     let font = get_font(sniffer.style);
 
     let text_input = TextInput::new("AAA", &sniffer.search)
-        .on_input(move |value| Message::Search(value))
+        .on_input(Message::Search)
         .padding([0, 0, 0, 10])
         .font(font)
         .width(Length::Fixed(100.0))

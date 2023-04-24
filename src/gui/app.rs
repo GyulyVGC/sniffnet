@@ -11,6 +11,7 @@ use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
@@ -75,6 +76,9 @@ impl Application for Sniffer {
             let overlay = match self.modal.unwrap() {
                 MyModal::Quit => get_exit_overlay(style, font, self.language),
                 MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
+                MyModal::ConnectionDetails(connection_index) => {
+                    connection_details_page(self, connection_index)
+                }
             };
 
             Modal::new(content, overlay)

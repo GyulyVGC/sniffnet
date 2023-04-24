@@ -52,7 +52,7 @@ pub fn get_searched_entries(
         .map
         .iter()
         //.filter(|(key, value)| value.country == search)
-        .map(|(key, value)| value.index)
+        .map(|key_val| key_val.1.index)
         .collect();
     let upper_bound = min(page_number * 15, all_results.len());
 

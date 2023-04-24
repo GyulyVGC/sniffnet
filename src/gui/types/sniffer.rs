@@ -74,6 +74,8 @@ pub struct Sniffer {
     pub search: String,
     /// Current page number of inspect search results
     pub page_number: usize,
+    /// Currently selected connection for inspection of its details
+    pub selected_connection: usize,
 }
 
 impl Sniffer {
@@ -108,6 +110,7 @@ impl Sniffer {
             unread_notifications: 0,
             search: String::new(),
             page_number: 1,
+            selected_connection: 0,
         }
     }
 
