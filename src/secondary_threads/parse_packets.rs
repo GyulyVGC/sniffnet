@@ -16,6 +16,8 @@ use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::countries::COUNTRY_MMDB;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
+use crate::utils::asn::ASN_MMDB;
+
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
@@ -47,6 +49,7 @@ pub fn parse_packets(
     let mut reported_packet;
 
     let country_db_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
+    let asn_db_reader = maxminddb::Reader::from_source(ASN_MMDB).unwrap();
 
     loop {
         match cap.next_packet() {
@@ -132,6 +135,7 @@ pub fn parse_packets(
                                 traffic_type,
                                 application_protocol,
                                 &country_db_reader,
+                                &asn_db_reader,
                             );
                             reported_packet = true;
                             // }

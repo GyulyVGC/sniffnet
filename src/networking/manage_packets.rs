@@ -7,8 +7,10 @@ use pcap::{Active, Capture, Device};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
+use crate::networking::types::asn::Asn;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::utils::asn::get_asn;
 use crate::utils::countries::get_country_code;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
@@ -92,6 +94,7 @@ pub fn modify_or_insert_in_map(
     traffic_type: TrafficType,
     application_protocol: AppProtocol,
     country_db_reader: &Reader<&[u8]>,
+    asn_db_reader: &Reader<&[u8]>,
 ) {
     let now = Local::now();
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
@@ -100,12 +103,15 @@ pub fn modify_or_insert_in_map(
         .expect("Error acquiring mutex\n\r");
     let len = info_traffic.map.len();
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
-    let country = if index == len {
-        // first occurrence of key => retrieve country code
-        get_country_code(traffic_type, &key, country_db_reader)
+    let (country, asn) = if index == len {
+        // first occurrence of key => retrieve country code and asn
+        (
+            get_country_code(traffic_type, &key, country_db_reader),
+            get_asn(traffic_type, &key, asn_db_reader),
+        )
     } else {
         // this key already occurred
-        String::new()
+        (String::new(), Asn::default())
     };
     let is_already_featured = info_traffic.favorites_last_interval.contains(&index);
     let mut update_favorites_featured = false;
@@ -129,6 +135,7 @@ pub fn modify_or_insert_in_map(
             very_long_address,
             traffic_type,
             country,
+            asn,
             index,
             is_favorite: false,
         });

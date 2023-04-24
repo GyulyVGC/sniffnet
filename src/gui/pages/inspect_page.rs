@@ -48,7 +48,6 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    body = body.push(search_bar(sniffer));
     let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
     col_report = col_report
         .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
@@ -87,13 +86,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(get_flag_from_country_code(&key_val.1.country))
                 .push(Text::new("  "));
         }
-        //     let address_to_lookup = match key_val.1.traffic_type {
-        //         TrafficType::Outgoing => &key_val.0.address2,
-        //         _ => &key_val.0.address1,
-        //     };
-        // entry_row = entry_row.push(
-        //             Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font)
-        //         );
+        let address_to_lookup = match key_val.1.traffic_type {
+            TrafficType::Outgoing => &key_val.0.address2,
+            _ => &key_val.0.address1,
+        };
+        entry_row = entry_row
+            //.push(Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font))
+            .push(Text::new(key_val.1.asn.name.clone()).font(font))
+            .push(Text::new(format!("{}",key_val.1.asn.number)).font(font));
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)

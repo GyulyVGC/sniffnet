@@ -34,7 +34,10 @@ impl button::StyleSheet for StyleTuple {
                 _ => colors.buttons,
             })),
             border_radius: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral) => 0.0,
+                StyleTuple(
+                    _,
+                    ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
+                ) => 0.0,
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }
@@ -76,7 +79,10 @@ impl button::StyleSheet for StyleTuple {
                 _ => mix_colors(colors.primary, colors.buttons),
             })),
             border_radius: match self {
-                StyleTuple(_, ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral) => 0.0,
+                StyleTuple(
+                    _,
+                    ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
+                ) => 0.0,
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }

@@ -6,6 +6,7 @@ use std::ops::Add;
 
 use chrono::{DateTime, Local};
 
+use crate::networking::types::asn::Asn;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
@@ -31,6 +32,8 @@ pub struct InfoAddressPortPair {
     pub traffic_type: TrafficType,
     /// Country of the remote IP address
     pub country: String,
+    /// Autonomous System of the remote IP address
+    pub asn: Asn,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
     /// Flag that indicates if this connection is marked as favourite
