@@ -7,8 +7,8 @@ use etherparse::PacketHeaders;
 use pcap::{Active, Capture, Device};
 
 use crate::networking::manage_packets::{
-    analyze_network_header, analyze_transport_header, is_broadcast_address, is_multicast_address,
-    modify_or_insert_in_map,
+    analyze_link_header, analyze_network_header, analyze_transport_header, is_broadcast_address,
+    is_multicast_address, modify_or_insert_in_map,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::filters::Filters;
@@ -68,6 +68,8 @@ pub fn parse_packets(
                         continue;
                     }
                     Ok(value) => {
+                        let mut mac_address1 = String::new();
+                        let mut mac_address2 = String::new();
                         let mut address1 = String::new();
                         let mut address2 = String::new();
                         network_protocol = IpVersion::Other;
@@ -76,6 +78,16 @@ pub fn parse_packets(
                         traffic_type = TrafficType::Other;
                         skip_packet = false;
                         reported_packet = false;
+
+                        analyze_link_header(
+                            value.link,
+                            &mut mac_address1,
+                            &mut mac_address2,
+                            &mut skip_packet,
+                        );
+                        if skip_packet {
+                            continue;
+                        }
 
                         analyze_network_header(
                             value.ip,
@@ -131,6 +143,8 @@ pub fn parse_packets(
                             modify_or_insert_in_map(
                                 info_traffic_mutex,
                                 key,
+                                mac_address1,
+                                mac_address2,
                                 exchanged_bytes,
                                 traffic_type,
                                 application_protocol,

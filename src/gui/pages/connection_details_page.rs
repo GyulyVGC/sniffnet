@@ -46,7 +46,6 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
         .align_items(Alignment::Start)
         .width(Length::Fill)
         .push(page_header(sniffer.style, sniffer.language))
-        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             Text::new(format!(
                 "Data exchanged: {} bytes ({} packets).",
@@ -63,10 +62,15 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
             ))
             .font(font),
         )
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(Text::new("Source").font(font).size(FONT_SIZE_TITLE))
-        .push(Text::new(format!("{} {}", key.address1, key.port1)).font(font))
+        .push(Text::new(format!("Socket address: {} {}", key.address1, key.port1)).font(font))
+        .push(Text::new(format!("MAC address: {}", val.mac_address1)).font(font))
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(Text::new("Destination").font(font).size(FONT_SIZE_TITLE))
-        .push(Text::new(format!("{} {}", key.address2, key.port2)).font(font))
+        .push(Text::new(format!("Socket address: {} {}", key.address2, key.port2)).font(font))
+        .push(Text::new(format!("MAC address: {}", val.mac_address2)).font(font))
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(Text::new(val.asn.name.clone()).font(font))
         .push(Text::new(format!("{}", val.asn.number)).font(font));
 

@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
-use etherparse::{IpHeader, TransportHeader};
+use etherparse::{Ethernet2Header, IpHeader, TransportHeader};
 use maxminddb::Reader;
 use pcap::{Active, Capture, Device};
 
@@ -13,6 +13,25 @@ use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::asn::get_asn;
 use crate::utils::countries::get_country_code;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
+
+/// This function analyzes the data link layer header passed as parameter and updates variables
+/// passed by reference on the basis of the packet header content.
+pub fn analyze_link_header(
+    link_header: Option<Ethernet2Header>,
+    mac_address1: &mut String,
+    mac_address2: &mut String,
+    skip_packet: &mut bool,
+) {
+    match link_header {
+        Some(header) => {
+            *mac_address1 = mac_from_dec_to_hex(header.source);
+            *mac_address2 = mac_from_dec_to_hex(header.destination);
+        }
+        _ => {
+            *skip_packet = true;
+        }
+    }
+}
 
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
@@ -90,6 +109,8 @@ pub fn analyze_transport_header(
 pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
+    mac_address1: String,
+    mac_address2: String,
     exchanged_bytes: u128,
     traffic_type: TrafficType,
     application_protocol: AppProtocol,
@@ -127,6 +148,8 @@ pub fn modify_or_insert_in_map(
             }
         })
         .or_insert(InfoAddressPortPair {
+            mac_address1,
+            mac_address2,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: now,
@@ -214,7 +237,16 @@ pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Ac
     }
 }
 
-// Test for this function at the end of this file (run with cargo test)
+/// Converts a MAC address in its hexadecimal form
+fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
+    let mut mac_hex = String::new();
+    for n in &mac_dec {
+        mac_hex.push_str(&format!("{:02x}:", n));
+    }
+    mac_hex.pop();
+    mac_hex
+}
+
 /// Function to convert a long decimal ipv6 address to a
 /// shorter compressed ipv6 address
 ///
@@ -228,7 +260,7 @@ pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Ac
 /// let result = ipv6_from_long_dec_to_short_hex([255,10,10,255,0,0,0,0,28,4,4,28,255,1,0,0]);
 /// assert_eq!(result, "ff0a:aff::1c04:41c:ff01:0".to_string());
 /// ```
-pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
+fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
     //from hex to dec, paying attention to the correct number of digits
     let mut ipv6_hex = String::new();
     for i in 0..=15 {
@@ -309,7 +341,19 @@ pub fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::networking::manage_packets::ipv6_from_long_dec_to_short_hex;
+    use crate::networking::manage_packets::{ipv6_from_long_dec_to_short_hex, mac_from_dec_to_hex};
+
+    #[test]
+    fn mac_simple_test() {
+        let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
+        assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
+    }
+
+    #[test]
+    fn mac_all_zero_test() {
+        let result = mac_from_dec_to_hex([0, 0, 0, 0, 0, 0]);
+        assert_eq!(result, "00:00:00:00:00:00".to_string());
+    }
 
     #[test]
     fn ipv6_simple_test() {
