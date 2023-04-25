@@ -87,8 +87,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(get_flag_from_country_code(&key_val.1.country))
                 .push(Text::new("  "));
         }
-        // entry_row = entry_row
-        //     //.push(Text::new(lookup_addr(&address_to_lookup.parse().unwrap()).unwrap()).font(font))
+
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)

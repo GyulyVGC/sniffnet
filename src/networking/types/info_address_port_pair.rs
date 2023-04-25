@@ -38,6 +38,8 @@ pub struct InfoAddressPortPair {
     pub country: String,
     /// Autonomous System of the remote IP address
     pub asn: Asn,
+    /// Reverse DNS lookup of the remote address. It is set to `None` if not requested yet.
+    pub r_dns: Option<String>,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
     /// Flag that indicates if this connection is marked as favourite

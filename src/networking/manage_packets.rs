@@ -159,6 +159,7 @@ pub fn modify_or_insert_in_map(
             traffic_type,
             country,
             asn,
+            r_dns: None,
             index,
             is_favorite: false,
         });

@@ -316,6 +316,8 @@ impl Sniffer {
         self.pcap_error = None;
         self.report_type = ReportType::MostRecent;
         self.unread_notifications = 0;
+        self.search = String::new();
+        self.page_number = 1;
         self.update(Message::HideModal)
     }
 

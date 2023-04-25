@@ -1,3 +1,4 @@
+use dns_lookup::lookup_addr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, Image, Row, Text, Tooltip};
 use iced::Length::Fixed;
@@ -5,6 +6,8 @@ use iced::{Alignment, Length};
 use iced_native::image::Handle;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space};
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -17,10 +20,11 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations::hide_translation;
 use crate::translations::translations_2::connection_details_translation;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
-use crate::{Language, Sniffer, StyleType};
+use crate::{InfoTraffic, Language, Sniffer, StyleType};
 
 pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -35,17 +39,26 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
     let val = key_val.1.clone();
     drop(info_traffic_lock);
 
-    // let address_to_lookup = match key_val.1.traffic_type {
-    //     TrafficType::Outgoing => &key_val.0.address2,
-    //     _ => &key_val.0.address1,
-    // };
+    if val.r_dns.is_none() {
+        let key2 = key.clone();
+        let val2 = val.clone();
+        let info_traffic = sniffer.info_traffic.clone();
+        thread::Builder::new()
+            .name("thread_reverse_dns_lookup".to_string())
+            .spawn(move || {
+                reverse_dns_lookup(info_traffic, key2, val2);
+            })
+            .unwrap();
+    }
 
-    let content = Column::new()
+    let header_and_content = Column::new()
+        .width(Length::Fill)
+        .push(page_header(sniffer.style, sniffer.language));
+    let mut content = Column::new()
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Start)
         .width(Length::Fill)
-        .push(page_header(sniffer.style, sniffer.language))
         .push(
             Text::new(format!(
                 "Data exchanged: {} bytes ({} packets).",
@@ -74,7 +87,13 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
         .push(Text::new(val.asn.name.clone()).font(font))
         .push(Text::new(format!("{}", val.asn.number)).font(font));
 
-    Container::new(content)
+    if let Some(r_dns) = val.r_dns {
+        if !r_dns.is_empty() {
+            content = content.push(Text::new(format!("{}", r_dns)).font(font));
+        }
+    }
+
+    Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
         .height(Length::Fixed(500.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
@@ -85,7 +104,6 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
 fn page_header(style: StyleType, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
-    //tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -129,4 +147,40 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
+}
+
+fn reverse_dns_lookup(
+    info_traffic: Arc<Mutex<InfoTraffic>>,
+    key: AddressPortPair,
+    val: InfoAddressPortPair,
+) {
+    // Assign the r_dns field of this entry to an empty string.
+    // Useful to NOT perform again a rDNS lookup for this entry.
+    info_traffic
+        .lock()
+        .unwrap()
+        .map
+        .entry(key.clone())
+        .and_modify(|info| {
+            info.r_dns = Some(String::new());
+        });
+
+    let address_to_lookup = match val.traffic_type {
+        TrafficType::Outgoing => key.address2.clone(),
+        _ => key.address1.clone(),
+    };
+
+    let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
+    if let Ok(r_dns) = lookup_result {
+        if r_dns.ne(&address_to_lookup) {
+            info_traffic
+                .lock()
+                .unwrap()
+                .map
+                .entry(key)
+                .and_modify(|info| {
+                    info.r_dns = Some(r_dns);
+                });
+        }
+    }
 }
