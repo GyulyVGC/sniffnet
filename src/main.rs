@@ -91,8 +91,6 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    gui::styles::fonts::load_fonts();
-
     print_cli_welcome_message();
 
     Sniffer::run(Settings {
@@ -119,7 +117,7 @@ pub fn main() -> iced::Result {
             newer_release_available1,
         ),
         default_font: Some(include_bytes!(
-            "../resources/fonts/sarasa/subset/sarasa-mono-subset-bold.ttf"
+            "../resources/fonts/noto-sans-regular.ttf"
         )),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,

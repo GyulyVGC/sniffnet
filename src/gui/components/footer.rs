@@ -8,7 +8,7 @@ use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
 use iced_native::widget::tooltip::Position;
 
-use crate::gui::styles::fonts::get_symbols_font;
+use crate::gui::styles::fonts;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
@@ -48,7 +48,7 @@ pub fn footer(
                     Text::new("❤")
                         .width(Length::Fixed(14.0))
                         .size(FONT_SIZE_FOOTER + 4.0)
-                        .font(get_symbols_font())
+                        .font(fonts::NOTO_SANS_SYMBOLS)
                 )
                 .push(
                     Text::new(" by Giuliano Bellini")
