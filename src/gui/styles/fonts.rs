@@ -1,8 +1,7 @@
 use iced::Font;
 use once_cell::sync::OnceCell;
-use plotters::style::RGBColor;
 use std::collections::HashMap;
-
+use plotters::style::RGBColor;
 use crate::translations::types::language::Language;
 
 pub type FontsMap = HashMap<&'static str, Font>;
@@ -28,12 +27,9 @@ const FONT_METADATA: [FontMetadata; 9] = [
 
 async fn download_font(base_url: &str, metadata: &FontMetadata) -> Result<Font, reqwest::Error> {
     let url = format!("{}/{}", base_url, metadata.file);
-    let client = reqwest::Client::builder().redirect(reqwest::redirect::Policy::none()).build()?;
-    let response = client.get(url).send().await?;
-    let content_type = response.headers().get(reqwest::header::CONTENT_TYPE).map(|ct| ct.to_str().unwrap_or("")).unwrap_or("");
+    let response = reqwest::get(url).await?;
 
-    if response.status() != reqwest::StatusCode::OK
-    || content_type != "application/octet-stream" {
+    if response.status() == reqwest::StatusCode::NOT_FOUND {
         return Ok(Font::Default);
     }
 
@@ -41,7 +37,7 @@ async fn download_font(base_url: &str, metadata: &FontMetadata) -> Result<Font, 
     let font_data = Box::new(bytes);
     let font = Font::External {
         name: metadata.name,
-        bytes: &*Box::leak(font_data)
+        bytes: &*Box::leak(font_data),
     };
     Ok(font)
 }

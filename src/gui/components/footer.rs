@@ -28,8 +28,6 @@ pub fn footer(
     let release_details_row =
         get_release_details(language, style, font_footer, newer_release_available);
 
-    let symbols_font = get_symbols_font();
-
     let footer_row = Row::new()
         .width(Length::Fill)
         .padding([0, 20])
@@ -49,11 +47,8 @@ pub fn footer(
                 .push(
                     Text::new("❤")
                         .width(Length::Fixed(14.0))
-                        .size(FONT_SIZE_FOOTER + match symbols_font {
-                            Font::Default => 0.0,
-                            _ => 4.0
-                        })
-                        .font(symbols_font)
+                        .size(FONT_SIZE_FOOTER + 4.0)
+                        .font(get_symbols_font())
                 )
                 .push(
                     Text::new(" by Giuliano Bellini")
