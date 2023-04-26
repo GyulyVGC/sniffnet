@@ -172,15 +172,13 @@ fn reverse_dns_lookup(
 
     let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
     if let Ok(r_dns) = lookup_result {
-        if r_dns.ne(&address_to_lookup) {
-            info_traffic
-                .lock()
-                .unwrap()
-                .map
-                .entry(key)
-                .and_modify(|info| {
-                    info.r_dns = Some(r_dns);
-                });
-        }
+        info_traffic
+            .lock()
+            .unwrap()
+            .map
+            .entry(key)
+            .and_modify(|info| {
+                info.r_dns = Some(r_dns);
+            });
     }
 }

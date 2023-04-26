@@ -22,8 +22,9 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
-use crate::report::get_report_entries::get_report_entries;
+use crate::report::get_report_entries::{get_app_entries, get_report_entries};
 use crate::translations::translations::{
     error_translation, filtered_application_translation, filtered_bytes_translation,
     filtered_packets_translation, no_addresses_translation, no_favorites_translation,
@@ -35,7 +36,7 @@ use crate::utils::formatted_strings::{
     get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
     get_percentage_string,
 };
-use crate::{AppProtocol, Language, ReportType, RunningPage, StyleType};
+use crate::{AppProtocol, ChartType, Language, ReportType, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -122,6 +123,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         num_favorites,
                         sniffer.style,
                         sniffer.language,
+                        sniffer.traffic_chart.chart_type,
                     ),
                     move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
                 );
@@ -276,47 +278,65 @@ fn lazy_row_report(
     sniffer: &Sniffer,
 ) -> Row<'static, Message> {
     let font = get_font(sniffer.style);
-    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    let filtered_packets =
-        info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets;
-    drop(info_traffic_lock);
+    // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+    // let filtered_packets =
+    //     info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets;
+    // drop(info_traffic_lock);
+
     // let row_radio_report =
     //     report_radios(active_radio_report, font, sniffer.style, sniffer.language);
+
+    let chart_type = sniffer.traffic_chart.chart_type;
     let mut row_host_app = Row::new().height(Length::Fill).width(Length::Fill);
     let width_host = 500.0;
     let mut col_host = Column::new().width(Length::Fixed(width_host));
     let width_app = 500.0;
     let mut col_app = Column::new().width(Length::Fixed(width_app));
 
-    // let max_length_bars = col_host.hei
-
-    for (app, packets) in &sniffer.info_traffic.lock().unwrap().app_protocols {
+    let entries = get_app_entries(&sniffer.info_traffic, chart_type);
+    for (app, data_info) in &entries {
+        let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
+            width_app,
+            chart_type,
+            entries.get(0).unwrap().1.clone(),
+            data_info,
+        );
         col_app = col_app
             .push(
                 Row::new()
-                    .push(Text::new(app.to_string()))
+                    .push(Text::new(format!("{:?}", app)))
                     .push(horizontal_space(Length::FillPortion(1)))
-                    .push(Text::new(packets.to_string())),
+                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
+                        data_info.tot_packets().to_string()
+                    } else {
+                        let mut bytes_string =
+                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
+                        bytes_string.push('B');
+                        bytes_string
+                    })),
             )
             .push(
                 Row::new()
                     .push(
                         Row::new()
                             .padding(0)
-                            .width(Length::Fixed(
-                                width_app * *packets as f32 / filtered_packets as f32,
-                            ))
+                            .width(Length::Fixed(incoming_bar_len))
                             .push(Rule::horizontal(1).style(<StyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Incoming),
                             ))),
                     )
-                    .push(Row::new().padding(0).width(Length::Fixed(30.0)).push(
-                        Rule::horizontal(1).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                            StyleTuple(sniffer.style, ElementType::Outgoing),
-                        )),
-                    )),
+                    .push(
+                        Row::new()
+                            .padding(0)
+                            .width(Length::Fixed(outgoing_bar_len))
+                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                                iced::theme::Rule,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                            ))),
+                    ),
             )
             .push(vertical_space(Length::Fixed(10.0)));
     }
@@ -447,19 +467,19 @@ fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column
     if sniffer.filters.application.eq(&AppProtocol::Other) {
         col_packets = col_packets
             .push(Text::new(" "))
-            .push(filtered_application_translation(sniffer.language).font(font))
-            .push(
-                Scrollable::new(
-                    Text::new(get_app_count_string(
-                        &sniffer.info_traffic.lock().unwrap().app_protocols,
-                        filtered,
-                    ))
-                    .font(font),
-                )
-                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
-            );
+            .push(filtered_application_translation(sniffer.language).font(font));
+        // .push(
+        //     Scrollable::new(
+        //         Text::new(get_app_count_string(
+        //             &sniffer.info_traffic.lock().unwrap().app_protocols,
+        //             filtered,
+        //         ))
+        //         .font(font),
+        //     )
+        //     .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+        //         StyleTuple(sniffer.style, ElementType::Standard),
+        //     )),
+        // );
     }
     col_packets
 }
@@ -487,4 +507,22 @@ fn get_button_open_report(
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
+}
+
+fn get_bars_length(
+    tot_width: f32,
+    chart_type: ChartType,
+    first_entry: DataInfo,
+    data_info: &DataInfo,
+) -> (f32, f32) {
+    return match chart_type {
+        ChartType::Packets => (
+            tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
+            tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
+        ),
+        ChartType::Bytes => (
+            tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
+            tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
+        ),
+    };
 }

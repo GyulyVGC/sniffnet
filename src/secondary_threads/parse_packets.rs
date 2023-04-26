@@ -11,6 +11,7 @@ use crate::networking::manage_packets::{
     is_multicast_address, modify_or_insert_in_map,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::countries::COUNTRY_MMDB;
@@ -167,8 +168,30 @@ pub fn parse_packets(
                             info_traffic
                                 .app_protocols
                                 .entry(application_protocol)
-                                .and_modify(|n| *n += 1)
-                                .or_insert(1);
+                                .and_modify(|data_info| {
+                                    if traffic_type == TrafficType::Outgoing {
+                                        data_info.outgoing_packets += 1;
+                                        data_info.outgoing_bytes += exchanged_bytes;
+                                    } else {
+                                        data_info.incoming_packets += 1;
+                                        data_info.incoming_bytes += exchanged_bytes;
+                                    }
+                                })
+                                .or_insert(if traffic_type == TrafficType::Outgoing {
+                                    DataInfo {
+                                        incoming_packets: 0,
+                                        outgoing_packets: 1,
+                                        incoming_bytes: 0,
+                                        outgoing_bytes: exchanged_bytes,
+                                    }
+                                } else {
+                                    DataInfo {
+                                        incoming_packets: 1,
+                                        outgoing_packets: 0,
+                                        incoming_bytes: exchanged_bytes,
+                                        outgoing_bytes: 0,
+                                    }
+                                });
 
                             if traffic_type == TrafficType::Outgoing {
                                 //increment number of sent packets and bytes

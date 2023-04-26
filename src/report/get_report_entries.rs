@@ -1,16 +1,17 @@
-use std::cmp::min;
+use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::{InfoTraffic, ReportType};
+use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
 
 pub fn get_report_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     report_type: ReportType,
 ) -> Vec<(AddressPortPair, InfoAddressPortPair)> {
-    let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&AddressPortPair, &InfoAddressPortPair)> = Vec::new();
+    let info_traffic_lock = info_traffic.lock().unwrap();
     match report_type {
         ReportType::MostRecent => {
             sorted_vec = info_traffic_lock.map.iter().collect();
@@ -60,4 +61,32 @@ pub fn get_searched_entries(
         all_results[(page_number - 1) * 15..upper_bound].to_vec(),
         all_results.len(),
     )
+}
+
+pub fn get_app_entries(
+    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    chart_type: ChartType,
+) -> Vec<(AppProtocol, DataInfo)> {
+    let mut sorted_vec = Vec::new();
+    let info_traffic_lock = info_traffic.lock().unwrap();
+    sorted_vec = info_traffic_lock.app_protocols.iter().collect();
+
+    sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
+        if p1.eq(&AppProtocol::Other) {
+            Ordering::Greater
+        } else if p2.eq(&AppProtocol::Other) {
+            Ordering::Less
+        } else {
+            match chart_type {
+                ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
+                ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
+            }
+        }
+    });
+
+    let n_entry = min(sorted_vec.len(), 15);
+    sorted_vec[0..n_entry]
+        .iter()
+        .map(|e| (e.0.clone(), e.1.clone()))
+        .collect()
 }

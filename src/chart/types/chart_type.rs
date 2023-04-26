@@ -2,7 +2,7 @@ use crate::translations::translations::{bytes_chart_translation, packets_chart_t
 use crate::Language;
 
 /// Enum representing the possible kind of chart displayed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChartType {
     Packets,
     Bytes,
