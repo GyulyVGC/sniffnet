@@ -12,4 +12,6 @@ pub enum ElementType {
     Alert,
     Tooltip,
     Badge,
+    Incoming,
+    Outgoing,
 }
