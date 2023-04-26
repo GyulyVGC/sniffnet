@@ -18,10 +18,9 @@ use crate::translations::translations::{
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
-use crate::translations::types::language::Language;
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
@@ -53,7 +52,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new()
                 .push(get_palette_container(
                     sniffer.style,
-                    sniffer.language,
                     YETI_NIGHT,
                     "Yeti Night".to_string(),
                     yeti_night_translation(sniffer.language).to_string(),
@@ -62,7 +60,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(horizontal_space(Length::Fixed(33.0)))
                 .push(get_palette_container(
                     sniffer.style,
-                    sniffer.language,
                     YETI_DAY,
                     "Yeti Day".to_string(),
                     yeti_day_translation(sniffer.language).to_string(),
@@ -74,7 +71,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new()
                 .push(get_palette_container(
                     sniffer.style,
-                    sniffer.language,
                     DEEP_SEA,
                     "Deep Sea".to_string(),
                     deep_sea_translation(sniffer.language).to_string(),
@@ -83,7 +79,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(horizontal_space(Length::Fixed(33.0)))
                 .push(get_palette_container(
                     sniffer.style,
-                    sniffer.language,
                     MON_AMOUR,
                     "Mon Amour".to_string(),
                     mon_amour_translation(sniffer.language).to_string(),
@@ -101,13 +96,12 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
 
 fn get_palette_container(
     style: StyleType,
-    language: Language,
     picture: &[u8],
     name: String,
     description: String,
     on_press: StyleType,
 ) -> Button<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let content = Column::new()
         .width(Length::Fill)
         .align_items(Alignment::Center)

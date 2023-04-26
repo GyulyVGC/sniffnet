@@ -25,7 +25,7 @@ use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
 
     let col_adapter = get_col_adapter(sniffer, font);
 
@@ -129,7 +129,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     //tooltip.push_str(" [⏎]");
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
-        .font(get_font(style, language))
+        .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))

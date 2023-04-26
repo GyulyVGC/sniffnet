@@ -3,10 +3,8 @@
 use iced::{Color, Font};
 use plotters::style::RGBColor;
 
-use crate::gui::styles::fonts;
 use crate::gui::styles::types::palette::{to_rgb_color, Palette};
-use crate::{font_selector, get_colors, StyleType};
-use crate::translations::types::language::Language;
+use crate::{get_colors, StyleType};
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -163,14 +161,23 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     },
 };
 
-pub fn get_font(style: StyleType, language: Language) -> Font {
-    let color_font = to_rgb_color(get_colors(style).text_body);
-    font_selector!(color_font, language)
+pub const SARASA_MONO_SC_BOLD: Font = Font::External {
+    name: "sarasa-mono-sc-bold",
+    bytes: include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf"),
+};
+
+pub fn get_font(style: StyleType) -> Font {
+    match to_rgb_color(get_colors(style).text_body) {
+        RGBColor(255, 255, 255) => Font::Default,
+        _ => SARASA_MONO_SC_BOLD,
+    }
 }
 
-pub fn get_font_headers(style: StyleType, language: Language) -> Font {
-    let color_font = to_rgb_color(get_colors(style).text_headers);
-    font_selector!(color_font, language)
+pub fn get_font_headers(style: StyleType) -> Font {
+    match to_rgb_color(get_colors(style).text_headers) {
+        RGBColor(255, 255, 255) => Font::Default,
+        _ => SARASA_MONO_SC_BOLD,
+    }
 }
 
 pub fn get_color_mix_chart(style: StyleType) -> f64 {
@@ -183,7 +190,7 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 //font to display icons
 pub const ICONS: Font = Font::External {
     name: "icons",
-    bytes: include_bytes!("../../../resources/fonts/icons.ttf"),
+    bytes: include_bytes!("../../../resources/fonts/subset/icons.ttf"),
 };
 
 // palettes pictures

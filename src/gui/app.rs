@@ -49,8 +49,7 @@ impl Application for Sniffer {
     fn view(&self) -> Element<Message> {
         let status = *self.status_pair.0.lock().unwrap();
         let style = self.style;
-        let language = self.language;
-        let font = get_font(style, language);
+        let font = get_font(style);
 
         let header = match status {
             Status::Init => header(style, false, self.language, self.last_opened_setting),

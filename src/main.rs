@@ -117,7 +117,7 @@ pub fn main() -> iced::Result {
             newer_release_available1,
         ),
         default_font: Some(include_bytes!(
-            "../resources/fonts/noto-sans-regular.ttf"
+            "../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf"
         )),
         default_text_size: FONT_SIZE_BODY,
         text_multithreading: true,

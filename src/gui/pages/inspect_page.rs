@@ -10,7 +10,7 @@
 //
 // /// Computes the body of gui inspect page
 // pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
-//     //let font = get_font(sniffer.style, sniffer.language);
+//     //let font = get_font(sniffer.style);
 //
 //     let body = Column::new()
 //         .width(Length::Fill)

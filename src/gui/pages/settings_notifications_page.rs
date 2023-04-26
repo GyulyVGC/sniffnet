@@ -30,7 +30,7 @@ use crate::translations::translations::{
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
     let mut content = Column::new()
         .width(Length::Fill)
         .push(settings_header(sniffer.style, sniffer.language))
@@ -108,7 +108,7 @@ fn get_packets_notify(
     language: Language,
     style: StyleType,
 ) -> Column<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let checkbox = Checkbox::new(
         packets_threshold_translation(language),
         packets_notification.threshold.is_some(),
@@ -183,7 +183,7 @@ fn get_bytes_notify(
     language: Language,
     style: StyleType,
 ) -> Column<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let checkbox = Checkbox::new(
         bytes_threshold_translation(language),
         bytes_notification.threshold.is_some(),
@@ -258,7 +258,7 @@ fn get_favorite_notify(
     language: Language,
     style: StyleType,
 ) -> Column<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let checkbox = Checkbox::new(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
@@ -316,7 +316,7 @@ fn input_group_packets(
     style: StyleType,
     language: Language,
 ) -> Container<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
         .spacing(10)
@@ -360,7 +360,7 @@ fn input_group_bytes(
     style: StyleType,
     language: Language,
 ) -> Container<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let mut info_str = per_second_translation(language).to_string();
     info_str.push_str(specify_multiples_translation(language));
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
@@ -401,7 +401,7 @@ fn input_group_bytes(
 }
 
 fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     Container::new(
         Column::new()
             .spacing(5)
@@ -442,7 +442,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
 }
 
 pub fn settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
-    let font = get_font(style, language);
+    let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
     Container::new(
@@ -450,7 +450,7 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new(settings_translation(language))
-                    .font(get_font_headers(style, language))
+                    .font(get_font_headers(style))
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),

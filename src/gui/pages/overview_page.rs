@@ -15,7 +15,7 @@ use thousands::Separable;
 
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
-use crate::gui::styles::style_constants::{get_font, ICONS};
+use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -39,7 +39,7 @@ use crate::{AppProtocol, Language, ReportType, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -275,7 +275,7 @@ fn lazy_row_report(
     num_favorites: usize,
     sniffer: &Sniffer,
 ) -> Row<'static, Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
     let row_radio_report =
         report_radios(active_radio_report, font, sniffer.style, sniffer.language);
     let mut col_report = Column::new()
@@ -308,7 +308,7 @@ fn lazy_row_report(
                     key_val.1.print_gui()
                 ))
                 .style(iced::theme::Text::Color(entry_color))
-                .font(get_font(sniffer.style, sniffer.language)),
+                .font(SARASA_MONO_SC_BOLD),
             );
             if key_val.1.country.is_empty() {
                 entry_row = entry_row
@@ -316,7 +316,7 @@ fn lazy_row_report(
                         Text::new("?")
                             .width(Length::Fixed(FLAGS_WIDTH))
                             .style(iced::theme::Text::Color(entry_color))
-                            .font(get_font(sniffer.style, sniffer.language)),
+                            .font(SARASA_MONO_SC_BOLD),
                     )
                     .push(Text::new("    "));
             } else {
@@ -376,7 +376,7 @@ fn lazy_row_report(
 }
 
 fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column<'static, Message> {
-    let font = get_font(sniffer.style, sniffer.language);
+    let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let mut col_packets = Column::new()
