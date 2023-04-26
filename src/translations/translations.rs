@@ -494,7 +494,7 @@ pub fn filtered_packets_translation(
         }
         Language::PT => {
             format!("Pacotes filtrados:\n   {filtered} ({percentage} do total)")
-        },
+        }
         Language::FA => format!("بسته های صاف شده\n   {filtered} ({percentage} از مجموع)"),
     })
 }
@@ -529,7 +529,7 @@ pub fn filtered_bytes_translation(
         }
         Language::PT => {
             format!("Bytes filtrados:\n   {filtered} ({percentage} do total)")
-        },
+        }
         Language::FA => format!("بایت های صاف شده\n   {filtered} ({percentage} از مجموع)"),
     })
 }
@@ -1475,7 +1475,7 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
         Language::PT => {
             "Nada para ver neste momento...\n\n\
                                 Quando receber uma notificação, ela será mostrada aqui"
-        },
+        }
         Language::FA => {
             "در حال حاضر هیچ چیزی برای دیدن نیست...\n\n\
                                  وقتی شما اعلانی دریافت می کنید، در اینجا نمایش داده خواهد شد"

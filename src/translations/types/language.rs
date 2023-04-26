@@ -54,12 +54,7 @@ impl Language {
         Language::TR,
         Language::FA,
     ];
-    pub(crate) const COL3: [Language; 4] = [
-        Language::ES,
-        Language::KO,
-        Language::RO,
-        Language::UK,
-    ];
+    pub(crate) const COL3: [Language; 4] = [Language::ES, Language::KO, Language::RO, Language::UK];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
