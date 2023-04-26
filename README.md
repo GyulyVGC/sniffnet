@@ -15,7 +15,6 @@ Multithreaded, cross-platform, reliable
 
 Graphical interface translated in:<br>
 🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
-[Would you like to add support for your native language?](https://github.com/GyulyVGC/sniffnet/issues/60)
 
 </div>
 
@@ -72,7 +71,6 @@ cargo install sniffnet
 
 </details>
 
-<!---
 
 <details>
 
@@ -86,7 +84,6 @@ brew install sniffnet
     
 </details>
 
---->
 
 ## Required dependencies
 
