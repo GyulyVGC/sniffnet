@@ -175,6 +175,7 @@ mod tests {
             tot_received_bytes: tot_received + 2222,
             tot_sent_packets: tot_sent + 3333,
             tot_received_packets: tot_received + 4444,
+            dropped_packets: 0,
             tot_sent_bytes_prev: tot_sent,
             tot_received_bytes_prev: tot_received,
             tot_sent_packets_prev: tot_sent,

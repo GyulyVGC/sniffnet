@@ -242,10 +242,10 @@ fn bytes_notification_log(
         &(logged_notification.threshold / logged_notification.byte_multiple.get_multiplier())
             .to_string(),
     );
-    threshold_str.push_str(&format!(
-        " {}",
-        logged_notification.byte_multiple.get_char()
-    ));
+    let char_multiple = logged_notification.byte_multiple.get_char();
+    if !char_multiple.is_empty() {
+        threshold_str.push_str(&format!(" {char_multiple}",));
+    }
     threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));

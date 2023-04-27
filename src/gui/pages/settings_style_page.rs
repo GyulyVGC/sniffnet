@@ -57,7 +57,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     yeti_night_translation(sniffer.language).to_string(),
                     Night,
                 ))
-                .push(horizontal_space(Length::Fixed(33.0)))
+                .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     sniffer.style,
                     YETI_DAY,
@@ -76,7 +76,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     deep_sea_translation(sniffer.language).to_string(),
                     DeepSea,
                 ))
-                .push(horizontal_space(Length::Fixed(33.0)))
+                .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     sniffer.style,
                     MON_AMOUR,
@@ -112,7 +112,7 @@ fn get_palette_container(
 
     Button::new(content)
         .height(Length::Fixed(130.0))
-        .width(Length::Fixed(360.0))
+        .width(Length::Fixed(380.0))
         .padding(5)
         .style(
             StyleTuple(
