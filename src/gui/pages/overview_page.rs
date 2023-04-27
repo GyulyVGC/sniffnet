@@ -28,11 +28,11 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::report::get_report_entries::{get_app_entries, get_report_entries};
 use crate::translations::translations::{
-    bytes_chart_translation, error_translation, filtered_application_translation,
-    filtered_bytes_no_percentage_translation, filtered_bytes_translation,
-    filtered_packets_translation, network_adapter_translation, no_addresses_translation,
-    no_favorites_translation, packets_chart_translation, some_observed_translation,
-    traffic_rate_translation, waiting_translation,
+    application_protocol_translation, bytes_chart_translation, error_translation,
+    filtered_application_translation, filtered_bytes_no_percentage_translation,
+    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
+    no_addresses_translation, no_favorites_translation, packets_chart_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation,
@@ -316,11 +316,21 @@ fn lazy_row_report(
     //     report_radios(active_radio_report, font, sniffer.style, sniffer.language);
 
     let chart_type = sniffer.traffic_chart.chart_type;
-    let mut row_host_app = Row::new().height(Length::Fill).width(Length::Fill);
-    let width_host = 500.0;
+    let mut row_host_app = Row::new()
+        .padding(10)
+        .height(Length::Fill)
+        .width(Length::Fill);
+    let width_host = 700.0;
     let mut col_host = Column::new().width(Length::Fixed(width_host));
-    let width_app = 200.0;
-    let mut col_app = Column::new().width(Length::Fixed(width_app));
+    let width_app = 250.0;
+    let mut col_app = Column::new()
+        .width(Length::Fixed(width_app))
+        .push(
+            Text::new(application_protocol_translation(sniffer.language))
+                .font(font)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(15.0)));
 
     let entries = get_app_entries(&sniffer.info_traffic, chart_type);
     for (app, data_info) in &entries {
@@ -460,10 +470,22 @@ fn lazy_row_report(
     //     col_report = col_report.push(Container::new(
     //     ));
     // };
-    row_host_app = row_host_app.push(col_host).push(col_app);
+    row_host_app =
+        row_host_app
+            .push(col_host)
+            .push(
+                Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+            )
+            .push(
+                Scrollable::new(Container::new(col_app).width(Length::Fixed(width_app + 40.0)))
+                    .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                        StyleTuple(sniffer.style, ElementType::Standard),
+                    )),
+            );
     Row::new().push(
         Container::new(row_host_app)
-            .padding([0, 5, 5, 5])
             .height(Length::Fill)
             .width(Length::Fixed(1080.0))
             .style(<StyleTuple as Into<iced::theme::Container>>::into(

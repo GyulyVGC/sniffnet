@@ -341,7 +341,7 @@ pub fn network_adapter_translation(language: Language, adapter: &str) -> Text<'s
         Language::EN => format!("Network adapter:\n   {adapter}"),
         Language::IT => format!("Adattatore di rete:\n   {adapter}"),
         Language::FR => format!("Carte réseau :\n   {adapter}"),
-        Language::ES => format!("Adaptador de red :\n   {adapter}"),
+        Language::ES => format!("Adaptador de red:\n   {adapter}"),
         Language::PL => format!("Adapter sieciowy:\n   {adapter}"),
         Language::DE => format!("Netzwerkadapter:\n   {adapter}"),
         Language::UK => format!("Мережквий адаптер:\n   {adapter}"),
