@@ -1,4 +1,6 @@
-use crate::translations::translations::{bytes_chart_translation, packets_chart_translation};
+use crate::translations::translations::{
+    bytes_chart_translation, bytes_translation, packets_chart_translation, packets_translation,
+};
 use crate::Language;
 
 /// Enum representing the possible kind of chart displayed.
@@ -13,8 +15,8 @@ impl ChartType {
 
     pub fn get_radio_label(&self, language: Language) -> &str {
         match self {
-            ChartType::Packets => packets_chart_translation(language),
-            ChartType::Bytes => bytes_chart_translation(language),
+            ChartType::Packets => packets_translation(language),
+            ChartType::Bytes => bytes_translation(language),
         }
     }
 }

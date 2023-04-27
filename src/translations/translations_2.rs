@@ -1,5 +1,7 @@
 #![allow(clippy::match_same_arms)]
+
 use crate::Language;
+use iced::widget::Text;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
@@ -29,4 +31,24 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::IT => "Dettagli della connessione",
         _ => "Connection details",
     }
+}
+
+pub fn dropped_packets_translation(
+    language: Language,
+    dropped: &str,
+    percentage: &str,
+) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => format!("Dropped packets:\n   {dropped} ({percentage} of the total)"),
+        Language::IT => format!("Pacchetti mancati:\n   {dropped} ({percentage} del totale)"),
+        _ => format!("Dropped packets:\n   {dropped} ({percentage} of the total)"),
+    })
+}
+
+pub fn data_representation_translation(language: Language) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => format!("Data representation:"),
+        Language::IT => format!("Rappresentazione dei dati:"),
+        _ => format!("Data representation:"),
+    })
 }

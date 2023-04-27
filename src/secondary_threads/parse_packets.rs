@@ -162,6 +162,10 @@ pub fn parse_packets(
                         //increment number of sniffed packets and bytes
                         info_traffic.all_packets += 1;
                         info_traffic.all_bytes += exchanged_bytes;
+                        // update dropped packets number
+                        if let Ok(stats) = cap.stats() {
+                            info_traffic.dropped_packets = stats.dropped;
+                        }
 
                         if reported_packet {
                             //increment the packet count for the sniffed app protocol

@@ -142,19 +142,19 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
 
 pub fn traffic_rate_translation(language: Language) -> Text<'static> {
     Text::new(match language {
-        Language::EN => "Traffic rate:",
-        Language::IT => "Intensità del traffico:",
-        Language::FR => "Fréquence du traffic:",
-        Language::ES => "Tasa de tráfico:",
-        Language::PL => "Prędkość ruchu:",
-        Language::DE => "Daten Frequenz:",
-        Language::UK => "Швидкість руху:",
-        Language::ZH => "网络速率图:",
-        Language::RO => "Rata de trafic:",
-        Language::KO => "트레픽 속도:",
-        Language::TR => "Trafik oranı:",
-        Language::RU => "Cкорость трафика:",
-        Language::PT => "Taxa de tráfego:",
+        Language::EN => "Traffic rate",
+        Language::IT => "Intensità del traffico",
+        Language::FR => "Fréquence du traffic",
+        Language::ES => "Tasa de tráfico",
+        Language::PL => "Prędkość ruchu",
+        Language::DE => "Daten Frequenz",
+        Language::UK => "Швидкість руху",
+        Language::ZH => "网络速率图",
+        Language::RO => "Rata de trafic",
+        Language::KO => "트레픽 속도",
+        Language::TR => "Trafik oranı",
+        Language::RU => "Cкорость трафика",
+        Language::PT => "Taxa de tráfego",
     })
 }
 
@@ -300,6 +300,24 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::RU => "Скрыть",
         Language::PT => "Esconder",
     }
+}
+
+pub fn network_adapter_translation(language: Language, adapter: &str) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => format!("Network adapter:\n   {adapter}"),
+        Language::IT => format!("Adattatore di rete:\n   {adapter}"),
+        Language::FR => format!("Carte réseau :\n   {adapter}"),
+        Language::ES => format!("Adaptador de red :\n   {adapter}"),
+        Language::PL => format!("Adapter sieciowy:\n   {adapter}"),
+        Language::DE => format!("Netzwerkadapter:\n   {adapter}"),
+        Language::UK => format!("Мережквий адаптер:\n   {adapter}"),
+        Language::ZH => format!("网络适配器:\n   {adapter}"),
+        Language::RO => format!("Adaptor de rețea:\n   {adapter}"),
+        Language::KO => format!("네트워크 어뎁터:\n   {adapter}"),
+        Language::TR => format!("Ağ adaptörü:\n   {adapter}"),
+        Language::RU => format!("Сетевой интерфейс:\n   {adapter}"),
+        Language::PT => format!("Adaptador de rede:\n   {adapter}"),
+    })
 }
 
 pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'static> {
@@ -506,6 +524,39 @@ pub fn filtered_bytes_translation(
     })
 }
 
+pub fn filtered_bytes_no_percentage_translation(
+    language: Language,
+    filtered: &str,
+) -> Text<'static> {
+    Text::new(match language {
+        Language::EN => format!("Filtered bytes:\n   {filtered}"),
+        Language::IT => format!("Byte filtrati:\n   {filtered}"),
+        Language::FR => format!("Octets filtrés:\n   {filtered}"),
+        Language::ES => format!("Bytes filtrados:\n   {filtered}"),
+        Language::PL => format!("Przechwycone bajty:\n   {filtered}"),
+        Language::DE => format!("Gefilterte Bytes:\n   {filtered}"),
+        Language::UK => {
+            format!("Відфільтровані байти:\n   {filtered}")
+        }
+        Language::ZH => {
+            format!("目标网络流量计数:\n   {filtered}")
+        }
+        Language::RO => {
+            format!("Octeți filtrați:\n   {filtered}")
+        }
+        Language::KO => {
+            format!("필터링된 바이트:\n   {filtered}")
+        }
+        Language::TR => format!("Filtrelenen bayt:\n   {filtered}"),
+        Language::RU => {
+            format!("Отфильтровано байт:\n   {filtered}")
+        }
+        Language::PT => {
+            format!("Bytes filtrados:\n   {filtered}")
+        }
+    })
+}
+
 pub fn filtered_application_translation(language: Language) -> Text<'static> {
     Text::new(match language {
         Language::EN => "Filtered packets per application protocol:",
@@ -658,6 +709,24 @@ pub fn all_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn packets_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "packets",
+        Language::IT => "pacchetti",
+        Language::FR => "paquets",
+        Language::ES => "paquetes",
+        Language::PL => "pakiety",
+        Language::DE => "pakete",
+        Language::UK => "пакети",
+        Language::ZH => "数据包",
+        Language::RO => "pachete",
+        Language::KO => "패킷",
+        Language::TR => "paket",
+        Language::RU => "пакектов",
+        Language::PT => "pacotes",
+    }
+}
+
 pub fn packets_chart_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "packets per second",
@@ -673,6 +742,23 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::TR => "saniye başı paket",
         Language::RU => "пакектов в секунду",
         Language::PT => "pacotes por segundo",
+    }
+}
+
+pub fn bytes_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "bytes",
+        Language::IT => "byte",
+        Language::FR => "octets",
+        Language::ES | Language::PT => "bytes",
+        Language::PL => "bajty",
+        Language::DE => "bytes",
+        Language::UK => "байти",
+        Language::ZH => "网络流量",
+        Language::RO => "octeți",
+        Language::KO => "바이트",
+        Language::TR => "bayt",
+        Language::RU => "байтов",
     }
 }
 

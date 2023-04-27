@@ -17,7 +17,9 @@ use thousands::Separable;
 
 use crate::gui::components::radio::{chart_radios, report_radios};
 use crate::gui::components::tab::get_pages_tabs;
-use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::style_constants::{
+    get_font, FONT_SIZE_FOOTER, FONT_SIZE_TITLE, ICONS, SARASA_MONO_SC_BOLD,
+};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -26,15 +28,19 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::report::get_report_entries::{get_app_entries, get_report_entries};
 use crate::translations::translations::{
-    error_translation, filtered_application_translation, filtered_bytes_translation,
-    filtered_packets_translation, no_addresses_translation, no_favorites_translation,
-    some_observed_translation, waiting_translation,
+    bytes_chart_translation, error_translation, filtered_application_translation,
+    filtered_bytes_no_percentage_translation, filtered_bytes_translation,
+    filtered_packets_translation, network_adapter_translation, no_addresses_translation,
+    no_favorites_translation, packets_chart_translation, some_observed_translation,
+    traffic_rate_translation, waiting_translation,
+};
+use crate::translations::translations_2::{
+    data_representation_translation, dropped_packets_translation,
 };
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_active_filters_string_nobr, get_app_count_string,
-    get_connection_color, get_formatted_bytes_string, get_open_report_tooltip,
-    get_percentage_string,
+    get_active_filters_string, get_app_count_string, get_connection_color,
+    get_formatted_bytes_string, get_open_report_tooltip, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, Language, ReportType, RunningPage, StyleType};
 
@@ -50,6 +56,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         let observed = sniffer.runtime_data.all_packets;
         let filtered =
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
+        let dropped = sniffer.runtime_data.dropped_packets;
+        let total = observed + dropped as u128;
 
         match (observed, filtered) {
             (0, 0) => {
@@ -87,15 +95,30 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let row_radio_chart = chart_radios(
-                    sniffer.traffic_chart.chart_type,
-                    font,
-                    sniffer.style,
-                    sniffer.language,
+                let mut chart_info_string = String::from("(");
+                chart_info_string.push_str(
+                    if sniffer.traffic_chart.chart_type.eq(&ChartType::Packets) {
+                        packets_chart_translation(sniffer.language)
+                    } else {
+                        bytes_chart_translation(sniffer.language)
+                    },
                 );
+                chart_info_string.push(')');
                 let col_chart = Container::new(
                     Column::new()
-                        .push(row_radio_chart)
+                        .align_items(Alignment::Center)
+                        .push(
+                            Row::new()
+                                .padding([10, 0, 15, 0])
+                                .spacing(10)
+                                .align_items(Alignment::Center)
+                                .push(
+                                    traffic_rate_translation(sniffer.language)
+                                        .font(font)
+                                        .size(FONT_SIZE_TITLE),
+                                )
+                                .push(Text::new(chart_info_string).font(font)),
+                        )
                         .push(sniffer.traffic_chart.view()),
                 )
                 .width(Fill)
@@ -105,9 +128,15 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 ));
 
-                let col_packets = lazy((observed, sniffer.style, sniffer.language), move |_| {
-                    lazy_col_packets(observed, filtered, sniffer)
-                });
+                let col_packets = lazy(
+                    (
+                        total,
+                        sniffer.style,
+                        sniffer.language,
+                        sniffer.traffic_chart.chart_type,
+                    ),
+                    move |_| lazy_col_packets(total, filtered, dropped, sniffer),
+                );
 
                 let active_radio_report = sniffer.report_type;
                 let num_favorites = sniffer
@@ -137,7 +166,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         Row::new()
                             .spacing(10)
                             .height(FillPortion(3))
-                            .push(col_chart)
                             .push(
                                 Container::new(col_packets)
                                     .width(Length::Fixed(400.0))
@@ -147,7 +175,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
                                         StyleTuple(sniffer.style, ElementType::BorderedRound),
                                     )),
-                            ),
+                            )
+                            .push(col_chart),
                     )
                     .push(
                         Container::new(
@@ -230,7 +259,7 @@ fn body_no_observed(
     let tot_packets_text = some_observed_translation(
         language,
         &observed.separate_with_spaces(),
-        &get_active_filters_string_nobr(filters, language),
+        &get_active_filters_string(filters, language),
     )
     .horizontal_alignment(Horizontal::Center)
     .font(font);
@@ -290,17 +319,33 @@ fn lazy_row_report(
     let mut row_host_app = Row::new().height(Length::Fill).width(Length::Fill);
     let width_host = 500.0;
     let mut col_host = Column::new().width(Length::Fixed(width_host));
-    let width_app = 500.0;
+    let width_app = 200.0;
     let mut col_app = Column::new().width(Length::Fixed(width_app));
 
     let entries = get_app_entries(&sniffer.info_traffic, chart_type);
     for (app, data_info) in &entries {
-        let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
+        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width_app,
             chart_type,
             entries.get(0).unwrap().1.clone(),
             data_info,
         );
+
+        // check if Other is longer than the first entry
+        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width_app {
+            let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
+            incoming_bar_len = width_app * incoming_proportion;
+            outgoing_bar_len = width_app * (1.0 - incoming_proportion);
+        }
+
+        // normalize smaller values
+        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
+            incoming_bar_len = 3.0;
+        }
+        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+            outgoing_bar_len = 3.0;
+        }
+
         col_app = col_app
             .push(
                 Row::new()
@@ -432,13 +477,18 @@ fn lazy_row_report(
     )
 }
 
-fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column<'static, Message> {
+fn lazy_col_packets(
+    total: u128,
+    filtered: u128,
+    dropped: u32,
+    sniffer: &Sniffer,
+) -> Column<'static, Message> {
     let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let mut col_packets = Column::new()
-        //.push(iced::Text::new(std::env::current_dir().unwrap().to_str().unwrap()).font(font))
-        //.push(iced::Text::new(confy::get_configuration_file_path("sniffnet", None).unwrap().to_string_lossy()).font(font))
+        .push(network_adapter_translation(sniffer.language, &sniffer.device.name).font(font))
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             Text::new(get_active_filters_string(
                 &sniffer.filters.clone(),
@@ -446,41 +496,50 @@ fn lazy_col_packets(observed: u128, filtered: u128, sniffer: &Sniffer) -> Column
             ))
             .font(font),
         )
-        .push(Text::new(" "))
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(
+            if dropped > 0 {
+                filtered_bytes_no_percentage_translation(
+                    sniffer.language,
+                    &get_formatted_bytes_string(filtered_bytes),
+                )
+            } else {
+                filtered_bytes_translation(
+                    sniffer.language,
+                    &get_formatted_bytes_string(filtered_bytes),
+                    &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes),
+                )
+            }
+            .font(font),
+        )
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             filtered_packets_translation(
                 sniffer.language,
                 &filtered.separate_with_spaces(),
-                &get_percentage_string(observed, filtered),
-            )
-            .font(font),
-        )
-        .push(Text::new(" "))
-        .push(
-            filtered_bytes_translation(
-                sniffer.language,
-                &get_formatted_bytes_string(filtered_bytes),
-                &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes),
+                &get_percentage_string(total, filtered),
             )
             .font(font),
         );
-    if sniffer.filters.application.eq(&AppProtocol::Other) {
-        col_packets = col_packets
-            .push(Text::new(" "))
-            .push(filtered_application_translation(sniffer.language).font(font));
-        // .push(
-        //     Scrollable::new(
-        //         Text::new(get_app_count_string(
-        //             &sniffer.info_traffic.lock().unwrap().app_protocols,
-        //             filtered,
-        //         ))
-        //         .font(font),
-        //     )
-        //     .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-        //         StyleTuple(sniffer.style, ElementType::Standard),
-        //     )),
-        // );
+    if dropped > 0 {
+        col_packets = col_packets.push(vertical_space(Length::Fixed(15.0))).push(
+            dropped_packets_translation(
+                sniffer.language,
+                &dropped.separate_with_spaces(),
+                &get_percentage_string(total, dropped as u128),
+            )
+            .font(font),
+        );
     }
+    col_packets = col_packets
+        .push(vertical_space(Length::Fixed(15.0)))
+        .push(data_representation_translation(sniffer.language))
+        .push(chart_radios(
+            sniffer.traffic_chart.chart_type,
+            font,
+            sniffer.style,
+            sniffer.language,
+        ));
     col_packets
 }
 
@@ -515,7 +574,7 @@ fn get_bars_length(
     first_entry: DataInfo,
     data_info: &DataInfo,
 ) -> (f32, f32) {
-    return match chart_type {
+    match chart_type {
         ChartType::Packets => (
             tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
             tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
@@ -524,5 +583,5 @@ fn get_bars_length(
             tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
             tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
         ),
-    };
+    }
 }

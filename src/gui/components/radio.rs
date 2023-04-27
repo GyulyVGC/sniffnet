@@ -14,6 +14,7 @@ use crate::translations::translations::{
     ip_version_translation, relevant_connections_translation, sound_translation,
     traffic_rate_translation, transport_protocol_translation,
 };
+use crate::translations::translations_2::data_representation_translation;
 use crate::utils::countries::get_flag_from_language_code;
 use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
 
@@ -228,16 +229,11 @@ pub fn chart_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
-    let mut ret_val = Row::new()
-        .padding([10, 0, 15, 10])
-        .spacing(20)
-        .align_items(Alignment::Center)
-        .push(
-            traffic_rate_translation(language)
-                .font(font)
-                .size(FONT_SIZE_TITLE),
-        );
+) -> Column<'static, Message> {
+    let mut ret_val = Column::new()
+        .padding([0, 0, 0, 25])
+        .spacing(5)
+        .align_items(Alignment::Start);
     for option in ChartType::ALL {
         ret_val = ret_val.push(
             Radio::new(

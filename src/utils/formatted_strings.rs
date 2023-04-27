@@ -40,33 +40,22 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
             none_translation(language)
         )
     } else {
-        let mut ret_val = active_filters_translation(language).to_string();
+        let mut filters_string = String::new();
         if filters.ip.ne(&IpVersion::Other) {
-            ret_val.push_str(&format!("\n   {}", filters.ip));
+            filters_string.push_str(&format!("{} ", filters.ip));
         }
         if filters.transport.ne(&TransProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters.transport));
+            filters_string.push_str(&format!("{} ", filters.transport));
         }
         if filters.application.ne(&AppProtocol::Other) {
-            ret_val.push_str(&format!("\n   {}", filters.application));
+            filters_string.push_str(&format!("{} ", filters.application));
         }
+        let mut ret_val = format!(
+            "{}\n   {filters_string}",
+            active_filters_translation(language),
+        );
         ret_val
     }
-}
-
-/// Computes the String representing the active filters, without line breaks
-pub fn get_active_filters_string_nobr(filters: &Filters, language: Language) -> String {
-    let mut ret_val = active_filters_translation(language).to_string();
-    if filters.ip.ne(&IpVersion::Other) {
-        ret_val.push_str(&format!(" {}", filters.ip));
-    }
-    if filters.transport.ne(&TransProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters.transport));
-    }
-    if filters.application.ne(&AppProtocol::Other) {
-        ret_val.push_str(&format!(" {}", filters.application));
-    }
-    ret_val
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
