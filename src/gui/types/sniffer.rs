@@ -25,6 +25,7 @@ use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_report_path;
 use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::networking::types::search_parameters::SearchParameters;
 
 /// Struct on which the gui is based
 ///
@@ -71,7 +72,7 @@ pub struct Sniffer {
     /// Number of unread notifications
     pub unread_notifications: usize,
     /// Search parameters of inspect page
-    pub search: String,
+    pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
     /// Currently selected connection for inspection of its details
@@ -108,7 +109,7 @@ impl Sniffer {
             running_page: RunningPage::Overview,
             language: config_settings.language,
             unread_notifications: 0,
-            search: String::new(),
+            search: SearchParameters::default(),
             page_number: 1,
             selected_connection: 0,
         }
@@ -182,6 +183,7 @@ impl Sniffer {
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
             Message::Search(parameters) => {
                 self.page_number = 1;
+                self.running_page = RunningPage::Inspect;
                 self.search = parameters;
             }
             Message::UpdatePageNumber(increment) => {
@@ -317,7 +319,7 @@ impl Sniffer {
         self.pcap_error = None;
         self.report_type = ReportType::MostRecent;
         self.unread_notifications = 0;
-        self.search = String::new();
+        self.search = SearchParameters::default();
         self.page_number = 1;
         self.update(Message::HideModal)
     }

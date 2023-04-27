@@ -5,6 +5,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
+use crate::networking::types::search_parameters::SearchParameters;
 
 pub fn get_report_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
@@ -45,14 +46,20 @@ pub fn get_report_entries(
 /// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
-    search: String,
+    search_parameters: SearchParameters,
     page_number: usize,
 ) -> (Vec<usize>, usize) {
     let info_traffic_lock = info_traffic.lock().unwrap();
     let all_results: Vec<usize> = info_traffic_lock
         .map
         .iter()
-        //.filter(|(key, value)| value.country == search)
+        .filter(|(key, value)| {
+            if search_parameters.app.is_some() {
+                value.app_protocol == search_parameters.app.unwrap()
+            } else {
+                true
+            }
+        })
         .map(|key_val| key_val.1.index)
         .collect();
     let upper_bound = min(page_number * 15, all_results.len());

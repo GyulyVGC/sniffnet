@@ -9,3 +9,4 @@ pub mod info_traffic;
 pub mod ip_version;
 pub mod traffic_type;
 pub mod trans_protocol;
+pub mod search_parameters;

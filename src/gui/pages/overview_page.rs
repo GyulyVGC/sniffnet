@@ -43,6 +43,7 @@ use crate::utils::formatted_strings::{
     get_formatted_bytes_string, get_open_report_tooltip, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, Language, ReportType, RunningPage, StyleType};
+use crate::networking::types::search_parameters::SearchParameters;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -324,15 +325,17 @@ fn lazy_row_report(
     let mut col_host = Column::new().width(Length::Fixed(width_host));
     let width_app = 250.0;
     let mut col_app = Column::new()
-        .width(Length::Fixed(width_app))
+        .width(Length::Fixed(width_app + 20.0))
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(vertical_space(Length::Fixed(15.0)));
+        .push(vertical_space(Length::Fixed(10.0)));
 
+    let mut scroll_app = Column::new().width(Length::Fixed(width_app));
     let entries = get_app_entries(&sniffer.info_traffic, chart_type);
+
     for (app, data_info) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width_app,
@@ -356,7 +359,7 @@ fn lazy_row_report(
             outgoing_bar_len = 3.0;
         }
 
-        col_app = col_app
+        let content = Column::new().width(Length::Fixed(width_app))
             .push(
                 Row::new()
                     .push(Text::new(format!("{:?}", app)))
@@ -392,9 +395,21 @@ fn lazy_row_report(
                                 StyleTuple(sniffer.style, ElementType::Outgoing),
                             ))),
                     ),
-            )
-            .push(vertical_space(Length::Fixed(10.0)));
+            );
+
+        scroll_app = scroll_app
+            .push(button(content)
+                .padding([3, 0, 7, 0])
+                .on_press(Message::Search(SearchParameters{
+                    app: Some(*app),
+                    ..sniffer.search
+                }))
+                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()));
     }
+    col_app = col_app.push(Scrollable::new(Container::new(scroll_app).width(Length::Fill))
+                               .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                                   StyleTuple(sniffer.style, ElementType::Standard),
+                               )));
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
     //     col_report = col_report.push(
@@ -478,12 +493,8 @@ fn lazy_row_report(
                     StyleTuple(sniffer.style, ElementType::Standard),
                 )),
             )
-            .push(
-                Scrollable::new(Container::new(col_app).width(Length::Fixed(width_app + 40.0)))
-                    .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
-                    )),
-            );
+            .push(col_app);
+
     Row::new().push(
         Container::new(row_host_app)
             .height(Length::Fill)

@@ -148,19 +148,19 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
-    let font = get_font(sniffer.style);
-
-    let text_input = TextInput::new("AAA", &sniffer.search)
-        .on_input(Message::Search)
-        .padding([0, 0, 0, 10])
-        .font(font)
-        .width(Length::Fixed(100.0))
-        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ));
-    Container::new(text_input)
-}
+// fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
+//     let font = get_font(sniffer.style);
+//
+//     let text_input = TextInput::new("AAA", &sniffer.search)
+//         .on_input(Message::Search)
+//         .padding([0, 0, 0, 10])
+//         .font(font)
+//         .width(Length::Fixed(100.0))
+//         .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+//             StyleTuple(sniffer.style, ElementType::Standard),
+//         ));
+//     Container::new(text_input)
+// }
 
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
     button(

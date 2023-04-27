@@ -72,7 +72,10 @@ impl button::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
         button::Appearance {
-            shadow_offset: Vector::new(0.0, 2.0),
+            shadow_offset: match self.1 {
+                ElementType::Neutral => Vector::default(),
+                _ => Vector::new(0.0, 2.0),
+            },
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::Starred) => STARRED,
                 StyleTuple(_, ElementType::TabActive) => colors.primary,
@@ -92,7 +95,6 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(
                     _,
                     ElementType::Starred
-                    | ElementType::Neutral
                     | ElementType::TabActive
                     | ElementType::TabInactive
                     | ElementType::BorderedRound,
@@ -101,7 +103,7 @@ impl button::StyleSheet for StyleTuple {
             },
             border_color: match self {
                 StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
-                StyleTuple(_, ElementType::BorderedRound) => colors.round_borders,
+                StyleTuple(_, ElementType::BorderedRound | ElementType::Neutral) => colors.round_borders,
                 _ => colors.secondary,
             },
             text_color: match self {
