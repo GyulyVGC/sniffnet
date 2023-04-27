@@ -352,7 +352,7 @@ pub fn network_adapter_translation(language: Language, adapter: &str) -> Text<'s
         Language::RU => format!("Сетевой интерфейс:\n   {adapter}"),
         Language::PT => format!("Adaptador de rede:\n   {adapter}"),
         Language::EL => format!("Προσαρμογέας δικτύου:\n   {adapter}"),
-        Language::FA => format!("مبدل شبکه:   \n{adapter}"),
+        Language::FA => format!("مبدل شبکه:\n   {adapter}"),
     })
 }
 

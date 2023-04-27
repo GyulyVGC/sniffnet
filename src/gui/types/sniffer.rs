@@ -564,13 +564,13 @@ mod tests {
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Bytes));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
-        sniffer.update(Message::ChartSelection(ChartType::Bytes));
         assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
         sniffer.update(Message::ChartSelection(ChartType::Packets));
         assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
+        sniffer.update(Message::ChartSelection(ChartType::Packets));
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
+        sniffer.update(Message::ChartSelection(ChartType::Bytes));
+        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
     }
 
     #[test]

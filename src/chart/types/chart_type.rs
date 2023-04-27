@@ -11,7 +11,7 @@ pub enum ChartType {
 }
 
 impl ChartType {
-    pub(crate) const ALL: [ChartType; 2] = [ChartType::Packets, ChartType::Bytes];
+    pub(crate) const ALL: [ChartType; 2] = [ChartType::Bytes, ChartType::Packets];
 
     pub fn get_radio_label(&self, language: Language) -> &str {
         match self {

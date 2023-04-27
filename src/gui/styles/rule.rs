@@ -27,9 +27,12 @@ impl rule::StyleSheet for StyleTuple {
             color: match self.1 {
                 ElementType::Incoming => colors.secondary,
                 ElementType::Outgoing => colors.outgoing,
-                _ => colors.secondary,
+                _ => colors.round_borders,
             },
-            width: 5,
+            width: match self.1 {
+                ElementType::Incoming | ElementType::Outgoing => 5,
+                _ => 3,
+            },
             radius: 0.0,
             fill_mode: FillMode::Full,
         }

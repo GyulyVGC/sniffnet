@@ -128,14 +128,14 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 ));
 
-                let col_packets = lazy(
+                let col_info = lazy(
                     (
                         total,
                         sniffer.style,
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
-                    move |_| lazy_col_packets(total, filtered, dropped, sniffer),
+                    move |_| lazy_col_info(total, filtered, dropped, sniffer),
                 );
 
                 let active_radio_report = sniffer.report_type;
@@ -165,9 +165,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(
                         Row::new()
                             .spacing(10)
-                            .height(FillPortion(3))
+                            .height(FillPortion(5))
                             .push(
-                                Container::new(col_packets)
+                                Container::new(col_info)
                                     .width(Length::Fixed(400.0))
                                     .padding([10, 5, 5, 5])
                                     .height(Length::Fill)
@@ -192,7 +192,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 )),
                         )
                         .align_x(Horizontal::Center)
-                        .height(FillPortion(2)),
+                        .height(FillPortion(4)),
                     );
             }
         }
@@ -458,11 +458,6 @@ fn lazy_row_report(
     //         scroll_report = scroll_report.push(entry_row);
     //     }
     //     col_report = col_report.push(Container::new(
-    //         Scrollable::new(scroll_report)
-    //             .horizontal_scroll(Properties::new())
-    //             .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-    //                 StyleTuple(sniffer.style, ElementType::Standard),
-    //             )),
     //     ));
     // };
     row_host_app = row_host_app.push(col_host).push(col_app);
@@ -477,7 +472,7 @@ fn lazy_row_report(
     )
 }
 
-fn lazy_col_packets(
+fn lazy_col_info(
     total: u128,
     filtered: u128,
     dropped: u32,
@@ -486,17 +481,29 @@ fn lazy_col_packets(
     let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-    let mut col_packets = Column::new()
+
+    let col_device_filters = Column::new()
+        .spacing(15)
         .push(network_adapter_translation(sniffer.language, &sniffer.device.name).font(font))
-        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             Text::new(get_active_filters_string(
                 &sniffer.filters.clone(),
                 sniffer.language,
             ))
             .font(font),
-        )
-        .push(vertical_space(Length::Fixed(15.0)))
+        );
+
+    let col_data_representation = Column::new()
+        .push(data_representation_translation(sniffer.language))
+        .push(chart_radios(
+            sniffer.traffic_chart.chart_type,
+            font,
+            sniffer.style,
+            sniffer.language,
+        ));
+
+    let mut col_bytes_packets = Column::new()
+        .spacing(15)
         .push(
             if dropped > 0 {
                 filtered_bytes_no_percentage_translation(
@@ -512,7 +519,6 @@ fn lazy_col_packets(
             }
             .font(font),
         )
-        .push(vertical_space(Length::Fixed(15.0)))
         .push(
             filtered_packets_translation(
                 sniffer.language,
@@ -522,7 +528,7 @@ fn lazy_col_packets(
             .font(font),
         );
     if dropped > 0 {
-        col_packets = col_packets.push(vertical_space(Length::Fixed(15.0))).push(
+        col_bytes_packets = col_bytes_packets.push(
             dropped_packets_translation(
                 sniffer.language,
                 &dropped.separate_with_spaces(),
@@ -531,16 +537,34 @@ fn lazy_col_packets(
             .font(font),
         );
     }
-    col_packets = col_packets
-        .push(vertical_space(Length::Fixed(15.0)))
-        .push(data_representation_translation(sniffer.language))
-        .push(chart_radios(
-            sniffer.traffic_chart.chart_type,
-            font,
-            sniffer.style,
-            sniffer.language,
-        ));
-    col_packets
+
+    Column::new()
+        .align_items(Alignment::Center)
+        .padding([5, 10])
+        .push(
+            Row::new()
+                .height(Length::Fixed(120.0))
+                .push(col_device_filters)
+                .push(
+                    Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                        StyleTuple(sniffer.style, ElementType::Standard),
+                    )),
+                )
+                .push(col_data_representation),
+        )
+        .push(
+            Rule::horizontal(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
+        )
+        .push(
+            Scrollable::new(col_bytes_packets)
+                .width(Length::Fill)
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+        )
 }
 
 fn get_button_open_report(

@@ -61,7 +61,7 @@ impl TrafficChart {
             color_incoming: to_rgb_color(get_colors(style).incoming),
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
-            chart_type: ChartType::Packets,
+            chart_type: ChartType::Bytes,
             language,
         }
     }
@@ -134,6 +134,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .y_labels(7)
                     .y_label_formatter(&|bytes| {
                         get_formatted_bytes_string(u128::from(bytes.unsigned_abs()))
                             .trim()
@@ -194,6 +195,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .y_labels(7)
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
                     .unwrap();
