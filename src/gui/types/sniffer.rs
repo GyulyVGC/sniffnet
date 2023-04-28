@@ -17,6 +17,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::{Notification, Notifications};
 use crate::notifications::types::sound::{play, Sound};
@@ -25,7 +26,6 @@ use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_report_path;
 use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
-use crate::networking::types::search_parameters::SearchParameters;
 
 /// Struct on which the gui is based
 ///

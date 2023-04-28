@@ -2,7 +2,7 @@ use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
 use iced_native::widget::horizontal_space;
 
-use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -11,12 +11,10 @@ use crate::notifications::types::notifications::{
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
-    ip_version_translation, relevant_connections_translation, sound_translation,
-    traffic_rate_translation, transport_protocol_translation,
+    ip_version_translation, sound_translation, transport_protocol_translation,
 };
-use crate::translations::translations_2::data_representation_translation;
 use crate::utils::countries::get_flag_from_language_code;
-use crate::{ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
+use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
 
 pub fn ip_version_radios(
     active: IpVersion,
@@ -254,38 +252,38 @@ pub fn chart_radios(
     ret_val
 }
 
-pub fn report_radios(
-    active: ReportType,
-    font: Font,
-    style: StyleType,
-    language: Language,
-) -> Row<'static, Message> {
-    let mut ret_val = Row::new()
-        .padding([10, 0, 15, 5])
-        .spacing(20)
-        .align_items(Alignment::Center)
-        .push(
-            relevant_connections_translation(language)
-                .font(font)
-                .size(FONT_SIZE_TITLE),
-        );
-    for option in ReportType::ALL {
-        ret_val = ret_val.push(
-            Radio::new(
-                option.get_radio_label(language),
-                option,
-                Some(active),
-                Message::ReportSelection,
-            )
-            .spacing(7)
-            .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                style,
-                ElementType::Standard,
-            ))),
-        );
-    }
-    ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
-    ret_val
-}
+// pub fn report_radios(
+//     active: ReportType,
+//     font: Font,
+//     style: StyleType,
+//     language: Language,
+// ) -> Row<'static, Message> {
+//     let mut ret_val = Row::new()
+//         .padding([10, 0, 15, 5])
+//         .spacing(20)
+//         .align_items(Alignment::Center)
+//         .push(
+//             relevant_connections_translation(language)
+//                 .font(font)
+//                 .size(FONT_SIZE_TITLE),
+//         );
+//     for option in ReportType::ALL {
+//         ret_val = ret_val.push(
+//             Radio::new(
+//                 option.get_radio_label(language),
+//                 option,
+//                 Some(active),
+//                 Message::ReportSelection,
+//             )
+//             .spacing(7)
+//             .font(font)
+//             .size(15)
+//             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+//                 style,
+//                 ElementType::Standard,
+//             ))),
+//         );
+//     }
+//     ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
+//     ret_val
+// }

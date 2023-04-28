@@ -7,6 +7,7 @@ use std::ops::Add;
 use chrono::{DateTime, Local};
 
 use crate::networking::types::asn::Asn;
+use crate::networking::types::host::Host;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
@@ -54,6 +55,28 @@ impl InfoAddressPortPair {
             .to_string()
             .replace('|', "")
             .add(&*format!(" {} ", &self.country))
+    }
+
+    pub fn get_host(&self) -> Host {
+        if self.r_dns.is_none() {
+            return Host::default();
+        }
+
+        Host {
+            domain: self.r_dns.as_ref().unwrap().clone(),
+            asn: self.asn.clone(),
+            country: self.country.clone(),
+        }
+    }
+
+    /// An rDNS resolution has already been requested for this host
+    pub fn r_dns_already_requested(&self) -> bool {
+        self.r_dns.is_some()
+    }
+
+    /// An rDNS resolution has already completed for this host
+    pub fn r_dns_already_resolved(&self) -> bool {
+        self.r_dns.is_some() && !self.r_dns.as_ref().unwrap().is_empty()
     }
 }
 

@@ -1,6 +1,4 @@
-use crate::translations::translations::{
-    bytes_chart_translation, bytes_translation, packets_chart_translation, packets_translation,
-};
+use crate::translations::translations::{bytes_translation, packets_translation};
 use crate::Language;
 
 /// Enum representing the possible kind of chart displayed.

@@ -4,8 +4,8 @@ use std::sync::{Arc, Mutex};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
 use crate::networking::types::search_parameters::SearchParameters;
+use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
 
 pub fn get_report_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
@@ -53,7 +53,7 @@ pub fn get_searched_entries(
     let all_results: Vec<usize> = info_traffic_lock
         .map
         .iter()
-        .filter(|(key, value)| {
+        .filter(|(_key, value)| {
             if search_parameters.app.is_some() {
                 value.app_protocol == search_parameters.app.unwrap()
             } else {
@@ -74,9 +74,9 @@ pub fn get_app_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
 ) -> Vec<(AppProtocol, DataInfo)> {
-    let mut sorted_vec = Vec::new();
     let info_traffic_lock = info_traffic.lock().unwrap();
-    sorted_vec = info_traffic_lock.app_protocols.iter().collect();
+    let mut sorted_vec: Vec<(&AppProtocol, &DataInfo)> =
+        info_traffic_lock.app_protocols.iter().collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
         if p1.eq(&AppProtocol::Other) {

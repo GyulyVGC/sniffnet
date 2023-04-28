@@ -7,6 +7,7 @@ use indexmap::IndexMap;
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
 
@@ -30,12 +31,14 @@ pub struct InfoTraffic {
     pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
     /// Set with the addresses of the last time interval
     pub addresses_last_interval: HashSet<usize>,
-    /// Map of the application layer protocols with their packet count
-    pub app_protocols: HashMap<AppProtocol, DataInfo>,
     /// Collection of indexes of the favorite connections
     pub favorite_connections: HashSet<usize>,
     /// Collection of favorite connections that exchanged data in the last interval
     pub favorites_last_interval: HashSet<usize>,
+    /// Map of the application layer protocols with their data info
+    pub app_protocols: HashMap<AppProtocol, DataInfo>,
+    /// Map of the hosts with their data info
+    pub hosts: HashMap<Host, DataInfo>,
 }
 
 impl InfoTraffic {
@@ -51,9 +54,10 @@ impl InfoTraffic {
             dropped_packets: 0,
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
-            app_protocols: HashMap::new(),
             favorite_connections: HashSet::new(),
             favorites_last_interval: HashSet::new(),
+            app_protocols: HashMap::new(),
+            hosts: HashMap::new(),
         }
     }
 }

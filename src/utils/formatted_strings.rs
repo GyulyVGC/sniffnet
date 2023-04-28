@@ -1,9 +1,6 @@
-use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 use iced::Color;
-use thousands::Separable;
 
 use crate::networking::types::filters::Filters;
 use crate::networking::types::traffic_type::TrafficType;
@@ -50,11 +47,10 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
         if filters.application.ne(&AppProtocol::Other) {
             filters_string.push_str(&format!("{} ", filters.application));
         }
-        let mut ret_val = format!(
+        format!(
             "{}\n   {filters_string}",
             active_filters_translation(language),
-        );
-        ret_val
+        )
     }
 }
 
@@ -65,78 +61,6 @@ pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Colo
     } else {
         get_colors(style).incoming
     }
-}
-
-/// Given the map of app layer protocols with the relative sniffed packets count,
-/// the function generates the corresponding String
-/// to be displayed in gui run page.
-///
-/// # Arguments
-///
-/// * `app_count` - Map of app layer protocols with the relative sniffed packets count
-///
-/// * `tot_packets` - Total number of sniffed packets
-pub fn get_app_count_string(app_count: &HashMap<AppProtocol, u128>, tot_packets: u128) -> String {
-    let mut ret_val = String::new();
-
-    if app_count.is_empty() {
-        return ret_val;
-    }
-
-    let mut sorted_app_count: Vec<(&AppProtocol, &u128)> = app_count.iter().collect();
-    sorted_app_count.sort_by(|&(p1, a), &(p2, b)| {
-        if p1.eq(&AppProtocol::Other) {
-            Ordering::Greater
-        } else if p2.eq(&AppProtocol::Other) {
-            Ordering::Less
-        } else {
-            b.cmp(a)
-        }
-    });
-
-    //compute the length of the longest packet count string, used to align text
-    let mut longest_num = sorted_app_count
-        .get(0)
-        .unwrap()
-        .1
-        .separate_with_spaces()
-        .len();
-    match app_count.get(&AppProtocol::Other) {
-        None => {}
-        Some(x) => {
-            if x.separate_with_spaces().len() > longest_num {
-                longest_num = x.separate_with_spaces().len();
-            }
-        }
-    }
-
-    for entry in sorted_app_count {
-        let app_proto_string = format!("{:?}", entry.0);
-
-        let num_string = entry.1.separate_with_spaces().to_string();
-
-        #[allow(clippy::cast_precision_loss)]
-        let num_app_float = *entry.1 as f32;
-        #[allow(clippy::cast_precision_loss)]
-        let num_tot_float = tot_packets as f32;
-        let percentage_string = if format!("{:.1}", 100.0 * num_app_float / num_tot_float).eq("0.0")
-        {
-            "(<0.1%)".to_string()
-        } else {
-            format!("({:.1}%)", 100.0 * num_app_float / num_tot_float)
-        };
-
-        //to align digits
-        let spaces_string_1 = " "
-            .to_string()
-            .repeat(9 + longest_num - num_string.len() - app_proto_string.len());
-        let spaces_string_2 = " ".to_string().repeat(10 - percentage_string.len());
-
-        ret_val.push_str(&format!(
-            "   {app_proto_string}:{spaces_string_1}{num_string}{spaces_string_2}{percentage_string}  \n",
-        ));
-    }
-    ret_val
 }
 
 /// Returns a String representing a quantity of bytes with their proper multiple (KB, MB, GB, TB)

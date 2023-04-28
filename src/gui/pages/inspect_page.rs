@@ -1,21 +1,17 @@
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
-use crate::networking::types::traffic_type::TrafficType;
-use crate::report::get_report_entries::{get_report_entries, get_searched_entries};
+use crate::report::get_report_entries::get_searched_entries;
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utils::formatted_strings::get_connection_color;
-use crate::{Language, RunningPage, Sniffer, StyleType};
-use dns_lookup::lookup_addr;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, Tooltip};
-use iced::{alignment, Alignment, Font, Length};
+use crate::{RunningPage, Sniffer, StyleType};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::{alignment, Alignment, Length};
 use iced_native::widget::scrollable::Properties;
-use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space};
-use std::cmp::min;
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {

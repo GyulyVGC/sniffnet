@@ -4,46 +4,41 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::scrollable::Properties;
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::{Fill, FillPortion};
 use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{horizontal_space, Rule};
-use iced_native::Widget;
 use pcap::Device;
 use thousands::Separable;
 
-use crate::gui::components::radio::{chart_radios, report_radios};
+use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
-use crate::gui::styles::style_constants::{
-    get_font, FONT_SIZE_FOOTER, FONT_SIZE_TITLE, ICONS, SARASA_MONO_SC_BOLD,
-};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
-use crate::report::get_report_entries::{get_app_entries, get_report_entries};
+use crate::networking::types::search_parameters::SearchParameters;
+use crate::report::get_report_entries::get_app_entries;
 use crate::translations::translations::{
     application_protocol_translation, bytes_chart_translation, error_translation,
-    filtered_application_translation, filtered_bytes_no_percentage_translation,
-    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
-    no_addresses_translation, no_favorites_translation, packets_chart_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    filtered_bytes_no_percentage_translation, filtered_bytes_translation,
+    filtered_packets_translation, network_adapter_translation, no_addresses_translation,
+    packets_chart_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation,
 };
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_app_count_string, get_connection_color,
-    get_formatted_bytes_string, get_open_report_tooltip, get_percentage_string,
+    get_active_filters_string, get_formatted_bytes_string, get_open_report_tooltip,
+    get_percentage_string,
 };
-use crate::{AppProtocol, ChartType, Language, ReportType, RunningPage, StyleType};
-use crate::networking::types::search_parameters::SearchParameters;
+use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -75,7 +70,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     &sniffer.waiting,
                 );
             }
-            (observed, filtered) => {
+            (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
                     [
@@ -155,7 +150,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
-                    move |_| lazy_row_report(active_radio_report, num_favorites, sniffer),
+                    move |_| lazy_row_report(sniffer),
                 );
 
                 body = body
@@ -302,11 +297,7 @@ fn body_pcap_error(
         .push(vertical_space(FillPortion(2)))
 }
 
-fn lazy_row_report(
-    active_radio_report: ReportType,
-    num_favorites: usize,
-    sniffer: &Sniffer,
-) -> Row<'static, Message> {
+fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     let font = get_font(sniffer.style);
     // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     // let filtered_packets =
@@ -322,7 +313,7 @@ fn lazy_row_report(
         .height(Length::Fill)
         .width(Length::Fill);
     let width_host = 700.0;
-    let mut col_host = Column::new().width(Length::Fixed(width_host));
+    let col_host = Column::new().width(Length::Fixed(width_host));
     let width_app = 250.0;
     let mut col_app = Column::new()
         .width(Length::Fixed(width_app + 20.0))
@@ -359,7 +350,8 @@ fn lazy_row_report(
             outgoing_bar_len = 3.0;
         }
 
-        let content = Column::new().width(Length::Fixed(width_app))
+        let content = Column::new()
+            .width(Length::Fixed(width_app))
             .push(
                 Row::new()
                     .push(Text::new(format!("{:?}", app)))
@@ -397,19 +389,24 @@ fn lazy_row_report(
                     ),
             );
 
-        scroll_app = scroll_app
-            .push(button(content)
+        scroll_app = scroll_app.push(
+            button(content)
                 .padding([3, 0, 7, 0])
-                .on_press(Message::Search(SearchParameters{
+                .on_press(Message::Search(SearchParameters {
                     app: Some(*app),
                     ..sniffer.search
                 }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()));
+                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+        );
     }
-    col_app = col_app.push(Scrollable::new(Container::new(scroll_app).width(Length::Fill))
-                               .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                                   StyleTuple(sniffer.style, ElementType::Standard),
-                               )));
+    col_app = col_app.push(
+        Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
+            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            )),
+        ),
+    );
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
     //     col_report = col_report.push(
@@ -485,15 +482,15 @@ fn lazy_row_report(
     //     col_report = col_report.push(Container::new(
     //     ));
     // };
-    row_host_app =
-        row_host_app
-            .push(col_host)
-            .push(
-                Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
-            )
-            .push(col_app);
+    row_host_app = row_host_app
+        .push(col_host)
+        .push(
+            Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
+        )
+        .push(col_app);
 
     Row::new().push(
         Container::new(row_host_app)

@@ -1,20 +1,14 @@
 use dns_lookup::lookup_addr;
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Button, Column, Container, Image, Row, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced_native::image::Handle;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use crate::gui::components::tab::get_settings_tabs;
-use crate::gui::pages::settings_notifications_page::settings_header;
-use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
-};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
