@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
@@ -48,26 +49,71 @@ pub fn get_searched_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     search_parameters: SearchParameters,
     page_number: usize,
-) -> (Vec<usize>, usize) {
+) -> (Vec<usize>, usize, u128) {
     let info_traffic_lock = info_traffic.lock().unwrap();
+    let mut tot_searched_packets = 0;
     let all_results: Vec<usize> = info_traffic_lock
         .map
         .iter()
         .filter(|(_key, value)| {
-            if search_parameters.app.is_some() {
-                value.app_protocol == search_parameters.app.unwrap()
-            } else {
-                true
+            let mut boolean_flags = Vec::new();
+            // check application protocol filter
+            if let Some(app) = &search_parameters.app {
+                boolean_flags.push(value.app_protocol.eq(app));
             }
+            // check domain filter
+            if let Some(domain) = &search_parameters.domain {
+                if !value.r_dns_already_resolved() {
+                    return false;
+                } else {
+                    boolean_flags.push(value.r_dns.as_ref().unwrap().ends_with(domain));
+                }
+            }
+            // check country filter
+            if let Some(country) = &search_parameters.country {
+                boolean_flags.push(value.country.eq(country));
+            }
+            // check Autonomous System name filter
+            if let Some(as_name) = &search_parameters.as_name {
+                boolean_flags.push(value.asn.name.eq(as_name));
+            }
+
+            if boolean_flags.is_empty() {
+                return true;
+            }
+            return boolean_flags.iter().all(|flag| *flag);
         })
-        .map(|key_val| key_val.1.index)
+        .map(|key_val| {
+            tot_searched_packets += key_val.1.transmitted_packets;
+            key_val.1.index
+        })
         .collect();
     let upper_bound = min(page_number * 15, all_results.len());
 
     (
         all_results[(page_number - 1) * 15..upper_bound].to_vec(),
         all_results.len(),
+        tot_searched_packets,
     )
+}
+
+pub fn get_host_entries(
+    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    chart_type: ChartType,
+) -> Vec<(Host, DataInfo)> {
+    let info_traffic_lock = info_traffic.lock().unwrap();
+    let mut sorted_vec: Vec<(&Host, &DataInfo)> = info_traffic_lock.hosts.iter().collect();
+
+    sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
+        ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
+        ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
+    });
+
+    let n_entry = min(sorted_vec.len(), 30);
+    sorted_vec[0..n_entry]
+        .iter()
+        .map(|e| (e.0.clone(), e.1.clone()))
+        .collect()
 }
 
 pub fn get_app_entries(
@@ -91,8 +137,7 @@ pub fn get_app_entries(
         }
     });
 
-    let n_entry = min(sorted_vec.len(), 15);
-    sorted_vec[0..n_entry]
+    sorted_vec
         .iter()
         .map(|e| (e.0.clone(), e.1.clone()))
         .collect()

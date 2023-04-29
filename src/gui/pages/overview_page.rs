@@ -23,7 +23,7 @@ use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::search_parameters::SearchParameters;
-use crate::report::get_report_entries::get_app_entries;
+use crate::report::get_report_entries::{get_app_entries, get_host_entries};
 use crate::translations::translations::{
     application_protocol_translation, bytes_chart_translation, error_translation,
     filtered_bytes_no_percentage_translation, filtered_bytes_translation,
@@ -32,7 +32,7 @@ use crate::translations::translations::{
     waiting_translation,
 };
 use crate::translations::translations_2::{
-    data_representation_translation, dropped_packets_translation,
+    data_representation_translation, dropped_packets_translation, host_translation,
 };
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_open_report_tooltip,
@@ -299,114 +299,14 @@ fn body_pcap_error(
 
 fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     let font = get_font(sniffer.style);
-    // let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    // let filtered_packets =
-    //     info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets;
-    // drop(info_traffic_lock);
 
-    // let row_radio_report =
-    //     report_radios(active_radio_report, font, sniffer.style, sniffer.language);
-
-    let chart_type = sniffer.traffic_chart.chart_type;
     let mut row_host_app = Row::new()
         .padding(10)
         .height(Length::Fill)
         .width(Length::Fill);
-    let width_host = 700.0;
-    let col_host = Column::new().width(Length::Fixed(width_host));
-    let width_app = 250.0;
-    let mut col_app = Column::new()
-        .width(Length::Fixed(width_app + 20.0))
-        .push(
-            Text::new(application_protocol_translation(sniffer.language))
-                .font(font)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(vertical_space(Length::Fixed(10.0)));
 
-    let mut scroll_app = Column::new().width(Length::Fixed(width_app));
-    let entries = get_app_entries(&sniffer.info_traffic, chart_type);
-
-    for (app, data_info) in &entries {
-        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width_app,
-            chart_type,
-            entries.get(0).unwrap().1.clone(),
-            data_info,
-        );
-
-        // check if Other is longer than the first entry
-        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width_app {
-            let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
-            incoming_bar_len = width_app * incoming_proportion;
-            outgoing_bar_len = width_app * (1.0 - incoming_proportion);
-        }
-
-        // normalize smaller values
-        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-            incoming_bar_len = 3.0;
-        }
-        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-            outgoing_bar_len = 3.0;
-        }
-
-        let content = Column::new()
-            .width(Length::Fixed(width_app))
-            .push(
-                Row::new()
-                    .push(Text::new(format!("{:?}", app)))
-                    .push(horizontal_space(Length::FillPortion(1)))
-                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
-                        data_info.tot_packets().to_string()
-                    } else {
-                        let mut bytes_string =
-                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
-                        bytes_string.push('B');
-                        bytes_string
-                    })),
-            )
-            .push(
-                Row::new()
-                    .push(
-                        Row::new()
-                            .padding(0)
-                            .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Incoming),
-                            ))),
-                    )
-                    .push(
-                        Row::new()
-                            .padding(0)
-                            .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(sniffer.style, ElementType::Outgoing),
-                            ))),
-                    ),
-            );
-
-        scroll_app = scroll_app.push(
-            button(content)
-                .padding([3, 0, 7, 0])
-                .on_press(Message::Search(SearchParameters {
-                    app: Some(*app),
-                    ..sniffer.search
-                }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
-        );
-    }
-    col_app = col_app.push(
-        Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
-            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            )),
-        ),
-    );
+    let col_host = col_host(700.0_f32, sniffer);
+    let col_app = col_app(250.0_f32, sniffer);
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
     //     col_report = col_report.push(
@@ -500,6 +400,210 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
                 StyleTuple(sniffer.style, ElementType::BorderedRound),
             )),
     )
+}
+
+fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
+    let font = get_font(sniffer.style);
+    let chart_type = sniffer.traffic_chart.chart_type;
+
+    let mut col_host = Column::new()
+        .width(Length::Fixed(width + 20.0))
+        .push(
+            Text::new(host_translation(sniffer.language))
+                .font(font)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)));
+
+    let mut scroll_host = Column::new().width(Length::Fixed(width));
+    let entries = get_host_entries(&sniffer.info_traffic, chart_type);
+
+    for (host, data_info) in &entries {
+        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
+            width,
+            chart_type,
+            entries.get(0).unwrap().1.clone(),
+            data_info,
+        );
+
+        // normalize smaller values
+        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
+            incoming_bar_len = 3.0;
+        }
+        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+            outgoing_bar_len = 3.0;
+        }
+
+        let content = Column::new()
+            .width(Length::Fixed(width))
+            .spacing(1)
+            .push(
+                Row::new()
+                    .push(Text::new(host.domain.clone()))
+                    .push(Text::new(if host.asn.name.is_empty() {
+                        String::new()
+                    } else {
+                        format!(" (operated by {})", host.asn.name)
+                    }))
+                    .push(horizontal_space(Length::FillPortion(1)))
+                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
+                        data_info.tot_packets().to_string()
+                    } else {
+                        let mut bytes_string =
+                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
+                        bytes_string.push('B');
+                        bytes_string
+                    })),
+            )
+            .push(
+                Row::new()
+                    .push(
+                        Row::new()
+                            .padding(0)
+                            .width(Length::Fixed(incoming_bar_len))
+                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                                iced::theme::Rule,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Incoming),
+                            ))),
+                    )
+                    .push(
+                        Row::new()
+                            .padding(0)
+                            .width(Length::Fixed(outgoing_bar_len))
+                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                                iced::theme::Rule,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                            ))),
+                    ),
+            );
+
+        scroll_host = scroll_host.push(
+            button(content)
+                .padding([3, 0, 7, 0])
+                .on_press(Message::Search(SearchParameters {
+                    app: None,
+                    domain: Some(host.domain.clone()),
+                    country: Some(host.country.clone()),
+                    as_name: Some(host.asn.name.clone()),
+                }))
+                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+        );
+    }
+    col_host = col_host.push(
+        Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
+            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            )),
+        ),
+    );
+
+    col_host
+}
+
+fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
+    let font = get_font(sniffer.style);
+    let chart_type = sniffer.traffic_chart.chart_type;
+
+    let mut col_app = Column::new()
+        .width(Length::Fixed(width + 20.0))
+        .push(
+            Text::new(application_protocol_translation(sniffer.language))
+                .font(font)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)));
+
+    let mut scroll_app = Column::new().width(Length::Fixed(width));
+    let entries = get_app_entries(&sniffer.info_traffic, chart_type);
+
+    for (app, data_info) in &entries {
+        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
+            width,
+            chart_type,
+            entries.get(0).unwrap().1.clone(),
+            data_info,
+        );
+
+        // check if Other is longer than the first entry
+        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width {
+            let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
+            incoming_bar_len = width * incoming_proportion;
+            outgoing_bar_len = width * (1.0 - incoming_proportion);
+        }
+
+        // normalize smaller values
+        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
+            incoming_bar_len = 3.0;
+        }
+        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+            outgoing_bar_len = 3.0;
+        }
+
+        let content = Column::new()
+            .spacing(1)
+            .width(Length::Fixed(width))
+            .push(
+                Row::new()
+                    .push(Text::new(format!("{:?}", app)))
+                    .push(horizontal_space(Length::FillPortion(1)))
+                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
+                        data_info.tot_packets().to_string()
+                    } else {
+                        let mut bytes_string =
+                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
+                        bytes_string.push('B');
+                        bytes_string
+                    })),
+            )
+            .push(
+                Row::new()
+                    .push(
+                        Row::new()
+                            .padding(0)
+                            .width(Length::Fixed(incoming_bar_len))
+                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                                iced::theme::Rule,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Incoming),
+                            ))),
+                    )
+                    .push(
+                        Row::new()
+                            .padding(0)
+                            .width(Length::Fixed(outgoing_bar_len))
+                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                                iced::theme::Rule,
+                            >>::into(
+                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                            ))),
+                    ),
+            );
+
+        scroll_app = scroll_app.push(
+            button(content)
+                .padding([3, 0, 7, 0])
+                .on_press(Message::Search(SearchParameters {
+                    app: Some(*app),
+                    domain: None,
+                    country: None,
+                    as_name: None,
+                }))
+                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+        );
+    }
+    col_app = col_app.push(
+        Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
+            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            )),
+        ),
+    );
+
+    col_app
 }
 
 fn lazy_col_info(

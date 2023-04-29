@@ -45,17 +45,20 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
+    let (search_results, results_number, packets_number) = get_searched_entries(
+        &sniffer.info_traffic.clone(),
+        sniffer.search.clone(),
+        sniffer.page_number,
+    );
+
+    tab_and_body = tab_and_body.push(Text::new(format!("{}", packets_number)));
+
     let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
     col_report = col_report
         .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
         .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
     ;
     let mut scroll_report = Column::new();
-    let (search_results, results_number) = get_searched_entries(
-        &sniffer.info_traffic.clone(),
-        sniffer.search.clone(),
-        sniffer.page_number,
-    );
     for index in &search_results {
         let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
         let key_val = info_traffic_lock.map.get_index(*index).unwrap();

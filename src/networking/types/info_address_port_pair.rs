@@ -70,7 +70,15 @@ impl InfoAddressPortPair {
             r_dns
         } else {
             let parts: Vec<&str> = r_dns.split('.').collect();
-            parts.get(parts.len() - 2..).unwrap_or(&parts).concat()
+            parts
+                .get(parts.len() - 2..)
+                .unwrap_or(&parts)
+                .iter()
+                .fold(Vec::new(), |mut vec, part| {
+                    vec.push(part.to_string());
+                    vec
+                })
+                .join(".")
         };
 
         Host {

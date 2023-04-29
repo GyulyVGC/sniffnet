@@ -54,3 +54,11 @@ pub fn data_representation_translation(language: Language) -> Text<'static> {
         _ => format!("Data representation:"),
     })
 }
+
+pub fn host_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Network host",
+        Language::IT => "Host di rete",
+        _ => "Network host",
+    }
+}
