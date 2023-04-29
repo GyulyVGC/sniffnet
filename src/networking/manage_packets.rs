@@ -118,7 +118,7 @@ pub fn modify_or_insert_in_map(
     application_protocol: AppProtocol,
     country_db_reader: &Reader<&[u8]>,
     asn_db_reader: &Reader<&[u8]>,
-) {
+) -> InfoAddressPortPair {
     let now = Local::now();
     let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
     let mut info_traffic = info_traffic_mutex
@@ -138,7 +138,7 @@ pub fn modify_or_insert_in_map(
     };
     let is_already_featured = info_traffic.favorites_last_interval.contains(&index);
     let mut update_favorites_featured = false;
-    info_traffic
+    let new_info = info_traffic
         .map
         .entry(key)
         .and_modify(|info| {
@@ -164,19 +164,22 @@ pub fn modify_or_insert_in_map(
             r_dns: None,
             index,
             is_favorite: false,
-        });
+        })
+        .clone();
     info_traffic.addresses_last_interval.insert(index);
     if update_favorites_featured {
         info_traffic.favorites_last_interval.insert(index);
     }
+
+    new_info
 }
 
 pub fn reverse_dns_lookup(
     info_traffic: Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
-    mut val: InfoAddressPortPair,
+    traffic_type: TrafficType,
 ) {
-    let address_to_lookup = match val.traffic_type {
+    let address_to_lookup = match traffic_type {
         TrafficType::Outgoing => key.address2.clone(),
         _ => key.address1.clone(),
     };
@@ -185,50 +188,54 @@ pub fn reverse_dns_lookup(
     let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
 
     let mut info_traffic_lock = info_traffic.lock().unwrap();
-    if let Ok(r_dns) = lookup_result {
+    let new_info: InfoAddressPortPair = if let Ok(r_dns) = lookup_result {
         let actual_r_dns = Some(if !r_dns.is_empty() {
             r_dns
         } else {
             address_to_lookup
         });
-        val.r_dns = actual_r_dns.as_ref().cloned();
-
         info_traffic_lock
             .map
             .entry(key)
-            .and_modify(|info| info.r_dns = actual_r_dns);
+            .and_modify(|info| info.r_dns = actual_r_dns)
+            .or_insert(InfoAddressPortPair::default())
+            .clone()
     } else {
-        val.r_dns = Some(address_to_lookup.clone());
-        info_traffic_lock.map.entry(key.clone()).and_modify(|info| {
-            info.r_dns = Some(address_to_lookup);
-        });
-    }
+        info_traffic_lock
+            .map
+            .entry(key.clone())
+            .and_modify(|info| {
+                info.r_dns = Some(address_to_lookup);
+            })
+            .or_insert(InfoAddressPortPair::default())
+            .clone()
+    };
 
     // insert the newly discovered host in the collection, with the data it exchanged so far
     info_traffic_lock
         .hosts
-        .entry(val.get_host())
+        .entry(new_info.get_host())
         .and_modify(|data_info| {
-            if val.traffic_type == TrafficType::Outgoing {
-                data_info.outgoing_packets += val.transmitted_packets;
-                data_info.outgoing_bytes += val.transmitted_bytes;
+            if new_info.traffic_type == TrafficType::Outgoing {
+                data_info.outgoing_packets += new_info.transmitted_packets;
+                data_info.outgoing_bytes += new_info.transmitted_bytes;
             } else {
-                data_info.incoming_packets += val.transmitted_packets;
-                data_info.incoming_bytes += val.transmitted_bytes;
+                data_info.incoming_packets += new_info.transmitted_packets;
+                data_info.incoming_bytes += new_info.transmitted_bytes;
             }
         })
-        .or_insert(if val.traffic_type == TrafficType::Outgoing {
+        .or_insert(if new_info.traffic_type == TrafficType::Outgoing {
             DataInfo {
                 incoming_packets: 0,
-                outgoing_packets: val.transmitted_packets,
+                outgoing_packets: new_info.transmitted_packets,
                 incoming_bytes: 0,
-                outgoing_bytes: val.transmitted_bytes,
+                outgoing_bytes: new_info.transmitted_bytes,
             }
         } else {
             DataInfo {
-                incoming_packets: val.transmitted_packets,
+                incoming_packets: new_info.transmitted_packets,
                 outgoing_packets: 0,
-                incoming_bytes: val.transmitted_bytes,
+                incoming_bytes: new_info.transmitted_bytes,
                 outgoing_bytes: 0,
             }
         });

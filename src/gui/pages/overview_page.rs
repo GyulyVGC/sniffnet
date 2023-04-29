@@ -28,11 +28,12 @@ use crate::translations::translations::{
     application_protocol_translation, bytes_chart_translation, error_translation,
     filtered_bytes_no_percentage_translation, filtered_bytes_translation,
     filtered_packets_translation, network_adapter_translation, no_addresses_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    none_translation, packets_chart_translation, some_observed_translation,
+    traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
+    of_total_translation,
 };
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_open_report_tooltip,
@@ -305,8 +306,8 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .height(Length::Fill)
         .width(Length::Fill);
 
-    let col_host = col_host(700.0_f32, sniffer);
-    let col_app = col_app(250.0_f32, sniffer);
+    let col_host = col_host(700.0, sniffer);
+    let col_app = col_app(250.0, sniffer);
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
     //     col_report = col_report.push(
@@ -636,6 +637,17 @@ fn lazy_col_info(
             sniffer.language,
         ));
 
+    let dropped_text = if dropped > 0 {
+        let mut temp =
+            dropped_packets_translation(sniffer.language, &dropped.separate_with_spaces());
+        temp.push_str(&of_total_translation(
+            sniffer.language,
+            get_percentage_string(total, dropped as u128),
+        ));
+        temp
+    } else {
+        dropped_packets_translation(sniffer.language, &none_translation(sniffer.language))
+    };
     let mut col_bytes_packets = Column::new()
         .spacing(15)
         .push(
@@ -660,17 +672,8 @@ fn lazy_col_info(
                 &get_percentage_string(total, filtered),
             )
             .font(font),
-        );
-    if dropped > 0 {
-        col_bytes_packets = col_bytes_packets.push(
-            dropped_packets_translation(
-                sniffer.language,
-                &dropped.separate_with_spaces(),
-                &get_percentage_string(total, dropped as u128),
-            )
-            .font(font),
-        );
-    }
+        )
+        .push(Text::new(dropped_text).font(font));
 
     Column::new()
         .align_items(Alignment::Center)

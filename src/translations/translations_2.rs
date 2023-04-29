@@ -35,16 +35,20 @@ pub fn connection_details_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn dropped_packets_translation(
-    language: Language,
-    dropped: &str,
-    percentage: &str,
-) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => format!("Dropped packets:\n   {dropped} ({percentage} of the total)"),
-        Language::IT => format!("Pacchetti mancati:\n   {dropped} ({percentage} del totale)"),
-        _ => format!("Dropped packets:\n   {dropped} ({percentage} of the total)"),
-    })
+pub fn dropped_packets_translation(language: Language, dropped: &str) -> String {
+    match language {
+        Language::EN => format!("Dropped packets:\n   {dropped}"),
+        Language::IT => format!("Pacchetti mancati:\n   {dropped}"),
+        _ => format!("Dropped packets:\n   {dropped}"),
+    }
+}
+
+pub fn of_total_translation(language: Language, percentage: String) -> String {
+    match language {
+        Language::EN => format!(" ({percentage} of the total)"),
+        Language::IT => format!(" ({percentage} del totale)"),
+        _ => format!(" ({percentage} of the total)"),
+    }
 }
 
 pub fn data_representation_translation(language: Language) -> Text<'static> {

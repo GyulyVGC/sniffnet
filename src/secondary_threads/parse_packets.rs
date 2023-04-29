@@ -134,6 +134,7 @@ pub fn parse_packets(
                             transport_protocol,
                         );
 
+                        let mut new_info = InfoAddressPortPair::default();
                         if (network_layer_filter.eq(&IpVersion::Other)
                             || network_layer_filter.eq(&network_protocol))
                             && (transport_layer_filter.eq(&TransProtocol::Other)
@@ -141,9 +142,7 @@ pub fn parse_packets(
                             && (app_layer_filter.eq(&AppProtocol::Other)
                                 || app_layer_filter.eq(&application_protocol))
                         {
-                            // if (port1 >= lowest_port && port1 <= highest_port)
-                            //     || (port2 >= lowest_port && port2 <= highest_port) {
-                            modify_or_insert_in_map(
+                            new_info = modify_or_insert_in_map(
                                 info_traffic_mutex,
                                 key.clone(),
                                 mac_address1,
@@ -155,7 +154,6 @@ pub fn parse_packets(
                                 &asn_db_reader,
                             );
                             reported_packet = true;
-                            // }
                         }
 
                         let mut info_traffic = info_traffic_mutex
@@ -180,8 +178,6 @@ pub fn parse_packets(
                                 info_traffic.tot_received_bytes += exchanged_bytes;
                             }
 
-                            let new_info: InfoAddressPortPair =
-                                info_traffic.map.get(&key).unwrap().clone();
                             // check the rDNS status and act consequently
                             match (
                                 new_info.r_dns_already_requested(),
@@ -198,12 +194,15 @@ pub fn parse_packets(
 
                                     // launch new thread to resolve host name
                                     let key2 = key.clone();
-                                    let new_info2 = new_info.clone();
                                     let info_traffic2 = info_traffic_mutex.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
                                         .spawn(move || {
-                                            reverse_dns_lookup(info_traffic2, key2, new_info2);
+                                            reverse_dns_lookup(
+                                                info_traffic2,
+                                                key2,
+                                                new_info.traffic_type,
+                                            );
                                         })
                                         .unwrap();
                                 }
@@ -214,8 +213,10 @@ pub fn parse_packets(
                                 (true, true) => {
                                     // rDNS already resolved
                                     // update the corresponding host's data info
-                                    info_traffic.hosts.entry(new_info.get_host()).and_modify(
-                                        |data_info| {
+                                    info_traffic
+                                        .hosts
+                                        .entry(new_info.get_host())
+                                        .and_modify(|data_info| {
                                             if traffic_type == TrafficType::Outgoing {
                                                 data_info.outgoing_packets += 1;
                                                 data_info.outgoing_bytes += exchanged_bytes;
@@ -223,8 +224,24 @@ pub fn parse_packets(
                                                 data_info.incoming_packets += 1;
                                                 data_info.incoming_bytes += exchanged_bytes;
                                             }
-                                        },
-                                    );
+                                        })
+                                        .or_insert(
+                                            if new_info.traffic_type == TrafficType::Outgoing {
+                                                DataInfo {
+                                                    incoming_packets: 0,
+                                                    outgoing_packets: new_info.transmitted_packets,
+                                                    incoming_bytes: 0,
+                                                    outgoing_bytes: new_info.transmitted_bytes,
+                                                }
+                                            } else {
+                                                DataInfo {
+                                                    incoming_packets: new_info.transmitted_packets,
+                                                    outgoing_packets: 0,
+                                                    incoming_bytes: new_info.transmitted_bytes,
+                                                    outgoing_bytes: 0,
+                                                }
+                                            },
+                                        );
                                 }
                             }
 

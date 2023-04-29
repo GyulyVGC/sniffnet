@@ -1031,7 +1031,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn none_translation(language: Language) -> &'static str {
+pub fn none_translation(language: Language) -> String {
     match language {
         Language::EN => "none",
         Language::IT => "nessuno",
@@ -1049,6 +1049,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::EL => "κανένα",
         Language::FA => "هیچ کدام",
     }
+    .to_string()
 }
 
 pub fn yeti_night_translation(language: Language) -> &'static str {

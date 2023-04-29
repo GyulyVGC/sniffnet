@@ -48,6 +48,27 @@ pub struct InfoAddressPortPair {
     pub is_favorite: bool,
 }
 
+impl Default for InfoAddressPortPair {
+    fn default() -> Self {
+        Self {
+            mac_address1: String::new(),
+            mac_address2: String::new(),
+            transmitted_bytes: 0,
+            transmitted_packets: 0,
+            initial_timestamp: Default::default(),
+            final_timestamp: Default::default(),
+            app_protocol: AppProtocol::Other,
+            very_long_address: false,
+            traffic_type: TrafficType::Other,
+            country: String::new(),
+            asn: Default::default(),
+            r_dns: None,
+            index: 0,
+            is_favorite: false,
+        }
+    }
+}
+
 impl InfoAddressPortPair {
     pub fn print_gui(&self) -> String {
         self.to_string()
