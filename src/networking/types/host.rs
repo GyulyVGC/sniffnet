@@ -1,7 +1,7 @@
 use crate::networking::types::asn::Asn;
 
 /// Struct to represent a network host
-#[derive(Default)]
+#[derive(Default, PartialEq, Eq, Hash)]
 pub struct Host {
     /// Hostname (domain). Obtained from the reverse DNS.
     pub domain: String,

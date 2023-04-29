@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
+use dns_lookup::lookup_addr;
 use etherparse::{Ethernet2Header, IpHeader, TransportHeader};
 use maxminddb::Reader;
 use pcap::{Active, Capture, Device};
@@ -8,6 +9,7 @@ use pcap::{Active, Capture, Device};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::asn::Asn;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::asn::get_asn;
@@ -167,6 +169,71 @@ pub fn modify_or_insert_in_map(
     if update_favorites_featured {
         info_traffic.favorites_last_interval.insert(index);
     }
+}
+
+pub fn reverse_dns_lookup(
+    info_traffic: Arc<Mutex<InfoTraffic>>,
+    key: AddressPortPair,
+    mut val: InfoAddressPortPair,
+) {
+    let address_to_lookup = match val.traffic_type {
+        TrafficType::Outgoing => key.address2.clone(),
+        _ => key.address1.clone(),
+    };
+
+    // perform rDNS lookup
+    let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
+
+    let mut info_traffic_lock = info_traffic.lock().unwrap();
+    if let Ok(r_dns) = lookup_result {
+        let actual_r_dns = Some(if !r_dns.is_empty() {
+            r_dns
+        } else {
+            address_to_lookup
+        });
+        val.r_dns = actual_r_dns.as_ref().cloned();
+
+        info_traffic_lock
+            .map
+            .entry(key)
+            .and_modify(|info| info.r_dns = actual_r_dns);
+    } else {
+        val.r_dns = Some(address_to_lookup.clone());
+        info_traffic_lock.map.entry(key.clone()).and_modify(|info| {
+            info.r_dns = Some(address_to_lookup);
+        });
+    }
+
+    // insert the newly discovered host in the collection, with the data it exchanged so far
+    info_traffic_lock
+        .hosts
+        .entry(val.get_host())
+        .and_modify(|data_info| {
+            if val.traffic_type == TrafficType::Outgoing {
+                data_info.outgoing_packets += val.transmitted_packets;
+                data_info.outgoing_bytes += val.transmitted_bytes;
+            } else {
+                data_info.incoming_packets += val.transmitted_packets;
+                data_info.incoming_bytes += val.transmitted_bytes;
+            }
+        })
+        .or_insert(if val.traffic_type == TrafficType::Outgoing {
+            DataInfo {
+                incoming_packets: 0,
+                outgoing_packets: val.transmitted_packets,
+                incoming_bytes: 0,
+                outgoing_bytes: val.transmitted_bytes,
+            }
+        } else {
+            DataInfo {
+                incoming_packets: val.transmitted_packets,
+                outgoing_packets: 0,
+                incoming_bytes: val.transmitted_bytes,
+                outgoing_bytes: 0,
+            }
+        });
+
+    drop(info_traffic_lock);
 }
 
 /// Determines if the input address is a multicast address or not.

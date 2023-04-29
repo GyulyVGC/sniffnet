@@ -2,17 +2,19 @@
 //! inserting them in the shared map.
 
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 use etherparse::PacketHeaders;
 use pcap::{Active, Capture, Device};
 
 use crate::networking::manage_packets::{
     analyze_link_header, analyze_network_header, analyze_transport_header, is_broadcast_address,
-    is_multicast_address, modify_or_insert_in_map,
+    is_multicast_address, modify_or_insert_in_map, reverse_dns_lookup,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::countries::COUNTRY_MMDB;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
@@ -125,9 +127,9 @@ pub fn parse_packets(
                         }
 
                         let key: AddressPortPair = AddressPortPair::new(
-                            address1,
+                            address1.clone(),
                             port1,
-                            address2,
+                            address2.clone(),
                             port2,
                             transport_protocol,
                         );
@@ -143,7 +145,7 @@ pub fn parse_packets(
                             //     || (port2 >= lowest_port && port2 <= highest_port) {
                             modify_or_insert_in_map(
                                 info_traffic_mutex,
-                                key,
+                                key.clone(),
                                 mac_address1,
                                 mac_address2,
                                 exchanged_bytes,
@@ -168,6 +170,64 @@ pub fn parse_packets(
                         }
 
                         if reported_packet {
+                            if traffic_type == TrafficType::Outgoing {
+                                //increment number of sent packets and bytes
+                                info_traffic.tot_sent_packets += 1;
+                                info_traffic.tot_sent_bytes += exchanged_bytes;
+                            } else {
+                                //increment number of received packets and bytes
+                                info_traffic.tot_received_packets += 1;
+                                info_traffic.tot_received_bytes += exchanged_bytes;
+                            }
+
+                            let new_info: InfoAddressPortPair =
+                                info_traffic.map.get(&key).unwrap().clone();
+                            // check the rDNS status and act consequently
+                            match (
+                                new_info.r_dns_already_requested(),
+                                new_info.r_dns_already_resolved(),
+                            ) {
+                                (false, _) => {
+                                    // rDNS not requested yet (first occurrence of this key)
+
+                                    // Assign the r_dns field of this entry to an empty string (requested but not resolved yet).
+                                    // Useful to NOT perform again a rDNS lookup for this entry.
+                                    info_traffic.map.entry(key.clone()).and_modify(|info| {
+                                        info.r_dns = Some(String::new());
+                                    });
+
+                                    // launch new thread to resolve host name
+                                    let key2 = key.clone();
+                                    let new_info2 = new_info.clone();
+                                    let info_traffic2 = info_traffic_mutex.clone();
+                                    thread::Builder::new()
+                                        .name("thread_reverse_dns_lookup".to_string())
+                                        .spawn(move || {
+                                            reverse_dns_lookup(info_traffic2, key2, new_info2);
+                                        })
+                                        .unwrap();
+                                }
+                                (true, false) => {
+                                    // waiting for a previously requested rDNS resolution
+                                    // do nothing
+                                }
+                                (true, true) => {
+                                    // rDNS already resolved
+                                    // update the corresponding host's data info
+                                    info_traffic.hosts.entry(new_info.get_host()).and_modify(
+                                        |data_info| {
+                                            if traffic_type == TrafficType::Outgoing {
+                                                data_info.outgoing_packets += 1;
+                                                data_info.outgoing_bytes += exchanged_bytes;
+                                            } else {
+                                                data_info.incoming_packets += 1;
+                                                data_info.incoming_bytes += exchanged_bytes;
+                                            }
+                                        },
+                                    );
+                                }
+                            }
+
                             //increment the packet count for the sniffed app protocol
                             info_traffic
                                 .app_protocols
@@ -196,16 +256,6 @@ pub fn parse_packets(
                                         outgoing_bytes: 0,
                                     }
                                 });
-
-                            if traffic_type == TrafficType::Outgoing {
-                                //increment number of sent packets and bytes
-                                info_traffic.tot_sent_packets += 1;
-                                info_traffic.tot_sent_bytes += exchanged_bytes;
-                            } else {
-                                //increment number of received packets and bytes
-                                info_traffic.tot_received_packets += 1;
-                                info_traffic.tot_received_bytes += exchanged_bytes;
-                            }
                         }
                     }
                 }

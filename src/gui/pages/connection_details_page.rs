@@ -1,12 +1,9 @@
-use dns_lookup::lookup_addr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space};
-use std::sync::{Arc, Mutex};
-use std::thread;
 
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::types::element_type::ElementType;
@@ -14,11 +11,10 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations::hide_translation;
 use crate::translations::translations_2::connection_details_translation;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
-use crate::{InfoTraffic, Language, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -32,18 +28,6 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
     let key = key_val.0.clone();
     let val = key_val.1.clone();
     drop(info_traffic_lock);
-
-    if val.r_dns.is_none() {
-        let key2 = key.clone();
-        let val2 = val.clone();
-        let info_traffic = sniffer.info_traffic.clone();
-        thread::Builder::new()
-            .name("thread_reverse_dns_lookup".to_string())
-            .spawn(move || {
-                reverse_dns_lookup(info_traffic, key2, val2);
-            })
-            .unwrap();
-    }
 
     let header_and_content = Column::new()
         .width(Length::Fill)
@@ -141,38 +125,4 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
-}
-
-fn reverse_dns_lookup(
-    info_traffic: Arc<Mutex<InfoTraffic>>,
-    key: AddressPortPair,
-    val: InfoAddressPortPair,
-) {
-    // Assign the r_dns field of this entry to an empty string.
-    // Useful to NOT perform again a rDNS lookup for this entry.
-    info_traffic
-        .lock()
-        .unwrap()
-        .map
-        .entry(key.clone())
-        .and_modify(|info| {
-            info.r_dns = Some(String::new());
-        });
-
-    let address_to_lookup = match val.traffic_type {
-        TrafficType::Outgoing => key.address2.clone(),
-        _ => key.address1.clone(),
-    };
-
-    let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
-    if let Ok(r_dns) = lookup_result {
-        info_traffic
-            .lock()
-            .unwrap()
-            .map
-            .entry(key)
-            .and_modify(|info| {
-                info.r_dns = Some(r_dns);
-            });
-    }
 }

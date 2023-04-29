@@ -2,6 +2,7 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
+use std::net::IpAddr;
 use std::ops::Add;
 
 use chrono::{DateTime, Local};
@@ -62,8 +63,18 @@ impl InfoAddressPortPair {
             return Host::default();
         }
 
+        let r_dns = self.r_dns.as_ref().unwrap().clone();
+
+        let domain = if r_dns.parse::<IpAddr>().is_ok() {
+            // rDNS is equal to the corresponding IP address
+            r_dns
+        } else {
+            let parts: Vec<&str> = r_dns.split('.').collect();
+            parts.get(parts.len() - 2..).unwrap_or(&parts).concat()
+        };
+
         Host {
-            domain: self.r_dns.as_ref().unwrap().clone(),
+            domain,
             asn: self.asn.clone(),
             country: self.country.clone(),
         }
