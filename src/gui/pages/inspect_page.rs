@@ -6,12 +6,13 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
-use crate::utils::formatted_strings::get_connection_color;
-use crate::{RunningPage, Sniffer, StyleType};
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
-use iced::{alignment, Alignment, Length};
+use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
+use crate::{Language, RunningPage, Sniffer, StyleType};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::{alignment, Alignment, Font, Length};
 use iced_native::widget::scrollable::Properties;
-use iced_native::widget::{button, horizontal_space};
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::{button, horizontal_space, Rule};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
@@ -56,7 +57,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
     col_report = col_report
         .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
-        .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
+        .push(Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+            sniffer.style,
+            ElementType::Standard,
+        ))))
     ;
     let mut scroll_report = Column::new();
     for index in &search_results {
@@ -105,19 +109,32 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             )),
     ));
 
-    let start_entry_num = (sniffer.page_number - 1) * 15 + 1;
+    let start_entry_num = (sniffer.page_number - 1) * 10 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     body = body
         .push(
-            Row::new().push(
-                Container::new(col_report)
-                    .padding([10, 7, 7, 7])
-                    .height(Length::Fixed(380.0))
-                    .width(Length::Fixed(1050.0))
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(sniffer.style, ElementType::BorderedRound),
-                    )),
-            ),
+            Row::new()
+                .spacing(15)
+                .align_items(Alignment::Center)
+                .width(Length::Fill)
+                .push(horizontal_space(Length::FillPortion(1)))
+                .push(
+                    Container::new(col_report)
+                        .padding([10, 7, 7, 7])
+                        .height(Length::Fixed(310.0))
+                        .width(Length::Fixed(1050.0))
+                        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                            StyleTuple(sniffer.style, ElementType::BorderedRound),
+                        )),
+                )
+                .push(
+                    Container::new(get_button_open_report(
+                        sniffer.style,
+                        sniffer.language,
+                        font,
+                    ))
+                    .width(Length::FillPortion(1)),
+                ),
         )
         .push(
             Row::new()
@@ -132,7 +149,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                     "Showing {start_entry_num}-{end_entry_num} of {results_number} total results",
                 )))
                 .push(
-                    if sniffer.page_number < f32::ceil(results_number as f32 / 15.0) as usize {
+                    if sniffer.page_number < f32::ceil(results_number as f32 / 10.0) as usize {
                         Container::new(get_button_change_page(sniffer.style, true).width(30.0))
                     } else {
                         Container::new(horizontal_space(30.0))
@@ -174,4 +191,29 @@ fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, 
     .width(Length::Fixed(30.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::UpdatePageNumber(increment))
+}
+
+fn get_button_open_report(
+    style: StyleType,
+    language: Language,
+    font: Font,
+) -> Tooltip<'static, Message> {
+    let content = button(
+        Text::new('8'.to_string())
+            .font(ICONS)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center),
+    )
+    .padding(10)
+    .height(Length::Fixed(50.0))
+    .width(Length::Fixed(75.0))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::OpenReport);
+
+    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
+        .gap(5)
+        .font(font)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }

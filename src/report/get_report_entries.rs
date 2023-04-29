@@ -88,10 +88,10 @@ pub fn get_searched_entries(
             key_val.1.index
         })
         .collect();
-    let upper_bound = min(page_number * 15, all_results.len());
+    let upper_bound = min(page_number * 10, all_results.len());
 
     (
-        all_results[(page_number - 1) * 15..upper_bound].to_vec(),
+        all_results[(page_number - 1) * 10..upper_bound].to_vec(),
         all_results.len(),
         tot_searched_packets,
     )

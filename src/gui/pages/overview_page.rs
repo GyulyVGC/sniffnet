@@ -4,11 +4,10 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text};
 use iced::Length::{Fill, FillPortion};
-use iced::{alignment, Alignment, Font, Length};
+use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
-use iced_native::widget::tooltip::Position;
 use iced_native::widget::{horizontal_space, Rule};
 use pcap::Device;
 use thousands::Separable;
@@ -36,10 +35,9 @@ use crate::translations::translations_2::{
     of_total_translation,
 };
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_formatted_bytes_string, get_open_report_tooltip,
-    get_percentage_string,
+    get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
 };
-use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
+use crate::{AppProtocol, ChartType, Language, RunningPage};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -176,20 +174,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(col_chart),
                     )
                     .push(
-                        Container::new(
-                            Row::new()
-                                .spacing(15)
-                                .align_items(Alignment::Center)
-                                .width(Length::Fill)
-                                .push(row_report)
-                                .push(get_button_open_report(
-                                    sniffer.style,
-                                    sniffer.language,
-                                    font,
-                                )),
-                        )
-                        .align_x(Horizontal::Center)
-                        .height(FillPortion(4)),
+                        Container::new(row_report)
+                            .align_x(Horizontal::Center)
+                            .height(FillPortion(4)),
                     );
             }
         }
@@ -299,14 +286,12 @@ fn body_pcap_error(
 }
 
 fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
-    let font = get_font(sniffer.style);
-
-    let mut row_host_app = Row::new()
+    let mut row_report = Row::new()
         .padding(10)
         .height(Length::Fill)
         .width(Length::Fill);
 
-    let col_host = col_host(700.0, sniffer);
+    let col_host = col_host(800.0, sniffer);
     let col_app = col_app(250.0, sniffer);
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
@@ -383,7 +368,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     //     col_report = col_report.push(Container::new(
     //     ));
     // };
-    row_host_app = row_host_app
+    row_report = row_report
         .push(col_host)
         .push(
             Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
@@ -394,9 +379,9 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .push(col_app);
 
     Row::new().push(
-        Container::new(row_host_app)
+        Container::new(row_report)
             .height(Length::Fill)
-            .width(Length::Fixed(1080.0))
+            .width(Length::Fixed(1170.0))
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(sniffer.style, ElementType::BorderedRound),
             )),
@@ -648,7 +633,7 @@ fn lazy_col_info(
     } else {
         dropped_packets_translation(sniffer.language, &none_translation(sniffer.language))
     };
-    let mut col_bytes_packets = Column::new()
+    let col_bytes_packets = Column::new()
         .spacing(15)
         .push(
             if dropped > 0 {
@@ -702,31 +687,6 @@ fn lazy_col_info(
                     StyleTuple(sniffer.style, ElementType::Standard),
                 )),
         )
-}
-
-fn get_button_open_report(
-    style: StyleType,
-    language: Language,
-    font: Font,
-) -> Tooltip<'static, Message> {
-    let content = button(
-        Text::new('8'.to_string())
-            .font(ICONS)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .padding(10)
-    .height(Length::Fixed(50.0))
-    .width(Length::Fixed(75.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::OpenReport);
-
-    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
-        .gap(5)
-        .font(font)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
-        ))
 }
 
 fn get_bars_length(
