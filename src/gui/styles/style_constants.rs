@@ -194,10 +194,10 @@ pub const ICONS: Font = Font::External {
 };
 
 // palettes pictures
-pub const YETI_DAY: &[u8] = include_bytes!("../../../resources/palettes/YetiDay.png");
-pub const YETI_NIGHT: &[u8] = include_bytes!("../../../resources/palettes/YetiNight.png");
-pub const DEEP_SEA: &[u8] = include_bytes!("../../../resources/palettes/DeepSea.png");
-pub const MON_AMOUR: &[u8] = include_bytes!("../../../resources/palettes/MonAmour.png");
+pub const YETI_DAY: &[u8] = include_bytes!("../../../resources/palettes/YetiDay.svg");
+pub const YETI_NIGHT: &[u8] = include_bytes!("../../../resources/palettes/YetiNight.svg");
+pub const DEEP_SEA: &[u8] = include_bytes!("../../../resources/palettes/DeepSea.svg");
+pub const MON_AMOUR: &[u8] = include_bytes!("../../../resources/palettes/MonAmour.svg");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 18.0;
