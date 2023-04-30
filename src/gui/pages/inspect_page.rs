@@ -5,7 +5,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH};
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip};
@@ -80,14 +80,17 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             entry_row = entry_row
                 .push(
                     Text::new("?")
-                        .width(Length::Fixed(FLAGS_WIDTH))
+                        .width(Length::Fixed(FLAGS_WIDTH_SMALL))
                         .style(iced::theme::Text::Color(entry_color))
                         .font(SARASA_MONO_SC_BOLD),
                 )
                 .push(Text::new("    "));
         } else {
             entry_row = entry_row
-                .push(get_flag_from_country_code(&key_val.1.country))
+                .push(get_flag_from_country_code(
+                    &key_val.1.country,
+                    FLAGS_WIDTH_SMALL,
+                ))
                 .push(Text::new("  "));
         }
 

@@ -25,7 +25,7 @@ use crate::translations::translations::{
     only_last_30_translation, outgoing_translation, packets_exceeded_translation,
     packets_exceeded_value_translation, per_second_translation, threshold_translation,
 };
-use crate::utils::countries::get_flag_from_country_code;
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
@@ -318,30 +318,16 @@ fn favorite_notification_log(
     style: StyleType,
 ) -> Container<'static, Message> {
     let font = get_font(style);
-    let traffic_type = logged_notification.connection.1.traffic_type;
-    let country = logged_notification.connection.1.country;
-    let src_str = format!("Src: {}", logged_notification.connection.0.address1);
-    let dst_str = format!("Dst: {}", logged_notification.connection.0.address2);
-    let mut app_str = application_protocol_translation(language).to_string();
-    app_str.push_str(&format!(
-        ": {:?}",
-        logged_notification.connection.1.app_protocol
-    ));
-    let mut row_src_flag = Row::new()
-        .align_items(Alignment::Center)
-        .spacing(5)
-        .push(Text::new(src_str).font(font));
-    let mut row_dst_flag = Row::new()
-        .align_items(Alignment::Center)
-        .spacing(5)
-        .push(Text::new(dst_str).font(font));
+    let domain = logged_notification.host.domain;
+    let country = logged_notification.host.country;
+    let asn = logged_notification.host.asn;
+    let details_str = format!("{domain} - {}", asn.name);
+    let mut row_flag_details = Row::new().align_items(Alignment::Center).spacing(5);
     if !country.is_empty() {
-        if traffic_type.eq(&TrafficType::Outgoing) {
-            row_dst_flag = row_dst_flag.push(get_flag_from_country_code(&country));
-        } else {
-            row_src_flag = row_src_flag.push(get_flag_from_country_code(&country));
-        }
+        row_flag_details =
+            row_flag_details.push(get_flag_from_country_code(&country, FLAGS_WIDTH_BIG));
     }
+    row_flag_details = row_flag_details.push(Text::new(details_str).font(font));
     let content = Row::new()
         .spacing(30)
         .align_items(Alignment::Center)
@@ -374,9 +360,7 @@ fn favorite_notification_log(
             Column::new()
                 .spacing(7)
                 .width(Length::Fill)
-                .push(row_src_flag)
-                .push(row_dst_flag)
-                .push(Text::new(app_str).font(font)),
+                .push(row_flag_details),
         );
     Container::new(content)
         .height(Length::Fixed(120.0))

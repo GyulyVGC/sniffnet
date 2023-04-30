@@ -17,6 +17,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::{Notification, Notifications};
@@ -136,7 +137,7 @@ impl Sniffer {
                 self.traffic_chart.change_colors(self.style);
             }
             Message::Waiting => self.update_waiting_dots(),
-            Message::AddOrRemoveFavorite(index, add) => self.add_or_remove_favorite(index, add),
+            Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(host, add),
             Message::ShowModal(modal) => {
                 if self.settings_page.is_none() && self.modal.is_none() {
                     self.modal = Some(modal);
@@ -340,15 +341,15 @@ impl Sniffer {
         self.waiting = ".".repeat(self.waiting.len() + 1);
     }
 
-    fn add_or_remove_favorite(&mut self, index: usize, add: bool) {
+    fn add_or_remove_favorite(&mut self, host: Host, add: bool) {
         let mut info_traffic = self.info_traffic.lock().unwrap();
         if add {
-            info_traffic.favorite_connections.insert(index);
+            info_traffic.favorite_hosts.insert(host.clone());
         } else {
-            info_traffic.favorite_connections.remove(&index);
+            info_traffic.favorite_hosts.remove(&host);
         }
-        if let Some(key_val) = info_traffic.map.get_index_mut(index) {
-            key_val.1.is_favorite = add;
+        if let Some(host_info) = info_traffic.hosts.get_mut(&host) {
+            host_info.1 = add;
         }
         drop(info_traffic);
     }
@@ -475,6 +476,7 @@ mod tests {
     use crate::gui::styles::style_constants::get_color_mix_chart;
     use crate::gui::styles::types::palette::to_rgb_color;
     use crate::gui::types::message::Message;
+    use crate::networking::types::host::Host;
     use crate::notifications::types::logged_notification::{
         LoggedNotification, PacketsThresholdExceeded,
     };
@@ -735,63 +737,187 @@ mod tests {
             Arc::new(Mutex::new(Err(String::new()))),
         );
         // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "1.1".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
             HashSet::new()
         );
         // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(2, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
             HashSet::new()
         );
         // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(2, true));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            true,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([2])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string()
+            }])
         );
         // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "1.1".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([2])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string()
+            }])
         );
         // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(2, true));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            true,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([2])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string()
+            }])
         );
         // add 1
-        sniffer.update(Message::AddOrRemoveFavorite(1, true));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "1.1".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            true,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([1, 2])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([
+                Host {
+                    domain: "1.1".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                },
+                Host {
+                    domain: "2.2".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                }
+            ])
         );
         // add 3
-        sniffer.update(Message::AddOrRemoveFavorite(3, true));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "3.3".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            true,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([1, 2, 3])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([
+                Host {
+                    domain: "1.1".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                },
+                Host {
+                    domain: "2.2".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                },
+                Host {
+                    domain: "3.3".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                }
+            ])
         );
         // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(2, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "2.2".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([1, 3])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([
+                Host {
+                    domain: "1.1".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                },
+                Host {
+                    domain: "3.3".to_string(),
+                    asn: Default::default(),
+                    country: "US".to_string()
+                }
+            ])
         );
         // remove 3
-        sniffer.update(Message::AddOrRemoveFavorite(3, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "3.3".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
-            HashSet::from([1])
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            HashSet::from([Host {
+                domain: "1.1".to_string(),
+                asn: Default::default(),
+                country: "US".to_string()
+            }])
         );
         // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(1, false));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            Host {
+                domain: "1.1".to_string(),
+                asn: Default::default(),
+                country: "US".to_string(),
+            },
+            false,
+        ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_connections,
+            sniffer.info_traffic.lock().unwrap().favorite_hosts,
             HashSet::new()
         );
     }

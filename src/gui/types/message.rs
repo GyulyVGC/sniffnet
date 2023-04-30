@@ -1,6 +1,7 @@
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
 use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
@@ -24,8 +25,8 @@ pub enum Message {
     ChartSelection(ChartType),
     /// Select report type to be displayed
     ReportSelection(ReportType),
-    /// Adds or removes the given connection into/from the favorites
-    AddOrRemoveFavorite(usize, bool),
+    /// Adds or removes the given host into/from the favorites
+    AddOrRemoveFavorite(Host, bool),
     /// Open Sniffnet's complete textual report
     OpenReport,
     /// Open Sniffnet's GitHub main page if true is passed, latest release page otherwise

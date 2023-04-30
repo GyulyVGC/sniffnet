@@ -216,7 +216,7 @@ pub fn parse_packets(
                                     info_traffic
                                         .hosts
                                         .entry(new_info.get_host())
-                                        .and_modify(|data_info| {
+                                        .and_modify(|(data_info, _)| {
                                             if traffic_type == TrafficType::Outgoing {
                                                 data_info.outgoing_packets += 1;
                                                 data_info.outgoing_bytes += exchanged_bytes;
@@ -227,19 +227,27 @@ pub fn parse_packets(
                                         })
                                         .or_insert(
                                             if new_info.traffic_type == TrafficType::Outgoing {
-                                                DataInfo {
-                                                    incoming_packets: 0,
-                                                    outgoing_packets: new_info.transmitted_packets,
-                                                    incoming_bytes: 0,
-                                                    outgoing_bytes: new_info.transmitted_bytes,
-                                                }
+                                                (
+                                                    DataInfo {
+                                                        incoming_packets: 0,
+                                                        outgoing_packets: new_info
+                                                            .transmitted_packets,
+                                                        incoming_bytes: 0,
+                                                        outgoing_bytes: new_info.transmitted_bytes,
+                                                    },
+                                                    false,
+                                                )
                                             } else {
-                                                DataInfo {
-                                                    incoming_packets: new_info.transmitted_packets,
-                                                    outgoing_packets: 0,
-                                                    incoming_bytes: new_info.transmitted_bytes,
-                                                    outgoing_bytes: 0,
-                                                }
+                                                (
+                                                    DataInfo {
+                                                        incoming_packets: new_info
+                                                            .transmitted_packets,
+                                                        outgoing_packets: 0,
+                                                        incoming_bytes: new_info.transmitted_bytes,
+                                                        outgoing_bytes: 0,
+                                                    },
+                                                    false,
+                                                )
                                             },
                                         );
                                 }

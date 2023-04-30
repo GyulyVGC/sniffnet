@@ -44,8 +44,6 @@ pub struct InfoAddressPortPair {
     pub r_dns: Option<String>,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
-    /// Flag that indicates if this connection is marked as favourite
-    pub is_favorite: bool,
 }
 
 impl Default for InfoAddressPortPair {
@@ -64,7 +62,6 @@ impl Default for InfoAddressPortPair {
             asn: Default::default(),
             r_dns: None,
             index: 0,
-            is_favorite: false,
         }
     }
 }
@@ -86,7 +83,7 @@ impl InfoAddressPortPair {
 
         let r_dns = self.r_dns.as_ref().unwrap().clone();
 
-        let domain = if r_dns.parse::<IpAddr>().is_ok() {
+        let domain = if r_dns.parse::<IpAddr>().is_ok() || r_dns.is_empty() {
             // rDNS is equal to the corresponding IP address
             r_dns
         } else {

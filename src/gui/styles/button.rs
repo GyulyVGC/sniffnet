@@ -27,7 +27,7 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::Starred) => STARRED,
                 StyleTuple(_, ElementType::Badge) => colors.secondary,
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
-                StyleTuple(_, ElementType::Neutral) => Color::TRANSPARENT,
+                StyleTuple(_, ElementType::Neutral | ElementType::NotStarred) => Color::TRANSPARENT,
                 StyleTuple(_, ElementType::BorderedRoundSelected) => {
                     mix_colors(colors.primary, colors.buttons)
                 }
@@ -41,6 +41,7 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }
+                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0,
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
@@ -49,6 +50,7 @@ impl button::StyleSheet for StyleTuple {
                     ElementType::TabActive
                     | ElementType::TabInactive
                     | ElementType::Starred
+                    | ElementType::NotStarred
                     | ElementType::Neutral
                     | ElementType::Badge,
                 ) => 0.0,
@@ -89,6 +91,7 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
                     12.0
                 }
+                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0,
                 _ => BORDER_BUTTON_RADIUS,
             },
             border_width: match self {
@@ -103,9 +106,10 @@ impl button::StyleSheet for StyleTuple {
             },
             border_color: match self {
                 StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
-                StyleTuple(_, ElementType::BorderedRound | ElementType::Neutral) => {
-                    colors.round_borders
-                }
+                StyleTuple(
+                    _,
+                    ElementType::BorderedRound | ElementType::Neutral | ElementType::NotStarred,
+                ) => colors.round_borders,
                 _ => colors.secondary,
             },
             text_color: match self {

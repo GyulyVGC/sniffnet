@@ -1,4 +1,5 @@
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::ByteMultiple;
 
@@ -31,6 +32,6 @@ pub struct BytesThresholdExceeded {
 
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
-    pub(crate) connection: (AddressPortPair, InfoAddressPortPair),
+    pub(crate) host: Host,
     pub(crate) timestamp: String,
 }

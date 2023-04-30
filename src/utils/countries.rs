@@ -29,7 +29,8 @@ pub fn get_country_code(
     String::new()
 }
 
-pub const FLAGS_WIDTH: f32 = 15.0;
+pub const FLAGS_WIDTH_SMALL: f32 = 15.0;
+pub const FLAGS_WIDTH_BIG: f32 = 37.5;
 
 pub const AD: &[u8] = include_bytes!("../../resources/countries_flags/4x3/ad.svg");
 pub const AE: &[u8] = include_bytes!("../../resources/countries_flags/4x3/ae.svg");
@@ -302,10 +303,10 @@ pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
         "FA" => IR,
         _ => UNKNOWN,
     })))
-    .width(Length::Fixed(FLAGS_WIDTH))
+    .width(Length::Fixed(FLAGS_WIDTH_SMALL))
 }
 
-pub fn get_flag_from_country_code(country: &str) -> Svg<Renderer> {
+pub fn get_flag_from_country_code(country: &str, width: f32) -> Svg<Renderer> {
     #![allow(clippy::too_many_lines)]
     Svg::new(Handle::from_memory(Vec::from(match country {
         "AD" => AD,
@@ -559,5 +560,5 @@ pub fn get_flag_from_country_code(country: &str) -> Svg<Renderer> {
         "ZW" => ZW,
         _ => UNKNOWN,
     })))
-    .width(Length::Fixed(FLAGS_WIDTH))
+    .width(Length::Fixed(width))
 }

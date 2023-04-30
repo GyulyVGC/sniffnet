@@ -136,18 +136,14 @@ pub fn modify_or_insert_in_map(
         // this key already occurred
         (String::new(), Asn::default())
     };
-    let is_already_featured = info_traffic.favorites_last_interval.contains(&index);
-    let mut update_favorites_featured = false;
-    let new_info = info_traffic
+
+    let new_info: InfoAddressPortPair = info_traffic
         .map
         .entry(key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = now;
-            if info.is_favorite && !is_already_featured {
-                update_favorites_featured = true;
-            }
         })
         .or_insert(InfoAddressPortPair {
             mac_address1,
@@ -163,12 +159,14 @@ pub fn modify_or_insert_in_map(
             asn,
             r_dns: None,
             index,
-            is_favorite: false,
         })
         .clone();
+
     info_traffic.addresses_last_interval.insert(index);
-    if update_favorites_featured {
-        info_traffic.favorites_last_interval.insert(index);
+
+    let host = new_info.get_host();
+    if info_traffic.favorite_hosts.contains(&host) {
+        info_traffic.favorites_last_interval.insert(host);
     }
 
     new_info
@@ -215,7 +213,7 @@ pub fn reverse_dns_lookup(
     info_traffic_lock
         .hosts
         .entry(new_info.get_host())
-        .and_modify(|data_info| {
+        .and_modify(|(data_info, _)| {
             if new_info.traffic_type == TrafficType::Outgoing {
                 data_info.outgoing_packets += new_info.transmitted_packets;
                 data_info.outgoing_bytes += new_info.transmitted_bytes;
@@ -225,19 +223,25 @@ pub fn reverse_dns_lookup(
             }
         })
         .or_insert(if new_info.traffic_type == TrafficType::Outgoing {
-            DataInfo {
-                incoming_packets: 0,
-                outgoing_packets: new_info.transmitted_packets,
-                incoming_bytes: 0,
-                outgoing_bytes: new_info.transmitted_bytes,
-            }
+            (
+                DataInfo {
+                    incoming_packets: 0,
+                    outgoing_packets: new_info.transmitted_packets,
+                    incoming_bytes: 0,
+                    outgoing_bytes: new_info.transmitted_bytes,
+                },
+                false,
+            )
         } else {
-            DataInfo {
-                incoming_packets: new_info.transmitted_packets,
-                outgoing_packets: 0,
-                incoming_bytes: new_info.transmitted_bytes,
-                outgoing_bytes: 0,
-            }
+            (
+                DataInfo {
+                    incoming_packets: new_info.transmitted_packets,
+                    outgoing_packets: 0,
+                    incoming_bytes: new_info.transmitted_bytes,
+                    outgoing_bytes: 0,
+                },
+                false,
+            )
         });
 
     drop(info_traffic_lock);

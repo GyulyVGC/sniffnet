@@ -34,6 +34,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     of_total_translation,
 };
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
 };
@@ -134,12 +135,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
 
                 let active_radio_report = sniffer.report_type;
-                let num_favorites = sniffer
-                    .info_traffic
-                    .lock()
-                    .unwrap()
-                    .favorite_connections
-                    .len();
+                let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
                 let row_report = lazy(
                     (
                         filtered,
@@ -291,7 +287,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .height(Length::Fill)
         .width(Length::Fill);
 
-    let col_host = col_host(800.0, sniffer);
+    let col_host = col_host(840.0, sniffer);
     let col_app = col_app(250.0, sniffer);
 
     // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
@@ -393,7 +389,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_host = Column::new()
-        .width(Length::Fixed(width + 20.0))
+        .width(Length::Fixed(width + 11.0))
         .push(
             Text::new(host_translation(sniffer.language))
                 .font(font)
@@ -404,13 +400,36 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     let mut scroll_host = Column::new().width(Length::Fixed(width));
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
-    for (host, data_info) in &entries {
+    for (host, (data_info, is_favorite)) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width,
+            width * 0.85,
             chart_type,
-            entries.get(0).unwrap().1.clone(),
+            entries.get(0).unwrap().1 .0.clone(),
             data_info,
         );
+
+        let star_button = button(
+            Text::new('g'.to_string())
+                .font(ICONS)
+                .size(20)
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        )
+        .padding(0)
+        .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
+        .width(Length::Fixed(FLAGS_WIDTH_BIG))
+        .style(
+            StyleTuple(
+                sniffer.style,
+                if *is_favorite {
+                    ElementType::Starred
+                } else {
+                    ElementType::NotStarred
+                },
+            )
+            .into(),
+        )
+        .on_press(Message::AddOrRemoveFavorite(host.clone(), !*is_favorite));
 
         // normalize smaller values
         if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
@@ -420,7 +439,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             outgoing_bar_len = 3.0;
         }
 
-        let content = Column::new()
+        let host_bar = Column::new()
             .width(Length::Fixed(width))
             .spacing(1)
             .push(
@@ -429,7 +448,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     .push(Text::new(if host.asn.name.is_empty() {
                         String::new()
                     } else {
-                        format!(" (operated by {})", host.asn.name)
+                        format!(" - {}", host.asn.name)
                     }))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(Text::new(if chart_type.eq(&ChartType::Packets) {
@@ -465,9 +484,16 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     ),
             );
 
+        let content = Row::new()
+            .align_items(Alignment::Center)
+            .spacing(5)
+            .push(star_button)
+            .push(get_flag_from_country_code(&host.country, FLAGS_WIDTH_BIG))
+            .push(host_bar);
+
         scroll_host = scroll_host.push(
             button(content)
-                .padding([3, 0, 7, 0])
+                .padding([5, 15, 5, 10])
                 .on_press(Message::Search(SearchParameters {
                     app: None,
                     domain: Some(host.domain.clone()),
@@ -494,7 +520,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_app = Column::new()
-        .width(Length::Fixed(width + 20.0))
+        .width(Length::Fixed(width + 11.0))
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
@@ -507,7 +533,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
     for (app, data_info) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width,
+            width * 0.85,
             chart_type,
             entries.get(0).unwrap().1.clone(),
             data_info,
@@ -570,7 +596,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
         scroll_app = scroll_app.push(
             button(content)
-                .padding([3, 0, 7, 0])
+                .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
                     app: Some(*app),
                     domain: None,
