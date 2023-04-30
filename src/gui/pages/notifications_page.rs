@@ -14,18 +14,17 @@ use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::translations::translations::{
-    application_protocol_translation, bytes_exceeded_translation, bytes_exceeded_value_translation,
+    bytes_exceeded_translation, bytes_exceeded_value_translation,
     clear_all_translation, favorite_transmitted_translation, incoming_translation,
     no_notifications_received_translation, no_notifications_set_translation,
     only_last_30_translation, outgoing_translation, packets_exceeded_translation,
     packets_exceeded_value_translation, per_second_translation, threshold_translation,
 };
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL};
+use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 

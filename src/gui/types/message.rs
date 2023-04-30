@@ -75,4 +75,6 @@ pub enum Message {
     Search(SearchParameters),
     /// Update page result number in inspect
     UpdatePageNumber(bool),
+    /// Left (false) or Right (true) arrow key has been pressed
+    ArrowPressed(bool),
 }

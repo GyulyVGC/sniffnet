@@ -147,6 +147,16 @@ impl Application for Sniffer {
                     key_code: iced_native::keyboard::KeyCode::D,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::CtrlDPressed),
+                // left arrow => one page before the current one
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Left,
+                    ..
+                }) => Some(Message::ArrowPressed(false)),
+                // right arrow => one page after the current one
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Right,
+                    ..
+                }) => Some(Message::ArrowPressed(true)),
                 _ => None,
             });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {

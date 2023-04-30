@@ -66,3 +66,11 @@ pub fn host_translation(language: Language) -> &'static str {
         _ => "Network host",
     }
 }
+
+pub fn only_top_30_hosts(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Only the top 30 hosts are displayed here",
+        Language::IT => "Solo i maggiori 30 host sono mostrati qui",
+        _ => "Only the top 30 hosts are displayed here",
+    }
+}

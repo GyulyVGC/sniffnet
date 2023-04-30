@@ -4,9 +4,8 @@ use std::sync::{Arc, Mutex};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::host::Host;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::search_parameters::SearchParameters;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportType};
+use crate::{AppProtocol, ChartType, InfoTraffic};
 
 // pub fn get_report_entries(
 //     info_traffic: &Arc<Mutex<InfoTraffic>>,
@@ -91,7 +90,10 @@ pub fn get_searched_entries(
     let upper_bound = min(page_number * 10, all_results.len());
 
     (
-        all_results[(page_number - 1) * 10..upper_bound].to_vec(),
+        all_results
+            .get((page_number - 1) * 10..upper_bound)
+            .unwrap_or(&Vec::new())
+            .to_vec(),
         all_results.len(),
         tot_searched_packets,
     )

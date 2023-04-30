@@ -22,6 +22,7 @@ use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::{Notification, Notifications};
 use crate::notifications::types::sound::{play, Sound};
+use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_type::ReportType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
@@ -190,6 +191,35 @@ impl Sniffer {
             Message::UpdatePageNumber(increment) => {
                 let new_page = self.page_number as i16 + if increment { 1 } else { -1 };
                 self.page_number = new_page as usize;
+            }
+            Message::ArrowPressed(increment) => {
+                if self.running_page.eq(&RunningPage::Inspect)
+                    && self.settings_page.is_none()
+                    && self.modal.is_none()
+                {
+                    match increment {
+                        true => {
+                            if self.page_number
+                                < f32::ceil(
+                                    get_searched_entries(
+                                        &self.info_traffic,
+                                        self.search.clone(),
+                                        self.page_number,
+                                    )
+                                    .1 as f32
+                                        / 10.0,
+                                ) as usize
+                            {
+                                return self.update(Message::UpdatePageNumber(increment));
+                            }
+                        }
+                        false => {
+                            if self.page_number > 1 {
+                                return self.update(Message::UpdatePageNumber(increment));
+                            }
+                        }
+                    }
+                }
             }
         }
         Command::none()

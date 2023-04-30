@@ -30,10 +30,7 @@ use crate::translations::translations::{
     none_translation, packets_chart_translation, some_observed_translation,
     traffic_rate_translation, waiting_translation,
 };
-use crate::translations::translations_2::{
-    data_representation_translation, dropped_packets_translation, host_translation,
-    of_total_translation,
-};
+use crate::translations::translations_2::{data_representation_translation, dropped_packets_translation, host_translation, of_total_translation, only_top_30_hosts};
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
@@ -397,12 +394,12 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         )
         .push(vertical_space(Length::Fixed(10.0)));
 
-    let mut scroll_host = Column::new().width(Length::Fixed(width));
+    let mut scroll_host = Column::new().width(Length::Fixed(width)).align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
     for (host, (data_info, is_favorite)) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width * 0.85,
+            width * 0.86,
             chart_type,
             entries.get(0).unwrap().1 .0.clone(),
             data_info,
@@ -503,6 +500,17 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
     }
+
+    if entries.len() == 30 {
+        scroll_host = scroll_host
+            .push(vertical_space(Length::Fixed(25.0)))
+            .push(
+                Text::new(only_top_30_hosts(sniffer.language))
+                    .horizontal_alignment(Horizontal::Center)
+                    .font(font)
+            );
+    }
+
     col_host = col_host.push(
         Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
             <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
@@ -533,17 +541,17 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
     for (app, data_info) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width * 0.85,
+            width * 0.88,
             chart_type,
             entries.get(0).unwrap().1.clone(),
             data_info,
         );
 
         // check if Other is longer than the first entry
-        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width {
+        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width * 0.88 {
             let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
-            incoming_bar_len = width * incoming_proportion;
-            outgoing_bar_len = width * (1.0 - incoming_proportion);
+            incoming_bar_len = width * 0.88 * incoming_proportion;
+            outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
         }
 
         // normalize smaller values
