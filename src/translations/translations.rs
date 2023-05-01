@@ -176,25 +176,25 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn relevant_connections_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => "Relevant connections:",
-        Language::IT => "Connessioni rilevanti:",
-        Language::FR => "Connexions pertinentes:",
-        Language::ES => "Conexiones Relevantes:",
-        Language::PL => "Istotne połączenia:",
-        Language::DE => "Relevante Verbindungen:",
-        Language::UK => "Важливі підключення:",
-        Language::ZH => "连接详情:",
-        Language::RO => "Conexiuni relevante:",
-        Language::KO => "관련 연결:",
-        Language::TR => "İlgili bağlantılar:",
-        Language::RU => "Важные подключения:",
-        Language::PT => "Conexões relevantes:",
-        Language::EL => "Σχετικές συνδέσεις:",
-        Language::FA => "پیوند های خویشاوند:",
-    })
-}
+// pub fn relevant_connections_translation(language: Language) -> Text<'static> {
+//     Text::new(match language {
+//         Language::EN => "Relevant connections:",
+//         Language::IT => "Connessioni rilevanti:",
+//         Language::FR => "Connexions pertinentes:",
+//         Language::ES => "Conexiones Relevantes:",
+//         Language::PL => "Istotne połączenia:",
+//         Language::DE => "Relevante Verbindungen:",
+//         Language::UK => "Важливі підключення:",
+//         Language::ZH => "连接详情:",
+//         Language::RO => "Conexiuni relevante:",
+//         Language::KO => "관련 연결:",
+//         Language::TR => "İlgili bağlantılar:",
+//         Language::RU => "Важные подключения:",
+//         Language::PT => "Conexões relevantes:",
+//         Language::EL => "Σχετικές συνδέσεις:",
+//         Language::FA => "پیوند های خویشاوند:",
+//     })
+// }
 
 pub fn settings_translation(language: Language) -> &'static str {
     match language {
@@ -623,25 +623,25 @@ pub fn filtered_bytes_no_percentage_translation(
     })
 }
 
-pub fn filtered_application_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => "Filtered packets per application protocol:",
-        Language::IT => "Pacchetti filtrati per protocollo applicativo:",
-        Language::FR => "Paquets filtrés par protocole applicatif:",
-        Language::ES => "Paquetes filtrados por protocolo de aplicación:",
-        Language::PL => "Przefiltrowane pakiety według protokołu aplikacji:",
-        Language::DE => "Gefilterte Pakete je Anwendungs-Protokoll:",
-        Language::UK => "Відфільтровані пакети протоколу аплікації/програми:",
-        Language::ZH => "按应用层协议分类的目标数据包计数:",
-        Language::RO => "Pachete filtrate pe protocol de aplicație:",
-        Language::KO => "애플리케이션 프로토콜당 필터링된 패킷 수:",
-        Language::TR => "Uygulama protokolü bazında filtrelenen paketler:",
-        Language::RU => "Отфильтровано пакетов прикладного протокола:",
-        Language::PT => "Pacotes filtrados por protocolo de aplicação:",
-        Language::EL => "Φιλτραρισμένα πακέτα ανά πρωτόκολλο εφαρμογής:",
-        Language::FA => "بسته های صاف شده برای هر پیوندنامهٔ درخواست:",
-    })
-}
+// pub fn filtered_application_translation(language: Language) -> Text<'static> {
+//     Text::new(match language {
+//         Language::EN => "Filtered packets per application protocol:",
+//         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
+//         Language::FR => "Paquets filtrés par protocole applicatif:",
+//         Language::ES => "Paquetes filtrados por protocolo de aplicación:",
+//         Language::PL => "Przefiltrowane pakiety według protokołu aplikacji:",
+//         Language::DE => "Gefilterte Pakete je Anwendungs-Protokoll:",
+//         Language::UK => "Відфільтровані пакети протоколу аплікації/програми:",
+//         Language::ZH => "按应用层协议分类的目标数据包计数:",
+//         Language::RO => "Pachete filtrate pe protocol de aplicație:",
+//         Language::KO => "애플리케이션 프로토콜당 필터링된 패킷 수:",
+//         Language::TR => "Uygulama protokolü bazında filtrelenen paketler:",
+//         Language::RU => "Отфильтровано пакетов прикладного протокола:",
+//         Language::PT => "Pacotes filtrados por protocolo de aplicação:",
+//         Language::EL => "Φιλτραρισμένα πακέτα ανά πρωτόκολλο εφαρμογής:",
+//         Language::FA => "بسته های صاف شده برای هر پیوندنامهٔ درخواست:",
+//     })
+// }
 
 pub fn no_favorites_translation(language: Language) -> Text<'static> {
     Text::new(match language {

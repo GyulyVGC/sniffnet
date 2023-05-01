@@ -1,4 +1,4 @@
-use std::net::{IpAddr, Ipv4Addr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
@@ -139,8 +139,8 @@ pub fn modify_or_insert_in_map(
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
     let (country, asn) = if index == len {
         // first occurrence of key => retrieve traffic type, country code and asn
-        traffic_type = get_traffic_type(destination_ip, my_interface_addresses);
         traffic_direction = get_traffic_direction(source_ip, my_interface_addresses);
+        traffic_type = get_traffic_type(destination_ip, my_interface_addresses, traffic_direction);
         is_local = is_local_connection(
             source_ip,
             destination_ip,
@@ -292,11 +292,20 @@ fn get_traffic_direction(
 }
 
 /// Returns the traffic type observed (unicast, multicast or broadcast)
-fn get_traffic_type(destination_ip: &str, my_interface_addresses: &[Address]) -> TrafficType {
-    if is_multicast_address(destination_ip) {
-        TrafficType::Multicast
-    } else if is_broadcast_address(destination_ip, my_interface_addresses) {
-        TrafficType::Broadcast
+/// It refers to the remote host
+fn get_traffic_type(
+    destination_ip: &str,
+    my_interface_addresses: &[Address],
+    traffic_direction: TrafficDirection,
+) -> TrafficType {
+    if traffic_direction.eq(&TrafficDirection::Outgoing) {
+        if is_multicast_address(destination_ip) {
+            TrafficType::Multicast
+        } else if is_broadcast_address(destination_ip, my_interface_addresses) {
+            TrafficType::Broadcast
+        } else {
+            TrafficType::Unicast
+        }
     } else {
         TrafficType::Unicast
     }
@@ -307,7 +316,7 @@ fn get_traffic_type(destination_ip: &str, my_interface_addresses: &[Address]) ->
 /// # Arguments
 ///
 /// * `address` - string representing an IPv4 or IPv6 network address.
-pub fn is_multicast_address(address: &str) -> bool {
+fn is_multicast_address(address: &str) -> bool {
     let mut ret_val = false;
     if address.contains(':') {
         //IPv6 address
@@ -335,9 +344,10 @@ pub fn is_multicast_address(address: &str) -> bool {
 /// # Arguments
 ///
 /// * `address` - string representing an IPv4 or IPv6 network address.
-pub fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bool {
-    let mut ret_val = false;
-
+fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bool {
+    if address.eq("255.255.255.255") {
+        return true;
+    }
     // check if directed broadcast
     let my_broadcast_addresses: Vec<String> = my_interface_addresses
         .iter()
@@ -351,22 +361,7 @@ pub fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -
     if my_broadcast_addresses.contains(&address.to_string()) {
         return true;
     }
-
-    if !address.contains(':') {
-        //IPv4 address
-        let groups: Vec<u8> = address
-            .split('.')
-            .map(|str| str.parse::<u8>().unwrap())
-            .collect();
-        if *groups.first().unwrap() == 255
-            && *groups.get(1).unwrap() == 255
-            && *groups.get(2).unwrap() == 255
-            && *groups.get(3).unwrap() == 255
-        {
-            ret_val = true;
-        }
-    }
-    ret_val
+    false
 }
 
 /// Determines if the connection is local
@@ -416,20 +411,24 @@ fn is_local_connection(
             }
             IpAddr::V6(local_addr) if address_to_lookup_type.eq(&IPv6) => {
                 // check if the two IPv6 addresses are in the same subnet
+                let address_to_lookup_parsed: Ipv6Addr =
+                    address_to_lookup.parse().unwrap_or(Ipv6Addr::from(0));
                 // remote is link local?
                 if address_to_lookup.starts_with("fe80") {
                     ret_val = true;
                 }
                 // is the same subnet?
                 else if let Some(IpAddr::V6(netmask)) = address.netmask {
-                    let netmask_len = netmask.to_string().len();
-                    let local_address_string = local_addr.to_string();
-                    let local_subnet = local_address_string.get(0..netmask_len).unwrap_or("");
-                    let remote_subnet = address_to_lookup.get(0..netmask_len).unwrap_or("");
-                    if !local_subnet.is_empty()
-                        && !remote_subnet.is_empty()
-                        && local_subnet == remote_subnet
-                    {
+                    let mut local_subnet = Vec::new();
+                    let mut remote_subnet = Vec::new();
+                    let netmask_digits = netmask.octets();
+                    let local_addr_digits = local_addr.octets();
+                    let remote_addr_digits = address_to_lookup_parsed.octets();
+                    for (i, netmask_digit) in netmask_digits.iter().enumerate() {
+                        local_subnet.push(netmask_digit & local_addr_digits[i]);
+                        remote_subnet.push(netmask_digit & remote_addr_digits[i]);
+                    }
+                    if local_subnet == remote_subnet {
                         ret_val = true;
                     }
                 }
@@ -562,9 +561,10 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 #[cfg(test)]
 mod tests {
     use crate::networking::manage_packets::{
-        ipv6_from_long_dec_to_short_hex, is_local_connection, mac_from_dec_to_hex,
+        get_traffic_type, ipv6_from_long_dec_to_short_hex, is_local_connection, mac_from_dec_to_hex,
     };
     use crate::networking::types::traffic_direction::TrafficDirection;
+    use crate::networking::types::traffic_type::TrafficType;
     use pcap::Address;
     use std::net::{IpAddr, Ipv4Addr};
 
@@ -681,15 +681,110 @@ mod tests {
     }
 
     #[test]
-    fn is_local_connection_ipv4_test() {
+    fn traffic_type_multicast_ipv4_test() {
+        let result1 = get_traffic_type("227.255.255.0", &[], TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Multicast);
+        let result2 = get_traffic_type("239.255.255.255", &[], TrafficDirection::Outgoing);
+        assert_eq!(result2, TrafficType::Multicast);
+        let result3 = get_traffic_type("224.0.0.0", &[], TrafficDirection::Outgoing);
+        assert_eq!(result3, TrafficType::Multicast);
+        let result4 = get_traffic_type("223.255.255.255", &[], TrafficDirection::Outgoing);
+        assert_eq!(result4, TrafficType::Unicast);
+        let result5 = get_traffic_type("240.0.0.0", &[], TrafficDirection::Outgoing);
+        assert_eq!(result5, TrafficType::Unicast);
+
+        let result6 = get_traffic_type("227.255.255.0", &[], TrafficDirection::Incoming);
+        assert_eq!(result6, TrafficType::Unicast);
+        let result7 = get_traffic_type("239.255.255.255", &[], TrafficDirection::Incoming);
+        assert_eq!(result7, TrafficType::Unicast);
+        let result8 = get_traffic_type("224.0.0.0", &[], TrafficDirection::Incoming);
+        assert_eq!(result8, TrafficType::Unicast);
+        let result9 = get_traffic_type("223.255.255.255", &[], TrafficDirection::Incoming);
+        assert_eq!(result9, TrafficType::Unicast);
+        let result10 = get_traffic_type("240.0.0.0", &[], TrafficDirection::Incoming);
+        assert_eq!(result10, TrafficType::Unicast);
+    }
+
+    #[test]
+    fn traffic_type_multicast_ipv6_test() {
+        let result1 = get_traffic_type("ff::", &[], TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Multicast);
+        let result2 = get_traffic_type("fe80:1234::", &[], TrafficDirection::Outgoing);
+        assert_eq!(result2, TrafficType::Unicast);
+        let result3 = get_traffic_type("ffff:ffff:ffff::", &[], TrafficDirection::Outgoing);
+        assert_eq!(result3, TrafficType::Multicast);
+
+        let result4 = get_traffic_type("ff::", &[], TrafficDirection::Incoming);
+        assert_eq!(result4, TrafficType::Unicast);
+        let result5 = get_traffic_type("fe80:1234::", &[], TrafficDirection::Incoming);
+        assert_eq!(result5, TrafficType::Unicast);
+        let result6 = get_traffic_type("ffff:ffff:ffff::", &[], TrafficDirection::Incoming);
+        assert_eq!(result6, TrafficType::Unicast);
+    }
+
+    #[test]
+    fn traffic_type_host_local_broadcast_test() {
+        let result1 = get_traffic_type("255.255.255.255", &[], TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Broadcast);
+        let result2 = get_traffic_type("255.255.255.255", &[], TrafficDirection::Incoming);
+        assert_eq!(result2, TrafficType::Unicast);
+        let result3 = get_traffic_type("255.255.255.254", &[], TrafficDirection::Outgoing);
+        assert_eq!(result3, TrafficType::Unicast);
+
         let mut address_vec: Vec<Address> = Vec::new();
         let my_address = Address {
             addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
             netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
-            broadcast_addr: None,
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
             dst_addr: None,
         };
         address_vec.push(my_address);
+
+        let result1 = get_traffic_type("255.255.255.255", &address_vec, TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Broadcast);
+        let result2 = get_traffic_type("255.255.255.255", &address_vec, TrafficDirection::Incoming);
+        assert_eq!(result2, TrafficType::Unicast);
+    }
+
+    #[test]
+    fn traffic_type_host_directed_broadcast_test() {
+        let result1 = get_traffic_type("172.20.10.15", &[], TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Unicast);
+        let result2 = get_traffic_type("172.20.10.15", &[], TrafficDirection::Incoming);
+        assert_eq!(result2, TrafficType::Unicast);
+
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        address_vec.push(my_address);
+
+        let result1 = get_traffic_type("172.20.10.15", &address_vec, TrafficDirection::Outgoing);
+        assert_eq!(result1, TrafficType::Broadcast);
+        let result2 = get_traffic_type("172.20.10.15", &address_vec, TrafficDirection::Incoming);
+        assert_eq!(result2, TrafficType::Unicast);
+    }
+
+    #[test]
+    fn is_local_connection_ipv4_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
 
         let result1 = is_local_connection(
             &"172.20.10.9".to_string(),
@@ -714,18 +809,183 @@ mod tests {
             &address_vec,
         );
         assert_eq!(result3, false);
+
+        let result4 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.0".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result4, true);
+
+        let result5 = is_local_connection(
+            &"172.20.10.7".to_string(),
+            &"8.8.8.8".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result5, true);
+
+        let result6 = is_local_connection(
+            &"172.20.10.99".to_string(),
+            &"172.20.10.16".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result6, false);
+    }
+
+    #[test]
+    fn is_local_connection_ipv6_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe90:8b1:1234:5678:d065::1234".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ff11::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = is_local_connection(
+            &"fe90:8b1:1234:5610:d065::1234".to_string(),
+            &"fe90:8b1:1234:5611:d065::1234".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+
+        let result2 = is_local_connection(
+            &"fe90:8b1:1234:5610:d065::1234".to_string(),
+            &"fe90:8b1:1234:5611:d065::1234".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result2, true);
+
+        let result3 = is_local_connection(
+            &"ff90:8b1:1234:5610:d065::1234".to_string(),
+            &"fe90:8b1:1234:5611:d065::1234".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result3, false);
+
+        let result4 = is_local_connection(
+            &"fe90:8b1:1234:5610:d065::1234".to_string(),
+            &"fe90:8b1:1234:5610:ffff:eeee:9876:1234".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result4, true);
+    }
+
+    #[test]
+    fn is_local_connection_ipv4_2_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.0".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"255.255.255.255".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+
+        let result2 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.15".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result2, true);
+
+        let result3 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.16".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result3, true);
+
+        let result4 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.0".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result4, true);
+
+        let result5 = is_local_connection(
+            &"172.20.10.7".to_string(),
+            &"8.8.8.8".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result5, true);
+
+        let result6 = is_local_connection(
+            &"172.20.10.99".to_string(),
+            &"172.20.10.16".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result6, true);
+
+        let result7 = is_local_connection(
+            &"172.20.11.0".to_string(),
+            &"172.20.10.16".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result7, false);
+
+        let result8 = is_local_connection(
+            &"172.20.10.7".to_string(),
+            &"172.20.9.255".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result8, false);
     }
 
     #[test]
     fn is_local_connection_ipv4_multicast_test() {
         let mut address_vec: Vec<Address> = Vec::new();
-        let my_address = Address {
+        let my_address_v4 = Address {
             addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
             netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
             broadcast_addr: None,
             dst_addr: None,
         };
-        address_vec.push(my_address);
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
 
         let result1 = is_local_connection(
             &"172.20.10.9".to_string(),
@@ -734,5 +994,118 @@ mod tests {
             &address_vec,
         );
         assert_eq!(result1, false);
+    }
+
+    #[test]
+    fn is_local_connection_ipv6_multicast_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = is_local_connection(
+            &"fe80::8b1:1234:5678:d065".to_string(),
+            &"ff::1234".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+    }
+
+    #[test]
+    fn is_local_connection_ipv4_link_local_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = is_local_connection(
+            &"224.0.1.2".to_string(),
+            &"169.254.17.199".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+
+        let result2 = is_local_connection(
+            &"224.0.1.2".to_string(),
+            &"169.254.17.199".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result2, true);
+
+        let result3 = is_local_connection(
+            &"224.0.1.2".to_string(),
+            &"169.255.17.199".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result3, false);
+    }
+
+    #[test]
+    fn is_local_connection_ipv6_link_local_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe90::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = is_local_connection(
+            &"ff88::".to_string(),
+            &"fe80::8b1:1234:5678:d065".to_string(),
+            TrafficDirection::Incoming,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+
+        let result2 = is_local_connection(
+            &"ff88::".to_string(),
+            &"fe80::8b1:1234:5678:d065".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result2, true);
+
+        let result3 = is_local_connection(
+            &"ff88::".to_string(),
+            &"fe70::8b1:1234:5678:d065".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result3, false);
     }
 }
