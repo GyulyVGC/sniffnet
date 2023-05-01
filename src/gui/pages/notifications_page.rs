@@ -18,11 +18,11 @@ use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::translations::translations::{
-    bytes_exceeded_translation, bytes_exceeded_value_translation,
-    clear_all_translation, favorite_transmitted_translation, incoming_translation,
-    no_notifications_received_translation, no_notifications_set_translation,
-    only_last_30_translation, outgoing_translation, packets_exceeded_translation,
-    packets_exceeded_value_translation, per_second_translation, threshold_translation,
+    bytes_exceeded_translation, bytes_exceeded_value_translation, clear_all_translation,
+    favorite_transmitted_translation, incoming_translation, no_notifications_received_translation,
+    no_notifications_set_translation, only_last_30_translation, outgoing_translation,
+    packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation,
+    threshold_translation,
 };
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::get_formatted_bytes_string;

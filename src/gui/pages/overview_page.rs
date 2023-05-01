@@ -30,7 +30,10 @@ use crate::translations::translations::{
     none_translation, packets_chart_translation, some_observed_translation,
     traffic_rate_translation, waiting_translation,
 };
-use crate::translations::translations_2::{data_representation_translation, dropped_packets_translation, host_translation, of_total_translation, only_top_30_hosts};
+use crate::translations::translations_2::{
+    data_representation_translation, dropped_packets_translation, host_translation,
+    of_total_translation, only_top_30_hosts,
+};
 use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
@@ -394,7 +397,9 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         )
         .push(vertical_space(Length::Fixed(10.0)));
 
-    let mut scroll_host = Column::new().width(Length::Fixed(width)).align_items(Alignment::Center);
+    let mut scroll_host = Column::new()
+        .width(Length::Fixed(width))
+        .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
     for (host, (data_info, is_favorite)) in &entries {
@@ -502,13 +507,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     }
 
     if entries.len() == 30 {
-        scroll_host = scroll_host
-            .push(vertical_space(Length::Fixed(25.0)))
-            .push(
-                Text::new(only_top_30_hosts(sniffer.language))
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font)
-            );
+        scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
+            Text::new(only_top_30_hosts(sniffer.language))
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        );
     }
 
     col_host = col_host.push(
@@ -636,9 +639,19 @@ fn lazy_col_info(
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
 
+    #[cfg(not(target_os = "windows"))]
+    let adapter_info = &sniffer.device.name;
+    #[cfg(target_os = "windows")]
+    let mut adapter_info = &sniffer.device.desc;
+    #[cfg(target_os = "windows")]
+    if adapter_info.is_empty() {
+        adapter_info = &sniffer.device.name;
+    }
+
     let col_device_filters = Column::new()
+        .width(Length::FillPortion(1))
         .spacing(15)
-        .push(network_adapter_translation(sniffer.language, &sniffer.device.name).font(font))
+        .push(network_adapter_translation(sniffer.language, adapter_info).font(font))
         .push(
             Text::new(get_active_filters_string(
                 &sniffer.filters.clone(),
@@ -648,6 +661,7 @@ fn lazy_col_info(
         );
 
     let col_data_representation = Column::new()
+        .width(Length::FillPortion(1))
         .push(data_representation_translation(sniffer.language))
         .push(chart_radios(
             sniffer.traffic_chart.chart_type,
