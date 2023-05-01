@@ -3,12 +3,12 @@
 
 use std::fmt;
 use std::net::IpAddr;
-use std::ops::Add;
 
 use chrono::{DateTime, Local};
 
 use crate::networking::types::asn::Asn;
 use crate::networking::types::host::Host;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
@@ -34,8 +34,6 @@ pub struct InfoAddressPortPair {
     pub app_protocol: AppProtocol,
     /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
     pub very_long_address: bool,
-    /// Flag to determine which of the address is that of the sniffed adapter or remote
-    pub traffic_type: TrafficType,
     /// Country of the remote IP address
     pub country: String,
     /// Autonomous System of the remote IP address
@@ -44,6 +42,12 @@ pub struct InfoAddressPortPair {
     pub r_dns: Option<String>,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
+    /// Determines if the connection is incoming or outgoing
+    pub traffic_direction: TrafficDirection,
+    /// Determines if the connection is unicast, multicast or broadcast
+    pub traffic_type: TrafficType,
+    /// Determines if the connection is local
+    pub is_local: bool,
 }
 
 impl Default for InfoAddressPortPair {
@@ -57,11 +61,13 @@ impl Default for InfoAddressPortPair {
             final_timestamp: Default::default(),
             app_protocol: AppProtocol::Other,
             very_long_address: false,
-            traffic_type: TrafficType::Other,
+            traffic_direction: TrafficDirection::default(),
+            traffic_type: TrafficType::default(),
             country: String::new(),
             asn: Default::default(),
             r_dns: None,
             index: 0,
+            is_local: false,
         }
     }
 }
@@ -73,7 +79,6 @@ impl InfoAddressPortPair {
             .unwrap()
             .to_string()
             .replace('|', "")
-            .add(&*format!(" {} ", &self.country))
     }
 
     pub fn get_host(&self) -> Host {

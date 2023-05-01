@@ -1,8 +1,8 @@
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
-use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::{AppProtocol, ChartType, InfoTraffic};
@@ -102,13 +102,13 @@ pub fn get_searched_entries(
 pub fn get_host_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
-) -> Vec<(Host, (DataInfo, bool))> {
+) -> Vec<(Host, DataInfoHost)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&Host, &(DataInfo, bool))> = info_traffic_lock.hosts.iter().collect();
+    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic_lock.hosts.iter().collect();
 
-    sorted_vec.sort_by(|&(_, (a, _)), &(_, (b, _))| match chart_type {
-        ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
-        ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
+    sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
+        ChartType::Packets => b.data_info.tot_packets().cmp(&a.data_info.tot_packets()),
+        ChartType::Bytes => b.data_info.tot_bytes().cmp(&a.data_info.tot_bytes()),
     });
 
     let n_entry = min(sorted_vec.len(), 30);

@@ -1,19 +1,23 @@
+use std::net::{IpAddr, Ipv4Addr};
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{Ethernet2Header, IpHeader, TransportHeader};
 use maxminddb::Reader;
-use pcap::{Active, Capture, Device};
+use pcap::{Active, Address, Capture, Device};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::asn::Asn;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::asn::get_asn;
 use crate::utils::countries::get_country_code;
+use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
 /// This function analyzes the data link layer header passed as parameter and updates variables
@@ -111,26 +115,40 @@ pub fn analyze_transport_header(
 pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
+    my_interface_addresses: &Vec<Address>,
     mac_address1: String,
     mac_address2: String,
     exchanged_bytes: u128,
-    traffic_type: TrafficType,
     application_protocol: AppProtocol,
     country_db_reader: &Reader<&[u8]>,
     asn_db_reader: &Reader<&[u8]>,
 ) -> InfoAddressPortPair {
     let now = Local::now();
-    let very_long_address = key.address1.len() > 25 || key.address2.len() > 25;
+    let mut traffic_direction = TrafficDirection::default();
+    let source_ip = &key.address1.clone();
+    let destination_ip = &key.address2.clone();
+    let very_long_address = source_ip.len() > 25 || destination_ip.len() > 25;
+    let mut is_local = false;
+    let mut traffic_type = TrafficType::default();
+
     let mut info_traffic = info_traffic_mutex
         .lock()
         .expect("Error acquiring mutex\n\r");
     let len = info_traffic.map.len();
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
     let (country, asn) = if index == len {
-        // first occurrence of key => retrieve country code and asn
+        // first occurrence of key => retrieve traffic type, country code and asn
+        traffic_type = get_traffic_type(destination_ip, my_interface_addresses);
+        traffic_direction = get_traffic_direction(source_ip, my_interface_addresses);
+        is_local = is_local_connection(
+            source_ip,
+            destination_ip,
+            traffic_direction,
+            my_interface_addresses,
+        );
         (
-            get_country_code(traffic_type, &key, country_db_reader),
-            get_asn(traffic_type, &key, asn_db_reader),
+            get_country_code(traffic_direction, &key, country_db_reader),
+            get_asn(traffic_direction, &key, asn_db_reader),
         )
     } else {
         // this key already occurred
@@ -154,11 +172,13 @@ pub fn modify_or_insert_in_map(
             final_timestamp: now,
             app_protocol: application_protocol,
             very_long_address,
+            traffic_direction,
             traffic_type,
             country,
             asn,
             r_dns: None,
             index,
+            is_local,
         })
         .clone();
 
@@ -175,10 +195,10 @@ pub fn modify_or_insert_in_map(
 pub fn reverse_dns_lookup(
     info_traffic: Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
-    traffic_type: TrafficType,
+    traffic_direction: TrafficDirection,
 ) {
-    let address_to_lookup = match traffic_type {
-        TrafficType::Outgoing => key.address2.clone(),
+    let address_to_lookup = match traffic_direction {
+        TrafficDirection::Outgoing => key.address2.clone(),
         _ => key.address1.clone(),
     };
 
@@ -213,38 +233,72 @@ pub fn reverse_dns_lookup(
     info_traffic_lock
         .hosts
         .entry(new_info.get_host())
-        .and_modify(|(data_info, _)| {
-            if new_info.traffic_type == TrafficType::Outgoing {
-                data_info.outgoing_packets += new_info.transmitted_packets;
-                data_info.outgoing_bytes += new_info.transmitted_bytes;
+        .and_modify(|data_info_host| {
+            if new_info.traffic_direction == TrafficDirection::Outgoing {
+                data_info_host.data_info.outgoing_packets += new_info.transmitted_packets;
+                data_info_host.data_info.outgoing_bytes += new_info.transmitted_bytes;
             } else {
-                data_info.incoming_packets += new_info.transmitted_packets;
-                data_info.incoming_bytes += new_info.transmitted_bytes;
+                data_info_host.data_info.incoming_packets += new_info.transmitted_packets;
+                data_info_host.data_info.incoming_bytes += new_info.transmitted_bytes;
             }
         })
-        .or_insert(if new_info.traffic_type == TrafficType::Outgoing {
-            (
-                DataInfo {
-                    incoming_packets: 0,
-                    outgoing_packets: new_info.transmitted_packets,
-                    incoming_bytes: 0,
-                    outgoing_bytes: new_info.transmitted_bytes,
-                },
-                false,
-            )
-        } else {
-            (
-                DataInfo {
-                    incoming_packets: new_info.transmitted_packets,
-                    outgoing_packets: 0,
-                    incoming_bytes: new_info.transmitted_bytes,
-                    outgoing_bytes: 0,
-                },
-                false,
-            )
-        });
+        .or_insert(
+            if new_info.traffic_direction == TrafficDirection::Outgoing {
+                DataInfoHost {
+                    data_info: DataInfo {
+                        incoming_packets: 0,
+                        outgoing_packets: new_info.transmitted_packets,
+                        incoming_bytes: 0,
+                        outgoing_bytes: new_info.transmitted_bytes,
+                    },
+                    is_favorite: false,
+                    is_local: new_info.is_local,
+                    traffic_type: new_info.traffic_type,
+                }
+            } else {
+                DataInfoHost {
+                    data_info: DataInfo {
+                        incoming_packets: new_info.transmitted_packets,
+                        outgoing_packets: 0,
+                        incoming_bytes: new_info.transmitted_bytes,
+                        outgoing_bytes: 0,
+                    },
+                    is_favorite: false,
+                    is_local: new_info.is_local,
+                    traffic_type: new_info.traffic_type,
+                }
+            },
+        );
 
     drop(info_traffic_lock);
+}
+
+/// Returns the traffic direction observed (incoming or outgoing)
+fn get_traffic_direction(
+    source_ip: &String,
+    my_interface_addresses: &Vec<Address>,
+) -> TrafficDirection {
+    let my_interface_addresses_string: Vec<String> = my_interface_addresses
+        .iter()
+        .map(|address| address.addr.to_string())
+        .collect();
+
+    if my_interface_addresses_string.contains(source_ip) {
+        TrafficDirection::Outgoing
+    } else {
+        TrafficDirection::Incoming
+    }
+}
+
+/// Returns the traffic type observed (unicast, multicast or broadcast)
+fn get_traffic_type(destination_ip: &String, my_interface_addresses: &Vec<Address>) -> TrafficType {
+    if is_multicast_address(destination_ip) {
+        TrafficType::Multicast
+    } else if is_broadcast_address(destination_ip, my_interface_addresses) {
+        TrafficType::Broadcast
+    } else {
+        TrafficType::Unicast
+    }
 }
 
 /// Determines if the input address is a multicast address or not.
@@ -280,8 +334,23 @@ pub fn is_multicast_address(address: &str) -> bool {
 /// # Arguments
 ///
 /// * `address` - string representing an IPv4 or IPv6 network address.
-pub fn is_broadcast_address(address: &str) -> bool {
+pub fn is_broadcast_address(address: &str, my_interface_addresses: &Vec<Address>) -> bool {
     let mut ret_val = false;
+
+    // check if directed broadcast
+    let my_broadcast_addresses: Vec<String> = my_interface_addresses
+        .iter()
+        .map(|address| {
+            address
+                .broadcast_addr
+                .unwrap_or("255.255.255.255".parse().unwrap())
+                .to_string()
+        })
+        .collect();
+    if my_broadcast_addresses.contains(&address.to_string()) {
+        return true;
+    }
+
     if !address.contains(':') {
         //IPv4 address
         let groups: Vec<u8> = address
@@ -295,8 +364,79 @@ pub fn is_broadcast_address(address: &str) -> bool {
         {
             ret_val = true;
         }
-        // still missing a check for directed broadcast!
     }
+    ret_val
+}
+
+/// Determines if the connection is local
+fn is_local_connection(
+    source_ip: &String,
+    destination_ip: &String,
+    traffic_direction: TrafficDirection,
+    my_interface_addresses: &Vec<Address>,
+) -> bool {
+    let mut ret_val = false;
+
+    let address_to_lookup = match traffic_direction {
+        TrafficDirection::Outgoing => destination_ip,
+        _ => source_ip,
+    };
+    let address_to_lookup_type = if address_to_lookup.contains(":") {
+        IPv6
+    } else {
+        IPv4
+    };
+
+    for address in my_interface_addresses {
+        match address.addr {
+            IpAddr::V4(local_addr) if address_to_lookup_type.eq(&IPv4) => {
+                // check if the two IPv4 addresses are in the same subnet
+                let address_to_lookup_parsed: Ipv4Addr =
+                    address_to_lookup.parse().unwrap_or(Ipv4Addr::from(0));
+                // remote is link local?
+                if address_to_lookup_parsed.is_link_local() {
+                    ret_val = true;
+                }
+                // is the same subnet?
+                else if let Some(IpAddr::V4(netmask)) = address.netmask {
+                    let mut local_subnet = Vec::new();
+                    let mut remote_subnet = Vec::new();
+                    let netmask_digits = netmask.octets();
+                    let local_addr_digits = local_addr.octets();
+                    let remote_addr_digits = address_to_lookup_parsed.octets();
+                    for (i, netmask_digit) in netmask_digits.iter().enumerate() {
+                        local_subnet.push(netmask_digit & local_addr_digits[i]);
+                        remote_subnet.push(netmask_digit & remote_addr_digits[i]);
+                    }
+                    if local_subnet == remote_subnet {
+                        ret_val = true;
+                    }
+                }
+            }
+            IpAddr::V6(local_addr) if address_to_lookup_type.eq(&IPv6) => {
+                // check if the two IPv6 addresses are in the same subnet
+                // remote is link local?
+                if address_to_lookup.starts_with("fe80") {
+                    ret_val = true;
+                }
+                // is the same subnet?
+                else if let Some(IpAddr::V6(netmask)) = address.netmask {
+                    let netmask_len = netmask.to_string().len();
+                    let local_address_string = local_addr.to_string();
+                    let local_subnet = local_address_string.get(0..netmask_len).unwrap_or("");
+                    let remote_subnet = address_to_lookup.get(0..netmask_len).unwrap_or("");
+                    if !local_subnet.is_empty()
+                        && !remote_subnet.is_empty()
+                        && local_subnet == remote_subnet
+                    {
+                        ret_val = true;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
     ret_val
 }
 
@@ -420,7 +560,12 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::networking::manage_packets::{ipv6_from_long_dec_to_short_hex, mac_from_dec_to_hex};
+    use crate::networking::manage_packets::{
+        ipv6_from_long_dec_to_short_hex, is_local_connection, mac_from_dec_to_hex,
+    };
+    use crate::networking::types::traffic_direction::TrafficDirection;
+    use pcap::Address;
+    use std::net::{IpAddr, Ipv4Addr};
 
     #[test]
     fn mac_simple_test() {
@@ -532,5 +677,61 @@ mod tests {
         let result =
             ipv6_from_long_dec_to_short_hex([0, 16, 16, 0, 0, 1, 7, 0, 0, 2, 216, 0, 1, 0, 0, 1]);
         assert_eq!(result, "10:1000:1:700:2:d800:100:1".to_string());
+    }
+
+    #[test]
+    fn is_local_connection_ipv4_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address);
+
+        let result1 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"104.18.43.158".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
+
+        let result2 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.15".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result2, true);
+
+        let result3 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"172.20.10.16".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result3, false);
+    }
+
+    #[test]
+    fn is_local_connection_ipv4_multicast_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address);
+
+        let result1 = is_local_connection(
+            &"172.20.10.9".to_string(),
+            &"224.0.0.251".to_string(),
+            TrafficDirection::Outgoing,
+            &address_vec,
+        );
+        assert_eq!(result1, false);
     }
 }

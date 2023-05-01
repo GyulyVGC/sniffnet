@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use iced::Color;
 
 use crate::networking::types::filters::Filters;
-use crate::networking::types::traffic_type::TrafficType;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
     active_filters_translation, none_translation, open_report_translation,
 };
@@ -55,8 +55,8 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_type: TrafficType, style: StyleType) -> Color {
-    if traffic_type == TrafficType::Outgoing {
+pub fn get_connection_color(traffic_direction: TrafficDirection, style: StyleType) -> Color {
+    if traffic_direction == TrafficDirection::Outgoing {
         get_colors(style).outgoing
     } else {
         get_colors(style).incoming

@@ -5,7 +5,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_SMALL};
+use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip};
@@ -66,33 +66,27 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     for index in &search_results {
         let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
         let key_val = info_traffic_lock.map.get_index(*index).unwrap();
-        let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
-        let mut entry_row = Row::new().align_items(Alignment::Center).push(
-            Text::new(format!(
-                "  {}{}",
-                key_val.0.print_gui(),
-                key_val.1.print_gui()
-            ))
-            .style(iced::theme::Text::Color(entry_color))
-            .font(SARASA_MONO_SC_BOLD),
-        );
-        if key_val.1.country.is_empty() {
-            entry_row = entry_row
-                .push(
-                    Text::new("?")
-                        .width(Length::Fixed(FLAGS_WIDTH_SMALL))
-                        .style(iced::theme::Text::Color(entry_color))
-                        .font(SARASA_MONO_SC_BOLD),
-                )
-                .push(Text::new("    "));
-        } else {
-            entry_row = entry_row
-                .push(get_flag_from_country_code(
-                    &key_val.1.country,
-                    FLAGS_WIDTH_SMALL,
+        let entry_color = get_connection_color(key_val.1.traffic_direction, sniffer.style);
+        let entry_row = Row::new()
+            .align_items(Alignment::Center)
+            .push(
+                Text::new(format!(
+                    "  {}{}",
+                    key_val.0.print_gui(),
+                    key_val.1.print_gui()
                 ))
-                .push(Text::new("  "));
-        }
+                .style(iced::theme::Text::Color(entry_color))
+                .font(SARASA_MONO_SC_BOLD),
+            )
+            .push(get_flag_tooltip(
+                &key_val.1.country,
+                FLAGS_WIDTH_SMALL,
+                key_val.1.is_local,
+                key_val.1.traffic_type,
+                sniffer.language,
+                sniffer.style,
+            ))
+            .push(Text::new("  "));
 
         scroll_report = scroll_report.push(
             button(entry_row)

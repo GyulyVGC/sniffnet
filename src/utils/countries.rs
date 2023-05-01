@@ -1,19 +1,26 @@
-use iced::widget::{svg::Handle, Svg};
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::{Language, StyleType};
+use iced::widget::{svg::Handle, Svg, Tooltip};
 use iced::{Length, Renderer};
+use iced_native::widget::tooltip::Position;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::translations::translations_2::{local_translation, unknown_translation};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
 pub fn get_country_code(
-    traffic_type: TrafficType,
+    traffic_direction: TrafficDirection,
     key: &AddressPortPair,
     country_db_reader: &Reader<&[u8]>,
 ) -> String {
-    let address_to_lookup = match traffic_type {
-        TrafficType::Outgoing => &key.address2,
+    let address_to_lookup = match traffic_direction {
+        TrafficDirection::Outgoing => &key.address2,
         _ => &key.address1,
     };
 
@@ -29,7 +36,7 @@ pub fn get_country_code(
     String::new()
 }
 
-pub const FLAGS_WIDTH_SMALL: f32 = 15.0;
+pub const FLAGS_WIDTH_SMALL: f32 = 20.0;
 pub const FLAGS_WIDTH_BIG: f32 = 37.5;
 
 pub const AD: &[u8] = include_bytes!("../../resources/countries_flags/4x3/ad.svg");
@@ -281,8 +288,10 @@ pub const YT: &[u8] = include_bytes!("../../resources/countries_flags/4x3/yt.svg
 pub const ZA: &[u8] = include_bytes!("../../resources/countries_flags/4x3/za.svg");
 pub const ZM: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zm.svg");
 pub const ZW: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zw.svg");
-pub const UNKNOWN: &[u8] =
-    include_bytes!("../../resources/countries_flags/4x3/question-mark-svgrepo-com.svg");
+pub const HOME: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-home.svg");
+pub const MULTICAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-multicast.svg");
+pub const BROADCAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-broadcast.svg");
+pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-unknown.svg");
 
 pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
     Svg::new(Handle::from_memory(Vec::from(match language {
@@ -306,9 +315,16 @@ pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
     .width(Length::Fixed(FLAGS_WIDTH_SMALL))
 }
 
-pub fn get_flag_from_country_code(country: &str, width: f32) -> Svg<Renderer> {
+fn get_flag_from_country_code(
+    country: &str,
+    width: f32,
+    is_local: bool,
+    traffic_type: TrafficType,
+    language: Language,
+) -> (Svg<Renderer>, String) {
     #![allow(clippy::too_many_lines)]
-    Svg::new(Handle::from_memory(Vec::from(match country {
+    let mut tooltip = country.to_string();
+    let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         "AD" => AD,
         "AE" => AE,
         "AF" => AF,
@@ -558,7 +574,49 @@ pub fn get_flag_from_country_code(country: &str, width: f32) -> Svg<Renderer> {
         "ZA" => ZA,
         "ZM" => ZM,
         "ZW" => ZW,
-        _ => UNKNOWN,
+        _ => {
+            if is_local {
+                tooltip = local_translation(language);
+                HOME
+            } else if traffic_type.eq(&TrafficType::Multicast) {
+                tooltip = "Multicast".to_string();
+                MULTICAST
+            } else if traffic_type.eq(&TrafficType::Broadcast) {
+                tooltip = "Broadcast".to_string();
+                BROADCAST
+            } else {
+                tooltip = unknown_translation(language);
+                UNKNOWN
+            }
+        }
     })))
     .width(Length::Fixed(width))
+    .height(Length::Fixed(width * 0.75));
+
+    (svg, tooltip)
+}
+
+pub fn get_flag_tooltip(
+    country: &str,
+    width: f32,
+    is_local: bool,
+    traffic_type: TrafficType,
+    language: Language,
+    style: StyleType,
+) -> Tooltip<'static, Message> {
+    let (content, tooltip) =
+        get_flag_from_country_code(country, width, is_local, traffic_type, language);
+    let mut position = Position::FollowCursor;
+    let mut snap = true;
+
+    if width == FLAGS_WIDTH_SMALL {
+        position = Position::Right;
+        snap = false;
+    }
+
+    Tooltip::new(content, tooltip, position)
+        .snap_within_viewport(snap)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
 }

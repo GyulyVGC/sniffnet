@@ -32,9 +32,9 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
-    of_total_translation, only_top_30_hosts,
+    of_total_translation, only_top_30_hosts_translation,
 };
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
+use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
 };
@@ -402,12 +402,12 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
-    for (host, (data_info, is_favorite)) in &entries {
+    for (host, data_info_host) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
-            entries.get(0).unwrap().1 .0.clone(),
-            data_info,
+            entries.get(0).unwrap().1.data_info.clone(),
+            &data_info_host.data_info,
         );
 
         let star_button = button(
@@ -423,7 +423,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .style(
             StyleTuple(
                 sniffer.style,
-                if *is_favorite {
+                if data_info_host.is_favorite {
                     ElementType::Starred
                 } else {
                     ElementType::NotStarred
@@ -431,7 +431,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             )
             .into(),
         )
-        .on_press(Message::AddOrRemoveFavorite(host.clone(), !*is_favorite));
+        .on_press(Message::AddOrRemoveFavorite(
+            host.clone(),
+            !data_info_host.is_favorite,
+        ));
 
         // normalize smaller values
         if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
@@ -454,10 +457,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     }))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(Text::new(if chart_type.eq(&ChartType::Packets) {
-                        data_info.tot_packets().to_string()
+                        data_info_host.data_info.tot_packets().to_string()
                     } else {
                         let mut bytes_string =
-                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
+                            get_formatted_bytes_string(data_info_host.data_info.tot_bytes())
+                                .replace("  ", " ");
                         bytes_string.push('B');
                         bytes_string
                     })),
@@ -490,7 +494,14 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             .align_items(Alignment::Center)
             .spacing(5)
             .push(star_button)
-            .push(get_flag_from_country_code(&host.country, FLAGS_WIDTH_BIG))
+            .push(get_flag_tooltip(
+                &host.country,
+                FLAGS_WIDTH_BIG,
+                data_info_host.is_local,
+                data_info_host.traffic_type,
+                sniffer.language,
+                sniffer.style,
+            ))
             .push(host_bar);
 
         scroll_host = scroll_host.push(
@@ -508,7 +519,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
     if entries.len() == 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
-            Text::new(only_top_30_hosts(sniffer.language))
+            Text::new(only_top_30_hosts_translation(sniffer.language))
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         );

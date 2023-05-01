@@ -67,10 +67,28 @@ pub fn host_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn only_top_30_hosts(language: Language) -> &'static str {
+pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 hosts are displayed here",
         Language::IT => "Solo i maggiori 30 host sono mostrati qui",
         _ => "Only the top 30 hosts are displayed here",
     }
+}
+
+pub fn local_translation(language: Language) -> String {
+    match language {
+        Language::EN => "Local",
+        Language::IT => "Locale",
+        _ => "Local",
+    }
+    .to_string()
+}
+
+pub fn unknown_translation(language: Language) -> String {
+    match language {
+        Language::EN => "Unknown",
+        Language::IT => "Sconosciuto",
+        _ => "Unknown",
+    }
+    .to_string()
 }

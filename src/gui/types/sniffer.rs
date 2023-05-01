@@ -379,7 +379,7 @@ impl Sniffer {
             info_traffic.favorite_hosts.remove(&host);
         }
         if let Some(host_info) = info_traffic.hosts.get_mut(&host) {
-            host_info.1 = add;
+            host_info.is_favorite = add;
         }
         drop(info_traffic);
     }

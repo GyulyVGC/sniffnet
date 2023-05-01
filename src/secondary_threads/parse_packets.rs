@@ -8,14 +8,15 @@ use etherparse::PacketHeaders;
 use pcap::{Active, Capture, Device};
 
 use crate::networking::manage_packets::{
-    analyze_link_header, analyze_network_header, analyze_transport_header, is_broadcast_address,
-    is_multicast_address, modify_or_insert_in_map, reverse_dns_lookup,
+    analyze_link_header, analyze_network_header, analyze_transport_header, modify_or_insert_in_map,
+    reverse_dns_lookup,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::traffic_type::TrafficType;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::countries::COUNTRY_MMDB;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
@@ -32,11 +33,6 @@ pub fn parse_packets(
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
-    let mut my_interface_addresses = Vec::new();
-    for address in device.addresses {
-        my_interface_addresses.push(address.addr.to_string());
-    }
-
     let network_layer_filter = filters.ip;
     let transport_layer_filter = filters.transport;
     let app_layer_filter = filters.application;
@@ -47,7 +43,6 @@ pub fn parse_packets(
     let mut network_protocol;
     let mut transport_protocol;
     let mut application_protocol;
-    let mut traffic_type;
     let mut skip_packet;
     let mut reported_packet;
 
@@ -78,7 +73,6 @@ pub fn parse_packets(
                         network_protocol = IpVersion::Other;
                         transport_protocol = TransProtocol::Other;
                         application_protocol = AppProtocol::Other;
-                        traffic_type = TrafficType::Other;
                         skip_packet = false;
                         reported_packet = false;
 
@@ -116,16 +110,6 @@ pub fn parse_packets(
                             continue;
                         }
 
-                        if my_interface_addresses.contains(&address1) {
-                            traffic_type = TrafficType::Outgoing;
-                        } else if my_interface_addresses.contains(&address2) {
-                            traffic_type = TrafficType::Incoming;
-                        } else if is_multicast_address(&address2) {
-                            traffic_type = TrafficType::Multicast;
-                        } else if is_broadcast_address(&address2) {
-                            traffic_type = TrafficType::Broadcast;
-                        }
-
                         let key: AddressPortPair = AddressPortPair::new(
                             address1.clone(),
                             port1,
@@ -145,10 +129,10 @@ pub fn parse_packets(
                             new_info = modify_or_insert_in_map(
                                 info_traffic_mutex,
                                 key.clone(),
+                                &device.addresses,
                                 mac_address1,
                                 mac_address2,
                                 exchanged_bytes,
-                                traffic_type,
                                 application_protocol,
                                 &country_db_reader,
                                 &asn_db_reader,
@@ -168,7 +152,7 @@ pub fn parse_packets(
                         }
 
                         if reported_packet {
-                            if traffic_type == TrafficType::Outgoing {
+                            if new_info.traffic_direction == TrafficDirection::Outgoing {
                                 //increment number of sent packets and bytes
                                 info_traffic.tot_sent_packets += 1;
                                 info_traffic.tot_sent_bytes += exchanged_bytes;
@@ -201,7 +185,7 @@ pub fn parse_packets(
                                             reverse_dns_lookup(
                                                 info_traffic2,
                                                 key2,
-                                                new_info.traffic_type,
+                                                new_info.traffic_direction,
                                             );
                                         })
                                         .unwrap();
@@ -216,38 +200,48 @@ pub fn parse_packets(
                                     info_traffic
                                         .hosts
                                         .entry(new_info.get_host())
-                                        .and_modify(|(data_info, _)| {
-                                            if traffic_type == TrafficType::Outgoing {
-                                                data_info.outgoing_packets += 1;
-                                                data_info.outgoing_bytes += exchanged_bytes;
+                                        .and_modify(|data_info_host| {
+                                            if new_info.traffic_direction
+                                                == TrafficDirection::Outgoing
+                                            {
+                                                data_info_host.data_info.outgoing_packets += 1;
+                                                data_info_host.data_info.outgoing_bytes +=
+                                                    exchanged_bytes;
                                             } else {
-                                                data_info.incoming_packets += 1;
-                                                data_info.incoming_bytes += exchanged_bytes;
+                                                data_info_host.data_info.incoming_packets += 1;
+                                                data_info_host.data_info.incoming_bytes +=
+                                                    exchanged_bytes;
                                             }
                                         })
                                         .or_insert(
-                                            if new_info.traffic_type == TrafficType::Outgoing {
-                                                (
-                                                    DataInfo {
+                                            if new_info.traffic_direction
+                                                == TrafficDirection::Outgoing
+                                            {
+                                                DataInfoHost {
+                                                    data_info: DataInfo {
                                                         incoming_packets: 0,
                                                         outgoing_packets: new_info
                                                             .transmitted_packets,
                                                         incoming_bytes: 0,
                                                         outgoing_bytes: new_info.transmitted_bytes,
                                                     },
-                                                    false,
-                                                )
+                                                    is_favorite: false,
+                                                    is_local: new_info.is_local,
+                                                    traffic_type: new_info.traffic_type,
+                                                }
                                             } else {
-                                                (
-                                                    DataInfo {
+                                                DataInfoHost {
+                                                    data_info: DataInfo {
                                                         incoming_packets: new_info
                                                             .transmitted_packets,
                                                         outgoing_packets: 0,
                                                         incoming_bytes: new_info.transmitted_bytes,
                                                         outgoing_bytes: 0,
                                                     },
-                                                    false,
-                                                )
+                                                    is_favorite: false,
+                                                    is_local: new_info.is_local,
+                                                    traffic_type: new_info.traffic_type,
+                                                }
                                             },
                                         );
                                 }
@@ -258,7 +252,7 @@ pub fn parse_packets(
                                 .app_protocols
                                 .entry(application_protocol)
                                 .and_modify(|data_info| {
-                                    if traffic_type == TrafficType::Outgoing {
+                                    if new_info.traffic_direction == TrafficDirection::Outgoing {
                                         data_info.outgoing_packets += 1;
                                         data_info.outgoing_bytes += exchanged_bytes;
                                     } else {
@@ -266,21 +260,23 @@ pub fn parse_packets(
                                         data_info.incoming_bytes += exchanged_bytes;
                                     }
                                 })
-                                .or_insert(if traffic_type == TrafficType::Outgoing {
-                                    DataInfo {
-                                        incoming_packets: 0,
-                                        outgoing_packets: 1,
-                                        incoming_bytes: 0,
-                                        outgoing_bytes: exchanged_bytes,
-                                    }
-                                } else {
-                                    DataInfo {
-                                        incoming_packets: 1,
-                                        outgoing_packets: 0,
-                                        incoming_bytes: exchanged_bytes,
-                                        outgoing_bytes: 0,
-                                    }
-                                });
+                                .or_insert(
+                                    if new_info.traffic_direction == TrafficDirection::Outgoing {
+                                        DataInfo {
+                                            incoming_packets: 0,
+                                            outgoing_packets: 1,
+                                            incoming_bytes: 0,
+                                            outgoing_bytes: exchanged_bytes,
+                                        }
+                                    } else {
+                                        DataInfo {
+                                            incoming_packets: 1,
+                                            outgoing_packets: 0,
+                                            incoming_bytes: exchanged_bytes,
+                                            outgoing_bytes: 0,
+                                        }
+                                    },
+                                );
                         }
                     }
                 }

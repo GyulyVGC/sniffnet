@@ -1,3 +1,4 @@
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::ByteMultiple;
 
@@ -31,5 +32,6 @@ pub struct BytesThresholdExceeded {
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
     pub(crate) host: Host,
+    pub(crate) data_info_host: DataInfoHost,
     pub(crate) timestamp: String,
 }

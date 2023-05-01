@@ -24,7 +24,7 @@ use crate::translations::translations::{
     packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation,
     threshold_translation,
 };
-use crate::utils::countries::{get_flag_from_country_code, FLAGS_WIDTH_BIG};
+use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
@@ -187,9 +187,8 @@ fn packets_notification_log(
             Tooltip::new(
                 Text::new("e").font(ICONS).size(80),
                 packets_exceeded_translation(language),
-                Position::Left,
+                Position::FollowCursor,
             )
-            .gap(5)
             .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
@@ -266,9 +265,8 @@ fn bytes_notification_log(
             Tooltip::new(
                 Text::new("f").font(ICONS).size(80),
                 bytes_exceeded_translation(language),
-                Position::Left,
+                Position::FollowCursor,
             )
-            .gap(5)
             .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),
@@ -323,8 +321,14 @@ fn favorite_notification_log(
     let details_str = format!("{domain} - {}", asn.name);
     let mut row_flag_details = Row::new().align_items(Alignment::Center).spacing(5);
     if !country.is_empty() {
-        row_flag_details =
-            row_flag_details.push(get_flag_from_country_code(&country, FLAGS_WIDTH_BIG));
+        row_flag_details = row_flag_details.push(get_flag_tooltip(
+            &country,
+            FLAGS_WIDTH_BIG,
+            logged_notification.data_info_host.is_local,
+            logged_notification.data_info_host.traffic_type,
+            language,
+            style,
+        ));
     }
     row_flag_details = row_flag_details.push(Text::new(details_str).font(font));
     let content = Row::new()
@@ -335,9 +339,8 @@ fn favorite_notification_log(
             Tooltip::new(
                 Text::new("g").font(ICONS).size(80),
                 favorite_transmitted_translation(language),
-                Position::Left,
+                Position::FollowCursor,
             )
-            .gap(5)
             .font(font)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(style, ElementType::Tooltip),

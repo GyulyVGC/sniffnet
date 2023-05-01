@@ -7,6 +7,7 @@ use indexmap::IndexMap;
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
@@ -38,7 +39,7 @@ pub struct InfoTraffic {
     /// Map of the application layer protocols with their data info
     pub app_protocols: HashMap<AppProtocol, DataInfo>,
     /// Map of the hosts with their data info
-    pub hosts: HashMap<Host, (DataInfo, bool)>,
+    pub hosts: HashMap<Host, DataInfoHost>,
 }
 
 impl InfoTraffic {
