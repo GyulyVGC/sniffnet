@@ -67,7 +67,7 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
 
     if let Some(r_dns) = val.r_dns {
         if !r_dns.is_empty() {
-            content = content.push(Text::new(format!("{}", r_dns)).font(font));
+            content = content.push(Text::new(r_dns).font(font));
         }
     }
 

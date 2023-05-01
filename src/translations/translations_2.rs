@@ -43,7 +43,7 @@ pub fn dropped_packets_translation(language: Language, dropped: &str) -> String 
     }
 }
 
-pub fn of_total_translation(language: Language, percentage: String) -> String {
+pub fn of_total_translation(language: Language, percentage: &str) -> String {
     match language {
         Language::EN => format!(" ({percentage} of the total)"),
         Language::IT => format!(" ({percentage} del totale)"),
@@ -53,9 +53,9 @@ pub fn of_total_translation(language: Language, percentage: String) -> String {
 
 pub fn data_representation_translation(language: Language) -> Text<'static> {
     Text::new(match language {
-        Language::EN => format!("Data representation:"),
-        Language::IT => format!("Rappresentazione dei dati:"),
-        _ => format!("Data representation:"),
+        Language::EN => "Data representation:",
+        Language::IT => "Rappresentazione dei dati:",
+        _ => "Data representation:",
     })
 }
 

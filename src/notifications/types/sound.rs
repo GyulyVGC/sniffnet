@@ -39,7 +39,7 @@ impl Sound {
         }
     }
 
-    pub fn get_radio_label(&self, language: Language) -> String {
+    pub fn get_radio_label(self, language: Language) -> String {
         match self {
             Gulp => "Gulp".to_string(),
             Pop => "Pop".to_string(),

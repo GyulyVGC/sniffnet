@@ -53,7 +53,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         let filtered =
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
-        let total = observed + dropped as u128;
+        let total = observed + u128::from(dropped);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -406,7 +406,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
-            entries.get(0).unwrap().1.data_info.clone(),
+            &entries.get(0).unwrap().1.data_info.clone(),
             &data_info_host.data_info,
         );
 
@@ -557,7 +557,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width * 0.88,
             chart_type,
-            entries.get(0).unwrap().1.clone(),
+            &entries.get(0).unwrap().1.clone(),
             data_info,
         );
 
@@ -581,7 +581,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             .width(Length::Fixed(width))
             .push(
                 Row::new()
-                    .push(Text::new(format!("{:?}", app)))
+                    .push(Text::new(format!("{app:?}")))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(Text::new(if chart_type.eq(&ChartType::Packets) {
                         data_info.tot_packets().to_string()
@@ -686,7 +686,7 @@ fn lazy_col_info(
             dropped_packets_translation(sniffer.language, &dropped.separate_with_spaces());
         temp.push_str(&of_total_translation(
             sniffer.language,
-            get_percentage_string(total, dropped as u128),
+            &get_percentage_string(total, u128::from(dropped)),
         ));
         temp
     } else {
@@ -751,7 +751,7 @@ fn lazy_col_info(
 fn get_bars_length(
     tot_width: f32,
     chart_type: ChartType,
-    first_entry: DataInfo,
+    first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (f32, f32) {
     match chart_type {

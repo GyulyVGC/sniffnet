@@ -57,14 +57,14 @@ impl Default for InfoAddressPortPair {
             mac_address2: String::new(),
             transmitted_bytes: 0,
             transmitted_packets: 0,
-            initial_timestamp: Default::default(),
-            final_timestamp: Default::default(),
+            initial_timestamp: DateTime::default(),
+            final_timestamp: DateTime::default(),
             app_protocol: AppProtocol::Other,
             very_long_address: false,
             traffic_direction: TrafficDirection::default(),
             traffic_type: TrafficType::default(),
             country: String::new(),
-            asn: Default::default(),
+            asn: Asn::default(),
             r_dns: None,
             index: 0,
             is_local: false,
@@ -99,7 +99,7 @@ impl InfoAddressPortPair {
                     .unwrap_or(&parts)
                     .iter()
                     .fold(Vec::new(), |mut vec, part| {
-                        vec.push(part.to_string());
+                        vec.push((*part).to_string());
                         vec
                     })
                     .join(".")
@@ -115,12 +115,12 @@ impl InfoAddressPortPair {
         }
     }
 
-    /// An rDNS resolution has already been requested for this host
+    /// An  `rDNS` resolution has already been requested for this host
     pub fn r_dns_already_requested(&self) -> bool {
         self.r_dns.is_some()
     }
 
-    /// An rDNS resolution has already completed for this host
+    /// An `rDNS` resolution has already completed for this host
     pub fn r_dns_already_resolved(&self) -> bool {
         self.r_dns.is_some() && !self.r_dns.as_ref().unwrap().is_empty()
     }

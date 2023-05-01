@@ -116,13 +116,14 @@ pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
     my_interface_addresses: &Vec<Address>,
-    mac_address1: String,
-    mac_address2: String,
+    mac_addresses: (String, String),
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
     country_db_reader: &Reader<&[u8]>,
     asn_db_reader: &Reader<&[u8]>,
 ) -> InfoAddressPortPair {
+    #![allow(clippy::too_many_arguments)]
+
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
     let source_ip = &key.address1.clone();
@@ -164,8 +165,8 @@ pub fn modify_or_insert_in_map(
             info.final_timestamp = now;
         })
         .or_insert(InfoAddressPortPair {
-            mac_address1,
-            mac_address2,
+            mac_address1: mac_addresses.0,
+            mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: now,
@@ -193,13 +194,13 @@ pub fn modify_or_insert_in_map(
 }
 
 pub fn reverse_dns_lookup(
-    info_traffic: Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
     traffic_direction: TrafficDirection,
 ) {
     let address_to_lookup = match traffic_direction {
         TrafficDirection::Outgoing => key.address2.clone(),
-        _ => key.address1.clone(),
+        TrafficDirection::Incoming => key.address1.clone(),
     };
 
     // perform rDNS lookup
@@ -207,10 +208,10 @@ pub fn reverse_dns_lookup(
 
     let mut info_traffic_lock = info_traffic.lock().unwrap();
     let new_info: InfoAddressPortPair = if let Ok(r_dns) = lookup_result {
-        let actual_r_dns = Some(if !r_dns.is_empty() {
-            r_dns
-        } else {
+        let actual_r_dns = Some(if r_dns.is_empty() {
             address_to_lookup
+        } else {
+            r_dns
         });
         info_traffic_lock
             .map
@@ -221,7 +222,7 @@ pub fn reverse_dns_lookup(
     } else {
         info_traffic_lock
             .map
-            .entry(key.clone())
+            .entry(key)
             .and_modify(|info| {
                 info.r_dns = Some(address_to_lookup);
             })
@@ -276,7 +277,7 @@ pub fn reverse_dns_lookup(
 /// Returns the traffic direction observed (incoming or outgoing)
 fn get_traffic_direction(
     source_ip: &String,
-    my_interface_addresses: &Vec<Address>,
+    my_interface_addresses: &[Address],
 ) -> TrafficDirection {
     let my_interface_addresses_string: Vec<String> = my_interface_addresses
         .iter()
@@ -291,7 +292,7 @@ fn get_traffic_direction(
 }
 
 /// Returns the traffic type observed (unicast, multicast or broadcast)
-fn get_traffic_type(destination_ip: &String, my_interface_addresses: &Vec<Address>) -> TrafficType {
+fn get_traffic_type(destination_ip: &str, my_interface_addresses: &[Address]) -> TrafficType {
     if is_multicast_address(destination_ip) {
         TrafficType::Multicast
     } else if is_broadcast_address(destination_ip, my_interface_addresses) {
@@ -334,7 +335,7 @@ pub fn is_multicast_address(address: &str) -> bool {
 /// # Arguments
 ///
 /// * `address` - string representing an IPv4 or IPv6 network address.
-pub fn is_broadcast_address(address: &str, my_interface_addresses: &Vec<Address>) -> bool {
+pub fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bool {
     let mut ret_val = false;
 
     // check if directed broadcast
@@ -379,9 +380,9 @@ fn is_local_connection(
 
     let address_to_lookup = match traffic_direction {
         TrafficDirection::Outgoing => destination_ip,
-        _ => source_ip,
+        TrafficDirection::Incoming => source_ip,
     };
-    let address_to_lookup_type = if address_to_lookup.contains(":") {
+    let address_to_lookup_type = if address_to_lookup.contains(':') {
         IPv6
     } else {
         IPv4
@@ -460,7 +461,7 @@ pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Ac
 fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
     let mut mac_hex = String::new();
     for n in &mac_dec {
-        mac_hex.push_str(&format!("{:02x}:", n));
+        mac_hex.push_str(&format!("{n:02x}:"));
     }
     mac_hex.pop();
     mac_hex

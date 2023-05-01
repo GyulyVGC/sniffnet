@@ -46,13 +46,11 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let (search_results, results_number, packets_number) = get_searched_entries(
+    let (search_results, results_number, _) = get_searched_entries(
         &sniffer.info_traffic.clone(),
-        sniffer.search.clone(),
+        &sniffer.search.clone(),
         sniffer.page_number,
     );
-
-    tab_and_body = tab_and_body.push(Text::new(format!("{}", packets_number)));
 
     let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
     col_report = col_report

@@ -138,7 +138,7 @@ impl Sniffer {
                 self.traffic_chart.change_colors(self.style);
             }
             Message::Waiting => self.update_waiting_dots(),
-            Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(host, add),
+            Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
             Message::ShowModal(modal) => {
                 if self.settings_page.is_none() && self.modal.is_none() {
                     self.modal = Some(modal);
@@ -197,27 +197,22 @@ impl Sniffer {
                     && self.settings_page.is_none()
                     && self.modal.is_none()
                 {
-                    match increment {
-                        true => {
-                            if self.page_number
-                                < f32::ceil(
-                                    get_searched_entries(
-                                        &self.info_traffic,
-                                        self.search.clone(),
-                                        self.page_number,
-                                    )
-                                    .1 as f32
-                                        / 10.0,
-                                ) as usize
-                            {
-                                return self.update(Message::UpdatePageNumber(increment));
-                            }
+                    if increment {
+                        if self.page_number
+                            < f32::ceil(
+                                get_searched_entries(
+                                    &self.info_traffic,
+                                    &self.search.clone(),
+                                    self.page_number,
+                                )
+                                .1 as f32
+                                    / 10.0,
+                            ) as usize
+                        {
+                            return self.update(Message::UpdatePageNumber(increment));
                         }
-                        false => {
-                            if self.page_number > 1 {
-                                return self.update(Message::UpdatePageNumber(increment));
-                            }
-                        }
+                    } else if self.page_number > 1 {
+                        return self.update(Message::UpdatePageNumber(increment));
                     }
                 }
             }
@@ -333,7 +328,7 @@ impl Sniffer {
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
-                        device.clone(),
+                        &device.clone(),
                         cap.unwrap(),
                         &filters,
                         &info_traffic_mutex,
@@ -371,14 +366,14 @@ impl Sniffer {
         self.waiting = ".".repeat(self.waiting.len() + 1);
     }
 
-    fn add_or_remove_favorite(&mut self, host: Host, add: bool) {
+    fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
         let mut info_traffic = self.info_traffic.lock().unwrap();
         if add {
             info_traffic.favorite_hosts.insert(host.clone());
         } else {
-            info_traffic.favorite_hosts.remove(&host);
+            info_traffic.favorite_hosts.remove(host);
         }
-        if let Some(host_info) = info_traffic.hosts.get_mut(&host) {
+        if let Some(host_info) = info_traffic.hosts.get_mut(host) {
             host_info.is_favorite = add;
         }
         drop(info_traffic);

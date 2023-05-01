@@ -21,7 +21,7 @@ pub fn get_country_code(
 ) -> String {
     let address_to_lookup = match traffic_direction {
         TrafficDirection::Outgoing => &key.address2,
-        _ => &key.address1,
+        TrafficDirection::Incoming => &key.address1,
     };
 
     let country_result: Result<geoip2::Country, MaxMindDBError> =

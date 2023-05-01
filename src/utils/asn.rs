@@ -12,7 +12,7 @@ pub fn get_asn(
 ) -> Asn {
     let address_to_lookup = match traffic_direction {
         TrafficDirection::Outgoing => &key.address2,
-        _ => &key.address1,
+        TrafficDirection::Incoming => &key.address1,
     };
 
     let asn_result: Result<geoip2::Asn, MaxMindDBError> =

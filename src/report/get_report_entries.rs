@@ -46,7 +46,7 @@ use crate::{AppProtocol, ChartType, InfoTraffic};
 /// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
-    search_parameters: SearchParameters,
+    search_parameters: &SearchParameters,
     page_number: usize,
 ) -> (Vec<usize>, usize, u128) {
     let info_traffic_lock = info_traffic.lock().unwrap();
@@ -64,9 +64,8 @@ pub fn get_searched_entries(
             if let Some(domain) = &search_parameters.domain {
                 if !value.r_dns_already_resolved() {
                     return false;
-                } else {
-                    boolean_flags.push(value.r_dns.as_ref().unwrap().ends_with(domain));
                 }
+                boolean_flags.push(value.r_dns.as_ref().unwrap().ends_with(domain));
             }
             // check country filter
             if let Some(country) = &search_parameters.country {
@@ -139,8 +138,5 @@ pub fn get_app_entries(
         }
     });
 
-    sorted_vec
-        .iter()
-        .map(|e| (e.0.clone(), e.1.clone()))
-        .collect()
+    sorted_vec.iter().map(|e| (*e.0, e.1.clone())).collect()
 }

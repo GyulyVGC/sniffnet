@@ -836,19 +836,16 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
 
 pub fn bytes_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "bytes",
+        Language::EN | Language::ES | Language::PT | Language::DE | Language::EL => "bytes",
         Language::IT => "byte",
         Language::FR => "octets",
-        Language::ES | Language::PT => "bytes",
         Language::PL => "bajty",
-        Language::DE => "bytes",
         Language::UK => "байти",
         Language::ZH => "网络流量",
         Language::RO => "octeți",
         Language::KO => "바이트",
         Language::TR => "bayt",
         Language::RU => "байтов",
-        Language::EL => "bytes",
         Language::FA => "بایت ها",
     }
 }
