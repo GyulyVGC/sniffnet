@@ -139,7 +139,8 @@ pub fn modify_or_insert_in_map(
     let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
     let (country, asn) = if index == len {
         // first occurrence of key => retrieve traffic type, country code and asn
-        traffic_direction = get_traffic_direction(source_ip, my_interface_addresses);
+        traffic_direction =
+            get_traffic_direction(source_ip, destination_ip, my_interface_addresses);
         traffic_type = get_traffic_type(destination_ip, my_interface_addresses, traffic_direction);
         is_local = is_local_connection(
             source_ip,
@@ -277,6 +278,7 @@ pub fn reverse_dns_lookup(
 /// Returns the traffic direction observed (incoming or outgoing)
 fn get_traffic_direction(
     source_ip: &String,
+    destination_ip: &String,
     my_interface_addresses: &[Address],
 ) -> TrafficDirection {
     let my_interface_addresses_string: Vec<String> = my_interface_addresses
@@ -285,6 +287,13 @@ fn get_traffic_direction(
         .collect();
 
     if my_interface_addresses_string.contains(source_ip) {
+        // source is local
+        TrafficDirection::Outgoing
+    } else if source_ip.ne("0.0.0.0") {
+        // source not local and different from 0.0.0.0
+        TrafficDirection::Incoming
+    } else if !my_interface_addresses_string.contains(destination_ip) {
+        // source is 0.0.0.0 (local not yet assigned an IP) and destination is not local
         TrafficDirection::Outgoing
     } else {
         TrafficDirection::Incoming
@@ -561,7 +570,8 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 #[cfg(test)]
 mod tests {
     use crate::networking::manage_packets::{
-        get_traffic_type, ipv6_from_long_dec_to_short_hex, is_local_connection, mac_from_dec_to_hex,
+        get_traffic_direction, get_traffic_type, ipv6_from_long_dec_to_short_hex,
+        is_local_connection, mac_from_dec_to_hex,
     };
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
@@ -678,6 +688,56 @@ mod tests {
         let result =
             ipv6_from_long_dec_to_short_hex([0, 16, 16, 0, 0, 1, 7, 0, 0, 2, 216, 0, 1, 0, 0, 1]);
         assert_eq!(result, "10:1000:1:700:2:d800:100:1".to_string());
+    }
+
+    #[test]
+    fn traffic_direction_ipv4_test() {
+        let mut address_vec: Vec<Address> = Vec::new();
+        let my_address_v4 = Address {
+            addr: IpAddr::V4("172.20.10.9".parse().unwrap()),
+            netmask: Some(IpAddr::V4("255.255.255.240".parse().unwrap())),
+            broadcast_addr: Some(IpAddr::V4("172.20.10.15".parse().unwrap())),
+            dst_addr: None,
+        };
+        let my_address_v6 = Address {
+            addr: IpAddr::V6("fe80::8b1:1234:5678:d065".parse().unwrap()),
+            netmask: Some(IpAddr::V6("ffff:ffff:ffff:ffff::".parse().unwrap())),
+            broadcast_addr: None,
+            dst_addr: None,
+        };
+        address_vec.push(my_address_v4);
+        address_vec.push(my_address_v6);
+
+        let result1 = get_traffic_direction(
+            &"172.20.10.9".to_string(),
+            &"99.88.77.00".to_string(),
+            &address_vec,
+        );
+        assert_eq!(result1, TrafficDirection::Outgoing);
+        let result2 = get_traffic_direction(
+            &"172.20.10.10".to_string(),
+            &"172.20.10.9".to_string(),
+            &address_vec,
+        );
+        assert_eq!(result2, TrafficDirection::Incoming);
+        let result3 = get_traffic_direction(
+            &"172.20.10.9".to_string(),
+            &"0.0.0.0".to_string(),
+            &address_vec,
+        );
+        assert_eq!(result3, TrafficDirection::Outgoing);
+        let result4 = get_traffic_direction(
+            &"0.0.0.0".to_string(),
+            &"172.20.10.9".to_string(),
+            &address_vec,
+        );
+        assert_eq!(result4, TrafficDirection::Incoming);
+        let result4 = get_traffic_direction(
+            &"0.0.0.0".to_string(),
+            &"172.20.10.10".to_string(),
+            &address_vec,
+        );
+        assert_eq!(result4, TrafficDirection::Outgoing);
     }
 
     #[test]
