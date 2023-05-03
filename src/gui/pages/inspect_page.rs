@@ -12,7 +12,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
-use crate::translations::translations_2::sort_by_translation;
+use crate::translations::translations_2::{showing_results_translation, sort_by_translation};
 use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
@@ -87,7 +87,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new()
                 .align_items(Alignment::Center)
                 .spacing(10)
-                .push(sort_by_translation(sniffer.language))
+                .push(Text::new(sort_by_translation(sniffer.language)).font(font))
                 .push(picklist_sort),
         )
         .push(report);
@@ -197,9 +197,15 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
                 } else {
                     Container::new(horizontal_space(30.0))
                 })
-                .push(Text::new(format!(
-                    "Showing {start_entry_num}-{end_entry_num} of {results_number} total results",
-                )))
+                .push(
+                    Text::new(showing_results_translation(
+                        sniffer.language,
+                        start_entry_num,
+                        end_entry_num,
+                        results_number,
+                    ))
+                    .font(font),
+                )
                 .push(
                     if sniffer.page_number < f32::ceil(results_number as f32 / 10.0) as usize {
                         Container::new(get_button_change_page(sniffer.style, true).width(30.0))

@@ -3,6 +3,7 @@ use iced::{Length, Renderer};
 use iced_native::widget::tooltip::Position;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
+use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -615,6 +616,8 @@ pub fn get_flag_tooltip(
     }
 
     Tooltip::new(content, tooltip, position)
+        .gap(5)
+        .font(get_font(style))
         .snap_within_viewport(snap)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),

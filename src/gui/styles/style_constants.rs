@@ -211,10 +211,20 @@ pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
 
-// stars yellow colors
-pub const STARRED: Color = Color {
-    r: 245.0 / 255.0,
-    g: 193.0 / 255.0,
-    b: 39.0 / 255.0,
-    a: 0.8,
-};
+/// Yellow color used in favorites star
+pub fn get_starred_color(style: StyleType) -> Color {
+    match style {
+        StyleType::Night | StyleType::DeepSea => Color {
+            r: 245.0 / 255.0,
+            g: 193.0 / 255.0,
+            b: 39.0 / 255.0,
+            a: 0.5,
+        },
+        StyleType::Day | StyleType::MonAmour => Color {
+            r: 245.0 / 255.0,
+            g: 193.0 / 255.0,
+            b: 39.0 / 255.0,
+            a: 0.8,
+        },
+    }
+}

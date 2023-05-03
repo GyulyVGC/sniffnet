@@ -373,22 +373,28 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             .spacing(1)
             .push(
                 Row::new()
-                    .push(Text::new(host.domain.clone()))
-                    .push(Text::new(if host.asn.name.is_empty() {
-                        String::new()
-                    } else {
-                        format!(" - {}", host.asn.name)
-                    }))
+                    .push(Text::new(host.domain.clone()).font(font))
+                    .push(
+                        Text::new(if host.asn.name.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" - {}", host.asn.name)
+                        })
+                        .font(font),
+                    )
                     .push(horizontal_space(Length::FillPortion(1)))
-                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
-                        data_info_host.data_info.tot_packets().to_string()
-                    } else {
-                        let mut bytes_string =
-                            get_formatted_bytes_string(data_info_host.data_info.tot_bytes())
-                                .replace("  ", " ");
-                        bytes_string.push('B');
-                        bytes_string
-                    })),
+                    .push(
+                        Text::new(if chart_type.eq(&ChartType::Packets) {
+                            data_info_host.data_info.tot_packets().to_string()
+                        } else {
+                            let mut bytes_string =
+                                get_formatted_bytes_string(data_info_host.data_info.tot_bytes())
+                                    .replace("  ", " ");
+                            bytes_string.push('B');
+                            bytes_string
+                        })
+                        .font(font),
+                    ),
             )
             .push(
                 Row::new()
@@ -444,6 +450,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     if entries.len() == 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
             Text::new(only_top_30_hosts_translation(sniffer.language))
+                .font(font)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         );
@@ -505,16 +512,20 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             .width(Length::Fixed(width))
             .push(
                 Row::new()
-                    .push(Text::new(format!("{app:?}")))
+                    .push(Text::new(format!("{app:?}")).font(font))
                     .push(horizontal_space(Length::FillPortion(1)))
-                    .push(Text::new(if chart_type.eq(&ChartType::Packets) {
-                        data_info.tot_packets().to_string()
-                    } else {
-                        let mut bytes_string =
-                            get_formatted_bytes_string(data_info.tot_bytes()).replace("  ", " ");
-                        bytes_string.push('B');
-                        bytes_string
-                    })),
+                    .push(
+                        Text::new(if chart_type.eq(&ChartType::Packets) {
+                            data_info.tot_packets().to_string()
+                        } else {
+                            let mut bytes_string =
+                                get_formatted_bytes_string(data_info.tot_bytes())
+                                    .replace("  ", " ");
+                            bytes_string.push('B');
+                            bytes_string
+                        })
+                        .font(font),
+                    ),
             )
             .push(
                 Row::new()
@@ -577,11 +588,7 @@ fn lazy_col_info(
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &sniffer.device.name;
     #[cfg(target_os = "windows")]
-    let mut adapter_info = &sniffer.device.desc;
-    #[cfg(target_os = "windows")]
-    if adapter_info.is_empty() {
-        adapter_info = &sniffer.device.name;
-    }
+    let mut adapter_info = &sniffer.device.desc.unwrap_or(sniffer.device.name.clone());
 
     let col_device_filters = Column::new()
         .width(Length::FillPortion(1))
@@ -597,7 +604,7 @@ fn lazy_col_info(
 
     let col_data_representation = Column::new()
         .width(Length::FillPortion(1))
-        .push(data_representation_translation(sniffer.language))
+        .push(data_representation_translation(sniffer.language).font(font))
         .push(chart_radios(
             sniffer.traffic_chart.chart_type,
             font,

@@ -101,3 +101,16 @@ pub fn unknown_translation(language: Language) -> String {
     }
     .to_string()
 }
+
+pub fn showing_results_translation(
+    language: Language,
+    start: usize,
+    end: usize,
+    total: usize,
+) -> String {
+    match language {
+        Language::EN => format!("Showing {start}-{end} of {total} total results"),
+        Language::IT => format!("Sono mostrati {start}-{end} di {total} risultati totali"),
+        _ => format!("Showing {start}-{end} of {total} total results"),
+    }
+}
