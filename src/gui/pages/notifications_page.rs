@@ -318,19 +318,28 @@ fn favorite_notification_log(
     let domain = logged_notification.host.domain;
     let country = logged_notification.host.country;
     let asn = logged_notification.host.asn;
-    let details_str = format!("{domain} - {}", asn.name);
-    let mut row_flag_details = Row::new().align_items(Alignment::Center).spacing(5);
-    if !country.is_empty() {
-        row_flag_details = row_flag_details.push(get_flag_tooltip(
+
+    let row_flag_details = Row::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(get_flag_tooltip(
             &country,
             FLAGS_WIDTH_BIG,
             logged_notification.data_info_host.is_local,
             logged_notification.data_info_host.traffic_type,
             language,
             style,
-        ));
-    }
-    row_flag_details = row_flag_details.push(Text::new(details_str).font(font));
+        ))
+        .push(Text::new(domain).font(font))
+        .push(
+            Text::new(if asn.name.is_empty() {
+                String::new()
+            } else {
+                format!(" - {}", asn.name)
+            })
+            .font(font),
+        );
+
     let content = Row::new()
         .spacing(30)
         .align_items(Alignment::Center)

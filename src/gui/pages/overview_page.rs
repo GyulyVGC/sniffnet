@@ -588,7 +588,9 @@ fn lazy_col_info(
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &sniffer.device.name;
     #[cfg(target_os = "windows")]
-    let mut adapter_info = &sniffer.device.desc.unwrap_or(sniffer.device.name.clone());
+    let adapter_name = &sniffer.device.name;
+    #[cfg(target_os = "windows")]
+    let adapter_info = sniffer.device.desc.as_ref().unwrap_or(adapter_name);
 
     let col_device_filters = Column::new()
         .width(Length::FillPortion(1))
