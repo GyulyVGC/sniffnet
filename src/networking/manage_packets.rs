@@ -15,7 +15,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::utils::asn::get_asn;
+use crate::utils::asn::asn;
 use crate::utils::countries::get_country_code;
 use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
@@ -150,7 +150,7 @@ pub fn modify_or_insert_in_map(
         );
         (
             get_country_code(traffic_direction, &key, country_db_reader),
-            get_asn(traffic_direction, &key, asn_db_reader),
+            asn(traffic_direction, &key, asn_db_reader),
         )
     } else {
         // this key already occurred
@@ -569,14 +569,16 @@ fn ipv6_from_long_dec_to_short_hex(ipv6_long: [u8; 16]) -> String {
 
 #[cfg(test)]
 mod tests {
+    use std::net::IpAddr;
+
+    use pcap::Address;
+
     use crate::networking::manage_packets::{
         get_traffic_direction, get_traffic_type, ipv6_from_long_dec_to_short_hex,
         is_local_connection, mac_from_dec_to_hex,
     };
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
-    use pcap::Address;
-    use std::net::{IpAddr, Ipv4Addr};
 
     #[test]
     fn mac_simple_test() {

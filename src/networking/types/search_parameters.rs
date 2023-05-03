@@ -1,7 +1,7 @@
 use crate::AppProtocol;
 
 /// Used to express the search filters applied to GUI inspect page
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Hash)]
 pub struct SearchParameters {
     /// Application protocol
     pub app: Option<AppProtocol>,

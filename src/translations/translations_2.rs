@@ -1,7 +1,8 @@
 #![allow(clippy::match_same_arms)]
 
-use crate::Language;
 use iced::widget::Text;
+
+use crate::Language;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
@@ -72,6 +73,14 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
         Language::EN => "Only the top 30 hosts are displayed here",
         Language::IT => "Solo i maggiori 30 host sono mostrati qui",
         _ => "Only the top 30 hosts are displayed here",
+    }
+}
+
+pub fn sort_by_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Sort by:",
+        Language::IT => "Ordina per:",
+        _ => "Sort by:",
     }
 }
 

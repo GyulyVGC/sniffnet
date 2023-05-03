@@ -17,10 +17,9 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::asn::ASN_MMDB;
 use crate::utils::countries::COUNTRY_MMDB;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
-
-use crate::utils::asn::ASN_MMDB;
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.

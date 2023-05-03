@@ -1,3 +1,10 @@
+use iced::widget::{Button, Column, Container, PickList, Row, Scrollable, Text, Tooltip};
+use iced::{alignment, Alignment, Font, Length};
+use iced_lazy::lazy;
+use iced_native::widget::scrollable::Properties;
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::{button, horizontal_space, Rule};
+
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
@@ -5,14 +12,10 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
+use crate::translations::translations_2::sort_by_translation;
 use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
-use crate::{Language, RunningPage, Sniffer, StyleType};
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip};
-use iced::{alignment, Alignment, Font, Length};
-use iced_native::widget::scrollable::Properties;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, horizontal_space, Rule};
+use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
@@ -46,9 +49,63 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let (search_results, results_number, _) = get_searched_entries(
+    let sort_active_str = sniffer
+        .report_sort_type
+        .get_picklist_label(sniffer.language);
+    let sort_list_str: Vec<String> = ReportSortType::all_strings(sniffer.language);
+    let picklist_sort = PickList::new(
+        sort_list_str.clone(),
+        Some(sort_active_str),
+        move |selected_str| {
+            if selected_str == *sort_list_str.get(0).unwrap_or(&String::new()) {
+                Message::ReportSortSelection(ReportSortType::MostRecent)
+            } else if selected_str == *sort_list_str.get(1).unwrap_or(&String::new()) {
+                Message::ReportSortSelection(ReportSortType::MostBytes)
+            } else {
+                Message::ReportSortSelection(ReportSortType::MostPackets)
+            }
+        },
+    )
+    .padding([3, 7])
+    .font(font)
+    .style(StyleTuple(sniffer.style, ElementType::Standard));
+
+    let report = lazy(
+        (
+            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+            sniffer.style,
+            sniffer.language,
+            sniffer.report_sort_type,
+            sniffer.search.clone(),
+            sniffer.page_number,
+        ),
+        move |_| lazy_report(sniffer),
+    );
+
+    body = body
+        .push(
+            Row::new()
+                .align_items(Alignment::Center)
+                .spacing(10)
+                .push(sort_by_translation(sniffer.language))
+                .push(picklist_sort),
+        )
+        .push(report);
+
+    Container::new(Column::new().push(tab_and_body.push(body)))
+        .height(Length::Fill)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::Standard),
+        ))
+}
+
+fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
+    let font = get_font(sniffer.style);
+
+    let (search_results, results_number) = get_searched_entries(
         &sniffer.info_traffic.clone(),
         &sniffer.search.clone(),
+        sniffer.report_sort_type,
         sniffer.page_number,
     );
 
@@ -61,9 +118,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         ))))
     ;
     let mut scroll_report = Column::new();
-    for index in &search_results {
-        let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-        let key_val = info_traffic_lock.map.get_index(*index).unwrap();
+    for key_val in &search_results {
         let entry_color = get_connection_color(key_val.1.traffic_direction, sniffer.style);
         let entry_row = Row::new()
             .align_items(Alignment::Center)
@@ -94,7 +149,6 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                 )))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
-        drop(info_traffic_lock);
     }
     col_report = col_report.push(Container::new(
         Scrollable::new(scroll_report)
@@ -106,7 +160,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     let start_entry_num = (sniffer.page_number - 1) * 10 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
-    body = body
+
+    Column::new()
+        .spacing(10)
+        .align_items(Alignment::Center)
         .push(
             Row::new()
                 .spacing(15)
@@ -150,13 +207,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                         Container::new(horizontal_space(30.0))
                     },
                 ),
-        );
-
-    Container::new(Column::new().push(tab_and_body.push(body)))
-        .height(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
-        ))
+        )
 }
 
 // fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {

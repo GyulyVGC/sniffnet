@@ -1,11 +1,12 @@
+use maxminddb::{geoip2, MaxMindDBError, Reader};
+
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::asn::Asn;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 pub const ASN_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-ASN.mmdb");
 
-pub fn get_asn(
+pub fn asn(
     traffic_direction: TrafficDirection,
     key: &AddressPortPair,
     asn_db_reader: &Reader<&[u8]>,

@@ -1,16 +1,16 @@
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
-use crate::gui::types::message::Message;
-use crate::{Language, StyleType};
 use iced::widget::{svg::Handle, Svg, Tooltip};
 use iced::{Length, Renderer};
 use iced_native::widget::tooltip::Position;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
+use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{local_translation, unknown_translation};
+use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 

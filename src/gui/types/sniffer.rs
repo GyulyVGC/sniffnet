@@ -23,7 +23,7 @@ use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::{Notification, Notifications};
 use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
-use crate::report::types::report_type::ReportType;
+use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_report_path;
@@ -58,7 +58,7 @@ pub struct Sniffer {
     /// Chart displayed
     pub traffic_chart: TrafficChart,
     /// Report type to be displayed
-    pub report_type: ReportType,
+    pub report_sort_type: ReportSortType,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -103,7 +103,7 @@ impl Sniffer {
             style: config_settings.style,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
-            report_type: ReportType::MostRecent,
+            report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
@@ -128,7 +128,9 @@ impl Sniffer {
             Message::ChartSelection(what_to_display) => {
                 self.traffic_chart.change_kind(what_to_display);
             }
-            Message::ReportSelection(what_to_display) => self.report_type = what_to_display,
+            Message::ReportSortSelection(what_to_display) => {
+                self.report_sort_type = what_to_display;
+            }
             Message::OpenReport => self.open_report_file(),
             Message::OpenGithub(main_page) => Self::open_github(main_page),
             Message::Start => self.start(),
@@ -203,6 +205,7 @@ impl Sniffer {
                                 get_searched_entries(
                                     &self.info_traffic,
                                     &self.search.clone(),
+                                    self.report_sort_type,
                                     self.page_number,
                                 )
                                 .1 as f32
@@ -343,7 +346,7 @@ impl Sniffer {
         self.running_page = RunningPage::Overview;
         *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
         self.pcap_error = None;
-        self.report_type = ReportType::MostRecent;
+        self.report_sort_type = ReportSortType::MostRecent;
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
@@ -496,6 +499,9 @@ impl Sniffer {
 mod tests {
     #![allow(unused_must_use)]
 
+    use std::collections::{HashSet, VecDeque};
+    use std::sync::{Arc, Mutex};
+
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::style_constants::get_color_mix_chart;
@@ -511,10 +517,8 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::{
         get_colors, AppProtocol, ByteMultiple, ChartType, InfoTraffic, IpVersion, Language,
-        ReportType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
+        ReportSortType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
     };
-    use std::collections::{HashSet, VecDeque};
-    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_correctly_update_ip_version() {
@@ -613,17 +617,15 @@ mod tests {
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
-        assert_eq!(sniffer.report_type, ReportType::MostRecent);
-        sniffer.update(Message::ReportSelection(ReportType::MostBytes));
-        assert_eq!(sniffer.report_type, ReportType::MostBytes);
-        sniffer.update(Message::ReportSelection(ReportType::MostPackets));
-        assert_eq!(sniffer.report_type, ReportType::MostPackets);
-        sniffer.update(Message::ReportSelection(ReportType::MostPackets));
-        assert_eq!(sniffer.report_type, ReportType::MostPackets);
-        sniffer.update(Message::ReportSelection(ReportType::MostRecent));
-        assert_eq!(sniffer.report_type, ReportType::MostRecent);
-        sniffer.update(Message::ReportSelection(ReportType::Favorites));
-        assert_eq!(sniffer.report_type, ReportType::Favorites);
+        assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
+        sniffer.update(Message::ReportSortSelection(ReportSortType::MostBytes));
+        assert_eq!(sniffer.report_sort_type, ReportSortType::MostBytes);
+        sniffer.update(Message::ReportSortSelection(ReportSortType::MostPackets));
+        assert_eq!(sniffer.report_sort_type, ReportSortType::MostPackets);
+        sniffer.update(Message::ReportSortSelection(ReportSortType::MostPackets));
+        assert_eq!(sniffer.report_sort_type, ReportSortType::MostPackets);
+        sniffer.update(Message::ReportSortSelection(ReportSortType::MostRecent));
+        assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
     }
 
     #[test]

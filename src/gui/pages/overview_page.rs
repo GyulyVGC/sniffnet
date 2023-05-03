@@ -134,12 +134,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     move |_| lazy_col_info(total, filtered, dropped, sniffer),
                 );
 
-                let active_radio_report = sniffer.report_type;
                 let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
                 let row_report = lazy(
                     (
                         filtered,
-                        active_radio_report,
                         num_favorites,
                         sniffer.style,
                         sniffer.language,
@@ -290,80 +288,6 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     let col_host = col_host(840.0, sniffer);
     let col_app = col_app(250.0, sniffer);
 
-    // if sniffer.report_type.eq(&ReportType::Favorites) && num_favorites == 0 {
-    //     col_report = col_report.push(
-    //         no_favorites_translation(sniffer.language)
-    //             .font(font)
-    //             .height(Length::Fill)
-    //             .width(Length::Fill)
-    //             .horizontal_alignment(Horizontal::Center)
-    //             .vertical_alignment(Vertical::Center),
-    //     );
-    // } else {
-    //     col_report = col_report
-    //             .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
-    //             .push(Text::new("--------------------------------------------------------------------------------------------------------------------------").font(font))
-    //         ;
-    //     let mut scroll_report = Column::new();
-    //     for key_val in get_report_entries(&sniffer.info_traffic.clone(), sniffer.report_type) {
-    //         let entry_color = get_connection_color(key_val.1.traffic_type, sniffer.style);
-    //         let mut entry_row = Row::new().align_items(Alignment::Center).push(
-    //             Text::new(format!(
-    //                 "  {}{}",
-    //                 key_val.0.print_gui(),
-    //                 key_val.1.print_gui()
-    //             ))
-    //             .style(iced::theme::Text::Color(entry_color))
-    //             .font(SARASA_MONO_SC_BOLD),
-    //         );
-    //         if key_val.1.country.is_empty() {
-    //             entry_row = entry_row
-    //                 .push(
-    //                     Text::new("?")
-    //                         .width(Length::Fixed(FLAGS_WIDTH))
-    //                         .style(iced::theme::Text::Color(entry_color))
-    //                         .font(SARASA_MONO_SC_BOLD),
-    //                 )
-    //                 .push(Text::new("    "));
-    //         } else {
-    //             entry_row = entry_row
-    //                 .push(get_flag_from_country_code(&key_val.1.country))
-    //                 .push(Text::new("  "));
-    //         }
-    //         entry_row = entry_row
-    //             .push(
-    //                 button(
-    //                     Text::new('X'.to_string())
-    //                         .font(ICONS)
-    //                         .size(14)
-    //                         .horizontal_alignment(Horizontal::Center)
-    //                         .vertical_alignment(Vertical::Center),
-    //                 )
-    //                 .padding(0)
-    //                 .height(Length::Fixed(16.0))
-    //                 .width(Length::Fixed(16.0))
-    //                 .style(
-    //                     StyleTuple(
-    //                         sniffer.style,
-    //                         if key_val.1.is_favorite {
-    //                             ElementType::Starred
-    //                         } else {
-    //                             ElementType::Neutral
-    //                         },
-    //                     )
-    //                     .into(),
-    //                 )
-    //                 .on_press(Message::AddOrRemoveFavorite(
-    //                     key_val.1.index,
-    //                     !key_val.1.is_favorite,
-    //                 )),
-    //             )
-    //             .push(Text::new("  ").font(font));
-    //         scroll_report = scroll_report.push(entry_row);
-    //     }
-    //     col_report = col_report.push(Container::new(
-    //     ));
-    // };
     row_report = row_report
         .push(col_host)
         .push(

@@ -643,40 +643,40 @@ pub fn filtered_bytes_no_percentage_translation(
 //     })
 // }
 
-pub fn no_favorites_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => "Nothing to show at the moment.\n\
-                         To add a connection to your favorites, click on the star symbol near the connection.",
-        Language::IT => "Nulla da vedere per il momento.\n\
-                         Per aggiungere una connessione ai tuoi preferiti, clicca sul simbolo della stella vicino alla connessione.",
-        Language::FR => "Rien a voir pour le moment.\n\
-                         Pour ajouter une connexion à vos favoris, cliquez sur l'étoile à côté de la connexion.",
-        Language::ES => "Nada que mostrar por el momento.\n\
-                         Para añadir una conexión a sus favoritos, haga clic en el símbolo de la estrella situado junto a la conexión.",
-        Language::PL => "Nie ma nic do pokazania w tej chwili.\n\
-                         Aby dodać połączenie do ulubionych, kliknij na ikonę 'gwiazdki' obok połączenia.",
-        Language::DE => "Im Moment nichts zu zeigen.\n\
-                         Um eine Verbindung zu deinen Favoriten hinzuzufügen, klick das auf das Stern-Symbol neben der Verbindung.",
-        Language::UK => "Немає, що показати в цей момент.\n\
-                         Щоб додати підключення до улюблених, натисни на іконку 'зірочки' біля підключення.",
-        Language::ZH => "收藏夹还是空的.\n\
-                         小贴士: 点击连接右侧的小星星即可收藏到这里哦.",
-        Language::RO => "Nimic de arătat în acest moment.\n\
-                        Pentru a adăuga o conexiune la favorite, faceți clic pe simbolul stea din apropierea conexiunii.",
-        Language::KO => "현재는 보여줄게 없습니다.\n\
-                         즐겨찾기에 연결을 추가하려면 별을 눌러주세요.",
-        Language::TR => "Şu an gösterecek bir şey yok.\n\
-                         Favorilere bağlantı eklemek için, bağlantı yanındaki yıldız sembolüne tıklayınız.",
-        Language::RU => "Нечего показать в настоящий момент.\n\
-                         Для добавления соединения в избранные, нажмите на символ звезды возле соединения.",
-        Language::PT => "Nada para mostrar de momento.\n\
-                         Para adicionar uma conexão aos seus favoritos, clique na estrela perto da conexão.",
-        Language::EL => "Δεν υπάρχει κάτι για απεικόνιση.\n\
-                         Για να προσθέσεις μια σύνδεση στα αγαπημένα σου, κλίκαρε στο σύμβολο με το αστέρι δίπλα στη σύνδεση.",
-        Language::FA => "در حال حاضر هیچ چیزی برای نمایش نیست.\n\
-                        برای افزودن یک پیوند به پسندیده های خود، روی نشان ستاره کنار پیوند کلیک کنید.",
-    })
-}
+// pub fn no_favorites_translation(language: Language) -> Text<'static> {
+//     Text::new(match language {
+//         Language::EN => "Nothing to show at the moment.\n\
+//                          To add a connection to your favorites, click on the star symbol near the connection.",
+//         Language::IT => "Nulla da vedere per il momento.\n\
+//                          Per aggiungere una connessione ai tuoi preferiti, clicca sul simbolo della stella vicino alla connessione.",
+//         Language::FR => "Rien a voir pour le moment.\n\
+//                          Pour ajouter une connexion à vos favoris, cliquez sur l'étoile à côté de la connexion.",
+//         Language::ES => "Nada que mostrar por el momento.\n\
+//                          Para añadir una conexión a sus favoritos, haga clic en el símbolo de la estrella situado junto a la conexión.",
+//         Language::PL => "Nie ma nic do pokazania w tej chwili.\n\
+//                          Aby dodać połączenie do ulubionych, kliknij na ikonę 'gwiazdki' obok połączenia.",
+//         Language::DE => "Im Moment nichts zu zeigen.\n\
+//                          Um eine Verbindung zu deinen Favoriten hinzuzufügen, klick das auf das Stern-Symbol neben der Verbindung.",
+//         Language::UK => "Немає, що показати в цей момент.\n\
+//                          Щоб додати підключення до улюблених, натисни на іконку 'зірочки' біля підключення.",
+//         Language::ZH => "收藏夹还是空的.\n\
+//                          小贴士: 点击连接右侧的小星星即可收藏到这里哦.",
+//         Language::RO => "Nimic de arătat în acest moment.\n\
+//                         Pentru a adăuga o conexiune la favorite, faceți clic pe simbolul stea din apropierea conexiunii.",
+//         Language::KO => "현재는 보여줄게 없습니다.\n\
+//                          즐겨찾기에 연결을 추가하려면 별을 눌러주세요.",
+//         Language::TR => "Şu an gösterecek bir şey yok.\n\
+//                          Favorilere bağlantı eklemek için, bağlantı yanındaki yıldız sembolüne tıklayınız.",
+//         Language::RU => "Нечего показать в настоящий момент.\n\
+//                          Для добавления соединения в избранные, нажмите на символ звезды возле соединения.",
+//         Language::PT => "Nada para mostrar de momento.\n\
+//                          Para adicionar uma conexão aos seus favoritos, clique na estrela perto da conexão.",
+//         Language::EL => "Δεν υπάρχει κάτι για απεικόνιση.\n\
+//                          Για να προσθέσεις μια σύνδεση στα αγαπημένα σου, κλίκαρε στο σύμβολο με το αστέρι δίπλα στη σύνδεση.",
+//         Language::FA => "در حال حاضر هیچ چیزی برای نمایش نیست.\n\
+//                         برای افزودن یک پیوند به پسندیده های خود، روی نشان ستاره کنار پیوند کلیک کنید.",
+//     })
+// }
 
 pub fn error_translation(language: Language, error: &str) -> Text<'static> {
     Text::new(match language {
@@ -929,24 +929,24 @@ pub fn bytes_report_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn favorite_report_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "favorites",
-        Language::IT => "preferiti",
-        Language::FR => "favoris",
-        Language::ES | Language::PT => "favoritos",
-        Language::PL => "ulubione",
-        Language::DE => "Favoriten",
-        Language::UK => "улюблені",
-        Language::ZH => "收藏夹",
-        Language::RO => "favorite",
-        Language::KO => "즐겨찾기",
-        Language::TR => "favoriler",
-        Language::RU => "избранное",
-        Language::EL => "αγαπημένα",
-        Language::FA => "پسندیده ها",
-    }
-}
+// pub fn favorite_report_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "favorites",
+//         Language::IT => "preferiti",
+//         Language::FR => "favoris",
+//         Language::ES | Language::PT => "favoritos",
+//         Language::PL => "ulubione",
+//         Language::DE => "Favoriten",
+//         Language::UK => "улюблені",
+//         Language::ZH => "收藏夹",
+//         Language::RO => "favorite",
+//         Language::KO => "즐겨찾기",
+//         Language::TR => "favoriler",
+//         Language::RU => "избранное",
+//         Language::EL => "αγαπημένα",
+//         Language::FA => "پسندیده ها",
+//     }
+// }
 
 pub fn notifications_title_translation(language: Language) -> Text<'static> {
     Text::new(match language {

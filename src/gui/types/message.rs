@@ -4,7 +4,9 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
-use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
+use crate::{
+    AppProtocol, ChartType, IpVersion, Language, ReportSortType, StyleType, TransProtocol,
+};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -24,7 +26,7 @@ pub enum Message {
     /// Select chart type to be displayed
     ChartSelection(ChartType),
     /// Select report type to be displayed
-    ReportSelection(ReportType),
+    ReportSortSelection(ReportSortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
     /// Open Sniffnet's complete textual report

@@ -81,9 +81,10 @@ fn get_max(deque: &VecDeque<(u32, i64)>) -> i64 {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
     use crate::{ChartType, RunTimeData, TrafficChart};
-    use std::collections::VecDeque;
 
     #[test]
     fn test_chart_data_updates() {
