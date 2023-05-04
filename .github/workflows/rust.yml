@@ -28,17 +28,19 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: install fmt
+        run: rustup component add rustfmt
+      - name: install clippy
+        run: rustup component add clippy
       - name: fmt
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
@@ -59,17 +61,19 @@ jobs:
         run: sudo apt-get install libpcap-dev
       - name: Install dependency for alsa-sys
         run: sudo apt-get install libasound2-dev
+      - name: install fmt
+        run: rustup component add rustfmt
+      - name: install clippy
+        run: rustup component add clippy
       - name: fmt
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
@@ -98,10 +102,13 @@ jobs:
       run: |
             Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
             C:/npcap-oem.exe /S
+    - name: install fmt
+      run: rustup component add rustfmt
+    - name: install clippy
+      run: rustup component add clippy
     - name: fmt
       if: github.event_name != 'pull_request'
-    - run: rustup component add rustfmt
-    - uses: actions-rs/cargo@v1
+      uses: actions-rs/cargo@v1
       with:
         command: fmt
         args: --all -- --check
@@ -110,8 +117,7 @@ jobs:
       run: cargo build --verbose
     - name: clippy
       if: github.event_name != 'pull_request'
-    - run: rustup component add clippy
-    - uses: actions-rs/cargo@v1
+      uses: actions-rs/cargo@v1
       with:
         command: clippy
         args: -- -D warnings
