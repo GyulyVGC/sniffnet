@@ -231,10 +231,11 @@ pub fn reverse_dns_lookup(
             .clone()
     };
 
-    // insert the newly discovered host in the collection, with the data it exchanged so far
+    let new_host = new_info.get_host();
+    // insert the newly resolved host in the collection, with the data it exchanged so far
     info_traffic_lock
         .hosts
-        .entry(new_info.get_host())
+        .entry(new_host.clone())
         .and_modify(|data_info_host| {
             if new_info.traffic_direction == TrafficDirection::Outgoing {
                 data_info_host.data_info.outgoing_packets += new_info.transmitted_packets;
@@ -271,6 +272,10 @@ pub fn reverse_dns_lookup(
                 }
             },
         );
+    // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
+    if info_traffic_lock.favorite_hosts.contains(&new_host) {
+        info_traffic_lock.favorites_last_interval.insert(new_host);
+    }
 
     drop(info_traffic_lock);
 }

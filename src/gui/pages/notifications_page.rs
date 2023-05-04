@@ -319,6 +319,11 @@ fn favorite_notification_log(
     let country = logged_notification.host.country;
     let asn = logged_notification.host.asn;
 
+    let mut domain_asn_str = domain;
+    if !asn.name.is_empty() {
+        domain_asn_str.push_str(&format!(" - {}", asn.name));
+    }
+
     let row_flag_details = Row::new()
         .align_items(Alignment::Center)
         .spacing(5)
@@ -330,15 +335,7 @@ fn favorite_notification_log(
             language,
             style,
         ))
-        .push(Text::new(domain).font(font))
-        .push(
-            Text::new(if asn.name.is_empty() {
-                String::new()
-            } else {
-                format!(" - {}", asn.name)
-            })
-            .font(font),
-        );
+        .push(Text::new(domain_asn_str).font(font));
 
     let content = Row::new()
         .spacing(30)

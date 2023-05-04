@@ -17,7 +17,6 @@ env:
 
 # Linters inspired from here: https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 jobs:
-
   macOS:
     name: MacOS (fmt, build, clippy, test)
     runs-on: macos-latest
