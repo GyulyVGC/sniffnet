@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use etherparse::PacketHeaders;
-use pcap::{Active, Capture, Device};
+use pcap::{Active, Capture};
 
 use crate::networking::manage_packets::{
     analyze_link_header, analyze_network_header, analyze_transport_header, modify_or_insert_in_map,
@@ -16,6 +16,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::asn::ASN_MMDB;
 use crate::utils::countries::COUNTRY_MMDB;
@@ -25,7 +26,7 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
     current_capture_id: &Arc<Mutex<u16>>,
-    device: &Device,
+    device: MyDevice,
     mut cap: Capture<Active>,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
@@ -128,7 +129,7 @@ pub fn parse_packets(
                             new_info = modify_or_insert_in_map(
                                 info_traffic_mutex,
                                 key.clone(),
-                                &device.addresses,
+                                &device,
                                 (mac_address1, mac_address2),
                                 exchanged_bytes,
                                 application_protocol,

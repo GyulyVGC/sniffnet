@@ -13,6 +13,7 @@ use crate::networking::types::asn::Asn;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::asn::asn;
@@ -115,7 +116,7 @@ pub fn analyze_transport_header(
 pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
-    my_interface_addresses: &Vec<Address>,
+    my_device: &MyDevice,
     mac_addresses: (String, String),
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
@@ -132,21 +133,37 @@ pub fn modify_or_insert_in_map(
     let mut is_local = false;
     let mut traffic_type = TrafficType::default();
 
-    let mut info_traffic = info_traffic_mutex
+    let len = info_traffic_mutex.lock().unwrap().map.len();
+    let index = info_traffic_mutex
         .lock()
-        .expect("Error acquiring mutex\n\r");
-    let len = info_traffic.map.len();
-    let index = info_traffic.map.get_index_of(&key).unwrap_or(len);
+        .unwrap()
+        .map
+        .get_index_of(&key)
+        .unwrap_or(len);
+
     let (country, asn) = if index == len {
-        // first occurrence of key => retrieve traffic type, country code and asn
+        // first occurrence of key
+
+        // update device addresses
+        let mut my_interface_addresses = Vec::new();
+        for dev in Device::list().expect("Error retrieving device list\r\n") {
+            if dev.name.eq(&my_device.name) {
+                let mut my_interface_addresses_mutex = my_device.addresses.lock().unwrap();
+                *my_interface_addresses_mutex = dev.addresses.clone();
+                drop(my_interface_addresses_mutex);
+                my_interface_addresses = dev.addresses;
+                break;
+            }
+        }
+
         traffic_direction =
-            get_traffic_direction(source_ip, destination_ip, my_interface_addresses);
-        traffic_type = get_traffic_type(destination_ip, my_interface_addresses, traffic_direction);
+            get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
+        traffic_type = get_traffic_type(destination_ip, &my_interface_addresses, traffic_direction);
         is_local = is_local_connection(
             source_ip,
             destination_ip,
             traffic_direction,
-            my_interface_addresses,
+            &my_interface_addresses,
         );
         (
             get_country_code(traffic_direction, &key, country_db_reader),
@@ -156,6 +173,10 @@ pub fn modify_or_insert_in_map(
         // this key already occurred
         (String::new(), Asn::default())
     };
+
+    let mut info_traffic = info_traffic_mutex
+        .lock()
+        .expect("Error acquiring mutex\n\r");
 
     let new_info: InfoAddressPortPair = info_traffic
         .map
@@ -455,7 +476,7 @@ fn is_local_connection(
 }
 
 /// Determines if the capture opening resolves into an Error
-pub fn get_capture_result(device: &Device) -> (Option<String>, Option<Capture<Active>>) {
+pub fn get_capture_result(device: &MyDevice) -> (Option<String>, Option<Capture<Active>>) {
     let cap_result = Capture::from_device(&*device.name)
         .expect("Capture initialization error\n\r")
         .promisc(true)

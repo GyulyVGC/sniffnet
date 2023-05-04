@@ -9,7 +9,6 @@ use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::{horizontal_space, Rule};
-use pcap::Device;
 use thousands::Separable;
 
 use crate::gui::components::radio::chart_radios;
@@ -21,6 +20,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
 use crate::translations::translations::{
@@ -192,13 +192,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 }
 
 fn body_no_packets(
-    device: &Device,
+    device: &MyDevice,
     font: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'static, Message> {
     let adapter_name = device.name.clone();
-    let (icon_text, nothing_to_see_text) = if device.addresses.is_empty() {
+    let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
             Text::new('T'.to_string()).font(ICONS).size(60),
             no_addresses_translation(language, &adapter_name)

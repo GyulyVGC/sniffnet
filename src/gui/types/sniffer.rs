@@ -18,6 +18,7 @@ use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
+use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::{Notification, Notifications};
@@ -44,7 +45,7 @@ pub struct Sniffer {
     /// Traffic data displayed in GUI
     pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed
-    pub device: Device,
+    pub device: MyDevice,
     /// Last network adapter name for which packets were observed; saved into config file
     pub last_device_name_sniffed: String,
     /// Active filters on the observed traffic
@@ -96,7 +97,7 @@ impl Sniffer {
             status_pair,
             newer_release_available,
             runtime_data: RunTimeData::new(),
-            device: config_device.to_pcap_device(),
+            device: config_device.to_my_device(),
             last_device_name_sniffed: config_device.device_name.clone(),
             filters: Filters::default(),
             pcap_error: None,
@@ -248,14 +249,16 @@ impl Sniffer {
             self.unread_notifications += emitted_notifications;
         }
         update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
+
+        let current_device_name = self.device.name.clone();
         // update ConfigDevice stored if different from last sniffed device
-        if self.device.name.ne(&self.last_device_name_sniffed) {
-            self.last_device_name_sniffed = self.device.name.clone();
+        if current_device_name.ne(&self.last_device_name_sniffed) {
+            self.last_device_name_sniffed = current_device_name.clone();
             confy::store(
                 "sniffnet",
                 "device",
                 ConfigDevice {
-                    device_name: self.device.name.clone(),
+                    device_name: current_device_name,
                 },
             )
             .unwrap_or(());
@@ -312,6 +315,8 @@ impl Sniffer {
     }
 
     fn start(&mut self) {
+        let current_device_name = &*self.device.name.clone();
+        self.set_adapter(current_device_name);
         let device = self.device.clone();
         let (pcap_error, cap) = get_capture_result(&device);
         self.pcap_error = pcap_error.clone();
@@ -331,7 +336,7 @@ impl Sniffer {
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
-                        &device.clone(),
+                        device,
                         cap.unwrap(),
                         &filters,
                         &info_traffic_mutex,
@@ -356,7 +361,14 @@ impl Sniffer {
     fn set_adapter(&mut self, name: &str) {
         for dev in Device::list().expect("Error retrieving device list\r\n") {
             if dev.name.eq(&name) {
-                self.device = dev;
+                let mut addresses_mutex = self.device.addresses.lock().unwrap();
+                *addresses_mutex = dev.addresses;
+                drop(addresses_mutex);
+                self.device = MyDevice {
+                    name: dev.name,
+                    desc: dev.desc,
+                    addresses: self.device.addresses.clone(),
+                };
                 break;
             }
         }
