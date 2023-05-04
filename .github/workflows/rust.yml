@@ -17,6 +17,7 @@ env:
 
 # Linters inspired from here: https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 jobs:
+
   macOS:
     name: MacOS (fmt, build, clippy, test)
     runs-on: macos-latest
@@ -28,16 +29,16 @@ jobs:
           toolchain: stable
           override: true
       - name: fmt
-        run: rustup component add rustfmt
-        uses: actions-rs/cargo@v1
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-        run: rustup component add clippy
-        uses: actions-rs/cargo@v1
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
@@ -59,16 +60,16 @@ jobs:
       - name: Install dependency for alsa-sys
         run: sudo apt-get install libasound2-dev
       - name: fmt
-        run: rustup component add rustfmt
-        uses: actions-rs/cargo@v1
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-        run: rustup component add clippy
-        uses: actions-rs/cargo@v1
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
@@ -99,8 +100,8 @@ jobs:
             C:/npcap-oem.exe /S
     - name: fmt
       if: github.event_name != 'pull_request'
-      run: rustup component add rustfmt
-      uses: actions-rs/cargo@v1
+    - run: rustup component add rustfmt
+    - uses: actions-rs/cargo@v1
       with:
         command: fmt
         args: --all -- --check
@@ -109,8 +110,8 @@ jobs:
       run: cargo build --verbose
     - name: clippy
       if: github.event_name != 'pull_request'
-      run: rustup component add clippy
-      uses: actions-rs/cargo@v1
+    - run: rustup component add clippy
+    - uses: actions-rs/cargo@v1
       with:
         command: clippy
         args: -- -D warnings
