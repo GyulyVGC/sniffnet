@@ -2,14 +2,10 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
-use std::net::IpAddr;
 
 use chrono::{DateTime, Local};
 
-use crate::networking::types::asn::Asn;
-use crate::networking::types::host::Host;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
 
@@ -32,22 +28,20 @@ pub struct InfoAddressPortPair {
     pub final_timestamp: DateTime<Local>,
     /// Set of application layer protocols carried by the associated address:port pair.
     pub app_protocol: AppProtocol,
-    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
+    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for layout)
     pub very_long_address: bool,
-    /// Country of the remote IP address
-    pub country: String,
-    /// Autonomous System of the remote IP address
-    pub asn: Asn,
-    /// Reverse DNS lookup of the remote address. It is set to `None` if not requested yet.
-    pub r_dns: Option<String>,
+    // /// Country of the remote IP address
+    // pub country: String,
+    // /// Autonomous System of the remote IP address
+    // pub asn: Asn,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
-    /// Determines if the connection is unicast, multicast or broadcast
-    pub traffic_type: TrafficType,
-    /// Determines if the connection is local
-    pub is_local: bool,
+    // /// Determines if the connection is unicast, multicast or broadcast
+    // pub traffic_type: TrafficType,
+    // /// Determines if the connection is local
+    // pub is_local: bool,
 }
 
 impl Default for InfoAddressPortPair {
@@ -62,12 +56,7 @@ impl Default for InfoAddressPortPair {
             app_protocol: AppProtocol::Other,
             very_long_address: false,
             traffic_direction: TrafficDirection::default(),
-            traffic_type: TrafficType::default(),
-            country: String::new(),
-            asn: Asn::default(),
-            r_dns: None,
             index: 0,
-            is_local: false,
         }
     }
 }
@@ -81,49 +70,39 @@ impl InfoAddressPortPair {
             .replace('|', "")
     }
 
-    pub fn get_host(&self) -> Host {
-        if self.r_dns.is_none() {
-            return Host::default();
-        }
-
-        let r_dns = self.r_dns.as_ref().unwrap().clone();
-
-        let domain = if r_dns.parse::<IpAddr>().is_ok() || r_dns.is_empty() {
-            // rDNS is equal to the corresponding IP address
-            r_dns
-        } else {
-            let parts: Vec<&str> = r_dns.split('.').collect();
-            if parts.len() >= 2 {
-                parts
-                    .get(parts.len() - 2..)
-                    .unwrap_or(&parts)
-                    .iter()
-                    .fold(Vec::new(), |mut vec, part| {
-                        vec.push((*part).to_string());
-                        vec
-                    })
-                    .join(".")
-            } else {
-                r_dns
-            }
-        };
-
-        Host {
-            domain,
-            asn: self.asn.clone(),
-            country: self.country.clone(),
-        }
-    }
-
-    /// An  `rDNS` resolution has already been requested for this host
-    pub fn r_dns_already_requested(&self) -> bool {
-        self.r_dns.is_some()
-    }
-
-    /// An `rDNS` resolution has already completed for this host
-    pub fn r_dns_already_resolved(&self) -> bool {
-        self.r_dns.is_some() && !self.r_dns.as_ref().unwrap().is_empty()
-    }
+    // pub fn get_host(&self) -> Host {
+    //     if self.r_dns.is_none() {
+    //         return Host::default();
+    //     }
+    //
+    //     let r_dns = self.r_dns.as_ref().unwrap().clone();
+    //
+    //     let domain = if r_dns.parse::<IpAddr>().is_ok() || r_dns.is_empty() {
+    //         // rDNS is equal to the corresponding IP address
+    //         r_dns
+    //     } else {
+    //         let parts: Vec<&str> = r_dns.split('.').collect();
+    //         if parts.len() >= 2 {
+    //             parts
+    //                 .get(parts.len() - 2..)
+    //                 .unwrap_or(&parts)
+    //                 .iter()
+    //                 .fold(Vec::new(), |mut vec, part| {
+    //                     vec.push((*part).to_string());
+    //                     vec
+    //                 })
+    //                 .join(".")
+    //         } else {
+    //             r_dns
+    //         }
+    //     };
+    //
+    //     Host {
+    //         domain,
+    //         asn: self.asn.clone(),
+    //         country: self.country.clone(),
+    //     }
+    // }
 }
 
 impl fmt::Display for InfoAddressPortPair {

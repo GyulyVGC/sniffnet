@@ -9,9 +9,9 @@ use pcap::{Active, Address, Capture, Device};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
-use crate::networking::types::asn::Asn;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -120,18 +120,14 @@ pub fn modify_or_insert_in_map(
     mac_addresses: (String, String),
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
-    country_db_reader: &Reader<&[u8]>,
-    asn_db_reader: &Reader<&[u8]>,
 ) -> InfoAddressPortPair {
     #![allow(clippy::too_many_arguments)]
 
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
-    let source_ip = &key.address1.clone();
-    let destination_ip = &key.address2.clone();
+    let source_ip = &key.address1;
+    let destination_ip = &key.address2;
     let very_long_address = source_ip.len() > 25 || destination_ip.len() > 25;
-    let mut is_local = false;
-    let mut traffic_type = TrafficType::default();
 
     let len = info_traffic_mutex.lock().unwrap().map.len();
     let index = info_traffic_mutex
@@ -141,7 +137,7 @@ pub fn modify_or_insert_in_map(
         .get_index_of(&key)
         .unwrap_or(len);
 
-    let (country, asn) = if index == len {
+    if index == len {
         // first occurrence of key
 
         // update device addresses
@@ -155,23 +151,15 @@ pub fn modify_or_insert_in_map(
                 break;
             }
         }
-
+        // determine traffic direction
         traffic_direction =
             get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
-        traffic_type = get_traffic_type(destination_ip, &my_interface_addresses, traffic_direction);
-        is_local = is_local_connection(
-            source_ip,
-            destination_ip,
-            traffic_direction,
-            &my_interface_addresses,
-        );
-        (
-            get_country_code(traffic_direction, &key, country_db_reader),
-            asn(traffic_direction, &key, asn_db_reader),
-        )
-    } else {
-        // this key already occurred
-        (String::new(), Asn::default())
+        // traffic_type = get_traffic_type(destination_ip, &my_interface_addresses, traffic_direction);
+        // is_local = is_local_connection(address_to_lookup, &my_interface_addresses);
+        // (
+        //     get_country_code(address_to_lookup.clone(), country_db_reader),
+        //     asn(address_to_lookup.clone(), asn_db_reader),
+        // )
     };
 
     let mut info_traffic = info_traffic_mutex
@@ -180,7 +168,7 @@ pub fn modify_or_insert_in_map(
 
     let new_info: InfoAddressPortPair = info_traffic
         .map
-        .entry(key)
+        .entry(key.clone())
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
@@ -196,20 +184,25 @@ pub fn modify_or_insert_in_map(
             app_protocol: application_protocol,
             very_long_address,
             traffic_direction,
-            traffic_type,
-            country,
-            asn,
-            r_dns: None,
+            // traffic_type,
+            // country,
+            // asn,
+            // r_dns: None,
             index,
-            is_local,
+            // is_local,
         })
         .clone();
 
     info_traffic.addresses_last_interval.insert(index);
 
-    let host = new_info.get_host();
-    if info_traffic.favorite_hosts.contains(&host) {
-        info_traffic.favorites_last_interval.insert(host);
+    if let Some(host_info) = info_traffic
+        .addresses_resolved
+        .get(&get_address_to_lookup(&key, traffic_direction))
+        .cloned()
+    {
+        if info_traffic.favorite_hosts.contains(&host_info.1) {
+            info_traffic.favorites_last_interval.insert(host_info.1);
+        }
     }
 
     new_info
@@ -219,80 +212,62 @@ pub fn reverse_dns_lookup(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     key: AddressPortPair,
     traffic_direction: TrafficDirection,
+    my_device: &MyDevice,
+    country_db_reader: &Reader<&[u8]>,
+    asn_db_reader: &Reader<&[u8]>,
 ) {
-    let address_to_lookup = match traffic_direction {
-        TrafficDirection::Outgoing => key.address2.clone(),
-        TrafficDirection::Incoming => key.address1.clone(),
-    };
+    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
+    let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
 
     // perform rDNS lookup
     let lookup_result = lookup_addr(&address_to_lookup.parse().unwrap());
 
-    let mut info_traffic_lock = info_traffic.lock().unwrap();
-    let new_info: InfoAddressPortPair = if let Ok(r_dns) = lookup_result {
-        let actual_r_dns = Some(if r_dns.is_empty() {
-            address_to_lookup
-        } else {
-            r_dns
-        });
-        info_traffic_lock
-            .map
-            .entry(key)
-            .and_modify(|info| info.r_dns = actual_r_dns)
-            .or_insert(InfoAddressPortPair::default())
-            .clone()
+    // get new host info
+    let traffic_type = get_traffic_type(
+        &address_to_lookup,
+        &my_interface_addresses,
+        traffic_direction,
+    );
+    let is_local = is_local_connection(address_to_lookup.clone(), &my_interface_addresses);
+    let country = get_country_code(address_to_lookup.clone(), country_db_reader);
+    let asn = asn(address_to_lookup.clone(), asn_db_reader);
+    let r_dns = if lookup_result.is_ok() && !lookup_result.as_ref().unwrap().is_empty() {
+        lookup_result.unwrap()
     } else {
-        info_traffic_lock
-            .map
-            .entry(key)
-            .and_modify(|info| {
-                info.r_dns = Some(address_to_lookup);
-            })
-            .or_insert(InfoAddressPortPair::default())
-            .clone()
+        address_to_lookup.clone()
     };
 
-    let new_host = new_info.get_host();
-    // insert the newly resolved host in the collection, with the data it exchanged so far
+    let mut info_traffic_lock = info_traffic.lock().unwrap();
+    // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
+    let other_data = info_traffic_lock
+        .addresses_waiting_resolution
+        .remove(&address_to_lookup)
+        .unwrap_or(DataInfo::default());
+    // build the new host
+    let new_host = Host {
+        domain: r_dns.clone(), // to be shortened
+        asn,
+        country,
+    };
+    // insert the newly resolved host in the collections, with the data it exchanged so far
+    info_traffic_lock
+        .addresses_resolved
+        .insert(address_to_lookup, (r_dns, new_host.clone()));
     info_traffic_lock
         .hosts
         .entry(new_host.clone())
         .and_modify(|data_info_host| {
-            if new_info.traffic_direction == TrafficDirection::Outgoing {
-                data_info_host.data_info.outgoing_packets += new_info.transmitted_packets;
-                data_info_host.data_info.outgoing_bytes += new_info.transmitted_bytes;
-            } else {
-                data_info_host.data_info.incoming_packets += new_info.transmitted_packets;
-                data_info_host.data_info.incoming_bytes += new_info.transmitted_bytes;
-            }
+            data_info_host.data_info.outgoing_packets += other_data.outgoing_packets;
+            data_info_host.data_info.outgoing_bytes += other_data.outgoing_bytes;
+            data_info_host.data_info.incoming_packets += other_data.incoming_packets;
+            data_info_host.data_info.incoming_bytes += other_data.incoming_bytes;
         })
-        .or_insert(
-            if new_info.traffic_direction == TrafficDirection::Outgoing {
-                DataInfoHost {
-                    data_info: DataInfo {
-                        incoming_packets: 0,
-                        outgoing_packets: new_info.transmitted_packets,
-                        incoming_bytes: 0,
-                        outgoing_bytes: new_info.transmitted_bytes,
-                    },
-                    is_favorite: false,
-                    is_local: new_info.is_local,
-                    traffic_type: new_info.traffic_type,
-                }
-            } else {
-                DataInfoHost {
-                    data_info: DataInfo {
-                        incoming_packets: new_info.transmitted_packets,
-                        outgoing_packets: 0,
-                        incoming_bytes: new_info.transmitted_bytes,
-                        outgoing_bytes: 0,
-                    },
-                    is_favorite: false,
-                    is_local: new_info.is_local,
-                    traffic_type: new_info.traffic_type,
-                }
-            },
-        );
+        .or_insert(DataInfoHost {
+            data_info: other_data,
+            is_favorite: false,
+            is_local,
+            traffic_type,
+        });
     // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
     if info_traffic_lock.favorite_hosts.contains(&new_host) {
         info_traffic_lock.favorites_last_interval.insert(new_host);
@@ -400,18 +375,9 @@ fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bo
 }
 
 /// Determines if the connection is local
-fn is_local_connection(
-    source_ip: &String,
-    destination_ip: &String,
-    traffic_direction: TrafficDirection,
-    my_interface_addresses: &Vec<Address>,
-) -> bool {
+fn is_local_connection(address_to_lookup: String, my_interface_addresses: &Vec<Address>) -> bool {
     let mut ret_val = false;
 
-    let address_to_lookup = match traffic_direction {
-        TrafficDirection::Outgoing => destination_ip,
-        TrafficDirection::Incoming => source_ip,
-    };
     let address_to_lookup_type = if address_to_lookup.contains(':') {
         IPv6
     } else {
@@ -499,6 +465,13 @@ fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
     }
     mac_hex.pop();
     mac_hex
+}
+
+pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> String {
+    match traffic_direction {
+        TrafficDirection::Outgoing => key.address2.clone(),
+        TrafficDirection::Incoming => key.address1.clone(),
+    }
 }
 
 /// Function to convert a long decimal ipv6 address to a

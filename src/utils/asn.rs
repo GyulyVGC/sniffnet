@@ -1,21 +1,10 @@
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
-use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::asn::Asn;
-use crate::networking::types::traffic_direction::TrafficDirection;
 
 pub const ASN_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-ASN.mmdb");
 
-pub fn asn(
-    traffic_direction: TrafficDirection,
-    key: &AddressPortPair,
-    asn_db_reader: &Reader<&[u8]>,
-) -> Asn {
-    let address_to_lookup = match traffic_direction {
-        TrafficDirection::Outgoing => &key.address2,
-        TrafficDirection::Incoming => &key.address1,
-    };
-
+pub fn asn(address_to_lookup: String, asn_db_reader: &Reader<&[u8]>) -> Asn {
     let asn_result: Result<geoip2::Asn, MaxMindDBError> =
         asn_db_reader.lookup(address_to_lookup.parse().unwrap());
     if let Ok(res) = asn_result {

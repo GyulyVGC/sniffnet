@@ -32,7 +32,7 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
     let header_and_content = Column::new()
         .width(Length::Fill)
         .push(page_header(sniffer.style, sniffer.language));
-    let mut content = Column::new()
+    let content = Column::new()
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Start)
@@ -62,14 +62,15 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
         .push(Text::new(format!("Socket address: {} {}", key.address2, key.port2)).font(font))
         .push(Text::new(format!("MAC address: {}", val.mac_address2)).font(font))
         .push(vertical_space(Length::Fixed(15.0)))
-        .push(Text::new(val.asn.name.clone()).font(font))
-        .push(Text::new(format!("{}", val.asn.number)).font(font));
+        //.push(Text::new(val.asn.name.clone()).font(font))
+        //.push(Text::new(format!("{}", val.asn.number)).font(font))
+        ;
 
-    if let Some(r_dns) = val.r_dns {
-        if !r_dns.is_empty() {
-            content = content.push(Text::new(r_dns).font(font));
-        }
-    }
+    // if let Some(r_dns) = val.r_dns {
+    //     if !r_dns.is_empty() {
+    //         content = content.push(Text::new(r_dns).font(font));
+    //     }
+    // }
 
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))

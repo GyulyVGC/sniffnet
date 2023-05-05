@@ -202,16 +202,7 @@ impl Sniffer {
                 {
                     if increment {
                         if self.page_number
-                            < f32::ceil(
-                                get_searched_entries(
-                                    &self.info_traffic,
-                                    &self.search.clone(),
-                                    self.report_sort_type,
-                                    self.page_number,
-                                )
-                                .1 as f32
-                                    / 10.0,
-                            ) as usize
+                            < f32::ceil(get_searched_entries(self).1 as f32 / 10.0) as usize
                         {
                             return self.update(Message::UpdatePageNumber(increment));
                         }

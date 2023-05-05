@@ -1,46 +1,67 @@
+use iced::widget::Tooltip;
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
+use crate::gui::types::message::Message;
+use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::search_parameters::SearchParameters;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType};
+use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
+use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 
 /// Returns the indexes of the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
-    search_parameters: &SearchParameters,
-    report_sort_type: ReportSortType,
-    page_number: usize,
-) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize) {
+    sniffer: &Sniffer,
+) -> (
+    Vec<(
+        AddressPortPair,
+        InfoAddressPortPair,
+        Tooltip<'static, Message>,
+    )>,
+    usize,
+) {
+    let info_traffic = sniffer.info_traffic.clone();
+    let search_parameters = &sniffer.search.clone();
+    let report_sort_type = sniffer.report_sort_type;
+    let page_number = sniffer.page_number;
+
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
         .iter()
-        .filter(|(_key, value)| {
+        .filter(|(key, value)| {
             let mut boolean_flags = Vec::new();
+            // retrieve host info
+            let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
+            let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
             // check application protocol filter
             if let Some(app) = &search_parameters.app {
                 boolean_flags.push(value.app_protocol.eq(app));
             }
             // check domain filter
             if let Some(domain) = &search_parameters.domain {
-                if !value.r_dns_already_resolved() {
+                if r_dns_host.is_none() {
                     return false;
                 }
-                boolean_flags.push(value.r_dns.as_ref().unwrap().ends_with(domain));
+                boolean_flags.push(r_dns_host.unwrap().0.ends_with(domain));
             }
             // check country filter
             if let Some(country) = &search_parameters.country {
-                boolean_flags.push(value.country.eq(country));
+                if r_dns_host.is_none() {
+                    return false;
+                }
+                boolean_flags.push(r_dns_host.unwrap().1.country.eq(country));
             }
             // check Autonomous System name filter
             if let Some(as_name) = &search_parameters.as_name {
-                boolean_flags.push(value.asn.name.eq(as_name));
+                if r_dns_host.is_none() {
+                    return false;
+                }
+                boolean_flags.push(r_dns_host.unwrap().1.asn.name.eq(as_name));
             }
 
             if boolean_flags.is_empty() {
@@ -62,7 +83,30 @@ pub fn get_searched_entries(
             .get((page_number - 1) * 10..upper_bound)
             .unwrap_or(&Vec::new())
             .iter()
-            .map(|key_val| (key_val.0.clone(), key_val.1.clone()))
+            .map(|key_val| {
+                let address_to_lookup =
+                    get_address_to_lookup(key_val.0, key_val.1.traffic_direction);
+                let host = info_traffic_lock
+                    .addresses_resolved
+                    .get(&address_to_lookup)
+                    .unwrap_or(&Default::default())
+                    .1
+                    .clone();
+                let default_host_info = &DataInfoHost::default();
+                let host_info = info_traffic_lock
+                    .hosts
+                    .get(&host)
+                    .unwrap_or(default_host_info);
+                let flag = get_flag_tooltip(
+                    &host.country,
+                    FLAGS_WIDTH_SMALL,
+                    host_info.is_local,
+                    host_info.traffic_type,
+                    sniffer.language,
+                    sniffer.style,
+                );
+                (key_val.0.clone(), key_val.1.clone(), flag)
+            })
             .collect(),
         all_results.len(),
     )

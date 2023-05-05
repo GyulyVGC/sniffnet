@@ -13,7 +13,6 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::translations::translations_2::{showing_results_translation, sort_by_translation};
-use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
@@ -102,12 +101,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
     let font = get_font(sniffer.style);
 
-    let (search_results, results_number) = get_searched_entries(
-        &sniffer.info_traffic.clone(),
-        &sniffer.search.clone(),
-        sniffer.report_sort_type,
-        sniffer.page_number,
-    );
+    let (search_results, results_number) = get_searched_entries(sniffer);
 
     let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
     col_report = col_report
@@ -118,35 +112,24 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
         ))))
     ;
     let mut scroll_report = Column::new();
-    for key_val in &search_results {
-        let entry_color = get_connection_color(key_val.1.traffic_direction, sniffer.style);
+    let start_entry_num = (sniffer.page_number - 1) * 10 + 1;
+    let end_entry_num = start_entry_num + search_results.len() - 1;
+    for (key, val, flag) in search_results {
+        let entry_color = get_connection_color(val.traffic_direction, sniffer.style);
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!(
-                    "  {}{}",
-                    key_val.0.print_gui(),
-                    key_val.1.print_gui()
-                ))
-                .style(iced::theme::Text::Color(entry_color))
-                .font(SARASA_MONO_SC_BOLD),
+                Text::new(format!("  {}{}", key.print_gui(), val.print_gui()))
+                    .style(iced::theme::Text::Color(entry_color))
+                    .font(SARASA_MONO_SC_BOLD),
             )
-            .push(get_flag_tooltip(
-                &key_val.1.country,
-                FLAGS_WIDTH_SMALL,
-                key_val.1.is_local,
-                key_val.1.traffic_type,
-                sniffer.language,
-                sniffer.style,
-            ))
+            .push(flag)
             .push(Text::new("  "));
 
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)
-                .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    key_val.1.index,
-                )))
+                .on_press(Message::ShowModal(MyModal::ConnectionDetails(val.index)))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
     }
@@ -157,9 +140,6 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
                 StyleTuple(sniffer.style, ElementType::Standard),
             )),
     ));
-
-    let start_entry_num = (sniffer.page_number - 1) * 10 + 1;
-    let end_entry_num = start_entry_num + search_results.len() - 1;
 
     Column::new()
         .spacing(10)

@@ -8,12 +8,11 @@ use etherparse::PacketHeaders;
 use pcap::{Active, Capture};
 
 use crate::networking::manage_packets::{
-    analyze_link_header, analyze_network_header, analyze_transport_header, modify_or_insert_in_map,
-    reverse_dns_lookup,
+    analyze_link_header, analyze_network_header, analyze_transport_header, get_address_to_lookup,
+    modify_or_insert_in_map, reverse_dns_lookup,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
@@ -46,8 +45,8 @@ pub fn parse_packets(
     let mut skip_packet;
     let mut reported_packet;
 
-    let country_db_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
-    let asn_db_reader = maxminddb::Reader::from_source(ASN_MMDB).unwrap();
+    let country_db_reader = Arc::new(maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap());
+    let asn_db_reader = Arc::new(maxminddb::Reader::from_source(ASN_MMDB).unwrap());
 
     loop {
         match cap.next_packet() {
@@ -133,8 +132,6 @@ pub fn parse_packets(
                                 (mac_address1, mac_address2),
                                 exchanged_bytes,
                                 application_protocol,
-                                &country_db_reader,
-                                &asn_db_reader,
                             );
                             reported_packet = true;
                         }
@@ -161,23 +158,51 @@ pub fn parse_packets(
                                 info_traffic.tot_received_bytes += exchanged_bytes;
                             }
 
-                            // check the rDNS status and act consequently
-                            match (
-                                new_info.r_dns_already_requested(),
-                                new_info.r_dns_already_resolved(),
-                            ) {
-                                (false, _) => {
-                                    // rDNS not requested yet (first occurrence of this key)
+                            // check the rDNS status of this address and act accordingly
+                            let address_to_lookup =
+                                get_address_to_lookup(&key, new_info.traffic_direction);
+                            let r_dns_already_resolved = info_traffic
+                                .addresses_resolved
+                                .contains_key(&address_to_lookup);
+                            let mut r_dns_waiting_resolution = false;
+                            if !r_dns_already_resolved {
+                                r_dns_waiting_resolution = info_traffic
+                                    .addresses_waiting_resolution
+                                    .contains_key(&address_to_lookup);
+                            }
 
-                                    // Assign the r_dns field of this entry to an empty string (requested but not resolved yet).
-                                    // Useful to NOT perform again a rDNS lookup for this entry.
-                                    info_traffic.map.entry(key.clone()).and_modify(|info| {
-                                        info.r_dns = Some(String::new());
-                                    });
+                            match (r_dns_waiting_resolution, r_dns_already_resolved) {
+                                (false, false) => {
+                                    // rDNS not requested yet (first occurrence of this address to lookup)
+
+                                    // Add this address to the map of addresses waiting for a resolution
+                                    // Useful to NOT perform again a rDNS lookup for this entry
+                                    info_traffic.addresses_waiting_resolution.insert(
+                                        address_to_lookup,
+                                        if new_info.traffic_direction == TrafficDirection::Outgoing
+                                        {
+                                            DataInfo {
+                                                incoming_packets: 0,
+                                                outgoing_packets: 1,
+                                                incoming_bytes: 0,
+                                                outgoing_bytes: exchanged_bytes,
+                                            }
+                                        } else {
+                                            DataInfo {
+                                                incoming_packets: 1,
+                                                outgoing_packets: 0,
+                                                incoming_bytes: exchanged_bytes,
+                                                outgoing_bytes: 0,
+                                            }
+                                        },
+                                    );
 
                                     // launch new thread to resolve host name
                                     let key2 = key.clone();
                                     let info_traffic2 = info_traffic_mutex.clone();
+                                    let device2 = device.clone();
+                                    let country_db_reader2 = country_db_reader.clone();
+                                    let asn_db_reader2 = asn_db_reader.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
                                         .spawn(move || {
@@ -185,64 +210,52 @@ pub fn parse_packets(
                                                 &info_traffic2,
                                                 key2,
                                                 new_info.traffic_direction,
+                                                &device2,
+                                                &country_db_reader2,
+                                                &asn_db_reader2,
                                             );
                                         })
                                         .unwrap();
                                 }
                                 (true, false) => {
                                     // waiting for a previously requested rDNS resolution
-                                    // do nothing
+                                    // update the corresponding waiting address data
+                                    info_traffic
+                                        .addresses_waiting_resolution
+                                        .entry(address_to_lookup)
+                                        .and_modify(|data_info| {
+                                            if new_info.traffic_direction
+                                                == TrafficDirection::Outgoing
+                                            {
+                                                data_info.outgoing_packets += 1;
+                                                data_info.outgoing_bytes += exchanged_bytes;
+                                            } else {
+                                                data_info.incoming_packets += 1;
+                                                data_info.incoming_bytes += exchanged_bytes;
+                                            }
+                                        });
                                 }
-                                (true, true) => {
+                                (_, true) => {
                                     // rDNS already resolved
                                     // update the corresponding host's data info
-                                    info_traffic
-                                        .hosts
-                                        .entry(new_info.get_host())
-                                        .and_modify(|data_info_host| {
-                                            if new_info.traffic_direction
-                                                == TrafficDirection::Outgoing
-                                            {
-                                                data_info_host.data_info.outgoing_packets += 1;
-                                                data_info_host.data_info.outgoing_bytes +=
-                                                    exchanged_bytes;
-                                            } else {
-                                                data_info_host.data_info.incoming_packets += 1;
-                                                data_info_host.data_info.incoming_bytes +=
-                                                    exchanged_bytes;
-                                            }
-                                        })
-                                        .or_insert(
-                                            if new_info.traffic_direction
-                                                == TrafficDirection::Outgoing
-                                            {
-                                                DataInfoHost {
-                                                    data_info: DataInfo {
-                                                        incoming_packets: 0,
-                                                        outgoing_packets: new_info
-                                                            .transmitted_packets,
-                                                        incoming_bytes: 0,
-                                                        outgoing_bytes: new_info.transmitted_bytes,
-                                                    },
-                                                    is_favorite: false,
-                                                    is_local: new_info.is_local,
-                                                    traffic_type: new_info.traffic_type,
-                                                }
-                                            } else {
-                                                DataInfoHost {
-                                                    data_info: DataInfo {
-                                                        incoming_packets: new_info
-                                                            .transmitted_packets,
-                                                        outgoing_packets: 0,
-                                                        incoming_bytes: new_info.transmitted_bytes,
-                                                        outgoing_bytes: 0,
-                                                    },
-                                                    is_favorite: false,
-                                                    is_local: new_info.is_local,
-                                                    traffic_type: new_info.traffic_type,
-                                                }
-                                            },
-                                        );
+                                    let host = info_traffic
+                                        .addresses_resolved
+                                        .get(&address_to_lookup)
+                                        .unwrap()
+                                        .1
+                                        .clone();
+                                    info_traffic.hosts.entry(host).and_modify(|data_info_host| {
+                                        if new_info.traffic_direction == TrafficDirection::Outgoing
+                                        {
+                                            data_info_host.data_info.outgoing_packets += 1;
+                                            data_info_host.data_info.outgoing_bytes +=
+                                                exchanged_bytes;
+                                        } else {
+                                            data_info_host.data_info.incoming_packets += 1;
+                                            data_info_host.data_info.incoming_bytes +=
+                                                exchanged_bytes;
+                                        }
+                                    });
                                 }
                             }
 

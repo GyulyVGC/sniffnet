@@ -7,24 +7,13 @@ use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
-use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{local_translation, unknown_translation};
 use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
-pub fn get_country_code(
-    traffic_direction: TrafficDirection,
-    key: &AddressPortPair,
-    country_db_reader: &Reader<&[u8]>,
-) -> String {
-    let address_to_lookup = match traffic_direction {
-        TrafficDirection::Outgoing => &key.address2,
-        TrafficDirection::Incoming => &key.address1,
-    };
-
+pub fn get_country_code(address_to_lookup: String, country_db_reader: &Reader<&[u8]>) -> String {
     let country_result: Result<geoip2::Country, MaxMindDBError> =
         country_db_reader.lookup(address_to_lookup.parse().unwrap());
     if let Ok(res1) = country_result {
