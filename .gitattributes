@@ -1,0 +1,20 @@
+*                   text eol=lf
+.*                  text eol=lf
+
+*.png               binary
+*.icns              binary
+*.ico               binary
+*.ttf               binary
+*.mp3               binary
+*.rtf               binary
+*.mmdb              binary
+
+*.rs                diff=rust
+*.md                diff=markdown
+
+/.github            export-ignore
+/.design            export-ignore
+CHANGELOG.md        export-ignore
+CONTRIBUTING.md     export-ignore
+CONTRIBUTORS.md     export-ignore
+CODE_OF_CONDUCT.md  export-ignore
