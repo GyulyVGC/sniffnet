@@ -8,7 +8,9 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::translations::translations_2::{local_translation, unknown_translation};
+use crate::translations::translations_2::{
+    local_translation, unknown_translation, your_network_adapter_translation,
+};
 use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
@@ -282,6 +284,7 @@ pub const HOME: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-h
 pub const MULTICAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-multicast.svg");
 pub const BROADCAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-broadcast.svg");
 pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-unknown.svg");
+pub const COMPUTER: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-computer.svg");
 
 pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
     Svg::new(Handle::from_memory(Vec::from(match language {
@@ -608,6 +611,39 @@ pub fn get_flag_tooltip(
         .gap(5)
         .font(get_font(style))
         .snap_within_viewport(snap)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(style, ElementType::Tooltip),
+        ))
+}
+
+pub fn get_computer_tooltip(
+    is_my_address: bool,
+    traffic_type: TrafficType,
+    language: Language,
+    style: StyleType,
+) -> Tooltip<'static, Message> {
+    let content = Svg::new(Handle::from_memory(Vec::from(
+        match (is_my_address, traffic_type) {
+            (true, _) => COMPUTER,
+            (false, TrafficType::Multicast) => MULTICAST,
+            (false, TrafficType::Broadcast) => BROADCAST,
+            (false, TrafficType::Unicast) => UNKNOWN,
+        },
+    )))
+    .width(Length::Fixed(FLAGS_WIDTH_BIG))
+    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75));
+
+    let tooltip = match (is_my_address, traffic_type) {
+        (true, _) => your_network_adapter_translation(language),
+        (false, TrafficType::Multicast) => "Multicast".to_string(),
+        (false, TrafficType::Broadcast) => "Broadcast".to_string(),
+        (false, TrafficType::Unicast) => unknown_translation(language),
+    };
+
+    Tooltip::new(content, tooltip, Position::FollowCursor)
+        .gap(5)
+        .font(get_font(style))
+        .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))

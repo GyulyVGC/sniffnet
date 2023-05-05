@@ -86,18 +86,27 @@ pub fn sort_by_translation(language: Language) -> &'static str {
 
 pub fn local_translation(language: Language) -> String {
     match language {
-        Language::EN => "Local",
-        Language::IT => "Locale",
-        _ => "Local",
+        Language::EN => "Local network",
+        Language::IT => "Rete locale",
+        _ => "Local network",
     }
     .to_string()
 }
 
 pub fn unknown_translation(language: Language) -> String {
     match language {
-        Language::EN => "Unknown",
-        Language::IT => "Sconosciuto",
-        _ => "Unknown",
+        Language::EN => "Unknown location",
+        Language::IT => "Localizzazione sconosciuta",
+        _ => "Unknown location",
+    }
+    .to_string()
+}
+
+pub fn your_network_adapter_translation(language: Language) -> String {
+    match language {
+        Language::EN => "Your network adapter",
+        Language::IT => "La tua scheda di rete",
+        _ => "Your network adapter",
     }
     .to_string()
 }

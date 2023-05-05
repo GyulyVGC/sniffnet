@@ -4,15 +4,19 @@ use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space};
+use std::net::IpAddr;
 
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
+use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::hide_translation;
 use crate::translations::translations_2::connection_details_translation;
+use crate::utils::countries::{get_computer_tooltip, get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::{Language, Sniffer, StyleType};
 
@@ -27,19 +31,129 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
         info_traffic_lock.map.get_index(connection_index).unwrap();
     let key = key_val.0.clone();
     let val = key_val.1.clone();
+    let address_to_lookup = get_address_to_lookup(&key, val.traffic_direction);
+    let host_option = info_traffic_lock
+        .addresses_resolved
+        .get(&address_to_lookup)
+        .cloned();
+    let host_info_option = info_traffic_lock
+        .hosts
+        .get(&host_option.clone().unwrap_or_default().1)
+        .cloned();
     drop(info_traffic_lock);
 
     let header_and_content = Column::new()
         .width(Length::Fill)
         .push(page_header(sniffer.style, sniffer.language));
-    let content = Column::new()
-        .padding(10)
+
+    let mut source_caption = Row::new()
         .spacing(10)
-        .align_items(Alignment::Start)
-        .width(Length::Fill)
+        .push(Text::new("Source").font(font).size(FONT_SIZE_TITLE));
+    let mut dest_caption = Row::new()
+        .spacing(10)
+        .push(Text::new("Destination").font(font).size(FONT_SIZE_TITLE));
+    let mut host_info_col = Column::new();
+    if let Some((r_dns, host)) = host_option {
+        let host_info = host_info_option.unwrap_or_default();
+        let flag = get_flag_tooltip(
+            &host.country,
+            FLAGS_WIDTH_BIG,
+            host_info.is_local,
+            host_info.traffic_type,
+            sniffer.language,
+            sniffer.style,
+        );
+        if address_to_lookup.eq(&key.address1) {
+            source_caption = source_caption.push(flag);
+            let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
+            let computer = get_computer_tooltip(
+                is_my_address(&key.address2, my_interface_addresses),
+                get_traffic_type(
+                    &key.address2,
+                    my_interface_addresses,
+                    TrafficDirection::Outgoing,
+                ),
+                sniffer.language,
+                sniffer.style,
+            );
+            dest_caption = dest_caption.push(computer);
+        } else {
+            dest_caption = dest_caption.push(flag);
+            let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
+            let computer = get_computer_tooltip(
+                is_my_address(&key.address1, my_interface_addresses),
+                get_traffic_type(
+                    &key.address1,
+                    my_interface_addresses,
+                    TrafficDirection::Outgoing,
+                ),
+                sniffer.language,
+                sniffer.style,
+            );
+            source_caption = source_caption.push(computer);
+        }
+        if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
+            host_info_col = host_info_col.push(vertical_space(Length::Fixed(15.0)));
+        }
+        if r_dns.parse::<IpAddr>().is_err() {
+            host_info_col = host_info_col.push(Text::new(r_dns).font(font));
+        }
+        if !host.asn.name.is_empty() && host.asn.number > 0 {
+            host_info_col = host_info_col
+                .push(Text::new(format!("{} (ASN {})", host.asn.name, host.asn.number)).font(font));
+        }
+    }
+
+    let mut source_col = Column::new()
+        .push(source_caption)
+        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Text::new(format!(
-                "Data exchanged: {} bytes ({} packets).",
+                "Socket address:\n   {} {}",
+                key.address1, key.port1
+            ))
+            .font(font),
+        )
+        .push(Text::new(format!("MAC address:\n   {}", val.mac_address1)).font(font));
+    let mut dest_col = Column::new()
+        .push(dest_caption)
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Text::new(format!(
+                "Socket address:\n   {} {}",
+                key.address2, key.port2
+            ))
+            .font(font),
+        )
+        .push(Text::new(format!("MAC address:\n   {}", val.mac_address2)).font(font));
+
+    if address_to_lookup.eq(&key.address1) {
+        source_col = source_col.push(host_info_col);
+    } else {
+        dest_col = dest_col.push(host_info_col);
+    }
+
+    let source_container = Container::new(source_col)
+        .padding([10, 20])
+        .width(Length::Fill)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::BorderedRound),
+        ));
+
+    let dest_container = Container::new(dest_col)
+        .padding([10, 20])
+        .width(Length::Fill)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(sniffer.style, ElementType::BorderedRound),
+        ));
+
+    let col_info = Column::new()
+        .spacing(10)
+        .width(Length::FillPortion(2))
+        .push(vertical_space(Length::FillPortion(1)))
+        .push(
+            Text::new(format!(
+                "Data exchanged:\n   {} bytes ({} packets).",
                 get_formatted_bytes_string(val.transmitted_bytes).trim(),
                 val.transmitted_packets,
             ))
@@ -53,24 +167,26 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
             ))
             .font(font),
         )
-        .push(vertical_space(Length::Fixed(15.0)))
-        .push(Text::new("Source").font(font).size(FONT_SIZE_TITLE))
-        .push(Text::new(format!("Socket address: {} {}", key.address1, key.port1)).font(font))
-        .push(Text::new(format!("MAC address: {}", val.mac_address1)).font(font))
-        .push(vertical_space(Length::Fixed(15.0)))
-        .push(Text::new("Destination").font(font).size(FONT_SIZE_TITLE))
-        .push(Text::new(format!("Socket address: {} {}", key.address2, key.port2)).font(font))
-        .push(Text::new(format!("MAC address: {}", val.mac_address2)).font(font))
-        .push(vertical_space(Length::Fixed(15.0)))
-        //.push(Text::new(val.asn.name.clone()).font(font))
-        //.push(Text::new(format!("{}", val.asn.number)).font(font))
-        ;
+        .push(vertical_space(Length::FillPortion(1)));
 
-    // if let Some(r_dns) = val.r_dns {
-    //     if !r_dns.is_empty() {
-    //         content = content.push(Text::new(r_dns).font(font));
-    //     }
-    // }
+    let content = Row::new()
+        .padding(10)
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .push(col_info)
+        .push(
+            Column::new()
+                .width(Length::FillPortion(3))
+                .align_items(Alignment::Center)
+                .spacing(5)
+                .push(vertical_space(Length::FillPortion(1)))
+                .push(source_container)
+                .push(Text::new(":").size(30).font(ICONS))
+                .push(dest_container)
+                .push(vertical_space(Length::FillPortion(1))),
+        );
 
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))

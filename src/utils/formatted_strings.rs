@@ -1,3 +1,4 @@
+use std::net::IpAddr;
 use std::path::PathBuf;
 
 use iced::Color;
@@ -145,4 +146,26 @@ pub fn print_cli_welcome_message() {
   \_________________________________________________________/
     "
     );
+}
+
+pub fn get_domain_from_r_dns(r_dns: String) -> String {
+    if r_dns.parse::<IpAddr>().is_ok() || r_dns.is_empty() {
+        // rDNS is equal to the corresponding IP address (can't be empty but checking it to be safe)
+        r_dns
+    } else {
+        let parts: Vec<&str> = r_dns.split('.').collect();
+        if parts.len() >= 2 {
+            parts
+                .get(parts.len() - 2..)
+                .unwrap_or(&parts)
+                .iter()
+                .fold(Vec::new(), |mut vec, part| {
+                    vec.push((*part).to_string());
+                    vec
+                })
+                .join(".")
+        } else {
+            r_dns
+        }
+    }
 }
