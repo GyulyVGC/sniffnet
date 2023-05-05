@@ -27,12 +27,12 @@ use crate::translations::translations::{
     application_protocol_translation, bytes_chart_translation, error_translation,
     filtered_bytes_no_percentage_translation, filtered_bytes_translation,
     filtered_packets_translation, network_adapter_translation, no_addresses_translation,
-    none_translation, packets_chart_translation, some_observed_translation,
+    none_translation, of_total_translation, packets_chart_translation, some_observed_translation,
     traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
-    of_total_translation, only_top_30_hosts_translation,
+    only_top_30_hosts_translation,
 };
 use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{

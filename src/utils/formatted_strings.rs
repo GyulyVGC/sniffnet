@@ -169,3 +169,13 @@ pub fn get_domain_from_r_dns(r_dns: String) -> String {
         }
     }
 }
+
+pub fn get_socket_address(address: &String, port: u16) -> String {
+    if address.contains(':') {
+        // IPv6
+        format!("[{address}]:{port}")
+    } else {
+        //IPv4
+        format!("{address}:{port}")
+    }
+}

@@ -44,14 +44,6 @@ pub fn dropped_packets_translation(language: Language, dropped: &str) -> String 
     }
 }
 
-pub fn of_total_translation(language: Language, percentage: &str) -> String {
-    match language {
-        Language::EN => format!(" ({percentage} of the total)"),
-        Language::IT => format!(" ({percentage} del totale)"),
-        _ => format!(" ({percentage} of the total)"),
-    }
-}
-
 pub fn data_representation_translation(language: Language) -> Text<'static> {
     Text::new(match language {
         Language::EN => "Data representation:",
@@ -109,6 +101,62 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         _ => "Your network adapter",
     }
     .to_string()
+}
+
+pub fn socket_address_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Socket address",
+        Language::IT => "Indirizzo del socket",
+        _ => "Socket address",
+    }
+}
+
+pub fn mac_address_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "MAC address",
+        Language::IT => "Indirizzo MAC",
+        _ => "MAC address",
+    }
+}
+
+pub fn source_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Source",
+        Language::IT => "Sorgente",
+        _ => "Source",
+    }
+}
+
+pub fn destination_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Destination",
+        Language::IT => "Destinazione",
+        _ => "Destination",
+    }
+}
+
+pub fn fqdn_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Fully qualified domain name",
+        Language::IT => "Nome di dominio completo",
+        _ => "Fully qualified domain name",
+    }
+}
+
+pub fn administrative_entity_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Administrative entity",
+        Language::IT => "Entità amministrativa",
+        _ => "Administrative entity",
+    }
+}
+
+pub fn transmitted_data_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Transmitted data",
+        Language::IT => "Dati trasmessi",
+        _ => "Transmitted data",
+    }
 }
 
 pub fn showing_results_translation(

@@ -536,7 +536,7 @@ pub fn filtered_packets_translation(
         }
         Language::TR => format!("Filtrelenen paketler:\n   {filtered} toplamın ({percentage})"),
         Language::RU => {
-            format!("Отфильтровано пакетов:\n   {filtered} ({percentage}% от общего числа)")
+            format!("Отфильтровано пакетов:\n   {filtered} ({percentage} от общего числа)")
         }
         Language::PT => {
             format!("Pacotes filtrados:\n   {filtered} ({percentage} do total)")
@@ -574,7 +574,7 @@ pub fn filtered_bytes_translation(
         }
         Language::TR => format!("Filtrelenen bayt:\n   {filtered} toplamın ({percentage})"),
         Language::RU => {
-            format!("Отфильтровано байт:\n   {filtered} ({percentage}% от общего числа)")
+            format!("Отфильтровано байт:\n   {filtered} ({percentage} от общего числа)")
         }
         Language::PT => {
             format!("Bytes filtrados:\n   {filtered} ({percentage} do total)")
@@ -584,6 +584,40 @@ pub fn filtered_bytes_translation(
         }
         Language::FA => format!("بایت های صاف شده\n   {filtered} ({percentage} از مجموع)"),
     })
+}
+
+pub fn of_total_translation(language: Language, percentage: &str) -> String {
+    match language {
+        Language::EN => format!(" ({percentage} of the total)"),
+        Language::IT => format!(" ({percentage} del totale)"),
+        Language::FR => format!("({percentage} du total)"),
+        Language::ES => format!("({percentage} del total)"),
+        Language::PL => format!("({percentage} z całości)"),
+        Language::DE => format!("({percentage} der Gesamtzahl)"),
+        Language::UK => {
+            format!("({percentage} від загальної суми)")
+        }
+        Language::ZH => {
+            format!("(占所有数据包的 {percentage})")
+        }
+        Language::RO => {
+            format!("({percentage} din total)")
+        }
+        Language::KO => {
+            format!("({percentage} 의 일부)")
+        }
+        Language::TR => format!("toplamın ({percentage})"),
+        Language::RU => {
+            format!("({percentage} от общего числа)")
+        }
+        Language::PT => {
+            format!("({percentage} do total)")
+        }
+        Language::EL => {
+            format!("({percentage} από τα συνολικά)")
+        }
+        Language::FA => format!("({percentage} از مجموع)"),
+    }
 }
 
 pub fn filtered_bytes_no_percentage_translation(
