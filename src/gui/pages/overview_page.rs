@@ -438,10 +438,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             button(content)
                 .padding([5, 15, 5, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app: None,
-                    domain: Some(host.domain.clone()),
-                    country: Some(host.country.clone()),
-                    as_name: Some(host.asn.name.clone()),
+                    domain: host.domain.clone(),
+                    country: host.country.clone(),
+                    as_name: host.asn.name.clone(),
+                    ..SearchParameters::default()
                 }))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
@@ -555,10 +555,8 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app: Some(*app),
-                    domain: None,
-                    country: None,
-                    as_name: None,
+                    app: format!("{:?}", app),
+                    ..SearchParameters::default()
                 }))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );

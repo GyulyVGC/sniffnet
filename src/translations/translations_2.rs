@@ -159,6 +159,14 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn country_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Country",
+        Language::IT => "Paese",
+        _ => "Country",
+    }
+}
+
 pub fn showing_results_translation(
     language: Language,
     start: usize,

@@ -1,4 +1,7 @@
-use iced::widget::{Button, Column, Container, PickList, Row, Scrollable, Text, Tooltip};
+use iced::alignment::Horizontal;
+use iced::widget::{
+    Button, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+};
 use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::scrollable::Properties;
@@ -11,8 +14,11 @@ use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
+use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::get_searched_entries;
-use crate::translations::translations_2::{showing_results_translation, sort_by_translation};
+use crate::translations::translations_2::{
+    country_translation, showing_results_translation, sort_by_translation,
+};
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
@@ -47,6 +53,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     );
 
     tab_and_body = tab_and_body.push(tabs);
+
+    tab_and_body = tab_and_body.push(filters_row(
+        sniffer.search.clone(),
+        sniffer.style,
+        sniffer.language,
+    ));
 
     let sort_active_str = sniffer
         .report_sort_type
@@ -196,19 +208,86 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
         )
 }
 
-// fn search_bar(sniffer: &Sniffer) -> Container<'static, Message> {
-//     let font = get_font(sniffer.style);
-//
-//     let text_input = TextInput::new("AAA", &sniffer.search)
-//         .on_input(Message::Search)
-//         .padding([0, 0, 0, 10])
-//         .font(font)
-//         .width(Length::Fixed(100.0))
-//         .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-//             StyleTuple(sniffer.style, ElementType::Standard),
-//         ));
-//     Container::new(text_input)
-// }
+fn filters_row(
+    search_params: SearchParameters,
+    style: StyleType,
+    language: Language,
+) -> Row<'static, Message> {
+    let font = get_font(style);
+
+    let mut row_filters = Row::new().spacing(10).padding(15);
+
+    row_filters = row_filters.push(country_filter(search_params, font, style, language));
+
+    row_filters
+}
+
+fn country_filter(
+    search_params: SearchParameters,
+    font: Font,
+    style: StyleType,
+    language: Language,
+) -> Container<'static, Message> {
+    let is_filter_active = !search_params.country.is_empty();
+
+    let button_clear = button(
+        Text::new("x")
+            .font(font)
+            .horizontal_alignment(Horizontal::Center)
+            .size(15),
+    )
+    .padding(2)
+    .height(Length::Fixed(20.0))
+    .width(Length::Fixed(20.0))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::Search(SearchParameters {
+        country: String::new(),
+        ..search_params.clone()
+    }));
+
+    let input = TextInput::new("+", &search_params.country)
+        .on_input(move |new_country| {
+            Message::Search(SearchParameters {
+                country: new_country.trim().to_string(),
+                ..search_params.clone()
+            })
+        })
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(if is_filter_active { 30.0 } else { 20.0 }))
+        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
+            StyleTuple(
+                style,
+                if is_filter_active {
+                    ElementType::Badge
+                } else {
+                    ElementType::Standard
+                },
+            ),
+        ));
+
+    let mut content = Row::new()
+        .spacing(5)
+        .push(Text::new(format!("{}:", country_translation(language))).font(font))
+        .push(input);
+
+    if is_filter_active {
+        content = content.push(button_clear);
+    }
+
+    Container::new(content)
+        .padding(15)
+        .style(<StyleTuple as Into<iced::theme::Container>>::into(
+            StyleTuple(
+                style,
+                if is_filter_active {
+                    ElementType::Badge
+                } else {
+                    ElementType::Standard
+                },
+            ),
+        ))
+}
 
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
     button(

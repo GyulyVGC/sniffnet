@@ -1,14 +1,14 @@
-use crate::AppProtocol;
-
 /// Used to express the search filters applied to GUI inspect page
 #[derive(Clone, Debug, Default, Hash)]
 pub struct SearchParameters {
     /// Application protocol
-    pub app: Option<AppProtocol>,
+    pub app: String,
     /// Domain
-    pub domain: Option<String>,
+    pub domain: String,
     /// Country
-    pub country: Option<String>,
+    pub country: String,
     /// Autonomous System name
-    pub as_name: Option<String>,
+    pub as_name: String,
+    /// Whether to display only favorites
+    pub only_favorites: bool,
 }

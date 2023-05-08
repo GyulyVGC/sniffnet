@@ -38,30 +38,66 @@ pub fn get_searched_entries(
             // retrieve host info
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
+            // if a host-related filter is active and this address has not been resolved yet => false
+            if r_dns_host.is_none()
+                && (!search_parameters.domain.is_empty()
+                    || !search_parameters.country.is_empty()
+                    || !search_parameters.as_name.is_empty()
+                    || search_parameters.only_favorites)
+            {
+                return false;
+            }
             // check application protocol filter
-            if let Some(app) = &search_parameters.app {
-                boolean_flags.push(value.app_protocol.eq(app));
+            if !search_parameters.app.is_empty() {
+                let app_str = format!("{:?}", value.app_protocol);
+                boolean_flags.push(
+                    app_str
+                        .to_lowercase()
+                        .contains(&search_parameters.app.to_lowercase()),
+                );
             }
             // check domain filter
-            if let Some(domain) = &search_parameters.domain {
-                if r_dns_host.is_none() {
-                    return false;
-                }
-                boolean_flags.push(r_dns_host.unwrap().0.ends_with(domain));
+            if !search_parameters.domain.is_empty() {
+                boolean_flags.push(
+                    r_dns_host
+                        .unwrap()
+                        .0
+                        .to_lowercase()
+                        .contains(&search_parameters.domain.to_lowercase()),
+                );
             }
             // check country filter
-            if let Some(country) = &search_parameters.country {
-                if r_dns_host.is_none() {
-                    return false;
-                }
-                boolean_flags.push(r_dns_host.unwrap().1.country.eq(country));
+            if !search_parameters.country.is_empty() {
+                boolean_flags.push(
+                    r_dns_host
+                        .unwrap()
+                        .1
+                        .country
+                        .to_lowercase()
+                        .starts_with(&search_parameters.country.to_lowercase()),
+                );
             }
             // check Autonomous System name filter
-            if let Some(as_name) = &search_parameters.as_name {
-                if r_dns_host.is_none() {
-                    return false;
-                }
-                boolean_flags.push(r_dns_host.unwrap().1.asn.name.eq(as_name));
+            if !search_parameters.as_name.is_empty() {
+                boolean_flags.push(
+                    r_dns_host
+                        .unwrap()
+                        .1
+                        .asn
+                        .name
+                        .to_lowercase()
+                        .contains(&search_parameters.as_name.to_lowercase()),
+                );
+            }
+            // check favorites filter
+            if search_parameters.only_favorites {
+                boolean_flags.push(
+                    info_traffic_lock
+                        .hosts
+                        .get(&r_dns_host.unwrap().1)
+                        .unwrap()
+                        .is_favorite,
+                )
             }
 
             if boolean_flags.is_empty() {
