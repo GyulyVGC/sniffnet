@@ -70,9 +70,9 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
 
 pub fn sort_by_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Sort by:",
-        Language::IT => "Ordina per:",
-        _ => "Sort by:",
+        Language::EN => "Sort by",
+        Language::IT => "Ordina per",
+        _ => "Sort by",
     }
 }
 

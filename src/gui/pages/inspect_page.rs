@@ -6,7 +6,7 @@ use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::scrollable::Properties;
 use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, horizontal_space, Rule};
+use iced_native::widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -94,15 +94,19 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             Container::new(
                 Row::new()
-                    .spacing(10)
                     .push(filters_col(
                         sniffer.search.clone(),
                         sniffer.style,
                         sniffer.language,
                     ))
                     .push(
+                        Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                            StyleTuple(sniffer.style, ElementType::Standard),
+                        )),
+                    )
+                    .push(
                         Column::new()
-                            .spacing(5)
+                            .spacing(10)
                             .push(
                                 Text::new(sort_by_translation(sniffer.language))
                                     .font(font)
@@ -111,6 +115,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(picklist_sort),
                     ),
             )
+            .height(Length::Fixed(160.0))
             .padding(10)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(sniffer.style, ElementType::BorderedRound),
@@ -232,34 +237,48 @@ fn filters_col(
     let search_params2 = search_params.clone();
 
     Column::new()
-        .spacing(5)
+        .spacing(3)
         .push(
             Text::new(search_filters_translation(language))
                 .font(font)
                 .size(FONT_SIZE_TITLE),
         )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Container::new(
+                Checkbox::new(
+                    only_show_favorites_translation(language),
+                    search_params.only_favorites,
+                    move |toggled| {
+                        Message::Search(SearchParameters {
+                            only_favorites: toggled,
+                            ..search_params2.clone()
+                        })
+                    },
+                )
+                .spacing(5)
+                .size(18)
+                .font(font)
+                .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
+                    StyleTuple(style, ElementType::Badge),
+                )),
+            )
+            .padding([5, 8])
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(
+                    style,
+                    if search_params.only_favorites {
+                        ElementType::Badge
+                    } else {
+                        ElementType::Neutral
+                    },
+                ),
+            )),
+        )
         .push(
             Row::new()
                 .align_items(Alignment::Center)
                 .spacing(10)
-                .push(
-                    Checkbox::new(
-                        only_show_favorites_translation(language),
-                        search_params.only_favorites,
-                        move |toggled| {
-                            Message::Search(SearchParameters {
-                                only_favorites: toggled,
-                                ..search_params2.clone()
-                            })
-                        },
-                    )
-                    .spacing(5)
-                    .size(18)
-                    .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-                        StyleTuple(style, ElementType::Standard),
-                    )),
-                )
                 .push(filter_input(
                     FilterInputType::App,
                     &search_params.app,
@@ -344,7 +363,7 @@ fn filter_input(
         },
     }));
 
-    let input = TextInput::new("+", filter_value)
+    let input = TextInput::new("-", filter_value)
         .on_input(move |new_value| {
             Message::Search(match filter_input_type {
                 FilterInputType::App => SearchParameters {
@@ -367,7 +386,7 @@ fn filter_input(
         })
         .padding([0, 5])
         .font(font)
-        .width(Length::Fixed(if is_filter_active { width } else { 20.0 }))
+        .width(Length::Fixed(width))
         .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
             StyleTuple(
                 style,
@@ -389,7 +408,7 @@ fn filter_input(
     }
 
     Container::new(content)
-        .padding(10)
+        .padding(5)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(
                 style,
