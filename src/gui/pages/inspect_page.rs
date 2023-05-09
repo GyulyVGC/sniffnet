@@ -1,6 +1,6 @@
 use iced::alignment::Horizontal;
 use iced::widget::{
-    Button, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length};
 use iced_lazy::lazy;
@@ -10,14 +10,17 @@ use iced_native::widget::{button, horizontal_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::styles::style_constants::{get_font, ICONS, SARASA_MONO_SC_BOLD};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS, SARASA_MONO_SC_BOLD};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
-use crate::networking::types::search_parameters::SearchParameters;
+use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::report::get_report_entries::get_searched_entries;
+use crate::translations::translations::application_protocol_translation;
 use crate::translations::translations_2::{
-    country_translation, showing_results_translation, sort_by_translation,
+    administrative_entity_translation, country_translation, domain_name_translation,
+    only_show_favorites_translation, search_filters_translation, showing_results_translation,
+    sort_by_translation,
 };
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
@@ -54,12 +57,6 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    tab_and_body = tab_and_body.push(filters_row(
-        sniffer.search.clone(),
-        sniffer.style,
-        sniffer.language,
-    ));
-
     let sort_active_str = sniffer
         .report_sort_type
         .get_picklist_label(sniffer.language);
@@ -95,11 +92,29 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
 
     body = body
         .push(
-            Row::new()
-                .align_items(Alignment::Center)
-                .spacing(10)
-                .push(Text::new(sort_by_translation(sniffer.language)).font(font))
-                .push(picklist_sort),
+            Container::new(
+                Row::new()
+                    .spacing(10)
+                    .push(filters_col(
+                        sniffer.search.clone(),
+                        sniffer.style,
+                        sniffer.language,
+                    ))
+                    .push(
+                        Column::new()
+                            .spacing(5)
+                            .push(
+                                Text::new(sort_by_translation(sniffer.language))
+                                    .font(font)
+                                    .size(FONT_SIZE_TITLE),
+                            )
+                            .push(picklist_sort),
+                    ),
+            )
+            .padding(10)
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(sniffer.style, ElementType::BorderedRound),
+            )),
         )
         .push(report);
 
@@ -208,27 +223,97 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
         )
 }
 
-fn filters_row(
+fn filters_col(
     search_params: SearchParameters,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
+) -> Column<'static, Message> {
     let font = get_font(style);
+    let search_params2 = search_params.clone();
 
-    let mut row_filters = Row::new().spacing(10).padding(15);
-
-    row_filters = row_filters.push(country_filter(search_params, font, style, language));
-
-    row_filters
+    Column::new()
+        .spacing(5)
+        .push(
+            Text::new(search_filters_translation(language))
+                .font(font)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(
+            Row::new()
+                .align_items(Alignment::Center)
+                .spacing(10)
+                .push(
+                    Checkbox::new(
+                        only_show_favorites_translation(language),
+                        search_params.only_favorites,
+                        move |toggled| {
+                            Message::Search(SearchParameters {
+                                only_favorites: toggled,
+                                ..search_params2.clone()
+                            })
+                        },
+                    )
+                    .spacing(5)
+                    .size(18)
+                    .font(font)
+                    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
+                        StyleTuple(style, ElementType::Standard),
+                    )),
+                )
+                .push(filter_input(
+                    FilterInputType::App,
+                    &search_params.app,
+                    application_protocol_translation(language),
+                    60.0,
+                    search_params.clone(),
+                    font,
+                    style,
+                ))
+                .push(filter_input(
+                    FilterInputType::Country,
+                    &search_params.country,
+                    country_translation(language),
+                    30.0,
+                    search_params.clone(),
+                    font,
+                    style,
+                )),
+        )
+        .push(
+            Row::new()
+                .align_items(Alignment::Center)
+                .spacing(10)
+                .push(filter_input(
+                    FilterInputType::Domain,
+                    &search_params.domain,
+                    domain_name_translation(language),
+                    120.0,
+                    search_params.clone(),
+                    font,
+                    style,
+                ))
+                .push(filter_input(
+                    FilterInputType::AS,
+                    &search_params.as_name.clone(),
+                    administrative_entity_translation(language),
+                    120.0,
+                    search_params.clone(),
+                    font,
+                    style,
+                )),
+        )
 }
 
-fn country_filter(
+fn filter_input(
+    filter_input_type: FilterInputType,
+    filter_value: &str,
+    caption: &str,
+    width: f32,
     search_params: SearchParameters,
     font: Font,
     style: StyleType,
-    language: Language,
 ) -> Container<'static, Message> {
-    let is_filter_active = !search_params.country.is_empty();
+    let is_filter_active = !filter_value.is_empty();
 
     let button_clear = button(
         Text::new("x")
@@ -240,21 +325,49 @@ fn country_filter(
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(20.0))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::Search(SearchParameters {
-        country: String::new(),
-        ..search_params.clone()
+    .on_press(Message::Search(match filter_input_type {
+        FilterInputType::App => SearchParameters {
+            app: String::new(),
+            ..search_params.clone()
+        },
+        FilterInputType::Domain => SearchParameters {
+            domain: String::new(),
+            ..search_params.clone()
+        },
+        FilterInputType::Country => SearchParameters {
+            country: String::new(),
+            ..search_params.clone()
+        },
+        FilterInputType::AS => SearchParameters {
+            as_name: String::new(),
+            ..search_params.clone()
+        },
     }));
 
-    let input = TextInput::new("+", &search_params.country)
-        .on_input(move |new_country| {
-            Message::Search(SearchParameters {
-                country: new_country.trim().to_string(),
-                ..search_params.clone()
+    let input = TextInput::new("+", filter_value)
+        .on_input(move |new_value| {
+            Message::Search(match filter_input_type {
+                FilterInputType::App => SearchParameters {
+                    app: new_value.trim().to_string(),
+                    ..search_params.clone()
+                },
+                FilterInputType::Domain => SearchParameters {
+                    domain: new_value.trim().to_string(),
+                    ..search_params.clone()
+                },
+                FilterInputType::Country => SearchParameters {
+                    country: new_value.trim().to_string(),
+                    ..search_params.clone()
+                },
+                FilterInputType::AS => SearchParameters {
+                    as_name: new_value.trim().to_string(),
+                    ..search_params.clone()
+                },
             })
         })
         .padding([0, 5])
         .font(font)
-        .width(Length::Fixed(if is_filter_active { 30.0 } else { 20.0 }))
+        .width(Length::Fixed(if is_filter_active { width } else { 20.0 }))
         .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
             StyleTuple(
                 style,
@@ -268,7 +381,7 @@ fn country_filter(
 
     let mut content = Row::new()
         .spacing(5)
-        .push(Text::new(format!("{}:", country_translation(language))).font(font))
+        .push(Text::new(format!("{}:", caption)).font(font))
         .push(input);
 
     if is_filter_active {
@@ -276,14 +389,14 @@ fn country_filter(
     }
 
     Container::new(content)
-        .padding(15)
+        .padding(10)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(
                 style,
                 if is_filter_active {
                     ElementType::Badge
                 } else {
-                    ElementType::Standard
+                    ElementType::Neutral
                 },
             ),
         ))

@@ -12,3 +12,10 @@ pub struct SearchParameters {
     /// Whether to display only favorites
     pub only_favorites: bool,
 }
+
+pub enum FilterInputType {
+    App,
+    Domain,
+    Country,
+    AS,
+}

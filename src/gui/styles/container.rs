@@ -31,6 +31,7 @@ impl iced::widget::container::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::Headers) => colors.secondary,
                 StyleTuple(_, ElementType::Tooltip) => colors.buttons,
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
+                StyleTuple(_, ElementType::Neutral) => Color::TRANSPARENT,
                 StyleTuple(_, ElementType::Badge) => Color {
                     a: get_color_mix_filter_badge(self.0),
                     ..colors.secondary
@@ -46,7 +47,10 @@ impl iced::widget::container::StyleSheet for StyleTuple {
                 _ => 0.0,
             },
             border_width: match self {
-                StyleTuple(_, ElementType::Standard | ElementType::Headers) => 0.0,
+                StyleTuple(
+                    _,
+                    ElementType::Standard | ElementType::Headers | ElementType::Neutral,
+                ) => 0.0,
                 StyleTuple(_, ElementType::Tooltip) => BORDER_WIDTH / 2.0,
                 StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,

@@ -53,7 +53,7 @@ pub fn get_searched_entries(
                 boolean_flags.push(
                     app_str
                         .to_lowercase()
-                        .contains(&search_parameters.app.to_lowercase()),
+                        .eq(&search_parameters.app.to_lowercase()),
                 );
             }
             // check domain filter

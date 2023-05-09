@@ -167,6 +167,30 @@ pub fn country_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn domain_name_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Domain name",
+        Language::IT => "Nome di dominio",
+        _ => "Domain name",
+    }
+}
+
+pub fn only_show_favorites_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Only show favorites",
+        Language::IT => "Mostra solo i preferiti",
+        _ => "Only show favorites",
+    }
+}
+
+pub fn search_filters_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Search filters",
+        Language::IT => "Filtri di ricerca",
+        _ => "Search filters",
+    }
+}
+
 pub fn showing_results_translation(
     language: Language,
     start: usize,
