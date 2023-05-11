@@ -191,6 +191,14 @@ pub fn search_filters_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn no_search_results_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "No result available according to the specified search filters",
+        Language::IT => "Nessun risultato disponibile secondo i filtri di ricerca specificati",
+        _ => "No result available according to the specified search filters",
+    }
+}
+
 pub fn showing_results_translation(
     language: Language,
     start: usize,

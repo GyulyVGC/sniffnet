@@ -19,8 +19,8 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::translations::translations::application_protocol_translation;
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
-    only_show_favorites_translation, search_filters_translation, showing_results_translation,
-    sort_by_translation,
+    no_search_results_translation, only_show_favorites_translation, search_filters_translation,
+    showing_results_translation, sort_by_translation,
 };
 use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
@@ -168,49 +168,63 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
     }
-    col_report = col_report
-        .push(
-            Scrollable::new(scroll_report)
-                .height(Length::FillPortion(15))
-                .width(Length::Fill)
-                .horizontal_scroll(Properties::new())
-                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+    if results_number > 0 {
+        col_report = col_report
+            .push(
+                Scrollable::new(scroll_report)
+                    .height(Length::FillPortion(15))
+                    .width(Length::Fill)
+                    .horizontal_scroll(Properties::new())
+                    .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                        StyleTuple(sniffer.style, ElementType::Standard),
+                    )),
+            )
+            .push(
+                Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(
                     StyleTuple(sniffer.style, ElementType::Standard),
                 )),
-        )
-        .push(
-            Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-                sniffer.style,
-                ElementType::Standard,
-            ))),
-        )
-        .push(
-            Row::new()
-                .height(Length::FillPortion(2))
-                .align_items(Alignment::Center)
-                .spacing(10)
-                .push(if sniffer.page_number > 1 {
-                    Container::new(get_button_change_page(sniffer.style, false).width(25.0))
-                } else {
-                    Container::new(horizontal_space(25.0))
-                })
-                .push(
-                    Text::new(showing_results_translation(
-                        sniffer.language,
-                        start_entry_num,
-                        end_entry_num,
-                        results_number,
-                    ))
-                    .font(font),
-                )
-                .push(
-                    if sniffer.page_number < f32::ceil(results_number as f32 / 20.0) as usize {
-                        Container::new(get_button_change_page(sniffer.style, true).width(25.0))
+            )
+            .push(
+                Row::new()
+                    .height(Length::FillPortion(2))
+                    .align_items(Alignment::Center)
+                    .spacing(10)
+                    .push(if sniffer.page_number > 1 {
+                        Container::new(get_button_change_page(sniffer.style, false).width(25.0))
                     } else {
                         Container::new(horizontal_space(25.0))
-                    },
-                ),
+                    })
+                    .push(
+                        Text::new(showing_results_translation(
+                            sniffer.language,
+                            start_entry_num,
+                            end_entry_num,
+                            results_number,
+                        ))
+                        .font(font),
+                    )
+                    .push(
+                        if sniffer.page_number < f32::ceil(results_number as f32 / 20.0) as usize {
+                            Container::new(get_button_change_page(sniffer.style, true).width(25.0))
+                        } else {
+                            Container::new(horizontal_space(25.0))
+                        },
+                    ),
+            );
+    } else {
+        col_report = col_report.push(
+            Column::new()
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .padding(20)
+                .align_items(Alignment::Center)
+                .push(vertical_space(Length::FillPortion(1)))
+                .push(Text::new('V'.to_string()).font(ICONS).size(60))
+                .push(vertical_space(Length::Fixed(15.0)))
+                .push(Text::new(no_search_results_translation(sniffer.language)).font(font))
+                .push(vertical_space(Length::FillPortion(2))),
         );
+    }
 
     Row::new()
         .spacing(15)
