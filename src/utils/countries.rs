@@ -599,15 +599,13 @@ pub fn get_flag_tooltip(
 ) -> Tooltip<'static, Message> {
     let (content, tooltip) =
         get_flag_from_country_code(country, width, is_local, traffic_type, language);
-    let mut position = Position::FollowCursor;
     let mut snap = true;
 
     if width == FLAGS_WIDTH_SMALL {
-        position = Position::Right;
         snap = false;
     }
 
-    Tooltip::new(content, tooltip, position)
+    Tooltip::new(content, tooltip, Position::FollowCursor)
         .gap(5)
         .font(get_font(style))
         .snap_within_viewport(snap)

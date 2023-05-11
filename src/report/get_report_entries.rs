@@ -112,11 +112,11 @@ pub fn get_searched_entries(
         ReportSortType::MostPackets => b.transmitted_packets.cmp(&a.transmitted_packets),
     });
 
-    let upper_bound = min(page_number * 10, all_results.len());
+    let upper_bound = min(page_number * 20, all_results.len());
 
     (
         all_results
-            .get((page_number - 1) * 10..upper_bound)
+            .get((page_number - 1) * 20..upper_bound)
             .unwrap_or(&Vec::new())
             .iter()
             .map(|key_val| {

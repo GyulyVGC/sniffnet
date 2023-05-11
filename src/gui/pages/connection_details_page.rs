@@ -143,7 +143,11 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
 
     let mut source_col = Column::new()
         .spacing(5)
-        .push(source_caption)
+        .push(
+            Container::new(source_caption)
+                .width(Length::Fill)
+                .align_x(Horizontal::Center),
+        )
         .push(
             Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
                 StyleTuple(sniffer.style, ElementType::Standard),
@@ -167,7 +171,11 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         );
     let mut dest_col = Column::new()
         .spacing(5)
-        .push(dest_caption)
+        .push(
+            Container::new(dest_caption)
+                .width(Length::Fill)
+                .align_x(Horizontal::Center),
+        )
         .push(
             Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
                 StyleTuple(sniffer.style, ElementType::Standard),

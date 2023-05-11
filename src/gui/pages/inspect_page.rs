@@ -130,21 +130,24 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
+fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
     let font = get_font(sniffer.style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 
-    let mut col_report = Column::new().height(Length::Fill).width(Length::Fill);
+    let mut col_report = Column::new()
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .align_items(Alignment::Center);
     col_report = col_report
-        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets      Bytes   Country").font(font))
+        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
         .push(Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
             sniffer.style,
             ElementType::Standard,
         ))))
     ;
     let mut scroll_report = Column::new();
-    let start_entry_num = (sniffer.page_number - 1) * 10 + 1;
+    let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for (key, val, flag) in search_results {
         let entry_color = get_connection_color(val.traffic_direction, sniffer.style);
@@ -165,49 +168,31 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
         );
     }
-    col_report = col_report.push(Container::new(
-        Scrollable::new(scroll_report)
-            .horizontal_scroll(Properties::new())
-            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
-    ));
-
-    Column::new()
-        .spacing(10)
-        .align_items(Alignment::Center)
+    col_report = col_report
         .push(
-            Row::new()
-                .spacing(15)
-                .align_items(Alignment::Center)
+            Scrollable::new(scroll_report)
+                .height(Length::FillPortion(15))
                 .width(Length::Fill)
-                .push(horizontal_space(Length::FillPortion(1)))
-                .push(
-                    Container::new(col_report)
-                        .padding([10, 7, 7, 7])
-                        .height(Length::Fixed(310.0))
-                        .width(Length::Fixed(1050.0))
-                        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                            StyleTuple(sniffer.style, ElementType::BorderedRound),
-                        )),
-                )
-                .push(
-                    Container::new(get_button_open_report(
-                        sniffer.style,
-                        sniffer.language,
-                        font,
-                    ))
-                    .width(Length::FillPortion(1)),
-                ),
+                .horizontal_scroll(Properties::new())
+                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                    StyleTuple(sniffer.style, ElementType::Standard),
+                )),
+        )
+        .push(
+            Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+                sniffer.style,
+                ElementType::Standard,
+            ))),
         )
         .push(
             Row::new()
+                .height(Length::FillPortion(2))
                 .align_items(Alignment::Center)
                 .spacing(10)
                 .push(if sniffer.page_number > 1 {
-                    Container::new(get_button_change_page(sniffer.style, false).width(30.0))
+                    Container::new(get_button_change_page(sniffer.style, false).width(25.0))
                 } else {
-                    Container::new(horizontal_space(30.0))
+                    Container::new(horizontal_space(25.0))
                 })
                 .push(
                     Text::new(showing_results_translation(
@@ -219,12 +204,34 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message> {
                     .font(font),
                 )
                 .push(
-                    if sniffer.page_number < f32::ceil(results_number as f32 / 10.0) as usize {
-                        Container::new(get_button_change_page(sniffer.style, true).width(30.0))
+                    if sniffer.page_number < f32::ceil(results_number as f32 / 20.0) as usize {
+                        Container::new(get_button_change_page(sniffer.style, true).width(25.0))
                     } else {
-                        Container::new(horizontal_space(30.0))
+                        Container::new(horizontal_space(25.0))
                     },
                 ),
+        );
+
+    Row::new()
+        .spacing(15)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .push(horizontal_space(Length::FillPortion(1)))
+        .push(
+            Container::new(col_report)
+                .padding([10, 7, 7, 7])
+                .width(Length::Fixed(1035.0))
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(sniffer.style, ElementType::BorderedRound),
+                )),
+        )
+        .push(
+            Container::new(get_button_open_report(
+                sniffer.style,
+                sniffer.language,
+                font,
+            ))
+            .width(Length::FillPortion(1)),
         )
 }
 
@@ -424,14 +431,14 @@ fn filter_input(
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
     button(
         Text::new(if increment { "j" } else { "i" })
-            .size(12.0)
+            .size(10.0)
             .font(ICONS)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(5)
-    .height(Length::Fixed(30.0))
-    .width(Length::Fixed(30.0))
+    .height(Length::Fixed(25.0))
+    .width(Length::Fixed(25.0))
     .style(StyleTuple(style, ElementType::Standard).into())
     .on_press(Message::UpdatePageNumber(increment))
 }
