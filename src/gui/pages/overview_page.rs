@@ -555,7 +555,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app: format!("{:?}", app),
+                    app: format!("{app:?}"),
                     ..SearchParameters::default()
                 }))
                 .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),

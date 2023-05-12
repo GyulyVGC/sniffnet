@@ -15,7 +15,7 @@ use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
-pub fn get_country_code(address_to_lookup: String, country_db_reader: &Reader<&[u8]>) -> String {
+pub fn get_country_code(address_to_lookup: &str, country_db_reader: &Reader<&[u8]>) -> String {
     let country_result: Result<geoip2::Country, MaxMindDBError> =
         country_db_reader.lookup(address_to_lookup.parse().unwrap());
     if let Ok(res1) = country_result {

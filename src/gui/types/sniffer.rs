@@ -327,7 +327,7 @@ impl Sniffer {
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
-                        device,
+                        &device,
                         cap.unwrap(),
                         &filters,
                         &info_traffic_mutex,

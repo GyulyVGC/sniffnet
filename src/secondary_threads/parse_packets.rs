@@ -25,7 +25,7 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
     current_capture_id: &Arc<Mutex<u16>>,
-    device: MyDevice,
+    device: &MyDevice,
     mut cap: Capture<Active>,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
@@ -127,8 +127,8 @@ pub fn parse_packets(
                         {
                             new_info = modify_or_insert_in_map(
                                 info_traffic_mutex,
-                                key.clone(),
-                                &device,
+                                &key,
+                                device,
                                 (mac_address1, mac_address2),
                                 exchanged_bytes,
                                 application_protocol,
@@ -208,7 +208,7 @@ pub fn parse_packets(
                                         .spawn(move || {
                                             reverse_dns_lookup(
                                                 &info_traffic2,
-                                                key2,
+                                                &key2,
                                                 new_info.traffic_direction,
                                                 &device2,
                                                 &country_db_reader2,

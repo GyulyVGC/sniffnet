@@ -95,7 +95,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             Container::new(
                 Row::new()
                     .push(filters_col(
-                        sniffer.search.clone(),
+                        &sniffer.search,
                         sniffer.style,
                         sniffer.language,
                     ))
@@ -250,7 +250,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
 }
 
 fn filters_col(
-    search_params: SearchParameters,
+    search_params: &SearchParameters,
     style: StyleType,
     language: Language,
 ) -> Column<'static, Message> {
@@ -421,7 +421,7 @@ fn filter_input(
 
     let mut content = Row::new()
         .spacing(5)
-        .push(Text::new(format!("{}:", caption)).font(font))
+        .push(Text::new(format!("{caption}:")).font(font))
         .push(input);
 
     if is_filter_active {

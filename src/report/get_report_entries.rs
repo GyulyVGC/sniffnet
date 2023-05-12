@@ -97,7 +97,7 @@ pub fn get_searched_entries(
                         .get(&r_dns_host.unwrap().1)
                         .unwrap()
                         .is_favorite,
-                )
+                );
             }
 
             if boolean_flags.is_empty() {

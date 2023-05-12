@@ -231,9 +231,8 @@ pub fn get_starred_color(style: StyleType) -> Color {
 
 pub fn get_color_mix_filter_badge(style: StyleType) -> f32 {
     match style {
-        StyleType::Night => 0.2,
+        StyleType::Night | StyleType::DeepSea => 0.2,
         StyleType::Day => 0.7,
-        StyleType::DeepSea => 0.2,
         StyleType::MonAmour => 0.5,
     }
 }

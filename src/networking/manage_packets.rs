@@ -116,7 +116,7 @@ pub fn analyze_transport_header(
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
-    key: AddressPortPair,
+    key: &AddressPortPair,
     my_device: &MyDevice,
     mac_addresses: (String, String),
     exchanged_bytes: u128,
@@ -135,7 +135,7 @@ pub fn modify_or_insert_in_map(
         .lock()
         .unwrap()
         .map
-        .get_index_of(&key)
+        .get_index_of(key)
         .unwrap_or(len);
 
     if index == len {
@@ -198,7 +198,7 @@ pub fn modify_or_insert_in_map(
 
     if let Some(host_info) = info_traffic
         .addresses_resolved
-        .get(&get_address_to_lookup(&key, traffic_direction))
+        .get(&get_address_to_lookup(key, traffic_direction))
         .cloned()
     {
         if info_traffic.favorite_hosts.contains(&host_info.1) {
@@ -211,13 +211,13 @@ pub fn modify_or_insert_in_map(
 
 pub fn reverse_dns_lookup(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
-    key: AddressPortPair,
+    key: &AddressPortPair,
     traffic_direction: TrafficDirection,
     my_device: &MyDevice,
     country_db_reader: &Reader<&[u8]>,
     asn_db_reader: &Reader<&[u8]>,
 ) {
-    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
+    let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
 
     // perform rDNS lookup
@@ -229,9 +229,9 @@ pub fn reverse_dns_lookup(
         &my_interface_addresses,
         traffic_direction,
     );
-    let is_local = is_local_connection(address_to_lookup.clone(), &my_interface_addresses);
-    let country = get_country_code(address_to_lookup.clone(), country_db_reader);
-    let asn = asn(address_to_lookup.clone(), asn_db_reader);
+    let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
+    let country = get_country_code(&address_to_lookup, country_db_reader);
+    let asn = asn(&address_to_lookup, asn_db_reader);
     let r_dns = if let Ok(result) = lookup_result {
         if result.is_empty() {
             address_to_lookup.clone()
@@ -379,7 +379,7 @@ fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bo
 }
 
 /// Determines if the connection is local
-fn is_local_connection(address_to_lookup: String, my_interface_addresses: &Vec<Address>) -> bool {
+fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec<Address>) -> bool {
     let mut ret_val = false;
 
     let address_to_lookup_type = if address_to_lookup.contains(':') {
@@ -865,22 +865,22 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("104.18.43.158".to_string(), &address_vec);
+        let result1 = is_local_connection("104.18.43.158", &address_vec);
         assert_eq!(result1, false);
 
-        let result2 = is_local_connection("172.20.10.15".to_string(), &address_vec);
+        let result2 = is_local_connection("172.20.10.15", &address_vec);
         assert_eq!(result2, true);
 
-        let result3 = is_local_connection("172.20.10.16".to_string(), &address_vec);
+        let result3 = is_local_connection("172.20.10.16", &address_vec);
         assert_eq!(result3, false);
 
-        let result4 = is_local_connection("172.20.10.0".to_string(), &address_vec);
+        let result4 = is_local_connection("172.20.10.0", &address_vec);
         assert_eq!(result4, true);
 
-        let result5 = is_local_connection("172.20.10.7".to_string(), &address_vec);
+        let result5 = is_local_connection("172.20.10.7", &address_vec);
         assert_eq!(result5, true);
 
-        let result6 = is_local_connection("172.20.10.99".to_string(), &address_vec);
+        let result6 = is_local_connection("172.20.10.99", &address_vec);
         assert_eq!(result6, false);
     }
 
@@ -902,22 +902,16 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 =
-            is_local_connection("fe90:8b1:1234:5611:d065::1234".to_string(), &address_vec);
+        let result1 = is_local_connection("fe90:8b1:1234:5611:d065::1234", &address_vec);
         assert_eq!(result1, false);
 
-        let result2 =
-            is_local_connection("fe90:8b1:1234:5610:d065::1234".to_string(), &address_vec);
+        let result2 = is_local_connection("fe90:8b1:1234:5610:d065::1234", &address_vec);
         assert_eq!(result2, true);
 
-        let result3 =
-            is_local_connection("ff90:8b1:1234:5610:d065::1234".to_string(), &address_vec);
+        let result3 = is_local_connection("ff90:8b1:1234:5610:d065::1234", &address_vec);
         assert_eq!(result3, false);
 
-        let result4 = is_local_connection(
-            "fe90:8b1:1234:5610:ffff:eeee:9876:1234".to_string(),
-            &address_vec,
-        );
+        let result4 = is_local_connection("fe90:8b1:1234:5610:ffff:eeee:9876:1234", &address_vec);
         assert_eq!(result4, true);
     }
 
@@ -939,28 +933,28 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("255.255.255.255".to_string(), &address_vec);
+        let result1 = is_local_connection("255.255.255.255", &address_vec);
         assert_eq!(result1, false);
 
-        let result2 = is_local_connection("172.20.10.9".to_string(), &address_vec);
+        let result2 = is_local_connection("172.20.10.9", &address_vec);
         assert_eq!(result2, true);
 
-        let result3 = is_local_connection("172.20.10.9".to_string(), &address_vec);
+        let result3 = is_local_connection("172.20.10.9", &address_vec);
         assert_eq!(result3, true);
 
-        let result4 = is_local_connection("172.20.10.9".to_string(), &address_vec);
+        let result4 = is_local_connection("172.20.10.9", &address_vec);
         assert_eq!(result4, true);
 
-        let result5 = is_local_connection("172.20.10.7".to_string(), &address_vec);
+        let result5 = is_local_connection("172.20.10.7", &address_vec);
         assert_eq!(result5, true);
 
-        let result6 = is_local_connection("172.20.10.99".to_string(), &address_vec);
+        let result6 = is_local_connection("172.20.10.99", &address_vec);
         assert_eq!(result6, true);
 
-        let result7 = is_local_connection("172.20.11.0".to_string(), &address_vec);
+        let result7 = is_local_connection("172.20.11.0", &address_vec);
         assert_eq!(result7, false);
 
-        let result8 = is_local_connection("172.20.9.255".to_string(), &address_vec);
+        let result8 = is_local_connection("172.20.9.255", &address_vec);
         assert_eq!(result8, false);
     }
 
@@ -982,7 +976,7 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("224.0.0.251".to_string(), &address_vec);
+        let result1 = is_local_connection("224.0.0.251", &address_vec);
         assert_eq!(result1, false);
     }
 
@@ -1004,7 +998,7 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("ff::1234".to_string(), &address_vec);
+        let result1 = is_local_connection("ff::1234", &address_vec);
         assert_eq!(result1, false);
     }
 
@@ -1026,13 +1020,13 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("224.0.1.2".to_string(), &address_vec);
+        let result1 = is_local_connection("224.0.1.2", &address_vec);
         assert_eq!(result1, false);
 
-        let result2 = is_local_connection("169.254.17.199".to_string(), &address_vec);
+        let result2 = is_local_connection("169.254.17.199", &address_vec);
         assert_eq!(result2, true);
 
-        let result3 = is_local_connection("169.255.17.199".to_string(), &address_vec);
+        let result3 = is_local_connection("169.255.17.199", &address_vec);
         assert_eq!(result3, false);
     }
 
@@ -1054,13 +1048,13 @@ mod tests {
         address_vec.push(my_address_v4);
         address_vec.push(my_address_v6);
 
-        let result1 = is_local_connection("ff88::".to_string(), &address_vec);
+        let result1 = is_local_connection("ff88::", &address_vec);
         assert_eq!(result1, false);
 
-        let result2 = is_local_connection("fe80::8b1:1234:5678:d065".to_string(), &address_vec);
+        let result2 = is_local_connection("fe80::8b1:1234:5678:d065", &address_vec);
         assert_eq!(result2, true);
 
-        let result3 = is_local_connection("fe70::8b1:1234:5678:d065".to_string(), &address_vec);
+        let result3 = is_local_connection("fe70::8b1:1234:5678:d065", &address_vec);
         assert_eq!(result3, false);
     }
 }
