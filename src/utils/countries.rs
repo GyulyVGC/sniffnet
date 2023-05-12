@@ -599,19 +599,19 @@ pub fn get_flag_tooltip(
 ) -> Tooltip<'static, Message> {
     let (content, tooltip) =
         get_flag_from_country_code(country, width, is_local, traffic_type, language);
-    let mut snap = true;
 
-    if width == FLAGS_WIDTH_SMALL {
-        snap = false;
-    }
-
-    Tooltip::new(content, tooltip, Position::FollowCursor)
-        .gap(5)
+    let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(get_font(style))
-        .snap_within_viewport(snap)
+        .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
-        ))
+        ));
+
+    if width == FLAGS_WIDTH_SMALL {
+        tooltip = tooltip.padding(3);
+    }
+
+    tooltip
 }
 
 pub fn get_computer_tooltip(
@@ -639,7 +639,6 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .gap(5)
         .font(get_font(style))
         .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
