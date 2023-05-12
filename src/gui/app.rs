@@ -140,7 +140,7 @@ impl Application for Sniffer {
                 // backspace => reset button pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Backspace,
-                    ..
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::ResetButtonPressed),
                 // ctrl+D => ctrl+D keys pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
@@ -150,12 +150,12 @@ impl Application for Sniffer {
                 // left arrow => one page before the current one
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Left,
-                    ..
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::ArrowPressed(false)),
                 // right arrow => one page after the current one
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Right,
-                    ..
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::ArrowPressed(true)),
                 _ => None,
             });
