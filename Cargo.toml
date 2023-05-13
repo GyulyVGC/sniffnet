@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.1.4"
+version = "1.2.0"
 authors = ["Giuliano Bellini"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"

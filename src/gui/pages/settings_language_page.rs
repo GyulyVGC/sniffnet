@@ -56,7 +56,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(30.0)));
+        .push(vertical_space(Fixed(20.0)));
 
     if ![Language::EN, Language::IT].contains(&sniffer.language) {
         content = content

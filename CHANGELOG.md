@@ -2,6 +2,25 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [1.2.0] - 2023-05-xx
+
+- Introduced host-based analysis: instead of just showing IP addresses, now host names and network providers are available for a quicker and more meaningful traffic interpretation 
+  * Added rDNS (reverse DNS) lookups to find out network host names
+  * Added ASN (Autonomous System name and number) lookups to find out the entity managing a given IP address
+- Individual connections identified by IP addresses remain available and can now be filtered and further inspected through a simple click
+- Support for identification of addresses in the local network
+- Support for data link layer MAC addresses
+- Full support for broadcast traffic recognition (added directed broadcast identification)
+- Added dropped packets number (packets dropped because there was no room in the operating system’s buffer when they arrived, because they weren't being read fast enough)
+- Changed favorites management: instead of referring to single IP addresses, favorites are now related to network hosts
+- Do not open terminal window when starting the application on Windows systems
+- Keep the active addresses of the selected network adapter up to date during analysis
+- Changed shortcut to interrupt analysis from `backspace` to `ctrl+backspace`
+- Images have been replaced with SVGs
+- Added unit tests for `chart` and started unit tests for `gui` modules
+- Fixed problem that let users switch page pressing the tab key even if no packets were received
+
+
 ## [1.1.4] - 2023-04-18
 
 - Added new translations of the GUI:

@@ -24,11 +24,11 @@ Graphical interface translated in:<br>
 </a>
 </p>
 
-<div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
+<div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
 
 <div align="center">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/settings_page.png?raw=true" width="49%"/>
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/inspect_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
 </div>
 
 <p>
