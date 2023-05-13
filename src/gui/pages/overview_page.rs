@@ -685,6 +685,7 @@ fn get_bars_length(
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (f32, f32) {
+    #[allow(clippy::cast_precision_loss)]
     match chart_type {
         ChartType::Packets => (
             tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,

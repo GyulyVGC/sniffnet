@@ -1,3 +1,5 @@
+use std::net::IpAddr;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
@@ -5,7 +7,6 @@ use iced::{Alignment, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space, Rule};
-use std::net::IpAddr;
 
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::types::element_type::ElementType;

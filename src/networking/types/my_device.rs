@@ -1,5 +1,6 @@
-use pcap::Address;
 use std::sync::{Arc, Mutex};
+
+use pcap::Address;
 
 /// Represents the current inspected device.
 /// Used to keep in sync the device addresses in case of changes

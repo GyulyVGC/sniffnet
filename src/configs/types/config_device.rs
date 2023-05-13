@@ -1,10 +1,12 @@
 //! Module defining the `ConfigDevice` struct, which allows to save and reload
 //! the application default configuration.
 
-use crate::networking::types::my_device::MyDevice;
+use std::sync::{Arc, Mutex};
+
 use pcap::Device;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+
+use crate::networking::types::my_device::MyDevice;
 
 #[derive(Serialize, Deserialize)]
 pub struct ConfigDevice {

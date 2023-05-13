@@ -1,6 +1,7 @@
-use iced::widget::Tooltip;
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
+
+use iced::widget::Tooltip;
 
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_address_to_lookup;

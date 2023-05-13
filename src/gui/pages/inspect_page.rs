@@ -203,13 +203,11 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                         ))
                         .font(font),
                     )
-                    .push(
-                        if sniffer.page_number < f32::ceil(results_number as f32 / 20.0) as usize {
-                            Container::new(get_button_change_page(sniffer.style, true).width(25.0))
-                        } else {
-                            Container::new(horizontal_space(25.0))
-                        },
-                    ),
+                    .push(if sniffer.page_number < (results_number + 20 - 1) / 20 {
+                        Container::new(get_button_change_page(sniffer.style, true).width(25.0))
+                    } else {
+                        Container::new(horizontal_space(25.0))
+                    }),
             );
     } else {
         col_report = col_report.push(

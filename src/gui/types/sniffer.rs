@@ -192,8 +192,13 @@ impl Sniffer {
                 self.search = parameters;
             }
             Message::UpdatePageNumber(increment) => {
-                let new_page = self.page_number as i16 + if increment { 1 } else { -1 };
-                self.page_number = new_page as usize;
+                let new_page = if increment {
+                    self.page_number.checked_add(1)
+                } else {
+                    self.page_number.checked_sub(1)
+                }
+                .unwrap();
+                self.page_number = new_page;
             }
             Message::ArrowPressed(increment) => {
                 if self.running_page.eq(&RunningPage::Inspect)
@@ -201,9 +206,7 @@ impl Sniffer {
                     && self.modal.is_none()
                 {
                     if increment {
-                        if self.page_number
-                            < f32::ceil(get_searched_entries(self).1 as f32 / 20.0) as usize
-                        {
+                        if self.page_number < (get_searched_entries(self).1 + 20 - 1) / 20 {
                             return self.update(Message::UpdatePageNumber(increment));
                         }
                     } else if self.page_number > 1 {
