@@ -9,13 +9,13 @@ repository = "https://github.com/GyulyVGC/sniffnet"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
-include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md", "resources/countries_flags/**/*", "resources/DB/GeoLite2-Country.mmdb", "resources/palettes/*", "resources/fonts/subset/*", "resources/sounds/*"]
+include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md", "resources/countries_flags/**/*", "resources/DB/*", "resources/palettes/*", "resources/fonts/subset/*", "resources/sounds/*"]
 
 
 [package.metadata.bundle]
 name = "Sniffnet"
 identifier = "gyulyvgc.sniffnet"
-icon = ["./resources/logos/icon.ico"]
+icon = ["./resources/logos/icon_macos.icns"]
 
 
 [profile.release]
