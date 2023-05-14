@@ -33,7 +33,7 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
         && filters.transport.eq(&TransProtocol::Other)
     {
         format!(
-            "{}\n   {}",
+            "{}:\n   {}",
             active_filters_translation(language),
             none_translation(language)
         )
@@ -49,7 +49,7 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
             filters_string.push_str(&format!("{} ", filters.application));
         }
         format!(
-            "{}\n   {filters_string}",
+            "{}:\n   {filters_string}",
             active_filters_translation(language),
         )
     }

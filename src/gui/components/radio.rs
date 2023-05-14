@@ -119,7 +119,7 @@ pub fn sound_packets_threshold_radios(
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .spacing(20)
-        .push(Text::new(sound_translation(language)).font(font));
+        .push(Text::new(format!("{}:", sound_translation(language))).font(font));
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(
@@ -156,7 +156,7 @@ pub fn sound_bytes_threshold_radios(
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .spacing(20)
-        .push(Text::new(sound_translation(language)).font(font));
+        .push(Text::new(format!("{}:", sound_translation(language))).font(font));
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(
@@ -193,7 +193,7 @@ pub fn sound_favorite_radios(
 ) -> Row<'static, Message> {
     let mut ret_val = Row::new()
         .spacing(20)
-        .push(Text::new(sound_translation(language)).font(font));
+        .push(Text::new(format!("{}:", sound_translation(language))).font(font));
     for option in Sound::ALL {
         ret_val = ret_val.push(
             Radio::new(

@@ -1,9 +1,8 @@
-#![allow(clippy::upper_case_acronyms)]
-
 use std::fmt;
 
 /// Enum representing the possible observed values of application layer protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum AppProtocol {
     /// File Transfer Protocol
     FTP,

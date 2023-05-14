@@ -81,39 +81,39 @@ pub fn start_translation(language: Language) -> &'static str {
 
 pub fn address_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "\nAddress:",
-        Language::IT => "\nIndirizzo:",
-        Language::FR | Language::DE => "\nAdresse:",
-        Language::ES => "\nDirección:",
-        Language::PL | Language::TR => "\nAdres:",
-        Language::UK => "\nАдреса:",
-        Language::ZH => "\n网络地址:",
-        Language::RO => "\nAdresă:",
-        Language::KO => "\n주소:",
-        Language::RU => "\nАдрес:",
-        Language::PT => "\nEndereço:",
-        Language::EL => "\nΔιεύθυνση:",
-        Language::FA => "\nنشانی:",
+        Language::EN => "Address",
+        Language::IT => "Indirizzo",
+        Language::FR | Language::DE => "Adresse",
+        Language::ES => "Dirección",
+        Language::PL | Language::TR => "Adres",
+        Language::UK => "Адреса",
+        Language::ZH => "网络地址",
+        Language::RO => "Adresă",
+        Language::KO => "주소",
+        Language::RU => "Адрес",
+        Language::PT => "Endereço",
+        Language::EL => "Διεύθυνση",
+        Language::FA => "نشانی",
     }
 }
 
 pub fn addresses_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "\nAddresses:",
-        Language::IT => "\nIndirizzi:",
-        Language::FR => "\nAdresses:",
-        Language::ES => "\nDirecciones:",
-        Language::PL => "\nAdresy:",
-        Language::DE => "\nAdressen:",
-        Language::UK => "\nАдреси:",
-        Language::ZH => "\n网络地址:",
-        Language::RO => "\nAdrese:",
-        Language::KO => "\n주소:",
-        Language::TR => "\nAdresler:",
-        Language::RU => "\nАдреса:",
-        Language::PT => "\nEndereços:",
-        Language::EL => "\nΔιευθύνσεις:",
-        Language::FA => "\nنشانی ها:",
+        Language::EN => "Addresses",
+        Language::IT => "Indirizzi",
+        Language::FR => "Adresses",
+        Language::ES => "Direcciones",
+        Language::PL => "Adresy",
+        Language::DE => "Adressen",
+        Language::UK => "Адреси",
+        Language::ZH => "网络地址",
+        Language::RO => "Adrese",
+        Language::KO => "주소",
+        Language::TR => "Adresler",
+        Language::RU => "Адреса",
+        Language::PT => "Endereços",
+        Language::EL => "Διευθύνσεις",
+        Language::FA => "نشانی ها",
     }
 }
 
@@ -336,24 +336,24 @@ pub fn hide_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn network_adapter_translation(language: Language, adapter: &str) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => format!("Network adapter:\n   {adapter}"),
-        Language::IT => format!("Adattatore di rete:\n   {adapter}"),
-        Language::FR => format!("Carte réseau :\n   {adapter}"),
-        Language::ES => format!("Adaptador de red:\n   {adapter}"),
-        Language::PL => format!("Adapter sieciowy:\n   {adapter}"),
-        Language::DE => format!("Netzwerkadapter:\n   {adapter}"),
-        Language::UK => format!("Мережквий адаптер:\n   {adapter}"),
-        Language::ZH => format!("网络适配器:\n   {adapter}"),
-        Language::RO => format!("Adaptor de rețea:\n   {adapter}"),
-        Language::KO => format!("네트워크 어뎁터:\n   {adapter}"),
-        Language::TR => format!("Ağ adaptörü:\n   {adapter}"),
-        Language::RU => format!("Сетевой интерфейс:\n   {adapter}"),
-        Language::PT => format!("Adaptador de rede:\n   {adapter}"),
-        Language::EL => format!("Προσαρμογέας δικτύου:\n   {adapter}"),
-        Language::FA => format!("مبدل شبکه:\n   {adapter}"),
-    })
+pub fn network_adapter_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Network adapter",
+        Language::IT => "Adattatore di rete",
+        Language::FR => "Carte réseau",
+        Language::ES => "Adaptador de red",
+        Language::PL => "Adapter sieciowy",
+        Language::DE => "Netzwerkadapter",
+        Language::UK => "Мережквий адаптер",
+        Language::ZH => "网络适配器",
+        Language::RO => "Adaptor de rețea",
+        Language::KO => "네트워크 어뎁터",
+        Language::TR => "Ağ adaptörü",
+        Language::RU => "Сетевой интерфейс",
+        Language::PT => "Adaptador de rede",
+        Language::EL => "Προσαρμογέας δικτύου",
+        Language::FA => "مبدل شبکه",
+    }
 }
 
 pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'static> {
@@ -510,86 +510,49 @@ pub fn some_observed_translation(
     })
 }
 
-pub fn filtered_packets_translation(
-    language: Language,
-    filtered: &str,
-    percentage: &str,
-) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => format!("Filtered packets:\n   {filtered} ({percentage} of the total)"),
-        Language::IT => format!("Pacchetti filtrati:\n   {filtered} ({percentage} del totale)"),
-        Language::FR => format!("Paquets filtrés:\n   {filtered} ({percentage} du total)"),
-        Language::ES => format!("Paquetes filtrados:\n   {filtered} ({percentage} del total)"),
-        Language::PL => format!("Przefiltrowane pakiety:\n   {filtered} ({percentage} z całości)"),
-        Language::DE => format!("Gefilterte Pakete:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UK => {
-            format!("Відфільтровані пакети:\n   {filtered} ({percentage} від загальної суми)")
-        }
-        Language::ZH => {
-            format!("目标数据包计数:\n   {filtered} (占所有数据包的 {percentage})")
-        }
-        Language::RO => {
-            format!("Pachete filtrate:\n   {filtered} ({percentage} din total)")
-        }
-        Language::KO => {
-            format!("필터링된 패킷:\n   {filtered} ({percentage} 의 일부)")
-        }
-        Language::TR => format!("Filtrelenen paketler:\n   {filtered} toplamın ({percentage})"),
-        Language::RU => {
-            format!("Отфильтровано пакетов:\n   {filtered} ({percentage} от общего числа)")
-        }
-        Language::PT => {
-            format!("Pacotes filtrados:\n   {filtered} ({percentage} do total)")
-        }
-        Language::EL => {
-            format!("Φιλτραρισμένα πακέτα:\n   {filtered} ({percentage} από τα συνολικά)")
-        }
-        Language::FA => format!("بسته های صاف شده\n   {filtered} ({percentage} از مجموع)"),
-    })
+pub fn filtered_packets_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Filtered packets",
+        Language::IT => "Pacchetti filtrati",
+        Language::FR => "Paquets filtrés",
+        Language::ES => "Paquetes filtrados",
+        Language::PL => "Przefiltrowane pakiety",
+        Language::DE => "Gefilterte Pakete",
+        Language::UK => "Відфільтровані пакети",
+        Language::ZH => "目标数据包计数",
+        Language::RO => "Pachete filtrate",
+        Language::KO => "필터링된 패킷",
+        Language::TR => "Filtrelenen paketler",
+        Language::RU => "Отфильтровано пакетов",
+        Language::PT => "Pacotes filtrados",
+        Language::EL => "Φιλτραρισμένα πακέτα",
+        Language::FA => "بسته های صاف شده",
+    }
 }
 
-pub fn filtered_bytes_translation(
-    language: Language,
-    filtered: &str,
-    percentage: &str,
-) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => format!("Filtered bytes:\n   {filtered} ({percentage} of the total)"),
-        Language::IT => format!("Byte filtrati:\n   {filtered} ({percentage} del totale)"),
-        Language::FR => format!("Octets filtrés:\n   {filtered} ({percentage} du total)"),
-        Language::ES => format!("Bytes filtrados:\n   {filtered} ({percentage} del total)"),
-        Language::PL => format!("Przechwycone bajty:\n   {filtered} ({percentage} całości)"),
-        Language::DE => format!("Gefilterte Bytes:\n   {filtered} ({percentage} der Gesamtzahl)"),
-        Language::UK => {
-            format!("Відфільтровані байти:\n   {filtered} ({percentage} від загальної суми)")
-        }
-        Language::ZH => {
-            format!("目标网络流量计数:\n   {filtered} (占所有网络流量的 {percentage})")
-        }
-        Language::RO => {
-            format!("Octeți filtrați:\n   {filtered} ({percentage} din total)")
-        }
-        Language::KO => {
-            format!("필터링된 바이트:\n   {filtered} ({percentage} 의 일부)")
-        }
-        Language::TR => format!("Filtrelenen bayt:\n   {filtered} toplamın ({percentage})"),
-        Language::RU => {
-            format!("Отфильтровано байт:\n   {filtered} ({percentage} от общего числа)")
-        }
-        Language::PT => {
-            format!("Bytes filtrados:\n   {filtered} ({percentage} do total)")
-        }
-        Language::EL => {
-            format!("Φιλτραρισμένα bytes:\n   {filtered} ({percentage} από τα συνολικά)")
-        }
-        Language::FA => format!("بایت های صاف شده\n   {filtered} ({percentage} از مجموع)"),
-    })
+pub fn filtered_bytes_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Filtered bytes",
+        Language::IT => "Byte filtrati",
+        Language::FR => "Octets filtrés",
+        Language::ES | Language::PT => "Bytes filtrados",
+        Language::PL => "Przechwycone bajty",
+        Language::DE => "Gefilterte Bytes",
+        Language::UK => "Відфільтровані байти",
+        Language::ZH => "目标网络流量计数",
+        Language::RO => "Octeți filtrați",
+        Language::KO => "필터링된 바이트",
+        Language::TR => "Filtrelenen bayt",
+        Language::RU => "Отфильтровано байт",
+        Language::EL => "Φιλτραρισμένα bytes",
+        Language::FA => "بایت های صاف شده",
+    }
 }
 
 pub fn of_total_translation(language: Language, percentage: &str) -> String {
     match language {
-        Language::EN => format!(" ({percentage} of the total)"),
-        Language::IT => format!(" ({percentage} del totale)"),
+        Language::EN => format!("({percentage} of the total)"),
+        Language::IT => format!("({percentage} del totale)"),
         Language::FR => format!("({percentage} du total)"),
         Language::ES => format!("({percentage} del total)"),
         Language::PL => format!("({percentage} z całości)"),
@@ -618,43 +581,6 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
         }
         Language::FA => format!("({percentage} از مجموع)"),
     }
-}
-
-pub fn filtered_bytes_no_percentage_translation(
-    language: Language,
-    filtered: &str,
-) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => format!("Filtered bytes:\n   {filtered}"),
-        Language::IT => format!("Byte filtrati:\n   {filtered}"),
-        Language::FR => format!("Octets filtrés:\n   {filtered}"),
-        Language::ES => format!("Bytes filtrados:\n   {filtered}"),
-        Language::PL => format!("Przechwycone bajty:\n   {filtered}"),
-        Language::DE => format!("Gefilterte Bytes:\n   {filtered}"),
-        Language::UK => {
-            format!("Відфільтровані байти:\n   {filtered}")
-        }
-        Language::ZH => {
-            format!("目标网络流量计数:\n   {filtered}")
-        }
-        Language::RO => {
-            format!("Octeți filtrați:\n   {filtered}")
-        }
-        Language::KO => {
-            format!("필터링된 바이트:\n   {filtered}")
-        }
-        Language::TR => format!("Filtrelenen bayt:\n   {filtered}"),
-        Language::RU => {
-            format!("Отфильтровано байт:\n   {filtered}")
-        }
-        Language::PT => {
-            format!("Bytes filtrados:\n   {filtered}")
-        }
-        Language::EL => {
-            format!("Φιλτραρισμένα bytes:\n   {filtered}")
-        }
-        Language::FA => format!("بایت های صاف شده\n   {filtered}"),
-    })
 }
 
 // pub fn filtered_application_translation(language: Language) -> Text<'static> {
@@ -1044,21 +970,21 @@ pub fn languages_title_translation(language: Language) -> Text<'static> {
 
 pub fn active_filters_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Active filters:",
-        Language::IT => "Filtri attivi:",
+        Language::EN => "Active filters",
+        Language::IT => "Filtri attivi",
         Language::FR => "Filtres actifs",
-        Language::ES => "Filtros activos:",
-        Language::PL => "Aktywne filtry:",
-        Language::DE => "Aktive Filter:",
-        Language::UK => "Активні фільтри:",
-        Language::ZH => "活动的过滤器:",
-        Language::RO => "Filtre active:",
-        Language::KO => "활성화된 필터:",
-        Language::TR => "Aktif filtreler:",
-        Language::RU => "Выбранные фильтры:",
-        Language::PT => "Filtros ativos:",
-        Language::EL => "Ενεργά φίλτρα:",
-        Language::FA => "صافی های فعال:",
+        Language::ES => "Filtros activos",
+        Language::PL => "Aktywne filtry",
+        Language::DE => "Aktive Filter",
+        Language::UK => "Активні фільтри",
+        Language::ZH => "活动的过滤器",
+        Language::RO => "Filtre active",
+        Language::KO => "활성화된 필터",
+        Language::TR => "Aktif filtreler",
+        Language::RU => "Выбранные фильтры",
+        Language::PT => "Filtros ativos",
+        Language::EL => "Ενεργά φίλτρα",
+        Language::FA => "صافی های فعال",
     }
 }
 
@@ -1379,57 +1305,57 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
 
 pub fn threshold_translation(language: Language) -> String {
     match language {
-        Language::EN => "Threshold: ".to_string(),
-        Language::IT => "Soglia: ".to_string(),
-        Language::FR => "Seuil: ".to_string(),
-        Language::ES => "Límite: ".to_string(),
-        Language::PL => "Próg: ".to_string(),
-        Language::DE => "Schwellenwert: ".to_string(),
-        Language::UK => "Ліміт: ".to_string(),
-        Language::ZH => "阈值: ".to_string(),
-        Language::RO => "Prag: ".to_string(),
-        Language::KO => "임계값: ".to_string(),
-        Language::TR => "Eşik: ".to_string(),
-        Language::RU => "Порог: ".to_string(),
-        Language::PT => "Limite: ".to_string(),
-        Language::EL => "όριο: ".to_string(),
-        Language::FA => "آستانه:".to_string(),
+        Language::EN => "Threshold".to_string(),
+        Language::IT => "Soglia".to_string(),
+        Language::FR => "Seuil".to_string(),
+        Language::ES => "Límite".to_string(),
+        Language::PL => "Próg".to_string(),
+        Language::DE => "Schwellenwert".to_string(),
+        Language::UK => "Ліміт".to_string(),
+        Language::ZH => "阈值".to_string(),
+        Language::RO => "Prag".to_string(),
+        Language::KO => "임계값".to_string(),
+        Language::TR => "Eşik".to_string(),
+        Language::RU => "Порог".to_string(),
+        Language::PT => "Limite".to_string(),
+        Language::EL => "όριο".to_string(),
+        Language::FA => "آستانه".to_string(),
     }
 }
 
-pub fn volume_translation(language: Language, value: u8) -> String {
+pub fn volume_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::FR | Language::PT => format!("Volume: {value:^3}%"),
-        Language::ES => format!("Volumen: {value:^3}%"),
-        Language::PL => format!("Głośność: {value:^3}%"),
-        Language::DE => format!("Lautstärke: {value:^3}%"),
-        Language::UK => format!("Гучність: {value:^3}%"),
-        Language::ZH => format!("通知音量: {value:^3}%"),
-        Language::RO => format!("Volum: {value:^3}%"),
-        Language::KO => format!("볼륨: {value:^3}%"),
-        Language::TR => format!("Ses: {value:^3}%"),
-        Language::RU => format!("Объём: {value:^3}%"),
-        Language::EL => format!("Ένταση: {value:^3}%"),
-        Language::FA => format!("حجم: {value:^3}%"),
+        Language::EN | Language::IT | Language::FR | Language::PT => "Volume",
+        Language::ES => "Volumen",
+        Language::PL => "Głośność",
+        Language::DE => "Lautstärke",
+        Language::UK => "Гучність",
+        Language::ZH => "通知音量",
+        Language::RO => "Volum",
+        Language::KO => "볼륨",
+        Language::TR => "Ses",
+        Language::RU => "Объём",
+        Language::EL => "Ένταση",
+        Language::FA => "حجم",
     }
 }
 
 pub fn sound_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Sound:",
-        Language::IT => "Suono:",
-        Language::FR => "Son:",
-        Language::ES => "Sonido:",
-        Language::PL => "Dźwięk:",
-        Language::DE => "Ton:",
-        Language::UK | Language::RU => "Звук:",
-        Language::ZH => "通知音:",
-        Language::RO => "Sunet:",
-        Language::KO => "사운드:",
-        Language::TR => "Ses:",
-        Language::PT => "Som:",
-        Language::EL => "Ήχος:",
-        Language::FA => "صدا:",
+        Language::EN => "Sound",
+        Language::IT => "Suono",
+        Language::FR => "Son",
+        Language::ES => "Sonido",
+        Language::PL => "Dźwięk",
+        Language::DE => "Ton",
+        Language::UK | Language::RU => "Звук",
+        Language::ZH => "通知音",
+        Language::RO => "Sunet",
+        Language::KO => "사운드",
+        Language::TR => "Ses",
+        Language::PT => "Som",
+        Language::EL => "Ήχος",
+        Language::FA => "صدا",
     }
 }
 

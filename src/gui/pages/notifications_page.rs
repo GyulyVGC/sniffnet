@@ -168,9 +168,12 @@ fn packets_notification_log(
     style: StyleType,
 ) -> Container<'static, Message> {
     let font = get_font(style);
-    let mut threshold_str = threshold_translation(language);
-    threshold_str.push_str(&logged_notification.threshold.to_string());
-    threshold_str.push_str(&format!(" {}", per_second_translation(language)));
+    let threshold_str = format!(
+        "{}: {} {}",
+        threshold_translation(language),
+        logged_notification.threshold,
+        per_second_translation(language)
+    );
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
@@ -236,6 +239,7 @@ fn bytes_notification_log(
 ) -> Container<'static, Message> {
     let font = get_font(style);
     let mut threshold_str = threshold_translation(language);
+    threshold_str.push_str(": ");
     threshold_str.push_str(
         &(logged_notification.threshold / logged_notification.byte_multiple.get_multiplier())
             .to_string(),

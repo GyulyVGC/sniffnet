@@ -122,8 +122,6 @@ pub fn modify_or_insert_in_map(
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
 ) -> InfoAddressPortPair {
-    #![allow(clippy::too_many_arguments)]
-
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
     let source_ip = &key.address1;

@@ -25,10 +25,9 @@ use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
 use crate::translations::translations::{
     application_protocol_translation, bytes_chart_translation, error_translation,
-    filtered_bytes_no_percentage_translation, filtered_bytes_translation,
-    filtered_packets_translation, network_adapter_translation, no_addresses_translation,
-    none_translation, of_total_translation, packets_chart_translation, some_observed_translation,
-    traffic_rate_translation, waiting_translation,
+    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
+    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
@@ -593,7 +592,14 @@ fn lazy_col_info(
     let col_device_filters = Column::new()
         .width(Length::FillPortion(1))
         .spacing(15)
-        .push(network_adapter_translation(sniffer.language, adapter_info).font(font))
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                network_adapter_translation(sniffer.language),
+                adapter_info
+            ))
+            .font(font),
+        )
         .push(
             Text::new(get_active_filters_string(
                 &sniffer.filters.clone(),
@@ -604,7 +610,13 @@ fn lazy_col_info(
 
     let col_data_representation = Column::new()
         .width(Length::FillPortion(1))
-        .push(data_representation_translation(sniffer.language).font(font))
+        .push(
+            Text::new(format!(
+                "{}:",
+                data_representation_translation(sniffer.language)
+            ))
+            .font(font),
+        )
         .push(chart_radios(
             sniffer.traffic_chart.chart_type,
             font,
@@ -613,39 +625,51 @@ fn lazy_col_info(
         ));
 
     let dropped_text = if dropped > 0 {
-        let mut temp =
-            dropped_packets_translation(sniffer.language, &dropped.separate_with_spaces());
-        temp.push_str(&of_total_translation(
-            sniffer.language,
-            &get_percentage_string(total, u128::from(dropped)),
-        ));
-        temp
+        format!(
+            "{}:\n   {} {}",
+            dropped_packets_translation(sniffer.language),
+            &dropped.separate_with_spaces(),
+            of_total_translation(
+                sniffer.language,
+                &get_percentage_string(total, u128::from(dropped))
+            )
+        )
     } else {
-        dropped_packets_translation(sniffer.language, &none_translation(sniffer.language))
+        format!(
+            "{}:\n   {}",
+            dropped_packets_translation(sniffer.language),
+            none_translation(sniffer.language)
+        )
     };
     let col_bytes_packets = Column::new()
         .spacing(15)
         .push(
             if dropped > 0 {
-                filtered_bytes_no_percentage_translation(
-                    sniffer.language,
-                    &get_formatted_bytes_string(filtered_bytes),
-                )
+                Text::new(format!(
+                    "{}:\n   {}",
+                    filtered_bytes_translation(sniffer.language),
+                    &get_formatted_bytes_string(filtered_bytes)
+                ))
             } else {
-                filtered_bytes_translation(
-                    sniffer.language,
+                Text::new(format!(
+                    "{}:\n   {} {}",
+                    filtered_bytes_translation(sniffer.language),
                     &get_formatted_bytes_string(filtered_bytes),
-                    &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes),
-                )
+                    of_total_translation(
+                        sniffer.language,
+                        &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes)
+                    )
+                ))
             }
             .font(font),
         )
         .push(
-            filtered_packets_translation(
-                sniffer.language,
+            Text::new(format!(
+                "{}:\n   {} {}",
+                filtered_packets_translation(sniffer.language),
                 &filtered.separate_with_spaces(),
-                &get_percentage_string(total, filtered),
-            )
+                of_total_translation(sniffer.language, &get_percentage_string(total, filtered))
+            ))
             .font(font),
         )
         .push(Text::new(dropped_text).font(font));

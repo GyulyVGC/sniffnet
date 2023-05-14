@@ -1,7 +1,5 @@
 #![allow(clippy::match_same_arms)]
 
-use iced::widget::Text;
-
 use crate::Language;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {
@@ -36,20 +34,20 @@ pub fn connection_details_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn dropped_packets_translation(language: Language, dropped: &str) -> String {
+pub fn dropped_packets_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => format!("Dropped packets:\n   {dropped}"),
-        Language::IT => format!("Pacchetti mancati:\n   {dropped}"),
-        _ => format!("Dropped packets:\n   {dropped}"),
+        Language::EN => "Dropped packets",
+        Language::IT => "Pacchetti mancati",
+        _ => "Dropped packets",
     }
 }
 
-pub fn data_representation_translation(language: Language) -> Text<'static> {
-    Text::new(match language {
-        Language::EN => "Data representation:",
-        Language::IT => "Rappresentazione dei dati:",
-        _ => "Data representation:",
-    })
+pub fn data_representation_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Data representation",
+        Language::IT => "Rappresentazione dei dati",
+        _ => "Data representation",
+    }
 }
 
 pub fn host_translation(language: Language) -> &'static str {
@@ -209,5 +207,14 @@ pub fn showing_results_translation(
         Language::EN => format!("Showing {start}-{end} of {total} total results"),
         Language::IT => format!("Sono mostrati {start}-{end} di {total} risultati totali"),
         _ => format!("Showing {start}-{end} of {total} total results"),
+    }
+}
+
+#[allow(dead_code)]
+pub fn color_gradients_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Apply color gradients",
+        Language::IT => "Applica sfumature di colore",
+        _ => "Apply color gradients",
     }
 }

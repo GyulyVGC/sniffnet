@@ -1,5 +1,3 @@
-#![allow(clippy::enum_variant_names)]
-
 use crate::translations::translations::{
     bytes_report_translation, packets_report_translation, recent_report_translation,
 };
@@ -7,6 +5,7 @@ use crate::Language;
 
 /// Enum representing the possible kinds of displayed relevant connections.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[allow(clippy::enum_variant_names)]
 pub enum ReportSortType {
     MostRecent,
     MostBytes,
