@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout repository
@@ -22,6 +22,10 @@ jobs:
           profile: minimal
           components: rustfmt, clippy
           default: true
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libpcap-dev libasound2-dev
 
       - name: Build
         uses: actions-rs/cargo@v1
@@ -44,34 +48,34 @@ jobs:
           mkdir artifacts
           mv target/generate-rpm/*.rpm artifacts/
 
-      - name: Package Universal DMG for macOS
-        if: matrix.os == 'macOS-latest'
-        run: |
-          cargo install cargo-bundle
-          cargo bundle --release
-          lipo -create -output \
-            target/release/bundle/osx/sniffnet.app/Contents/MacOS/sniffnet \
-            target/release/x86_64-apple-darwin/sniffnet \
-            target/release/aarch64-apple-darwin/sniffnet
-          brew install create-dmg
-          mkdir artifacts
-          create-dmg \
-            --volname "Sniffnet Installer" \
-            --window-pos 200 120           \
-            --window-size 800 400          \
-            --icon-size 100                \
-            --app-drop-link 600 185        \
-            --icon "target/release/bundle/osx/sniffnet.app" 200 185   \
-            --hide-extension "target/release/bundle/osx/sniffnet.app" \
-            --app-drop-link 600 185 artifacts/sniffnet-universal.dmg target/release/bundle/osx/sniffnet.app
+#      - name: Package Universal DMG for macOS
+#        if: matrix.os == 'macOS-latest'
+#        run: |
+#          cargo install cargo-bundle
+#          cargo bundle --release
+#          lipo -create -output \
+#            target/release/bundle/osx/sniffnet.app/Contents/MacOS/sniffnet \
+#            target/release/x86_64-apple-darwin/sniffnet \
+#            target/release/aarch64-apple-darwin/sniffnet
+#          brew install create-dmg
+#          mkdir artifacts
+#          create-dmg \
+#            --volname "Sniffnet Installer" \
+#            --window-pos 200 120           \
+#            --window-size 800 400          \
+#            --icon-size 100                \
+#            --app-drop-link 600 185        \
+#            --icon "target/release/bundle/osx/sniffnet.app" 200 185   \
+#            --hide-extension "target/release/bundle/osx/sniffnet.app" \
+#            --app-drop-link 600 185 artifacts/sniffnet-universal.dmg target/release/bundle/osx/sniffnet.app
 
-      - name: Package MSI for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          cargo install cargo-wix
-          cargo wix main.wxs
-          mkdir artifacts
-          mv target/wix/*.msi artifacts/
+#      - name: Package MSI for Windows
+#        if: matrix.os == 'windows-latest'
+#        run: |
+#          cargo install cargo-wix
+#          cargo wix main.wxs
+#          mkdir artifacts
+#          mv target/wix/*.msi artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
