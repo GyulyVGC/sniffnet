@@ -7,4 +7,4 @@ Categories=Network;Security;Utility;
 Icon=sniffnet
 Exec=sudo /usr/bin/sniffnet
 StartupWMClass=sniffnet
-Terminal=false
+Terminal=true
