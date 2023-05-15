@@ -39,11 +39,11 @@ impl Sound {
         }
     }
 
-    pub fn get_radio_label(&self, language: Language) -> &str {
+    pub fn get_radio_label(self, language: Language) -> String {
         match self {
-            Gulp => "Gulp",
-            Pop => "Pop",
-            Swhoosh => "Swhoosh",
+            Gulp => "Gulp".to_string(),
+            Pop => "Pop".to_string(),
+            Swhoosh => "Swhoosh".to_string(),
             Sound::None => none_translation(language),
         }
     }

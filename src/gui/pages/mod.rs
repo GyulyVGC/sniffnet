@@ -1,3 +1,4 @@
+pub mod connection_details_page;
 pub mod initial_page;
 pub mod inspect_page;
 pub mod notifications_page;

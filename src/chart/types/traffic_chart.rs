@@ -37,10 +37,10 @@ pub struct TrafficChart {
     pub min_sent_packets: i64,
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
-    color_mix: f64,
-    color_incoming: RGBColor,
-    color_outgoing: RGBColor,
-    color_font: RGBColor,
+    pub color_mix: f64,
+    pub color_incoming: RGBColor,
+    pub color_outgoing: RGBColor,
+    pub color_font: RGBColor,
     pub chart_type: ChartType,
     pub language: Language,
 }
@@ -61,7 +61,7 @@ impl TrafficChart {
             color_incoming: to_rgb_color(get_colors(style).incoming),
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
-            chart_type: ChartType::Packets,
+            chart_type: ChartType::Bytes,
             language,
         }
     }
@@ -134,6 +134,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .y_labels(7)
                     .y_label_formatter(&|bytes| {
                         get_formatted_bytes_string(u128::from(bytes.unsigned_abs()))
                             .trim()
@@ -194,6 +195,7 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_mesh()
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .y_labels(7)
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
                     .unwrap();

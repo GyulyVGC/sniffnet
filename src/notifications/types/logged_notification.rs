@@ -1,5 +1,5 @@
-use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::host::Host;
 use crate::ByteMultiple;
 
 /// Enum representing the possible notification events.
@@ -31,6 +31,7 @@ pub struct BytesThresholdExceeded {
 
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
-    pub(crate) connection: (AddressPortPair, InfoAddressPortPair),
+    pub(crate) host: Host,
+    pub(crate) data_info_host: DataInfoHost,
     pub(crate) timestamp: String,
 }

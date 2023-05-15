@@ -39,3 +39,28 @@ impl SettingsPage {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::gui::pages::types::settings_page::SettingsPage;
+
+    #[test]
+    fn test_previous_settings_page() {
+        assert_eq!(
+            SettingsPage::Notifications.previous(),
+            SettingsPage::Language
+        );
+        assert_eq!(
+            SettingsPage::Appearance.previous(),
+            SettingsPage::Notifications
+        );
+        assert_eq!(SettingsPage::Language.previous(), SettingsPage::Appearance);
+    }
+
+    #[test]
+    fn test_next_settings_page() {
+        assert_eq!(SettingsPage::Notifications.next(), SettingsPage::Appearance);
+        assert_eq!(SettingsPage::Appearance.next(), SettingsPage::Language);
+        assert_eq!(SettingsPage::Language.next(), SettingsPage::Notifications);
+    }
+}

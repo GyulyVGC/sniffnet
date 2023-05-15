@@ -154,16 +154,16 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         match num_addresses {
             0 => {}
             1 => {
-                dev_str.push_str(address_translation(sniffer.language));
+                dev_str.push_str(&format!("\n{}:", address_translation(sniffer.language)));
             }
             _ => {
-                dev_str.push_str(addresses_translation(sniffer.language));
+                dev_str.push_str(&format!("\n{}:", addresses_translation(sniffer.language)));
             }
         }
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n    {address_string}"));
+            dev_str.push_str(&format!("\n   {address_string}"));
         }
         dev_str_list.push((name, dev_str));
     }

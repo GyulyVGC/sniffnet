@@ -5,6 +5,7 @@ use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
 use crate::get_colors;
+use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 
 impl From<StyleTuple> for iced::theme::TextInput {
@@ -19,10 +20,16 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     fn active(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            background: Background::Color(colors.buttons),
+            background: Background::Color(match self.1 {
+                ElementType::Badge => Color::TRANSPARENT,
+                _ => colors.buttons,
+            }),
             border_radius: 0.0,
             border_width: 1.0,
-            border_color: colors.round_borders,
+            border_color: match self.1 {
+                ElementType::Badge => Color::TRANSPARENT,
+                _ => colors.round_borders,
+            },
             icon_color: colors.text_body,
         }
     }
@@ -61,7 +68,10 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     fn hovered(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(self.0);
         Appearance {
-            background: Background::Color(colors.buttons),
+            background: Background::Color(match self.1 {
+                ElementType::Badge => Color::TRANSPARENT,
+                _ => colors.buttons,
+            }),
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,

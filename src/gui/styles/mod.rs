@@ -3,6 +3,7 @@ pub mod checkbox;
 pub mod container;
 pub mod picklist;
 pub mod radio;
+pub mod rule;
 pub mod scrollbar;
 pub mod slider;
 pub mod style_constants;

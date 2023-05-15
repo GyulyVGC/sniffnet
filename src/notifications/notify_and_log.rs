@@ -88,18 +88,19 @@ pub fn notify_and_log(
             .is_empty()
     {
         let info_traffic_lock = info_traffic.lock().unwrap();
-        for index in &info_traffic_lock.favorites_last_interval.clone() {
+        for host in &info_traffic_lock.favorites_last_interval.clone() {
             //log this notification
             emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
                 runtime_data.logged_notifications.pop_back();
             }
-            let key_val = info_traffic_lock.map.get_index(*index).unwrap();
+
             runtime_data
                 .logged_notifications
                 .push_front(LoggedNotification::FavoriteTransmitted(
                     FavoriteTransmitted {
-                        connection: (key_val.0.clone(), key_val.1.clone()),
+                        host: host.clone(),
+                        data_info_host: info_traffic_lock.hosts.get(host).unwrap().clone(),
                         timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
                     },
                 ));

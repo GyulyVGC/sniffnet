@@ -1,4 +1,4 @@
-use iced::widget::{Column, Container, Row};
+use iced::widget::{Column, Container, Row, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
 use iced_native::widget::vertical_space;
@@ -30,7 +30,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(col_language_radio_2)
         .push(col_language_radio_3);
 
-    let content = Column::new()
+    let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(sniffer.style, sniffer.language))
@@ -56,8 +56,24 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(30.0)))
-        .push(row_language_radio);
+        .push(vertical_space(Fixed(20.0)));
+
+    if ![Language::EN, Language::IT].contains(&sniffer.language) {
+        content = content
+            .push(
+                Container::new(
+                    Text::new("The selected language is not fully updated to version 1.2")
+                        .font(font),
+                )
+                .padding(10.0)
+                .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                    StyleTuple(sniffer.style, ElementType::Badge),
+                )),
+            )
+            .push(vertical_space(Fixed(20.0)));
+    }
+
+    content = content.push(row_language_radio);
 
     Container::new(content)
         .height(Fixed(400.0))

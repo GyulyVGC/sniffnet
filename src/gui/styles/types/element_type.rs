@@ -9,7 +9,10 @@ pub enum ElementType {
     TabInactive,
     Starred,
     NotStarred,
+    Neutral,
     Alert,
     Tooltip,
     Badge,
+    Incoming,
+    Outgoing,
 }
