@@ -2,8 +2,6 @@ name: Build and Package
 
 on:
   push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 jobs:
