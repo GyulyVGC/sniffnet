@@ -51,6 +51,26 @@ jobs:
           targets: ${{ matrix.targets }}
           default: true
 
+      - name: Install build targets for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          rustup target add x86_64-unknown-linux-gnu
+          rustup target add i686-unknown-linux-gnu
+          rustup target add aarch64-unknown-linux-gnu
+          rustup target add armv7-unknown-linux-gnueabihf
+
+      - name: Install build targets for macOS
+        if: matrix.os == 'macOS-latest'
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+      - name: Install build targets for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          rustup target add x86_64-pc-windows-msvc
+          rustup target add i686-pc-windows-msvc
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
