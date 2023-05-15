@@ -42,7 +42,7 @@ jobs:
               --target i686-pc-windows-msvc
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -105,13 +105,7 @@ jobs:
           mv target/wix/*.msi artifacts/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-artifacts
-          path: artifacts/
-
-      - name: Download artifacts
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/download-artifact@v2
-        with:
           path: artifacts/
