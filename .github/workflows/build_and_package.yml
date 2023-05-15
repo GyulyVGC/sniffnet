@@ -10,30 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            targets: >-
-              x86_64-unknown-linux-gnu
-              i686-unknown-linux-gnu
-            build_targets: >-
-              --target x86_64-unknown-linux-gnu
-              --target i686-unknown-linux-gnu
 
-          - os: macOS-latest
-            targets: >-
-              x86_64-apple-darwin
-              aarch64-apple-darwin
-            build_targets: >-
-              --target x86_64-apple-darwin
-              --target aarch64-apple-darwin
-
-          - os: windows-latest
-            targets: >-
-              x86_64-pc-windows-msvc
-              i686-pc-windows-msvc
-            build_targets: >-
-              --target x86_64-pc-windows-msvc
-              --target i686-pc-windows-msvc
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -44,32 +21,12 @@ jobs:
           toolchain: stable
           profile: minimal
           components: rustfmt, clippy
-          targets: ${{ matrix.targets }}
           default: true
-
-      - name: Install build targets for Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          rustup target add x86_64-unknown-linux-gnu
-          rustup target add i686-unknown-linux-gnu
-
-      - name: Install build targets for macOS
-        if: matrix.os == 'macOS-latest'
-        run: |
-          rustup target add x86_64-apple-darwin
-          rustup target add aarch64-apple-darwin
-
-      - name: Install build targets for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          rustup target add x86_64-pc-windows-msvc
-          rustup target add i686-pc-windows-msvc
 
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release ${{ matrix.build_targets }}
 
       - name: Package for Debian-based Linux distros
         if: matrix.os == 'ubuntu-latest'
