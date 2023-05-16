@@ -74,6 +74,11 @@ assets = [
     { source = "resources/icons/sniffnet-linux_1024x1024.png", dest = "/usr/share/icons/hicolor/1024x1024/apps/sniffnet.png", mode = "644" }
 ]
 
+[package.metadata.generate-rpm.requires]
+alsa-lib-devel = "*"
+libpcap-devel = "*"
+fontconfig-devel = "*"
+
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [package.metadata.bundle]
