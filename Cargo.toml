@@ -24,6 +24,7 @@ include     = [
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [package.metadata.deb]
+depends = "libasound2-dev, libpcap-dev, libfontconfig1"
 assets = [
     ["target/release/sniffnet", "/usr/bin/", "755"],
     ["resources/sniffnet.desktop", "/usr/share/applications/", "644"],
