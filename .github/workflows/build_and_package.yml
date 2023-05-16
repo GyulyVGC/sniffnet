@@ -61,12 +61,12 @@ jobs:
           create-dmg \
             --volname "Sniffnet Installer" \
             --background "resources/logos/bg_dmg.png" \
-            --window-pos 200 120           \
-            --window-size 900 450          \
-            --icon-size 100                \
-            --app-drop-link 620 240        \
-            --icon "target/release/bundle/osx/sniffnet.app" 300 240   \
-            --hide-extension "target/release/bundle/osx/sniffnet.app" \
+            --window-pos 200 120 \
+            --window-size 900 450 \
+            --icon-size 100 \
+            --app-drop-link 620 240 \
+            --icon "Sniffnet.app" 300 240 \
+            --hide-extension "Sniffnet.app" \
             "artifacts/sniffnet.dmg" \
             "target/release/bundle/osx/"
 
