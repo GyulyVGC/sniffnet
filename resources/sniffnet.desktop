@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sniffnet
+Comment=Application to comfortably monitor your network traffic
+Categories=Network;Security;Utility;
+Icon=sniffnet
+Exec=sudo /usr/bin/sniffnet
+StartupWMClass=sniffnet
+Terminal=true
