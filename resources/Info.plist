@@ -9,7 +9,7 @@
   <key>CFBundleExecutable</key>
   <string>wrapper.sh</string>
   <key>CFBundleIconFile</key>
-  <string>Sniffnet.icns</string>
+  <string>sniffnet-macos.icns</string>
   <key>CFBundleIdentifier</key>
   <string>gyulyvgc.sniffnet</string>
   <key>CFBundleInfoDictionaryVersion</key>

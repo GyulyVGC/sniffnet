@@ -60,7 +60,6 @@ jobs:
           mkdir artifacts
           create-dmg \
             --volname "Sniffnet Installer" \
-            --volicon "resources/icons/sniffnet-macos.icns" \
             --background "resources/logos/bg_dmg.png" \
             --window-pos 200 120 \
             --window-size 900 450 \
