@@ -1,7 +1,3 @@
 #!/bin/sh
-osascript -e '
-    tell app "Terminal"
-        do script "sudo /*/Sniffnet.app/Contents/MacOS/sniffnet"
-        activate
-    end tell
-'
+osascript \
+	-e "do shell script \"/*/Sniffnet.app/Contents/MacOS/sniffnet > /dev/null 2>&1 & \" with administrator privileges"
