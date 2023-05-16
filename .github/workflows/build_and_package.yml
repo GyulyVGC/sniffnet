@@ -53,10 +53,6 @@ jobs:
         run: |
           cargo install cargo-bundle
           cargo bundle --release
-#          lipo -create -output \
-#            target/release/bundle/osx/sniffnet.app/Contents/MacOS/sniffnet \
-#            target/release/x86_64-apple-darwin/sniffnet \
-#            target/release/aarch64-apple-darwin/sniffnet
           rm target/release/bundle/osx/sniffnet.app/Contents/Info.plist
           cp resources/Info.plist target/release/bundle/osx/sniffnet.app/Contents/Info.plist
           cp resources/wrapper.sh target/release/bundle/osx/sniffnet.app/Contents/MacOS/wrapper.sh
