@@ -51,6 +51,7 @@ assets = [
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [package.metadata.generate-rpm]
+auto-req = "no"
 assets = [
     { source = "target/release/sniffnet", dest = "/usr/bin/", mode = "755" },
     { source = "resources/sniffnet.desktop", dest = "/usr/share/applications/", mode = "644" },
