@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout repository
@@ -48,26 +48,31 @@ jobs:
           cargo generate-rpm
           mv target/generate-rpm/*.rpm artifacts/
 
-#      - name: Package Universal DMG for macOS
-#        if: matrix.os == 'macOS-latest'
-#        run: |
-#          cargo install cargo-bundle
-#          cargo bundle --release
+      - name: Package DMG for macOS
+        if: matrix.os == 'macOS-latest'
+        run: |
+          cargo install cargo-bundle
+          cargo bundle --release
 #          lipo -create -output \
 #            target/release/bundle/osx/sniffnet.app/Contents/MacOS/sniffnet \
 #            target/release/x86_64-apple-darwin/sniffnet \
 #            target/release/aarch64-apple-darwin/sniffnet
-#          brew install create-dmg
-#          mkdir artifacts
-#          create-dmg \
-#            --volname "Sniffnet Installer" \
-#            --window-pos 200 120           \
-#            --window-size 800 400          \
-#            --icon-size 100                \
-#            --app-drop-link 600 185        \
-#            --icon "target/release/bundle/osx/sniffnet.app" 200 185   \
-#            --hide-extension "target/release/bundle/osx/sniffnet.app" \
-#            --app-drop-link 600 185 artifacts/sniffnet-universal.dmg target/release/bundle/osx/sniffnet.app
+          rm target/release/bundle/osx/sniffnet.app/Contents/Info.plist
+          cp resources/Info.plist target/release/bundle/osx/sniffnet.app/Contents/Info.plist
+          cp resources/wrapper.sh target/release/bundle/osx/sniffnet.app/Contents/MacOS/wrapper.sh
+          brew install create-dmg
+          mkdir artifacts
+          create-dmg \
+            --volname "Sniffnet Installer" \
+            --background "resources/logos/bg_dmg.png" \
+            --window-pos 200 120           \
+            --window-size 900 450          \
+            --icon-size 100                \
+            --app-drop-link 620 240        \
+            --icon "target/release/bundle/osx/sniffnet.app" 300 240   \
+            --hide-extension "target/release/bundle/osx/sniffnet.app" \
+            "artifacts/sniffnet.dmg" \
+            "target/release/bundle/osx/"
 
 #      - name: Package MSI for Windows
 #        if: matrix.os == 'windows-latest'
