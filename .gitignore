@@ -215,9 +215,6 @@ $RECYCLE.BIN/
 
 #####################################################################
 
-#folder used for Windows installer
-/wix
-
 .idea
 
 Dockerfile
