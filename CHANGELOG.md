@@ -1,8 +1,9 @@
 # Change Log
+
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.2.0] - 2023-05-xx
+## [1.2.0] - 2023-05-18
 
 - Introduced host-based analysis: instead of just showing IP addresses, now host names and network providers are available for a quicker and more meaningful traffic interpretation 
   * Added rDNS (reverse DNS) lookups to find out network host names
@@ -15,7 +16,10 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Changed favorites management: instead of referring to single IP addresses, favorites are now related to network hosts
 - Added Greek translation 🇬🇷 ([#160](https://github.com/GyulyVGC/sniffnet/pull/160))
 - Added Persian translation 🇮🇷 ([#158](https://github.com/GyulyVGC/sniffnet/pull/158))
-- Do not open terminal window when starting the application on Windows systems (fixes [#85](https://github.com/GyulyVGC/sniffnet/issues/85))
+- Do not open terminal window when starting the application on Windows (fixes [#85](https://github.com/GyulyVGC/sniffnet/issues/85))
+- Do not open terminal window when starting the application on macOS
+- Changed macOS application icon to be consistent with standard icons dimension (fixes [#177](https://github.com/GyulyVGC/sniffnet/issues/177))
+- Made available RPM package for Linux and automated packaging process for Windows, macOS, and Linux ([#180](https://github.com/GyulyVGC/sniffnet/pull/180) - fixes [#20](https://github.com/GyulyVGC/sniffnet/issues/20))
 - Keep the active addresses of the selected network adapter up to date during analysis
 - Changed shortcut to interrupt analysis from `backspace` to `ctrl+backspace`
 - Images have been replaced with SVGs

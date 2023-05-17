@@ -24,11 +24,11 @@ Graphical interface translated in:<br>
 </a>
 </p>
 
-<div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
+<div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
 
 <div align="center">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/inspect_page.png?raw=true" width="49%"/>
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/v1.2.0/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/inspect_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
 </div>
 
 <p>
@@ -50,9 +50,10 @@ You can install Sniffnet in one of the following ways:
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Windows.msi) (8.8 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_MacOS.dmg) (7.3 MB)
-  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.deb) (5.3 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Windows.msi) (13.1 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_MacOS.dmg) (12.4 MB)
+  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.deb) (9.2 MB)
+  - [Linux (.rpm)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.rpm) (11.4 MB)
 
     
 </details>
