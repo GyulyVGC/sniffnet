@@ -1,15 +1,19 @@
 name: Package
 
 on:
-  push:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      NPCAP_OEM_URL:
+        required: true
 
 jobs:
+
   package:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout repository
@@ -26,6 +30,19 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install libpcap-dev libasound2-dev
+
+      - name: Install Windows dependency - npcap sdk
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
+          Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
+          echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
+
+      - name: Install Windows dependency - npcap dll
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
+          C:/npcap-oem.exe /S
 
       - name: Build
         uses: actions-rs/cargo@v1
@@ -71,13 +88,13 @@ jobs:
             "artifacts/sniffnet.dmg" \
             "target/release/bundle/osx/"
 
-#      - name: Package MSI for Windows
-#        if: matrix.os == 'windows-latest'
-#        run: |
-#          cargo install cargo-wix
-#          cargo wix main.wxs
-#          mkdir artifacts
-#          mv target/wix/*.msi artifacts/
+      - name: Package MSI for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cargo install cargo-wix
+          cargo wix resources/main.wxs
+          mkdir artifacts
+          mv target/wix/*.msi artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
