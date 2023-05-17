@@ -92,7 +92,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cargo install cargo-wix
-          cargo wix resources/main.wxs
+          cargo wix main.wxs
           mkdir artifacts
           mv target/wix/*.msi artifacts/
 
