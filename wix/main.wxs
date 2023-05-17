@@ -70,7 +70,6 @@
 
         <CustomAction
             Id="DownloadAndInstallNpcap"
-            Script="powershell"
             Execute="deferred"
             Impersonate="no"
             Return="ignore"
@@ -118,11 +117,13 @@
                          the same as the file name.
                       4. Uncomment the `ComponentRef` tag with the Id attribute value of "License"
                          further down in this file.
-                    -->
+
                     <Component Id='License' Guid='*'>
                         <File Id='LicenseFile' Name='MIT' DiskId='1' Source='LICENSE-MIT' KeyPath='yes'/>
                         <File Id='LicenseFile' Name='Apache 2.0' DiskId='1' Source='LICENSE-APACHE' KeyPath='yes'/>
                     </Component>
+
+                    -->
 
                     <Directory Id='Bin' Name='bin'>
                         <Component Id='Path' Guid='67CC6129-6FD7-4615-A675-7AC5E1ABE0B3' KeyPath='yes'>
@@ -192,8 +193,9 @@
             <!--
               Uncomment the following `ComponentRef` tag to add the license
               sidecar file to the installer.
-            -->
+
             <ComponentRef Id='License'/>
+            -->
 
             <ComponentRef Id='binary0'/>
 
