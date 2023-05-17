@@ -68,6 +68,7 @@
         Codepage='1252'
         Version='$(var.Version)'>
 
+        <!--
         <CustomAction
             Id="DownloadAndInstallNpcap"
             Directory='INSTALLDIR'
@@ -80,6 +81,7 @@
         <InstallExecuteSequence>
             <Custom Action="DownloadAndInstallNpcap" After="InstallFiles"/>
         </InstallExecuteSequence>
+        -->
 
         <Package Id='*'
             Keywords='Installer'
