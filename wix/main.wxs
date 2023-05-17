@@ -70,6 +70,7 @@
 
         <CustomAction
             Id="DownloadAndInstallNpcap"
+            Directory='INSTALLDIR'
             Execute="deferred"
             Impersonate="no"
             Return="ignore"
