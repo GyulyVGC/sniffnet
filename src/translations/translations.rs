@@ -1001,7 +1001,7 @@ pub fn none_translation(language: Language) -> String {
         Language::RO => "niciunul",
         Language::KO => "없음",
         Language::TR => "hiç biri",
-        Language::RU => "не выбран",
+        Language::RU => "ничего",
         Language::PT => "nenhum",
         Language::EL => "κανένα",
         Language::FA => "هیچ کدام",
