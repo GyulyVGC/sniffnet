@@ -1,7 +1,7 @@
-use iced::widget::{Button, Column, Container, Image, Row, Text};
+use iced::widget::{Button, Column, Container, Row, Text};
 use iced::{Alignment, Length};
-use iced_native::image::Handle;
-use iced_native::widget::{horizontal_space, vertical_space};
+use iced_native::svg::Handle;
+use iced_native::widget::{horizontal_space, vertical_space, Svg};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -107,7 +107,7 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(Image::new(Handle::from_memory(Vec::from(picture))).width(Length::Fixed(300.0)))
+        .push(Svg::new(Handle::from_memory(Vec::from(picture))).width(Length::Fixed(300.0)))
         .push(Text::new(description).font(font));
 
     Button::new(content)

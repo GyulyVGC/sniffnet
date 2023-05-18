@@ -1,8 +1,12 @@
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::networking::types::host::Host;
+use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
-use crate::{AppProtocol, ChartType, IpVersion, Language, ReportType, StyleType, TransProtocol};
+use crate::{
+    AppProtocol, ChartType, IpVersion, Language, ReportSortType, StyleType, TransProtocol,
+};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -22,9 +26,9 @@ pub enum Message {
     /// Select chart type to be displayed
     ChartSelection(ChartType),
     /// Select report type to be displayed
-    ReportSelection(ReportType),
-    /// Adds or removes the given connection into/from the favorites
-    AddOrRemoveFavorite(usize, bool),
+    ReportSortSelection(ReportSortType),
+    /// Adds or removes the given host into/from the favorites
+    AddOrRemoveFavorite(Host, bool),
     /// Open Sniffnet's complete textual report
     OpenReport,
     /// Open Sniffnet's GitHub main page if true is passed, latest release page otherwise
@@ -69,4 +73,10 @@ pub enum Message {
     ResetButtonPressed,
     /// Ctrl+D keys have been pressed
     CtrlDPressed,
+    /// Update search parameters of inspect page
+    Search(SearchParameters),
+    /// Update page result number in inspect
+    UpdatePageNumber(bool),
+    /// Left (false) or Right (true) arrow key has been pressed
+    ArrowPressed(bool),
 }

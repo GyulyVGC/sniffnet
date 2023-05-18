@@ -6,6 +6,9 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::AppProtocol;
 
@@ -23,16 +26,24 @@ pub struct InfoTraffic {
     pub all_packets: u128,
     /// Total bytes including those not filtered
     pub all_bytes: u128,
+    /// Number of dropped packets
+    pub dropped_packets: u32,
     /// Map of the filtered traffic
     pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
     /// Set with the addresses of the last time interval
     pub addresses_last_interval: HashSet<usize>,
-    /// Map of the application layer protocols with their packet count
-    pub app_protocols: HashMap<AppProtocol, u128>,
-    /// Collection of indexes of the favorite connections
-    pub favorite_connections: HashSet<usize>,
-    /// Collection of favorite connections that exchanged data in the last interval
-    pub favorites_last_interval: HashSet<usize>,
+    /// Collection of the favorite hosts
+    pub favorite_hosts: HashSet<Host>,
+    /// Collection of favorite hosts that exchanged data in the last interval
+    pub favorites_last_interval: HashSet<Host>,
+    /// Map of the application layer protocols with their data info
+    pub app_protocols: HashMap<AppProtocol, DataInfo>,
+    /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
+    pub addresses_waiting_resolution: HashMap<String, DataInfo>,
+    /// Map of the resolved addresses with their full rDNS value and the corresponding host
+    pub addresses_resolved: HashMap<String, (String, Host)>,
+    /// Map of the hosts with their data info
+    pub hosts: HashMap<Host, DataInfoHost>,
 }
 
 impl InfoTraffic {
@@ -45,11 +56,15 @@ impl InfoTraffic {
             tot_sent_packets: 0,
             all_packets: 0,
             all_bytes: 0,
+            dropped_packets: 0,
             map: IndexMap::new(),
             addresses_last_interval: HashSet::new(),
-            app_protocols: HashMap::new(),
-            favorite_connections: HashSet::new(),
+            favorite_hosts: HashSet::new(),
             favorites_last_interval: HashSet::new(),
+            app_protocols: HashMap::new(),
+            addresses_waiting_resolution: HashMap::new(),
+            addresses_resolved: HashMap::new(),
+            hosts: HashMap::new(),
         }
     }
 }

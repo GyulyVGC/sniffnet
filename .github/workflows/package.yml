@@ -1,0 +1,103 @@
+name: Package
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      NPCAP_OEM_URL:
+        required: true
+
+jobs:
+
+  package:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          components: rustfmt, clippy
+          default: true
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libpcap-dev libasound2-dev
+
+      - name: Install Windows dependency - npcap sdk
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
+          Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
+          echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
+
+      - name: Install Windows dependency - npcap dll
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
+          C:/npcap-oem.exe /S
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - name: Package for Debian-based Linux distros
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo install cargo-deb
+          cargo deb
+          mkdir artifacts
+          mv target/debian/*.deb artifacts/
+
+#      doesn't work properly on ubuntu-latest!
+#      - name: Package for RPM-based Linux distros
+#        if: matrix.os == 'ubuntu-latest'
+#        run: |
+#          cargo install cargo-generate-rpm
+#          cargo generate-rpm
+#          mv target/generate-rpm/*.rpm artifacts/
+
+      - name: Package DMG for macOS
+        if: matrix.os == 'macOS-latest'
+        run: |
+          cargo install cargo-bundle
+          cargo bundle --release
+          rm target/release/bundle/osx/sniffnet.app/Contents/Info.plist
+          cp resources/Info.plist target/release/bundle/osx/sniffnet.app/Contents/Info.plist
+          cp resources/wrapper.sh target/release/bundle/osx/sniffnet.app/Contents/MacOS/wrapper.sh
+          brew install create-dmg
+          mkdir artifacts
+          create-dmg \
+            --volname "Sniffnet Installer" \
+            --background "resources/logos/bg_dmg.png" \
+            --window-pos 200 120 \
+            --window-size 900 450 \
+            --icon-size 100 \
+            --app-drop-link 620 240 \
+            --icon "Sniffnet.app" 300 240 \
+            --hide-extension "Sniffnet.app" \
+            "artifacts/sniffnet.dmg" \
+            "target/release/bundle/osx/"
+
+      - name: Package MSI for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          cargo install cargo-wix
+          cargo wix --nocapture
+          mkdir artifacts
+          mv target/wix/*.msi artifacts/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-artifacts
+          path: artifacts/

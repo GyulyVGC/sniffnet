@@ -1,5 +1,30 @@
-# Change Log
+# Changelog
+
 All Sniffnet releases with the relative changes are documented in this file.
+
+
+## [1.2.0] - 2023-05-18
+
+- Introduced host-based analysis: instead of just showing IP addresses, now host names and network providers are available for a quicker and more meaningful traffic interpretation 
+  * Added rDNS (reverse DNS) lookups to find out network host names
+  * Added ASN (Autonomous System name and number) lookups to find out the entity managing a given IP address (fixes [#62](https://github.com/GyulyVGC/sniffnet/issues/62))
+- Individual connections identified by IP addresses remain available and can now be filtered and further inspected through a simple click
+- Support for identification of addresses in the local network
+- Support for data link layer MAC addresses
+- Full support for broadcast traffic recognition (added directed broadcast identification)
+- Added dropped packets number (fixes [#135](https://github.com/GyulyVGC/sniffnet/issues/135))
+- Changed favorites management: instead of referring to single IP addresses, favorites are now related to network hosts
+- Added Greek translation 🇬🇷 ([#160](https://github.com/GyulyVGC/sniffnet/pull/160))
+- Added Persian translation 🇮🇷 ([#158](https://github.com/GyulyVGC/sniffnet/pull/158))
+- Do not open terminal window when starting the application on Windows (fixes [#85](https://github.com/GyulyVGC/sniffnet/issues/85))
+- Do not open terminal window when starting the application on macOS
+- Changed macOS application icon to be consistent with standard icons dimension (fixes [#177](https://github.com/GyulyVGC/sniffnet/issues/177))
+- Made available RPM package for Linux and automated packaging process for Windows, macOS, and Linux ([#180](https://github.com/GyulyVGC/sniffnet/pull/180) - fixes [#20](https://github.com/GyulyVGC/sniffnet/issues/20))
+- Keep the active addresses of the selected network adapter up to date during analysis
+- Changed shortcut to interrupt analysis from `backspace` to `ctrl+backspace`
+- Images have been replaced with SVGs
+- Added unit tests for `chart` and started unit tests for `gui` modules ([#132](https://github.com/GyulyVGC/sniffnet/pull/132))
+- Fixed problem that let users switch page pressing the tab key even if no packets were received
 
 
 ## [1.1.4] - 2023-04-18

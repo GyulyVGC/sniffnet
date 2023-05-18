@@ -194,10 +194,10 @@ pub const ICONS: Font = Font::External {
 };
 
 // palettes pictures
-pub const YETI_DAY: &[u8] = include_bytes!("../../../resources/palettes/YetiDay.png");
-pub const YETI_NIGHT: &[u8] = include_bytes!("../../../resources/palettes/YetiNight.png");
-pub const DEEP_SEA: &[u8] = include_bytes!("../../../resources/palettes/DeepSea.png");
-pub const MON_AMOUR: &[u8] = include_bytes!("../../../resources/palettes/MonAmour.png");
+pub const YETI_DAY: &[u8] = include_bytes!("../../../resources/palettes/YetiDay.svg");
+pub const YETI_NIGHT: &[u8] = include_bytes!("../../../resources/palettes/YetiNight.svg");
+pub const DEEP_SEA: &[u8] = include_bytes!("../../../resources/palettes/DeepSea.svg");
+pub const MON_AMOUR: &[u8] = include_bytes!("../../../resources/palettes/MonAmour.svg");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 18.0;
@@ -211,10 +211,28 @@ pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
 
-// stars yellow colors
-pub const STARRED: Color = Color {
-    r: 245.0 / 255.0,
-    g: 193.0 / 255.0,
-    b: 39.0 / 255.0,
-    a: 1.0,
-};
+/// Yellow color used in favorites star
+pub fn get_starred_color(style: StyleType) -> Color {
+    match style {
+        StyleType::Night | StyleType::DeepSea => Color {
+            r: 245.0 / 255.0,
+            g: 193.0 / 255.0,
+            b: 39.0 / 255.0,
+            a: 0.5,
+        },
+        StyleType::Day | StyleType::MonAmour => Color {
+            r: 245.0 / 255.0,
+            g: 193.0 / 255.0,
+            b: 39.0 / 255.0,
+            a: 0.8,
+        },
+    }
+}
+
+pub fn get_color_mix_filter_badge(style: StyleType) -> f32 {
+    match style {
+        StyleType::Night | StyleType::DeepSea => 0.2,
+        StyleType::Day => 0.7,
+        StyleType::MonAmour => 0.5,
+    }
+}

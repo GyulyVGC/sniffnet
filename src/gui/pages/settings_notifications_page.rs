@@ -152,7 +152,7 @@ fn get_packets_notify(
     } else {
         let input_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
-            .push(Text::new(threshold_translation(language)).font(font))
+            .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
             .push(input_group_packets(packets_notification, style, language));
         let sound_row =
             Row::new()
@@ -227,7 +227,7 @@ fn get_bytes_notify(
     } else {
         let input_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
-            .push(Text::new(threshold_translation(language)).font(font))
+            .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
             .push(input_group_bytes(bytes_notification, style, language));
         let sound_row =
             Row::new()
@@ -406,7 +406,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
         Column::new()
             .spacing(5)
             .align_items(Alignment::Center)
-            .push(Text::new(volume_translation(language, volume)).font(font))
+            .push(Text::new(format!("{}: {volume:^3}%", volume_translation(language))).font(font))
             .push(
                 Row::new()
                     .push(

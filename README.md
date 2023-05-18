@@ -14,7 +14,7 @@ Multithreaded, cross-platform, reliable
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 
 </div>
 
@@ -27,7 +27,7 @@ Graphical interface translated in:<br>
 <div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
 
 <div align="center">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/settings_page.png?raw=true" width="49%"/>
+<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/inspect_page.png?raw=true" width="49%"/>
 <img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
 </div>
 
@@ -35,6 +35,21 @@ Graphical interface translated in:<br>
 <a href="#x">
 <img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
 </a>
+</p>
+
+
+## _Help fund Sniffnet's Development_ 💖
+
+Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
+
+If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC?preview=true): ***this is the only way for me to keep working on this project***,
+constantly improving and expanding it.
+
+A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
+
+<p align="center">
+<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="50px" alt="github"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="50px" alt="tiansheng li"/></a>
 </p>
 
 
@@ -50,9 +65,10 @@ You can install Sniffnet in one of the following ways:
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_Windows.msi) (8.8 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_MacOS.dmg) (7.3 MB)
-  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.1.4/Sniffnet_Linux.deb) (5.3 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Windows.msi) (13.1 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_MacOS.dmg) (12.4 MB)
+  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.deb) (9.2 MB)
+  - [Linux (.rpm)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.rpm) (11.4 MB)
 
     
 </details>
@@ -150,11 +166,14 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 - 🏷️ select a set of filters to apply to the observed traffic
 - 📖 view overall statistics about your Internet traffic
 - 📈 view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-- 🔉 set custom notifications to inform you when defined network events occur (data rate exceeded a specified threshold, or new data have been exchanged from your favorite connections)
-- ⭐ view most relevant connections in real time (most recent, most packets, most bytes, favorites)
-- 🌍 get information about the country of the remote network addresses (IP Geolocation)
-- 🎨 choose the style that fits you the most from 4 different available themes 
-- 📁 save complete textual report with detailed information for each connection:
+- 🌐 get details about domain names and network providers of the hosts you are exchanging traffic with
+- 🏠 identify connections in your local network
+- 🌍 get information about the country of the remote hosts (IP geolocation)
+- ⭐ save your favorite network hosts
+- 🔉 set custom notifications to inform you when defined network events occur
+- 🎨 choose the style that fits you the most from 4 different available themes
+- 🕵️ inspect each of your network connections in real time
+- 📁 save complete textual report with detailed information for each network connection:
   * source and destination IP addresses
   * source and destination ports
   * carried protocols
@@ -163,7 +182,7 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 - ... and more!
   
 
-## IP Geolocation
+## IP geolocation and network providers (ASN)
 
 <details>
 
@@ -171,19 +190,20 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 
   <br>
 
-  Geolocation refers to the remote IP address of the connection, and it's performed against a [MMDB file](https://maxmind.github.io/MaxMind-DB/):
+  Geolocation and network providers (ASN) refer to the remote IP address of each connection, and they are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
 
+  > **Note**
+  > 
   > The MMDB (MaxMind database) format has been developed especially for IP lookup.<br>
   > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.<br>
   > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
   > 
   > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
   
-  This format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
-
-  Sometimes it is not possible to determine the location of an IP address (in this case the country will be marked as `?`); this is most likely due to the address being a private IP address.
+  This file format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
 
 </details>
+
 
 ## Supported application layer protocols
 
@@ -197,6 +217,9 @@ sudo apt-get install libfontconfig libfontconfig1-dev
   following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
 
   Please, remember that this is just a convention:
+
+  > **Warning**
+  > 
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
   > However, many unofficial uses of well-known port numbers occur in practice.
@@ -249,22 +272,27 @@ sudo apt-get install libfontconfig libfontconfig1-dev
 Some keyboard shortcuts are available to improve the efficiency of use and the overall user experience.
 
 If you want to suggest a different key combination for one of the existing shortcuts or if you want to propose a new shortcut,
-give a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue. 
+give a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue.
 
-The currently usable hotkeys are reported in the following:
+The currently usable hotkeys are reported in the following.
+
+> **Note**
+>
+> On macOS, use the `cmd` key instead of `ctrl`
 
 <div align="center">
 
 | Event | Shortcut keys |
 |--|--|
-| Quit the application | `ctrl+Q` (`cmd+Q` on macOS) |
-| Open full report | `ctrl+O` (`cmd+O` on macOS) |
-| Open settings | `ctrl+,` (`cmd+,` on macOS) |
-| Clear all notifications | `ctrl+D` (`cmd+D` on macOS) |
+| Quit the application | `ctrl+Q` |
+| Open full report | `ctrl+O` |
+| Open settings | `ctrl+,` |
+| Clear all notifications | `ctrl+D` |
+| Interrupt the ongoing analysis | `ctrl+backspace` |
 | Start the analysis and confirm modal actions | `enter` |
-| Interrupt the ongoing analysis | `backspace` |
 | Close settings and modal popups | `esc` |
 | Switch from a tab to the next (or previous) one | `tab` (or `shift+tab`) |
+| Change inspect connections page to the next (or previous) one | `ctrl+rightArrow` (or `ctrl+leftArrow`) |
 
 </div>
 
@@ -312,8 +340,6 @@ branch, which uses the `glow` renderer.
 
 
 ## Acknowledgements
-
-- A special mention goes to [Tiansheng Li](https://github.com/0x0177b11f) for being [my first sponsor](https://github.com/sponsors/GyulyVGC) ever!
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
 

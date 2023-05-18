@@ -1,3 +1,5 @@
+# TODO: Needs cleanup!
+
 # Created by https://www.toptal.com/developers/gitignore/api/rust,clion,windows,osx,linux,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=rust,clion,windows,osx,linux,macos
 
@@ -212,9 +214,6 @@ $RECYCLE.BIN/
 *.lnk
 
 #####################################################################
-
-#folder used for Windows installer
-/wix
 
 .idea
 

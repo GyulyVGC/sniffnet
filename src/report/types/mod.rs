@@ -1,1 +1,1 @@
-pub mod report_type;
+pub mod report_sort_type;

@@ -1,14 +1,16 @@
-/// Enum representing the possible traffic type (incoming, outgoing or multicast).
-#[derive(Clone, Copy, PartialEq, Eq)]
+/// Enum representing the possible traffic type (unicast, multicast or broadcast).
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TrafficType {
-    /// Incoming traffic (from remote address to local interface)
-    Incoming,
-    /// Outgoing traffic (from local interface to remote address)
-    Outgoing,
-    /// Multicast traffic (from remote address to multicast address)
+    /// Unicast traffic
+    Unicast,
+    /// Multicast traffic (destination is a multicast address)
     Multicast,
-    /// Multicast traffic (from remote address to broadcast address)
+    /// Broadcast traffic (destination is a broadcast address)
     Broadcast,
-    /// Not identified
-    Other,
+}
+
+impl Default for TrafficType {
+    fn default() -> Self {
+        Self::Unicast
+    }
 }

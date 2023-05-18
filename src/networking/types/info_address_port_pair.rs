@@ -2,11 +2,10 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::fmt;
-use std::ops::Add;
 
 use chrono::{DateTime, Local};
 
-use crate::networking::types::traffic_type::TrafficType;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
 
@@ -15,6 +14,10 @@ use crate::AppProtocol;
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
 #[derive(Clone)]
 pub struct InfoAddressPortPair {
+    /// Source MAC address
+    pub mac_address1: String,
+    /// Destination MAC address
+    pub mac_address2: String,
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.
@@ -25,16 +28,29 @@ pub struct InfoAddressPortPair {
     pub final_timestamp: DateTime<Local>,
     /// Set of application layer protocols carried by the associated address:port pair.
     pub app_protocol: AppProtocol,
-    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for Display
+    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for layout)
     pub very_long_address: bool,
-    /// Flag to determine which of the address is that of the sniffed adapter or remote
-    pub traffic_type: TrafficType,
-    /// Country of the remote IP address
-    pub country: String,
     /// Integer corresponding to the index inside the connections map
     pub index: usize,
-    /// Flag that indicates if this connection is marked as favourite
-    pub is_favorite: bool,
+    /// Determines if the connection is incoming or outgoing
+    pub traffic_direction: TrafficDirection,
+}
+
+impl Default for InfoAddressPortPair {
+    fn default() -> Self {
+        Self {
+            mac_address1: String::new(),
+            mac_address2: String::new(),
+            transmitted_bytes: 0,
+            transmitted_packets: 0,
+            initial_timestamp: DateTime::default(),
+            final_timestamp: DateTime::default(),
+            app_protocol: AppProtocol::Other,
+            very_long_address: false,
+            traffic_direction: TrafficDirection::default(),
+            index: 0,
+        }
+    }
 }
 
 impl InfoAddressPortPair {
@@ -44,7 +60,6 @@ impl InfoAddressPortPair {
             .unwrap()
             .to_string()
             .replace('|', "")
-            .add(&*format!(" {} ", &self.country))
     }
 }
 

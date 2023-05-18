@@ -39,7 +39,7 @@ pub fn get_settings_tabs(
 }
 
 pub fn get_pages_tabs(
-    labels: [RunningPage; 2],
+    labels: [RunningPage; 3],
     icons: &[&str],
     actions: &[Message],
     active: RunningPage,

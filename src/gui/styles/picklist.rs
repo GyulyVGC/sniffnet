@@ -6,7 +6,7 @@ use iced::widget::pick_list;
 use iced::Background;
 
 use crate::get_colors;
-use crate::gui::styles::style_constants::BORDER_WIDTH;
+use crate::gui::styles::types::palette::mix_colors;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 
 impl From<StyleTuple> for iced::theme::PickList {
@@ -23,11 +23,11 @@ impl iced::overlay::menu::StyleSheet for StyleTuple {
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(colors.buttons),
-            border_width: BORDER_WIDTH / 2.0,
+            border_width: 1.0,
             border_radius: 0.0,
             border_color: colors.secondary,
             selected_text_color: colors.text_body,
-            selected_background: Background::Color(colors.primary),
+            selected_background: Background::Color(mix_colors(colors.buttons, colors.primary)),
         }
     }
 }
@@ -43,8 +43,8 @@ impl pick_list::StyleSheet for StyleTuple {
             handle_color: colors.text_body,
             background: Background::Color(colors.buttons),
             border_radius: 0.0,
-            border_width: BORDER_WIDTH,
-            border_color: colors.buttons,
+            border_width: 1.0,
+            border_color: colors.round_borders,
         }
     }
 
@@ -54,9 +54,9 @@ impl pick_list::StyleSheet for StyleTuple {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
-            background: Background::Color(colors.primary),
+            background: Background::Color(mix_colors(colors.buttons, colors.primary)),
             border_radius: 0.0,
-            border_width: BORDER_WIDTH,
+            border_width: 1.0,
             border_color: colors.secondary,
         }
     }

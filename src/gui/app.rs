@@ -11,8 +11,9 @@ use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
-// use crate::gui::pages::inspect_page::inspect_page;
+use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_language_page::settings_language_page;
@@ -60,7 +61,7 @@ impl Application for Sniffer {
             Status::Init => initial_page(self),
             Status::Running => match self.running_page {
                 RunningPage::Overview => overview_page(self),
-                // RunningPage::Inspect => inspect_page(self),
+                RunningPage::Inspect => inspect_page(self),
                 RunningPage::Notifications => notifications_page(self),
             },
         };
@@ -75,6 +76,9 @@ impl Application for Sniffer {
             let overlay = match self.modal.unwrap() {
                 MyModal::Quit => get_exit_overlay(style, font, self.language),
                 MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
+                MyModal::ConnectionDetails(connection_index) => {
+                    connection_details_page(self, connection_index)
+                }
             };
 
             Modal::new(content, overlay)
@@ -136,13 +140,23 @@ impl Application for Sniffer {
                 // backspace => reset button pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::Backspace,
-                    ..
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::ResetButtonPressed),
                 // ctrl+D => ctrl+D keys pressed
                 iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
                     key_code: iced_native::keyboard::KeyCode::D,
                     modifiers: iced_native::keyboard::Modifiers::COMMAND,
                 }) => Some(Message::CtrlDPressed),
+                // left arrow => one page before the current one
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Left,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
+                }) => Some(Message::ArrowPressed(false)),
+                // right arrow => one page after the current one
+                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
+                    key_code: iced_native::keyboard::KeyCode::Right,
+                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
+                }) => Some(Message::ArrowPressed(true)),
                 _ => None,
             });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {

@@ -47,9 +47,9 @@ pub fn get_colors(style: StyleType) -> Palette {
     }
 }
 
-#[allow(clippy::cast_possible_truncation)]
-#[allow(clippy::cast_sign_loss)]
 pub fn to_rgb_color(color: Color) -> RGBColor {
+    #[allow(clippy::cast_possible_truncation)]
+    #[allow(clippy::cast_sign_loss)]
     if color.r <= 1.0
         && color.r >= 0.0
         && color.g <= 1.0

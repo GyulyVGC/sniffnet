@@ -18,6 +18,8 @@ pub struct RunTimeData {
     pub tot_sent_packets: u128,
     /// Total received packets filtered
     pub tot_received_packets: u128,
+    /// Number of dropped packets
+    pub dropped_packets: u32,
     /// Total sent bytes filtered before the current time interval
     pub tot_sent_bytes_prev: u128,
     /// Total received bytes filtered before the current time interval
@@ -42,6 +44,7 @@ impl RunTimeData {
             tot_received_bytes: 0,
             tot_sent_packets: 0,
             tot_received_packets: 0,
+            dropped_packets: 0,
             tot_sent_bytes_prev: 0,
             tot_received_bytes_prev: 0,
             tot_sent_packets_prev: 0,

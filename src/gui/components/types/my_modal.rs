@@ -5,4 +5,6 @@ pub enum MyModal {
     Quit,
     /// Clear all modal.
     ClearAll,
+    /// Connection details modal.
+    ConnectionDetails(usize),
 }

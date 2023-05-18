@@ -17,8 +17,9 @@ env:
 
 # Linters inspired from here: https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 jobs:
-  fmt:
-    name: Rustfmt
+
+  macOS:
+    name: MacOS (fmt, build, clippy, test)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,15 +28,28 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+      - name: install fmt
+        run: rustup component add rustfmt
+      - name: install clippy
+        run: rustup component add clippy
+      - name: fmt
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
+      - name: build
+        run: cargo build --verbose
+      - name: clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+      - name: test
+        run: cargo test --verbose
 
-  clippy:
-    name: Clippy
-    runs-on: macos-latest
+  Linux:
+    name: Linux (fmt, build, clippy, test)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
@@ -43,40 +57,39 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-  Mac:
-    name: Mac Tests
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
-
-  Linux:
-    name: Linux Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: Install libpcap
         run: sudo apt-get install libpcap-dev
       - name: Install dependency for alsa-sys
         run: sudo apt-get install libasound2-dev
-      - name: Build
+      - name: install fmt
+        run: rustup component add rustfmt
+      - name: install clippy
+        run: rustup component add clippy
+      - name: fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+      - name: build
         run: cargo build --verbose
-      - name: Run tests
+      - name: clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+      - name: test
         run: cargo test --verbose
 
   Windows:
-    name: Windows Tests
+    name: Windows (fmt, build, clippy, test)
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
     - name: Install npcap sdk
       run: |
             Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
@@ -89,9 +102,25 @@ jobs:
       run: |
             Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
             C:/npcap-oem.exe /S
-    - name: Build
+    - name: install fmt
+      run: rustup component add rustfmt
+    - name: install clippy
+      run: rustup component add clippy
+    - name: fmt
+      if: github.event_name != 'pull_request'
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: build
       if: github.event_name != 'pull_request'
       run: cargo build --verbose
-    - name: Run tests
+    - name: clippy
+      if: github.event_name != 'pull_request'
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: -- -D warnings
+    - name: test
       if: github.event_name != 'pull_request'
       run: cargo test --verbose

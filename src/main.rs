@@ -1,5 +1,7 @@
 //! Module containing the entry point of application execution.
 
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
@@ -22,7 +24,7 @@ use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::trans_protocol::TransProtocol;
-use report::types::report_type::ReportType;
+use report::types::report_sort_type::ReportSortType;
 use secondary_threads::write_report_file::sleep_and_write_report_loop;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
