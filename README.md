@@ -42,7 +42,7 @@ Graphical interface translated in:<br>
 
 Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
 
-If you appreciate Sniffnet, please consider donating: ***this is the only way for me to keep working on this project***,
+If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC?preview=true): ***this is the only way for me to keep working on this project***,
 constantly improving and expanding it.
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
