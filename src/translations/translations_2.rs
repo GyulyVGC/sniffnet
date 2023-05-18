@@ -160,7 +160,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Administrative entity",
         Language::IT => "Entità amministrativa",
-        Language::DE => "Verwaltungseinheit",
+        Language::DE => "Name des autonomen Systems",
         _ => "Administrative entity",
     }
 }
