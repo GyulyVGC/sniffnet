@@ -38,6 +38,21 @@ Graphical interface translated in:<br>
 </p>
 
 
+## _Help fund Sniffnet's Development_ 💖
+
+Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
+
+If you appreciate Sniffnet, please consider donating: ***this is the only way for me to keep working on this project***,
+constantly improving and expanding it.
+
+A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
+
+<p align="center">
+<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="50px" alt="github"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="50px" alt="tiansheng li"/></a>
+</p>
+
+
 ## Installation
 
 You can install Sniffnet in one of the following ways:
@@ -277,7 +292,7 @@ The currently usable hotkeys are reported in the following.
 | Start the analysis and confirm modal actions | `enter` |
 | Close settings and modal popups | `esc` |
 | Switch from a tab to the next (or previous) one | `tab` (or `shift+tab`) |
-| Change connections page number to the next (or previous) one | `ctrl+rightArrow` (or `ctrl+leftArrow`) |
+| Change inspect connections page to the next (or previous) one | `ctrl+rightArrow` (or `ctrl+leftArrow`) |
 
 </div>
 
@@ -325,8 +340,6 @@ branch, which uses the `glow` renderer.
 
 
 ## Acknowledgements
-
-- A special mention goes to [Tiansheng Li](https://github.com/0x0177b11f) for being [my first sponsor](https://github.com/sponsors/GyulyVGC) ever!
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
 
