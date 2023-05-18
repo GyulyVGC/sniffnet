@@ -170,6 +170,16 @@
         "translation",
         "platform"
       ]
+    },
+    {
+      "login": "orhun",
+      "name": "Orhun Parmaksız",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24392180?v=4",
+      "profile": "http://orhun.dev",
+      "contributions": [
+        "doc",
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
