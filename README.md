@@ -101,6 +101,18 @@ brew install sniffnet
 </details>
 
 
+<details>
+
+  <summary>on Arch Linux</summary>
+
+  You can install [Sniffnet community package](https://archlinux.org/packages/community/x86_64/sniffnet/) via [pacman](https://wiki.archlinux.org/title/Pacman):
+  
+  ```sh
+pacman -S sniffnet
+```
+    
+</details>
+
 ## Required dependencies
 
 Depending on your operating system, you may need to install some dependencies to run Sniffnet:
