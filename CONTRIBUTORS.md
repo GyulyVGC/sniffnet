@@ -28,6 +28,7 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
       <td align="center" valign="top" width="14.28%"><a href="https://hachyderm.io/@phil8o"><img src="https://avatars.githubusercontent.com/u/8797027?v=4?s=100" width="100px;" alt="Phil Clifford"/><br /><sub><b>Phil Clifford</b></sub></a><br /><a href="#platform-philclifford" title="Packaging/porting to new platform">📦</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/abousis"><img src="https://avatars.githubusercontent.com/u/25039645?v=4?s=100" width="100px;" alt="Angelos Bousis"/><br /><sub><b>Angelos Bousis</b></sub></a><br /><a href="#translation-abousis" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/4r7if3x"><img src="https://avatars.githubusercontent.com/u/8606282?v=4?s=100" width="100px;" alt="The Artifex"/><br /><sub><b>The Artifex</b></sub></a><br /><a href="#translation-4r7if3x" title="Translation">🌍</a> <a href="#platform-4r7if3x" title="Packaging/porting to new platform">📦</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://orhun.dev"><img src="https://avatars.githubusercontent.com/u/24392180?v=4?s=100" width="100px;" alt="Orhun Parmaksız"/><br /><sub><b>Orhun Parmaksız</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=orhun" title="Documentation">📖</a> <a href="#platform-orhun" title="Packaging/porting to new platform">📦</a></td>
     </tr>
   </tbody>
 </table>
