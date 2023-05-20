@@ -221,7 +221,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
 
 pub fn showing_results_translation(
     language: Language,
-    start: usize,format!("Mostrando {start}-{end} de {total} resultados totales")
+    start: usize,
     end: usize,
     total: usize,
 ) -> String {
