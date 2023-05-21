@@ -303,6 +303,7 @@ pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
         "UK" => UA,
         "EL" => GR,
         "FA" => IR,
+        "SE" => SE,
         _ => UNKNOWN,
     })))
     .width(Length::Fixed(FLAGS_WIDTH_SMALL))

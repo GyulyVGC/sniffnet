@@ -33,6 +33,8 @@ pub enum Language {
     EL,
     /// Persian
     FA,
+    /// Swedish
+    SE,
 }
 
 impl Default for Language {
@@ -42,12 +44,13 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const COL1: [Language; 5] = [
+    pub(crate) const COL1: [Language; 6] = [
         Language::EN,
         Language::ES,
         Language::IT,
         Language::PT,
         Language::TR,
+        Language::SE,
     ];
     pub(crate) const COL2: [Language; 5] = [
         Language::DE,
@@ -81,6 +84,7 @@ impl Language {
             Language::PT => "Português",
             Language::EL => "Ελληνικά",
             Language::FA => "فارسی",
+            Language::SE => "Svenska",
         }
     }
 }
