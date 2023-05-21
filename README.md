@@ -123,7 +123,7 @@ Depending on your operating system, you may need to install some dependencies to
 
   In order to correctly run Sniffnet on Windows systems you need to:
 
-  - Install [Npcap](https://npcap.com/#download).
+  - Install [Npcap](https://npcap.com/#download). Make sure to check the box `Install Npcap in WinPcap API-compatible Mode` during the installation.
 
   - Download the [Npcap SDK](https://npcap.com/#download).
 
