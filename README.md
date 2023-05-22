@@ -38,7 +38,7 @@ Graphical interface translated in:<br>
 </p>
 
 
-## _Help fund Sniffnet's Development_ 💖
+## _Help fund Sniffnet's development_ 💖
 
 Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
 
@@ -49,8 +49,8 @@ _In absence of more sponsors, I may be forced to quit my full-time job on this p
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
 <p align="center">
-<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="50px" alt="github"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="50px" alt="tiansheng li"/></a>
+<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="github"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="tiansheng li"/></a>
 </p>
 
 
