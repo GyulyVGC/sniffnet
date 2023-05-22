@@ -7,7 +7,7 @@
 </p>
 
 <p align="center"> 
-Application to comfortably monitor your network traffic <br>
+Application to comfortably monitor your Internet traffic <br>
 Multithreaded, cross-platform, reliable
 </p>
 
@@ -42,8 +42,9 @@ Graphical interface translated in:<br>
 
 Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
 
-If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC?preview=true): ***this is the only way for me to keep working on this project***,
-constantly improving and expanding it.
+If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC): ***this is the only way for me to keep working on this project***,
+constantly improving and expanding it.<br/>
+_In absence of more sponsors, I may be forced to quit my full-time job on this project soon._
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
@@ -65,10 +66,10 @@ You can install Sniffnet in one of the following ways:
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
   Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Windows.msi) (13.1 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_MacOS.dmg) (12.4 MB)
-  - [Linux (.deb)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.deb) (9.2 MB)
-  - [Linux (.rpm)](https://github.com/GyulyVGC/sniffnet/releases/download/v1.2.0/Sniffnet_Linux.rpm) (11.4 MB)
+  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
+  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
+  - [Linux (DEB)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.deb) (9.2 MB)
+  - [Linux (RPM)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.rpm) (11.4 MB)
 
     
 </details>
@@ -105,7 +106,7 @@ brew install sniffnet
 
   <summary>on Arch Linux</summary>
 
-  You can install [Sniffnet community package](https://archlinux.org/packages/community/x86_64/sniffnet/) via [pacman](https://wiki.archlinux.org/title/Pacman):
+  You can install Sniffnet community package via [pacman](https://wiki.archlinux.org/title/Pacman):
   
   ```sh
 pacman -S sniffnet
@@ -123,11 +124,11 @@ Depending on your operating system, you may need to install some dependencies to
 
   In order to correctly run Sniffnet on Windows systems you need to:
 
-  - Install [Npcap](https://npcap.com/#download). Make sure to check the box `Install Npcap in WinPcap API-compatible Mode` during the installation.
+  - Install [Npcap](https://npcap.com/#download), making sure to check the box `Install Npcap in WinPcap API-compatible Mode` during the installation.
 
   - Download the [Npcap SDK](https://npcap.com/#download).
 
-  - Add the SDK's ```/Lib``` or ```/Lib/x64``` folder to your ```LIB``` environment variable.
+  - Add the SDK's ```/Lib/x64``` folder to your ```LIB``` environment variable.
     
 </details>
 
