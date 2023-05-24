@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+<p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
 <p align="center"> 
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
@@ -8,7 +8,8 @@
 
 <p align="center"> 
 Application to comfortably monitor your Internet traffic <br>
-Multithreaded, cross-platform, reliable
+Multithreaded, cross-platform, reliable <br>
+🌐 <a href="https://www.sniffnet.net">www.sniffnet.net</a>
 </p>
 
 <div align="center">
@@ -40,11 +41,11 @@ Graphical interface translated in:<br>
 
 ## _Help fund Sniffnet's development_ 💖
 
-Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
+Sniffnet is a **completely free, open-source software** which needs your support to be developed and maintained.
 
 If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC): ***this is the only way for me to keep working on this project***,
 constantly improving and expanding it.<br/>
-_In absence of more sponsors, I may be forced to quit my full-time job on this project soon._
+_In scarcity of sponsors, I will be forced to quit my contributions to this project (sadly)._
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
