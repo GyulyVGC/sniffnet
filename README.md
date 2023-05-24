@@ -325,8 +325,6 @@ Most of the errors that can occur are likely due to your system missing required
 necessary to correctly analyze a network adapter. <br>
 Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
-For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
-
 Note that most Linux system also need this dependency (required to build the library used to play sounds):
 
 ```sh
@@ -335,11 +333,20 @@ sudo apt-get install libasound2-dev
 
 Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
 
+> **Note**
+>
+> View issues labeled with [`missing-dependencies`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3A%22missing+dependency%22+) to see how those problems have been solved by others.
+
 ### Installers incompatibilities
 
 If you have problems after having installed Sniffnet through the provided installers,
 it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
 Reach me out, and I'll try to generate an installer for your specific operating system.
+
+> **Warning**
+>
+> The DEB package for Linux is built on the latest version of Ubuntu and in some cases may not be compatible with Debian. <br/>
+> See issue [#199](https://github.com/GyulyVGC/sniffnet/issues/199) for a reference.
 
 ### Rendering problems
 
@@ -347,6 +354,10 @@ In some cases, especially if you are running on an old architecture, the `wgpu` 
 may cause some problems that could prevent you from running Sniffnet. <br>
 In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
 branch, which uses the `glow` renderer.
+
+> **Note**
+>
+> View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
