@@ -65,7 +65,7 @@ You can install Sniffnet in one of the following ways:
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
-  Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
+  Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
   - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
   - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
@@ -81,7 +81,7 @@ You can install Sniffnet in one of the following ways:
   <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
 
 Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
-In this case, the application binary can be installed with:
+In this case, the application binary can be built and installed with:
 
 ```sh
 cargo install sniffnet
@@ -123,7 +123,7 @@ Depending on your operating system, you may need to install some dependencies to
 
   <summary>Windows dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
 
-  In order to correctly run Sniffnet on Windows systems you need to:
+  In order to correctly build and run Sniffnet on Windows systems you need to:
 
   - Install [Npcap](https://npcap.com/#download), making sure to check the box `Install Npcap in WinPcap API-compatible Mode` during the installation.
 
@@ -137,12 +137,15 @@ Depending on your operating system, you may need to install some dependencies to
 <details>
 
   <summary>Linux dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
- 
-  In order to correctly run Sniffnet on Linux systems, install the libraries and header files for the libpcap library: 
-  
-```sh
-sudo apt-get install libpcap-dev
-```
+
+  - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
+    - `libpcap-dev`
+    - `libasound2-dev`
+    - `libfontconfig1`
+  - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
+    - `libpcap-devel`
+    - `alsa-lib-devel`
+    - `fontconfig-devel`
 
   Note that if you are not running as root, you need to set capabilities to inspect a network adapter: 
   
@@ -150,16 +153,10 @@ sudo apt-get install libpcap-dev
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
 
-Most Linux system also need this dependency (required to build the library used to play sounds):
+  Alternatively you can run the app with sudo privileges:
 
 ```sh
-sudo apt-get install libasound2-dev
-```
-
-Depending on your Linux environment you may also need `libfontconfig`:
-
-```sh
-sudo apt-get install libfontconfig libfontconfig1-dev
+sudo sniffnet
 ```
     
 </details>
