@@ -286,24 +286,24 @@ pub const BROADCAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3
 pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-unknown.svg");
 pub const COMPUTER: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-computer.svg");
 
-pub fn get_flag_from_language_code(language: &str) -> Svg<Renderer> {
+pub fn get_flag_from_language(language: Language) -> Svg<Renderer> {
     Svg::new(Handle::from_memory(Vec::from(match language {
-        "ZH" => CN,
-        "DE" => DE,
-        "ES" => ES,
-        "FR" => FR,
-        "EN" => GB,
-        "IT" => IT,
-        "KO" => KR,
-        "PL" => PL,
-        "PT" => PT,
-        "RO" => RO,
-        "RU" => RU,
-        "TR" => TR,
-        "UK" => UA,
-        "EL" => GR,
-        "FA" => IR,
-        _ => UNKNOWN,
+        Language::ZH => CN,
+        Language::DE => DE,
+        Language::ES => ES,
+        Language::FR => FR,
+        Language::EN => GB,
+        Language::IT => IT,
+        Language::KO => KR,
+        Language::PL => PL,
+        Language::PT => PT,
+        Language::RO => RO,
+        Language::RU => RU,
+        Language::TR => TR,
+        Language::UK => UA,
+        Language::EL => GR,
+        Language::FA => IR,
+        Language::SV => SE,
     })))
     .width(Length::Fixed(FLAGS_WIDTH_SMALL))
 }
