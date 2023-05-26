@@ -170,6 +170,25 @@
         "translation",
         "platform"
       ]
+    },
+    {
+      "login": "orhun",
+      "name": "Orhun Parmaksız",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24392180?v=4",
+      "profile": "http://orhun.dev",
+      "contributions": [
+        "doc",
+        "platform"
+      ]
+    },
+    {
+      "login": "vcrn",
+      "name": "Victor Nilsson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79985743?v=4",
+      "profile": "http://index45.com",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -178,5 +197,6 @@
   "repoHost": "https://github.com",
   "projectName": "sniffnet",
   "projectOwner": "GyulyVGC",
-  "linkToUsage": false
+  "linkToUsage": false,
+  "commitType": "docs"
 }
