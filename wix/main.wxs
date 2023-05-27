@@ -159,8 +159,8 @@
 
 	<DirectoryRef Id="ApplicationProgramsFolder">
 			<Component Id="AppStart" Guid="d5886d8d-009d-4468-9db3-1ebc72f7c201">
-				<Shortcut Id="AppStartShortcut" 
-					Name="Sniffet" 
+				<Shortcut Id="AppStartShortcut"
+					Name="Sniffet"
 					Description="Application to comfortably monitor your network traffic"
 					Target="[APPLICATIONFOLDER]bin\sniffnet.exe"
 					WorkingDirectory="APPLICATIONROOTDIRECTORY"
@@ -169,7 +169,7 @@
 				<RegistryValue Root="HKCU" Key="Software\gyulyvgc\sniffnet" Name="StartShortcut" Type="integer" Value="1" KeyPath="yes"/>
 		   </Component>
 		</DirectoryRef>
-		
+
 		<DirectoryRef Id="DesktopFolder">
 		    <Component Id="AppDesk" Guid="e7261bca-c8c3-4f7f-be81-eb3a7470bc7d">
 				<Shortcut Id="AppDeskShortcut"
@@ -220,9 +220,9 @@
 			AllowAdvertise='no'
 			Display='expand'
 			Absent='disallow'>
-			<ComponentRef Id="AppStart" /> 
+			<ComponentRef Id="AppStart" />
 		</Feature>
-		
+
 		<Feature
 			Id='DeskShort'
 			Title='Desktop shortcut'
@@ -231,7 +231,7 @@
 			AllowAdvertise='no'
 			Display='expand'
 			Absent='disallow'>
-			<ComponentRef Id="AppDesk" /> 
+			<ComponentRef Id="AppDesk" />
 		</Feature>
 
         <SetProperty Id='ARPINSTALLLOCATION' Value='[APPLICATIONFOLDER]' After='CostFinalize'/>
@@ -271,9 +271,9 @@
           Enabling the EULA dialog in the installer requires uncommenting
           the following `WixUILicenseRTF` tag and changing the `Value`
           attribute.
-        -->
-        <WixVariable Id='WixUILicenseRtf' Value='resources\EULA.rtf'/>
 
+        <WixVariable Id='WixUILicenseRtf' Value='resources\EULA.rtf'/>
+        -->
 
         <!--
           Uncomment the next `WixVariable` tag to customize the installer's
