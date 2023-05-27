@@ -187,12 +187,12 @@ pub fn fqdn_translation(language: Language) -> &'static str {
 
 pub fn administrative_entity_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Administrative entity",
-        Language::IT => "Entità amministrativa",
+        Language::EN => "Autonomous System name",
+        Language::IT => "Nome del sistema autonomo",
         Language::RU => "Имя автономной системы",
         Language::SV => "Administrativ enhet",
         Language::DE => "Name des autonomen Systems",
-        _ => "Administrative entity",
+        _ => "Autonomous System name",
     }
 }
 

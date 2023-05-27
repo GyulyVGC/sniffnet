@@ -134,7 +134,7 @@ impl Sniffer {
                 self.report_sort_type = what_to_display;
             }
             Message::OpenReport => self.open_report_file(),
-            Message::OpenWebPage(web_page) => Self::open_web(web_page),
+            Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
@@ -289,7 +289,7 @@ impl Sniffer {
         }
     }
 
-    fn open_web(web_page: WebPage) {
+    fn open_web(web_page: &WebPage) {
         let url = web_page.get_url();
         #[cfg(target_os = "windows")]
         std::process::Command::new("explorer")
