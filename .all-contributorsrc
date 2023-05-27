@@ -189,6 +189,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "nitefood",
+      "name": "Adriano",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24555810?v=4",
+      "profile": "https://github.com/nitefood",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
