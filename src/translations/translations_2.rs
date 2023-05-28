@@ -11,6 +11,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::FA => "یک نسخه جدیدتر روی GitHub موجود است",
         Language::SV => "En nyare version finns tillgänglig på GitHub",
         Language::DE => "Eine neue Version ist auf GitHub verfügbar",
+        Language::TR => "Daha yeni bir versiyon GitHub'ta mevcut",
         _ => "A newer version is available on GitHub",
     }
 }
@@ -25,6 +26,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::DE => "Inspizieren",
         Language::RU => "Инспектировать",
         Language::SV => "Inspektera",
+        Language::TR => "İncele",
         _ => "Inspect",
     }
 }
@@ -36,6 +38,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::RU => "Подробнее о соединении",
         Language::SV => "Anslutningsdetaljer",
         Language::DE => "Verbindungsdetails",
+        Language::TR => "Bağlantı detayları",
         _ => "Connection details",
     }
 }
@@ -47,6 +50,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
         Language::RU => "Потеряно пакетов",
         Language::SV => "Tappade paket",
         Language::DE => "Verlorene Pakete",
+        Language::TR => "Düşen paketler",
         _ => "Dropped packets",
     }
 }
@@ -58,6 +62,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::RU => "Показывать в виде", // there is selector below: "байтов" or "пакетов"
         Language::SV => "Datarepresentation",
         Language::DE => "Daten Darstellung",
+        Language::TR => "Veri gösterimi",
         _ => "Data representation",
     }
 }
@@ -69,6 +74,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::RU => "Сетевой хост",
         Language::SV => "Nätverksvärd",
         Language::DE => "Netzwerk-Host",
+        Language::TR => "Ağ sunucusu",
         _ => "Network host",
     }
 }
@@ -80,6 +86,7 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
         Language::RU => "Тут показываются только первые 30 хостов",
         Language::SV => "Endast de 30 främsta värdarna visas här",
         Language::DE => "Nur die obersten 30 Hosts werden hier angezeigt",
+        Language::TR => "Sadece ilk 30 sunucu burda gösterilmektedir",
         _ => "Only the top 30 hosts are displayed here",
     }
 }
@@ -91,6 +98,7 @@ pub fn sort_by_translation(language: Language) -> &'static str {
         Language::RU => "Сортировка",
         Language::SV => "Sortera efter",
         Language::DE => "Sortieren nach",
+        Language::TR => "Şuna göre sırala",
         _ => "Sort by",
     }
 }
@@ -102,6 +110,7 @@ pub fn local_translation(language: Language) -> String {
         Language::RU => "Локальная сеть",
         Language::SV => "Lokalt nätverk",
         Language::DE => "Lokales Netzwerk",
+        Language::TR => "Yerel ağ",
         _ => "Local network",
     }
     .to_string()
@@ -114,6 +123,7 @@ pub fn unknown_translation(language: Language) -> String {
         Language::RU => "Неизвестный регион",
         Language::SV => "Okänd plats",
         Language::DE => "Ort unbekannt",
+        Language::TR => "Bilinmeyen yer",
         _ => "Unknown location",
     }
     .to_string()
@@ -126,6 +136,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         Language::RU => "Ваш сетевой адаптер",
         Language::SV => "Din nätverksadapter",
         Language::DE => "Dein Netzwerk-Adapter",
+        Language::TR => "Ağ adaptörün",
         _ => "Your network adapter",
     }
     .to_string()
@@ -138,6 +149,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::RU => "Адрес сокекта",
         Language::SV => "Socketadress",
         Language::DE => "Socket Adresse",
+        Language::TR => "Soket adresi",
         _ => "Socket address",
     }
 }
@@ -149,6 +161,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::RU => "MAC адрес",
         Language::SV => "MAC-adress",
         Language::DE => "MAC Adresse",
+        Language::TR => "MAC adresi",
         _ => "MAC address",
     }
 }
@@ -160,6 +173,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::RU => "Источник",
         Language::SV => "Källa",
         Language::DE => "Quelle",
+        Language::TR => "Kaynak",
         _ => "Source",
     }
 }
@@ -170,6 +184,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::IT => "Destinazione",
         Language::RU => "Получатель",
         Language::DE => "Ziel",
+        Language::TR => "Hedef",
         _ => "Destination",
     }
 }
@@ -181,6 +196,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::RU => "Полное доменное имя",
         Language::SV => "Fullständigt domännamn",
         Language::DE => "Vollständig qualifizierter Domain Name",
+        Language::TR => "Tam nitelikli alan adı",
         _ => "Fully qualified domain name",
     }
 }
@@ -192,6 +208,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::RU => "Имя автономной системы",
         Language::SV => "Administrativ enhet",
         Language::DE => "Name des autonomen Systems",
+        Language::TR => "Yönetim varlığı",
         _ => "Autonomous System name",
     }
 }
@@ -203,6 +220,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::RU => "Передано данных",
         Language::SV => "Överförd data",
         Language::DE => "Übermittelte Daten",
+        Language::TR => "Aktarılan veri",
         _ => "Transmitted data",
     }
 }
@@ -214,6 +232,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::RU => "Страна",
         Language::SV => "Land",
         Language::DE => "Land",
+        Language::TR => "Ülke",
         _ => "Country",
     }
 }
@@ -225,6 +244,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::RU => "Доменное имя",
         Language::SV => "Domännamn",
         Language::DE => "Domain Name",
+        Language::TR => "Alan adı",
         _ => "Domain name",
     }
 }
@@ -236,6 +256,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::RU => "Показывать только избранные",
         Language::SV => "Visa endast favoriter",
         Language::DE => "Zeige nur die Favoriten",
+        Language::TR => "Sadece favorileri göster",
         _ => "Only show favorites",
     }
 }
@@ -247,6 +268,7 @@ pub fn search_filters_translation(language: Language) -> &'static str {
         Language::RU => "Фильтры для поиска",
         Language::SV => "Sökfilter",
         Language::DE => "Filter suchen",
+        Language::TR => "Arama filtresi",
         _ => "Search filters",
     }
 }
@@ -258,6 +280,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::RU => "После применения выбранных фильтров результат поиска пустой",
         Language::SV => "Inga resultat tillgängliga utifrån de angivna sökfilterna",
         Language::DE => "Keine Resultate für die spezifizierten Such-Filter verfügbar",
+        Language::TR => "Belirtilen arama filtrelerine göre herhangi bir sonuç bulunmamaktadır",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -274,6 +297,7 @@ pub fn showing_results_translation(
         Language::RU => format!("Показываются {start}-{end} из {total} общего числа результатов"),
         Language::SV => format!("Visar {start}-{end} av {total} totala resultat"),
         Language::DE => format!("{start}-{end} von insgesamt {total} Resultaten werden angezeigt"),
+        Language::TR => format!("{total} sonuç içinde {start}-{end}"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -286,6 +310,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::RU => "Применить цветовой градиент", // recheck
         Language::SV => "Applicera färggradient",
         Language::DE => "Farb-Gradienten anwenden",
+        Language::TR => "Renk grandyanı uygula",
         _ => "Apply color gradients",
     }
 }
