@@ -28,6 +28,7 @@ use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_report_path;
+use crate::utils::types::web_page::WebPage;
 use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
@@ -133,7 +134,7 @@ impl Sniffer {
                 self.report_sort_type = what_to_display;
             }
             Message::OpenReport => self.open_report_file(),
-            Message::OpenGithub(main_page) => Self::open_github(main_page),
+            Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
@@ -288,12 +289,8 @@ impl Sniffer {
         }
     }
 
-    fn open_github(main_page: bool) {
-        let url = if main_page {
-            "https://github.com/GyulyVGC/sniffnet"
-        } else {
-            "https://github.com/GyulyVGC/sniffnet/releases/latest"
-        };
+    fn open_web(web_page: &WebPage) {
+        let url = web_page.get_url();
         #[cfg(target_os = "windows")]
         std::process::Command::new("explorer")
             .arg(url)
