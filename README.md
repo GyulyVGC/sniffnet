@@ -41,11 +41,12 @@ Graphical interface translated in:<br>
 
 ## _Help fund Sniffnet's development_ 💖
 
-Sniffnet is a **completely free, open-source software** which needs your support to be developed and maintained.
+Sniffnet is a **completely free, open-source software** which needs lots of efforts and time to be developed and maintained.
 
-If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC): ***this is the only way for me to keep working on this project***,
-constantly improving and expanding it.<br/>
-_In scarcity of sponsors, I will be forced to quit my contributions to this project (sadly)._
+Working on Sniffnet is what I love doing, but it wouldn't be sustainable for me in the long term without your help.<br/>
+If you appreciate Sniffnet, [**please consider sponsoring**](https://github.com/sponsors/GyulyVGC): 
+***this is the only way for me to keep dedicate a considerable fraction of my time to this project***,
+constantly expanding it including new features and functionalities.<br/>
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
