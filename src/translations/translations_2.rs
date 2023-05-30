@@ -12,6 +12,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::SV => "En nyare version finns tillgänglig på GitHub",
         Language::DE => "Eine neue Version ist auf GitHub verfügbar",
         Language::TR => "Daha yeni bir versiyon GitHub'ta mevcut",
+        Language::ES => "Hay una nueva versión disponible en GitHub",
         _ => "A newer version is available on GitHub",
     }
 }
@@ -41,6 +42,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::DE => "Verbindungsdetails",
         Language::TR => "Bağlantı detayları",
         Language::FA => "مشخصات اتصال",
+        Language::ES => "Detalles de la Conexión",
         _ => "Connection details",
     }
 }
@@ -54,6 +56,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
         Language::DE => "Verlorene Pakete",
         Language::TR => "Düşen paketler",
         Language::FA => "بسته های رها شده",
+        Language::ES => "Paquetes perdidos",
         _ => "Dropped packets",
     }
 }
@@ -67,6 +70,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::DE => "Daten Darstellung",
         Language::TR => "Veri gösterimi",
         Language::FA => "بازنمایی داده ها", // TODO: or نمایندگی داده ها depending on context
+        Language::ES => "Representación de los datos",
         _ => "Data representation",
     }
 }
@@ -80,6 +84,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::DE => "Netzwerk-Host",
         Language::TR => "Ağ sunucusu",
         Language::FA => "میزبان شبکه",
+        Language::ES => "Host de red",
         _ => "Network host",
     }
 }
@@ -93,6 +98,7 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
         Language::DE => "Nur die obersten 30 Hosts werden hier angezeigt",
         Language::TR => "Sadece ilk 30 sunucu burda gösterilmektedir",
         Language::FA => "تنها ۳۰ میزبان برتر در اینجا نمایش داده شده اند",
+        Language::ES => "Aquí sólo se muestran los 30 mejores anfitriones",
         _ => "Only the top 30 hosts are displayed here",
     }
 }
@@ -106,6 +112,7 @@ pub fn sort_by_translation(language: Language) -> &'static str {
         Language::DE => "Sortieren nach",
         Language::TR => "Şuna göre sırala",
         Language::FA => "مرتب سازی بر اساس",
+        Language::ES => "Ordenar por",
         _ => "Sort by",
     }
 }
@@ -119,6 +126,7 @@ pub fn local_translation(language: Language) -> String {
         Language::DE => "Lokales Netzwerk",
         Language::TR => "Yerel ağ",
         Language::FA => "شبکه محلی",
+        Language::ES => "Red local",
         _ => "Local network",
     }
     .to_string()
@@ -133,6 +141,7 @@ pub fn unknown_translation(language: Language) -> String {
         Language::DE => "Ort unbekannt",
         Language::TR => "Bilinmeyen yer",
         Language::FA => "محل نامعلوم",
+        Language::ES => "Localización desconocida",
         _ => "Unknown location",
     }
     .to_string()
@@ -147,6 +156,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         Language::DE => "Dein Netzwerk-Adapter",
         Language::TR => "Ağ adaptörün",
         Language::FA => "مبدل شبکه شما",
+        Language::ES => "Su adaptador de red",
         _ => "Your network adapter",
     }
     .to_string()
@@ -161,6 +171,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::DE => "Socket Adresse",
         Language::TR => "Soket adresi",
         Language::FA => "پریز شبکه",
+        Language::ES => "Dirección del socket",
         _ => "Socket address",
     }
 }
@@ -174,6 +185,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::DE => "MAC Adresse",
         Language::TR => "MAC adresi",
         Language::FA => "آدرس MAC",
+        Language::ES => "Dirección MAC",
         _ => "MAC address",
     }
 }
@@ -187,6 +199,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::DE => "Quelle",
         Language::TR => "Kaynak",
         Language::FA => "منبع",
+        Language::ES => "Origen",
         _ => "Source",
     }
 }
@@ -199,6 +212,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::DE => "Ziel",
         Language::TR => "Hedef",
         Language::FA => "مقصد",
+        Language::ES => "Destino",
         _ => "Destination",
     }
 }
@@ -212,6 +226,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::DE => "Vollständig qualifizierter Domain Name",
         Language::TR => "Tam nitelikli alan adı",
         Language::FA => "نام دامنه جامع الشرایط",
+        Language::ES => "Nombre de dominio completo",
         _ => "Fully qualified domain name",
     }
 }
@@ -225,6 +240,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::DE => "Name des autonomen Systems",
         Language::TR => "Yönetim varlığı",
         Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
+        Language::ES => "Entidad Administrativa",
         _ => "Autonomous System name",
     }
 }
@@ -238,6 +254,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::DE => "Übermittelte Daten",
         Language::TR => "Aktarılan veri",
         Language::FA => "دادهٔ منتقل شده",
+        Language::ES => "Datos transmitidos",
         _ => "Transmitted data",
     }
 }
@@ -251,6 +268,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::DE => "Land",
         Language::TR => "Ülke",
         Language::FA => "کشور",
+        Language::ES => "País",
         _ => "Country",
     }
 }
@@ -264,6 +282,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::DE => "Domain Name",
         Language::TR => "Alan adı",
         Language::FA => "نام دامنه",
+        Language::ES => "Nombre de dominio",
         _ => "Domain name",
     }
 }
@@ -277,6 +296,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::DE => "Zeige nur die Favoriten",
         Language::TR => "Sadece favorileri göster",
         Language::FA => "فقط پسندیده ها را نمایش بده",
+        Language::ES => "Mostrar solo los favoritos",
         _ => "Only show favorites",
     }
 }
@@ -290,6 +310,7 @@ pub fn search_filters_translation(language: Language) -> &'static str {
         Language::DE => "Filter suchen",
         Language::TR => "Arama filtresi",
         Language::FA => "صافی های جستجو",
+        Language::ES => "Filtros de búsqueda",
         _ => "Search filters",
     }
 }
@@ -303,6 +324,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::DE => "Keine Resultate für die spezifizierten Such-Filter verfügbar",
         Language::TR => "Belirtilen arama filtrelerine göre herhangi bir sonuç bulunmamaktadır",
         Language::FA => "هیچ نتیجه ای بر اساس صافی های جستجوی تعیین شده وجود ندارد",
+        Language::ES => "No hay resultados disponibles según los filtros de búsqueda especificados",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -321,6 +343,7 @@ pub fn showing_results_translation(
         Language::DE => format!("{start}-{end} von insgesamt {total} Resultaten werden angezeigt"),
         Language::TR => format!("{total} sonuç içinde {start}-{end}"),
         Language::FA => format!("نمایش {start}-{end} از تمامی {total} نتیجه"),
+        Language::ES => format!("Mostrando {start}-{end} de {total} resultados totales"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -335,6 +358,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::DE => "Farb-Gradienten anwenden",
         Language::TR => "Renk grandyanı uygula",
         Language::FA => "اعمال گرادیان های رنگ",
+        Language::ES => "Aplicar gradientes de color",
         _ => "Apply color gradients",
     }
 }
