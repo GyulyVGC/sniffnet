@@ -33,7 +33,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style, sniffer.language);
     let col_ip = Column::new()
         .spacing(10)
-        .width(FillPortion(1))
+        .width(FillPortion(5))
         .push(col_ip_radio);
 
     let transport_active = sniffer.filters.transport;
@@ -42,7 +42,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
-        .width(FillPortion(2))
+        .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
         .push(button_start(sniffer.style, sniffer.language))
@@ -67,7 +67,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     .font(font)
     .style(StyleTuple(sniffer.style, ElementType::Standard));
     let col_app = Column::new()
-        .width(FillPortion(1))
+        .width(FillPortion(8))
         .spacing(10)
         .push(
             Text::new(application_protocol_translation(sniffer.language))
