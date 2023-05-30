@@ -160,7 +160,7 @@
 	<DirectoryRef Id="ApplicationProgramsFolder">
 			<Component Id="AppStart" Guid="d5886d8d-009d-4468-9db3-1ebc72f7c201">
 				<Shortcut Id="AppStartShortcut"
-					Name="Sniffet"
+					Name="Sniffnet"
 					Description="Application to comfortably monitor your network traffic"
 					Target="[APPLICATIONFOLDER]bin\sniffnet.exe"
 					WorkingDirectory="APPLICATIONROOTDIRECTORY"
