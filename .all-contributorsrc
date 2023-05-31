@@ -180,6 +180,24 @@
         "doc",
         "platform"
       ]
+    },
+    {
+      "login": "vcrn",
+      "name": "Victor Nilsson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79985743?v=4",
+      "profile": "http://index45.com",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "nitefood",
+      "name": "Adriano",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24555810?v=4",
+      "profile": "https://github.com/nitefood",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -188,5 +206,6 @@
   "repoHost": "https://github.com",
   "projectName": "sniffnet",
   "projectOwner": "GyulyVGC",
-  "linkToUsage": false
+  "linkToUsage": false,
+  "commitType": "docs"
 }
