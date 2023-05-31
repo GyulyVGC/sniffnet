@@ -32,6 +32,9 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
       <td align="center" valign="top" width="14.28%"><a href="http://index45.com"><img src="https://avatars.githubusercontent.com/u/79985743?v=4?s=100" width="100px;" alt="Victor Nilsson"/><br /><sub><b>Victor Nilsson</b></sub></a><br /><a href="#translation-vcrn" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nitefood"><img src="https://avatars.githubusercontent.com/u/24555810?v=4?s=100" width="100px;" alt="Adriano"/><br /><sub><b>Adriano</b></sub></a><br /><a href="#ideas-nitefood" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/eatingdm"><img src="https://avatars.githubusercontent.com/u/44078909?v=4?s=100" width="100px;" alt="Dominic Kim"/><br /><sub><b>Dominic Kim</b></sub></a><br /><a href="#translation-eatingdm" title="Translation">🌍</a></td>
+    </tr>
   </tbody>
 </table>
 
