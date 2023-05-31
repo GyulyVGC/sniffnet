@@ -14,6 +14,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::TR => "Daha yeni bir versiyon GitHub'ta mevcut",
         Language::ES => "Hay una nueva versión disponible en GitHub",
         Language::KO => "GitHub에 새로운 버전이 출시되었습니다.",
+        Language::ZH => "新版本已在 Github 发布",
         _ => "A newer version is available on GitHub",
     }
 }
@@ -31,6 +32,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::TR => "İncele",
         Language::FA => "بازرسی",
         Language::KO => "검사",
+        Language::ZH => "检索",
         _ => "Inspect",
     }
 }
@@ -46,6 +48,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::FA => "مشخصات اتصال",
         Language::ES => "Detalles de la Conexión",
         Language::KO => "연결 상세",
+        Language::ZH => "连接详情",
         _ => "Connection details",
     }
 }
@@ -61,6 +64,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
         Language::FA => "بسته های رها شده",
         Language::ES => "Paquetes perdidos",
         Language::KO => "손실 패킷",
+        Language::ZH => "丢包计数",
         _ => "Dropped packets",
     }
 }
@@ -76,6 +80,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::FA => "بازنمایی داده ها", // TODO: or نمایندگی داده ها depending on context
         Language::ES => "Representación de los datos",
         Language::KO => "데이터 단위",
+        Language::ZH => "图表数据",
         _ => "Data representation",
     }
 }
@@ -91,6 +96,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::FA => "میزبان شبکه",
         Language::ES => "Host de red",
         Language::KO => "네트워크 호스트",
+        Language::ZH => "主机",
         _ => "Network host",
     }
 }
@@ -106,6 +112,7 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
         Language::FA => "تنها ۳۰ میزبان برتر در اینجا نمایش داده شده اند",
         Language::ES => "Aquí sólo se muestran los 30 mejores anfitriones",
         Language::KO => "상위 30개의 호스트만 노출됩니다",
+        Language::ZH => "仅展示前 30 个主机",
         _ => "Only the top 30 hosts are displayed here",
     }
 }
@@ -121,6 +128,7 @@ pub fn sort_by_translation(language: Language) -> &'static str {
         Language::FA => "مرتب سازی بر اساس",
         Language::ES => "Ordenar por",
         Language::KO => "정렬",
+        Language::ZH => "排序",
         _ => "Sort by",
     }
 }
@@ -136,6 +144,7 @@ pub fn local_translation(language: Language) -> String {
         Language::FA => "شبکه محلی",
         Language::ES => "Red local",
         Language::KO => "로컬 네트워크",
+        Language::ZH => "局域网",
         _ => "Local network",
     }
     .to_string()
@@ -152,6 +161,7 @@ pub fn unknown_translation(language: Language) -> String {
         Language::FA => "محل نامعلوم",
         Language::ES => "Localización desconocida",
         Language::KO => "알 수 없는 위치",
+        Language::ZH => "未知",
         _ => "Unknown location",
     }
     .to_string()
@@ -168,6 +178,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         Language::FA => "مبدل شبکه شما",
         Language::ES => "Su adaptador de red",
         Language::KO => "네트워크 어댑터",
+        Language::ZH => "你的网络适配器",
         _ => "Your network adapter",
     }
     .to_string()
@@ -184,6 +195,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::FA => "پریز شبکه",
         Language::ES => "Dirección del socket",
         Language::KO => "소켓 어드레스",
+        Language::ZH => "套接字地址",
         _ => "Socket address",
     }
 }
@@ -199,6 +211,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::FA => "آدرس MAC",
         Language::ES => "Dirección MAC",
         Language::KO => "맥 어드레스",
+        Language::ZH => "MAC 地址",
         _ => "MAC address",
     }
 }
@@ -214,6 +227,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::FA => "منبع",
         Language::ES => "Origen",
         Language::KO => "소스",
+        Language::ZH => "源",
         _ => "Source",
     }
 }
@@ -228,6 +242,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::FA => "مقصد",
         Language::ES => "Destino",
         Language::KO => "목적지",
+        Language::ZH => "目标",
         _ => "Destination",
     }
 }
@@ -243,6 +258,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::FA => "نام دامنه جامع الشرایط",
         Language::ES => "Nombre de dominio completo",
         Language::KO => "절대 도메인 네임",
+        Language::ZH => "FQDN",
         _ => "Fully qualified domain name",
     }
 }
@@ -258,6 +274,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
         Language::ES => "Entidad Administrativa",
         Language::KO => "관리 엔티티",
+        Language::ZH => "ASN 信息",
         _ => "Autonomous System name",
     }
 }
@@ -273,6 +290,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::FA => "دادهٔ منتقل شده",
         Language::ES => "Datos transmitidos",
         Language::KO => "수신된 데이터",
+        Language::ZH => "数据传输",
         _ => "Transmitted data",
     }
 }
@@ -288,6 +306,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::FA => "کشور",
         Language::ES => "País",
         Language::KO => "국가",
+        Language::ZH => "国家",
         _ => "Country",
     }
 }
@@ -303,6 +322,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::FA => "نام دامنه",
         Language::ES => "Nombre de dominio",
         Language::KO => "도메인 네임",
+        Language::ZH => "域名",
         _ => "Domain name",
     }
 }
@@ -318,6 +338,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::FA => "فقط پسندیده ها را نمایش بده",
         Language::ES => "Mostrar solo los favoritos",
         Language::KO => "즐겨찾기만 보기",
+        Language::ZH => "仅显示收藏",
         _ => "Only show favorites",
     }
 }
@@ -333,6 +354,7 @@ pub fn search_filters_translation(language: Language) -> &'static str {
         Language::FA => "صافی های جستجو",
         Language::ES => "Filtros de búsqueda",
         Language::KO => "검색 필터",
+        Language::ZH => "搜索条件",
         _ => "Search filters",
     }
 }
@@ -348,6 +370,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::FA => "هیچ نتیجه ای بر اساس صافی های جستجوی تعیین شده وجود ندارد",
         Language::ES => "No hay resultados disponibles según los filtros de búsqueda especificados",
         Language::KO => "해당 검색 필터로 검색된 결과가 없습니다.",
+        Language::ZH => "没有符合条件的条目",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -368,6 +391,7 @@ pub fn showing_results_translation(
         Language::FA => format!("نمایش {start}-{end} از تمامی {total} نتیجه"),
         Language::ES => format!("Mostrando {start}-{end} de {total} resultados totales"),
         Language::KO => format!("총 {total}개의 결과 중 {start}-{end}을(를) 보여줍니다"),
+        Language::ZH => format!("显示累计 {total} 条目中第 {start}-{end} 个"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -384,6 +408,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::FA => "اعمال گرادیان های رنگ",
         Language::ES => "Aplicar gradientes de color",
         Language::KO => "그라디언트 색상 적용",
+        Language::ZH => "应用渐变色",
         _ => "Apply color gradients",
     }
 }
