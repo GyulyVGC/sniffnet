@@ -1336,7 +1336,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::UK => "; можеш також вибрати 'K', 'M' i 'G'",
         Language::ZH => "您可指定 'K', 'M', 'G'",
         Language::RO => "; puteți specifica 'K', 'M', 'G'",
-        Language::KO => "; 지정가능합니다 'K', 'M', 'G'",
+        Language::KO => "; 지정 가능합니다 'K', 'M', 'G'",
         Language::TR => "; şunları da kullanabilirsin 'K', 'M' ve 'G'",
         Language::RU => "; Так же можно указать 'K', 'M' или 'G'",
         Language::PT => "; também pode especificar 'K', 'M' e 'G'",
