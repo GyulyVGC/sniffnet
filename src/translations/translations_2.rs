@@ -367,7 +367,7 @@ pub fn showing_results_translation(
         Language::TR => format!("{total} sonuç içinde {start}-{end}"),
         Language::FA => format!("نمایش {start}-{end} از تمامی {total} نتیجه"),
         Language::ES => format!("Mostrando {start}-{end} de {total} resultados totales"),
-        Language::KO => format!("총 {total}개의 결과 중 {start}-{end}을(를) 보여줍니다")
+        Language::KO => format!("총 {total}개의 결과 중 {start}-{end}을(를) 보여줍니다"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
