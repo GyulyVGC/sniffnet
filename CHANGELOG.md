@@ -3,6 +3,16 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## UNRELEASED
+
+- Added Swedish translation 🇸🇪 ([#213](https://github.com/GyulyVGC/sniffnet/pull/213))
+- URLs update...
+- Updated existing translations to v1.2 (German, Spanish, Persian, Korean, Russian, Turkish, Ukrainian, and Chinese)
+- Renamed "Administrative entity" to "Autonomous System name" to avoid confusion
+- Improved filter columns relative width to avoid the "Application protocol" label being cut when displayed in Swedish
+- Updated docs including installation instruction for Aarch Linux
+
+
 ## [1.2.0] - 2023-05-18
 
 - Introduced host-based analysis: instead of just showing IP addresses, now host names and network providers are available for a quicker and more meaningful traffic interpretation 
