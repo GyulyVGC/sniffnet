@@ -70,6 +70,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         Language::TR,
         Language::FA,
         Language::ES,
+        Language::KO,
     ]
     .contains(&sniffer.language)
     {
