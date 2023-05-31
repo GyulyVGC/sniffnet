@@ -198,6 +198,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "eatingdm",
+      "name": "Dominic Kim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44078909?v=4",
+      "profile": "https://github.com/eatingdm",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
