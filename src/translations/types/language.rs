@@ -60,7 +60,7 @@ impl Language {
             Language::UK => "Українська",
             Language::ZH => "简体中文",
             Language::RO => "Română",
-            Language::KO => "한국인",
+            Language::KO => "한국어",
             Language::TR => "Türkçe",
             Language::RU => "Русский",
             Language::PT => "Português",
