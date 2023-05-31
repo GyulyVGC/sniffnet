@@ -61,17 +61,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         )
         .push(vertical_space(Fixed(20.0)));
 
-    if ![
-        Language::EN,
-        Language::IT,
-        Language::SV,
-        Language::RU,
-        Language::DE,
-        Language::TR,
-        Language::FA,
-        Language::ES,
-        Language::KO,
-        Language::ZH,
+    if [
+        Language::EL,
+        Language::FR,
+        Language::PL,
+        Language::PT,
+        Language::RO,
     ]
     .contains(&sniffer.language)
     {
