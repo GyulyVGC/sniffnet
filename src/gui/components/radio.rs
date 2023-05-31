@@ -13,7 +13,7 @@ use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
     ip_version_translation, sound_translation, transport_protocol_translation,
 };
-use crate::utils::countries::get_flag_from_language_code;
+use crate::utils::countries::get_flag_from_language;
 use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
 
 pub fn ip_version_radios(
@@ -83,29 +83,33 @@ pub fn language_radios(
     collection: &[Language],
     font: Font,
     style: StyleType,
-) -> Column<'static, Message> {
-    let mut ret_val = Column::new().spacing(10);
+) -> Row<'static, Message> {
+    let mut ret_val = Row::new().spacing(10);
     for option in collection {
         ret_val = ret_val.push(
-            Row::new()
-                .align_items(Alignment::Center)
-                .push(
-                    Radio::new(
-                        format!("{} ({:?})", option.get_radio_label(), option),
-                        *option,
-                        Some(active),
-                        Message::LanguageSelection,
+            Row::new().align_items(Alignment::Center).push(
+                Row::new()
+                    .width(Length::Fixed(180.0))
+                    .push(
+                        Radio::new(
+                            format!("{} ({:?})", option.get_radio_label(), option),
+                            *option,
+                            Some(active),
+                            Message::LanguageSelection,
+                        )
+                        .spacing(7)
+                        .font(font)
+                        .size(15)
+                        .style(
+                            <StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
+                                style,
+                                ElementType::Standard,
+                            )),
+                        ),
                     )
-                    .spacing(7)
-                    .font(font)
-                    .size(15)
-                    .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                        style,
-                        ElementType::Standard,
-                    ))),
-                )
-                .push(horizontal_space(Length::Fixed(8.0)))
-                .push(get_flag_from_language_code(&format!("{option:?}"))),
+                    .push(horizontal_space(Length::Fixed(8.0)))
+                    .push(get_flag_from_language(*option)),
+            ),
         );
     }
     ret_val
