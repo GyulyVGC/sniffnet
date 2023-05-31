@@ -15,6 +15,7 @@ use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
 use crate::utils::formatted_strings::APP_VERSION;
+use crate::utils::types::web_page::WebPage;
 use crate::Language;
 
 pub fn footer(
@@ -62,7 +63,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
     .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::OpenGithub(true));
+    .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(content, "GitHub", Position::Top)
         .font(get_font(style))
@@ -100,7 +101,7 @@ fn get_release_details(
             .height(Length::Fixed(40.0))
             .width(Length::Fixed(40.0))
             .style(StyleTuple(style, ElementType::Alert).into())
-            .on_press(Message::OpenGithub(false));
+            .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
                 new_version_available_translation(language),

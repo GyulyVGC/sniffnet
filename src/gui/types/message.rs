@@ -4,6 +4,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
+use crate::utils::types::web_page::WebPage;
 use crate::{
     AppProtocol, ChartType, IpVersion, Language, ReportSortType, StyleType, TransProtocol,
 };
@@ -31,8 +32,8 @@ pub enum Message {
     AddOrRemoveFavorite(Host, bool),
     /// Open Sniffnet's complete textual report
     OpenReport,
-    /// Open Sniffnet's GitHub main page if true is passed, latest release page otherwise
-    OpenGithub(bool),
+    /// Open the supplied web page
+    OpenWebPage(WebPage),
     /// Start sniffing packets
     Start,
     /// Stop sniffing process and return to initial page

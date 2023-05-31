@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+<p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
 <p align="center"> 
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
@@ -8,7 +8,8 @@
 
 <p align="center"> 
 Application to comfortably monitor your Internet traffic <br>
-Multithreaded, cross-platform, reliable
+Multithreaded, cross-platform, reliable <br>
+🌐 <a href="https://www.sniffnet.net">www.sniffnet.net</a>
 </p>
 
 <div align="center">
@@ -38,19 +39,20 @@ Graphical interface translated in:<br>
 </p>
 
 
-## _Help fund Sniffnet's Development_ 💖
+## _Help fund Sniffnet's development_ 💖
 
-Sniffnet is a **fully free, open-source software** which needs your support to be maintained on a regular basis.
+Sniffnet is a **completely free, open-source software** which needs lots of efforts and time to be developed and maintained.
 
-If you appreciate Sniffnet, [**please consider donating**](https://github.com/sponsors/GyulyVGC): ***this is the only way for me to keep working on this project***,
-constantly improving and expanding it.<br/>
-_In absence of more sponsors, I may be forced to quit my full-time job on this project soon._
+Working on Sniffnet is what I love doing, but it wouldn't be sustainable for me in the long term without your help.<br/>
+If you appreciate Sniffnet, [**please consider sponsoring**](https://github.com/sponsors/GyulyVGC): 
+***this is the only way for me to keep dedicate a considerable fraction of my time to this project***,
+constantly expanding it including new features and functionalities.<br/>
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
 <p align="center">
-<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="50px" alt="github"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="50px" alt="tiansheng li"/></a>
+<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="github"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="tiansheng li"/></a>
 </p>
 
 
@@ -64,7 +66,7 @@ You can install Sniffnet in one of the following ways:
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
-  Choose from a Windows installer, a macOS disk image, or a DEB package (depending on your operating system). <br>
+  Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
   - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
   - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
@@ -80,7 +82,7 @@ You can install Sniffnet in one of the following ways:
   <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
 
 Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
-In this case, the application binary can be installed with:
+In this case, the application binary can be built and installed with:
 
 ```sh
 cargo install sniffnet
@@ -122,7 +124,7 @@ Depending on your operating system, you may need to install some dependencies to
 
   <summary>Windows dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474292-d84f2a96-f445-40ac-8930-9d0f00a3c2bb.png" width="35px"/></summary>
 
-  In order to correctly run Sniffnet on Windows systems you need to:
+  In order to correctly build and run Sniffnet on Windows systems you need to:
 
   - Install [Npcap](https://npcap.com/#download), making sure to check the box `Install Npcap in WinPcap API-compatible Mode` during the installation.
 
@@ -136,12 +138,15 @@ Depending on your operating system, you may need to install some dependencies to
 <details>
 
   <summary>Linux dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
- 
-  In order to correctly run Sniffnet on Linux systems, install the libraries and header files for the libpcap library: 
-  
-```sh
-sudo apt-get install libpcap-dev
-```
+
+  - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
+    - `libpcap-dev`
+    - `libasound2-dev`
+    - `libfontconfig1`
+  - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
+    - `libpcap-devel`
+    - `alsa-lib-devel`
+    - `fontconfig-devel`
 
   Note that if you are not running as root, you need to set capabilities to inspect a network adapter: 
   
@@ -149,16 +154,10 @@ sudo apt-get install libpcap-dev
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
 
-Most Linux system also need this dependency (required to build the library used to play sounds):
+  Alternatively you can run the app with sudo privileges:
 
 ```sh
-sudo apt-get install libasound2-dev
-```
-
-Depending on your Linux environment you may also need `libfontconfig`:
-
-```sh
-sudo apt-get install libfontconfig libfontconfig1-dev
+sudo sniffnet
 ```
     
 </details>
@@ -324,8 +323,6 @@ Most of the errors that can occur are likely due to your system missing required
 necessary to correctly analyze a network adapter. <br>
 Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
 
-For a Windows reference, you can check issue [#1](https://github.com/GyulyVGC/sniffnet/issues/1).
-
 Note that most Linux system also need this dependency (required to build the library used to play sounds):
 
 ```sh
@@ -334,11 +331,20 @@ sudo apt-get install libasound2-dev
 
 Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
 
+> **Note**
+>
+> View issues labeled with [`missing-dependencies`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3A%22missing+dependency%22+) to see how those problems have been solved by others.
+
 ### Installers incompatibilities
 
 If you have problems after having installed Sniffnet through the provided installers,
 it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
 Reach me out, and I'll try to generate an installer for your specific operating system.
+
+> **Warning**
+>
+> The DEB package for Linux is built on the latest version of Ubuntu and in some cases may not be compatible with Debian. <br/>
+> See issue [#199](https://github.com/GyulyVGC/sniffnet/issues/199) for a reference.
 
 ### Rendering problems
 
@@ -346,6 +352,10 @@ In some cases, especially if you are running on an old architecture, the `wgpu` 
 may cause some problems that could prevent you from running Sniffnet. <br>
 In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
 branch, which uses the `glow` renderer.
+
+> **Note**
+>
+> View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
