@@ -41,11 +41,11 @@ Graphical interface translated in:<br>
 
 ## _Help fund Sniffnet's development_ 💖
 
-Sniffnet is a **completely free, open-source software** which needs lots of efforts and time to be developed and maintained.
+Sniffnet is **completely free, open-source software** which needs lots of effort and time to develop and maintain.
 
 Working on Sniffnet is what I love doing, but it wouldn't be sustainable for me in the long term without your help.<br/>
 If you appreciate Sniffnet, [**please consider sponsoring**](https://github.com/sponsors/GyulyVGC): 
-***this is the only way for me to keep dedicate a considerable fraction of my time to this project***,
+***this is the only way for me to keep dedicating a considerable fraction of my time to this project***,
 constantly expanding it including new features and functionalities.<br/>
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
@@ -73,7 +73,6 @@ You can install Sniffnet in one of the following ways:
   - [Linux (DEB)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.deb) (9.2 MB)
   - [Linux (RPM)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.rpm) (11.4 MB)
 
-    
 </details>
 
 
@@ -96,11 +95,11 @@ cargo install sniffnet
   <summary>from Homebrew</summary>
 
   You can install [Sniffnet Homebrew package](https://github.com/Homebrew/homebrew-core/pkgs/container/core%2Fsniffnet) with:
-  
+
   ```sh
 brew install sniffnet
 ```
-    
+
 </details>
 
 
@@ -109,11 +108,11 @@ brew install sniffnet
   <summary>on Arch Linux</summary>
 
   You can install Sniffnet community package via [pacman](https://wiki.archlinux.org/title/Pacman):
-  
+
   ```sh
 pacman -S sniffnet
 ```
-    
+
 </details>
 
 ## Required dependencies
@@ -131,7 +130,7 @@ Depending on your operating system, you may need to install some dependencies to
   - Download the [Npcap SDK](https://npcap.com/#download).
 
   - Add the SDK's ```/Lib/x64``` folder to your ```LIB``` environment variable.
-    
+
 </details>
 
 
@@ -148,8 +147,8 @@ Depending on your operating system, you may need to install some dependencies to
     - `alsa-lib-devel`
     - `fontconfig-devel`
 
-  Note that if you are not running as root, you need to set capabilities to inspect a network adapter: 
-  
+  Note that if you are not running as root, you need to set capabilities to inspect a network adapter:
+
 ```sh
 sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```
@@ -159,7 +158,7 @@ sudo setcap cap_net_raw,cap_net_admin=eip <your/Sniffnet/executable/path>
 ```sh
 sudo sniffnet
 ```
-    
+
 </details>
 
 
@@ -168,7 +167,7 @@ sudo sniffnet
   <summary>MacOS dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
 
   MacOS natively has all the dependencies you need to build and run Sniffnet!
-    
+
 </details>
 
 
@@ -185,14 +184,14 @@ sudo sniffnet
 - 🔉 set custom notifications to inform you when defined network events occur
 - 🎨 choose the style that fits you the most from 4 different available themes
 - 🕵️ inspect each of your network connections in real time
-- 📁 save complete textual report with detailed information for each network connection:
+- 📁 save complete textual reports with detailed information for each network connection:
   * source and destination IP addresses
   * source and destination ports
   * carried protocols
   * amount of exchanged packets and bytes
   * initial and final timestamp of information exchange
 - ... and more!
-  
+
 
 ## IP geolocation and network providers (ASN)
 
@@ -202,7 +201,7 @@ sudo sniffnet
 
   <br>
 
-  Geolocation and network providers (ASN) refer to the remote IP address of each connection, and they are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
+  Geolocation and network providers (ASN) refer to the remote IP address of each connection. They are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
 
   > **Note**
   > 
@@ -212,7 +211,7 @@ sudo sniffnet
   > 
   > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
   
-  This file format potentially allows Sniffnet to execute different hundreds of IP lookups in a matter of a few milliseconds.
+  This file format potentially allows Sniffnet to execute hundreds of different IP lookups in a matter of a few milliseconds.
 
 </details>
 
@@ -284,7 +283,7 @@ sudo sniffnet
 Some keyboard shortcuts are available to improve the efficiency of use and the overall user experience.
 
 If you want to suggest a different key combination for one of the existing shortcuts or if you want to propose a new shortcut,
-give a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue.
+have a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue.
 
 The currently usable hotkeys are reported in the following.
 
@@ -339,7 +338,7 @@ Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com
 
 If you have problems after having installed Sniffnet through the provided installers,
 it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
-Reach me out, and I'll try to generate an installer for your specific operating system.
+Reach out to me, and I'll try to generate an installer for your specific operating system.
 
 > **Warning**
 >
