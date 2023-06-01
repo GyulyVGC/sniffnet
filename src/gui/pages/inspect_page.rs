@@ -255,13 +255,30 @@ fn filters_col(
     let font = get_font(style);
     let search_params2 = search_params.clone();
 
+    let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
+        Text::new(search_filters_translation(language))
+            .font(font)
+            .size(FONT_SIZE_TITLE),
+    );
+    if search_params.is_some_filter_active() {
+        title_row = title_row.push(
+            button(
+                Text::new("x")
+                    .font(font)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(15),
+            )
+            .padding(2)
+            .height(Length::Fixed(20.0))
+            .width(Length::Fixed(20.0))
+            .style(StyleTuple(style, ElementType::Standard).into())
+            .on_press(Message::Search(SearchParameters::default())),
+        );
+    }
+
     Column::new()
         .spacing(3)
-        .push(
-            Text::new(search_filters_translation(language))
-                .font(font)
-                .size(FONT_SIZE_TITLE),
-        )
+        .push(title_row)
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Container::new(

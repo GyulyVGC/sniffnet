@@ -13,6 +13,16 @@ pub struct SearchParameters {
     pub only_favorites: bool,
 }
 
+impl SearchParameters {
+    pub fn is_some_filter_active(&self) -> bool {
+        self.only_favorites
+            || !self.app.is_empty()
+            || !self.domain.is_empty()
+            || !self.country.is_empty()
+            || !self.as_name.is_empty()
+    }
+}
+
 pub enum FilterInputType {
     App,
     Domain,

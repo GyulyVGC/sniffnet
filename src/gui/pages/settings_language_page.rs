@@ -27,7 +27,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let row_language_radio_4 =
         language_radios(language_active, &Language::ROW4, font, sniffer.style);
     let col_language_radio_all = Column::new()
-        .spacing(20)
+        .spacing(10)
         .push(row_language_radio_1)
         .push(row_language_radio_2)
         .push(row_language_radio_3)
@@ -59,7 +59,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(20.0)));
+        .push(vertical_space(Fixed(40.0)))
+        .push(col_language_radio_all);
 
     if [
         Language::EL,
@@ -70,21 +71,16 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     ]
     .contains(&sniffer.language)
     {
-        content = content
-            .push(
-                Container::new(
-                    Text::new("The selected language is not fully updated to version 1.2")
-                        .font(font),
-                )
-                .padding(10.0)
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(sniffer.style, ElementType::Badge),
-                )),
+        content = content.push(vertical_space(Fixed(40.0))).push(
+            Container::new(
+                Text::new("The selected language is not fully updated to version 1.2").font(font),
             )
-            .push(vertical_space(Fixed(20.0)));
+            .padding(10.0)
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(sniffer.style, ElementType::Badge),
+            )),
+        );
     }
-
-    content = content.push(col_language_radio_all);
 
     Container::new(content)
         .height(Fixed(400.0))

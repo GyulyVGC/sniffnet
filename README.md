@@ -43,10 +43,9 @@ Graphical interface translated in:<br>
 
 Sniffnet is **completely free, open-source software** which needs lots of effort and time to develop and maintain.
 
-Working on Sniffnet is what I love doing, but it wouldn't be sustainable for me in the long term without your help.<br/>
-If you appreciate Sniffnet, [**please consider sponsoring**](https://github.com/sponsors/GyulyVGC): 
-***this is the only way for me to keep dedicating a considerable fraction of my time to this project***,
-constantly expanding it including new features and functionalities.<br/>
+If you appreciate Sniffnet, [**consider sponsoring**](https://github.com/sponsors/GyulyVGC):
+***your support will allow me to dedicate more and more time to this project***,
+constantly expanding it including **new features and functionalities**.<br/>
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
