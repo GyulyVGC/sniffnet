@@ -64,7 +64,7 @@ impl button::StyleSheet for StyleTuple {
                 _ => colors.text_body,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
+                StyleTuple(_, ElementType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_borders,
                 _ => colors.secondary,
             },
@@ -105,7 +105,7 @@ impl button::StyleSheet for StyleTuple {
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
+                StyleTuple(_, ElementType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
                 StyleTuple(
                     _,
                     ElementType::BorderedRound | ElementType::Neutral | ElementType::NotStarred,
