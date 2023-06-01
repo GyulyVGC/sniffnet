@@ -35,6 +35,7 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/eatingdm"><img src="https://avatars.githubusercontent.com/u/44078909?v=4?s=100" width="100px;" alt="Dominic Kim"/><br /><sub><b>Dominic Kim</b></sub></a><br /><a href="#translation-eatingdm" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://blog.brightone.cloud"><img src="https://avatars.githubusercontent.com/u/12615679?v=4?s=100" width="100px;" alt="Oleksii Filonenko"/><br /><sub><b>Oleksii Filonenko</b></sub></a><br /><a href="#translation-Br1ght0ne" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mb720"><img src="https://avatars.githubusercontent.com/u/4164548?v=4?s=100" width="100px;" alt="Matthias Braun"/><br /><sub><b>Matthias Braun</b></sub></a><br /><a href="https://github.com/GyulyVGC/sniffnet/commits?author=mb720" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
