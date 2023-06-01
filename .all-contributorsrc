@@ -216,6 +216,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "mb720",
+      "name": "Matthias Braun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4164548?v=4",
+      "profile": "https://github.com/mb720",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
