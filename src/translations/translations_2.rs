@@ -4,20 +4,20 @@ use crate::Language;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "A newer version is available on GitHub",
-        Language::IT => "Una versione più recente è disponibile su GitHub",
-        Language::RU => "Новая версия доступна на GitHub",
-        Language::EL => "Μια νεότερη έκδοση είναι διαθέσιμη στο GitHub",
+        Language::EN => "A newer version is available!",
+        Language::IT => "Una versione più recente è disponibile!",
+        Language::RU => "Новая версия доступна!",
+        Language::EL => "Μια νεότερη έκδοση είναι διαθέσιμη!",
         Language::FA => "یک نسخه جدیدتر روی GitHub موجود است",
-        Language::SV => "En nyare version finns tillgänglig på GitHub",
-        Language::DE => "Eine neue Version ist auf GitHub verfügbar",
-        Language::TR => "Daha yeni bir versiyon GitHub'ta mevcut",
-        Language::ES => "Hay una nueva versión disponible en GitHub",
-        Language::KO => "GitHub에 새로운 버전이 출시되었습니다.",
-        Language::ZH => "新版本已在 Github 发布",
-        Language::UK => "Нова версія доступна на GitHub",
-        Language::RO => "O versiune nouă este disponibilă pe GitHub",
-        Language::PL => "Nowsza wersja jest dostępna na GitHub",
+        Language::SV => "En nyare version finns tillgänglig!",
+        Language::DE => "Eine neue Version ist verfügbar!",
+        Language::TR => "Daha yeni bir versiyon mevcut!",
+        Language::ES => "Hay una nueva versión disponible!",
+        Language::KO => "새로운 버전이 출시되었습니다!",
+        Language::ZH => "新版本已在 Github 发布!",
+        Language::UK => "Нова версія доступна!",
+        Language::RO => "O versiune nouă este disponibilă!",
+        Language::PL => "Nowsza wersja jest dostępna!",
         _ => "A newer version is available on GitHub",
     }
 }

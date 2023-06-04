@@ -481,7 +481,7 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
 
 pub fn some_observed_translation(
     language: Language,
-    observed: &str,
+    observed: u128,
     filters: &str,
 ) -> Text<'static> {
     Text::new(match language {

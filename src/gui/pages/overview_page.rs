@@ -9,7 +9,6 @@ use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::{horizontal_space, Rule};
-use thousands::Separable;
 
 use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
@@ -235,7 +234,7 @@ fn body_no_observed(
 ) -> Column<'static, Message> {
     let tot_packets_text = some_observed_translation(
         language,
-        &observed.separate_with_spaces(),
+        observed,
         &get_active_filters_string(filters, language),
     )
     .horizontal_alignment(Horizontal::Center)
@@ -628,7 +627,7 @@ fn lazy_col_info(
         format!(
             "{}:\n   {} {}",
             dropped_packets_translation(sniffer.language),
-            &dropped.separate_with_spaces(),
+            dropped,
             of_total_translation(
                 sniffer.language,
                 &get_percentage_string(total, u128::from(dropped))
@@ -667,7 +666,7 @@ fn lazy_col_info(
             Text::new(format!(
                 "{}:\n   {} {}",
                 filtered_packets_translation(sniffer.language),
-                &filtered.separate_with_spaces(),
+                filtered,
                 of_total_translation(sniffer.language, &get_percentage_string(total, filtered))
             ))
             .font(font),
