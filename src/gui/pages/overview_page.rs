@@ -34,7 +34,7 @@ use crate::translations::translations_2::{
 };
 use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_formatted_bytes_string, get_percentage_string,
+    get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, Language, RunningPage};
 
@@ -385,11 +385,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info_host.data_info.tot_packets().to_string()
                         } else {
-                            let mut bytes_string =
-                                get_formatted_bytes_string(data_info_host.data_info.tot_bytes())
-                                    .replace("  ", " ");
-                            bytes_string.push('B');
-                            bytes_string
+                            get_formatted_bytes_string_with_b(data_info_host.data_info.tot_bytes())
                         })
                         .font(font),
                     ),
@@ -516,11 +512,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info.tot_packets().to_string()
                         } else {
-                            let mut bytes_string =
-                                get_formatted_bytes_string(data_info.tot_bytes())
-                                    .replace("  ", " ");
-                            bytes_string.push('B');
-                            bytes_string
+                            get_formatted_bytes_string_with_b(data_info.tot_bytes())
                         })
                         .font(font),
                     ),
@@ -647,13 +639,13 @@ fn lazy_col_info(
                 Text::new(format!(
                     "{}:\n   {}",
                     filtered_bytes_translation(sniffer.language),
-                    &get_formatted_bytes_string(filtered_bytes)
+                    &get_formatted_bytes_string_with_b(filtered_bytes)
                 ))
             } else {
                 Text::new(format!(
                     "{}:\n   {} {}",
                     filtered_bytes_translation(sniffer.language),
-                    &get_formatted_bytes_string(filtered_bytes),
+                    &get_formatted_bytes_string_with_b(filtered_bytes),
                     of_total_translation(
                         sniffer.language,
                         &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes)

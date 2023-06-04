@@ -64,7 +64,7 @@ pub fn get_connection_color(traffic_direction: TrafficDirection, style: StyleTyp
     }
 }
 
-/// Returns a String representing a quantity of bytes with their proper multiple (KB, MB, GB, TB)
+/// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
     let mut multiple_transmitted = String::new();
     #[allow(clippy::cast_precision_loss)]
@@ -97,6 +97,13 @@ pub fn get_formatted_bytes_string(bytes: u128) -> String {
         // with multiple
         format!("{n:.1} {multiple_transmitted}")
     }
+}
+
+/// Returns a String representing a quantity of bytes with its proper multiple (KB, MB, GB, TB)
+pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
+    let mut bytes_string = get_formatted_bytes_string(bytes).replace("  ", " ");
+    bytes_string.push('B');
+    bytes_string
 }
 
 pub fn get_report_path() -> PathBuf {

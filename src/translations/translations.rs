@@ -1471,24 +1471,23 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
 }
 
 pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> String {
-    let trimmed_value = value.trim();
     match language {
-        Language::EN => format!("{trimmed_value} bytes have been exchanged"),
-        Language::IT => format!("{trimmed_value} byte sono stati scambiati"),
-        Language::FR => format!("{trimmed_value} octets ont été échangé"),
-        Language::ES => format!("{trimmed_value} byte/s han sido intercambiado/s"),
-        Language::PL => format!("Wymieniono {trimmed_value} bajtów"),
-        Language::DE => format!("{trimmed_value} Bytes wurden ausgetauscht"),
-        Language::UK => format!("{trimmed_value} байтів було обміняно"),
-        Language::ZH => format!("已交换字节 {trimmed_value}"),
-        Language::RO => format!("au fost transferați {trimmed_value} octeți"),
-        Language::KO => format!("바이트 {trimmed_value} 가 교환되었습니다"),
-        Language::TR => format!("{trimmed_value} bayt aktarıldı"),
-        Language::RU => format!("{trimmed_value} байт обмена информацией"),
-        Language::PT => format!("Foram trocados {trimmed_value} bytes"),
-        Language::EL => format!("{trimmed_value} bytes έχουν ανταλλαγεί"),
-        Language::FA => format!("{trimmed_value} بایت مبادله شده است"),
-        Language::SV => format!("{trimmed_value} bytes har utbytts"),
+        Language::EN => format!("{value} have been exchanged"),
+        Language::IT => format!("{value} sono stati scambiati"),
+        Language::FR => format!("{value} ont été échangé"),
+        Language::ES => format!("{value} han sido intercambiado/s"),
+        Language::PL => format!("Wymieniono {value}"),
+        Language::DE => format!("{value} wurden ausgetauscht"),
+        Language::UK => format!("{value} було обміняно"),
+        Language::ZH => format!("已交换字节 {value}"),
+        Language::RO => format!("au fost transferați {value}"),
+        Language::KO => format!("바이트 {value} 가 교환되었습니다"),
+        Language::TR => format!("{value} aktarıldı"),
+        Language::RU => format!("{value} обмена информацией"),
+        Language::PT => format!("Foram trocados {value}"),
+        Language::EL => format!("{value} έχουν ανταλλαγεί"),
+        Language::FA => format!("{value} بایت مبادله شده است"),
+        Language::SV => format!("{value} har utbytts"),
     }
 }
 

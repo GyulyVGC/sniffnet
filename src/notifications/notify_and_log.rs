@@ -66,7 +66,6 @@ pub fn notify_and_log(
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::BytesThresholdExceeded(BytesThresholdExceeded {
                     threshold: notifications.bytes_notification.previous_threshold,
-                    byte_multiple: notifications.bytes_notification.byte_multiple,
                     incoming: received_bytes_entry.try_into().unwrap(),
                     outgoing: sent_bytes_entry.try_into().unwrap(),
                     timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),

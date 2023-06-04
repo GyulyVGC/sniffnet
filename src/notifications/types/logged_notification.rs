@@ -1,6 +1,5 @@
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
-use crate::ByteMultiple;
 
 /// Enum representing the possible notification events.
 pub enum LoggedNotification {
@@ -23,7 +22,6 @@ pub struct PacketsThresholdExceeded {
 #[derive(Clone)]
 pub struct BytesThresholdExceeded {
     pub(crate) threshold: u64,
-    pub(crate) byte_multiple: ByteMultiple,
     pub(crate) incoming: u32,
     pub(crate) outgoing: u32,
     pub(crate) timestamp: String,

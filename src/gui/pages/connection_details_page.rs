@@ -17,8 +17,8 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
-    application_protocol_translation, bytes_translation, hide_translation, incoming_translation,
-    outgoing_translation, packets_translation, transport_protocol_translation,
+    application_protocol_translation, hide_translation, incoming_translation, outgoing_translation,
+    packets_translation, transport_protocol_translation,
 };
 use crate::translations::translations_2::{
     administrative_entity_translation, connection_details_translation, destination_translation,
@@ -26,7 +26,7 @@ use crate::translations::translations_2::{
     transmitted_data_translation,
 };
 use crate::utils::countries::{get_computer_tooltip, get_flag_tooltip, FLAGS_WIDTH_BIG};
-use crate::utils::formatted_strings::{get_formatted_bytes_string, get_socket_address};
+use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::{Language, Sniffer, StyleType};
 
 pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Container<Message> {
@@ -252,15 +252,14 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         )
         .push(
             Text::new(format!(
-                "{} ({}):\n   {} {}\n   {} {}",
+                "{} ({}):\n   {}\n   {} {}",
                 transmitted_data_translation(sniffer.language),
                 if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
                     outgoing_translation(sniffer.language).to_lowercase()
                 } else {
                     incoming_translation(sniffer.language).to_lowercase()
                 },
-                get_formatted_bytes_string(val.transmitted_bytes).trim(),
-                bytes_translation(sniffer.language),
+                get_formatted_bytes_string_with_b(val.transmitted_bytes),
                 val.transmitted_packets,
                 packets_translation(sniffer.language),
             ))

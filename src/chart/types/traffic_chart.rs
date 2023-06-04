@@ -14,7 +14,7 @@ use crate::gui::styles::style_constants::{
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
-use crate::utils::formatted_strings::get_formatted_bytes_string;
+use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::{get_colors, ChartType, Language, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
@@ -136,9 +136,7 @@ impl Chart<Message> for TrafficChart {
                     .label_style(("notosans", 15).into_font().color(&self.color_font))
                     .y_labels(7)
                     .y_label_formatter(&|bytes| {
-                        get_formatted_bytes_string(u128::from(bytes.unsigned_abs()))
-                            .trim()
-                            .to_string()
+                        get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
                     })
                     .draw()
                     .unwrap();

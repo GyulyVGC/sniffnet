@@ -18,7 +18,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::UK => "Нова версія доступна!",
         Language::RO => "O versiune nouă este disponibilă!",
         Language::PL => "Nowsza wersja jest dostępna!",
-        _ => "A newer version is available on GitHub",
+        _ => "A newer version is available!",
     }
 }
 
