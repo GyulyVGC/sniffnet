@@ -13,7 +13,6 @@ use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
     ip_version_translation, sound_translation, transport_protocol_translation,
 };
-use crate::utils::countries::get_flag_from_language;
 use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
 
 pub fn ip_version_radios(
@@ -108,7 +107,7 @@ pub fn language_radios(
                         ),
                     )
                     .push(horizontal_space(Length::Fixed(8.0)))
-                    .push(get_flag_from_language(*option)),
+                    .push(option.get_flag()),
             ),
         );
     }

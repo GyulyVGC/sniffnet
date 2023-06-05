@@ -1,3 +1,9 @@
+use crate::utils::countries::{
+    CN, DE, ES, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
+};
+use iced::{Length, Renderer};
+use iced_native::svg::Handle;
+use iced_native::widget::Svg;
 use serde::{Deserialize, Serialize};
 
 /// This enum defines the available languages.
@@ -68,5 +74,27 @@ impl Language {
             Language::FA => "فارسی",
             Language::SV => "Svenska",
         }
+    }
+
+    pub fn get_flag(self) -> Svg<Renderer> {
+        Svg::new(Handle::from_memory(Vec::from(match self {
+            Language::ZH => CN,
+            Language::DE => DE,
+            Language::ES => ES,
+            Language::FR => FR,
+            Language::EN => GB,
+            Language::IT => IT,
+            Language::KO => KR,
+            Language::PL => PL,
+            Language::PT => PT,
+            Language::RO => RO,
+            Language::RU => RU,
+            Language::TR => TR,
+            Language::UK => UA,
+            Language::EL => GR,
+            Language::FA => IR,
+            Language::SV => SE,
+        })))
+        .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }
 }

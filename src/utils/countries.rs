@@ -286,28 +286,6 @@ pub const BROADCAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3
 pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-unknown.svg");
 pub const COMPUTER: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-computer.svg");
 
-pub fn get_flag_from_language(language: Language) -> Svg<Renderer> {
-    Svg::new(Handle::from_memory(Vec::from(match language {
-        Language::ZH => CN,
-        Language::DE => DE,
-        Language::ES => ES,
-        Language::FR => FR,
-        Language::EN => GB,
-        Language::IT => IT,
-        Language::KO => KR,
-        Language::PL => PL,
-        Language::PT => PT,
-        Language::RO => RO,
-        Language::RU => RU,
-        Language::TR => TR,
-        Language::UK => UA,
-        Language::EL => GR,
-        Language::FA => IR,
-        Language::SV => SE,
-    })))
-    .width(Length::Fixed(FLAGS_WIDTH_SMALL))
-}
-
 #[allow(clippy::too_many_lines)]
 fn get_flag_from_country_code(
     country: &str,
