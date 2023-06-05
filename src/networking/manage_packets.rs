@@ -153,12 +153,6 @@ pub fn modify_or_insert_in_map(
         // determine traffic direction
         traffic_direction =
             get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
-        // traffic_type = get_traffic_type(destination_ip, &my_interface_addresses, traffic_direction);
-        // is_local = is_local_connection(address_to_lookup, &my_interface_addresses);
-        // (
-        //     get_country_code(address_to_lookup.clone(), country_db_reader),
-        //     asn(address_to_lookup.clone(), asn_db_reader),
-        // )
     };
 
     let mut info_traffic = info_traffic_mutex
@@ -183,12 +177,7 @@ pub fn modify_or_insert_in_map(
             app_protocol: application_protocol,
             very_long_address,
             traffic_direction,
-            // traffic_type,
-            // country,
-            // asn,
-            // r_dns: None,
             index,
-            // is_local,
         })
         .clone();
 

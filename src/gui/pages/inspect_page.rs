@@ -184,31 +184,14 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     StyleTuple(sniffer.style, ElementType::Standard),
                 )),
             )
-            .push(
-                Row::new()
-                    .height(Length::FillPortion(2))
-                    .align_items(Alignment::Center)
-                    .spacing(10)
-                    .push(if sniffer.page_number > 1 {
-                        Container::new(get_button_change_page(sniffer.style, false).width(25.0))
-                    } else {
-                        Container::new(horizontal_space(25.0))
-                    })
-                    .push(
-                        Text::new(showing_results_translation(
-                            sniffer.language,
-                            start_entry_num,
-                            end_entry_num,
-                            results_number,
-                        ))
-                        .font(font),
-                    )
-                    .push(if sniffer.page_number < (results_number + 20 - 1) / 20 {
-                        Container::new(get_button_change_page(sniffer.style, true).width(25.0))
-                    } else {
-                        Container::new(horizontal_space(25.0))
-                    }),
-            );
+            .push(get_change_page_row(
+                sniffer.style,
+                sniffer.language,
+                sniffer.page_number,
+                start_entry_num,
+                end_entry_num,
+                results_number,
+            ));
     } else {
         col_report = col_report.push(
             Column::new()
@@ -261,19 +244,11 @@ fn filters_col(
             .size(FONT_SIZE_TITLE),
     );
     if search_params.is_some_filter_active() {
-        title_row = title_row.push(
-            button(
-                Text::new("x")
-                    .font(font)
-                    .horizontal_alignment(Horizontal::Center)
-                    .size(15),
-            )
-            .padding(2)
-            .height(Length::Fixed(20.0))
-            .width(Length::Fixed(20.0))
-            .style(StyleTuple(style, ElementType::Standard).into())
-            .on_press(Message::Search(SearchParameters::default())),
-        );
+        title_row = title_row.push(button_clear_filter(
+            SearchParameters::default(),
+            style,
+            font,
+        ));
     }
 
     Column::new()
@@ -370,34 +345,28 @@ fn filter_input(
 ) -> Container<'static, Message> {
     let is_filter_active = !filter_value.is_empty();
 
-    let button_clear = button(
-        Text::new("x")
-            .font(font)
-            .horizontal_alignment(Horizontal::Center)
-            .size(15),
-    )
-    .padding(2)
-    .height(Length::Fixed(20.0))
-    .width(Length::Fixed(20.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
-    .on_press(Message::Search(match filter_input_type {
-        FilterInputType::App => SearchParameters {
-            app: String::new(),
-            ..search_params.clone()
+    let button_clear = button_clear_filter(
+        match filter_input_type {
+            FilterInputType::App => SearchParameters {
+                app: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Domain => SearchParameters {
+                domain: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Country => SearchParameters {
+                country: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::AS => SearchParameters {
+                as_name: String::new(),
+                ..search_params.clone()
+            },
         },
-        FilterInputType::Domain => SearchParameters {
-            domain: String::new(),
-            ..search_params.clone()
-        },
-        FilterInputType::Country => SearchParameters {
-            country: String::new(),
-            ..search_params.clone()
-        },
-        FilterInputType::AS => SearchParameters {
-            as_name: String::new(),
-            ..search_params.clone()
-        },
-    }));
+        style,
+        font,
+    );
 
     let input = TextInput::new("-", filter_value)
         .on_input(move |new_value| {
@@ -472,6 +441,39 @@ fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, 
     .on_press(Message::UpdatePageNumber(increment))
 }
 
+fn get_change_page_row(
+    style: StyleType,
+    language: Language,
+    page_number: usize,
+    start_entry_num: usize,
+    end_entry_num: usize,
+    results_number: usize,
+) -> Row<'static, Message> {
+    Row::new()
+        .height(Length::FillPortion(2))
+        .align_items(Alignment::Center)
+        .spacing(10)
+        .push(if page_number > 1 {
+            Container::new(get_button_change_page(style, false).width(25.0))
+        } else {
+            Container::new(horizontal_space(25.0))
+        })
+        .push(
+            Text::new(showing_results_translation(
+                language,
+                start_entry_num,
+                end_entry_num,
+                results_number,
+            ))
+            .font(get_font(style)),
+        )
+        .push(if page_number < (results_number + 20 - 1) / 20 {
+            Container::new(get_button_change_page(style, true).width(25.0))
+        } else {
+            Container::new(horizontal_space(25.0))
+        })
+}
+
 fn get_button_open_report(
     style: StyleType,
     language: Language,
@@ -495,4 +497,22 @@ fn get_button_open_report(
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(style, ElementType::Tooltip),
         ))
+}
+
+fn button_clear_filter(
+    new_search_parameters: SearchParameters,
+    style: StyleType,
+    font: Font,
+) -> Button<'static, Message> {
+    button(
+        Text::new("x")
+            .font(font)
+            .horizontal_alignment(Horizontal::Center)
+            .size(15),
+    )
+    .padding(2)
+    .height(Length::Fixed(20.0))
+    .width(Length::Fixed(20.0))
+    .style(StyleTuple(style, ElementType::Standard).into())
+    .on_press(Message::Search(new_search_parameters))
 }

@@ -57,6 +57,10 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
         get_colors(self.0).text_body
     }
 
+    fn disabled_color(&self, _style: &Self::Style) -> Color {
+        Color::BLACK
+    }
+
     fn selection_color(&self, _: &Self::Style) -> Color {
         let color = get_colors(self.0).text_body;
         Color {
@@ -81,9 +85,5 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
         text_input::StyleSheet::active(self, style)
-    }
-
-    fn disabled_color(&self, _style: &Self::Style) -> Color {
-        Color::BLACK
     }
 }

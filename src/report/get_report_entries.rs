@@ -13,7 +13,7 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 
-/// Returns the indexes of the elements which satisfy the search constraints and belong to the given page,
+/// Returns the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(
     sniffer: &Sniffer,
