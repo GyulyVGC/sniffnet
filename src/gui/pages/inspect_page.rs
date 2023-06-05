@@ -140,7 +140,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .width(Length::Fill)
         .align_items(Alignment::Center);
     col_report = col_report
-        .push(Text::new("       Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
+        .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
         .push(Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
             sniffer.style,
             ElementType::Standard,
@@ -154,7 +154,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!("  {}{}", key.print_gui(), val.print_gui()))
+                Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
                     .style(iced::theme::Text::Color(entry_color))
                     .font(SARASA_MONO_SC_BOLD),
             )
@@ -232,7 +232,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .push(
             Container::new(col_report)
                 .padding([10, 7, 7, 7])
-                .width(Length::Fixed(1035.0))
+                .width(Length::Fixed(1042.0))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
                     StyleTuple(sniffer.style, ElementType::BorderedRound),
                 )),

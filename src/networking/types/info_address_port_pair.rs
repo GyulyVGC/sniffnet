@@ -56,7 +56,7 @@ impl Default for InfoAddressPortPair {
 impl InfoAddressPortPair {
     pub fn print_gui(&self) -> String {
         self.to_string()
-            .get(0..37)
+            .get(0..35)
             .unwrap()
             .to_string()
             .replace('|', "")
