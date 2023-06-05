@@ -7,6 +7,7 @@ use etherparse::{Ethernet2Header, IpHeader, TransportHeader};
 use maxminddb::Reader;
 use pcap::{Active, Address, Capture, Device};
 
+use crate::countries::country_utils::get_country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info::DataInfo;
@@ -17,7 +18,6 @@ use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::asn::asn;
-use crate::utils::countries::get_country_code;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
@@ -217,7 +217,7 @@ pub fn reverse_dns_lookup(
         traffic_direction,
     );
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
-    let country = get_country_code(&address_to_lookup, country_db_reader);
+    let country = get_country(&address_to_lookup, country_db_reader);
     let asn = asn(&address_to_lookup, asn_db_reader);
     let r_dns = if let Ok(result) = lookup_result {
         if result.is_empty() {

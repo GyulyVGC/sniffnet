@@ -1,4 +1,4 @@
-use crate::utils::countries::{
+use crate::countries::flags_pictures::{
     CN, DE, ES, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
 };
 use iced::{Length, Renderer};

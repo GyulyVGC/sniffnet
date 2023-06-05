@@ -7,6 +7,7 @@ use std::thread;
 use etherparse::PacketHeaders;
 use pcap::{Active, Capture};
 
+use crate::countries::country_utils::COUNTRY_MMDB;
 use crate::networking::manage_packets::{
     analyze_link_header, analyze_network_header, analyze_transport_header, get_address_to_lookup,
     modify_or_insert_in_map, reverse_dns_lookup,
@@ -18,7 +19,6 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::asn::ASN_MMDB;
-use crate::utils::countries::COUNTRY_MMDB;
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according

@@ -6,6 +6,8 @@ use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, vertical_space};
 
+use crate::countries::country_utils::get_flag_tooltip;
+use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -24,7 +26,6 @@ use crate::translations::translations::{
     packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation,
     threshold_translation,
 };
-use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
@@ -328,7 +329,7 @@ fn favorite_notification_log(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(get_flag_tooltip(
-            &country,
+            country,
             FLAGS_WIDTH_BIG,
             logged_notification.data_info_host.is_local,
             logged_notification.data_info_host.traffic_type,

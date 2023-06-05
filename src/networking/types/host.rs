@@ -1,3 +1,4 @@
+use crate::countries::types::country::Country;
 use crate::networking::types::asn::Asn;
 
 /// Struct to represent a network host
@@ -8,5 +9,5 @@ pub struct Host {
     /// Autonomous System which operates the host
     pub asn: Asn,
     /// Country
-    pub country: String,
+    pub country: Country,
 }

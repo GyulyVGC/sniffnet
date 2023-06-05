@@ -33,6 +33,7 @@ use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
 mod configs;
+mod countries;
 mod gui;
 mod networking;
 mod notifications;

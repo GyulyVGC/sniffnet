@@ -10,6 +10,8 @@ use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
 use iced_native::widget::{horizontal_space, Rule};
 
+use crate::countries::country_utils::get_flag_tooltip;
+use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
@@ -32,7 +34,6 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     only_top_30_hosts_translation,
 };
-use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_BIG};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
@@ -419,7 +420,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             .spacing(5)
             .push(star_button)
             .push(get_flag_tooltip(
-                &host.country,
+                host.country,
                 FLAGS_WIDTH_BIG,
                 data_info_host.is_local,
                 data_info_host.traffic_type,
@@ -433,7 +434,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 .padding([5, 15, 5, 10])
                 .on_press(Message::Search(SearchParameters {
                     domain: host.domain.clone(),
-                    country: host.country.clone(),
+                    country: host.country.to_string().clone(),
                     as_name: host.asn.name.clone(),
                     ..SearchParameters::default()
                 }))

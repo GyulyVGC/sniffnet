@@ -3,6 +3,8 @@ use std::sync::{Arc, Mutex};
 
 use iced::widget::Tooltip;
 
+use crate::countries::country_utils::get_flag_tooltip;
+use crate::countries::flags_pictures::FLAGS_WIDTH_SMALL;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -10,7 +12,6 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::utils::countries::{get_flag_tooltip, FLAGS_WIDTH_SMALL};
 use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
@@ -74,6 +75,7 @@ pub fn get_searched_entries(
                         .unwrap()
                         .1
                         .country
+                        .to_string()
                         .to_lowercase()
                         .starts_with(&search_parameters.country.to_lowercase()),
                 );
@@ -135,7 +137,7 @@ pub fn get_searched_entries(
                     .get(&host)
                     .unwrap_or(default_host_info);
                 let flag = get_flag_tooltip(
-                    &host.country,
+                    host.country,
                     FLAGS_WIDTH_SMALL,
                     host_info.is_local,
                     host_info.traffic_type,
