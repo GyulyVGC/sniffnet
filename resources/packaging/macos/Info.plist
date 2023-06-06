@@ -10,7 +10,7 @@
         <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
         <key>CFBundleName</key><string>Sniffnet</string>
         <key>CFBundlePackageType</key><string>APPL</string>
-        <key>CFBundleShortVersionString</key><string>1.0.0</string>
+        <key>CFBundleShortVersionString</key><string>0.0.0</string>
         <key>CFBundleVersion</key><string>20221123.150927</string>
         <key>CSResourcesFileMapped</key><true/>
         <key>LSRequiresCarbon</key><true/>

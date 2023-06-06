@@ -208,7 +208,7 @@ jobs:
 
       - name: Install packaging tools
         run: |
-          cargo install cargo-bundle
+          cargo install cargo-bundle toml-cli
           brew install create-dmg
 
       - uses: actions/download-artifact@v3
@@ -218,14 +218,17 @@ jobs:
 
       - name: Package for macOS
         run: |
+          VERSION=$(toml get Cargo.toml package.version --raw)
           cargo bundle --release
           lipo -create -output target/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet \
             target/x86_64-apple-darwin/release/sniffnet \
             target/aarch64-apple-darwin/release/sniffnet
-          cp resources/packaging/macos/wrapper.sh \
-             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
+          chmod +x target/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet
+          sed -i "s/0\.0\.0/${VERSION}/g" resources/packaging/macos/Info.plist
           cp resources/packaging/macos/Info.plist \
              target/release/bundle/osx/Sniffnet.app/Contents/Info.plist
+          cp resources/packaging/macos/wrapper.sh \
+             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
           mkdir artifacts
           create-dmg \
             --volname "Sniffnet Installer" \
@@ -236,7 +239,7 @@ jobs:
             --app-drop-link 620 240 \
             --icon "Sniffnet.app" 300 240 \
             --hide-extension "Sniffnet.app" \
-            "artifacts/sniffnet-universal.dmg" \
+            "artifacts/sniffnet-${VERSION}-universal.dmg" \
             "target/release/bundle/osx/"
 
       - name: Upload package artifacts
