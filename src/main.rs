@@ -2,11 +2,9 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// use std::path::Path; // TODO: Uncomment to set window icon
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
-// use iced::window::icon; // TODO: Uncomment to set window icon
 use iced::window::{PlatformSpecific, Position};
 use iced::{window, Application, Settings};
 
@@ -98,13 +96,6 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    // TODO: Uncomment to set window icon
-    // let icon_path = "resources/packaging/windows/graphics/sniffnet_icon.png";
-    // let icon = match get_icon(icon_path) {
-    //     Ok(icon) => icon,
-    //     Err(err) => panic!("Error: {:?}", err)
-    // };
-
     Sniffer::run(Settings {
         id: None,
         window: window::Settings {
@@ -117,7 +108,7 @@ pub fn main() -> iced::Result {
             decorations: true,
             transparent: false,
             always_on_top: false,
-            icon: None, // TODO: Replace with 'Some(icon)' to set window icon
+            icon: None,
             platform_specific: PlatformSpecific::default(),
         },
         flags: Sniffer::new(
@@ -138,11 +129,3 @@ pub fn main() -> iced::Result {
         try_opengles_first: false,
     })
 }
-
-// TODO: Uncomment to set window icon
-// fn get_icon(file_path: &str) -> Result<icon::Icon, Box<dyn std::error::Error>> {
-//     let icon_path = Path::new(file_path);
-//     let icon = icon::from_file(icon_path)?;
-//
-//     Ok(icon)
-// }
