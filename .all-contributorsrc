@@ -252,5 +252,6 @@
   "projectName": "sniffnet",
   "projectOwner": "GyulyVGC",
   "linkToUsage": false,
-  "commitType": "docs"
+  "commitType": "docs",
+  "contributorsSortAlphabetically": true
 }
