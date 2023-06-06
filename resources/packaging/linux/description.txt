@@ -1,0 +1,18 @@
+Features:
+Choose a network adapter of your PC to inspect
+Select a set of filters to apply to the observed traffic;
+View overall statistics about your Internet traffic;
+View real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing);
+Get details about domain names and network providers of the hosts you are exchanging traffic with;
+Identify connections in your local network;
+Get information about the country of the remote hosts (IP geolocation);
+Save your favorite network hosts;
+Set custom notifications to inform you when defined network events occur;
+Choose the style that fits you the most from 4 different available themes;
+Inspect each of your network connections in real time;
+Save complete textual report with detailed information for each network connection:
+Source and destination IP addresses,
+Source and destination ports,
+Carried protocols,
+Amount of exchanged packets and bytes,
+Initial and final timestamp of information exchange

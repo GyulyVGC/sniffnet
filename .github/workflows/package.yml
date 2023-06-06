@@ -2,6 +2,9 @@ name: Package
 
 on:
   workflow_dispatch:
+    secrets:
+      NPCAP_OEM_URL:
+        required: true
   workflow_call:
     secrets:
       NPCAP_OEM_URL:
@@ -9,12 +12,189 @@ on:
 
 jobs:
 
-  package:
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ${{ matrix.os }}-latest
     strategy:
+      fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu
+            arch: amd64
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu
+            arch: i386
+            target: i686-unknown-linux-gnu
+          - os: ubuntu
+            arch: arm64
+            target: aarch64-unknown-linux-gnu
+          - os: ubuntu
+            arch: armhf
+            target: armv7-unknown-linux-gnueabihf
+          - os: macos
+            arch: amd64
+            target: x86_64-apple-darwin
+          - os: macos
+            arch: arm64
+            target: aarch64-apple-darwin
+          - os: windows
+            arch: amd64
+            target: x86_64-pc-windows-msvc
+          - os: windows
+            arch: i386
+            target: i686-pc-windows-msvc
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        if: ${{ matrix.os == 'windows' }}
+        shell: powershell
+        run: .\resources\packaging\windows\scripts\npcap.ps1 -ARCH ${{ matrix.arch }} -OEM "${{ secrets.NPCAP_OEM_URL }}"
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+
+      - name: Add build targets
+        if: ${{ matrix.os == 'macos' }}
+        run: |
+          rustup target add \
+            x86_64-apple-darwin \
+            aarch64-apple-darwin
+
+      - name: Add build targets
+        if: ${{ matrix.os == 'windows' }}
+        run: |
+          rustup target add `
+            x86_64-pc-windows-msvc `
+            i686-pc-windows-msvc
+
+      - name: Install Cross
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build binary
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Build binary
+        if: ${{ matrix.os == 'macos' || matrix.os == 'windows' }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.target }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.os }}
+          path: |
+            target/*/release/sniffnet
+            target/*/release/sniffnet.exe
+          if-no-files-found: error
+
+  deb:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: apt update -y && apt install -y curl build-essential
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+
+      - name: Install packaging tools
+        run: cargo install cargo-deb
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-ubuntu
+          path: target/
+
+      - name: Package for Debian-based Linux distros
+        shell: bash
+        run: |
+          targets=(
+            x86_64-unknown-linux-gnu
+            i686-unknown-linux-gnu
+            aarch64-unknown-linux-gnu
+            armv7-unknown-linux-gnueabihf
+          )
+          mkdir artifacts
+          for target in "${targets[@]}"; do
+            cargo deb --no-build --no-strip --target $target
+            mv target/${target}/debian/*.deb artifacts/
+          done
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb
+          path: artifacts/
+
+  rpm:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: dnf update -y && dnf install -y @development-tools patchelf
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+
+      - name: Install packaging tools
+        run: cargo install cargo-generate-rpm
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-ubuntu
+          path: target/
+
+      - name: Package for RPM-based Linux distros
+        shell: bash
+        run: |
+          targets=(
+            x86_64-unknown-linux-gnu
+            aarch64-unknown-linux-gnu
+          )
+          mkdir artifacts
+          for target in "${targets[@]}"; do
+            patchelf --replace-needed libpcap.so.0.8 libpcap.so target/${target}/release/sniffnet
+            cargo generate-rpm --target $target
+            mv target/${target}/generate-rpm/*.rpm artifacts/
+          done
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rpm
+          path: artifacts/
+
+  dmg:
+    runs-on: macos-latest
+    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,80 +204,89 @@ jobs:
         with:
           toolchain: stable
           profile: minimal
-          components: rustfmt, clippy
           default: true
 
-      - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install libpcap-dev libasound2-dev
-
-      - name: Install Windows dependency - npcap sdk
-        if: matrix.os == 'windows-latest'
-        run: |
-          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
-          Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
-          echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
-
-      - name: Install Windows dependency - npcap dll
-        if: matrix.os == 'windows-latest'
-        run: |
-          Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
-          C:/npcap-oem.exe /S
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
-
-      - name: Package for Debian-based Linux distros
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          cargo install cargo-deb
-          cargo deb
-          mkdir artifacts
-          mv target/debian/*.deb artifacts/
-
-#      doesn't work properly on ubuntu-latest!
-#      - name: Package for RPM-based Linux distros
-#        if: matrix.os == 'ubuntu-latest'
-#        run: |
-#          cargo install cargo-generate-rpm
-#          cargo generate-rpm
-#          mv target/generate-rpm/*.rpm artifacts/
-
-      - name: Package DMG for macOS
-        if: matrix.os == 'macOS-latest'
+      - name: Install packaging tools
         run: |
           cargo install cargo-bundle
-          cargo bundle --release
-          rm target/release/bundle/osx/sniffnet.app/Contents/Info.plist
-          cp resources/Info.plist target/release/bundle/osx/sniffnet.app/Contents/Info.plist
-          cp resources/wrapper.sh target/release/bundle/osx/sniffnet.app/Contents/MacOS/wrapper.sh
           brew install create-dmg
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-macos
+          path: target/
+
+      - name: Package for macOS
+        run: |
+          cargo bundle --release
+          lipo -create -output target/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet \
+            target/x86_64-apple-darwin/release/sniffnet \
+            target/aarch64-apple-darwin/release/sniffnet
+          cp resources/packaging/macos/wrapper.sh \
+             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
+          cp resources/packaging/macos/Info.plist \
+             target/release/bundle/osx/Sniffnet.app/Contents/Info.plist
           mkdir artifacts
           create-dmg \
             --volname "Sniffnet Installer" \
-            --background "resources/logos/bg_dmg.png" \
+            --background "resources/packaging/macos/graphics/dmg_bg.png" \
             --window-pos 200 120 \
             --window-size 900 450 \
             --icon-size 100 \
             --app-drop-link 620 240 \
             --icon "Sniffnet.app" 300 240 \
             --hide-extension "Sniffnet.app" \
-            "artifacts/sniffnet.dmg" \
+            "artifacts/sniffnet-universal.dmg" \
             "target/release/bundle/osx/"
 
-      - name: Package MSI for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          cargo install cargo-wix
-          cargo wix --nocapture
-          mkdir artifacts
-          mv target/wix/*.msi artifacts/
-
-      - name: Upload artifacts
+      - name: Upload package artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-artifacts
+          name: dmg
+          path: artifacts/
+
+  msi:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        shell: powershell
+        run: .\resources\packaging\windows\scripts\wix.ps1
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+
+      - name: Install packaging tools
+        run: cargo install cargo-wix
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-windows
+          path: target/
+
+      - name: Package for Microsoft Windows
+        shell: powershell
+        run: |
+          $targets=@(
+            "x86_64-pc-windows-msvc",
+            "i686-pc-windows-msvc"
+          )
+          New-Item -ItemType Directory -Path artifacts
+          foreach ($target in $targets)
+          {
+            cargo wix --no-build --nocapture --target $target
+            Move-Item -Path target\wix\*.msi -Destination .\artifacts\
+          }
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: msi
           path: artifacts/
