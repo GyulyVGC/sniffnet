@@ -66,19 +66,21 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    let config_settings_result = confy::load::<ConfigSettings>("sniffnet", "settings");
-    if config_settings_result.is_err() {
-        // it happens when changing the ConfigSettings struct fields during development or after new releases
-        confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
-    }
-    let config_settings = config_settings_result.unwrap_or(ConfigSettings::default());
+    let config_settings = match confy::load::<ConfigSettings>("sniffnet", "settings") {
+        Ok(setting) => { setting }
+        Err(_) => {
+            confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
+            ConfigSettings::default()
+        }
+    };
 
-    let config_device_result = confy::load::<ConfigDevice>("sniffnet", "device");
-    if config_device_result.is_err() {
-        // it happens when changing the ConfigDevice struct fields during development or after new releases
-        confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
-    }
-    let config_device = config_device_result.unwrap_or(ConfigDevice::default());
+    let config_device = match confy::load::<ConfigDevice>("sniffnet", "device") {
+        Ok(device) => { device }
+        Err(_) => {
+            confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
+            ConfigDevice::default()
+        }
+    };
 
     thread::Builder::new()
         .name("thread_check_updates".to_string())
