@@ -221,8 +221,7 @@ jobs:
         shell: bash
         run: |
           VERSION=$(toml get Cargo.toml package.version --raw)
-          GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
-          sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GIT_HASH}/g" resources/packaging/macos/Info.plist
+          sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GITHUB_SHA:0:7}/g" resources/packaging/macos/Info.plist
           cargo bundle --release
           targets=(
             x86_64-apple-darwin
