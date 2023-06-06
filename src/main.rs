@@ -67,7 +67,7 @@ pub fn main() -> iced::Result {
     }));
 
     let config_settings = match confy::load::<ConfigSettings>("sniffnet", "settings") {
-        Ok(setting) => { setting }
+        Ok(setting) => setting,
         Err(_) => {
             confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
             ConfigSettings::default()
@@ -75,7 +75,7 @@ pub fn main() -> iced::Result {
     };
 
     let config_device = match confy::load::<ConfigDevice>("sniffnet", "device") {
-        Ok(device) => { device }
+        Ok(device) => device,
         Err(_) => {
             confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
             ConfigDevice::default()

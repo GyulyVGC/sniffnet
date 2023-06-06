@@ -85,7 +85,7 @@ impl Application for Sniffer {
                 } else {
                     content.into()
                 }
-            },
+            }
             Some(modal) => {
                 let overlay = match modal {
                     MyModal::Quit => get_exit_overlay(style, font, self.language),
@@ -98,47 +98,41 @@ impl Application for Sniffer {
                 Modal::new(content, overlay)
                     .on_blur(Message::HideModal)
                     .into()
-            },
+            }
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
         use iced_native::keyboard::{Event, KeyCode, Modifiers};
         let hot_keys_subscription =
-            iced_native::subscription::events_with(|event, _|
-                match event {
-                    iced_native::Event::Keyboard(Event::KeyPressed { key_code, modifiers}) => {
-                        match modifiers {
-                            Modifiers::COMMAND => {
-                                match key_code {
-                                    KeyCode::Q => Some(Message::Quit),
-                                    KeyCode::O => Some(Message::OpenReport),
-                                    KeyCode::Comma => Some(Message::OpenLastSettings),
-                                    KeyCode::Backspace => Some(Message::ResetButtonPressed),
-                                    KeyCode::D => Some(Message::CtrlDPressed),
-                                    KeyCode::Left => Some(Message::ArrowPressed(false)),
-                                    KeyCode::Right => Some(Message::ArrowPressed(true)),
-                                    _ => None,
-                                }
-                            },
-                            Modifiers::SHIFT => {
-                                match key_code {
-                                    KeyCode::Tab => Some(Message::SwitchPage(false)),
-                                    _ => None,
-                                }
-                            },
-                            _ => {
-                                match key_code {
-                                    KeyCode::Enter => Some(Message::ReturnKeyPressed),
-                                    KeyCode::Escape => Some(Message::EscKeyPressed),
-                                    KeyCode::Tab => Some(Message::SwitchPage(true)),
-                                    _ => None,
-                                }
-                            },
-                        }
-                    }
-                    _ => None,
-                });
+            iced_native::subscription::events_with(|event, _| match event {
+                iced_native::Event::Keyboard(Event::KeyPressed {
+                    key_code,
+                    modifiers,
+                }) => match modifiers {
+                    Modifiers::COMMAND => match key_code {
+                        KeyCode::Q => Some(Message::Quit),
+                        KeyCode::O => Some(Message::OpenReport),
+                        KeyCode::Comma => Some(Message::OpenLastSettings),
+                        KeyCode::Backspace => Some(Message::ResetButtonPressed),
+                        KeyCode::D => Some(Message::CtrlDPressed),
+                        KeyCode::Left => Some(Message::ArrowPressed(false)),
+                        KeyCode::Right => Some(Message::ArrowPressed(true)),
+                        _ => None,
+                    },
+                    Modifiers::SHIFT => match key_code {
+                        KeyCode::Tab => Some(Message::SwitchPage(false)),
+                        _ => None,
+                    },
+                    _ => match key_code {
+                        KeyCode::Enter => Some(Message::ReturnKeyPressed),
+                        KeyCode::Escape => Some(Message::EscKeyPressed),
+                        KeyCode::Tab => Some(Message::SwitchPage(true)),
+                        _ => None,
+                    },
+                },
+                _ => None,
+            });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
