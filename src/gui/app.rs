@@ -70,93 +70,67 @@ impl Application for Sniffer {
 
         let content = Column::new().push(header).push(body).push(footer);
 
-        if self.modal.is_none() && self.settings_page.is_none() {
-            content.into()
-        } else if self.modal.is_some() {
-            let overlay = match self.modal.unwrap() {
-                MyModal::Quit => get_exit_overlay(style, font, self.language),
-                MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
-                MyModal::ConnectionDetails(connection_index) => {
-                    connection_details_page(self, connection_index)
+        match self.modal {
+            None => {
+                if let Some(settings_page) = self.settings_page {
+                    let overlay = match settings_page {
+                        SettingsPage::Notifications => settings_notifications_page(self),
+                        SettingsPage::Appearance => settings_style_page(self),
+                        SettingsPage::Language => settings_language_page(self),
+                    };
+
+                    Modal::new(content, overlay)
+                        .on_blur(Message::CloseSettings)
+                        .into()
+                } else {
+                    content.into()
                 }
-            };
+            }
+            Some(modal) => {
+                let overlay = match modal {
+                    MyModal::Quit => get_exit_overlay(style, font, self.language),
+                    MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
+                    MyModal::ConnectionDetails(connection_index) => {
+                        connection_details_page(self, connection_index)
+                    }
+                };
 
-            Modal::new(content, overlay)
-                .on_blur(Message::HideModal)
-                .into()
-        } else {
-            let overlay = match self.settings_page.unwrap() {
-                SettingsPage::Notifications => settings_notifications_page(self),
-                SettingsPage::Appearance => settings_style_page(self),
-                SettingsPage::Language => settings_language_page(self),
-            };
-
-            Modal::new(content, overlay)
-                .on_blur(Message::CloseSettings)
-                .into()
+                Modal::new(content, overlay)
+                    .on_blur(Message::HideModal)
+                    .into()
+            }
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        const NO_MODIFIER: iced_native::keyboard::Modifiers =
-            iced_native::keyboard::Modifiers::empty();
+        use iced_native::keyboard::{Event, KeyCode, Modifiers};
         let hot_keys_subscription =
             iced_native::subscription::events_with(|event, _| match event {
-                // ctrl+Q => exit
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Q,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::Quit),
-                // return => return key pressed
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Enter,
-                    ..
-                }) => Some(Message::ReturnKeyPressed),
-                // esc => esc key pressed
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Escape,
-                    ..
-                }) => Some(Message::EscKeyPressed),
-                // tab => switch to next page
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Tab,
-                    modifiers: NO_MODIFIER,
-                }) => Some(Message::SwitchPage(true)),
-                // shift+tab => switch to previous page
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Tab,
-                    modifiers: iced_native::keyboard::Modifiers::SHIFT,
-                }) => Some(Message::SwitchPage(false)),
-                // ctrl+O => open full report
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::O,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::OpenReport),
-                // ctrl+, => open settings
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Comma,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::OpenLastSettings),
-                // backspace => reset button pressed
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Backspace,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::ResetButtonPressed),
-                // ctrl+D => ctrl+D keys pressed
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::D,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::CtrlDPressed),
-                // left arrow => one page before the current one
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Left,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::ArrowPressed(false)),
-                // right arrow => one page after the current one
-                iced_native::Event::Keyboard(iced_native::keyboard::Event::KeyPressed {
-                    key_code: iced_native::keyboard::KeyCode::Right,
-                    modifiers: iced_native::keyboard::Modifiers::COMMAND,
-                }) => Some(Message::ArrowPressed(true)),
+                iced_native::Event::Keyboard(Event::KeyPressed {
+                    key_code,
+                    modifiers,
+                }) => match modifiers {
+                    Modifiers::COMMAND => match key_code {
+                        KeyCode::Q => Some(Message::Quit),
+                        KeyCode::O => Some(Message::OpenReport),
+                        KeyCode::Comma => Some(Message::OpenLastSettings),
+                        KeyCode::Backspace => Some(Message::ResetButtonPressed),
+                        KeyCode::D => Some(Message::CtrlDPressed),
+                        KeyCode::Left => Some(Message::ArrowPressed(false)),
+                        KeyCode::Right => Some(Message::ArrowPressed(true)),
+                        _ => None,
+                    },
+                    Modifiers::SHIFT => match key_code {
+                        KeyCode::Tab => Some(Message::SwitchPage(false)),
+                        _ => None,
+                    },
+                    _ => match key_code {
+                        KeyCode::Enter => Some(Message::ReturnKeyPressed),
+                        KeyCode::Escape => Some(Message::EscKeyPressed),
+                        KeyCode::Tab => Some(Message::SwitchPage(true)),
+                        _ => None,
+                    },
+                },
                 _ => None,
             });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {
