@@ -66,20 +66,19 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    let config_settings = match confy::load::<ConfigSettings>("sniffnet", "settings") {
-        Ok(setting) => setting,
-        Err(_) => {
-            confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
-            ConfigSettings::default()
-        }
+    let config_settings = if let Ok(setting) = confy::load::<ConfigSettings>("sniffnet", "settings")
+    {
+        setting
+    } else {
+        confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
+        ConfigSettings::default()
     };
 
-    let config_device = match confy::load::<ConfigDevice>("sniffnet", "device") {
-        Ok(device) => device,
-        Err(_) => {
-            confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
-            ConfigDevice::default()
-        }
+    let config_device = if let Ok(device) = confy::load::<ConfigDevice>("sniffnet", "device") {
+        device
+    } else {
+        confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
+        ConfigDevice::default()
     };
 
     thread::Builder::new()
