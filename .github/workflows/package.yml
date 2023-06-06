@@ -217,30 +217,36 @@ jobs:
           path: target/
 
       - name: Package for macOS
+        shell: bash
         run: |
           VERSION=$(toml get Cargo.toml package.version --raw)
+          sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" resources/packaging/macos/Info.plist
           cargo bundle --release
-          lipo -create -output target/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet \
-            target/x86_64-apple-darwin/release/sniffnet \
-            target/aarch64-apple-darwin/release/sniffnet
-          chmod +x target/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet
-          sed -i "s/0\.0\.0/${VERSION}/g" resources/packaging/macos/Info.plist
-          cp resources/packaging/macos/Info.plist \
-             target/release/bundle/osx/Sniffnet.app/Contents/Info.plist
-          cp resources/packaging/macos/wrapper.sh \
-             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
+          targets=(
+            x86_64-apple-darwin
+            aarch64-apple-darwin
+          )
           mkdir artifacts
-          create-dmg \
-            --volname "Sniffnet Installer" \
-            --background "resources/packaging/macos/graphics/dmg_bg.png" \
-            --window-pos 200 120 \
-            --window-size 900 450 \
-            --icon-size 100 \
-            --app-drop-link 620 240 \
-            --icon "Sniffnet.app" 300 240 \
-            --hide-extension "Sniffnet.app" \
-            "artifacts/sniffnet-${VERSION}-universal.dmg" \
-            "target/release/bundle/osx/"
+          for target in "${targets[@]}"; do
+            cp -R target/release/bundle target/${target}/release
+            cp -f target/${target}/release/sniffnet \
+               target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet
+            cp resources/packaging/macos/wrapper.sh \
+               target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
+            cp resources/packaging/macos/Info.plist \
+               target/${target}/release/bundle/osx/Sniffnet.app/Contents/Info.plist
+            create-dmg \
+              --volname "Sniffnet Installer" \
+              --background "resources/packaging/macos/graphics/dmg_bg.png" \
+              --window-pos 200 120 \
+              --window-size 900 450 \
+              --icon-size 100 \
+              --app-drop-link 620 240 \
+              --icon "Sniffnet.app" 300 240 \
+              --hide-extension "Sniffnet.app" \
+              "artifacts/sniffnet-${VERSION}-${target%%-*}.dmg" \
+              "target/${target}/release/bundle/osx/"
+          done
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
