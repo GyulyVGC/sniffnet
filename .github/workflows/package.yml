@@ -149,6 +149,10 @@ jobs:
             cargo deb --no-build --no-strip --target $target
             mv target/${target}/debian/*.deb artifacts/
           done
+          mv artifacts/sniffnet*amd64.deb artifacts/Sniffnet_LinuxDEB_amd64.deb
+          mv artifacts/sniffnet*arm64.deb artifacts/Sniffnet_LinuxDEB_arm64.deb
+          mv artifacts/sniffnet*i386.deb artifacts/Sniffnet_LinuxDEB_i386.deb
+          mv artifacts/sniffnet*armhf.deb artifacts/Sniffnet_LinuxDEB_armhf.deb
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
@@ -196,6 +200,8 @@ jobs:
             cargo generate-rpm --target $target
             mv target/${target}/generate-rpm/*.rpm artifacts/
           done
+          mv artifacts/sniffnet-*x86_64.rpm artifacts/Sniffnet_LinuxRPM_x86_64.rpm
+          mv artifacts/sniffnet-*aarch64.rpm artifacts/Sniffnet_LinuxRPM_aarch64.rpm
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3

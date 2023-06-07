@@ -83,17 +83,17 @@ You can install Sniffnet in one of the following ways:
   - [macOS Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)
   - [macOS Apple Silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
 
-  ### Linux Debian-based
+  ### Linux DEB-based
 
-  - [Linux amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_amd64.deb)
-  - [Linux arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_arm64.deb)
-  - [Linux i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_i386.deb)
-  - [Linux armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_armhf.deb)
+  - [Linux amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)
+  - [Linux arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)
+  - [Linux i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)
+  - [Linux armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
 
 ### Linux RPM-based
 
-  - [Linux x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_x86_64.rpm)
-  - [Linux aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux_aarch64.rpm)
+  - [Linux x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)
+  - [Linux aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
 
 </details>
 
@@ -160,7 +160,7 @@ Depending on your operating system, you may need to install some dependencies to
 
   <summary>Linux dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
 
-  - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
+  - On [DEB-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
     - `libfontconfig1`
