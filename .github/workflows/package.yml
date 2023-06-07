@@ -4,10 +4,6 @@ on:
   push:
     tags:
       - v*
-  workflow_call:
-    secrets:
-      NPCAP_OEM_URL:
-        required: true
   workflow_dispatch:
 
 jobs:
@@ -49,6 +45,8 @@ jobs:
 
       - name: Install dependencies
         if: ${{ matrix.os == 'windows' }}
+        env:
+          NPCAP_OEM_URL: ${{ secrets.NPCAP_OEM_URL }}
         shell: powershell
         run: |
           Write-Host "::group::Npcap SDK"
@@ -57,7 +55,7 @@ jobs:
           Expand-Archive -LiteralPath "$env:TEMP\npcap-sdk.zip" -DestinationPath "$env:TEMP\npcap-sdk" -Verbose
           $LibPath = switch ($ARCH)
           {
-            "i386"  { "Lib"        }
+            "i386"  { "Lib"       }
             "amd64" { "Lib\x64"   }
             "arm64" { "Lib\ARM64" }
             default { throw "$ARCH is not supported!" }
@@ -65,7 +63,7 @@ jobs:
           Add-Content -Path "$env:GITHUB_ENV" -Value "LIB=$env:TEMP\npcap-sdk\$LibPath"
           Write-Host "::endgroup::"
           Write-Host "::group::Npcap DLL"
-          Invoke-WebRequest -Uri "${{ secrets.NPCAP_OEM_URL }}" -OutFile "$env:TEMP\npcap-oem.exe" -Verbose
+          Invoke-WebRequest -Uri "$env:NPCAP_OEM_URL" -OutFile "$env:TEMP\npcap-oem.exe" -Verbose
           Start-Process -FilePath "$env:TEMP\npcap-oem.exe" -ArgumentList "/S" -Wait
           Write-Host "::endgroup::"
 
