@@ -51,7 +51,24 @@ jobs:
       - name: Install dependencies
         if: ${{ matrix.os == 'windows' }}
         shell: powershell
-        run: .\resources\packaging\windows\scripts\npcap.ps1 -ARCH ${{ matrix.arch }} -OEM "${{ secrets.NPCAP_OEM_URL }}"
+        run: |
+          Write-Host "::group::Npcap SDK"
+          $ARCH = "${{ matrix.arch }}"
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "$env:TEMP\npcap-sdk.zip" -Verbose
+          Expand-Archive -LiteralPath "$env:TEMP\npcap-sdk.zip" -DestinationPath "$env:TEMP\npcap-sdk" -Verbose
+          $LibPath = switch ($ARCH)
+          {
+            "i386"  { "Lib"        }
+            "amd64" { "Lib\x64"   }
+            "arm64" { "Lib\ARM64" }
+            default { throw "$ARCH is not supported!" }
+          }
+          Add-Content -Path "$env:GITHUB_ENV" -Value "LIB=$env:TEMP\npcap-sdk\$LibPath"
+          Write-Host "::endgroup::"
+          Write-Host "::group::Npcap DLL"
+          Invoke-WebRequest -Uri "${{ secrets.NPCAP_OEM_URL }}" -OutFile "$env:TEMP\npcap-oem.exe" -Verbose
+          Start-Process -FilePath "$env:TEMP\npcap-oem.exe" -ArgumentList "/S" -Wait
+          Write-Host "::endgroup::"
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -264,7 +281,14 @@ jobs:
 
       - name: Install dependencies
         shell: powershell
-        run: .\resources\packaging\windows\scripts\wix.ps1
+        run: |
+          Write-Host "::group::WiX Toolset"
+          Invoke-WebRequest `
+            -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" `
+            -OutFile "$env:TEMP\wix-binaries.zip" -Verbose
+          Expand-Archive -LiteralPath "$env:TEMP\wix-binaries.zip" -DestinationPath "$env:TEMP\wix" -Verbose
+          Set-Item -Path env:Path -Value "$env:Path;$env:TEMP\wix"
+          Write-Host "::endgroup::"
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1

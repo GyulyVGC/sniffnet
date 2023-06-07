@@ -8,11 +8,8 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
-[*.{ps1,rtf}]
+[*.rtf]
 end_of_line = crlf
-
-[*.ps1]
-indent_style = tab
 
 [{.gitignore,*.desktop}]
 indent_size = 0
