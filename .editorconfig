@@ -8,6 +8,9 @@ indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
+[*.rtf]
+end_of_line = crlf
+
 [{.gitignore,*.desktop}]
 indent_size = 0
 
