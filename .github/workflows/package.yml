@@ -255,9 +255,11 @@ jobs:
               --app-drop-link 620 240 \
               --icon "Sniffnet.app" 300 240 \
               --hide-extension "Sniffnet.app" \
-              "artifacts/sniffnet-${VERSION}-${target%%-*}.dmg" \
+              "artifacts/sniffnet-${target%%-*}.dmg" \
               "target/${target}/release/bundle/osx/"
           done
+          mv artifacts/sniffnet-x86_64.dmg artifacts/Sniffnet_macOS_Intel.dmg
+          mv artifacts/sniffnet-aarch64.dmg artifacts/Sniffnet_macOS_AppleSilicon.dmg
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
