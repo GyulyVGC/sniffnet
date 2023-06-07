@@ -222,7 +222,7 @@ jobs:
 
       - name: Install packaging tools
         run: |
-          cargo install cargo-bundle toml-cli
+          cargo install toml-cli
           brew install create-dmg
 
       - uses: actions/download-artifact@v3
@@ -235,20 +235,21 @@ jobs:
         run: |
           VERSION=$(toml get Cargo.toml package.version --raw)
           sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GITHUB_SHA:0:7}/g" resources/packaging/macos/Info.plist
-          cargo bundle --release
           targets=(
             x86_64-apple-darwin
             aarch64-apple-darwin
           )
           mkdir artifacts
           for target in "${targets[@]}"; do
-            cp -R target/release/bundle target/${target}/release
-            cp -f target/${target}/release/sniffnet \
-               target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/sniffnet
-            cp resources/packaging/macos/wrapper.sh \
-               target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/wrapper.sh
+            mkdir -p target/${target}/release/bundle/osx/Sniffnet.app/Contents/{MacOS,Resources}
             cp resources/packaging/macos/Info.plist \
-               target/${target}/release/bundle/osx/Sniffnet.app/Contents/Info.plist
+              target/${target}/release/bundle/osx/Sniffnet.app/Contents/
+            cp resources/packaging/macos/graphics/sniffnet.icns \
+              target/${target}/release/bundle/osx/Sniffnet.app/Contents/Resources/
+            cp target/${target}/release/sniffnet \
+              target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+            cp resources/packaging/macos/wrapper.sh \
+              target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
             create-dmg \
               --volname "Sniffnet Installer" \
               --background "resources/packaging/macos/graphics/dmg_bg.png" \

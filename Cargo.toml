@@ -152,15 +152,5 @@ fontconfig = "*"
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-[package.metadata.bundle]
-name = "Sniffnet"
-category = "Utilities"
-identifier = "io.github.gyulyvgc.sniffnet"
-icon = [
-    "resources/packaging/macos/graphics/sniffnet.icns"
-]
-
-#───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
 [package.metadata.wix]
 include = [".\\resources\\packaging\\windows\\setup.wxs"]
