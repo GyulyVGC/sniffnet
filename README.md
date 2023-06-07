@@ -81,7 +81,7 @@ You can install Sniffnet in one of the following ways:
   ### macOS
   
   - [macOS Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)
-  - [macOS Apple Silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.msi)
+  - [macOS Apple Silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
 
   ### Linux Debian-based
 
