@@ -1,9 +1,6 @@
 name: Package
 
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch:
 
 jobs:
@@ -304,6 +301,7 @@ jobs:
       - name: Package for Microsoft Windows
         shell: powershell
         run: |
+          $VERSION=(toml get Cargo.toml package.version --raw)
           $targets=@(
             "i686-pc-windows-msvc",
             "x86_64-pc-windows-msvc"
@@ -312,7 +310,8 @@ jobs:
           foreach ($target in $targets)
           {
             cargo wix --no-build --nocapture --target $target
-            Move-Item -Path target\wix\*.msi -Destination .\artifacts\
+            Move-Item -Path target\wix\sniffnet-$VERSION-x86.msi -Destination .\artifacts\Sniffnet_Windows_32-bit.msi
+            Move-Item -Path target\wix\sniffnet-$VERSION-x86_64.msi -Destination .\artifacts\Sniffnet_Windows_64-bit.msi
           }
 
       - name: Upload package artifacts
