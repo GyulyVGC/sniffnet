@@ -5,6 +5,6 @@ Name=Sniffnet
 Comment=Application to comfortably monitor your network traffic
 Categories=Network;Utility;
 Icon=sniffnet
-Exec=sniffnet
+Exec=/usr/bin/sniffnet
 StartupWMClass=sniffnet
 Terminal=false
