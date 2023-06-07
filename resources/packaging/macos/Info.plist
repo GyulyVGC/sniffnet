@@ -13,6 +13,7 @@
         <key>CFBundleShortVersionString</key><string>0.0.0</string>
         <key>CFBundleVersion</key><string>fffffff</string>
         <key>CSResourcesFileMapped</key><true/>
+        <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
         <key>LSRequiresCarbon</key><true/>
         <key>NSHighResolutionCapable</key><true/>
     </dict>
