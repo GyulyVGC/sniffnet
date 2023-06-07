@@ -1,15 +1,14 @@
 name: Package
 
 on:
-  workflow_dispatch:
   push:
-    secrets:
-      NPCAP_OEM_URL:
-        required: true
+    tags:
+      - v*
   workflow_call:
     secrets:
       NPCAP_OEM_URL:
         required: true
+  workflow_dispatch:
 
 jobs:
 
