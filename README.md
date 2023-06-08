@@ -68,6 +68,10 @@ You can install Sniffnet in one of the following ways:
   Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
   Below, for your convenience, you can find the direct links to the downloads.
 
+> **Note**
+>
+> If you are unsure which package to download, you should probably choose the first from your operating system list.
+
   ### Windows
 
   - [64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi) |
@@ -87,10 +91,6 @@ You can install Sniffnet in one of the following ways:
   
   - rpm: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) |
 [aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
-
-> **Note**
->
-> If you are unsure which package to download, you should probably choose the first from your operating system list.
 
 </details>
 
@@ -130,6 +130,18 @@ brew install sniffnet
 
   ```sh
 pacman -S sniffnet
+```
+
+</details>
+
+<details>
+
+  <summary>on NetBSD</summary>
+
+You can install Sniffnet from the official repositories via [pkgin](https://pkgin.net):
+
+  ```sh
+pkgin install sniffnet
 ```
 
 </details>
