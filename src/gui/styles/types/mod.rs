@@ -1,3 +1,4 @@
+pub(super) mod color_remote;
 pub mod element_type;
 pub mod palette;
 pub mod style_tuple;

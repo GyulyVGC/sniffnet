@@ -2,11 +2,13 @@
 
 use iced::Color;
 use plotters::style::RGBColor;
+use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
 use crate::StyleType;
+use super::color_remote::ColorDelegate;
 
 /// Set of colors to apply to GUI
 ///
@@ -17,24 +19,34 @@ use crate::StyleType;
 /// - `incoming` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
+#[derive(Deserialize, Serialize)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
+    #[serde(with = "ColorDelegate")]
     pub primary: Color,
     /// Secondary color of the GUI (header, footer, buttons' borders, radio selection)
+    #[serde(with = "ColorDelegate")]
     pub secondary: Color,
     /// Color of active buttons (when not hovered) and inactive tabs
+    #[serde(with = "ColorDelegate")]
     pub buttons: Color,
     /// Color of incoming connections
+    #[serde(with = "ColorDelegate")]
     pub incoming: Color,
     /// Color of outgoing connections
+    #[serde(with = "ColorDelegate")]
     pub outgoing: Color,
     /// Color of header and footer text
+    #[serde(with = "ColorDelegate")]
     pub text_headers: Color,
     /// Color of body and buttons text
+    #[serde(with = "ColorDelegate")]
     pub text_body: Color,
     /// Color of round container borders and scrollbar borders
+    #[serde(with = "ColorDelegate")]
     pub round_borders: Color,
     /// Color of round containers
+    #[serde(with = "ColorDelegate")]
     pub round_containers: Color,
 }
 
