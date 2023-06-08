@@ -3,14 +3,16 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## UNRELEASED
+## [1.2.1] - 2023-06-xx
 
+- Considerably improved the app packaging strategy (see [#246](https://github.com/GyulyVGC/sniffnet/pull/246) for more details), fixing various related issues ([#199](https://github.com/GyulyVGC/sniffnet/issues/199), [#220](https://github.com/GyulyVGC/sniffnet/issues/220), [#223](https://github.com/GyulyVGC/sniffnet/issues/223), [#224](https://github.com/GyulyVGC/sniffnet/issues/224), [#225](https://github.com/GyulyVGC/sniffnet/issues/225), [#242](https://github.com/GyulyVGC/sniffnet/issues/242))
 - Added Swedish translation 🇸🇪 ([#213](https://github.com/GyulyVGC/sniffnet/pull/213))
-- URLs update...
-- Updated existing translations to v1.2 (German, Spanish, Persian, Korean, Russian, Turkish, Ukrainian, and Chinese)
+- Updated existing translations to v1.2 (German - [#191](https://github.com/GyulyVGC/sniffnet/pull/191), Spanish - [#203](https://github.com/GyulyVGC/sniffnet/pull/203), Persian - [#193](https://github.com/GyulyVGC/sniffnet/pull/193), Korean - [#205](https://github.com/GyulyVGC/sniffnet/pull/205), Polish - [#244](https://github.com/GyulyVGC/sniffnet/pull/244), Romanian - [#241](https://github.com/GyulyVGC/sniffnet/pull/241), Russian - [#187](https://github.com/GyulyVGC/sniffnet/pull/187), Turkish - [#192](https://github.com/GyulyVGC/sniffnet/pull/192), Ukrainian - [#216](https://github.com/GyulyVGC/sniffnet/pull/216), and Chinese - [#214](https://github.com/GyulyVGC/sniffnet/pull/214))
 - Renamed "Administrative entity" to "Autonomous System name" to avoid confusion
 - Improved filter columns relative width to avoid the "Application protocol" label being cut when displayed in Swedish
-- Updated docs including installation instruction for Aarch Linux
+- Footer URLs have been updated to include links to Sniffnet's official website and GitHub Sponsor page
+- Updated docs including installation instruction for Aarch Linux ([#185](https://github.com/GyulyVGC/sniffnet/pull/185))
+- Minor improvements to code readability ([#248](https://github.com/GyulyVGC/sniffnet/pull/248)) and docs (([#235](https://github.com/GyulyVGC/sniffnet/pull/235)))
 
 
 ## [1.2.0] - 2023-05-18

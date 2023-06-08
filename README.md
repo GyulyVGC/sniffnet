@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 
 </div>
 
@@ -68,15 +68,10 @@ You can install Sniffnet in one of the following ways:
   Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
   Here for your convenience you can find the direct link to the downloads:
 
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
-  - [Linux (DEB)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.deb) (9.2 MB)
-  - [Linux (RPM)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.rpm) (11.4 MB)
-
   ### Windows
 
   - [Windows 64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)
-  - [Windows 32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)
+  - [Windows 32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi) (only for older architectures)
 
   ### macOS
   
@@ -87,8 +82,8 @@ You can install Sniffnet in one of the following ways:
 
   - [Linux amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)
   - [Linux arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)
-  - [Linux i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)
-  - [Linux armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
+  - [Linux i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) (only for older architectures)
+  - [Linux armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) (only for older architectures)
 
 ### Linux RPM-based
 
@@ -163,7 +158,7 @@ Depending on your operating system, you may need to install some dependencies to
   - On [DEB-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
-    - `libfontconfig1`
+    - `libfontconfig1-dev`
   - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
     - `libpcap-devel`
     - `alsa-lib-devel`

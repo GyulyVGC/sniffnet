@@ -200,8 +200,8 @@ jobs:
             cargo generate-rpm --target $target
             mv target/${target}/generate-rpm/*.rpm artifacts/
           done
-          mv artifacts/sniffnet-*x86_64.rpm artifacts/Sniffnet_LinuxRPM_x86_64.rpm
-          mv artifacts/sniffnet-*aarch64.rpm artifacts/Sniffnet_LinuxRPM_aarch64.rpm
+          mv artifacts/sniffnet*x86_64.rpm artifacts/Sniffnet_LinuxRPM_x86_64.rpm
+          mv artifacts/sniffnet*aarch64.rpm artifacts/Sniffnet_LinuxRPM_aarch64.rpm
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
@@ -265,8 +265,8 @@ jobs:
               "artifacts/sniffnet-${target%%-*}.dmg" \
               "target/${target}/release/bundle/osx/"
           done
-          mv artifacts/sniffnet-x86_64.dmg artifacts/Sniffnet_macOS_Intel.dmg
-          mv artifacts/sniffnet-aarch64.dmg artifacts/Sniffnet_macOS_AppleSilicon.dmg
+          mv artifacts/sniffnet*x86_64.dmg artifacts/Sniffnet_macOS_Intel.dmg
+          mv artifacts/sniffnet*aarch64.dmg artifacts/Sniffnet_macOS_AppleSilicon.dmg
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
@@ -318,8 +318,8 @@ jobs:
           foreach ($target in $targets)
           {
             cargo wix --no-build --nocapture --target $target
-            Move-Item -Path target\wix\sniffnet-*-x86.msi -Destination .\artifacts\Sniffnet_Windows_32-bit.msi
-            Move-Item -Path target\wix\sniffnet-*-x86_64.msi -Destination .\artifacts\Sniffnet_Windows_64-bit.msi
+            Move-Item -Path target\wix\sniffnet*x86.msi -Destination .\artifacts\Sniffnet_Windows_32-bit.msi
+            Move-Item -Path target\wix\sniffnet*x86_64.msi -Destination .\artifacts\Sniffnet_Windows_64-bit.msi
           }
 
       - name: Upload package artifacts
