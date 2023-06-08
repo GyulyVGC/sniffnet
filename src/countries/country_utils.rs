@@ -1,3 +1,10 @@
+use iced::widget::Tooltip;
+use iced::{Length, Renderer};
+use iced_native::svg::Handle;
+use iced_native::widget::tooltip::Position;
+use iced_native::widget::Svg;
+use maxminddb::{geoip2, MaxMindDBError, Reader};
+
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
     BJ, BL, BM, BN, BO, BQ, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK,
@@ -22,12 +29,6 @@ use crate::translations::translations_2::{
     local_translation, unknown_translation, your_network_adapter_translation,
 };
 use crate::{Language, StyleType};
-use iced::widget::Tooltip;
-use iced::{Length, Renderer};
-use iced_native::svg::Handle;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::Svg;
-use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 

@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 
 </div>
 
@@ -64,13 +64,31 @@ You can install Sniffnet in one of the following ways:
 
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
-  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
+  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases/latest). <br>
   Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
-  Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
-  - [Linux (DEB)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.deb) (9.2 MB)
-  - [Linux (RPM)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.rpm) (11.4 MB)
+  Below, for your convenience, you can find the direct links to the downloads.
+
+  ### Windows
+
+  - [Windows 64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)
+  - [Windows 32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi) (only for older architectures)
+
+  ### macOS
+  
+  - [macOS Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)
+  - [macOS Apple Silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
+
+  ### Linux DEB-based
+
+  - [Linux amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)
+  - [Linux arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)
+  - [Linux i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) (only for older architectures)
+  - [Linux armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) (only for older architectures)
+
+### Linux RPM-based
+
+  - [Linux x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)
+  - [Linux aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
 
 </details>
 
@@ -128,7 +146,7 @@ Depending on your operating system, you may need to install some dependencies to
 
   - Download the [Npcap SDK](https://npcap.com/#download).
 
-  - Add the SDK's ```/Lib/x64``` folder to your ```LIB``` environment variable.
+  - Add the SDK's ```/Lib/x64``` (or ```/Lib```) folder to your ```LIB``` environment variable.
 
 </details>
 
@@ -137,10 +155,10 @@ Depending on your operating system, you may need to install some dependencies to
 
   <summary>Linux dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474239-c48d37af-d4c1-4a94-9207-0d46c6d75f1f.png" width="35px"/></summary>
 
-  - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
+  - On [DEB-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
-    - `libfontconfig1`
+    - `libfontconfig1-dev`
   - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
     - `libpcap-devel`
     - `alsa-lib-devel`
