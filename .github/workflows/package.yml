@@ -249,6 +249,7 @@ jobs:
               target/${target}/release/bundle/osx/Sniffnet.app/Contents/
             cp resources/packaging/macos/graphics/sniffnet.icns \
               target/${target}/release/bundle/osx/Sniffnet.app/Contents/Resources/
+            chmod +x target/${target}/release/sniffnet
             cp target/${target}/release/sniffnet \
               target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
             cp resources/packaging/macos/wrapper.sh \
