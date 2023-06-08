@@ -66,7 +66,7 @@ You can install Sniffnet in one of the following ways:
 
   You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases/latest). <br>
   Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
-  Below, for your convenience, you can find the direct link to the downloads.
+  Below, for your convenience, you can find the direct links to the downloads.
 
   ### Windows
 

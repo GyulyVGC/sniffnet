@@ -3,7 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.2.1] - 2023-06-xx
+## [1.2.1] - 2023-06-08
 
 - Considerably refined the app packaging strategy (see [#246](https://github.com/GyulyVGC/sniffnet/pull/246) for more details), fixing various related issues ([#199](https://github.com/GyulyVGC/sniffnet/issues/199), [#220](https://github.com/GyulyVGC/sniffnet/issues/220), [#223](https://github.com/GyulyVGC/sniffnet/issues/223), [#224](https://github.com/GyulyVGC/sniffnet/issues/224), [#225](https://github.com/GyulyVGC/sniffnet/issues/225), [#242](https://github.com/GyulyVGC/sniffnet/issues/242))
 - Added button to clear all the current search filters quickly in inspect page
