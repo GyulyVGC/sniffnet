@@ -248,10 +248,7 @@ pub fn reverse_dns_lookup(
         .hosts
         .entry(new_host.clone())
         .and_modify(|data_info_host| {
-            data_info_host.data_info.outgoing_packets += other_data.outgoing_packets;
-            data_info_host.data_info.outgoing_bytes += other_data.outgoing_bytes;
-            data_info_host.data_info.incoming_packets += other_data.incoming_packets;
-            data_info_host.data_info.incoming_bytes += other_data.incoming_bytes;
+            data_info_host.data_info += other_data;
         })
         .or_insert(DataInfoHost {
             data_info: other_data,

@@ -179,22 +179,10 @@ pub fn parse_packets(
                                     // Useful to NOT perform again a rDNS lookup for this entry
                                     info_traffic.addresses_waiting_resolution.insert(
                                         address_to_lookup,
-                                        if new_info.traffic_direction == TrafficDirection::Outgoing
-                                        {
-                                            DataInfo {
-                                                incoming_packets: 0,
-                                                outgoing_packets: 1,
-                                                incoming_bytes: 0,
-                                                outgoing_bytes: exchanged_bytes,
-                                            }
-                                        } else {
-                                            DataInfo {
-                                                incoming_packets: 1,
-                                                outgoing_packets: 0,
-                                                incoming_bytes: exchanged_bytes,
-                                                outgoing_bytes: 0,
-                                            }
-                                        },
+                                        DataInfo::new_with_first_packet(
+                                            exchanged_bytes,
+                                            new_info.traffic_direction,
+                                        ),
                                     );
 
                                     // launch new thread to resolve host name
@@ -224,15 +212,10 @@ pub fn parse_packets(
                                         .addresses_waiting_resolution
                                         .entry(address_to_lookup)
                                         .and_modify(|data_info| {
-                                            if new_info.traffic_direction
-                                                == TrafficDirection::Outgoing
-                                            {
-                                                data_info.outgoing_packets += 1;
-                                                data_info.outgoing_bytes += exchanged_bytes;
-                                            } else {
-                                                data_info.incoming_packets += 1;
-                                                data_info.incoming_bytes += exchanged_bytes;
-                                            }
+                                            data_info.add_packet(
+                                                exchanged_bytes,
+                                                new_info.traffic_direction,
+                                            );
                                         });
                                 }
                                 (_, true) => {
@@ -245,16 +228,10 @@ pub fn parse_packets(
                                         .1
                                         .clone();
                                     info_traffic.hosts.entry(host).and_modify(|data_info_host| {
-                                        if new_info.traffic_direction == TrafficDirection::Outgoing
-                                        {
-                                            data_info_host.data_info.outgoing_packets += 1;
-                                            data_info_host.data_info.outgoing_bytes +=
-                                                exchanged_bytes;
-                                        } else {
-                                            data_info_host.data_info.incoming_packets += 1;
-                                            data_info_host.data_info.incoming_bytes +=
-                                                exchanged_bytes;
-                                        }
+                                        data_info_host.data_info.add_packet(
+                                            exchanged_bytes,
+                                            new_info.traffic_direction,
+                                        );
                                     });
                                 }
                             }
@@ -264,31 +241,13 @@ pub fn parse_packets(
                                 .app_protocols
                                 .entry(application_protocol)
                                 .and_modify(|data_info| {
-                                    if new_info.traffic_direction == TrafficDirection::Outgoing {
-                                        data_info.outgoing_packets += 1;
-                                        data_info.outgoing_bytes += exchanged_bytes;
-                                    } else {
-                                        data_info.incoming_packets += 1;
-                                        data_info.incoming_bytes += exchanged_bytes;
-                                    }
+                                    data_info
+                                        .add_packet(exchanged_bytes, new_info.traffic_direction);
                                 })
-                                .or_insert(
-                                    if new_info.traffic_direction == TrafficDirection::Outgoing {
-                                        DataInfo {
-                                            incoming_packets: 0,
-                                            outgoing_packets: 1,
-                                            incoming_bytes: 0,
-                                            outgoing_bytes: exchanged_bytes,
-                                        }
-                                    } else {
-                                        DataInfo {
-                                            incoming_packets: 1,
-                                            outgoing_packets: 0,
-                                            incoming_bytes: exchanged_bytes,
-                                            outgoing_bytes: 0,
-                                        }
-                                    },
-                                );
+                                .or_insert(DataInfo::new_with_first_packet(
+                                    exchanged_bytes,
+                                    new_info.traffic_direction,
+                                ));
                         }
                     }
                 }
