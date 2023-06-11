@@ -252,6 +252,24 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "0323pin",
+      "name": "pin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/90570748?v=4",
+      "profile": "https://github.com/0323pin",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "Aloso",
+      "name": "Ludwig Stecher",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15658558?v=4",
+      "profile": "https://aloso.github.io/",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,

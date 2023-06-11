@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 
 </div>
 
@@ -64,13 +64,33 @@ You can install Sniffnet in one of the following ways:
 
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
-  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases). <br>
+  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases/latest). <br>
   Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
-  Here for your convenience you can find the direct link to the downloads:
-  - [Windows](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows.msi) (13.1 MB)
-  - [macOS](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_MacOS.dmg) (12.4 MB)
-  - [Linux (DEB)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.deb) (9.2 MB)
-  - [Linux (RPM)](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Linux.rpm) (11.4 MB)
+  Below, for your convenience, you can find the direct links to the downloads.
+
+> **Note**
+>
+> If you are unsure which package to download, you should probably choose the first from your operating system list.
+
+  ### Windows
+
+  - [64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi) |
+[32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)
+
+  ### macOS
+  
+  - [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) |
+[Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
+
+  ### Linux
+
+  - deb: [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) |
+[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) | 
+[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) |
+[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
+  
+  - rpm: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) |
+[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
 
 </details>
 
@@ -114,6 +134,18 @@ pacman -S sniffnet
 
 </details>
 
+<details>
+
+  <summary>on NetBSD</summary>
+
+You can install Sniffnet from the official repositories via [pkgin](https://pkgin.net):
+
+  ```sh
+pkgin install sniffnet
+```
+
+</details>
+
 ## Required dependencies
 
 Depending on your operating system, you may need to install some dependencies to run Sniffnet:
@@ -128,7 +160,11 @@ Depending on your operating system, you may need to install some dependencies to
 
   - Download the [Npcap SDK](https://npcap.com/#download).
 
-  - Add the SDK's ```/Lib/x64``` folder to your ```LIB``` environment variable.
+  - Add the SDK's ```/Lib/x64``` (or ```/Lib```) folder to your ```LIB``` environment variable.
+
+> **Note**
+>
+> If you just need to run the app, perform only the first step (second and third steps are required only for the build).
 
 </details>
 
@@ -140,11 +176,15 @@ Depending on your operating system, you may need to install some dependencies to
   - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
-    - `libfontconfig1`
+    - `libfontconfig1-dev`
   - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
     - `libpcap-devel`
     - `alsa-lib-devel`
     - `fontconfig-devel`
+
+> **Note**
+>
+> If you just need to run the app, the `-dev` / `-devel` part of the dependencies is not needed (it's required only for the build).
 
   Note that if you are not running as root, you need to set capabilities to inspect a network adapter:
 

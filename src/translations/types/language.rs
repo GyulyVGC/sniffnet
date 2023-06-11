@@ -1,10 +1,11 @@
-use crate::countries::flags_pictures::{
-    CN, DE, ES, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
-};
 use iced::{Length, Renderer};
 use iced_native::svg::Handle;
 use iced_native::widget::Svg;
 use serde::{Deserialize, Serialize};
+
+use crate::countries::flags_pictures::{
+    CN, DE, ES, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
+};
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]

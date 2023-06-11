@@ -191,5 +191,5 @@ pub fn get_app_entries(
         }
     });
 
-    sorted_vec.iter().map(|e| (*e.0, e.1.clone())).collect()
+    sorted_vec.iter().map(|e| (*e.0, *e.1)).collect()
 }
