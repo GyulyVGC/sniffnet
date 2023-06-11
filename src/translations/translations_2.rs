@@ -35,7 +35,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::TR => "İncele",
         Language::FA => "بازرسی",
         Language::KO => "검사",
-        Language::ZH => "检索",
+        Language::ZH => "检查",
         Language::UK => "Інспектувати",
         Language::RO => "Inspectați",
         _ => "Inspect",
