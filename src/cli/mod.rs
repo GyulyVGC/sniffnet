@@ -10,7 +10,7 @@ pub fn parse_cli_args() {
                 print_help();
                 break;
             }
-            "--version" | "-V" => {
+            "--version" | "-v" | "-V" => {
                 print_version();
                 break;
             }
@@ -32,7 +32,7 @@ Usage: sniffnet [OPTIONS]
 
 Options:
     -h, --help      Print help
-    -V, --version   Print version info"
+    -v, --version   Print version info"
     );
 }
 
