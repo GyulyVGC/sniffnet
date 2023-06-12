@@ -5,6 +5,7 @@
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
+use cli::parse_cli_args;
 use iced::window::{PlatformSpecific, Position};
 use iced::{window, Application, Settings};
 
@@ -32,6 +33,7 @@ use utils::formatted_strings::print_cli_welcome_message;
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
+mod cli;
 mod configs;
 mod countries;
 mod gui;
@@ -95,6 +97,7 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
+    parse_cli_args();
     print_cli_welcome_message();
 
     Sniffer::run(Settings {
