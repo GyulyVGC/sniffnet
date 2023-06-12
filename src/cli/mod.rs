@@ -6,21 +6,15 @@ pub fn parse_cli_args() {
     let args = std::env::args().skip(1);
     for arg in args {
         match arg.as_str() {
-            "--help" | "-h" => {
-                print_help();
-                break;
-            }
-            "--version" | "-v" | "-V" => {
-                print_version();
-                break;
-            }
+            "--help" | "-h" => print_help(),
+            "--version" | "-v" | "-V" => print_version(),
             _ => {
                 unknown_argument(&arg);
                 std::process::exit(1);
             }
         }
+        std::process::exit(0);
     }
-    std::process::exit(0);
 }
 
 fn print_help() {
