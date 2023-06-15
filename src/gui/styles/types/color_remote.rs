@@ -9,7 +9,9 @@ use serde::{
 };
 
 // #aabbcc is seven bytes long
-const HEX_STR_LEN: usize = 7;
+const HEX_STR_BASE_LEN: usize = 7;
+// #aabbccdd is nine bytes long
+const HEX_STR_ALPHA_LEN: usize = 9;
 
 /// Serde delegate type for [iced::Color].
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -32,7 +34,7 @@ impl<'de> Deserialize<'de> for ColorDelegate {
         // The string should be seven bytes long (octothorpe + six hex chars).
         // Safety: Hexadecimal is ASCII so bytes are okay here.
         let hex_len = hex.len();
-        if hex_len == HEX_STR_LEN {
+        if hex_len == HEX_STR_BASE_LEN || hex_len == HEX_STR_ALPHA_LEN {
             let color = hex
                 .strip_prefix('#') // Remove the octothorpe or fail
                 .ok_or_else(|| {
@@ -47,6 +49,7 @@ impl<'de> Deserialize<'de> for ColorDelegate {
                 .step_by(2) // Step by every first hex char of the two char sequence
                 .zip(hex.bytes().skip(2).step_by(2)) // Step by every second hex char
                 .map(|(first, second)| {
+                    // Parse hex strings
                     let maybe_hex = [first, second];
                     std::str::from_utf8(&maybe_hex)
                         .map_err(|_| {
@@ -60,17 +63,17 @@ impl<'de> Deserialize<'de> for ColorDelegate {
                 })
                 .collect::<Result<Vec<f32>, _>>()?;
 
-            // Alpha isn't part of the color scheme. The resulting Vec should always have three elements.
+            // Alpha isn't always part of the color scheme. The resulting Vec should always have at least three elements.
             Ok(Self {
                 r: color[0],
                 g: color[1],
                 b: color[2],
-                a: 1.0,
+                a: *color.get(3).unwrap_or(&1.0),
             })
         } else {
             Err(DeErrorTrait::invalid_length(
                 hex_len,
-                &&*format!("{HEX_STR_LEN}"),
+                &&*format!("{HEX_STR_BASE_LEN} or {HEX_STR_ALPHA_LEN}"),
             ))
         }
     }
@@ -100,6 +103,8 @@ impl Serialize for ColorDelegate {
 #[cfg(test)]
 mod tests {
     use super::ColorDelegate;
+    use iced::Color;
+    use serde::{Deserialize, Serialize};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
 
     // https://github.com/catppuccin/catppuccin
@@ -109,6 +114,22 @@ mod tests {
         g: 194.0 / 255.0,
         b: 231.0 / 255.0,
         a: 1.0,
+    };
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    #[serde(transparent)]
+    struct DelegateTest {
+        #[serde(flatten, with = "ColorDelegate")]
+        color: Color,
+    }
+
+    const ICED_CATPPUCCIN_PINK: DelegateTest = DelegateTest {
+        color: Color {
+            r: 245.0 / 255.0,
+            g: 194.0 / 255.0,
+            b: 231.0 / 255.0,
+            a: 1.0,
+        },
     };
 
     // Invalid hex colors
@@ -121,6 +142,12 @@ mod tests {
     #[test]
     fn test_working_color_round_trip() {
         assert_tokens(&CATPPUCCIN_PINK, &[Token::Str(CATPPUCCIN_PINK_HEX)]);
+    }
+
+    // Test iced::Color using ColorDelegate as a delegate
+    #[test]
+    fn test_working_iced_color_round_trip() {
+        serde_test::assert_de_tokens(&ICED_CATPPUCCIN_PINK, &[Token::Str(CATPPUCCIN_PINK_HEX)]);
     }
 
     // Missing octothorpe should fail.
@@ -137,7 +164,7 @@ mod tests {
     fn test_len_too_small_color_de() {
         assert_de_tokens_error::<ColorDelegate>(
             &[Token::Str(CATPPUCCIN_PINK_TRUNCATED)],
-            "invalid length 5, expected 7",
+            "invalid length 5, expected 7 or 9",
         );
     }
 
@@ -145,7 +172,7 @@ mod tests {
     fn test_len_too_large_color_de() {
         assert_de_tokens_error::<ColorDelegate>(
             &[Token::Str(CATPPUCCIN_PINK_TOO_LONG)],
-            "invalid length 15, expected 7",
+            "invalid length 15, expected 7 or 9",
         );
     }
 

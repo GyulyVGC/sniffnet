@@ -4,11 +4,11 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
+use super::color_remote::ColorDelegate;
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
 use crate::StyleType;
-use super::color_remote::ColorDelegate;
 
 /// Set of colors to apply to GUI
 ///
@@ -19,7 +19,7 @@ use super::color_remote::ColorDelegate;
 /// - `incoming` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
     #[serde(with = "ColorDelegate")]
@@ -93,4 +93,15 @@ impl Default for Palette {
     fn default() -> Self {
         get_colors(StyleType::Night)
     }
+}
+
+/// Extension colors for custom themes.
+// NOTE: The purpose of this type is primarily to avoid modifying the existing [Palette].
+#[derive(Debug, PartialEq, Deserialize)]
+pub struct PaletteExtension {
+    /// Color of favorites star
+    #[serde(with = "ColorDelegate")]
+    pub starred: Color,
+    /// Badge alpha channel
+    pub badge_alpha: f32,
 }
