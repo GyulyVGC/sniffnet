@@ -4,7 +4,7 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use super::color_remote::ColorDelegate;
+use super::color_remote::{deserialize_color, serialize_color};
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
@@ -22,31 +22,31 @@ use crate::StyleType;
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub primary: Color,
     /// Secondary color of the GUI (header, footer, buttons' borders, radio selection)
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub secondary: Color,
     /// Color of active buttons (when not hovered) and inactive tabs
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub buttons: Color,
     /// Color of incoming connections
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub incoming: Color,
     /// Color of outgoing connections
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub outgoing: Color,
     /// Color of header and footer text
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub text_headers: Color,
     /// Color of body and buttons text
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub text_body: Color,
     /// Color of round container borders and scrollbar borders
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub round_borders: Color,
     /// Color of round containers
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub round_containers: Color,
 }
 
@@ -100,7 +100,7 @@ impl Default for Palette {
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct PaletteExtension {
     /// Color of favorites star
-    #[serde(with = "ColorDelegate")]
+    #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]
     pub starred: Color,
     /// Badge alpha channel
     pub badge_alpha: f32,

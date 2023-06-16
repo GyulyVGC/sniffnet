@@ -11,8 +11,12 @@ use std::{
 
 use super::palette::{Palette, PaletteExtension};
 
+#[cfg(test)]
+use super::color_remote::color_partialeq;
+
 /// Custom color scheme data including the palette, name, and location of the toml.
-#[derive(Debug, PartialEq, Deserialize)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Deserialize)]
 pub struct CustomStyle {
     /// Display name of the color scheme.
     /// This is the user facing color scheme name that may be displayed in the UI.
@@ -36,8 +40,8 @@ pub struct CustomStyle {
     pub palette: CustomPalette,
 }
 
-/// Palette for [CustomStyle].
-#[derive(Deserialize, Debug, PartialEq)]
+/// Base [Palette] and extension colors for [CustomStyle].
+#[derive(Debug, Deserialize)]
 pub struct CustomPalette {
     /// Base colors as used for the default sniffnet themes.
     #[serde(flatten)]
@@ -45,6 +49,58 @@ pub struct CustomPalette {
     /// Extension colors such as the yellow used for favorites.
     #[serde(flatten)]
     pub extension: PaletteExtension,
+}
+
+#[cfg(test)]
+impl PartialEq for CustomPalette {
+    fn eq(&self, other: &Self) -> bool {
+        let Palette {
+            primary,
+            secondary,
+            buttons,
+            incoming,
+            outgoing,
+            text_headers,
+            text_body,
+            round_borders,
+            round_containers,
+        } = self.base;
+
+        let PaletteExtension {
+            starred,
+            badge_alpha,
+        } = self.extension;
+
+        // Other
+        let Palette {
+            primary: primary_other,
+            secondary: secondary_other,
+            buttons: buttons_other,
+            incoming: incoming_other,
+            outgoing: outgoing_other,
+            text_headers: text_headers_other,
+            text_body: text_body_other,
+            round_borders: round_borders_other,
+            round_containers: round_containers_other,
+        } = other.base;
+
+        let PaletteExtension {
+            starred: starred_other,
+            badge_alpha: badge_alpha_other,
+        } = other.extension;
+
+        color_partialeq(primary, primary_other)
+            && color_partialeq(secondary, secondary_other)
+            && color_partialeq(buttons, buttons_other)
+            && color_partialeq(incoming, incoming_other)
+            && color_partialeq(outgoing, outgoing_other)
+            && color_partialeq(text_headers, text_headers_other)
+            && color_partialeq(text_body, text_body_other)
+            && color_partialeq(round_borders, round_borders_other)
+            && color_partialeq(round_containers, round_containers_other)
+            && color_partialeq(starred, starred_other)
+            && badge_alpha == badge_alpha_other
+    }
 }
 
 /// Deserialize [CustomStyle] by first deserializing a file path which in turn contains the style as TOML.
@@ -162,7 +218,7 @@ mod tests {
                     round_borders: Color {
                         r: 116.0 / 255.0,
                         g: 199.0 / 255.0,
-                        b: 250.0 / 255.0,
+                        b: 236.0 / 255.0,
                         a: 1.0,
                     },
                     round_containers: Color {
