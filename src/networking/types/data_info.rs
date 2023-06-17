@@ -1,7 +1,8 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use crate::networking::types::traffic_direction::TrafficDirection;
 use std::ops::AddAssign;
+
+use crate::networking::types::traffic_direction::TrafficDirection;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing
 #[derive(Clone, Default, Copy)]
