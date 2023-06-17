@@ -7,7 +7,7 @@ pub fn parse_cli_args() {
     for arg in args {
         match arg.as_str() {
             "--help" | "-h" => print_help(),
-            "--version" | "-v" | "-V" => print_version(),
+            "--version" | "-v" => print_version(),
             _ => {
                 unknown_argument(&arg);
                 std::process::exit(1);
@@ -18,26 +18,23 @@ pub fn parse_cli_args() {
 }
 
 fn print_help() {
-    print_version();
-    eprintln!(
-        "Application to comfortably monitor your Internet traffic
-
-Usage: sniffnet [OPTIONS]
-
-Options:
-    -h, --help      Print help
-    -v, --version   Print version info"
+    println!(
+        "Application to comfortably monitor your Internet traffic\n\
+        Usage: sniffnet [OPTIONS]\n\
+        Options:\n\
+        \t-h, --help      Print help\n\
+        \t-v, --version   Print version info\n\
+        (Run without options to start the app)"
     );
 }
 
 fn print_version() {
-    eprintln!("sniffnet {APP_VERSION}");
+    println!("sniffnet {APP_VERSION}");
 }
 
 fn unknown_argument(arg: &str) {
     eprintln!(
-        "error: unknown argument '{arg}'
-
-For more information, try '--help'"
+        "sniffnet: unknown option '{arg}'\n\
+        For more information, try 'sniffnet --help'"
     );
 }

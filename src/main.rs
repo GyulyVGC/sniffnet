@@ -5,12 +5,12 @@
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
-use cli::parse_cli_args;
 use iced::window::{PlatformSpecific, Position};
 use iced::{window, Application, Settings};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
+use cli::parse_cli_args;
 use configs::types::config_device::ConfigDevice;
 use configs::types::config_settings::ConfigSettings;
 use gui::pages::types::running_page::RunningPage;
@@ -48,6 +48,8 @@ mod utils;
 ///
 /// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
+    parse_cli_args();
+
     let current_capture_id1 = Arc::new(Mutex::new(0));
     let current_capture_id2 = current_capture_id1.clone();
 
@@ -97,7 +99,6 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    parse_cli_args();
     print_cli_welcome_message();
 
     Sniffer::run(Settings {
