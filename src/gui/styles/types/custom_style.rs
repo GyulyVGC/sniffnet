@@ -3,20 +3,22 @@
 //! ```toml
 //! ```
 
-use serde::{de::Error as DeErrorTrait, Deserialize, Deserializer, Serializer};
+use serde::{de::Error as DeErrorTrait, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
+    collections::HashMap,
     fs::File,
     io::{BufReader, Read},
 };
 
 use super::palette::{Palette, PaletteExtension};
+use crate::Language;
 
 #[cfg(test)]
 use super::color_remote::color_partialeq;
 
 /// Custom color scheme data including the palette, name, and location of the toml.
 #[cfg_attr(test, derive(PartialEq))]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CustomStyle {
     /// Display name of the color scheme.
     /// This is the user facing color scheme name that may be displayed in the UI.
@@ -29,19 +31,18 @@ pub struct CustomStyle {
     #[serde(skip)]
     pub path: String,
     /// Short description of the color scheme
-    pub description: String,
+    pub description: HashMap<Language, String>,
     /// Color scheme's Sniffnet palette.
     /// Should be an implementation of the scheme that is tuned to Sniffnet.
-    // NOTE: This is flattened for ergonomics. With flatten, both [Palette] and [PaletteExtension] can be
-    // defined in the TOML as a single entity rather than two separate listings. This is intentional because
-    // the separation between palette and its extension is an implementation detail that shouldn't be exposed
-    // to custom theme designers.
-    #[serde(flatten)]
     pub palette: CustomPalette,
 }
 
 /// Base [Palette] and extension colors for [CustomStyle].
-#[derive(Debug, Deserialize)]
+// NOTE: This is flattened for ergonomics. With flatten, both [Palette] and [PaletteExtension] can be
+// defined in the TOML as a single entity rather than two separate tables. This is intentional because
+// the separation between palette and its extension is an implementation detail that shouldn't be exposed
+// to custom theme designers.
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CustomPalette {
     /// Base colors as used for the default sniffnet themes.
     #[serde(flatten)]
@@ -103,7 +104,9 @@ impl PartialEq for CustomPalette {
     }
 }
 
-/// Deserialize [CustomStyle] by first deserializing a file path which in turn contains the style as TOML.
+/// Deserialize [CustomStyle] from a file path.
+///
+/// This is implemented by first deserializing a file path which in turn contains the style as TOML.
 pub(super) fn deserialize_from_path<'de, D>(deserializer: D) -> Result<CustomStyle, D::Error>
 where
     D: Deserializer<'de>,
@@ -125,6 +128,9 @@ where
 }
 
 /// Serialize [CustomStyle]'s path.
+///
+/// Themes aren't serialized because they're already located somewhere else (the TOML file from which it was loaded).
+/// However, the theme's path must be serialized so that Sniffnet can reload it after the program is restarted.
 #[inline]
 pub(super) fn serialize_to_path<S>(style: &CustomStyle, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -139,9 +145,11 @@ mod tests {
         deserialize_from_path, serialize_to_path, CustomPalette, CustomStyle, Palette,
         PaletteExtension,
     };
+    use crate::translations::types::language::Language;
     use iced::Color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_tokens, Token};
+    use std::collections::HashMap;
 
     // Convenience struct for testing
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -164,13 +172,18 @@ mod tests {
         )
     }
 
-    const STYLE_DESC: &str = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin";
+    const STYLE_DESC_ENG: &str = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin";
+    // Polish translation by Bartosz.
+    const STYLE_DESC_PL: &str = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin";
 
     fn catppuccin_style() -> StyleForTests {
         StyleForTests(CustomStyle {
             name: "Catppuccin (Mocha)".to_owned(),
             path: style_path(),
-            description: STYLE_DESC.to_owned(),
+            description: HashMap::from([
+                (Language::EN, STYLE_DESC_ENG.to_owned()),
+                (Language::PL, STYLE_DESC_PL.to_owned()),
+            ]),
             palette: CustomPalette {
                 base: Palette {
                     primary: Color {

@@ -97,7 +97,7 @@ impl Default for Palette {
 
 /// Extension colors for custom themes.
 // NOTE: The purpose of this type is primarily to avoid modifying the existing [Palette].
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct PaletteExtension {
     /// Color of favorites star
     #[serde(deserialize_with = "deserialize_color", serialize_with = "serialize_color")]

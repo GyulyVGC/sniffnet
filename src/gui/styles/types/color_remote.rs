@@ -232,4 +232,16 @@ mod tests {
             "invalid value: string \"#ca🐈\", expected valid hexadecimal",
         );
     }
+
+    // Test that colors are rounded correctly
+    #[test]
+    fn test_color_rounding() {
+
+    }
+
+    // Test imprecise, fake PartialEq for [iced::Color]
+    #[test]
+    fn test_color_partialeq() {
+
+    }
 }
