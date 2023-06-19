@@ -108,6 +108,39 @@ jobs:
             target/*/release/sniffnet.exe
           if-no-files-found: error
 
+  deb-source:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+
+      - name: Install packaging tools
+        run: cargo install debcargo
+
+      - name: Source Debian Package
+        shell: bash
+        run: |
+          mkdir artifacts
+          export DEBFULLNAME="Giuliano Bellini"
+          export DEBEMAIL="gyulyvgc99@gmail.com"
+          debcargo package --config resources/packaging/linux/deb-source/debcargo.toml sniffnet
+          mv rust-sniffnet-1.2.1 artifacts/
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-source
+          path: artifacts/
+
   deb:
     runs-on: ubuntu-latest
     container:
