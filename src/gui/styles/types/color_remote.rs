@@ -10,6 +10,7 @@ use serde::{
     de::{Error as DeErrorTrait, Unexpected},
     Deserialize, Deserializer, Serializer,
 };
+use std::hash::{Hash, Hasher};
 
 // #aabbcc is seven bytes long
 const HEX_STR_BASE_LEN: usize = 7;
@@ -82,6 +83,14 @@ where
     }
 }
 
+/// Hash delegate for [iced::Color] that hashes RGBA in lieu of floats.
+#[inline]
+pub(super) fn color_hash<H: Hasher>(color: Color, state: &mut H) {
+    // Hash isn't implemented for floats, so I hash the color as RGBA instead.
+    let color = color.into_rgba8();
+    color.hash(state);
+}
+
 /// Serialize [iced::Color] as a hex string.
 #[inline]
 pub(super) fn serialize_color<S>(color: &Color, serializer: S) -> Result<S::Ok, S::Error>
@@ -106,7 +115,6 @@ where
 }
 
 // Round and truncate [Color] to facilitate comparisons.
-#[cfg(test)]
 pub(super) fn color_round(color: Color) -> Color {
     let Color { r, g, b, a } = color;
     Color {
@@ -117,8 +125,7 @@ pub(super) fn color_round(color: Color) -> Color {
     }
 }
 
-// Lower precision float equality for unit tests.
-#[cfg(test)]
+// Lower precision float equality for unit tests and cases where we need Color comparisons.
 pub(super) fn color_partialeq(color: Color, other: Color) -> bool {
     let color = color_round(color);
     let other = color_round(other);
@@ -127,7 +134,7 @@ pub(super) fn color_partialeq(color: Color, other: Color) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{color_partialeq, deserialize_color, serialize_color};
+    use super::{color_partialeq, color_round, deserialize_color, serialize_color};
     use iced::Color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
@@ -236,12 +243,22 @@ mod tests {
     // Test that colors are rounded correctly
     #[test]
     fn test_color_rounding() {
+        let color = Color {
+            r: 1.0 / 3.0,
+            g: 2.0 / 3.0,
+            b: 3.0 / 3.0,
+            #[allow(clippy::excessive_precision)]
+            a: 1.618033988749,
+        };
 
-    }
+        let color_rounded = color_round(color);
+        let color_expected = Color {
+            r: 333.0,
+            g: 666.0,
+            b: 1000.0,
+            a: 1618.0,
+        };
 
-    // Test imprecise, fake PartialEq for [iced::Color]
-    #[test]
-    fn test_color_partialeq() {
-
+        assert_eq!(color_expected, color_rounded);
     }
 }

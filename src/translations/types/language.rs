@@ -8,7 +8,7 @@ use crate::countries::flags_pictures::{
 };
 
 /// This enum defines the available languages.
-#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash, PartialOrd, Ord)]
 pub enum Language {
     /// English (default language).
     EN,

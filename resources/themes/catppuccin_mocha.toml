@@ -2,6 +2,8 @@ name = "Catppuccin (Mocha)"
 
 [description]
 EN = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin"
+# Contributed by Emilia
+# HU = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin"
 # Contributed by Bartosz
 PL = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin"
 

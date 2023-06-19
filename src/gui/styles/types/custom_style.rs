@@ -5,20 +5,19 @@
 
 use serde::{de::Error as DeErrorTrait, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     fs::File,
     io::{BufReader, Read},
 };
 
-use super::palette::{Palette, PaletteExtension};
+use super::{
+    color_remote::color_partialeq,
+    palette::{Palette, PaletteExtension},
+};
 use crate::Language;
 
-#[cfg(test)]
-use super::color_remote::color_partialeq;
-
 /// Custom color scheme data including the palette, name, and location of the toml.
-#[cfg_attr(test, derive(PartialEq))]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Hash, Clone, Deserialize, Serialize)]
 pub struct CustomStyle {
     /// Display name of the color scheme.
     /// This is the user facing color scheme name that may be displayed in the UI.
@@ -31,7 +30,7 @@ pub struct CustomStyle {
     #[serde(skip)]
     pub path: String,
     /// Short description of the color scheme
-    pub description: HashMap<Language, String>,
+    pub description: BTreeMap<Language, String>,
     /// Color scheme's Sniffnet palette.
     /// Should be an implementation of the scheme that is tuned to Sniffnet.
     pub palette: CustomPalette,
@@ -42,7 +41,11 @@ pub struct CustomStyle {
 // defined in the TOML as a single entity rather than two separate tables. This is intentional because
 // the separation between palette and its extension is an implementation detail that shouldn't be exposed
 // to custom theme designers.
-#[derive(Debug, Deserialize, Serialize)]
+//
+// Clippy complains about deriving [Hash] with a manually written [PartialEq]. We manually implemented
+// Hash for [Palette] and [PaletteExtension], so deriving Hash is convenient and the error is spurious.
+#[allow(clippy::derived_hash_with_manual_eq)]
+#[derive(Debug, Hash, Clone, Deserialize, Serialize)]
 pub struct CustomPalette {
     /// Base colors as used for the default sniffnet themes.
     #[serde(flatten)]
@@ -52,7 +55,6 @@ pub struct CustomPalette {
     pub extension: PaletteExtension,
 }
 
-#[cfg(test)]
 impl PartialEq for CustomPalette {
     fn eq(&self, other: &Self) -> bool {
         let Palette {
@@ -149,7 +151,7 @@ mod tests {
     use iced::Color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_tokens, Token};
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     // Convenience struct for testing
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -173,6 +175,8 @@ mod tests {
     }
 
     const STYLE_DESC_ENG: &str = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin";
+    // Hungarian translation by Emi.
+    const STYLE_DESC_HU: &str = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin";
     // Polish translation by Bartosz.
     const STYLE_DESC_PL: &str = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin";
 
@@ -180,8 +184,9 @@ mod tests {
         StyleForTests(CustomStyle {
             name: "Catppuccin (Mocha)".to_owned(),
             path: style_path(),
-            description: HashMap::from([
+            description: BTreeMap::from([
                 (Language::EN, STYLE_DESC_ENG.to_owned()),
+                // (Language::HU, STYLE_DESC_HU.to_owned()),
                 (Language::PL, STYLE_DESC_PL.to_owned()),
             ]),
             palette: CustomPalette {
