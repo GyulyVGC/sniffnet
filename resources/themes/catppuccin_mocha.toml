@@ -19,3 +19,4 @@ round_borders = "#74c7ec"    # Sapphire
 round_containers = "#585b70" # Surface 2
 starred = "#f9e2af"          # Yellow
 badge_alpha = 0.75
+color_mix_chart = 0.3

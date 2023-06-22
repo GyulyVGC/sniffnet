@@ -21,7 +21,7 @@ impl iced::widget::container::StyleSheet for StyleTuple {
     type Style = Theme;
 
     fn appearance(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             text_color: Some(match self {
                 StyleTuple(_, ElementType::Headers) => colors.text_headers,
@@ -33,7 +33,7 @@ impl iced::widget::container::StyleSheet for StyleTuple {
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
                 StyleTuple(_, ElementType::Neutral) => Color::TRANSPARENT,
                 StyleTuple(_, ElementType::Badge) => Color {
-                    a: get_color_mix_filter_badge(self.0),
+                    a: get_color_mix_filter_badge(&self.0),
                     ..colors.secondary
                 },
                 _ => colors.primary,

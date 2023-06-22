@@ -78,12 +78,13 @@ pub struct Palette {
     pub round_containers: Color,
 }
 
-pub fn get_colors(style: StyleType) -> Palette {
+pub fn get_colors(style: &StyleType) -> &Palette {
     match style {
-        StyleType::Night => NIGHT_STYLE,
-        StyleType::Day => DAY_STYLE,
-        StyleType::DeepSea => DEEP_SEA_STYLE,
-        StyleType::MonAmour => MON_AMOUR_STYLE,
+        StyleType::Night => &NIGHT_STYLE,
+        StyleType::Day => &DAY_STYLE,
+        StyleType::DeepSea => &DEEP_SEA_STYLE,
+        StyleType::MonAmour => &MON_AMOUR_STYLE,
+        StyleType::Custom(style) => &style.palette.base,
     }
 }
 
@@ -119,7 +120,7 @@ pub fn mix_colors(color_1: Color, color_2: Color) -> Color {
 
 impl Default for Palette {
     fn default() -> Self {
-        get_colors(StyleType::Night)
+        get_colors(&StyleType::Night).clone()
     }
 }
 
@@ -163,6 +164,8 @@ pub struct PaletteExtension {
     pub starred: Color,
     /// Badge alpha channel
     pub badge_alpha: f32,
+    /// Color mixing for charts
+    pub color_mix_chart: f64,
 }
 
 impl Hash for PaletteExtension {
@@ -171,5 +174,7 @@ impl Hash for PaletteExtension {
         // f32::NAN is 0i32 when casted using `as`.
         let alpha: i32 = (self.badge_alpha * 1000.0).trunc() as i32;
         alpha.hash(state);
+        let color_mix: i32 = (self.color_mix_chart * 1000.0).trunc() as i32;
+        color_mix.hash(state)
     }
 }

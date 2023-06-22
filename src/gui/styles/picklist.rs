@@ -19,7 +19,7 @@ impl iced::overlay::menu::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn appearance(&self, _: &Self::Style) -> iced::overlay::menu::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(colors.buttons),
@@ -36,7 +36,7 @@ impl pick_list::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> pick_list::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
@@ -49,7 +49,7 @@ impl pick_list::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style) -> pick_list::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,

@@ -17,7 +17,7 @@ impl rule::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn appearance(&self, _: &Self::Style) -> iced::widget::rule::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         iced::widget::rule::Appearance {
             color: match self.1 {
                 ElementType::Incoming => colors.secondary,

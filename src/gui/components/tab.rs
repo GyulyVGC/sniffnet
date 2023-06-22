@@ -1,4 +1,5 @@
 //! Tab buttons to be used in the various pages just under the header
+use std::sync::Arc;
 
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
@@ -15,7 +16,7 @@ pub fn get_settings_tabs(
     icons: &[&str],
     actions: &[Message],
     active: SettingsPage,
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
 ) -> Row<'static, Message> {
     let font = get_font(style);
@@ -43,7 +44,7 @@ pub fn get_pages_tabs(
     icons: &[&str],
     actions: &[Message],
     active: RunningPage,
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
     unread_notifications: usize,
 ) -> Row<'static, Message> {
@@ -77,7 +78,7 @@ fn new_tab(
     icon: String,
     action: Message,
     active: bool,
-    style: StyleType,
+    style: &Arc<StyleType>,
     font: Font,
     unread: Option<usize>,
 ) -> Button<'static, Message> {
@@ -110,7 +111,7 @@ fn new_tab(
             )
             .padding(4)
             .height(Length::Fixed(20.0))
-            .style(StyleTuple(style, ElementType::Badge).into());
+            .style(StyleTuple(Arc::clone(style), ElementType::Badge).into());
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
@@ -124,7 +125,7 @@ fn new_tab(
         .width(Length::FillPortion(1))
         .style(
             StyleTuple(
-                style,
+                Arc::clone(style),
                 if active {
                     ElementType::TabActive
                 } else {

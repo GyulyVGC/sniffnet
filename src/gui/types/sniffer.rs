@@ -54,7 +54,7 @@ pub struct Sniffer {
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Application style (only values Day and Night are possible for this field)
-    pub style: StyleType,
+    pub style: Arc<StyleType>,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -102,9 +102,9 @@ impl Sniffer {
             last_device_name_sniffed: config_device.device_name.clone(),
             filters: Filters::default(),
             pcap_error: None,
-            style: config_settings.style,
+            style: Arc::clone(&config_settings.style),
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
+            traffic_chart: TrafficChart::new(&config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
@@ -139,7 +139,7 @@ impl Sniffer {
             Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.style = style;
-                self.traffic_chart.change_colors(self.style);
+                self.traffic_chart.change_colors(&self.style);
             }
             Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
@@ -315,7 +315,7 @@ impl Sniffer {
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
-        self.traffic_chart = TrafficChart::new(self.style, self.language);
+        self.traffic_chart = TrafficChart::new(&self.style, self.language);
 
         if pcap_error.is_none() {
             // no pcap error
@@ -390,7 +390,7 @@ impl Sniffer {
             self.last_opened_setting = self.settings_page.unwrap();
             self.settings_page = None;
             let store = ConfigSettings {
-                style: self.style,
+                style: Arc::clone(&self.style),
                 notifications: self.notifications,
                 language: self.language,
             };
@@ -643,95 +643,95 @@ mod tests {
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
-        sniffer.update(Message::Style(StyleType::MonAmour));
-        assert_eq!(sniffer.style, StyleType::MonAmour);
+        sniffer.update(Message::Style(Arc::new(StyleType::MonAmour)));
+        assert_eq!(*sniffer.style, StyleType::MonAmour);
         assert_eq!(
             sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::MonAmour).text_body)
+            to_rgb_color(get_colors(&StyleType::MonAmour).text_body)
         );
         assert_eq!(
             sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::MonAmour).outgoing)
+            to_rgb_color(get_colors(&StyleType::MonAmour).outgoing)
         );
         assert_eq!(
             sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::MonAmour).secondary)
+            to_rgb_color(get_colors(&StyleType::MonAmour).secondary)
         );
         assert_eq!(
             sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::MonAmour)
+            get_color_mix_chart(&StyleType::MonAmour)
         );
-        sniffer.update(Message::Style(StyleType::Day));
-        assert_eq!(sniffer.style, StyleType::Day);
+        sniffer.update(Message::Style(Arc::new(StyleType::Day)));
+        assert_eq!(*sniffer.style, StyleType::Day);
         assert_eq!(
             sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::Day).text_body)
+            to_rgb_color(get_colors(&StyleType::Day).text_body)
         );
         assert_eq!(
             sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::Day).outgoing)
+            to_rgb_color(get_colors(&StyleType::Day).outgoing)
         );
         assert_eq!(
             sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::Day).secondary)
+            to_rgb_color(get_colors(&StyleType::Day).secondary)
         );
         assert_eq!(
             sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::Day)
+            get_color_mix_chart(&StyleType::Day)
         );
-        sniffer.update(Message::Style(StyleType::Night));
-        assert_eq!(sniffer.style, StyleType::Night);
+        sniffer.update(Message::Style(Arc::new(StyleType::Night)));
+        assert_eq!(*sniffer.style, StyleType::Night);
         assert_eq!(
             sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::Night).text_body)
+            to_rgb_color(get_colors(&StyleType::Night).text_body)
         );
         assert_eq!(
             sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::Night).outgoing)
+            to_rgb_color(get_colors(&StyleType::Night).outgoing)
         );
         assert_eq!(
             sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::Night).secondary)
+            to_rgb_color(get_colors(&StyleType::Night).secondary)
         );
         assert_eq!(
             sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::Night)
+            get_color_mix_chart(&StyleType::Night)
         );
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.style, StyleType::DeepSea);
+        sniffer.update(Message::Style(Arc::new(StyleType::DeepSea)));
+        assert_eq!(*sniffer.style, StyleType::DeepSea);
         assert_eq!(
             sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
+            to_rgb_color(get_colors(&StyleType::DeepSea).text_body)
         );
         assert_eq!(
             sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
+            to_rgb_color(get_colors(&StyleType::DeepSea).outgoing)
         );
         assert_eq!(
             sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
+            to_rgb_color(get_colors(&StyleType::DeepSea).secondary)
         );
         assert_eq!(
             sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::DeepSea)
+            get_color_mix_chart(&StyleType::DeepSea)
         );
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.style, StyleType::DeepSea);
+        sniffer.update(Message::Style(Arc::new(StyleType::DeepSea)));
+        assert_eq!(*sniffer.style, StyleType::DeepSea);
         assert_eq!(
             sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
+            to_rgb_color(get_colors(&StyleType::DeepSea).text_body)
         );
         assert_eq!(
             sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
+            to_rgb_color(get_colors(&StyleType::DeepSea).outgoing)
         );
         assert_eq!(
             sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
+            to_rgb_color(get_colors(&StyleType::DeepSea).secondary)
         );
         assert_eq!(
             sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::DeepSea)
+            get_color_mix_chart(&StyleType::DeepSea)
         );
     }
 

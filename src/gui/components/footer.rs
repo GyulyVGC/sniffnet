@@ -22,7 +22,7 @@ use crate::Language;
 
 pub fn footer(
     language: Language,
-    style: StyleType,
+    style: &Arc<StyleType>,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message> {
     let font_footer = get_font_headers(style);
@@ -53,11 +53,11 @@ pub fn footer(
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Headers),
+            StyleTuple(Arc::clone(style), ElementType::Headers),
         ))
 }
 
-fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_website(style: &Arc<StyleType>) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('c'.to_string())
             .font(ICONS)
@@ -67,17 +67,17 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(content, "Website", Position::Top)
-        .font(get_font(style))
+        .font(get_font(&style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }
 
-fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_github(style: &Arc<StyleType>) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
@@ -87,17 +87,17 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     )
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(content, "GitHub", Position::Top)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }
 
-fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_sponsor(style: &Arc<StyleType>) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('❤'.to_string())
             .size(28)
@@ -107,19 +107,19 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
     Tooltip::new(content, "Sponsor", Position::Top)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }
 
 fn get_release_details(
     language: Language,
-    style: StyleType,
+    style: &Arc<StyleType>,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Row<'static, Message> {
@@ -146,7 +146,7 @@ fn get_release_details(
             .padding(5)
             .height(Length::Fixed(35.0))
             .width(Length::Fixed(35.0))
-            .style(StyleTuple(style, ElementType::Alert).into())
+            .style(StyleTuple(Arc::clone(style), ElementType::Alert).into())
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
@@ -155,7 +155,7 @@ fn get_release_details(
             )
             .font(get_font(style))
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::Tooltip),
+                StyleTuple(Arc::clone(style), ElementType::Tooltip),
             ));
             ret_val = ret_val
                 .push(horizontal_space(Length::Fixed(10.0)))

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use iced::widget::Tooltip;
 use iced::{Length, Renderer};
 use iced_native::svg::Handle;
@@ -332,16 +334,16 @@ pub fn get_flag_tooltip(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
+    style: &Arc<StyleType>,
 ) -> Tooltip<'static, Message> {
     let (content, tooltip) =
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(get_font(&style))
         .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ));
 
     if width == FLAGS_WIDTH_SMALL {
@@ -355,7 +357,7 @@ pub fn get_computer_tooltip(
     is_my_address: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
+    style: &Arc<StyleType>,
 ) -> Tooltip<'static, Message> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, traffic_type) {
@@ -376,9 +378,9 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(get_font(&style))
         .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -39,7 +41,7 @@ pub enum Message {
     /// Stop sniffing process and return to initial page
     Reset,
     /// Change application style
-    Style(StyleType),
+    Style(Arc<StyleType>),
     /// Manage waiting time
     Waiting,
     /// Displays a modal

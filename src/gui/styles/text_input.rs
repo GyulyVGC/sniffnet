@@ -18,7 +18,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             background: Background::Color(match self.1 {
                 ElementType::Badge => Color::TRANSPARENT,
@@ -35,7 +35,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     }
 
     fn focused(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             background: Background::Color(colors.primary),
             border_radius: 0.0,
@@ -46,7 +46,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     }
 
     fn placeholder_color(&self, _: &Self::Style) -> Color {
-        let color = get_colors(self.0).text_body;
+        let color = get_colors(&self.0).text_body;
         Color {
             a: if color.eq(&Color::BLACK) { 0.7 } else { 0.2 },
             ..color
@@ -54,7 +54,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     }
 
     fn value_color(&self, _: &Self::Style) -> Color {
-        get_colors(self.0).text_body
+        get_colors(&self.0).text_body
     }
 
     fn disabled_color(&self, _style: &Self::Style) -> Color {
@@ -62,7 +62,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     }
 
     fn selection_color(&self, _: &Self::Style) -> Color {
-        let color = get_colors(self.0).text_body;
+        let color = get_colors(&self.0).text_body;
         Color {
             a: if color.eq(&Color::BLACK) { 0.4 } else { 0.05 },
             ..color
@@ -70,7 +70,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             background: Background::Color(match self.1 {
                 ElementType::Badge => Color::TRANSPARENT,

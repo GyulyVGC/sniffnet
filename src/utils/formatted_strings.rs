@@ -56,11 +56,11 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
 }
 
 /// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_direction: TrafficDirection, style: StyleType) -> Color {
+pub fn get_connection_color(traffic_direction: TrafficDirection, style: &StyleType) -> Color {
     if traffic_direction == TrafficDirection::Outgoing {
-        get_colors(style).outgoing
+        get_colors(&style).outgoing
     } else {
-        get_colors(style).incoming
+        get_colors(&style).incoming
     }
 }
 

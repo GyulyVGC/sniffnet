@@ -142,7 +142,7 @@ pub fn get_searched_entries(
                     host_info.is_local,
                     host_info.traffic_type,
                     sniffer.language,
-                    sniffer.style,
+                    &sniffer.style,
                 );
                 (key_val.0.clone(), key_val.1.clone(), flag)
             })

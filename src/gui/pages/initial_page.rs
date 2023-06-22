@@ -2,6 +2,8 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
+use std::sync::Arc;
+
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, PickList, Row, Scrollable,
     Text, Tooltip,
@@ -25,12 +27,12 @@ use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let col_adapter = get_col_adapter(sniffer, font);
 
     let ip_active = sniffer.filters.ip;
-    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style, sniffer.language);
+    let col_ip_radio = ip_version_radios(ip_active, font, &sniffer.style, sniffer.language);
     let col_ip = Column::new()
         .spacing(10)
         .width(FillPortion(5))
@@ -38,14 +40,14 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     let transport_active = sniffer.filters.transport;
     let col_transport_radio =
-        transport_protocol_radios(transport_active, font, sniffer.style, sniffer.language);
+        transport_protocol_radios(transport_active, font, &sniffer.style, sniffer.language);
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
         .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(button_start(sniffer.style, sniffer.language))
+        .push(button_start(&sniffer.style, sniffer.language))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -65,7 +67,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
     .font(font)
-    .style(StyleTuple(sniffer.style, ElementType::Standard));
+    .style(StyleTuple(
+        Arc::clone(&sniffer.style),
+        ElementType::Standard,
+    ));
     let col_app = Column::new()
         .width(FillPortion(8))
         .spacing(10)
@@ -105,13 +110,13 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(body).height(Length::Fill).style(
         <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-            sniffer.style,
+            Arc::clone(&sniffer.style),
             ElementType::Standard,
         )),
     )
 }
 
-fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn button_start(style: &Arc<StyleType>, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)
@@ -122,7 +127,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::Start);
 
     let tooltip = start_translation(language).to_string();
@@ -131,7 +136,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
         .gap(5)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }
 
@@ -190,7 +195,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                             .width(Length::Fill)
                             .style(
                                 StyleTuple(
-                                    sniffer.style,
+                                    Arc::clone(&sniffer.style),
                                     if name == sniffer.device.name {
                                         ElementType::BorderedRoundSelected
                                     } else {
@@ -204,7 +209,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                 },
             ))
             .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
             )),
         )
 }

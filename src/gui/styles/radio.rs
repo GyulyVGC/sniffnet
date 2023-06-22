@@ -17,7 +17,7 @@ impl iced::widget::radio::StyleSheet for StyleTuple {
     type Style = Theme;
 
     fn active(&self, _: &Self::Style, is_selected: bool) -> iced::widget::radio::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         iced::widget::radio::Appearance {
             background: Background::Color(colors.buttons),
             dot_color: colors.secondary,
@@ -28,7 +28,7 @@ impl iced::widget::radio::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style, _is_selected: bool) -> iced::widget::radio::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         iced::widget::radio::Appearance {
             background: Background::Color(colors.buttons),
             dot_color: colors.secondary,

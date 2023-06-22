@@ -166,24 +166,25 @@ pub const SARASA_MONO_SC_BOLD: Font = Font::External {
     bytes: include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf"),
 };
 
-pub fn get_font(style: StyleType) -> Font {
+pub fn get_font(style: &StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
         RGBColor(255, 255, 255) => Font::Default,
         _ => SARASA_MONO_SC_BOLD,
     }
 }
 
-pub fn get_font_headers(style: StyleType) -> Font {
+pub fn get_font_headers(style: &StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => Font::Default,
         _ => SARASA_MONO_SC_BOLD,
     }
 }
 
-pub fn get_color_mix_chart(style: StyleType) -> f64 {
+pub fn get_color_mix_chart(style: &StyleType) -> f64 {
     match style {
         StyleType::Night | StyleType::DeepSea => 0.3,
         StyleType::Day | StyleType::MonAmour => 0.8,
+        StyleType::Custom(style) => style.palette.extension.color_mix_chart,
     }
 }
 
@@ -212,7 +213,7 @@ pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
 
 /// Yellow color used in favorites star
-pub fn get_starred_color(style: StyleType) -> Color {
+pub fn get_starred_color(style: &StyleType) -> Color {
     match style {
         StyleType::Night | StyleType::DeepSea => Color {
             r: 245.0 / 255.0,
@@ -226,13 +227,15 @@ pub fn get_starred_color(style: StyleType) -> Color {
             b: 39.0 / 255.0,
             a: 0.8,
         },
+        StyleType::Custom(style) => style.palette.extension.starred,
     }
 }
 
-pub fn get_color_mix_filter_badge(style: StyleType) -> f32 {
+pub fn get_color_mix_filter_badge(style: &StyleType) -> f32 {
     match style {
         StyleType::Night | StyleType::DeepSea => 0.2,
         StyleType::Day => 0.7,
         StyleType::MonAmour => 0.5,
+        StyleType::Custom(style) => style.palette.extension.badge_alpha,
     }
 }

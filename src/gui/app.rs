@@ -49,12 +49,12 @@ impl Application for Sniffer {
 
     fn view(&self) -> Element<Message> {
         let status = *self.status_pair.0.lock().unwrap();
-        let style = self.style;
-        let font = get_font(style);
+        let style = &self.style;
+        let font = get_font(&style);
 
         let header = match status {
-            Status::Init => header(style, false, self.language, self.last_opened_setting),
-            Status::Running => header(style, true, self.language, self.last_opened_setting),
+            Status::Init => header(&style, false, self.language, self.last_opened_setting),
+            Status::Running => header(&style, true, self.language, self.last_opened_setting),
         };
 
         let body = match status {
@@ -66,7 +66,7 @@ impl Application for Sniffer {
             },
         };
 
-        let footer = footer(self.language, style, &self.newer_release_available.clone());
+        let footer = footer(self.language, &style, &self.newer_release_available.clone());
 
         let content = Column::new().push(header).push(body).push(footer);
 
@@ -88,8 +88,8 @@ impl Application for Sniffer {
             }
             Some(modal) => {
                 let overlay = match modal {
-                    MyModal::Quit => get_exit_overlay(style, font, self.language),
-                    MyModal::ClearAll => get_clear_all_overlay(style, font, self.language),
+                    MyModal::Quit => get_exit_overlay(&style, font, self.language),
+                    MyModal::ClearAll => get_clear_all_overlay(&style, font, self.language),
                     MyModal::ConnectionDetails(connection_index) => {
                         connection_details_page(self, connection_index)
                     }

@@ -46,7 +46,7 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(style: StyleType, language: Language) -> Self {
+    pub fn new(style: &StyleType, language: Language) -> Self {
         TrafficChart {
             ticks: 0,
             sent_bytes: VecDeque::default(),
@@ -89,7 +89,7 @@ impl TrafficChart {
         self.language = language;
     }
 
-    pub fn change_colors(&mut self, style: StyleType) {
+    pub fn change_colors(&mut self, style: &StyleType) {
         self.color_font = to_rgb_color(get_colors(style).text_body);
         self.color_incoming = to_rgb_color(get_colors(style).incoming);
         self.color_outgoing = to_rgb_color(get_colors(style).outgoing);

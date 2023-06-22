@@ -72,6 +72,7 @@ impl PartialEq for CustomPalette {
         let PaletteExtension {
             starred,
             badge_alpha,
+            color_mix_chart,
         } = self.extension;
 
         // Other
@@ -90,6 +91,7 @@ impl PartialEq for CustomPalette {
         let PaletteExtension {
             starred: starred_other,
             badge_alpha: badge_alpha_other,
+            color_mix_chart: color_mix_chart_other,
         } = other.extension;
 
         color_partialeq(primary, primary_other)
@@ -103,6 +105,7 @@ impl PartialEq for CustomPalette {
             && color_partialeq(round_containers, round_containers_other)
             && color_partialeq(starred, starred_other)
             && badge_alpha == badge_alpha_other
+            && color_mix_chart == color_mix_chart_other
     }
 }
 
@@ -254,6 +257,7 @@ mod tests {
                         a: 1.0,
                     },
                     badge_alpha: 0.75,
+                    color_mix_chart: 0.3,
                 },
             },
         })

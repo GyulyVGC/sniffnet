@@ -1,15 +1,19 @@
 use serde::{Deserialize, Serialize};
 
-use super::custom_style::CustomStyle;
+use super::custom_style::{deserialize_from_path, serialize_to_path, CustomStyle};
 
 /// Used to specify the kind of style of the application
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, Hash, PartialEq)]
 pub enum StyleType {
     Night,
     Day,
     DeepSea,
     MonAmour,
-    // Custom(CustomStyle)
+    #[serde(
+        serialize_with = "serialize_to_path",
+        deserialize_with = "deserialize_from_path"
+    )]
+    Custom(CustomStyle),
 }
 
 impl Default for StyleType {

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use iced::alignment::Horizontal;
 use iced::widget::{
     Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
@@ -27,7 +29,7 @@ use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let mut body = Column::new()
         .width(Length::Fill)
@@ -50,7 +52,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             Message::ChangeRunningPage(RunningPage::Notifications),
         ],
         RunningPage::Inspect,
-        sniffer.style,
+        &sniffer.style,
         sniffer.language,
         sniffer.unread_notifications,
     );
@@ -76,12 +78,15 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     )
     .padding([3, 7])
     .font(font)
-    .style(StyleTuple(sniffer.style, ElementType::Standard));
+    .style(StyleTuple(
+        Arc::clone(&sniffer.style),
+        ElementType::Standard,
+    ));
 
     let report = lazy(
         (
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
-            sniffer.style,
+            Arc::clone(&sniffer.style),
             sniffer.language,
             sniffer.report_sort_type,
             sniffer.search.clone(),
@@ -96,12 +101,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                 Row::new()
                     .push(filters_col(
                         &sniffer.search,
-                        sniffer.style,
+                        &sniffer.style,
                         sniffer.language,
                     ))
                     .push(
                         Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
+                            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                         )),
                     )
                     .push(
@@ -118,7 +123,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             .height(Length::Fixed(160.0))
             .padding(10)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
             )),
         )
         .push(report);
@@ -126,12 +131,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
         ))
 }
 
 fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 
@@ -142,7 +147,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
     col_report = col_report
         .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
         .push(Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-            sniffer.style,
+            Arc::clone(&sniffer.style),
             ElementType::Standard,
         ))))
     ;
@@ -150,7 +155,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for (key, val, flag) in search_results {
-        let entry_color = get_connection_color(val.traffic_direction, sniffer.style);
+        let entry_color = get_connection_color(val.traffic_direction, &sniffer.style);
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
@@ -165,7 +170,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             button(entry_row)
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(val.index)))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Neutral).into()),
         );
     }
     if results_number > 0 {
@@ -176,16 +181,16 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     .width(Length::Fill)
                     .horizontal_scroll(Properties::new())
                     .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
+                        StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                     )),
             )
             .push(
                 Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
+                    StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                 )),
             )
             .push(get_change_page_row(
-                sniffer.style,
+                &sniffer.style,
                 sniffer.language,
                 sniffer.page_number,
                 start_entry_num,
@@ -217,12 +222,12 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                 .padding([10, 7, 7, 7])
                 .width(Length::Fixed(1042.0))
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(sniffer.style, ElementType::BorderedRound),
+                    StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
                 )),
         )
         .push(
             Container::new(get_button_open_report(
-                sniffer.style,
+                &sniffer.style,
                 sniffer.language,
                 font,
             ))
@@ -232,10 +237,10 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
 
 fn filters_col(
     search_params: &SearchParameters,
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
 ) -> Column<'static, Message> {
-    let font = get_font(style);
+    let font = get_font(&style);
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
@@ -246,7 +251,7 @@ fn filters_col(
     if search_params.is_some_filter_active() {
         title_row = title_row.push(button_clear_filter(
             SearchParameters::default(),
-            style,
+            &style,
             font,
         ));
     }
@@ -271,13 +276,13 @@ fn filters_col(
                 .size(18)
                 .font(font)
                 .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-                    StyleTuple(style, ElementType::Badge),
+                    StyleTuple(Arc::clone(style), ElementType::Badge),
                 )),
             )
             .padding([5, 8])
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(
-                    style,
+                    Arc::clone(style),
                     if search_params.only_favorites {
                         ElementType::Badge
                     } else {
@@ -297,7 +302,7 @@ fn filters_col(
                     60.0,
                     search_params.clone(),
                     font,
-                    style,
+                    &style,
                 ))
                 .push(filter_input(
                     FilterInputType::Country,
@@ -306,7 +311,7 @@ fn filters_col(
                     30.0,
                     search_params.clone(),
                     font,
-                    style,
+                    &style,
                 )),
         )
         .push(
@@ -320,7 +325,7 @@ fn filters_col(
                     120.0,
                     search_params.clone(),
                     font,
-                    style,
+                    &style,
                 ))
                 .push(filter_input(
                     FilterInputType::AS,
@@ -329,7 +334,7 @@ fn filters_col(
                     120.0,
                     search_params.clone(),
                     font,
-                    style,
+                    &style,
                 )),
         )
 }
@@ -341,7 +346,7 @@ fn filter_input(
     width: f32,
     search_params: SearchParameters,
     font: Font,
-    style: StyleType,
+    style: &Arc<StyleType>,
 ) -> Container<'static, Message> {
     let is_filter_active = !filter_value.is_empty();
 
@@ -394,7 +399,7 @@ fn filter_input(
         .width(Length::Fixed(width))
         .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
             StyleTuple(
-                style,
+                Arc::clone(style),
                 if is_filter_active {
                     ElementType::Badge
                 } else {
@@ -416,7 +421,7 @@ fn filter_input(
         .padding(5)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(
-                style,
+                Arc::clone(style),
                 if is_filter_active {
                     ElementType::Badge
                 } else {
@@ -426,7 +431,7 @@ fn filter_input(
         ))
 }
 
-fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
+fn get_button_change_page(style: &Arc<StyleType>, increment: bool) -> Button<'static, Message> {
     button(
         Text::new(if increment { "j" } else { "i" })
             .size(10.0)
@@ -437,12 +442,12 @@ fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, 
     .padding(5)
     .height(Length::Fixed(25.0))
     .width(Length::Fixed(25.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::UpdatePageNumber(increment))
 }
 
 fn get_change_page_row(
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
     page_number: usize,
     start_entry_num: usize,
@@ -475,7 +480,7 @@ fn get_change_page_row(
 }
 
 fn get_button_open_report(
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
     font: Font,
 ) -> Tooltip<'static, Message> {
@@ -488,20 +493,20 @@ fn get_button_open_report(
     .padding(10)
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::OpenReport);
 
     Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
         .gap(5)
         .font(font)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }
 
 fn button_clear_filter(
     new_search_parameters: SearchParameters,
-    style: StyleType,
+    style: &Arc<StyleType>,
     font: Font,
 ) -> Button<'static, Message> {
     button(
@@ -513,6 +518,6 @@ fn button_clear_filter(
     .padding(2)
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(20.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::Search(new_search_parameters))
 }

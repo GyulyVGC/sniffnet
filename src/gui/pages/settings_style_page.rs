@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use iced::widget::{Button, Column, Container, Row, Text};
 use iced::{Alignment, Length};
 use iced_native::svg::Handle;
@@ -20,11 +22,11 @@ use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(&sniffer.style, sniffer.language))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -38,7 +40,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 Message::OpenSettings(SettingsPage::Language),
             ],
             SettingsPage::Appearance,
-            sniffer.style,
+            &sniffer.style,
             sniffer.language,
         ))
         .push(vertical_space(Length::Fixed(15.0)))
@@ -51,38 +53,38 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             Row::new()
                 .push(get_palette_container(
-                    sniffer.style,
+                    &sniffer.style,
                     YETI_NIGHT,
                     "Yeti Night".to_string(),
                     yeti_night_translation(sniffer.language).to_string(),
-                    Night,
+                    &Arc::new(Night),
                 ))
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
-                    sniffer.style,
+                    &sniffer.style,
                     YETI_DAY,
                     "Yeti Day".to_string(),
                     yeti_day_translation(sniffer.language).to_string(),
-                    Day,
+                    &Arc::new(Day),
                 )),
         )
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Row::new()
                 .push(get_palette_container(
-                    sniffer.style,
+                    &sniffer.style,
                     DEEP_SEA,
                     "Deep Sea".to_string(),
                     deep_sea_translation(sniffer.language).to_string(),
-                    DeepSea,
+                    &Arc::new(DeepSea),
                 ))
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
-                    sniffer.style,
+                    &sniffer.style,
                     MON_AMOUR,
                     "Mon Amour".to_string(),
                     mon_amour_translation(sniffer.language).to_string(),
-                    MonAmour,
+                    &Arc::new(MonAmour),
                 )),
         );
 
@@ -90,16 +92,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .height(Length::Fixed(400.0))
         .width(Length::Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
         ))
 }
 
 fn get_palette_container(
-    style: StyleType,
+    style: &Arc<StyleType>,
     picture: &[u8],
     name: String,
     description: String,
-    on_press: StyleType,
+    on_press: &Arc<StyleType>,
 ) -> Button<'static, Message> {
     let font = get_font(style);
     let content = Column::new()
@@ -116,7 +118,7 @@ fn get_palette_container(
         .padding(5)
         .style(
             StyleTuple(
-                style,
+                Arc::clone(style),
                 if on_press.eq(&style) {
                     ElementType::BorderedRoundSelected
                 } else {
@@ -125,5 +127,5 @@ fn get_palette_container(
             )
             .into(),
         )
-        .on_press(Message::Style(on_press))
+        .on_press(Message::Style(Arc::clone(on_press)))
 }

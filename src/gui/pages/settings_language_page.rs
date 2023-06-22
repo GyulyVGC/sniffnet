@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use iced::widget::{Column, Container, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
@@ -15,17 +17,17 @@ use crate::translations::translations::languages_title_translation;
 use crate::{Language, Sniffer};
 
 pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let language_active = sniffer.language;
     let row_language_radio_1 =
-        language_radios(language_active, &Language::ROW1, font, sniffer.style);
+        language_radios(language_active, &Language::ROW1, font, &sniffer.style);
     let row_language_radio_2 =
-        language_radios(language_active, &Language::ROW2, font, sniffer.style);
+        language_radios(language_active, &Language::ROW2, font, &sniffer.style);
     let row_language_radio_3 =
-        language_radios(language_active, &Language::ROW3, font, sniffer.style);
+        language_radios(language_active, &Language::ROW3, font, &sniffer.style);
     let row_language_radio_4 =
-        language_radios(language_active, &Language::ROW4, font, sniffer.style);
+        language_radios(language_active, &Language::ROW4, font, &sniffer.style);
     let col_language_radio_all = Column::new()
         .spacing(10)
         .push(row_language_radio_1)
@@ -36,7 +38,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(&sniffer.style, sniffer.language))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -50,7 +52,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Message::TickInit,
             ],
             SettingsPage::Language,
-            sniffer.style,
+            &sniffer.style,
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))
@@ -69,7 +71,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
             )
             .padding(10.0)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::Badge),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::Badge),
             )),
         );
     }
@@ -78,6 +80,6 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .height(Fixed(400.0))
         .width(Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
         ))
 }

@@ -20,11 +20,11 @@ impl button::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> button::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         button::Appearance {
             background: Some(Background::Color(match self {
                 StyleTuple(_, ElementType::TabActive) => colors.primary,
-                StyleTuple(_, ElementType::Starred) => get_starred_color(self.0),
+                StyleTuple(_, ElementType::Starred) => get_starred_color(&self.0),
                 StyleTuple(_, ElementType::Badge) => colors.secondary,
                 StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
                 StyleTuple(_, ElementType::Neutral | ElementType::NotStarred) => Color::TRANSPARENT,
@@ -72,14 +72,14 @@ impl button::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style) -> button::Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         button::Appearance {
             shadow_offset: match self.1 {
                 ElementType::Neutral => Vector::default(),
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::Starred) => get_starred_color(self.0),
+                StyleTuple(_, ElementType::Starred) => get_starred_color(&self.0),
                 StyleTuple(_, ElementType::TabActive) => colors.primary,
                 _ => mix_colors(colors.primary, colors.buttons),
             })),

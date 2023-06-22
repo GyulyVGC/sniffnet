@@ -17,7 +17,7 @@ impl iced::widget::checkbox::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style, is_checked: bool) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,
@@ -29,7 +29,7 @@ impl iced::widget::checkbox::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style, _is_checked: bool) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,

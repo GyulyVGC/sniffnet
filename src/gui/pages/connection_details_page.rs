@@ -1,4 +1,4 @@
-use std::net::IpAddr;
+use std::{net::IpAddr, sync::Arc};
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
@@ -38,7 +38,7 @@ pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Co
 }
 
 fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static, Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let info_traffic_lock = sniffer
         .info_traffic
@@ -61,7 +61,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
 
     let header_and_content = Column::new()
         .width(Length::Fill)
-        .push(page_header(sniffer.style, sniffer.language));
+        .push(page_header(&sniffer.style, sniffer.language));
 
     let mut source_caption = Row::new().spacing(10).push(
         Text::new(source_translation(sniffer.language))
@@ -82,7 +82,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
             host_info.is_local,
             host_info.traffic_type,
             sniffer.language,
-            sniffer.style,
+            &sniffer.style,
         );
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
@@ -95,7 +95,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
                     TrafficDirection::Outgoing,
                 ),
                 sniffer.language,
-                sniffer.style,
+                &sniffer.style,
             );
             dest_caption = dest_caption.push(computer);
         } else {
@@ -109,7 +109,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
                     TrafficDirection::Outgoing,
                 ),
                 sniffer.language,
-                sniffer.style,
+                &sniffer.style,
             );
             source_caption = source_caption.push(computer);
         }
@@ -118,7 +118,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
                 host_info_col.push(Rule::horizontal(10.0).style(<StyleTuple as Into<
                     iced::theme::Rule,
                 >>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
+                    StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                 )));
         }
         if r_dns.parse::<IpAddr>().is_err() {
@@ -152,7 +152,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         )
         .push(
             Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
             )),
         )
         .push(
@@ -180,7 +180,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         )
         .push(
             Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
             )),
         )
         .push(
@@ -210,14 +210,14 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         .padding(10)
         .width(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::BorderedRound),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
         ));
 
     let dest_container = Container::new(dest_col)
         .padding(10)
         .width(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::BorderedRound),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
         ));
 
     let col_info = Column::new()
@@ -291,11 +291,11 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         .width(Length::Fixed(1000.0))
         .height(Length::Fixed(500.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
         ))
 }
 
-fn page_header(style: StyleType, language: Language) -> Container<'static, Message> {
+fn page_header(style: &Arc<StyleType>, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     Container::new(
@@ -320,14 +320,14 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Tooltip),
+                        StyleTuple(Arc::clone(style), ElementType::Tooltip),
                     )),
                 )
                 .width(Length::FillPortion(1))
@@ -339,6 +339,6 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .height(Fixed(40.0))
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+        StyleTuple(Arc::clone(style), ElementType::Headers),
     ))
 }

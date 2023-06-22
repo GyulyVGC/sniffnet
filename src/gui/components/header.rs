@@ -1,5 +1,7 @@
 //! GUI upper header
 
+use std::sync::Arc;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
@@ -15,7 +17,7 @@ use crate::translations::translations::{quit_analysis_translation, settings_tran
 use crate::{Language, StyleType};
 
 pub fn header(
-    style: StyleType,
+    style: &Arc<StyleType>,
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
@@ -61,11 +63,11 @@ pub fn header(
     .align_y(Vertical::Center)
     .width(Length::Fill)
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+        StyleTuple(Arc::clone(style), ElementType::Headers),
     ))
 }
 
-fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_reset(style: &Arc<StyleType>, language: Language) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('C'.to_string())
             .font(ICONS)
@@ -76,7 +78,7 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
     .padding(10)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -86,12 +88,12 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
     )
     .font(get_font(style))
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Tooltip),
+        StyleTuple(Arc::clone(style), ElementType::Tooltip),
     ))
 }
 
 pub fn get_button_settings(
-    style: StyleType,
+    style: &Arc<StyleType>,
     language: Language,
     open_overlay: SettingsPage,
 ) -> Tooltip<'static, Message> {
@@ -104,12 +106,12 @@ pub fn get_button_settings(
     .padding(10)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+            StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))
 }

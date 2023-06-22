@@ -3,6 +3,8 @@
 //! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
+use std::sync::Arc;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text};
 use iced::Length::{Fill, FillPortion};
@@ -41,7 +43,7 @@ use crate::{AppProtocol, ChartType, Language, RunningPage};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -84,7 +86,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         Message::ChangeRunningPage(RunningPage::Notifications),
                     ],
                     RunningPage::Overview,
-                    sniffer.style,
+                    &sniffer.style,
                     sniffer.language,
                     sniffer.unread_notifications,
                 );
@@ -120,13 +122,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
                 .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(sniffer.style, ElementType::BorderedRound),
+                    StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
                 ));
 
                 let col_info = lazy(
                     (
                         total,
-                        sniffer.style,
+                        Arc::clone(&sniffer.style),
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
@@ -138,7 +140,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                     (
                         filtered,
                         num_favorites,
-                        sniffer.style,
+                        Arc::clone(&sniffer.style),
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
@@ -161,7 +163,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     .height(Length::Fill)
                                     .align_x(Horizontal::Center)
                                     .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                                        StyleTuple(sniffer.style, ElementType::BorderedRound),
+                                        StyleTuple(
+                                            Arc::clone(&sniffer.style),
+                                            ElementType::BorderedRound,
+                                        ),
                                     )),
                             )
                             .push(col_chart),
@@ -186,7 +191,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
         ))
 }
 
@@ -291,7 +296,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .push(col_host)
         .push(
             Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-                sniffer.style,
+                Arc::clone(&sniffer.style),
                 ElementType::Standard,
             ))),
         )
@@ -302,13 +307,13 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
             .height(Length::Fill)
             .width(Length::Fixed(1170.0))
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::BorderedRound),
+                StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
             )),
     )
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_host = Column::new()
@@ -345,7 +350,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .width(Length::Fixed(FLAGS_WIDTH_BIG))
         .style(
             StyleTuple(
-                sniffer.style,
+                Arc::clone(&sniffer.style),
                 if data_info_host.is_favorite {
                     ElementType::Starred
                 } else {
@@ -400,7 +405,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                             .push(Rule::horizontal(1).style(<StyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Incoming),
+                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
                             ))),
                     )
                     .push(
@@ -410,7 +415,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                             .push(Rule::horizontal(1).style(<StyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
                             ))),
                     ),
             );
@@ -425,7 +430,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 data_info_host.is_local,
                 data_info_host.traffic_type,
                 sniffer.language,
-                sniffer.style,
+                &sniffer.style,
             ))
             .push(host_bar);
 
@@ -438,7 +443,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     as_name: host.asn.name.clone(),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Neutral).into()),
         );
     }
 
@@ -454,7 +459,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     col_host = col_host.push(
         Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
             <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
-                sniffer.style,
+                Arc::clone(&sniffer.style),
                 ElementType::Standard,
             )),
         ),
@@ -464,7 +469,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 }
 
 fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_app = Column::new()
@@ -527,7 +532,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                             .push(Rule::horizontal(1).style(<StyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Incoming),
+                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
                             ))),
                     )
                     .push(
@@ -537,7 +542,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                             .push(Rule::horizontal(1).style(<StyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
                             ))),
                     ),
             );
@@ -549,13 +554,13 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     app: format!("{app:?}"),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Neutral).into()),
         );
     }
     col_app = col_app.push(
         Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
             <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
-                sniffer.style,
+                Arc::clone(&sniffer.style),
                 ElementType::Standard,
             )),
         ),
@@ -570,7 +575,7 @@ fn lazy_col_info(
     dropped: u32,
     sniffer: &Sniffer,
 ) -> Column<'static, Message> {
-    let font = get_font(sniffer.style);
+    let font = get_font(&sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
 
@@ -612,7 +617,7 @@ fn lazy_col_info(
         .push(chart_radios(
             sniffer.traffic_chart.chart_type,
             font,
-            sniffer.style,
+            &sniffer.style,
             sniffer.language,
         ));
 
@@ -675,14 +680,14 @@ fn lazy_col_info(
                 .push(col_device_filters)
                 .push(
                     Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
+                        StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                     )),
                 )
                 .push(col_data_representation),
         )
         .push(
             Rule::horizontal(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-                sniffer.style,
+                Arc::clone(&sniffer.style),
                 ElementType::Standard,
             ))),
         )
@@ -690,7 +695,7 @@ fn lazy_col_info(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
                 .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
+                    StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
                 )),
         )
 }

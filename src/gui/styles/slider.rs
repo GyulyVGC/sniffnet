@@ -19,7 +19,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
@@ -35,7 +35,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
@@ -51,7 +51,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
     }
 
     fn dragging(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(&self.0);
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
