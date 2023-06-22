@@ -1,4 +1,4 @@
-#![allow(clippy::match_same_arms)]
+#![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
 
 use crate::Language;
 
@@ -321,7 +321,6 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::RO => "Nume de domeniu complet calificat",
         Language::PL => "Pełna nazwa domeny",
         Language::FR => "Nom de domaine complètement qualifié",
-        
         _ => "Fully qualified domain name",
     }
 }
@@ -486,7 +485,7 @@ pub fn showing_results_translation(
         Language::UK => format!("Показано {start}-{end} з {total} загальних результатів"),
         Language::RO => format!("Se afișează {start}-{end} din {total} rezultate"),
         Language::PL => format!("Wyświetlanie {start}-{end} z {total} wyników"),
-        Language::FR => format!("Affichage de {start}-{end} de {total} résultats totaux",
+        Language::FR => format!("Affichage de {start}-{end} de {total} résultats totaux"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -507,7 +506,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::UK => "Застосувати кольорові градієнти",
         Language::RO => "Aplicați gradient de culoare",
         Language::PL => "Zastosuj gradient kolorów",
-        Language::FR => "Appliquer des gradients de couleur"
+        Language::FR => "Appliquer des gradients de couleur",
         _ => "Apply color gradients",
     }
 }
