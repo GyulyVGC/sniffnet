@@ -1,0 +1,5 @@
+rust-sniffnet (1.2.1-1) unstable; urgency=medium
+
+  * Package sniffnet 1.2.1 from crates.io using debcargo 2.6.0
+
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Fri, 23 Jun 2023 16:30:47 +0200

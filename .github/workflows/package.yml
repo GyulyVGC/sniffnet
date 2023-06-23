@@ -133,7 +133,10 @@ jobs:
           export DEBFULLNAME="Giuliano Bellini"
           export DEBEMAIL="gyulyvgc99@gmail.com"
           debcargo package --config resources/packaging/linux/deb-source/debcargo.toml sniffnet
-          mv rust-sniffnet-1.2.1 artifacts/
+          cp resources/packaging/linux/deb-source/changelog rust-sniffnet*/debian/changelog
+          cp resources/packaging/linux/deb-source/copyright rust-sniffnet*/debian/copyright
+          mv resources/packaging/linux/scripts/postinst rust-sniffnet*/debian/sniffnet.postinst
+          mv rust-sniffnet* artifacts/
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v3
