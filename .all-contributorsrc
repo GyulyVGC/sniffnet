@@ -298,6 +298,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "tagattie",
+      "name": "Hiroki Tagato",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16320859?v=4",
+      "profile": "https://blog.c6h12o6.org/",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
