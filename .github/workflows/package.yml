@@ -138,7 +138,9 @@ jobs:
           debcargo package --config resources/packaging/linux/deb-source/debcargo.toml sniffnet
           cp resources/packaging/linux/deb-source/changelog rust-sniffnet*/debian/changelog
           cp resources/packaging/linux/deb-source/copyright rust-sniffnet*/debian/copyright
-          mv resources/packaging/linux/scripts/postinst rust-sniffnet*/debian/sniffnet.postinst
+          for dir in rust-sniffnet*/debian/ ; do
+            cp resources/packaging/linux/scripts/postinst "$dir"sniffnet.postinst ;
+          done
           mv rust-sniffnet* artifacts/
 
       - name: Upload package artifacts
