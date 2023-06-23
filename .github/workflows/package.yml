@@ -113,12 +113,18 @@ jobs:
     container:
       image: debian:latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: apt update -y && apt install -y curl build-essential
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
         with:
-          profile: minimal
           toolchain: stable
-          override: true
+          profile: minimal
+          default: true
 
       - name: Install packaging tools
         run: cargo install debcargo
