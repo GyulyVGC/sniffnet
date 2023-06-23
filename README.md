@@ -64,9 +64,8 @@ You can install Sniffnet in one of the following ways:
 
   <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
 
-  You can install Sniffnet through the installers available in the [latest release](https://github.com/GyulyVGC/sniffnet/releases/latest). <br>
-  Choose from a Windows installer, a macOS disk image, a DEB package, or an RPM package (depending on your operating system). <br>
-  Below, for your convenience, you can find the direct links to the downloads.
+  You can download the latest version of Sniffnet through the installers available **below**. <br>
+  _Choose from a Windows Installer, an Apple Disk Image, a DEB package, or an RPM package (depending on your operating system)._
 
 > **Note**
 >
@@ -130,6 +129,18 @@ brew install sniffnet
 
   ```sh
 pacman -S sniffnet
+```
+
+</details>
+
+<details>
+
+  <summary>on FreeBSD</summary>
+
+You can install Sniffnet port with:
+
+  ```sh
+pkg install sniffnet
 ```
 
 </details>
