@@ -142,6 +142,7 @@ jobs:
             cp resources/packaging/linux/scripts/postinst "$dir"sniffnet.postinst ;
           done
           cd rust-sniffnet*/
+          mk-build-deps -i debian/control
           debuild -b -uc -us
           mv rust-sniffnet* artifacts/
 
