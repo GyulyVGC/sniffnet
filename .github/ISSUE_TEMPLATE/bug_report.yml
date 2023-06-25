@@ -1,0 +1,60 @@
+name: I have a problem with the app ❌
+description: Create a report to help us improve Sniffnet.
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: |
+        Please, search [the existing issues] and see if an issue already exists for the bug you encountered.
+
+        [the existing issues]: https://github.com/GyulyVGC/sniffnet/issues
+      options:
+        - label: I have searched the existing issues.
+          required: true
+  - type: textarea
+    attributes:
+      label: What's the problem?
+      id: what-happened
+      description: |
+        What problem are you having? Please, also provide the steps to reproduce it.
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: How did you install the app?
+      description: |
+        Select the strategy you used to install Sniffnet.
+      options:
+        - downloaded one of the provided packages
+        - installed from crates.io
+        - built locally by cloning the repository
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Select the operating system you are using.
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - FreeBSD
+        - OpenBSD
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional context
+      id: additional-info
+      description: |
+        Do you have any additional information to report? You can optionally include pictures or other resources.
+    validations:
+      required: false

@@ -1,0 +1,34 @@
+name: I have a suggestion 💡
+description: Suggest an idea for Sniffnet (you can request for new features, or other kinds of improvement).
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: |
+        Please, search [the existing issues] and see if an issue already exists for your request.
+
+        [the existing issues]: https://github.com/GyulyVGC/sniffnet/issues
+      options:
+        - label: I have searched the existing issues.
+          required: true
+  - type: textarea
+    attributes:
+      label: Describe the solution you'd like
+      id: solution
+      description: |
+        Please, describe what you would like to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem?
+      id: is-problem
+      description: |
+        A clear and concise description of what the problem is, if any. Example: I'm always frustrated when [...]
+    validations:
+      required: false
