@@ -50,8 +50,9 @@ constantly expanding it including **new features and functionalities**.<br/>
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
 <p align="center">
-<a href="https://github.com/github"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="github"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="tiansheng li"/></a>
+<a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="GitHub"/></a>&nbsp;&nbsp;
+<a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="75px" alt="Cthulu201"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="Tiansheng Li"/></a>
 </p>
 
 
