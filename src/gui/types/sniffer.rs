@@ -307,7 +307,7 @@ impl Sniffer {
                 .arg(report_path)
                 .spawn()
                 .unwrap();
-            #[cfg(target_os = "linux")]
+            #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
             std::process::Command::new("xdg-open")
                 .arg(report_path)
                 .spawn()
@@ -324,7 +324,7 @@ impl Sniffer {
             .unwrap();
         #[cfg(target_os = "macos")]
         std::process::Command::new("open").arg(url).spawn().unwrap();
-        #[cfg(target_os = "linux")]
+        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
         std::process::Command::new("xdg-open")
             .arg(url)
             .spawn()

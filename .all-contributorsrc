@@ -268,7 +268,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/15658558?v=4",
       "profile": "https://aloso.github.io/",
       "contributions": [
-        "ideas"
+        "ideas",
+        "code"
       ]
     },
     {
@@ -287,6 +288,33 @@
       "profile": "https://github.com/wangzishi",
       "contributions": [
         "translation"
+      ]
+    },
+    {
+      "login": "Quetzal-coalt",
+      "name": "Quetzal-coalt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62941885?v=4",
+      "profile": "https://github.com/Quetzal-coalt",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "tagattie",
+      "name": "Hiroki Tagato",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16320859?v=4",
+      "profile": "https://blog.c6h12o6.org/",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "Cthulu201",
+      "name": "Cthulu201",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9865418?v=4",
+      "profile": "https://github.com/Cthulu201",
+      "contributions": [
+        "financial"
       ]
     }
   ],
