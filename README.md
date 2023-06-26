@@ -1,12 +1,12 @@
 <p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
-<p align="center"> 
+<p align="center">
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
 &nbsp;
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?&logo=rust&color=blue"/></a> <br>
 </p>
 
-<p align="center"> 
+<p align="center">
 Application to comfortably monitor your Internet traffic <br>
 Multithreaded, cross-platform, reliable <br>
 🌐 <a href="https://www.sniffnet.net">www.sniffnet.net</a>
@@ -78,17 +78,17 @@ You can install Sniffnet in one of the following ways:
 [32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)
 
   ### macOS
-  
+
   - [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) |
 [Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
 
   ### Linux
 
   - deb: [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) |
-[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) | 
+[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) |
 [i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) |
 [armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
-  
+
   - rpm: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) |
 [aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
 
@@ -221,7 +221,7 @@ sudo sniffnet
 - 🌍 get information about the country of the remote hosts (IP geolocation)
 - ⭐ save your favorite network hosts
 - 🔉 set custom notifications to inform you when defined network events occur
-- 🎨 choose the style that fits you the most from 4 different available themes
+- 🎨 choose the style that fits you the most from 4 different available themes plus custom theme support
 - 🕵️ inspect each of your network connections in real time
 - 📁 save complete textual reports with detailed information for each network connection:
   * source and destination IP addresses
@@ -243,13 +243,13 @@ sudo sniffnet
   Geolocation and network providers (ASN) refer to the remote IP address of each connection. They are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
 
   > **Note**
-  > 
+  >
   > The MMDB (MaxMind database) format has been developed especially for IP lookup.<br>
   > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.<br>
   > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
-  > 
+  >
   > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
-  
+
   This file format potentially allows Sniffnet to execute hundreds of different IP lookups in a matter of a few milliseconds.
 
 </details>
@@ -260,23 +260,23 @@ sudo sniffnet
 <details>
 
   <summary>See details</summary>
-  
+
   <br>
-  
+
   Application layer protocols are inferred from the transport port numbers,
   following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
 
   Please, remember that this is just a convention:
 
   > **Warning**
-  > 
+  >
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
   > However, many unofficial uses of well-known port numbers occur in practice.
 
   The following table reports the port-to-service mappings used by Sniffnet,
   chosen from the most common assignments by IANA.
-  
+
 <div align="center">
 
 |Port number(s)|Application protocol  |  Description |
@@ -348,6 +348,45 @@ The currently usable hotkeys are reported in the following.
 
 </details>
 
+## Custom themes
+<details>
+
+  <summary>See details</summary>
+
+  Custom themes are specified as a TOML file that may be loaded from anywhere. Themes support multilingual
+  descriptions.
+
+  The TOML must follow this format:
+  ```toml
+  name = "Catppuccin (Mocha)"
+
+  [description]
+  EN = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin"
+  # Contributed by Emilia
+  HU = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin"
+  # Contributed by Bartosz
+  PL = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin"
+
+  # Color palettes are in RGBA hexadecimal where the alpha is optional.
+  [palette]
+  primary = "#1e1e2e"          # Base
+  secondary = "#89b4fa"        # Blue
+  buttons = "#313244"          # Surface0
+  incoming = "#89b4fa"         # Blue
+  outgoing = "#f5c2e7"         # Pink
+  text_headers = "#11111b"     # Crust
+  text_body = "#cdd6f4"        # Text
+  round_borders = "#74c7ec"    # Sapphire
+  round_containers = "#585b70" # Surface 2
+  starred = "#f9e2af"          # Yellow
+
+  # Alpha channels are floats within [0.0, 1.0]
+  badge_alpha = 0.75
+  color_mix_chart = 0.3
+  ```
+
+  The example theme above uses colors from [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
+</details>
 
 ## Troubleshooting
 
@@ -388,7 +427,7 @@ Reach out to me, and I'll try to generate an installer for your specific operati
 
 In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause some problems that could prevent you from running Sniffnet. <br>
-In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
+In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer)
 branch, which uses the `glow` renderer.
 
 > **Note**

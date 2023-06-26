@@ -1,6 +1,31 @@
 //! Custom Sniffnet color schemes.
 //! Themes should be in TOML files with the following schema.
 //! ```toml
+//! name = "Theme's name"
+//!
+//! [description]
+//! # Descriptions of the theme in any of Sniffnet's supported languages
+//! # CODE = "DESC"
+//! EN = "A fantastically dark theme!"
+//! HU = ""
+//! PL = ""
+//!
+//! # The palette is specified in RGB hexadecimal with an optional alpha
+//! [palette]
+//! primary = "#000000"
+//! secondary = "#000000"
+//! buttons = "#000000"
+//! incoming = "#000000"
+//! outgoing = "#000000"
+//! text_headers = "#000000"
+//! text_body = "#000000"
+//! round_borders = "#000000"
+//! round_containers = "#000000"
+//! starred = "#000000"
+//!
+//! # floats for these two alpha values
+//! badge_alpha = 0.9
+//! color_mix_chart = 0.3
 //! ```
 
 use serde::{de::Error as DeErrorTrait, Deserialize, Deserializer, Serialize, Serializer};

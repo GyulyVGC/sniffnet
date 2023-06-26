@@ -145,11 +145,11 @@ impl Sniffer {
                 self.style = style;
                 self.traffic_chart.change_colors(&self.style);
             }
-            Message::UpdateStylePath(keys) => {
+            Message::UpdateStylePath(value) => {
                 if let Some(path) = &mut self.style_path_update {
-                    *path = keys
+                    *path = value
                 } else {
-                    self.style_path_update.replace(keys);
+                    self.style_path_update.replace(value);
                 }
             }
             Message::PasteCustomStyle(path) => {
@@ -159,7 +159,7 @@ impl Sniffer {
             Message::LoadCustomStyle => {
                 // Purposefully ignoring the error because this bit of code will be called on on_input repeatedly.
                 // This entire bit of code should be much cleaner once we use file dialogs
-                dbg!(&self.style_path_update);
+                // dbg!(&self.style_path_update);
                 let style =
                     CustomStyle::from_file(self.style_path_update.as_deref().unwrap_or_default())
                         .map(|style| Arc::new(StyleType::Custom(style)));
