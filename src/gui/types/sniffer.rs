@@ -13,6 +13,7 @@ use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::custom_style::CustomStyle;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
@@ -55,6 +56,8 @@ pub struct Sniffer {
     pub pcap_error: Option<String>,
     /// Application style (only values Day and Night are possible for this field)
     pub style: Arc<StyleType>,
+    /// Receiver for custom style path input on the settings page
+    pub style_path_update: Option<String>,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -103,6 +106,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             style: Arc::clone(&config_settings.style),
+            style_path_update: None,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(&config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
@@ -140,6 +144,28 @@ impl Sniffer {
             Message::Style(style) => {
                 self.style = style;
                 self.traffic_chart.change_colors(&self.style);
+            }
+            Message::UpdateStylePath(keys) => {
+                if let Some(path) = &mut self.style_path_update {
+                    *path = keys
+                } else {
+                    self.style_path_update.replace(keys);
+                }
+            }
+            Message::PasteCustomStyle(path) => {
+                self.style_path_update.replace(path);
+                return self.update(Message::LoadCustomStyle);
+            }
+            Message::LoadCustomStyle => {
+                // Purposefully ignoring the error because this bit of code will be called on on_input repeatedly.
+                // This entire bit of code should be much cleaner once we use file dialogs
+                dbg!(&self.style_path_update);
+                let style =
+                    CustomStyle::from_file(self.style_path_update.as_deref().unwrap_or_default())
+                        .map(|style| Arc::new(StyleType::Custom(style)));
+                if let Ok(style) = style {
+                    return self.update(Message::Style(style));
+                }
             }
             Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),

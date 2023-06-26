@@ -240,7 +240,7 @@ fn filters_col(
     style: &Arc<StyleType>,
     language: Language,
 ) -> Column<'static, Message> {
-    let font = get_font(&style);
+    let font = get_font(style);
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
@@ -251,7 +251,7 @@ fn filters_col(
     if search_params.is_some_filter_active() {
         title_row = title_row.push(button_clear_filter(
             SearchParameters::default(),
-            &style,
+            style,
             font,
         ));
     }
@@ -302,7 +302,7 @@ fn filters_col(
                     60.0,
                     search_params.clone(),
                     font,
-                    &style,
+                    style,
                 ))
                 .push(filter_input(
                     FilterInputType::Country,
@@ -311,7 +311,7 @@ fn filters_col(
                     30.0,
                     search_params.clone(),
                     font,
-                    &style,
+                    style,
                 )),
         )
         .push(
@@ -325,7 +325,7 @@ fn filters_col(
                     120.0,
                     search_params.clone(),
                     font,
-                    &style,
+                    style,
                 ))
                 .push(filter_input(
                     FilterInputType::AS,
@@ -334,7 +334,7 @@ fn filters_col(
                     120.0,
                     search_params.clone(),
                     font,
-                    &style,
+                    style,
                 )),
         )
 }

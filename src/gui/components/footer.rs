@@ -71,7 +71,7 @@ fn get_button_website(style: &Arc<StyleType>) -> Tooltip<'static, Message> {
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(content, "Website", Position::Top)
-        .font(get_font(&style))
+        .font(get_font(style))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(Arc::clone(style), ElementType::Tooltip),
         ))

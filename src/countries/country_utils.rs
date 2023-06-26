@@ -340,7 +340,7 @@ pub fn get_flag_tooltip(
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(&style))
+        .font(get_font(style))
         .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(Arc::clone(style), ElementType::Tooltip),
@@ -378,7 +378,7 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(&style))
+        .font(get_font(style))
         .snap_within_viewport(true)
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(Arc::clone(style), ElementType::Tooltip),

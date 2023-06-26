@@ -5,6 +5,8 @@ use iced::{Alignment, Length};
 use iced_native::svg::Handle;
 use iced_native::widget::{horizontal_space, vertical_space, Svg};
 
+use iced::widget::TextInput;
+
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -86,10 +88,29 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     mon_amour_translation(sniffer.language).to_string(),
                     &Arc::new(MonAmour),
                 )),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Row::new().push(
+                TextInput::new(
+                    "Path to custom theme and hit enter!",
+                    sniffer.style_path_update.as_deref().unwrap_or_default(),
+                )
+                .font(font)
+                // Iced's TextInput has an on_submit function but there's no callback
+                .on_input(Message::UpdateStylePath)
+                .on_paste(Message::PasteCustomStyle)
+                .on_submit(Message::LoadCustomStyle)
+                .padding(10)
+                .style(StyleTuple(
+                    Arc::clone(&sniffer.style),
+                    ElementType::Standard,
+                )),
+            ),
         );
 
     Container::new(content)
-        .height(Length::Fixed(400.0))
+        .height(Length::Fixed(440.0))
         .width(Length::Fixed(800.0))
         .style(<StyleTuple as Into<iced::theme::Container>>::into(
             StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
@@ -119,7 +140,7 @@ fn get_palette_container(
         .style(
             StyleTuple(
                 Arc::clone(style),
-                if on_press.eq(&style) {
+                if on_press.eq(style) {
                     ElementType::BorderedRoundSelected
                 } else {
                     ElementType::BorderedRound

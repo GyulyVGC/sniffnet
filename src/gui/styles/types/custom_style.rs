@@ -36,6 +36,35 @@ pub struct CustomStyle {
     pub palette: CustomPalette,
 }
 
+impl CustomStyle {
+    /// Deserialize [CustomStyle] from `path`.
+    ///
+    /// # Arguments
+    /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
+    pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
+    where
+        P: Into<String>,
+    {
+        // Try to open the file at `path`
+        let path = path.into();
+        let mut toml_reader = File::open(&path)
+            .map_err(DeErrorTrait::custom)
+            .map(BufReader::new)?;
+
+        // Read the ostensible TOML
+        let mut style_toml = String::new();
+        toml_reader
+            .read_to_string(&mut style_toml)
+            .map_err(DeErrorTrait::custom)?;
+
+        // Deserialize it and store `path` into the resulting struct
+        toml::de::from_str::<CustomStyle>(&style_toml).map(|mut style| {
+            style.path = path;
+            style
+        })
+    }
+}
+
 /// Base [Palette] and extension colors for [CustomStyle].
 // NOTE: This is flattened for ergonomics. With flatten, both [Palette] and [PaletteExtension] can be
 // defined in the TOML as a single entity rather than two separate tables. This is intentional because
@@ -112,24 +141,13 @@ impl PartialEq for CustomPalette {
 /// Deserialize [CustomStyle] from a file path.
 ///
 /// This is implemented by first deserializing a file path which in turn contains the style as TOML.
+#[inline]
 pub(super) fn deserialize_from_path<'de, D>(deserializer: D) -> Result<CustomStyle, D::Error>
 where
     D: Deserializer<'de>,
 {
     let path = String::deserialize(deserializer)?;
-    let mut toml_reader = File::open(&path)
-        .map_err(DeErrorTrait::custom)
-        .map(BufReader::new)?;
-    let mut style_toml = String::new();
-    toml_reader
-        .read_to_string(&mut style_toml)
-        .map_err(DeErrorTrait::custom)?;
-    toml::de::from_str::<CustomStyle>(&style_toml)
-        .map_err(DeErrorTrait::custom)
-        .map(|mut style| {
-            style.path = path;
-            style
-        })
+    CustomStyle::from_file(path).map_err(DeErrorTrait::custom)
 }
 
 /// Serialize [CustomStyle]'s path.
@@ -183,6 +201,7 @@ mod tests {
     // Polish translation by Bartosz.
     const STYLE_DESC_PL: &str = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin";
 
+    // NOTE: This has to be updated if `resources/themes/catppuccin_mocha.toml` changes
     fn catppuccin_style() -> StyleForTests {
         StyleForTests(CustomStyle {
             name: "Catppuccin (Mocha)".to_owned(),
@@ -207,9 +226,9 @@ mod tests {
                         a: 1.0,
                     },
                     buttons: Color {
-                        r: 137.0 / 255.0,
-                        g: 220.0 / 255.0,
-                        b: 235.0 / 255.0,
+                        r: 49.0 / 255.0,
+                        g: 50.0 / 255.0,
+                        b: 68.0 / 255.0,
                         a: 1.0,
                     },
                     incoming: Color {
@@ -225,9 +244,9 @@ mod tests {
                         a: 1.0,
                     },
                     text_headers: Color {
-                        r: 205.0 / 255.0,
-                        g: 214.0 / 255.0,
-                        b: 244.0 / 255.0,
+                        r: 17.0 / 255.0,
+                        g: 17.0 / 255.0,
+                        b: 27.0 / 255.0,
                         a: 1.0,
                     },
                     text_body: Color {

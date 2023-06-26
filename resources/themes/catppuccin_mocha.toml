@@ -10,10 +10,10 @@ PL = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://
 [palette]
 primary = "#1e1e2e"          # Base
 secondary = "#89b4fa"        # Blue
-buttons = "#89dceb"          # Sky
+buttons = "#313244"          # Surface0
 incoming = "#89b4fa"         # Blue
 outgoing = "#f5c2e7"         # Pink
-text_headers = "#cdd6f4"     # Text
+text_headers = "#11111b"     # Crust
 text_body = "#cdd6f4"        # Text
 round_borders = "#74c7ec"    # Sapphire
 round_containers = "#585b70" # Surface 2

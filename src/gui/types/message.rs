@@ -42,6 +42,12 @@ pub enum Message {
     Reset,
     /// Change application style
     Style(Arc<StyleType>),
+    /// Update custom style path
+    UpdateStylePath(String),
+    /// Handle a custom style path
+    PasteCustomStyle(String),
+    /// Load custom style from a path
+    LoadCustomStyle,
     /// Manage waiting time
     Waiting,
     /// Displays a modal
