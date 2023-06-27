@@ -17,16 +17,6 @@ const HEX_STR_BASE_LEN: usize = 7;
 // #aabbccdd is nine bytes long
 const HEX_STR_ALPHA_LEN: usize = 9;
 
-/// Serde delegate type for [iced::Color].
-// #[derive(Debug, PartialEq, Serialize, Deserialize)]
-// #[serde(remote = "iced::Color")]
-// pub(super) struct ColorDelegate {
-//    pub r: f32,
-//    pub g: f32,
-//    pub b: f32,
-//    pub a: f32,
-// }
-
 pub(super) fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
 where
     D: Deserializer<'de>,
@@ -114,27 +104,16 @@ where
     serializer.serialize_str(&hex_color)
 }
 
-// Round and truncate [Color] to facilitate comparisons.
-pub(super) fn color_round(color: Color) -> Color {
-    let Color { r, g, b, a } = color;
-    Color {
-        r: (r * 1000.0).trunc(),
-        g: (g * 1000.0).trunc(),
-        b: (b * 1000.0).trunc(),
-        a: (a * 1000.0).trunc(),
-    }
-}
-
-// Lower precision float equality for unit tests and cases where we need Color comparisons.
+// Compare [iced::Color] as RGBA.
 pub(super) fn color_partialeq(color: Color, other: Color) -> bool {
-    let color = color_round(color);
-    let other = color_round(other);
-    color == other
+    let color = color.into_rgba8();
+    let other = other.into_rgba8();
+    color.into_iter().eq(other.into_iter())
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{color_partialeq, color_round, deserialize_color, serialize_color};
+    use super::{color_partialeq, deserialize_color, serialize_color};
     use iced::Color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
@@ -240,9 +219,9 @@ mod tests {
         );
     }
 
-    // Test that colors are rounded correctly
+    // Test color equality
     #[test]
-    fn test_color_rounding() {
+    fn test_color_partialeq() {
         let color = Color {
             r: 1.0 / 3.0,
             g: 2.0 / 3.0,
@@ -250,15 +229,7 @@ mod tests {
             #[allow(clippy::excessive_precision)]
             a: 1.618033988749,
         };
-
-        let color_rounded = color_round(color);
-        let color_expected = Color {
-            r: 333.0,
-            g: 666.0,
-            b: 1000.0,
-            a: 1618.0,
-        };
-
-        assert_eq!(color_expected, color_rounded);
+        let other = color;
+        assert!(color_partialeq(color, other))
     }
 }
