@@ -4,7 +4,6 @@ use iced::widget::checkbox::Appearance;
 use iced::Background;
 
 use crate::get_colors;
-use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 
 impl From<StyleTuple> for iced::theme::Checkbox {
@@ -36,10 +35,7 @@ impl iced::widget::checkbox::StyleSheet for StyleTuple {
             border_radius: 0.0,
             border_width: 1.0,
             border_color: colors.secondary,
-            text_color: match self.1 {
-                ElementType::Badge => None,
-                _ => Some(colors.secondary),
-            },
+            text_color: None,
         }
     }
 }

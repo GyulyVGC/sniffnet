@@ -505,7 +505,7 @@ fn button_clear_filter(
     font: Font,
 ) -> Button<'static, Message> {
     button(
-        Text::new("x")
+        Text::new("×")
             .font(font)
             .horizontal_alignment(Horizontal::Center)
             .size(15),

@@ -312,7 +312,7 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
                 Container::new(
                     Tooltip::new(
                         button(
-                            Text::new("x")
+                            Text::new("×")
                                 .font(font)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),

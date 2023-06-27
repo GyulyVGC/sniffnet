@@ -136,10 +136,9 @@ fn get_release_details(
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(
-                Text::new('T'.to_string())
+                Text::new('!'.to_string())
                     .style(iced::theme::Text::Color(Color::from_rgb(0.8, 0.15, 0.15)))
-                    .font(ICONS)
-                    .size(22)
+                    .size(28)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center),
             )

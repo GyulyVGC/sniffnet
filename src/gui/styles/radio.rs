@@ -34,7 +34,7 @@ impl iced::widget::radio::StyleSheet for StyleTuple {
             dot_color: colors.secondary,
             border_width: BORDER_WIDTH,
             border_color: colors.secondary,
-            text_color: Some(colors.secondary),
+            text_color: None,
         }
     }
 }
