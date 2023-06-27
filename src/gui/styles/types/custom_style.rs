@@ -194,7 +194,7 @@ mod tests {
         PaletteExtension,
     };
     use crate::translations::types::language::Language;
-    use iced::Color;
+    use iced::color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_tokens, Token};
     use std::collections::BTreeMap;
@@ -238,68 +238,18 @@ mod tests {
             ]),
             palette: CustomPalette {
                 base: Palette {
-                    primary: Color {
-                        r: 30.0 / 255.0,
-                        g: 30.0 / 255.0,
-                        b: 46.0 / 255.0,
-                        a: 1.0,
-                    },
-                    secondary: Color {
-                        r: 137.0 / 255.0,
-                        g: 180.0 / 255.0,
-                        b: 250.0 / 255.0,
-                        a: 1.0,
-                    },
-                    buttons: Color {
-                        r: 49.0 / 255.0,
-                        g: 50.0 / 255.0,
-                        b: 68.0 / 255.0,
-                        a: 1.0,
-                    },
-                    incoming: Color {
-                        r: 137.0 / 255.0,
-                        g: 180.0 / 255.0,
-                        b: 250.0 / 255.0,
-                        a: 1.0,
-                    },
-                    outgoing: Color {
-                        r: 245.0 / 255.0,
-                        g: 194.0 / 255.0,
-                        b: 231.0 / 255.0,
-                        a: 1.0,
-                    },
-                    text_headers: Color {
-                        r: 17.0 / 255.0,
-                        g: 17.0 / 255.0,
-                        b: 27.0 / 255.0,
-                        a: 1.0,
-                    },
-                    text_body: Color {
-                        r: 205.0 / 255.0,
-                        g: 214.0 / 255.0,
-                        b: 244.0 / 255.0,
-                        a: 1.0,
-                    },
-                    round_borders: Color {
-                        r: 116.0 / 255.0,
-                        g: 199.0 / 255.0,
-                        b: 236.0 / 255.0,
-                        a: 1.0,
-                    },
-                    round_containers: Color {
-                        r: 88.0 / 255.0,
-                        g: 91.0 / 255.0,
-                        b: 112.0 / 255.0,
-                        a: 1.0,
-                    },
+                    primary: color!(30, 30, 46),
+                    secondary: color!(137, 180, 250),
+                    buttons: color!(49, 50, 68),
+                    incoming: color!(137, 180, 250),
+                    outgoing: color!(245, 194, 231),
+                    text_headers: color!(17, 17, 27),
+                    text_body: color!(205, 214, 244),
+                    round_borders: color!(116, 199, 236),
+                    round_containers: color!(88, 91, 112),
                 },
                 extension: PaletteExtension {
-                    starred: Color {
-                        r: 249.0 / 255.0,
-                        g: 226.0 / 255.0,
-                        b: 175.0 / 255.0,
-                        a: 1.0,
-                    },
+                    starred: color!(249, 226, 175),
                     badge_alpha: 0.75,
                     color_mix_chart: 0.3,
                 },
