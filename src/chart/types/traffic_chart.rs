@@ -118,6 +118,7 @@ impl Chart<Message> for TrafficChart {
 
         chart_builder
             .margin_right(30)
+            .margin_bottom(0)
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
@@ -175,7 +176,8 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
-                    .border_style(BLACK)
+                    .background_style(BLACK.mix(0.3))
+                    .border_style(BLACK.mix(0.6))
                     .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
@@ -232,7 +234,8 @@ impl Chart<Message> for TrafficChart {
                 chart
                     .configure_series_labels()
                     .position(SeriesLabelPosition::UpperRight)
-                    .border_style(BLACK)
+                    .background_style(BLACK.mix(0.3))
+                    .border_style(BLACK.mix(0.6))
                     .label_font(("notosans", 17).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
