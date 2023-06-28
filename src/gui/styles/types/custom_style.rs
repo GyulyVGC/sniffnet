@@ -35,10 +35,7 @@ use std::{
     io::{BufReader, Read},
 };
 
-use super::{
-    color_remote::color_partialeq,
-    palette::{Palette, PaletteExtension},
-};
+use super::palette::{Palette, PaletteExtension};
 use crate::Language;
 
 /// Custom color scheme data including the palette, name, and location of the toml.
@@ -99,7 +96,7 @@ impl CustomStyle {
 // Clippy complains about deriving [Hash] with a manually written [PartialEq]. We manually implemented
 // Hash for [Palette] and [PaletteExtension], so deriving Hash is convenient and the error is spurious.
 #[allow(clippy::derived_hash_with_manual_eq)]
-#[derive(Debug, Hash, Clone, Deserialize, Serialize)]
+#[derive(Debug, Hash, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CustomPalette {
     /// Base colors as used for the default sniffnet themes.
     #[serde(flatten)]
@@ -107,60 +104,6 @@ pub struct CustomPalette {
     /// Extension colors such as the yellow used for favorites.
     #[serde(flatten)]
     pub extension: PaletteExtension,
-}
-
-impl PartialEq for CustomPalette {
-    fn eq(&self, other: &Self) -> bool {
-        let Palette {
-            primary,
-            secondary,
-            buttons,
-            incoming,
-            outgoing,
-            text_headers,
-            text_body,
-            round_borders,
-            round_containers,
-        } = self.base;
-
-        let PaletteExtension {
-            starred,
-            badge_alpha,
-            color_mix_chart,
-        } = self.extension;
-
-        // Other
-        let Palette {
-            primary: primary_other,
-            secondary: secondary_other,
-            buttons: buttons_other,
-            incoming: incoming_other,
-            outgoing: outgoing_other,
-            text_headers: text_headers_other,
-            text_body: text_body_other,
-            round_borders: round_borders_other,
-            round_containers: round_containers_other,
-        } = other.base;
-
-        let PaletteExtension {
-            starred: starred_other,
-            badge_alpha: badge_alpha_other,
-            color_mix_chart: color_mix_chart_other,
-        } = other.extension;
-
-        color_partialeq(primary, primary_other)
-            && color_partialeq(secondary, secondary_other)
-            && color_partialeq(buttons, buttons_other)
-            && color_partialeq(incoming, incoming_other)
-            && color_partialeq(outgoing, outgoing_other)
-            && color_partialeq(text_headers, text_headers_other)
-            && color_partialeq(text_body, text_body_other)
-            && color_partialeq(round_borders, round_borders_other)
-            && color_partialeq(round_containers, round_containers_other)
-            && color_partialeq(starred, starred_other)
-            && badge_alpha == badge_alpha_other
-            && color_mix_chart == color_mix_chart_other
-    }
 }
 
 /// Deserialize [CustomStyle] from a file path.

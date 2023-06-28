@@ -104,16 +104,10 @@ where
     serializer.serialize_str(&hex_color)
 }
 
-// Compare [iced::Color] as RGBA.
-pub(super) fn color_partialeq(color: Color, other: Color) -> bool {
-    let color = color.into_rgba8();
-    let other = other.into_rgba8();
-    color.into_iter().eq(other.into_iter())
-}
 
 #[cfg(test)]
 mod tests {
-    use super::{color_partialeq, deserialize_color, serialize_color};
+    use super::{deserialize_color, serialize_color};
     use iced::Color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
@@ -135,7 +129,7 @@ mod tests {
         a: 128.0 / 255.0,
     };
 
-    #[derive(Debug, Deserialize, Serialize)]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
     #[serde(transparent)]
     struct DelegateTest {
         #[serde(
@@ -144,12 +138,6 @@ mod tests {
             serialize_with = "serialize_color"
         )]
         color: Color,
-    }
-
-    impl PartialEq for DelegateTest {
-        fn eq(&self, other: &Self) -> bool {
-            color_partialeq(self.color, other.color)
-        }
     }
 
     const CATPPUCCIN_PINK_DELEGATE: DelegateTest = DelegateTest {
@@ -202,6 +190,7 @@ mod tests {
         );
     }
 
+    // A hex string that is too long shouldn't deserialize
     #[test]
     fn test_len_too_large_color_de() {
         assert_de_tokens_error::<DelegateTest>(
@@ -217,19 +206,5 @@ mod tests {
             &[Token::Str(INVALID_COLOR)],
             "invalid value: string \"#ca🐈\", expected valid hexadecimal",
         );
-    }
-
-    // Test color equality
-    #[test]
-    fn test_color_partialeq() {
-        let color = Color {
-            r: 1.0 / 3.0,
-            g: 2.0 / 3.0,
-            b: 3.0 / 3.0,
-            #[allow(clippy::excessive_precision)]
-            a: 1.618033988749,
-        };
-        let other = color;
-        assert!(color_partialeq(color, other))
     }
 }
