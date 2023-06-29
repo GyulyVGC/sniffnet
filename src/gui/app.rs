@@ -104,6 +104,8 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         use iced_native::keyboard::{Event, KeyCode, Modifiers};
+        const NO_MODIFIER: iced_native::keyboard::Modifiers =
+            iced_native::keyboard::Modifiers::empty();
         let hot_keys_subscription =
             iced_native::subscription::events_with(|event, _| match event {
                 iced_native::Event::Keyboard(Event::KeyPressed {
@@ -124,12 +126,13 @@ impl Application for Sniffer {
                         KeyCode::Tab => Some(Message::SwitchPage(false)),
                         _ => None,
                     },
-                    _ => match key_code {
+                    NO_MODIFIER => match key_code {
                         KeyCode::Enter => Some(Message::ReturnKeyPressed),
                         KeyCode::Escape => Some(Message::EscKeyPressed),
                         KeyCode::Tab => Some(Message::SwitchPage(true)),
                         _ => None,
                     },
+                    _ => None,
                 },
                 _ => None,
             });
