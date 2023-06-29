@@ -36,7 +36,6 @@ pub fn get_searched_entries(
         .map
         .iter()
         .filter(|(key, value)| {
-            let mut boolean_flags = Vec::new();
             // retrieve host info
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
@@ -52,61 +51,59 @@ pub fn get_searched_entries(
             // check application protocol filter
             if !search_parameters.app.is_empty() {
                 let app_str = format!("{:?}", value.app_protocol);
-                boolean_flags.push(
-                    app_str
-                        .to_lowercase()
-                        .eq(&search_parameters.app.to_lowercase()),
-                );
+                if app_str
+                    .to_lowercase()
+                    .ne(&search_parameters.app.to_lowercase())
+                {
+                    return false;
+                }
             }
             // check domain filter
-            if !search_parameters.domain.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .0
-                        .to_lowercase()
-                        .contains(&search_parameters.domain.to_lowercase()),
-                );
+            if !search_parameters.domain.is_empty()
+                && !r_dns_host
+                    .unwrap()
+                    .0
+                    .to_lowercase()
+                    .contains(&search_parameters.domain.to_lowercase())
+            {
+                return false;
             }
             // check country filter
-            if !search_parameters.country.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .1
-                        .country
-                        .to_string()
-                        .to_lowercase()
-                        .starts_with(&search_parameters.country.to_lowercase()),
-                );
+            if !search_parameters.country.is_empty()
+                && !r_dns_host
+                    .unwrap()
+                    .1
+                    .country
+                    .to_string()
+                    .to_lowercase()
+                    .starts_with(&search_parameters.country.to_lowercase())
+            {
+                return false;
             }
             // check Autonomous System name filter
-            if !search_parameters.as_name.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .1
-                        .asn
-                        .name
-                        .to_lowercase()
-                        .contains(&search_parameters.as_name.to_lowercase()),
-                );
+            if !search_parameters.as_name.is_empty()
+                && !r_dns_host
+                    .unwrap()
+                    .1
+                    .asn
+                    .name
+                    .to_lowercase()
+                    .contains(&search_parameters.as_name.to_lowercase())
+            {
+                return false;
             }
             // check favorites filter
-            if search_parameters.only_favorites {
-                boolean_flags.push(
-                    info_traffic_lock
-                        .hosts
-                        .get(&r_dns_host.unwrap().1)
-                        .unwrap()
-                        .is_favorite,
-                );
+            if search_parameters.only_favorites
+                && !info_traffic_lock
+                    .hosts
+                    .get(&r_dns_host.unwrap().1)
+                    .unwrap()
+                    .is_favorite
+            {
+                return false;
             }
-
-            if boolean_flags.is_empty() {
-                return true;
-            }
-            return boolean_flags.iter().all(|flag| *flag);
+            // if arrived at this point, return true
+            true
         })
         .collect();
     all_results.sort_by(|&(_, a), &(_, b)| match report_sort_type {
