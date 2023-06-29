@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
-use crate::{AppProtocol, ChartType, Language, RunningPage};
+use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
@@ -573,98 +573,27 @@ fn lazy_col_info(
     let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let all_bytes = sniffer.runtime_data.all_bytes;
 
-    #[cfg(not(target_os = "windows"))]
-    let adapter_info = &sniffer.device.name;
-    #[cfg(target_os = "windows")]
-    let adapter_name = &sniffer.device.name;
-    #[cfg(target_os = "windows")]
-    let adapter_info = sniffer.device.desc.as_ref().unwrap_or(adapter_name);
+    let col_device_filters =
+        col_device_filters(sniffer.language, font, &sniffer.filters, &sniffer.device);
 
-    let col_device_filters = Column::new()
-        .width(Length::FillPortion(1))
-        .spacing(15)
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                network_adapter_translation(sniffer.language),
-                adapter_info
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(get_active_filters_string(
-                &sniffer.filters.clone(),
-                sniffer.language,
-            ))
-            .font(font),
-        );
+    let col_data_representation = col_data_representation(
+        sniffer.language,
+        font,
+        sniffer.style,
+        sniffer.traffic_chart.chart_type,
+    );
 
-    let col_data_representation = Column::new()
-        .width(Length::FillPortion(1))
-        .push(
-            Text::new(format!(
-                "{}:",
-                data_representation_translation(sniffer.language)
-            ))
-            .font(font),
-        )
-        .push(chart_radios(
-            sniffer.traffic_chart.chart_type,
-            font,
-            sniffer.style,
-            sniffer.language,
-        ));
-
-    let dropped_text = if dropped > 0 {
-        format!(
-            "{}:\n   {} {}",
-            dropped_packets_translation(sniffer.language),
-            dropped,
-            of_total_translation(
-                sniffer.language,
-                &get_percentage_string(total, u128::from(dropped))
-            )
-        )
-    } else {
-        format!(
-            "{}:\n   {}",
-            dropped_packets_translation(sniffer.language),
-            none_translation(sniffer.language)
-        )
-    };
-    let col_bytes_packets = Column::new()
-        .spacing(15)
-        .push(
-            if dropped > 0 {
-                Text::new(format!(
-                    "{}:\n   {}",
-                    filtered_bytes_translation(sniffer.language),
-                    &get_formatted_bytes_string_with_b(filtered_bytes)
-                ))
-            } else {
-                Text::new(format!(
-                    "{}:\n   {} {}",
-                    filtered_bytes_translation(sniffer.language),
-                    &get_formatted_bytes_string_with_b(filtered_bytes),
-                    of_total_translation(
-                        sniffer.language,
-                        &get_percentage_string(sniffer.runtime_data.all_bytes, filtered_bytes)
-                    )
-                ))
-            }
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {} {}",
-                filtered_packets_translation(sniffer.language),
-                filtered,
-                of_total_translation(sniffer.language, &get_percentage_string(total, filtered))
-            ))
-            .font(font),
-        )
-        .push(Text::new(dropped_text).font(font));
+    let col_bytes_packets = col_bytes_packets(
+        sniffer.language,
+        dropped,
+        total,
+        filtered,
+        all_bytes,
+        filtered_bytes,
+        font,
+    );
 
     Column::new()
         .align_items(Alignment::Center)
@@ -693,6 +622,102 @@ fn lazy_col_info(
                     StyleTuple(sniffer.style, ElementType::Standard),
                 )),
         )
+}
+
+fn col_device_filters(
+    language: Language,
+    font: Font,
+    filters: &Filters,
+    device: &MyDevice,
+) -> Column<'static, Message> {
+    #[cfg(not(target_os = "windows"))]
+    let adapter_info = &device.name;
+    #[cfg(target_os = "windows")]
+    let adapter_name = &device.name;
+    #[cfg(target_os = "windows")]
+    let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+
+    Column::new()
+        .width(Length::FillPortion(1))
+        .spacing(15)
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                network_adapter_translation(language),
+                adapter_info
+            ))
+            .font(font),
+        )
+        .push(Text::new(get_active_filters_string(filters, language)).font(font))
+}
+
+fn col_data_representation(
+    language: Language,
+    font: Font,
+    style: StyleType,
+    chart_type: ChartType,
+) -> Column<'static, Message> {
+    Column::new()
+        .width(Length::FillPortion(1))
+        .push(Text::new(format!("{}:", data_representation_translation(language))).font(font))
+        .push(chart_radios(chart_type, font, style, language))
+}
+
+fn col_bytes_packets(
+    language: Language,
+    dropped: u32,
+    total: u128,
+    filtered: u128,
+    all_bytes: u128,
+    filtered_bytes: u128,
+    font: Font,
+) -> Column<'static, Message> {
+    let dropped_text = if dropped > 0 {
+        format!(
+            "{}:\n   {} {}",
+            dropped_packets_translation(language),
+            dropped,
+            of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
+        )
+    } else {
+        format!(
+            "{}:\n   {}",
+            dropped_packets_translation(language),
+            none_translation(language)
+        )
+    };
+    Column::new()
+        .spacing(15)
+        .push(
+            if dropped > 0 {
+                Text::new(format!(
+                    "{}:\n   {}",
+                    filtered_bytes_translation(language),
+                    &get_formatted_bytes_string_with_b(filtered_bytes)
+                ))
+            } else {
+                Text::new(format!(
+                    "{}:\n   {} {}",
+                    filtered_bytes_translation(language),
+                    &get_formatted_bytes_string_with_b(filtered_bytes),
+                    of_total_translation(
+                        language,
+                        &get_percentage_string(all_bytes, filtered_bytes)
+                    )
+                ))
+            }
+            .font(font),
+        )
+        .push(
+            Text::new(format!(
+                "{}:\n   {} {}",
+                filtered_packets_translation(language),
+                filtered,
+                of_total_translation(language, &get_percentage_string(total, filtered))
+            ))
+            .font(font),
+        )
+        .push(Text::new(dropped_text).font(font))
 }
 
 fn get_bars_length(
