@@ -4,6 +4,7 @@ use super::custom_style::{deserialize_from_path, serialize_to_path, CustomStyle}
 
 /// Used to specify the kind of style of the application
 #[derive(Clone, Serialize, Deserialize, Debug, Hash, PartialEq)]
+#[serde(tag = "style", content = "path")]
 pub enum StyleType {
     Night,
     Day,

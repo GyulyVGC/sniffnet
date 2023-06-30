@@ -10,7 +10,8 @@ use crate::{Language, StyleType};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct ConfigSettings {
-    pub style: Arc<StyleType>,
     pub language: Language,
     pub notifications: Notifications,
+    // This field should be last so that the TOML for StyleType can serialize properly
+    pub style: Arc<StyleType>,
 }

@@ -136,7 +136,7 @@ mod tests {
         deserialize_from_path, serialize_to_path, CustomPalette, CustomStyle, Palette,
         PaletteExtension,
     };
-    use crate::translations::types::language::Language;
+    use crate::{translations::types::language::Language, StyleType};
     use iced::color;
     use serde::{Deserialize, Serialize};
     use serde_test::{assert_tokens, Token};
@@ -200,11 +200,55 @@ mod tests {
         })
     }
 
+    // Test that split deserialization works for `CustomStyle`.
+    // This is different than testing that `StyleType` properly deserializes.
     #[test]
-    fn test_styletype_split_de() {
+    fn test_customstyle_split_de() {
         let style_test = catppuccin_style();
         // This is only used for the test which requires an &'static str.
         let path: &'static str = Box::leak(style_path().into_boxed_str());
         assert_tokens(&style_test, &[Token::String(path)]);
+    }
+
+    // Ensure that StyleType itself still deserializes properly
+    #[test]
+    fn test_styletype_unit_split_de() {
+        // Unit variant without a struct
+        assert_tokens(
+            &StyleType::DeepSea,
+            &[
+                Token::Struct {
+                    name: "StyleType",
+                    len: 1,
+                },
+                Token::Str("style"),
+                Token::Str("DeepSea"),
+                Token::StructEnd,
+            ],
+        );
+    }
+
+    // Test that StyleType::Custom successfully deserializes.
+    // Originally, StyleType::Custom did not ser/de correctly because of how TOML
+    // handles enums.
+    #[test]
+    fn test_styletype_custom_split_de() {
+        // CustomStyle
+        // This is only used for the test so leaking it is fine.
+        let path = &*Box::leak(style_path().into_boxed_str());
+        assert_tokens(
+            &StyleType::Custom(catppuccin_style().0),
+            &[
+                Token::Struct {
+                    name: "StyleType",
+                    len: 2,
+                },
+                Token::Str("style"),
+                Token::Str("Custom"),
+                Token::Str("path"),
+                Token::Str(path),
+                Token::StructEnd,
+            ],
+        );
     }
 }
