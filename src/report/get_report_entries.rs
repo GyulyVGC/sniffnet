@@ -75,12 +75,13 @@ pub fn get_searched_entries(
                 }
             }
             // check favorites filter
-            let is_favorite = info_traffic_lock
-                .hosts
-                .get(&r_dns_host.unwrap().1)
-                .unwrap()
-                .is_favorite;
-            if searched_only_fav && !is_favorite {
+            if searched_only_fav
+                && !info_traffic_lock
+                    .hosts
+                    .get(&r_dns_host.unwrap().1)
+                    .unwrap()
+                    .is_favorite
+            {
                 return false;
             }
             // if arrived at this point all filters are satisfied => return true

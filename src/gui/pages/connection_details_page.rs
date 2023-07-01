@@ -7,6 +7,7 @@ use iced::{Alignment, Length};
 use iced_lazy::lazy;
 use iced_native::widget::tooltip::Position;
 use iced_native::widget::{button, horizontal_space, vertical_space, Rule};
+use iced_native::Font;
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -16,6 +17,7 @@ use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
@@ -73,8 +75,9 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
             .font(font)
             .size(FONT_SIZE_TITLE),
     );
-    let mut host_info_col = Column::new().spacing(4);
+    let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
+        host_info_col = get_host_info_col(&r_dns, &host, sniffer.style, sniffer.language, font);
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(
             host.country,
@@ -84,121 +87,34 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
             sniffer.language,
             sniffer.style,
         );
+        let computer = get_local_tooltip(sniffer, &address_to_lookup, &key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
-            let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
-            let computer = get_computer_tooltip(
-                is_my_address(&key.address2, my_interface_addresses),
-                get_traffic_type(
-                    &key.address2,
-                    my_interface_addresses,
-                    TrafficDirection::Outgoing,
-                ),
-                sniffer.language,
-                sniffer.style,
-            );
             dest_caption = dest_caption.push(computer);
         } else {
             dest_caption = dest_caption.push(flag);
-            let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
-            let computer = get_computer_tooltip(
-                is_my_address(&key.address1, my_interface_addresses),
-                get_traffic_type(
-                    &key.address1,
-                    my_interface_addresses,
-                    TrafficDirection::Outgoing,
-                ),
-                sniffer.language,
-                sniffer.style,
-            );
             source_caption = source_caption.push(computer);
-        }
-        if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
-            host_info_col =
-                host_info_col.push(Rule::horizontal(10.0).style(<StyleTuple as Into<
-                    iced::theme::Rule,
-                >>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )));
-        }
-        if r_dns.parse::<IpAddr>().is_err() {
-            host_info_col = host_info_col.push(
-                Text::new(format!(
-                    "{}:\n   {r_dns}",
-                    fqdn_translation(sniffer.language)
-                ))
-                .font(font),
-            );
-        }
-        if !host.asn.name.is_empty() && host.asn.number > 0 {
-            host_info_col = host_info_col.push(
-                Text::new(format!(
-                    "{}:\n   {} (ASN {})",
-                    administrative_entity_translation(sniffer.language),
-                    host.asn.name,
-                    host.asn.number
-                ))
-                .font(font),
-            );
         }
     }
 
-    let mut source_col = Column::new()
-        .spacing(5)
-        .push(
-            Container::new(source_caption)
-                .width(Length::Fill)
-                .align_x(Horizontal::Center),
-        )
-        .push(
-            Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                socket_address_translation(sniffer.language),
-                get_socket_address(&key.address1, key.port1)
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                mac_address_translation(sniffer.language),
-                val.mac_address1
-            ))
-            .font(font),
-        );
-    let mut dest_col = Column::new()
-        .spacing(5)
-        .push(
-            Container::new(dest_caption)
-                .width(Length::Fill)
-                .align_x(Horizontal::Center),
-        )
-        .push(
-            Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                socket_address_translation(sniffer.language),
-                get_socket_address(&key.address2, key.port2)
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                mac_address_translation(sniffer.language),
-                val.mac_address2
-            ))
-            .font(font),
-        );
+    let mut source_col = get_src_or_dest_col(
+        source_caption,
+        &key.address1,
+        key.port1,
+        &val.mac_address1,
+        sniffer.style,
+        sniffer.language,
+        font,
+    );
+    let mut dest_col = get_src_or_dest_col(
+        dest_caption,
+        &key.address2,
+        key.port2,
+        &val.mac_address2,
+        sniffer.style,
+        sniffer.language,
+        font,
+    );
 
     if address_to_lookup.eq(&key.address1) {
         source_col = source_col.push(host_info_col);
@@ -206,86 +122,9 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         dest_col = dest_col.push(host_info_col);
     }
 
-    let source_container = Container::new(source_col)
-        .padding(10)
-        .width(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::BorderedRound),
-        ));
+    let col_info = col_info(&key, &val, font, sniffer.language);
 
-    let dest_container = Container::new(dest_col)
-        .padding(10)
-        .width(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::BorderedRound),
-        ));
-
-    let col_info = Column::new()
-        .spacing(10)
-        .padding([0, 0, 0, 40])
-        .width(Length::FillPortion(2))
-        .push(vertical_space(Length::FillPortion(1)))
-        .push(
-            Row::new().spacing(5).push(Text::new("9").font(ICONS)).push(
-                Text::new(format!(
-                    "{} - {}",
-                    val.initial_timestamp.to_string().get(11..19).unwrap(),
-                    val.final_timestamp.to_string().get(11..19).unwrap()
-                ))
-                .font(font),
-            ),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                transport_protocol_translation(sniffer.language),
-                key.trans_protocol
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                application_protocol_translation(sniffer.language),
-                val.app_protocol
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{} ({}):\n   {}\n   {} {}",
-                transmitted_data_translation(sniffer.language),
-                if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
-                    outgoing_translation(sniffer.language).to_lowercase()
-                } else {
-                    incoming_translation(sniffer.language).to_lowercase()
-                },
-                get_formatted_bytes_string_with_b(val.transmitted_bytes),
-                val.transmitted_packets,
-                packets_translation(sniffer.language),
-            ))
-            .font(font),
-        )
-        .push(vertical_space(Length::FillPortion(1)));
-
-    let content = Row::new()
-        .padding([0, 10])
-        .spacing(10)
-        .align_items(Alignment::Center)
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .push(col_info)
-        .push(
-            Column::new()
-                .width(Length::FillPortion(3))
-                .align_items(Alignment::Center)
-                .spacing(5)
-                .push(vertical_space(Length::FillPortion(1)))
-                .push(source_container)
-                .push(Text::new(":").font(ICONS))
-                .push(dest_container)
-                .push(vertical_space(Length::FillPortion(1))),
-        );
+    let content = assemble_widgets(col_info, source_col, dest_col, sniffer.style);
 
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
@@ -341,4 +180,194 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Headers),
     ))
+}
+
+fn col_info(
+    key: &AddressPortPair,
+    val: &InfoAddressPortPair,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message> {
+    Column::new()
+        .spacing(10)
+        .padding([0, 0, 0, 40])
+        .width(Length::FillPortion(2))
+        .push(vertical_space(Length::FillPortion(1)))
+        .push(
+            Row::new().spacing(5).push(Text::new("9").font(ICONS)).push(
+                Text::new(format!(
+                    "{} - {}",
+                    val.initial_timestamp.to_string().get(11..19).unwrap(),
+                    val.final_timestamp.to_string().get(11..19).unwrap()
+                ))
+                .font(font),
+            ),
+        )
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                transport_protocol_translation(language),
+                key.trans_protocol
+            ))
+            .font(font),
+        )
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                application_protocol_translation(language),
+                val.app_protocol
+            ))
+            .font(font),
+        )
+        .push(
+            Text::new(format!(
+                "{} ({}):\n   {}\n   {} {}",
+                transmitted_data_translation(language),
+                if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
+                    outgoing_translation(language).to_lowercase()
+                } else {
+                    incoming_translation(language).to_lowercase()
+                },
+                get_formatted_bytes_string_with_b(val.transmitted_bytes),
+                val.transmitted_packets,
+                packets_translation(language),
+            ))
+            .font(font),
+        )
+        .push(vertical_space(Length::FillPortion(1)))
+}
+
+fn get_host_info_col(
+    r_dns: &str,
+    host: &Host,
+    style: StyleType,
+    language: Language,
+    font: Font,
+) -> Column<'static, Message> {
+    let mut host_info_col = Column::new().spacing(4);
+    if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
+        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(<StyleTuple as Into<
+            iced::theme::Rule,
+        >>::into(
+            StyleTuple(style, ElementType::Standard),
+        )));
+    }
+    if r_dns.parse::<IpAddr>().is_err() {
+        host_info_col = host_info_col
+            .push(Text::new(format!("{}:\n   {r_dns}", fqdn_translation(language))).font(font));
+    }
+    if !host.asn.name.is_empty() && host.asn.number > 0 {
+        host_info_col = host_info_col.push(
+            Text::new(format!(
+                "{}:\n   {} (ASN {})",
+                administrative_entity_translation(language),
+                host.asn.name,
+                host.asn.number
+            ))
+            .font(font),
+        );
+    }
+    host_info_col
+}
+
+fn get_local_tooltip(
+    sniffer: &Sniffer,
+    address_to_lookup: &str,
+    key: &AddressPortPair,
+) -> Tooltip<'static, Message> {
+    let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
+    get_computer_tooltip(
+        is_my_address(
+            if address_to_lookup.eq(&key.address1) {
+                &key.address2
+            } else {
+                &key.address1
+            },
+            my_interface_addresses,
+        ),
+        get_traffic_type(
+            if address_to_lookup.eq(&key.address1) {
+                &key.address2
+            } else {
+                &key.address1
+            },
+            my_interface_addresses,
+            TrafficDirection::Outgoing,
+        ),
+        sniffer.language,
+        sniffer.style,
+    )
+}
+
+fn get_src_or_dest_col(
+    caption: Row<'static, Message>,
+    ip: &String,
+    port: u16,
+    mac: &str,
+    style: StyleType,
+    language: Language,
+    font: Font,
+) -> Column<'static, Message> {
+    Column::new()
+        .spacing(5)
+        .push(
+            Container::new(caption)
+                .width(Length::Fill)
+                .align_x(Horizontal::Center),
+        )
+        .push(
+            Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                StyleTuple(style, ElementType::Standard),
+            )),
+        )
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                socket_address_translation(language),
+                get_socket_address(ip, port)
+            ))
+            .font(font),
+        )
+        .push(
+            Text::new(format!(
+                "{}:\n   {}",
+                mac_address_translation(language),
+                mac
+            ))
+            .font(font),
+        )
+}
+
+fn assemble_widgets(
+    col_info: Column<'static, Message>,
+    source_col: Column<'static, Message>,
+    dest_col: Column<'static, Message>,
+    style: StyleType,
+) -> Row<'static, Message> {
+    let [source_container, dest_container] = [source_col, dest_col].map(|col| {
+        Container::new(col)
+            .padding(10)
+            .width(Length::Fill)
+            .style(<StyleTuple as Into<iced::theme::Container>>::into(
+                StyleTuple(style, ElementType::BorderedRound),
+            ))
+    });
+    Row::new()
+        .padding([0, 10])
+        .spacing(10)
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .push(col_info)
+        .push(
+            Column::new()
+                .width(Length::FillPortion(3))
+                .align_items(Alignment::Center)
+                .spacing(5)
+                .push(vertical_space(Length::FillPortion(1)))
+                .push(source_container)
+                .push(Text::new(":").font(ICONS))
+                .push(dest_container)
+                .push(vertical_space(Length::FillPortion(1))),
+        )
 }
