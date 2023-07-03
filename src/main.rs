@@ -102,7 +102,7 @@ pub fn main() -> iced::Result {
     print_cli_welcome_message();
 
     Sniffer::run(Settings {
-        id: None,
+        id: Some("sniffnet".to_string()),
         window: window::Settings {
             size: (1190, 670), // start size
             position: Position::Centered,
