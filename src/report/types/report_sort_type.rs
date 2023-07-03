@@ -13,20 +13,19 @@ pub enum ReportSortType {
 }
 
 impl ReportSortType {
-    pub fn all_strings(language: Language) -> Vec<String> {
+    pub fn all_strings(language: Language) -> Vec<&'static str> {
         vec![
-            recent_report_translation(language).to_string(),
-            bytes_report_translation(language).to_string(),
-            packets_report_translation(language).to_string(),
+            recent_report_translation(language),
+            bytes_report_translation(language),
+            packets_report_translation(language),
         ]
     }
 
-    pub fn get_picklist_label(self, language: Language) -> String {
+    pub fn get_picklist_label(self, language: Language) -> &'static str {
         match self {
             ReportSortType::MostRecent => recent_report_translation(language),
             ReportSortType::MostBytes => bytes_report_translation(language),
             ReportSortType::MostPackets => packets_report_translation(language),
         }
-        .to_string()
     }
 }

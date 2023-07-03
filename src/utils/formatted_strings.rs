@@ -60,7 +60,7 @@ pub fn get_connection_color(traffic_direction: TrafficDirection, style: StyleTyp
     if traffic_direction == TrafficDirection::Outgoing {
         get_colors(style).outgoing
     } else {
-        get_colors(style).incoming
+        get_colors(style).secondary
     }
 }
 

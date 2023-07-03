@@ -58,7 +58,7 @@ impl TrafficChart {
             min_sent_packets: 0,
             max_received_packets: 0,
             color_mix: get_color_mix_chart(style),
-            color_incoming: to_rgb_color(get_colors(style).incoming),
+            color_incoming: to_rgb_color(get_colors(style).secondary),
             color_outgoing: to_rgb_color(get_colors(style).outgoing),
             color_font: to_rgb_color(get_colors(style).text_body),
             chart_type: ChartType::Bytes,
@@ -91,7 +91,7 @@ impl TrafficChart {
 
     pub fn change_colors(&mut self, style: StyleType) {
         self.color_font = to_rgb_color(get_colors(style).text_body);
-        self.color_incoming = to_rgb_color(get_colors(style).incoming);
+        self.color_incoming = to_rgb_color(get_colors(style).secondary);
         self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
         self.color_mix = get_color_mix_chart(style);
     }

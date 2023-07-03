@@ -1,14 +1,12 @@
+use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, Row, Text};
 use iced::{Alignment, Length};
-use iced_native::svg::Handle;
-use iced_native::widget::{horizontal_space, vertical_space, Svg};
+use iced_native::widget::{horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{
-    get_font, DEEP_SEA, FONT_SIZE_SUBTITLE, MON_AMOUR, YETI_DAY, YETI_NIGHT,
-};
+use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -52,7 +50,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new()
                 .push(get_palette_container(
                     sniffer.style,
-                    YETI_NIGHT,
                     "Yeti Night".to_string(),
                     yeti_night_translation(sniffer.language).to_string(),
                     Night,
@@ -60,7 +57,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     sniffer.style,
-                    YETI_DAY,
                     "Yeti Day".to_string(),
                     yeti_day_translation(sniffer.language).to_string(),
                     Day,
@@ -71,7 +67,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new()
                 .push(get_palette_container(
                     sniffer.style,
-                    DEEP_SEA,
                     "Deep Sea".to_string(),
                     deep_sea_translation(sniffer.language).to_string(),
                     DeepSea,
@@ -79,7 +74,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     sniffer.style,
-                    MON_AMOUR,
                     "Mon Amour".to_string(),
                     mon_amour_translation(sniffer.language).to_string(),
                     MonAmour,
@@ -96,7 +90,6 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
 
 fn get_palette_container(
     style: StyleType,
-    picture: &[u8],
     name: String,
     description: String,
     on_press: StyleType,
@@ -107,11 +100,11 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(Svg::new(Handle::from_memory(Vec::from(picture))).width(Length::Fixed(300.0)))
+        .push(get_palette(on_press))
         .push(Text::new(description).font(font));
 
     Button::new(content)
-        .height(Length::Fixed(130.0))
+        .height(Length::Fixed(120.0))
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
@@ -126,4 +119,38 @@ fn get_palette_container(
             .into(),
         )
         .on_press(Message::Style(on_press))
+}
+
+fn get_palette(style: StyleType) -> Container<'static, Message> {
+    Container::new(
+        Row::new()
+            .padding(0)
+            .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
+                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                    StyleTuple(style, ElementType::PalettePrimary),
+                )),
+            ))
+            .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
+                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                    StyleTuple(style, ElementType::PaletteSecondary),
+                )),
+            ))
+            .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
+                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                    StyleTuple(style, ElementType::PaletteOutgoing),
+                )),
+            ))
+            .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
+                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
+                    StyleTuple(style, ElementType::PaletteButtons),
+                )),
+            )),
+    )
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .width(300.0 + 2.0 * BORDER_WIDTH)
+    .height(50.0 + 1.7 * BORDER_WIDTH)
+    .style(<StyleTuple as Into<iced::theme::Container>>::into(
+        StyleTuple(style, ElementType::Palette),
+    ))
 }

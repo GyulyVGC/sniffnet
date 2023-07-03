@@ -29,7 +29,6 @@ pub const NIGHT_STYLE: Palette = Palette {
     primary: PRIMARY_NIGHT,
     secondary: SECONDARY_NIGHT,
     buttons: BUTTONS_NIGHT,
-    incoming: SECONDARY_NIGHT,
     outgoing: SECONDARY_DAY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
@@ -61,7 +60,6 @@ pub const DAY_STYLE: Palette = Palette {
     primary: PRIMARY_DAY,
     secondary: SECONDARY_DAY,
     buttons: BUTTONS_DAY,
-    incoming: SECONDARY_DAY,
     outgoing: SECONDARY_NIGHT,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
@@ -104,7 +102,6 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
     primary: PRIMARY_DEEP_SEA,
     secondary: SECONDARY_DEEP_SEA,
     buttons: BUTTONS_DEEP_SEA,
-    incoming: SECONDARY_DEEP_SEA,
     outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
@@ -147,7 +144,6 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     primary: PRIMARY_MON_AMOUR,
     secondary: SECONDARY_MON_AMOUR,
     buttons: BUTTONS_MON_AMOUR,
-    incoming: SECONDARY_MON_AMOUR,
     outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
@@ -192,12 +188,6 @@ pub const ICONS: Font = Font::External {
     name: "icons",
     bytes: include_bytes!("../../../resources/fonts/subset/icons.ttf"),
 };
-
-// palettes pictures
-pub const YETI_DAY: &[u8] = include_bytes!("../../../resources/palettes/YetiDay.svg");
-pub const YETI_NIGHT: &[u8] = include_bytes!("../../../resources/palettes/YetiNight.svg");
-pub const DEEP_SEA: &[u8] = include_bytes!("../../../resources/palettes/DeepSea.svg");
-pub const MON_AMOUR: &[u8] = include_bytes!("../../../resources/palettes/MonAmour.svg");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 18.0;

@@ -24,7 +24,7 @@ pub fn update_charts_data(mut runtime_data: &mut RunTimeData, traffic_chart: &mu
         tot_seconds,
         -<u128 as TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
     ));
-    traffic_chart.min_sent_bytes = get_min(&traffic_chart.sent_bytes.clone());
+    traffic_chart.min_sent_bytes = get_min(&traffic_chart.sent_bytes);
     runtime_data.tot_sent_bytes_prev = runtime_data.tot_sent_bytes;
     // update received bytes traffic data
     if traffic_chart.received_bytes.len() >= 30 {
@@ -33,7 +33,7 @@ pub fn update_charts_data(mut runtime_data: &mut RunTimeData, traffic_chart: &mu
     traffic_chart
         .received_bytes
         .push_back((tot_seconds, received_bytes_entry.try_into().unwrap()));
-    traffic_chart.max_received_bytes = get_max(&traffic_chart.received_bytes.clone());
+    traffic_chart.max_received_bytes = get_max(&traffic_chart.received_bytes);
     runtime_data.tot_received_bytes_prev = runtime_data.tot_received_bytes;
 
     // update sent packets traffic data
@@ -44,7 +44,7 @@ pub fn update_charts_data(mut runtime_data: &mut RunTimeData, traffic_chart: &mu
         tot_seconds,
         -<u128 as TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
     ));
-    traffic_chart.min_sent_packets = get_min(&traffic_chart.sent_packets.clone());
+    traffic_chart.min_sent_packets = get_min(&traffic_chart.sent_packets);
     runtime_data.tot_sent_packets_prev = runtime_data.tot_sent_packets;
     // update received packets traffic data
     if traffic_chart.received_packets.len() >= 30 {
@@ -53,7 +53,7 @@ pub fn update_charts_data(mut runtime_data: &mut RunTimeData, traffic_chart: &mu
     traffic_chart
         .received_packets
         .push_back((tot_seconds, received_packets_entry.try_into().unwrap()));
-    traffic_chart.max_received_packets = get_max(&traffic_chart.received_packets.clone());
+    traffic_chart.max_received_packets = get_max(&traffic_chart.received_packets);
     runtime_data.tot_received_packets_prev = runtime_data.tot_received_packets;
 }
 

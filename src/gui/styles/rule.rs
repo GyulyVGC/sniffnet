@@ -20,12 +20,18 @@ impl rule::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         iced::widget::rule::Appearance {
             color: match self.1 {
-                ElementType::Incoming => colors.secondary,
-                ElementType::Outgoing => colors.outgoing,
+                ElementType::Incoming | ElementType::PaletteSecondary => colors.secondary,
+                ElementType::Outgoing | ElementType::PaletteOutgoing => colors.outgoing,
+                ElementType::PalettePrimary => colors.primary,
+                ElementType::PaletteButtons => colors.buttons,
                 _ => colors.round_borders,
             },
             width: match self.1 {
                 ElementType::Incoming | ElementType::Outgoing => 5,
+                ElementType::PalettePrimary
+                | ElementType::PaletteSecondary
+                | ElementType::PaletteOutgoing
+                | ElementType::PaletteButtons => 50,
                 _ => 3,
             },
             radius: 0.0,

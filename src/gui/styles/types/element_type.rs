@@ -15,4 +15,9 @@ pub enum ElementType {
     Badge,
     Incoming,
     Outgoing,
+    Palette,
+    PalettePrimary,
+    PaletteSecondary,
+    PaletteOutgoing,
+    PaletteButtons,
 }
