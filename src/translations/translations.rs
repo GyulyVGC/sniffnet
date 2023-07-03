@@ -1714,3 +1714,11 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::SV => "Endast de senaste 30 notifikationerna visas",
     }
 }
+
+pub fn custom_theme_path(language: Language) -> &'static str {
+    // Currently only English because it's a new text
+    match language {
+        Language::EN => "Path to a custom theme and hit enter!",
+        _ => custom_theme_path(Language::EN),
+    }
+}

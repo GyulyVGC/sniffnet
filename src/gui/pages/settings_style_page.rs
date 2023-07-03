@@ -17,7 +17,7 @@ use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
-    appearance_title_translation, deep_sea_translation, mon_amour_translation,
+    appearance_title_translation, custom_theme_path, deep_sea_translation, mon_amour_translation,
     yeti_day_translation, yeti_night_translation,
 };
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
@@ -93,7 +93,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             Row::new().push(
                 TextInput::new(
-                    "Path to custom theme and hit enter!",
+                    custom_theme_path(sniffer.language),
                     sniffer.style_path_update.as_deref().unwrap_or_default(),
                 )
                 .font(font)

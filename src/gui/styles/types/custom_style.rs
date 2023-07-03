@@ -31,8 +31,9 @@
 use serde::{de::Error as DeErrorTrait, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     collections::BTreeMap,
-    fs::File,
-    io::{BufReader, Read},
+    fs::{self, File},
+    io::{self, BufReader, Read},
+    path::{Path, PathBuf},
 };
 
 use super::palette::{Palette, PaletteExtension};
@@ -84,6 +85,40 @@ impl CustomStyle {
             style.path = path;
             style
         })
+    }
+
+    /// Load [CustomStyle]s from a directory.
+    ///
+    /// # Errors
+    /// [io::Error] is only returned if `dir` can't be read. A best effort is made to read any styles
+    /// present in the directory.
+    pub fn from_dir<P>(dir: P) -> Result<impl Iterator<Item = Self>, io::Error>
+    where
+        P: Into<PathBuf>,
+    {
+        let iter = fs::read_dir(dir.into())?.filter_map(|entry| {
+            let entry = entry.ok()?.path();
+            Self::from_file(entry.to_str()?).ok()
+        });
+        Ok(iter)
+    }
+
+    /// Return translated description or a default.
+    ///
+    /// Defaults to English is the language isn't implemented or "" if English is missing too.
+    ///
+    /// # Arguments
+    /// * `language` - Description language
+    pub fn description(&self, language: Language) -> &str {
+        self.description
+            .get(&language)
+            .map(|s| s.as_str())
+            .unwrap_or_else(|| {
+                self.description
+                    .get(&Language::EN)
+                    .map(|s| s.as_str())
+                    .unwrap_or_default()
+            })
     }
 }
 
