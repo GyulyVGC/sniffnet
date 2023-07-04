@@ -14,7 +14,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::message::Message;
-use crate::gui::types::status::Status;
+use crate::gui::types::status::{FocusState, Status};
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -81,7 +81,12 @@ pub struct Sniffer {
     pub page_number: usize,
     /// Currently selected connection for inspection of its details
     pub selected_connection: usize,
+    /// Record the information of last focus for the window
+    pub focus_state: FocusState,
 }
+
+/// A period of time to determine focus status (milliseconds)
+const FOCUS_TIMEOUT_TIME: u64 = 200;
 
 impl Sniffer {
     pub fn new(
@@ -116,6 +121,7 @@ impl Sniffer {
             search: SearchParameters::default(),
             page_number: 1,
             selected_connection: 0,
+            focus_state: FocusState::new(FOCUS_TIMEOUT_TIME),
         }
     }
 
@@ -182,7 +188,13 @@ impl Sniffer {
                 return self.update(Message::HideModal);
             }
             Message::Quit => return window::close(),
-            Message::SwitchPage(next) => self.switch_page(next),
+            Message::SwitchPage(next) => {
+                // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
+                // first check if user switch back just now, and ignore the request for a short time.
+                if !self.focus_state.is_just_focus() {
+                    self.switch_page(next)
+                }
+            },
             Message::ReturnKeyPressed => return self.shortcut_return(),
             Message::EscKeyPressed => return self.shortcut_esc(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
@@ -214,6 +226,9 @@ impl Sniffer {
                         return self.update(Message::UpdatePageNumber(increment));
                     }
                 }
+            }
+            Message::WindowFocused => {
+                self.focus_state.update();
             }
         }
         Command::none()

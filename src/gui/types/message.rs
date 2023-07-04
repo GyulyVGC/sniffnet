@@ -80,4 +80,6 @@ pub enum Message {
     UpdatePageNumber(bool),
     /// Left (false) or Right (true) arrow key has been pressed
     ArrowPressed(bool),
+    /// Emit when the main window be focused
+    WindowFocused,
 }
