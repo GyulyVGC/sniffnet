@@ -101,6 +101,10 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
+    // The id string field is essential for Linux Wayland, especially for correctly showing
+    // the app name and icon on Gnome Shell dash (see issue #292).
+    // Besides the id string should be the same specified for `StartupWMClass` keyword in
+    // `sniffnet.desktop` file for Linux packaging.
     Sniffer::run(Settings {
         id: Some("sniffnet".to_string()),
         window: window::Settings {
