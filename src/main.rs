@@ -102,6 +102,7 @@ pub fn main() -> iced::Result {
     print_cli_welcome_message();
 
     Sniffer::run(Settings {
+        // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some("sniffnet".to_string()),
         window: window::Settings {
             size: (1190, 670), // start size
