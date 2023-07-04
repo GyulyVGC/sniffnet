@@ -5,7 +5,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 
-- Added app `id` in order to correctly show the icon and app name on Linux Waylend ([#292](https://github.com/GyulyVGC/sniffnet/issues/119))   
+- Added app `id` in order to correctly show the icon and app name on Linux Wayland ([#292](https://github.com/GyulyVGC/sniffnet/issues/119))   
 - Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
 - Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
 - Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
