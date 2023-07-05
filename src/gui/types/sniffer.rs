@@ -4,6 +4,7 @@
 use std::collections::{HashSet, VecDeque};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
+use std::time::Duration;
 
 use iced::window;
 use iced_native::Command;
@@ -14,7 +15,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::message::Message;
-use crate::gui::types::status::{FocusState, Status};
+use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -81,12 +82,9 @@ pub struct Sniffer {
     pub page_number: usize,
     /// Currently selected connection for inspection of its details
     pub selected_connection: usize,
-    /// Record the information of last focus for the window
-    pub focus_state: FocusState,
+    /// Record the timestamp of last window focus
+    pub last_focus_time: std::time::Instant,
 }
-
-/// A period of time to determine focus status (milliseconds)
-const FOCUS_TIMEOUT_TIME: u64 = 200;
 
 impl Sniffer {
     pub fn new(
@@ -121,7 +119,7 @@ impl Sniffer {
             search: SearchParameters::default(),
             page_number: 1,
             selected_connection: 0,
-            focus_state: FocusState::new(FOCUS_TIMEOUT_TIME),
+            last_focus_time: std::time::Instant::now(),
         }
     }
 
@@ -191,10 +189,10 @@ impl Sniffer {
             Message::SwitchPage(next) => {
                 // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
                 // first check if user switch back just now, and ignore the request for a short time.
-                if !self.focus_state.is_just_focus() {
-                    self.switch_page(next)
+                if self.last_focus_time.elapsed() > Duration::from_millis(200) {
+                    self.switch_page(next);
                 }
-            },
+            }
             Message::ReturnKeyPressed => return self.shortcut_return(),
             Message::EscKeyPressed => return self.shortcut_esc(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
@@ -228,7 +226,7 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => {
-                self.focus_state.update();
+                self.last_focus_time = std::time::Instant::now();
             }
         }
         Command::none()
