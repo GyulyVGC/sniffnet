@@ -516,7 +516,9 @@ mod tests {
     #![allow(unused_must_use)]
 
     use std::collections::{HashSet, VecDeque};
+    use std::ops::Sub;
     use std::sync::{Arc, Mutex};
+    use std::time::Duration;
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
@@ -1291,6 +1293,7 @@ mod tests {
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
+        sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
         assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
@@ -1337,6 +1340,12 @@ mod tests {
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+
+        // focus the window and try to switch => nothing changes
+        sniffer.update(Message::WindowFocused);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
