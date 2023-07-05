@@ -3,6 +3,16 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
+## [UNRELEASED]
+
+- Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
+- Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
+- Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
+- Minor aesthetic improvements (implemented part of the suggestions provided in [#119](https://github.com/GyulyVGC/sniffnet/issues/119))
+- Fixed problem that didn't allow opening links and the report file on operating systems different from Windows, macOS, and Linux
+- Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
+
+
 ## [1.2.1] - 2023-06-08
 
 - Considerably refined the app packaging strategy (see [#246](https://github.com/GyulyVGC/sniffnet/pull/246) for more details), fixing various related issues ([#199](https://github.com/GyulyVGC/sniffnet/issues/199), [#220](https://github.com/GyulyVGC/sniffnet/issues/220), [#223](https://github.com/GyulyVGC/sniffnet/issues/223), [#224](https://github.com/GyulyVGC/sniffnet/issues/224), [#225](https://github.com/GyulyVGC/sniffnet/issues/225), [#242](https://github.com/GyulyVGC/sniffnet/issues/242))

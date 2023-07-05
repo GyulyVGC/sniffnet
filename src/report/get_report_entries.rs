@@ -26,100 +26,79 @@ pub fn get_searched_entries(
     )>,
     usize,
 ) {
-    let info_traffic = sniffer.info_traffic.clone();
-    let search_parameters = &sniffer.search.clone();
-    let report_sort_type = sniffer.report_sort_type;
-    let page_number = sniffer.page_number;
-
-    let info_traffic_lock = info_traffic.lock().unwrap();
+    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
         .iter()
         .filter(|(key, value)| {
-            let mut boolean_flags = Vec::new();
-            // retrieve host info
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
+
+            let searched_domain = &*sniffer.search.domain.to_lowercase();
+            let searched_country = &*sniffer.search.country.to_lowercase();
+            let searched_as_name = &*sniffer.search.as_name.to_lowercase();
+            let searched_only_fav = sniffer.search.only_favorites;
             // if a host-related filter is active and this address has not been resolved yet => false
             if r_dns_host.is_none()
-                && (!search_parameters.domain.is_empty()
-                    || !search_parameters.country.is_empty()
-                    || !search_parameters.as_name.is_empty()
-                    || search_parameters.only_favorites)
+                && (!searched_domain.is_empty()
+                    || !searched_country.is_empty()
+                    || !searched_as_name.is_empty()
+                    || searched_only_fav)
             {
                 return false;
             }
             // check application protocol filter
-            if !search_parameters.app.is_empty() {
-                let app_str = format!("{:?}", value.app_protocol);
-                boolean_flags.push(
-                    app_str
-                        .to_lowercase()
-                        .eq(&search_parameters.app.to_lowercase()),
-                );
+            let searched_app = &*sniffer.search.app.to_lowercase();
+            let app = format!("{:?}", value.app_protocol).to_lowercase();
+            if !searched_app.is_empty() && app.ne(searched_app) {
+                return false;
             }
             // check domain filter
-            if !search_parameters.domain.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .0
-                        .to_lowercase()
-                        .contains(&search_parameters.domain.to_lowercase()),
-                );
+            if !searched_domain.is_empty() {
+                let domain = r_dns_host.unwrap().0.to_lowercase();
+                if !domain.contains(searched_domain) {
+                    return false;
+                }
             }
             // check country filter
-            if !search_parameters.country.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .1
-                        .country
-                        .to_string()
-                        .to_lowercase()
-                        .starts_with(&search_parameters.country.to_lowercase()),
-                );
+            if !searched_country.is_empty() {
+                let country = r_dns_host.unwrap().1.country.to_string().to_lowercase();
+                if !country.starts_with(searched_country) {
+                    return false;
+                }
             }
             // check Autonomous System name filter
-            if !search_parameters.as_name.is_empty() {
-                boolean_flags.push(
-                    r_dns_host
-                        .unwrap()
-                        .1
-                        .asn
-                        .name
-                        .to_lowercase()
-                        .contains(&search_parameters.as_name.to_lowercase()),
-                );
+            if !searched_as_name.is_empty() {
+                let asn_name = r_dns_host.unwrap().1.asn.name.to_lowercase();
+                if !asn_name.contains(searched_as_name) {
+                    return false;
+                }
             }
             // check favorites filter
-            if search_parameters.only_favorites {
-                boolean_flags.push(
-                    info_traffic_lock
-                        .hosts
-                        .get(&r_dns_host.unwrap().1)
-                        .unwrap()
-                        .is_favorite,
-                );
+            if searched_only_fav
+                && !info_traffic_lock
+                    .hosts
+                    .get(&r_dns_host.unwrap().1)
+                    .unwrap()
+                    .is_favorite
+            {
+                return false;
             }
-
-            if boolean_flags.is_empty() {
-                return true;
-            }
-            return boolean_flags.iter().all(|flag| *flag);
+            // if arrived at this point all filters are satisfied => return true
+            true
         })
         .collect();
-    all_results.sort_by(|&(_, a), &(_, b)| match report_sort_type {
+    all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
         ReportSortType::MostRecent => b.final_timestamp.cmp(&a.final_timestamp),
         ReportSortType::MostBytes => b.transmitted_bytes.cmp(&a.transmitted_bytes),
         ReportSortType::MostPackets => b.transmitted_packets.cmp(&a.transmitted_packets),
     });
 
-    let upper_bound = min(page_number * 20, all_results.len());
+    let upper_bound = min(sniffer.page_number * 20, all_results.len());
 
     (
         all_results
-            .get((page_number - 1) * 20..upper_bound)
+            .get((sniffer.page_number - 1) * 20..upper_bound)
             .unwrap_or(&Vec::new())
             .iter()
             .map(|key_val| {

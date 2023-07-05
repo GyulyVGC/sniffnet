@@ -465,7 +465,7 @@ pub fn settings_header(style: &Arc<StyleType>, language: Language) -> Container<
                 Container::new(
                     Tooltip::new(
                         button(
-                            Text::new("x")
+                            Text::new("×")
                                 .font(font)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),

@@ -15,7 +15,6 @@
 //! primary = "#000000"
 //! secondary = "#000000"
 //! buttons = "#000000"
-//! incoming = "#000000"
 //! outgoing = "#000000"
 //! text_headers = "#000000"
 //! text_body = "#000000"
@@ -33,7 +32,7 @@ use std::{
     collections::BTreeMap,
     fs::{self, File},
     io::{self, BufReader, Read},
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
 
 use super::palette::{Palette, PaletteExtension};
@@ -219,7 +218,6 @@ mod tests {
                     primary: color!(30, 30, 46),
                     secondary: color!(137, 180, 250),
                     buttons: color!(49, 50, 68),
-                    incoming: color!(137, 180, 250),
                     outgoing: color!(245, 194, 231),
                     text_headers: color!(17, 17, 27),
                     text_body: color!(205, 214, 244),

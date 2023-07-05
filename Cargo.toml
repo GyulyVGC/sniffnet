@@ -16,7 +16,6 @@ include     = [
     "CHANGELOG.md",
     "resources/countries_flags/**/*",
     "resources/DB/*",
-    "resources/palettes/*",
     "resources/fonts/subset/*",
     "resources/sounds/*"
 ]

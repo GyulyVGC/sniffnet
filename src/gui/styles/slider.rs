@@ -6,7 +6,6 @@ use iced_native::widget::vertical_slider::HandleShape;
 
 use crate::get_colors;
 use crate::gui::styles::style_constants::BORDER_WIDTH;
-use crate::gui::styles::types::palette::mix_colors;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 
 impl From<StyleTuple> for iced::theme::Slider {
@@ -27,7 +26,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 5.0 },
-                color: colors.primary,
+                color: colors.secondary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
             },
@@ -43,7 +42,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },
-                color: mix_colors(colors.primary, colors.buttons),
+                color: colors.secondary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
             },
@@ -59,7 +58,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },
-                color: mix_colors(colors.primary, colors.buttons),
+                color: colors.secondary,
                 border_width: BORDER_WIDTH,
                 border_color: colors.secondary,
             },

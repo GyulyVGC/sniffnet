@@ -62,14 +62,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     let sort_active_str = sniffer
         .report_sort_type
         .get_picklist_label(sniffer.language);
-    let sort_list_str: Vec<String> = ReportSortType::all_strings(sniffer.language);
+    let sort_list_str: Vec<&str> = ReportSortType::all_strings(sniffer.language);
     let picklist_sort = PickList::new(
         sort_list_str.clone(),
         Some(sort_active_str),
         move |selected_str| {
-            if selected_str == *sort_list_str.get(0).unwrap_or(&String::new()) {
+            if selected_str == *sort_list_str.first().unwrap_or(&"") {
                 Message::ReportSortSelection(ReportSortType::MostRecent)
-            } else if selected_str == *sort_list_str.get(1).unwrap_or(&String::new()) {
+            } else if selected_str == *sort_list_str.get(1).unwrap_or(&"") {
                 Message::ReportSortSelection(ReportSortType::MostBytes)
             } else {
                 Message::ReportSortSelection(ReportSortType::MostPackets)
@@ -510,7 +510,7 @@ fn button_clear_filter(
     font: Font,
 ) -> Button<'static, Message> {
     button(
-        Text::new("x")
+        Text::new("×")
             .font(font)
             .horizontal_alignment(Horizontal::Center)
             .size(15),

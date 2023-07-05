@@ -16,8 +16,7 @@ use crate::StyleType;
 /// Best practices:
 /// - `primary` should be a kind of neutral color
 /// - `primary` and `buttons` should be similar colors
-/// - `secondary` and one of `incoming` or `outgoing` should be the same color
-/// - `incoming` and `outgoing` should be complementary colors if possible
+/// - `secondary` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -28,30 +27,24 @@ pub struct Palette {
         serialize_with = "serialize_color"
     )]
     pub primary: Color,
-    /// Secondary color of the GUI (header, footer, buttons' borders, radio selection)
+    /// Secondary color of the GUI (incoming connections, header, footer, buttons' borders, radio selection)
     #[serde(
         deserialize_with = "deserialize_color",
         serialize_with = "serialize_color"
     )]
     pub secondary: Color,
-    /// Color of active buttons (when not hovered) and inactive tabs
-    #[serde(
-        deserialize_with = "deserialize_color",
-        serialize_with = "serialize_color"
-    )]
-    pub buttons: Color,
-    /// Color of incoming connections
-    #[serde(
-        deserialize_with = "deserialize_color",
-        serialize_with = "serialize_color"
-    )]
-    pub incoming: Color,
     /// Color of outgoing connections
     #[serde(
         deserialize_with = "deserialize_color",
         serialize_with = "serialize_color"
     )]
     pub outgoing: Color,
+    /// Color of active buttons (when not hovered) and inactive tabs
+    #[serde(
+        deserialize_with = "deserialize_color",
+        serialize_with = "serialize_color"
+    )]
+    pub buttons: Color,
     /// Color of header and footer text
     #[serde(
         deserialize_with = "deserialize_color",
@@ -132,7 +125,6 @@ impl Hash for Palette {
             primary,
             secondary,
             buttons,
-            incoming,
             outgoing,
             text_headers,
             text_body,
@@ -143,7 +135,6 @@ impl Hash for Palette {
         color_hash(*primary, state);
         color_hash(*secondary, state);
         color_hash(*buttons, state);
-        color_hash(*incoming, state);
         color_hash(*outgoing, state);
         color_hash(*text_headers, state);
         color_hash(*text_body, state);
