@@ -1,16 +1,15 @@
 use std::sync::Arc;
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Button, Column, Container, Row, Text};
+use iced::widget::{Button, Column, Container, Row, Space, Text, TextInput};
 use iced::{Alignment, Length};
 use iced_native::widget::{horizontal_space, vertical_space, Rule};
-
-use iced::widget::TextInput;
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::types::custom_style::CustomStyle;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -18,12 +17,13 @@ use crate::translations::translations::{
     appearance_title_translation, custom_theme_path, deep_sea_translation, mon_amour_translation,
     yeti_day_translation, yeti_night_translation,
 };
+use crate::translations::types::language::Language;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(&sniffer.style);
-    let content = Column::new()
+    let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(&sniffer.style, sniffer.language))
@@ -82,8 +82,17 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     mon_amour_translation(sniffer.language).to_string(),
                     &Arc::new(MonAmour),
                 )),
-        )
+        );
+
+    // Append custom style buttons if any exist
+    if let Some(custom_styles) = get_custom_styles(sniffer.language) {
+        content = content.push(custom_styles);
+    }
+
+    // Append text box to manually load custom styles from a TOML file
+    let content = content
         .push(vertical_space(Length::Fixed(10.0)))
+        // Custom theme text box
         .push(
             Row::new().push(
                 TextInput::new(
@@ -176,4 +185,54 @@ fn get_palette(style: &Arc<StyleType>) -> Container<'static, Message> {
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(Arc::clone(style), ElementType::Palette),
     ))
+}
+
+// Load and process `CustomStyles`.
+fn get_custom_styles(lang: Language) -> Option<Column<'static, Message>> {
+    let mut styles = confy::get_configuration_file_path("sniffnet", None)
+        .ok()
+        .and_then(|mut path| {
+            path.push("themes");
+            CustomStyle::from_dir(path).ok()
+        })?
+        .map(|style| {
+            let name = style.name.clone();
+            let description = style.description(lang).to_owned();
+            let style = Arc::new(StyleType::Custom(style));
+            get_palette_container(&style, name, description, &style)
+        });
+
+    // The easiest way to do this is with itertools, but I don't want to introduce another
+    // dependency just for this one function. So I'll do it iteratively for now.
+    let mut children = if let (_, Some(capacity)) = styles.size_hint() {
+        Vec::with_capacity(capacity)
+    } else {
+        Vec::new()
+    };
+
+    // This handles the case where there aren't an even number of styles.
+    // [Iterator::zip] drops remainders. Itertools' `zip_longest` and the unstable array chunks API
+    // are both better solutions.
+    while let (Some(first), second) = (styles.next(), styles.next()) {
+        // Add both styles and the vertical space to a row if there are two styles.
+        if let Some(second) = second {
+            children.extend([
+                Row::new()
+                    .push(first)
+                    .push(horizontal_space(Length::Fixed(15.0)))
+                    .push(second)
+                    .into(),
+                <Space as Into<iced::Element<Message>>>::into(vertical_space(Length::Fixed(10.0))),
+            ]);
+        }
+        // Or else just add the single style and the space
+        else {
+            children.extend([
+                Row::new().push(first).into(),
+                <Space as Into<iced::Element<Message>>>::into(vertical_space(Length::Fixed(10.0))),
+            ]);
+        }
+    }
+
+    Some(Column::with_children(children))
 }
