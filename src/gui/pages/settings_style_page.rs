@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Button, Column, Container, Row, Space, Text, TextInput};
-use iced::{Alignment, Length};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, TextInput};
+use iced::{Alignment, Element, Length};
 use iced_native::widget::{horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
@@ -86,11 +86,14 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
 
     // Append custom style buttons if any exist
     if let Some(custom_styles) = get_custom_styles(sniffer.language) {
-        content = content.push(custom_styles);
+        content = content.push(vertical_space(Length::Fixed(10.0)));
+        for child in custom_styles {
+            content = content.push(child);
+        }
     }
 
     // Append text box to manually load custom styles from a TOML file
-    let content = content
+    content = content
         .push(vertical_space(Length::Fixed(10.0)))
         // Custom theme text box
         .push(
@@ -111,6 +114,9 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 )),
             ),
         );
+
+    // Wrap content into a scrollable widget
+    let content = Scrollable::new(content);
 
     Container::new(content)
         .height(Length::Fixed(440.0))
@@ -188,10 +194,12 @@ fn get_palette(style: &Arc<StyleType>) -> Container<'static, Message> {
 }
 
 // Load and process `CustomStyles`.
-fn get_custom_styles(lang: Language) -> Option<Column<'static, Message>> {
+fn get_custom_styles(lang: Language) -> Option<Vec<Element<'static, Message>>> {
+    // Lazily load `CustomStyles` and process them into GUI elements.
     let mut styles = confy::get_configuration_file_path("sniffnet", None)
         .ok()
         .and_then(|mut path| {
+            path.pop();
             path.push("themes");
             CustomStyle::from_dir(path).ok()
         })?
@@ -234,5 +242,5 @@ fn get_custom_styles(lang: Language) -> Option<Column<'static, Message>> {
         }
     }
 
-    Some(Column::with_children(children))
+    Some(children)
 }
