@@ -104,10 +104,12 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         use iced_native::keyboard::{Event, KeyCode, Modifiers};
+        use iced_native::window;
         const NO_MODIFIER: iced_native::keyboard::Modifiers =
             iced_native::keyboard::Modifiers::empty();
         let hot_keys_subscription =
             iced_native::subscription::events_with(|event, _| match event {
+                iced_native::Event::Window(window::Event::Focused) => Some(Message::WindowFocused),
                 iced_native::Event::Keyboard(Event::KeyPressed {
                     key_code,
                     modifiers,

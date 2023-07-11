@@ -316,6 +316,24 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "Digitalone1",
+      "name": "Giusy Digital",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25790525?v=4",
+      "profile": "https://github.com/Digitalone1",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "starccy",
+      "name": "starccy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17541742?v=4",
+      "profile": "https://github.com/starccy",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

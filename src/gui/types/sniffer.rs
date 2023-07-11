@@ -4,6 +4,7 @@
 use std::collections::{HashSet, VecDeque};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
+use std::time::Duration;
 
 use iced::window;
 use iced_native::Command;
@@ -84,6 +85,8 @@ pub struct Sniffer {
     pub page_number: usize,
     /// Currently selected connection for inspection of its details
     pub selected_connection: usize,
+    /// Record the timestamp of last window focus
+    pub last_focus_time: std::time::Instant,
 }
 
 impl Sniffer {
@@ -120,6 +123,7 @@ impl Sniffer {
             search: SearchParameters::default(),
             page_number: 1,
             selected_connection: 0,
+            last_focus_time: std::time::Instant::now(),
         }
     }
 
@@ -208,7 +212,13 @@ impl Sniffer {
                 return self.update(Message::HideModal);
             }
             Message::Quit => return window::close(),
-            Message::SwitchPage(next) => self.switch_page(next),
+            Message::SwitchPage(next) => {
+                // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
+                // first check if user switch back just now, and ignore the request for a short time.
+                if self.last_focus_time.elapsed() > Duration::from_millis(200) {
+                    self.switch_page(next);
+                }
+            }
             Message::ReturnKeyPressed => return self.shortcut_return(),
             Message::EscKeyPressed => return self.shortcut_esc(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
@@ -240,6 +250,9 @@ impl Sniffer {
                         return self.update(Message::UpdatePageNumber(increment));
                     }
                 }
+            }
+            Message::WindowFocused => {
+                self.last_focus_time = std::time::Instant::now();
             }
         }
         Command::none()
@@ -529,7 +542,9 @@ mod tests {
     #![allow(unused_must_use)]
 
     use std::collections::{HashSet, VecDeque};
+    use std::ops::Sub;
     use std::sync::{Arc, Mutex};
+    use std::time::Duration;
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
@@ -1304,6 +1319,7 @@ mod tests {
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
+        sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
         assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
@@ -1350,6 +1366,12 @@ mod tests {
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        sniffer.update(Message::SwitchPage(true));
+        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+
+        // focus the window and try to switch => nothing changes
+        sniffer.update(Message::WindowFocused);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
