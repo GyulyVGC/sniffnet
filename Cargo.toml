@@ -44,7 +44,7 @@ iced_lazy = "0.6.1"
 plotters-iced = "0.8.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
-serde = { version = "1.0.163", default_features = false, features = ["derive", "rc"] }
+serde = { version = "1.0.171", default_features = false, features = ["derive", "rc"] }
 rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
 reqwest = { version = "0.11.18", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 dns-lookup = "2.0.2"
@@ -53,8 +53,8 @@ toml = "0.7.4"
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
-rstest = "0.17.0"
-serde_test = "1.0.163"
+rstest = "0.18.1"
+serde_test = "1.0.171"
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 

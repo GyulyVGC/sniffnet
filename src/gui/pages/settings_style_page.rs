@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::sync::Arc;
 
 use iced::alignment::{Horizontal, Vertical};
@@ -85,7 +86,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         );
 
     // Append custom style buttons if any exist
-    if let Some(custom_styles) = get_custom_styles(sniffer.language) {
+    if let Some(custom_styles) = custom_styles_conf_dir(sniffer.language) {
         content = content.push(vertical_space(Length::Fixed(10.0)));
         for child in custom_styles {
             content = content.push(child);
@@ -193,22 +194,29 @@ fn get_palette(style: &Arc<StyleType>) -> Container<'static, Message> {
     ))
 }
 
-// Load and process `CustomStyles`.
-fn get_custom_styles(lang: Language) -> Option<Vec<Element<'static, Message>>> {
-    // Lazily load `CustomStyles` and process them into GUI elements.
-    let mut styles = confy::get_configuration_file_path("sniffnet", None)
+#[inline]
+fn custom_styles_conf_dir(lang: Language) -> Option<Vec<Element<'static, Message>>> {
+    confy::get_configuration_file_path("sniffnet", None)
         .ok()
         .and_then(|mut path| {
             path.pop();
             path.push("themes");
-            CustomStyle::from_dir(path).ok()
-        })?
-        .map(|style| {
-            let name = style.name.clone();
-            let description = style.description(lang).to_owned();
-            let style = Arc::new(StyleType::Custom(style));
-            get_palette_container(&style, name, description, &style)
-        });
+            load_custom_styles(path, lang)
+        })
+}
+
+// Load and process `CustomStyles`.
+fn load_custom_styles<P>(path: P, lang: Language) -> Option<Vec<Element<'static, Message>>>
+where
+    P: AsRef<Path>,
+{
+    // Lazily load `CustomStyles` and process them into GUI elements.
+    let mut styles = CustomStyle::from_dir(path.as_ref()).ok()?.map(|style| {
+        let name = style.name.clone();
+        let description = style.description(lang).to_owned();
+        let style = Arc::new(StyleType::Custom(style));
+        get_palette_container(&style, name, description, &style)
+    });
 
     // The easiest way to do this is with itertools, but I don't want to introduce another
     // dependency just for this one function. So I'll do it iteratively for now.
@@ -243,4 +251,26 @@ fn get_custom_styles(lang: Language) -> Option<Vec<Element<'static, Message>>> {
     }
 
     Some(children)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{fs::read_dir, io};
+
+    use super::load_custom_styles;
+    use crate::Language;
+
+    #[test]
+    fn test_deserialize_all_builtin_styles() -> Result<(), io::Error> {
+        let path = format!("{}/resources/themes", env!("CARGO_MANIFEST_DIR"));
+        // The counts `Result<DirEntry>`, but that doesn't matter since none of the files should fail
+        let count = read_dir(&path)?.count();
+        let themes = load_custom_styles(path, Language::EN)
+            .expect("should be able to read all of the custom themes");
+
+        // Make sure number of themes matches number of dir entries
+        assert_eq!(count, themes.len());
+
+        Ok(())
+    }
 }
