@@ -1,5 +1,5 @@
 # https://github.com/catppuccin/catppuccin
-name = "Catppuccin (Mocha)"
+name = "Catppuccin (Latte)"
 
 [description]
 EN = "Soothing pastel theme for the high-spirited!"
@@ -9,14 +9,14 @@ EN = "Soothing pastel theme for the high-spirited!"
 PL = "Kojący pastelowy motyw dla porywczych"
 
 [palette]
-primary = "#1e1e2e"          # Base
-secondary = "#89b4fa"        # Blue
-buttons = "#313244"          # Surface0
-outgoing = "#f5c2e7"         # Pink
-text_headers = "#11111b"     # Crust
-text_body = "#cdd6f4"        # Text
-round_borders = "#b4befe"    # Lavender
-round_containers = "#181825" # Mantle
-starred = "#f9e2af"          # Yellow
+primary = "#eff1f5"          # Base
+secondary = "#1e66f5"        # Blue
+buttons = "#ccd0da"          # Surface0
+outgoing = "#ea76cb"         # Pink
+text_headers = "#dce0e8"     # Crust
+text_body = "#4c4f69"        # Text
+round_borders = "#7287fd"    # Lavender
+round_containers = "#e6e9ef" # Mantle
+starred = "#df8e1d"          # Yellow
 badge_alpha = 0.75
 color_mix_chart = 0.3

@@ -197,11 +197,11 @@ mod tests {
         )
     }
 
-    const STYLE_DESC_ENG: &str = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin";
+    const STYLE_DESC_ENG: &str = "Soothing pastel theme for the high-spirited!";
     // Hungarian translation by Emi.
     const STYLE_DESC_HU: &str = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin";
     // Polish translation by Bartosz.
-    const STYLE_DESC_PL: &str = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin";
+    const STYLE_DESC_PL: &str = "Kojący pastelowy motyw dla porywczych";
 
     // NOTE: This has to be updated if `resources/themes/catppuccin_mocha.toml` changes
     fn catppuccin_style() -> StyleForTests {
@@ -221,8 +221,8 @@ mod tests {
                     outgoing: color!(245, 194, 231),
                     text_headers: color!(17, 17, 27),
                     text_body: color!(205, 214, 244),
-                    round_borders: color!(116, 199, 236),
-                    round_containers: color!(88, 91, 112),
+                    round_borders: color!(180, 190, 254),
+                    round_containers: color!(24, 24, 37),
                 },
                 extension: PaletteExtension {
                     starred: color!(249, 226, 175),

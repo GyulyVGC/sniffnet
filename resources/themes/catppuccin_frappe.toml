@@ -1,0 +1,20 @@
+# https://github.com/catppuccin/catppuccin
+name = "Catppuccin (Frappé)"
+
+[description]
+EN = "Soothing pastel theme for the high-spirited!"
+# Contributed by Bartosz
+PL = "Kojący pastelowy motyw dla porywczych"
+
+[palette]
+primary = "#303446"          # Base
+secondary = "#8caaee"        # Blue
+buttons = "#414559"          # Surface0
+outgoing = "#f4b8e4"         # Pink
+text_headers = "#232634"     # Crust
+text_body = "#c6d0f5"        # Text
+round_borders = "#babbf1"    # Lavender
+round_containers = "#292c3c" # Mantle
+starred = "#e5c890"          # Yellow
+badge_alpha = 0.75
+color_mix_chart = 0.3
