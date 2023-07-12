@@ -334,6 +334,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "wahn",
+      "name": "Jan Walter",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1074865?v=4",
+      "profile": "https://www.janwalter.org",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
