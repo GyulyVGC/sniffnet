@@ -343,6 +343,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "vtiinanen",
+      "name": "vtiinanen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49340148?v=4",
+      "profile": "https://github.com/vtiinanen",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
