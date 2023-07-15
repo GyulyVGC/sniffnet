@@ -55,6 +55,7 @@ pub enum AppProtocol {
     XMPP,
     /// not identified
     Other,
+    ICMP,
 }
 
 /// Given an integer in the range `0..=65535`, this function returns an `Option<AppProtocol>` containing
@@ -120,7 +121,7 @@ impl fmt::Display for AppProtocol {
 
 impl AppProtocol {
     /// Defines a constant to be used in the picklist in gui initial page
-    pub(crate) const ALL: [AppProtocol; 25] = [
+    pub(crate) const ALL: [AppProtocol; 26] = [
         AppProtocol::Other,
         AppProtocol::BGP,
         AppProtocol::DHCP,
@@ -146,6 +147,7 @@ impl AppProtocol {
         AppProtocol::Telnet,
         AppProtocol::TFTP,
         AppProtocol::XMPP,
+        AppProtocol::ICMP,
     ];
 }
 

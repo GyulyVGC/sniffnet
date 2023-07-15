@@ -107,6 +107,18 @@ pub fn analyze_transport_header(
                 *application_protocol = from_port_to_application_protocol(*port2);
             }
         }
+        Some(TransportHeader::Icmpv4(_icmpv4_header)) => {
+            *transport_protocol = TransProtocol::ICMP;
+            *application_protocol = AppProtocol::ICMP;
+            *port1 = 0;
+            *port2 = 0;
+        }
+        Some(TransportHeader::Icmpv6(_icmpv6_header)) => {
+            *transport_protocol = TransProtocol::ICMP;
+            *application_protocol = AppProtocol::ICMP;
+            *port1 = 0;
+            *port2 = 0;
+        }
         _ => {
             *skip_packet = true;
         }

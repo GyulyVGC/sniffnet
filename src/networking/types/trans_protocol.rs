@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::translations::translations::both_translation;
+use crate::translations::translations::all_translation;
 use crate::Language;
 
 /// Enum representing the possible observed values of transport layer protocol.
@@ -11,6 +11,8 @@ pub enum TransProtocol {
     TCP,
     /// User Datagram Protocol
     UDP,
+    /// Internet Control Message Protocol
+    ICMP,
     /// Not identified
     Other,
 }
@@ -22,14 +24,15 @@ impl fmt::Display for TransProtocol {
 }
 
 impl TransProtocol {
-    pub(crate) const ALL: [TransProtocol; 3] =
-        [TransProtocol::TCP, TransProtocol::UDP, TransProtocol::Other];
+    pub(crate) const ALL: [TransProtocol; 4] =
+        [TransProtocol::TCP, TransProtocol::UDP, TransProtocol::ICMP, TransProtocol::Other];
 
     pub fn get_radio_label(&self, language: Language) -> &str {
         match self {
             TransProtocol::TCP => "TCP",
             TransProtocol::UDP => "UDP",
-            TransProtocol::Other => both_translation(language),
+            TransProtocol::ICMP => "ICMP",
+            TransProtocol::Other => all_translation(language),
         }
     }
 }
