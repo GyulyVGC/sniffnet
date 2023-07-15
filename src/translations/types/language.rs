@@ -4,7 +4,7 @@ use iced_native::widget::Svg;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
+    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
 };
 
 /// This enum defines the available languages.
@@ -42,6 +42,8 @@ pub enum Language {
     FA,
     /// Swedish
     SV,
+    /// Finnish
+    FI,
 }
 
 impl Default for Language {
@@ -55,6 +57,7 @@ impl Language {
     pub(crate) const ROW2: [Language; 4] = [Language::FA, Language::FR, Language::IT, Language::KO];
     pub(crate) const ROW3: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
     pub(crate) const ROW4: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
+    pub(crate) const ROW5: [Language; 1] = [Language::FI];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
@@ -74,6 +77,7 @@ impl Language {
             Language::EL => "Ελληνικά",
             Language::FA => "فارسی",
             Language::SV => "Svenska",
+            Language::FI => "Suomi",
         }
     }
 
@@ -95,6 +99,7 @@ impl Language {
             Language::EL => GR,
             Language::FA => IR,
             Language::SV => SE,
+            Language::FI => FI,
         })))
         .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }
