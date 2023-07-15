@@ -83,11 +83,12 @@ pub fn language_radios(
     font: Font,
     style: StyleType,
 ) -> Row<'static, Message> {
-    let mut ret_val = Row::new().spacing(10);
+    let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
     for option in collection {
         ret_val = ret_val.push(
             Row::new().align_items(Alignment::Center).push(
                 Row::new()
+                    .align_items(Alignment::Center)
                     .width(Length::Fixed(180.0))
                     .push(
                         Radio::new(

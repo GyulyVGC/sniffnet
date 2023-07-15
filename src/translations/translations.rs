@@ -1698,7 +1698,7 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
                                  Du kan aktivera notifikationer i inställingarna",
         Language::FI => "Et ole vielä ottanut ilmoituksia käyttöön!\n\n\
                                  Kun olet ottanut ne käyttöön, tällä sivulla näkyy loki ilmoituksistasi\n\n\
-                                 Voit ottaa ilmoitukset käyttöön asetuksista:",,
+                                 Voit ottaa ilmoitukset käyttöön asetuksista:",
     })
 }
 
