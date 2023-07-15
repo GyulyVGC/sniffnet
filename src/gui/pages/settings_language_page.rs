@@ -26,12 +26,15 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         language_radios(language_active, &Language::ROW3, font, sniffer.style);
     let row_language_radio_4 =
         language_radios(language_active, &Language::ROW4, font, sniffer.style);
+    let row_language_radio_5 =
+        language_radios(language_active, &Language::ROW5, font, sniffer.style);
     let col_language_radio_all = Column::new()
         .spacing(10)
         .push(row_language_radio_1)
         .push(row_language_radio_2)
         .push(row_language_radio_3)
-        .push(row_language_radio_4);
+        .push(row_language_radio_4)
+        .push(row_language_radio_5);
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
