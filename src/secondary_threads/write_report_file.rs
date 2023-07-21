@@ -64,9 +64,9 @@ pub fn sleep_and_write_report_loop(
             }
             info_traffic.addresses_last_interval = HashSet::new(); // empty set
 
-            output.flush().expect("Error writing output file\n\r");
-
             drop(info_traffic);
+
+            output.flush().expect("Error writing output file\n\r");
         } else {
             //status is Init
             while *status == Status::Init {
