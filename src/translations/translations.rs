@@ -502,63 +502,59 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
     })
 }
 
-pub fn some_observed_translation(
-    language: Language,
-    observed: u128,
-    filters: &str,
-) -> Text<'static> {
+pub fn some_observed_translation(language: Language, observed: u128) -> Text<'static> {
     Text::new(match language {
         Language::EN => format!("Total intercepted packets: {observed}\n\n\
                                  Filtered packets: 0\n\n\
-                                 Some packets have been intercepted, but still none has been selected according to the filters you specified...\n\n{filters}"),
+                                 Some packets have been intercepted, but still none has been selected according to the filters you specified..."),
         Language::IT => format!("Totale pacchetti intercettati: {observed}\n\n\
                                  Pacchetti filtrati: 0\n\n\
-                                 Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati...\n\n{filters}"),
+                                 Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati..."),
         Language::FR => format!("Total des paquets interceptés: {observed}\n\n\
                                  Paquets filtrés: 0\n\n\
-                                 Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés...\n\n{filters}"),
+                                 Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés..."),
         Language::ES => format!("Total de paquetes interceptados: {observed}\n\n\
                                  Paquetes filtrados: 0\n\n\
-                                 Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados...\n\n{filters}"),
+                                 Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados..."),
         Language::PL => format!("Suma przechwyconych pakietów: {observed}\n\n\
                                  Przefiltrowane pakiety: 0\n\n\
-                                 Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami...\n\n{filters}"),
+                                 Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."),
         Language::DE => format!("Anzahl der empfangenen Pakete: {observed}\n\n\
                                  Gefilterte Pakete: 0\n\n\
-                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den spezifizierten Filtern...\n\n{filters}"),
+                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den spezifizierten Filtern..."),
         Language::UK => format!("Сума перехоплених пакетів: {observed}\n\n\
                                  Відфільтровані пакеті: 0\n\n\
-                                 Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів...\n\n{filters}"),
+                                 Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."),
         Language::ZH => format!("监测到的数据包总数: {observed}\n\n\
                                  目标数据包总数: 0\n\n\
-                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......\n\n{filters}"),
+                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......"),
         Language::RO => format!("Total pachete interceptate: {observed}\n\n\
                                 Pachete filtrate: 0\n\n\
-                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat...\n\n{filters}"),
+                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat..."),
         Language::KO => format!("감지한 총 패킷: {observed}\n\n\
                                 필터링된 패킷: 0\n\n\
-                                일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다...\n\n{filters}"),
+                                일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다..."),
         Language::TR => format!("Toplam yakalanan paketler: {observed}\n\n\
                                  Filterelenen paketler: 0\n\n\
-                                 Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi...\n\n{filters}"),
+                                 Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi..."),
         Language::RU => format!("Всего пакетов перехвачено: {observed}\n\n\
                                  Фильтровано пакетов: 0\n\n\
-                                 Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам...\n\n{filters}"),
+                                 Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам..."),
         Language::PT => format!("Total de pacotes interceptados: {observed}\n\n\
                                 Pacotes filtrados: 0\n\n\
-                                Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados...\n\n{filters}"),
+                                Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados..."),
         Language::EL => format!("Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
                                  Φιλτραρισμένα πακέτα: 0\n\n\
-                                 Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες...\n\n{filters}"),
+                                 Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες..."),
         Language::FA => format!("مجموع بسته های رهگیری شده: {observed}\n\n\
                                 بسته های صاف شده: 0\n\n\
-                                شماری از بسته ها رهگیری شده اند، ولی هنوز هیچ کدام بر اساس صافی تعیین شده شما انتخاب نشده اند...\n\n{filters}"),
+                                شماری از بسته ها رهگیری شده اند، ولی هنوز هیچ کدام بر اساس صافی تعیین شده شما انتخاب نشده اند..."),
         Language::SV => format!("Antal fångade paket: {observed}\n\n\
                                  Filtrerade paket: 0\n\n\
-                                 Några paket har fångats, men än har inget valts enligt de angivna filtren ...\n\n{filters}"),
+                                 Några paket har fångats, men än har inget valts enligt de angivna filtren ..."),
         Language::FI => format!("Siepattuja paketteja yhteensä: {observed}\n\n\
                                  Suodatettuja paketteja: 0\n\n\
-                                 Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan...\n\n{filters}"),
+                                 Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan..."),
     })
 }
 

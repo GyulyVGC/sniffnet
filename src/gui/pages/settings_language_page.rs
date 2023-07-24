@@ -59,6 +59,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Fixed(15.0)))
         .push(
             languages_title_translation(sniffer.language)
+                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )

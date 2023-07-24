@@ -24,6 +24,7 @@ pub fn ip_version_radios(
     let mut ret_val = Column::new().spacing(10).padding(0).push(
         ip_version_translation(language)
             .font(font)
+            .style(StyleTuple(style, ElementType::Subtitle))
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in IpVersion::ALL {
@@ -55,6 +56,7 @@ pub fn transport_protocol_radios(
     let mut ret_val = Column::new().spacing(10).push(
         Text::new(transport_protocol_translation(language))
             .font(font)
+            .style(StyleTuple(style, ElementType::Subtitle))
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in TransProtocol::ALL {

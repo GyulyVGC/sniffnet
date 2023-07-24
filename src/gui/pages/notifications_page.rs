@@ -208,8 +208,17 @@ fn packets_notification_log(
                         .push(Text::new("9").font(ICONS))
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
-                .push(Text::new(packets_exceeded_translation(language)).font(font))
-                .push(Text::new(threshold_str).size(FONT_SIZE_FOOTER).font(font)),
+                .push(
+                    Text::new(packets_exceeded_translation(language))
+                        .style(StyleTuple(style, ElementType::Title))
+                        .font(font),
+                )
+                .push(
+                    Text::new(threshold_str)
+                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .size(FONT_SIZE_FOOTER)
+                        .font(font),
+                ),
         )
         .push(
             Column::new()
@@ -283,8 +292,17 @@ fn bytes_notification_log(
                         .push(Text::new("9").font(ICONS))
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
-                .push(Text::new(bytes_exceeded_translation(language)).font(font))
-                .push(Text::new(threshold_str).size(FONT_SIZE_FOOTER).font(font)),
+                .push(
+                    Text::new(bytes_exceeded_translation(language))
+                        .style(StyleTuple(style, ElementType::Title))
+                        .font(font),
+                )
+                .push(
+                    Text::new(threshold_str)
+                        .size(FONT_SIZE_FOOTER)
+                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .font(font),
+                ),
         )
         .push(
             Column::new()
@@ -363,7 +381,11 @@ fn favorite_notification_log(
                         .push(Text::new("9").font(ICONS))
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
-                .push(Text::new(favorite_transmitted_translation(language)).font(font)), // .push(Text::new(threshold_str).font(font)),
+                .push(
+                    Text::new(favorite_transmitted_translation(language))
+                        .style(StyleTuple(style, ElementType::Title))
+                        .font(font),
+                ),
         )
         .push(
             Column::new()

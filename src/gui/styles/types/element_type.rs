@@ -20,4 +20,6 @@ pub enum ElementType {
     PaletteSecondary,
     PaletteOutgoing,
     PaletteButtons,
+    Title,
+    Subtitle,
 }

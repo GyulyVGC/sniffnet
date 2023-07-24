@@ -54,6 +54,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
+                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),

@@ -110,6 +110,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(
                                 Text::new(sort_by_translation(sniffer.language))
                                     .font(font)
+                                    .style(StyleTuple(sniffer.style, ElementType::Title))
                                     .size(FONT_SIZE_TITLE),
                             )
                             .push(picklist_sort),
@@ -241,6 +242,7 @@ fn filters_col(
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(search_filters_translation(language))
             .font(font)
+            .style(StyleTuple(style, ElementType::Title))
             .size(FONT_SIZE_TITLE),
     );
     if search_params.is_some_filter_active() {
