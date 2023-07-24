@@ -611,7 +611,13 @@ fn lazy_col_info(
         .push(
             Row::new()
                 .height(Length::Fixed(120.0))
-                .push(col_device_filters)
+                .push(
+                    Scrollable::new(col_device_filters)
+                        .width(Length::FillPortion(1))
+                        .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                            StyleTuple(sniffer.style, ElementType::Standard),
+                        )),
+                )
                 .push(
                     Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
                         StyleTuple(sniffer.style, ElementType::Standard),
@@ -650,7 +656,6 @@ fn col_device_filters(
     let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
     Column::new()
-        .width(Length::FillPortion(1))
         .push(
             Text::new(format!("{}:", network_adapter_translation(language),))
                 .font(font)
