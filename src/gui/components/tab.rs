@@ -88,6 +88,14 @@ fn new_tab(
             Text::new(icon)
                 .font(ICONS)
                 .size(15)
+                .style(StyleTuple(
+                    style,
+                    if active {
+                        ElementType::Title
+                    } else {
+                        ElementType::Standard
+                    },
+                ))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
@@ -95,6 +103,14 @@ fn new_tab(
             Text::new(label)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
+                .style(StyleTuple(
+                    style,
+                    if active {
+                        ElementType::Title
+                    } else {
+                        ElementType::Standard
+                    },
+                ))
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         );
