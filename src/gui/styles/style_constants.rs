@@ -81,9 +81,9 @@ const PRIMARY_DEEP_SEA: Color = Color {
     a: 1.0,
 };
 const SECONDARY_DEEP_SEA: Color = Color {
-    r: 34.0 / 255.0,
-    g: 124.0 / 255.0,
-    b: 112.0 / 255.0,
+    r: 8.0 / 255.0,
+    g: 131.0 / 255.0,
+    b: 149.0 / 255.0,
     a: 1.0,
 };
 const BUTTONS_DEEP_SEA: Color = Color {
@@ -93,9 +93,9 @@ const BUTTONS_DEEP_SEA: Color = Color {
     a: 1.0,
 };
 const OUTGOING_DEEP_SEA: Color = Color {
-    r: 230.0 / 255.0,
-    g: 226.0 / 255.0,
-    b: 195.0 / 255.0,
+    r: 254.0 / 255.0,
+    g: 254.0 / 255.0,
+    b: 134.0 / 255.0,
     a: 1.0,
 };
 pub const DEEP_SEA_STYLE: Palette = Palette {
@@ -117,9 +117,9 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
 
 // mon amour theme
 const SECONDARY_MON_AMOUR: Color = Color {
-    r: 127.0 / 255.0,
-    g: 102.0 / 255.0,
-    b: 157.0 / 255.0,
+    r: 67.0 / 255.0,
+    g: 44.0 / 255.0,
+    b: 122.0 / 255.0,
     a: 1.0,
 };
 const PRIMARY_MON_AMOUR: Color = Color {
@@ -129,15 +129,15 @@ const PRIMARY_MON_AMOUR: Color = Color {
     a: 1.0,
 };
 const BUTTONS_MON_AMOUR: Color = Color {
-    r: 222.0 / 255.0,
-    g: 186.0 / 255.0,
-    b: 206.0 / 255.0,
+    r: 242.0 / 255.0,
+    g: 190.0 / 255.0,
+    b: 209.0 / 255.0,
     a: 1.0,
 };
 const OUTGOING_MON_AMOUR: Color = Color {
-    r: 90.0 / 255.0,
-    g: 164.0 / 255.0,
-    b: 105.0 / 255.0,
+    r: 58.0 / 255.0,
+    g: 166.0 / 255.0,
+    b: 185.0 / 255.0,
     a: 1.0,
 };
 pub const MON_AMOUR_STYLE: Palette = Palette {
@@ -148,7 +148,7 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
     round_borders: Color {
-        a: 0.5,
+        a: 0.6,
         ..BUTTONS_MON_AMOUR
     },
     round_containers: Color {
