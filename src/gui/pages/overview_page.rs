@@ -398,7 +398,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             )
             .push(
                 Row::new()
-                    .push(
+                    .push(if incoming_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
@@ -406,9 +406,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Incoming),
-                            ))),
-                    )
-                    .push(
+                            )))
+                    } else {
+                        Row::new()
+                    })
+                    .push(if outgoing_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
@@ -416,8 +418,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Outgoing),
-                            ))),
-                    ),
+                            )))
+                    } else {
+                        Row::new()
+                    }),
             );
 
         let content = Row::new()
@@ -526,7 +530,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             )
             .push(
                 Row::new()
-                    .push(
+                    .push(if incoming_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
@@ -534,9 +538,11 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Incoming),
-                            ))),
-                    )
-                    .push(
+                            )))
+                    } else {
+                        Row::new()
+                    })
+                    .push(if outgoing_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
@@ -544,8 +550,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(sniffer.style, ElementType::Outgoing),
-                            ))),
-                    ),
+                            )))
+                    } else {
+                        Row::new()
+                    }),
             );
 
         scroll_app = scroll_app.push(

@@ -12,6 +12,6 @@ pub struct DataInfoHost {
     pub is_favorite: bool,
     /// Determine if the connection with this host is local
     pub is_local: bool,
-    /// Determine if the connection with this host is multicast or broadcast
+    /// Determine if the connection with this host is unicast, multicast, or broadcast
     pub traffic_type: TrafficType,
 }
