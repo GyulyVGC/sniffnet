@@ -8,9 +8,9 @@ PL = "Kojący pastelowy motyw dla porywczych"
 
 [palette]
 primary = "#24273a"          # Base
-secondary = "#8aadf4"        # Blue
+secondary = "#f5bde6"        # Pink
 buttons = "#363a4f"          # Surface0
-outgoing = "#f5bde6"         # Pink
+outgoing = "#c6a0f6"         # Mauve
 text_headers = "#181926"     # Crust
 text_body = "#cad3f5"        # Text
 round_borders = "#b7bdf8"    # Lavender

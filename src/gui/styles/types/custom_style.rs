@@ -91,6 +91,8 @@ impl CustomStyle {
     /// # Errors
     /// [io::Error] is only returned if `dir` can't be read. A best effort is made to read any styles
     /// present in the directory.
+    ///
+    /// Styles that cannot be read are ignored.
     pub fn from_dir<P>(dir: P) -> Result<impl Iterator<Item = Self>, io::Error>
     where
         P: Into<PathBuf>,
