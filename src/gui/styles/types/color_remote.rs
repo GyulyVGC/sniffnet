@@ -104,7 +104,6 @@ where
     serializer.serialize_str(&hex_color)
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::{deserialize_color, serialize_color};

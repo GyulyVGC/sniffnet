@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
     only_top_30_hosts_translation,
 };
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
+    get_active_filters_col, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
@@ -66,7 +66,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 body = body_no_observed(
                     &sniffer.filters,
                     observed,
-                    font,
+                    &sniffer.style,
                     sniffer.language,
                     &sniffer.waiting,
                 );
@@ -112,9 +112,20 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 .push(
                                     traffic_rate_translation(sniffer.language)
                                         .font(font)
+                                        .style(StyleTuple(
+                                            Arc::clone(&sniffer.style),
+                                            ElementType::Title,
+                                        ))
                                         .size(FONT_SIZE_TITLE),
                                 )
-                                .push(Text::new(chart_info_string).font(font)),
+                                .push(
+                                    Text::new(chart_info_string)
+                                        .style(StyleTuple(
+                                            Arc::clone(&sniffer.style),
+                                            ElementType::Subtitle,
+                                        ))
+                                        .font(font),
+                                ),
                         )
                         .push(sniffer.traffic_chart.view()),
                 )
@@ -234,17 +245,15 @@ fn body_no_packets(
 fn body_no_observed(
     filters: &Filters,
     observed: u128,
-    font: Font,
+    style: &Arc<StyleType>,
     language: Language,
     waiting: &str,
 ) -> Column<'static, Message> {
-    let tot_packets_text = some_observed_translation(
-        language,
-        observed,
-        &get_active_filters_string(filters, language),
-    )
-    .horizontal_alignment(Horizontal::Center)
-    .font(font);
+    let font = get_font(style);
+
+    let tot_packets_text = some_observed_translation(language, observed)
+        .horizontal_alignment(Horizontal::Center)
+        .font(font);
 
     Column::new()
         .width(Length::Fill)
@@ -255,6 +264,7 @@ fn body_no_observed(
         .push(Text::new('V'.to_string()).font(ICONS).size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(tot_packets_text)
+        .push(get_active_filters_col(filters, language, style))
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
@@ -321,6 +331,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .push(
             Text::new(host_translation(sniffer.language))
                 .font(font)
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
@@ -398,7 +409,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             )
             .push(
                 Row::new()
-                    .push(
+                    .push(if incoming_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
@@ -406,9 +417,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
-                            ))),
-                    )
-                    .push(
+                            )))
+                    } else {
+                        Row::new()
+                    })
+                    .push(if outgoing_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
@@ -416,8 +429,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
-                            ))),
-                    ),
+                            )))
+                    } else {
+                        Row::new()
+                    }),
             );
 
         let content = Row::new()
@@ -477,6 +492,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
@@ -525,7 +541,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             )
             .push(
                 Row::new()
-                    .push(
+                    .push(if incoming_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
@@ -533,9 +549,11 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
-                            ))),
-                    )
-                    .push(
+                            )))
+                    } else {
+                        Row::new()
+                    })
+                    .push(if outgoing_bar_len > 0.0 {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
@@ -543,8 +561,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                                 iced::theme::Rule,
                             >>::into(
                                 StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
-                            ))),
-                    ),
+                            )))
+                    } else {
+                        Row::new()
+                    }),
             );
 
         scroll_app = scroll_app.push(
@@ -580,8 +600,12 @@ fn lazy_col_info(
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters =
-        col_device_filters(sniffer.language, font, &sniffer.filters, &sniffer.device);
+    let col_device_filters = col_device_filters(
+        sniffer.language,
+        &sniffer.style,
+        &sniffer.filters,
+        &sniffer.device,
+    );
 
     let col_data_representation = col_data_representation(
         sniffer.language,
@@ -597,7 +621,7 @@ fn lazy_col_info(
         filtered,
         all_bytes,
         filtered_bytes,
-        font,
+        &sniffer.style,
     );
 
     Column::new()
@@ -606,7 +630,13 @@ fn lazy_col_info(
         .push(
             Row::new()
                 .height(Length::Fixed(120.0))
-                .push(col_device_filters)
+                .push(
+                    Scrollable::new(col_device_filters)
+                        .width(Length::FillPortion(1))
+                        .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
+                            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
+                        )),
+                )
                 .push(
                     Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
                         StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
@@ -631,10 +661,12 @@ fn lazy_col_info(
 
 fn col_device_filters(
     language: Language,
-    font: Font,
+    style: &Arc<StyleType>,
     filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message> {
+    let font = get_font(style);
+
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
@@ -643,17 +675,14 @@ fn col_device_filters(
     let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
     Column::new()
-        .width(Length::FillPortion(1))
-        .spacing(15)
         .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                network_adapter_translation(language),
-                adapter_info
-            ))
-            .font(font),
+            Text::new(format!("{}:", network_adapter_translation(language),))
+                .font(font)
+                .style(StyleTuple(Arc::clone(style), ElementType::Subtitle)),
         )
-        .push(Text::new(get_active_filters_string(filters, language)).font(font))
+        .push(Text::new(format!("   {adapter_info}",)).font(font))
+        .push(vertical_space(15))
+        .push(get_active_filters_col(filters, language, style))
 }
 
 fn col_data_representation(
@@ -664,7 +693,11 @@ fn col_data_representation(
 ) -> Column<'static, Message> {
     Column::new()
         .width(Length::FillPortion(1))
-        .push(Text::new(format!("{}:", data_representation_translation(language))).font(font))
+        .push(
+            Text::new(format!("{}:", data_representation_translation(language)))
+                .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+                .font(font),
+        )
         .push(chart_radios(chart_type, font, style, language))
 }
 
@@ -675,54 +708,71 @@ fn col_bytes_packets(
     filtered: u128,
     all_bytes: u128,
     filtered_bytes: u128,
-    font: Font,
+    style: &Arc<StyleType>,
 ) -> Column<'static, Message> {
-    let dropped_text = if dropped > 0 {
+    let font = get_font(style);
+    let dropped_val = if dropped > 0 {
         format!(
-            "{}:\n   {} {}",
-            dropped_packets_translation(language),
+            "   {} {}",
             dropped,
             of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
         )
     } else {
-        format!(
-            "{}:\n   {}",
-            dropped_packets_translation(language),
-            none_translation(language)
-        )
+        format!("   {}", none_translation(language))
     };
     Column::new()
         .spacing(15)
         .push(
-            if dropped > 0 {
-                Text::new(format!(
-                    "{}:\n   {}",
-                    filtered_bytes_translation(language),
-                    &get_formatted_bytes_string_with_b(filtered_bytes)
-                ))
-            } else {
-                Text::new(format!(
-                    "{}:\n   {} {}",
-                    filtered_bytes_translation(language),
-                    &get_formatted_bytes_string_with_b(filtered_bytes),
-                    of_total_translation(
-                        language,
-                        &get_percentage_string(all_bytes, filtered_bytes)
-                    )
-                ))
-            }
-            .font(font),
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", filtered_bytes_translation(language)))
+                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+                        .font(font),
+                )
+                .push(
+                    if dropped > 0 {
+                        Text::new(format!(
+                            "   {}",
+                            &get_formatted_bytes_string_with_b(filtered_bytes)
+                        ))
+                    } else {
+                        Text::new(format!(
+                            "   {} {}",
+                            &get_formatted_bytes_string_with_b(filtered_bytes),
+                            of_total_translation(
+                                language,
+                                &get_percentage_string(all_bytes, filtered_bytes)
+                            )
+                        ))
+                    }
+                    .font(font),
+                ),
         )
         .push(
-            Text::new(format!(
-                "{}:\n   {} {}",
-                filtered_packets_translation(language),
-                filtered,
-                of_total_translation(language, &get_percentage_string(total, filtered))
-            ))
-            .font(font),
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", filtered_packets_translation(language)))
+                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+                        .font(font),
+                )
+                .push(
+                    Text::new(format!(
+                        "   {} {}",
+                        filtered,
+                        of_total_translation(language, &get_percentage_string(total, filtered))
+                    ))
+                    .font(font),
+                ),
         )
-        .push(Text::new(dropped_text).font(font))
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", dropped_packets_translation(language)))
+                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+                        .font(font),
+                )
+                .push(Text::new(dropped_val).font(font)),
+        )
 }
 
 fn get_bars_length(

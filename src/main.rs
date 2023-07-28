@@ -5,7 +5,7 @@
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
-use iced::window::{PlatformSpecific, Position};
+use iced::window::Position;
 use iced::{window, Application, Settings};
 
 use chart::types::chart_type::ChartType;
@@ -115,7 +115,7 @@ pub fn main() -> iced::Result {
             transparent: false,
             always_on_top: false,
             icon: None,
-            platform_specific: PlatformSpecific::default(),
+            ..Default::default()
         },
         flags: Sniffer::new(
             current_capture_id1,

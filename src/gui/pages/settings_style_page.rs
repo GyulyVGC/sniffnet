@@ -47,6 +47,10 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Length::Fixed(15.0)))
         .push(
             appearance_title_translation(sniffer.language)
+                .style(StyleTuple(
+                    Arc::clone(&sniffer.style),
+                    ElementType::Subtitle,
+                ))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )

@@ -7,5 +7,6 @@ pub mod rule;
 pub mod scrollbar;
 pub mod slider;
 pub mod style_constants;
+pub mod text;
 pub mod text_input;
 pub mod types;

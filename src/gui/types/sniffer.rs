@@ -135,12 +135,8 @@ impl Sniffer {
             Message::IpVersionSelection(version) => self.filters.ip = version,
             Message::TransportProtocolSelection(protocol) => self.filters.transport = protocol,
             Message::AppProtocolSelection(protocol) => self.filters.application = protocol,
-            Message::ChartSelection(what_to_display) => {
-                self.traffic_chart.change_kind(what_to_display);
-            }
-            Message::ReportSortSelection(what_to_display) => {
-                self.report_sort_type = what_to_display;
-            }
+            Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
+            Message::ReportSortSelection(sort) => self.report_sort_type = sort,
             Message::OpenReport => self.open_report_file(),
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => self.start(),
@@ -251,9 +247,7 @@ impl Sniffer {
                     }
                 }
             }
-            Message::WindowFocused => {
-                self.last_focus_time = std::time::Instant::now();
-            }
+            Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
         }
         Command::none()
     }

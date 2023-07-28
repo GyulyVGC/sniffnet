@@ -5,7 +5,7 @@ use crate::{RunTimeData, TrafficChart};
 /// This function is invoked every second by the application subscription
 ///
 /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
-pub fn update_charts_data(mut runtime_data: &mut RunTimeData, traffic_chart: &mut TrafficChart) {
+pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut TrafficChart) {
     let tot_seconds = traffic_chart.ticks;
     traffic_chart.ticks += 1;
 

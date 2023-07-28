@@ -334,6 +334,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "wahn",
+      "name": "Jan Walter",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1074865?v=4",
+      "profile": "https://www.janwalter.org",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "vtiinanen",
+      "name": "vtiinanen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49340148?v=4",
+      "profile": "https://github.com/vtiinanen",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "glitsj16",
+      "name": "glitsj16",
+      "avatar_url": "https://avatars.githubusercontent.com/u/959378?v=4",
+      "profile": "https://github.com/glitsj16",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,

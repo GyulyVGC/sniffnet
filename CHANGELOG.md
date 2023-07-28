@@ -5,11 +5,14 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 
-- Added app `id` in order to correctly show the icon and app name on Linux Wayland ([#292](https://github.com/GyulyVGC/sniffnet/issues/292))   
+- Added app `id` in order to correctly show the icon and app name on Linux Wayland (fixes [#292](https://github.com/GyulyVGC/sniffnet/issues/292))   
 - Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
-- Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
+- Added Finnish translation 🇫🇮 ([#310](https://github.com/GyulyVGC/sniffnet/pull/310))
 - Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
+- Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
 - Minor aesthetic improvements (implemented part of the suggestions provided in [#119](https://github.com/GyulyVGC/sniffnet/issues/119))
+- Color palettes in settings page are now built as `Rule` widgets, without involving the use of external SVGs
+- Fixed `alt`+`tab` shortcut issue ([#298](https://github.com/GyulyVGC/sniffnet/pull/298) — fixes [#262](https://github.com/GyulyVGC/sniffnet/issues/262))
 - Fixed problem that didn't allow opening links and the report file on operating systems different from Windows, macOS, and Linux
 - Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
 

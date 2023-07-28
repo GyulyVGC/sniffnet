@@ -77,6 +77,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
+                .style(StyleTuple(
+                    Arc::clone(&sniffer.style),
+                    ElementType::Subtitle,
+                ))
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(picklist_app);
@@ -89,6 +93,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new().push(
                 select_filters_translation(sniffer.language)
                     .font(font)
+                    .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
                     .size(FONT_SIZE_TITLE),
             ),
         )
@@ -181,6 +186,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         .push(
             choose_adapters_translation(sniffer.language)
                 .font(font)
+                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(
