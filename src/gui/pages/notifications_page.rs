@@ -1,5 +1,5 @@
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, lazy};
+use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
 use iced_widget::tooltip::Position;

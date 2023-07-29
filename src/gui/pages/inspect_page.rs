@@ -1,6 +1,6 @@
 use iced::alignment::Horizontal;
 use iced::widget::{
-    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip, lazy
+    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length};
 use iced_widget::scrollable::{Direction, Properties};
@@ -9,7 +9,7 @@ use iced_widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS, SARASA_MONO_BOLD};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS, SARASA_MONO};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -156,7 +156,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             .push(
                 Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
                     .style(iced::theme::Text::Color(entry_color))
-                    .font(SARASA_MONO_BOLD),
+                    .font(SARASA_MONO),
             )
             .push(flag)
             .push(Text::new("  "));
@@ -174,7 +174,10 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                 Scrollable::new(scroll_report)
                     .height(Length::FillPortion(15))
                     .width(Length::Fill)
-                    .direction(Direction::Horizontal(Properties::new()))
+                    .direction(Direction::Both {
+                        vertical: Properties::new(),
+                        horizontal: Properties::new(),
+                    })
                     .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
                         StyleTuple(sniffer.style, ElementType::Standard),
                     )),
@@ -483,6 +486,7 @@ fn get_button_open_report(
     let content = button(
         Text::new('8'.to_string())
             .font(ICONS)
+            .size(21)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )

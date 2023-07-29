@@ -24,9 +24,7 @@ use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{
-    get_font, ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES,
-};
+use crate::gui::styles::style_constants::{get_font, ICONS_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::gui::types::status::Status;
@@ -44,7 +42,7 @@ impl Application for Sniffer {
         (
             flags,
             Command::batch(vec![
-                font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
+                //font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
                 font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
                 font::load(ICONS_BYTES).map(Message::FontLoaded),
                 iced::window::maximize(true),

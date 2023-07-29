@@ -4,6 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
+use iced_widget::text::LineHeight;
 use iced_widget::tooltip::Position;
 
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -23,6 +24,8 @@ pub fn header(
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
+        .vertical_alignment(Vertical::Center)
+        .line_height(LineHeight::Relative(1.0))
         .size(100);
 
     Container::new(
@@ -98,6 +101,8 @@ pub fn get_button_settings(
     let content = button(
         Text::new("a")
             .font(ICONS)
+            .size(20.5)
+            .line_height(LineHeight::Relative(1.0))
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )

@@ -4,13 +4,11 @@ use std::collections::VecDeque;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
-use iced::{Element, Font};
+use iced::Element;
 use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::style_constants::{
-    get_color_mix_chart, CHARTS_LINE_BORDER, SARASA_MONO_BOLD,
-};
+use crate::gui::styles::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER};
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -67,16 +65,10 @@ impl TrafficChart {
     }
 
     pub fn view(&self) -> Element<Message> {
-        let color_font = self.color_font;
-        Container::new(Column::new().push(
-            ChartWidget::new(self), //     .resolve_font(move |_, _| match color_font {
-                                    //     RGBColor(255, 255, 255) => Font::Default, // if white non-bold
-                                    //     _ => SARASA_MONO_BOLD,
-                                    // }),
-        ))
-        .align_x(Horizontal::Left)
-        .align_y(Vertical::Bottom)
-        .into()
+        Container::new(Column::new().push(ChartWidget::new(self)))
+            .align_x(Horizontal::Left)
+            .align_y(Vertical::Bottom)
+            .into()
     }
 
     pub fn change_kind(&mut self, kind: ChartType) {
@@ -132,7 +124,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .label_style(("Sarasa Mono SC", 12).into_font().color(&self.color_font))
                     .y_labels(7)
                     .y_label_formatter(&|bytes| {
                         get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
@@ -176,7 +168,7 @@ impl Chart<Message> for TrafficChart {
                     .position(SeriesLabelPosition::UpperRight)
                     .background_style(BLACK.mix(0.3))
                     .border_style(BLACK.mix(0.6))
-                    .label_font(("notosans", 17).into_font().color(&self.color_font))
+                    .label_font(("Sarasa Mono SC", 13.5).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }
@@ -192,7 +184,7 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("notosans", 15).into_font().color(&self.color_font))
+                    .label_style(("Sarasa Mono SC", 12).into_font().color(&self.color_font))
                     .y_labels(7)
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
@@ -234,7 +226,7 @@ impl Chart<Message> for TrafficChart {
                     .position(SeriesLabelPosition::UpperRight)
                     .background_style(BLACK.mix(0.3))
                     .border_style(BLACK.mix(0.6))
-                    .label_font(("notosans", 17).into_font().color(&self.color_font))
+                    .label_font(("Sarasa Mono SC", 13.5).into_font().color(&self.color_font))
                     .draw()
                     .expect("Error drawing graph");
             }

@@ -1,5 +1,6 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
+use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
 use plotters::style::RGBColor;
 
@@ -157,25 +158,35 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     },
 };
 
-pub const SARASA_MONO_BOLD_BYTES: &[u8] =
-    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
-pub const SARASA_MONO_BOLD: Font = Font::with_name("sarasa-mono-bold");
+// pub const SARASA_MONO_BOLD_BYTES: &[u8] =
+//     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
+// pub const SARASA_MONO_BOLD: Font = Font {
+//     family: Family::Name("Sarasa Mono SC Bold"),
+//     weight: Weight::Normal,
+//     stretch: Stretch::Normal,
+//     monospaced: true
+// };
 
 pub const SARASA_MONO_BYTES: &[u8] =
     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
-pub const SARASA_MONO: Font = Font::with_name("sarasa-mono");
+pub const SARASA_MONO: Font = Font {
+    family: Family::Name("Sarasa Mono SC"),
+    weight: Weight::Normal,
+    stretch: Stretch::Normal,
+    monospaced: true,
+};
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
         RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
+        _ => SARASA_MONO,
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
         RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
+        _ => SARASA_MONO,
     }
 }
 
@@ -188,13 +199,13 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 
 //font to display icons
 pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
-pub const ICONS: Font = Font::with_name("icons");
+pub const ICONS: Font = Font::with_name("Glyphter");
 
 // font sizes
-pub const FONT_SIZE_FOOTER: f32 = 18.0;
-pub const FONT_SIZE_BODY: f32 = 21.0;
-pub const FONT_SIZE_SUBTITLE: f32 = 23.0;
-pub const FONT_SIZE_TITLE: f32 = 25.0;
+pub const FONT_SIZE_FOOTER: f32 = 14.3;
+pub const FONT_SIZE_BODY: f32 = 16.7;
+pub const FONT_SIZE_SUBTITLE: f32 = 18.3;
+pub const FONT_SIZE_TITLE: f32 = 19.9;
 
 // border styles
 pub const BORDER_WIDTH: f32 = 2.0;

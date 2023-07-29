@@ -117,7 +117,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     let content = button(
         Text::new("S")
             .font(ICONS)
-            .size(FONT_SIZE_TITLE)
+            .size(25)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )

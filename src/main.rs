@@ -124,7 +124,7 @@ pub fn main() -> iced::Result {
             &config_device,
             newer_release_available1,
         ),
-        default_font: Font::with_name("sarasa-mono"),
+        default_font: Font::with_name("Sarasa Mono SC"),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,
         exit_on_close_request: true,

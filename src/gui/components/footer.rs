@@ -6,6 +6,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Color, Font, Length};
 use iced_widget::horizontal_space;
+use iced_widget::text::LineHeight;
 use iced_widget::tooltip::Position;
 
 use crate::gui::styles::style_constants::{
@@ -61,7 +62,7 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('c'.to_string())
             .font(ICONS)
-            .size(18)
+            .size(17)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
@@ -81,7 +82,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
-            .size(28)
+            .size(26)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
@@ -100,11 +101,13 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
 fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('❤'.to_string())
-            .size(28)
+            .size(23)
+            .line_height(LineHeight::Relative(1.0))
             .style(iced::theme::Text::Color(Color::from_rgb(1.0, 0.3, 0.5)))
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
+    .padding([3, 0, 0, 0])
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
     .style(StyleTuple(style, ElementType::Standard).into())
