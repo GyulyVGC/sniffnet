@@ -20,7 +20,7 @@ impl iced::widget::checkbox::StyleSheet for StyleTuple {
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: if is_checked { 1.0 } else { 0.0 },
             border_color: colors.secondary,
             text_color: None,
@@ -32,7 +32,7 @@ impl iced::widget::checkbox::StyleSheet for StyleTuple {
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
             text_color: None,

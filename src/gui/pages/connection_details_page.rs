@@ -3,11 +3,10 @@ use std::net::IpAddr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
-use iced::{Alignment, Length};
+use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, horizontal_space, vertical_space, Rule};
-use iced_native::Font;
+use iced_widget::tooltip::Position;
+use iced_widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

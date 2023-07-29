@@ -1,6 +1,6 @@
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
-use iced_native::widget::horizontal_space;
+use iced_widget::horizontal_space;
 
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::types::element_type::ElementType;
@@ -257,39 +257,3 @@ pub fn chart_radios(
     }
     ret_val
 }
-
-// pub fn report_radios(
-//     active: ReportType,
-//     font: Font,
-//     style: StyleType,
-//     language: Language,
-// ) -> Row<'static, Message> {
-//     let mut ret_val = Row::new()
-//         .padding([10, 0, 15, 5])
-//         .spacing(20)
-//         .align_items(Alignment::Center)
-//         .push(
-//             relevant_connections_translation(language)
-//                 .font(font)
-//                 .size(FONT_SIZE_TITLE),
-//         );
-//     for option in ReportType::ALL {
-//         ret_val = ret_val.push(
-//             Radio::new(
-//                 option.get_radio_label(language),
-//                 option,
-//                 Some(active),
-//                 Message::ReportSelection,
-//             )
-//             .spacing(7)
-//             .font(font)
-//             .size(15)
-//             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-//                 style,
-//                 ElementType::Standard,
-//             ))),
-//         );
-//     }
-//     ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
-//     ret_val
-// }

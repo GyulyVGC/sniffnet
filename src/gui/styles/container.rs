@@ -40,11 +40,11 @@ impl iced::widget::container::StyleSheet for StyleTuple {
             })),
             border_radius: match self {
                 StyleTuple(_, ElementType::BorderedRound | ElementType::Alert) => {
-                    BORDER_ROUNDED_RADIUS
+                    BORDER_ROUNDED_RADIUS.into()
                 }
-                StyleTuple(_, ElementType::Tooltip) => 7.0,
-                StyleTuple(_, ElementType::Badge) => 100.0,
-                _ => 0.0,
+                StyleTuple(_, ElementType::Tooltip) => 7.0.into(),
+                StyleTuple(_, ElementType::Badge) => 100.0.into(),
+                _ => 0.0.into(),
             },
             border_width: match self {
                 StyleTuple(

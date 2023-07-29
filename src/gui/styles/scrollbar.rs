@@ -21,12 +21,12 @@ impl iced::widget::scrollable::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Scrollbar {
             background: Some(Background::Color(colors.round_borders)),
-            border_radius: BORDER_ROUNDED_RADIUS,
+            border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: colors.round_borders,
             scroller: Scroller {
                 color: colors.primary,
-                border_radius: BORDER_ROUNDED_RADIUS,
+                border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: BORDER_WIDTH * 1.5,
                 border_color: Color::TRANSPARENT,
             },
@@ -37,12 +37,12 @@ impl iced::widget::scrollable::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Scrollbar {
             background: Some(Background::Color(colors.round_borders)),
-            border_radius: BORDER_ROUNDED_RADIUS,
+            border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: BORDER_WIDTH / 1.5,
             border_color: colors.round_borders,
             scroller: Scroller {
                 color: colors.secondary,
-                border_radius: BORDER_ROUNDED_RADIUS,
+                border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: if is_mouse_over_scrollbar {
                     BORDER_WIDTH * 1.25
                 } else {

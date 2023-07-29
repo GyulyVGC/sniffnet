@@ -1,7 +1,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, Row, Text};
 use iced::{Alignment, Length};
-use iced_native::widget::{horizontal_space, vertical_space, Rule};
+use iced_widget::{horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;

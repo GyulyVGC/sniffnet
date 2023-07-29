@@ -1,11 +1,10 @@
 //! Rule style
 
-use iced_native::widget::rule;
-use iced_native::widget::rule::FillMode;
-
 use crate::get_colors;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
+use iced_widget::rule;
+use iced_widget::rule::FillMode;
 
 impl From<StyleTuple> for iced::theme::Rule {
     fn from(tuple: StyleTuple) -> Self {
@@ -34,7 +33,7 @@ impl rule::StyleSheet for StyleTuple {
                 | ElementType::PaletteButtons => 50,
                 _ => 3,
             },
-            radius: 0.0,
+            radius: 0.0.into(),
             fill_mode: FillMode::Full,
         }
     }

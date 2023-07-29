@@ -8,6 +8,7 @@ use crate::utils::types::web_page::WebPage;
 use crate::{
     AppProtocol, ChartType, IpVersion, Language, ReportSortType, StyleType, TransProtocol,
 };
+use iced::font;
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -82,4 +83,6 @@ pub enum Message {
     ArrowPressed(bool),
     /// Emit when the main window be focused
     WindowFocused,
+    /// Result after loading a custom font
+    FontLoaded(Result<(), font::Error>),
 }

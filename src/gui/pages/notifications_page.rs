@@ -3,8 +3,8 @@ use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, vertical_space};
+use iced_widget::tooltip::Position;
+use iced_widget::{button, vertical_space};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

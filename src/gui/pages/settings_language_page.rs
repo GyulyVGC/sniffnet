@@ -1,7 +1,7 @@
 use iced::widget::{Column, Container, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced_native::widget::vertical_space;
+use iced_widget::vertical_space;
 
 use crate::gui::components::radio::language_radios;
 use crate::gui::components::tab::get_settings_tabs;

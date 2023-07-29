@@ -6,7 +6,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
 use iced::window::Position;
-use iced::{window, Application, Settings};
+use iced::{window, Application, Font, Settings};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -113,7 +113,6 @@ pub fn main() -> iced::Result {
             resizable: true,
             decorations: true,
             transparent: false,
-            always_on_top: false,
             icon: None,
             ..Default::default()
         },
@@ -125,13 +124,9 @@ pub fn main() -> iced::Result {
             &config_device,
             newer_release_available1,
         ),
-        default_font: Some(include_bytes!(
-            "../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf"
-        )),
+        default_font: Font::with_name("sarasa-mono"),
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: true,
         antialiasing: false,
         exit_on_close_request: true,
-        try_opengles_first: false,
     })
 }

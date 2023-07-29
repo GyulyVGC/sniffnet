@@ -24,7 +24,7 @@ impl iced::overlay::menu::StyleSheet for StyleTuple {
             text_color: colors.text_body,
             background: Background::Color(colors.buttons),
             border_width: 1.0,
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_color: colors.secondary,
             selected_text_color: colors.text_body,
             selected_background: Background::Color(mix_colors(colors.buttons, colors.primary)),
@@ -42,7 +42,7 @@ impl pick_list::StyleSheet for StyleTuple {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(colors.buttons),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.round_borders,
         }
@@ -55,7 +55,7 @@ impl pick_list::StyleSheet for StyleTuple {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(mix_colors(colors.buttons, colors.primary)),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
         }

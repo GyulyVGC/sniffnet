@@ -24,7 +24,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
                 ElementType::Badge => Color::TRANSPARENT,
                 _ => colors.buttons,
             }),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: match self.1 {
                 ElementType::Badge => Color::TRANSPARENT,
@@ -38,7 +38,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             background: Background::Color(colors.primary),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
             icon_color: colors.text_body,
@@ -76,7 +76,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
                 ElementType::Badge => Color::TRANSPARENT,
                 _ => colors.buttons,
             }),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
             icon_color: colors.text_body,

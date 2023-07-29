@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Color, Font, Length};
-use iced_native::widget::horizontal_space;
-use iced_native::widget::tooltip::Position;
+use iced_widget::horizontal_space;
+use iced_widget::tooltip::Position;
 
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,

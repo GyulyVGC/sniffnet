@@ -8,7 +8,7 @@ use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, T
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
 use iced_lazy::lazy;
-use iced_native::widget::{horizontal_space, Rule};
+use iced_widget::{horizontal_space, Rule};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

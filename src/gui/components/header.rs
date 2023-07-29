@@ -4,7 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
+use iced_widget::tooltip::Position;
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{get_font, ICONS};

@@ -8,7 +8,7 @@ use iced::widget::{
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
-use iced_native::widget::tooltip::Position;
+use iced_widget::tooltip::Position;
 use pcap::Device;
 
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};

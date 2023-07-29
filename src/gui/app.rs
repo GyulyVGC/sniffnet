@@ -4,8 +4,11 @@
 
 use std::time::Duration;
 
+use iced::keyboard::{Event, KeyCode, Modifiers};
 use iced::widget::Column;
-use iced::{executor, Application, Command, Element, Subscription, Theme};
+use iced::Event::{Keyboard, Window};
+use iced::{executor, font, window, Application, Command, Element, Subscription, Theme};
+use iced_widget::runtime::futures::subscription;
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -21,7 +24,9 @@ use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::get_font;
+use crate::gui::styles::style_constants::{
+    get_font, ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES,
+};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::gui::types::status::Status;
@@ -36,7 +41,15 @@ impl Application for Sniffer {
     type Flags = Sniffer;
 
     fn new(flags: Sniffer) -> (Sniffer, Command<Message>) {
-        (flags, iced::window::maximize(true))
+        (
+            flags,
+            Command::batch(vec![
+                font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
+                font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
+                font::load(ICONS_BYTES).map(Message::FontLoaded),
+                iced::window::maximize(true),
+            ]),
+        )
     }
 
     fn title(&self) -> String {
@@ -103,41 +116,37 @@ impl Application for Sniffer {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        use iced_native::keyboard::{Event, KeyCode, Modifiers};
-        use iced_native::window;
-        const NO_MODIFIER: iced_native::keyboard::Modifiers =
-            iced_native::keyboard::Modifiers::empty();
-        let hot_keys_subscription =
-            iced_native::subscription::events_with(|event, _| match event {
-                iced_native::Event::Window(window::Event::Focused) => Some(Message::WindowFocused),
-                iced_native::Event::Keyboard(Event::KeyPressed {
-                    key_code,
-                    modifiers,
-                }) => match modifiers {
-                    Modifiers::COMMAND => match key_code {
-                        KeyCode::Q => Some(Message::Quit),
-                        KeyCode::O => Some(Message::OpenReport),
-                        KeyCode::Comma => Some(Message::OpenLastSettings),
-                        KeyCode::Backspace => Some(Message::ResetButtonPressed),
-                        KeyCode::D => Some(Message::CtrlDPressed),
-                        KeyCode::Left => Some(Message::ArrowPressed(false)),
-                        KeyCode::Right => Some(Message::ArrowPressed(true)),
-                        _ => None,
-                    },
-                    Modifiers::SHIFT => match key_code {
-                        KeyCode::Tab => Some(Message::SwitchPage(false)),
-                        _ => None,
-                    },
-                    NO_MODIFIER => match key_code {
-                        KeyCode::Enter => Some(Message::ReturnKeyPressed),
-                        KeyCode::Escape => Some(Message::EscKeyPressed),
-                        KeyCode::Tab => Some(Message::SwitchPage(true)),
-                        _ => None,
-                    },
+        const NO_MODIFIER: Modifiers = Modifiers::empty();
+        let hot_keys_subscription = subscription::events_with(|event, _| match event {
+            Window(window::Event::Focused) => Some(Message::WindowFocused),
+            Keyboard(Event::KeyPressed {
+                key_code,
+                modifiers,
+            }) => match modifiers {
+                Modifiers::COMMAND => match key_code {
+                    KeyCode::Q => Some(Message::Quit),
+                    KeyCode::O => Some(Message::OpenReport),
+                    KeyCode::Comma => Some(Message::OpenLastSettings),
+                    KeyCode::Backspace => Some(Message::ResetButtonPressed),
+                    KeyCode::D => Some(Message::CtrlDPressed),
+                    KeyCode::Left => Some(Message::ArrowPressed(false)),
+                    KeyCode::Right => Some(Message::ArrowPressed(true)),
+                    _ => None,
+                },
+                Modifiers::SHIFT => match key_code {
+                    KeyCode::Tab => Some(Message::SwitchPage(false)),
+                    _ => None,
+                },
+                NO_MODIFIER => match key_code {
+                    KeyCode::Enter => Some(Message::ReturnKeyPressed),
+                    KeyCode::Escape => Some(Message::EscKeyPressed),
+                    KeyCode::Tab => Some(Message::SwitchPage(true)),
                     _ => None,
                 },
                 _ => None,
-            });
+            },
+            _ => None,
+        });
         let time_subscription = match *self.status_pair.0.lock().unwrap() {
             Status::Running => {
                 iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)

@@ -5,8 +5,8 @@ use iced::widget::{
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::Slider;
+use iced_widget::tooltip::Position;
+use iced_widget::Slider;
 
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,

@@ -1,6 +1,6 @@
 use iced::{Length, Renderer};
-use iced_native::svg::Handle;
-use iced_native::widget::Svg;
+use iced_widget::svg::Handle;
+use iced_widget::Svg;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{

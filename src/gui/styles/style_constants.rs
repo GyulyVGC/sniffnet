@@ -157,22 +157,25 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     },
 };
 
-pub const SARASA_MONO_SC_BOLD: Font = Font::External {
-    name: "sarasa-mono-sc-bold",
-    bytes: include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf"),
-};
+pub const SARASA_MONO_BOLD_BYTES: &[u8] =
+    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
+pub const SARASA_MONO_BOLD: Font = Font::with_name("sarasa-mono-bold");
+
+pub const SARASA_MONO_BYTES: &[u8] =
+    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
+pub const SARASA_MONO: Font = Font::with_name("sarasa-mono");
 
 pub fn get_font(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_body) {
-        RGBColor(255, 255, 255) => Font::Default,
-        _ => SARASA_MONO_SC_BOLD,
+        RGBColor(255, 255, 255) => SARASA_MONO,
+        _ => SARASA_MONO_BOLD,
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
     match to_rgb_color(get_colors(style).text_headers) {
-        RGBColor(255, 255, 255) => Font::Default,
-        _ => SARASA_MONO_SC_BOLD,
+        RGBColor(255, 255, 255) => SARASA_MONO,
+        _ => SARASA_MONO_BOLD,
     }
 }
 
@@ -184,10 +187,8 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
 }
 
 //font to display icons
-pub const ICONS: Font = Font::External {
-    name: "icons",
-    bytes: include_bytes!("../../../resources/fonts/subset/icons.ttf"),
-};
+pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
+pub const ICONS: Font = Font::with_name("icons");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 18.0;

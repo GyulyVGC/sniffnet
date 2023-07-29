@@ -9,7 +9,7 @@ use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::gui::styles::style_constants::{
-    get_color_mix_chart, CHARTS_LINE_BORDER, SARASA_MONO_SC_BOLD,
+    get_color_mix_chart, CHARTS_LINE_BORDER, SARASA_MONO_BOLD,
 };
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
@@ -68,14 +68,12 @@ impl TrafficChart {
 
     pub fn view(&self) -> Element<Message> {
         let color_font = self.color_font;
-        Container::new(
-            Column::new().push(
-                ChartWidget::new(self).resolve_font(move |_, _| match color_font {
-                    RGBColor(255, 255, 255) => Font::Default, // if white non-bold
-                    _ => SARASA_MONO_SC_BOLD,
-                }),
-            ),
-        )
+        Container::new(Column::new().push(
+            ChartWidget::new(self), //     .resolve_font(move |_, _| match color_font {
+                                    //     RGBColor(255, 255, 255) => Font::Default, // if white non-bold
+                                    //     _ => SARASA_MONO_BOLD,
+                                    // }),
+        ))
         .align_x(Horizontal::Left)
         .align_y(Vertical::Bottom)
         .into()

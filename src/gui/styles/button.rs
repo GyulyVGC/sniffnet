@@ -37,12 +37,12 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(
                     _,
                     ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
-                ) => 0.0,
+                ) => 0.0.into(),
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
-                    12.0
+                    12.0.into()
                 }
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0,
-                _ => BORDER_BUTTON_RADIUS,
+                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0.into(),
+                _ => BORDER_BUTTON_RADIUS.into(),
             },
             border_width: match self {
                 StyleTuple(
@@ -87,12 +87,12 @@ impl button::StyleSheet for StyleTuple {
                 StyleTuple(
                     _,
                     ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
-                ) => 0.0,
+                ) => 0.0.into(),
                 StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
-                    12.0
+                    12.0.into()
                 }
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0,
-                _ => BORDER_BUTTON_RADIUS,
+                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0.into(),
+                _ => BORDER_BUTTON_RADIUS.into(),
             },
             border_width: match self {
                 StyleTuple(

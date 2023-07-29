@@ -6,8 +6,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use iced::window;
-use iced_native::Command;
+use iced::{window, Command};
 use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
@@ -125,7 +124,6 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::TickInit => {}
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version) => self.filters.ip = version,
@@ -222,6 +220,7 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
+            _ => {}
         }
         Command::none()
     }
