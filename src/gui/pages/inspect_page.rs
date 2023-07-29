@@ -1,9 +1,8 @@
 use iced::alignment::Horizontal;
 use iced::widget::{
-    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip, lazy
 };
 use iced::{alignment, Alignment, Font, Length};
-use iced_lazy::lazy;
 use iced_widget::scrollable::{Direction, Properties};
 use iced_widget::tooltip::Position;
 use iced_widget::{button, horizontal_space, vertical_space, Rule};

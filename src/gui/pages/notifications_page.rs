@@ -1,8 +1,7 @@
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, lazy};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
-use iced_lazy::lazy;
 use iced_widget::tooltip::Position;
 use iced_widget::{button, vertical_space};
 
