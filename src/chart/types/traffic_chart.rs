@@ -97,6 +97,11 @@ impl Chart<Message> for TrafficChart {
     ) {
         use plotters::prelude::*;
 
+        let font_weight = match self.color_font {
+            RGBColor(255, 255, 255) => FontStyle::Normal, // if white non-bold
+            _ => FontStyle::Bold,
+        };
+
         if self.ticks == 0 {
             return;
         }
@@ -124,7 +129,12 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("Sarasa Mono SC", 12).into_font().color(&self.color_font))
+                    .label_style(
+                        ("Sarasa Mono SC", 12)
+                            .into_font()
+                            .style(font_weight)
+                            .color(&self.color_font),
+                    )
                     .y_labels(7)
                     .y_label_formatter(&|bytes| {
                         get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
@@ -168,7 +178,12 @@ impl Chart<Message> for TrafficChart {
                     .position(SeriesLabelPosition::UpperRight)
                     .background_style(BLACK.mix(0.3))
                     .border_style(BLACK.mix(0.6))
-                    .label_font(("Sarasa Mono SC", 13.5).into_font().color(&self.color_font))
+                    .label_font(
+                        ("Sarasa Mono SC", 13.5)
+                            .into_font()
+                            .style(font_weight)
+                            .color(&self.color_font),
+                    )
                     .draw()
                     .expect("Error drawing graph");
             }
@@ -184,7 +199,12 @@ impl Chart<Message> for TrafficChart {
 
                 chart
                     .configure_mesh()
-                    .label_style(("Sarasa Mono SC", 12).into_font().color(&self.color_font))
+                    .label_style(
+                        ("Sarasa Mono SC", 12)
+                            .into_font()
+                            .style(font_weight)
+                            .color(&self.color_font),
+                    )
                     .y_labels(7)
                     .y_label_formatter(&|packets| packets.abs().to_string())
                     .draw()
@@ -226,7 +246,12 @@ impl Chart<Message> for TrafficChart {
                     .position(SeriesLabelPosition::UpperRight)
                     .background_style(BLACK.mix(0.3))
                     .border_style(BLACK.mix(0.6))
-                    .label_font(("Sarasa Mono SC", 13.5).into_font().color(&self.color_font))
+                    .label_font(
+                        ("Sarasa Mono SC", 13.5)
+                            .into_font()
+                            .style(font_weight)
+                            .color(&self.color_font),
+                    )
                     .draw()
                     .expect("Error drawing graph");
             }

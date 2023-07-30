@@ -9,7 +9,7 @@ use iced_widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS, SARASA_MONO};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -115,7 +115,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                             .push(picklist_sort),
                     ),
             )
-            .height(Length::Fixed(160.0))
+            .height(Length::Fixed(165.0))
             .padding(10)
             .style(<StyleTuple as Into<iced::theme::Container>>::into(
                 StyleTuple(sniffer.style, ElementType::BorderedRound),
@@ -156,7 +156,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             .push(
                 Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
                     .style(iced::theme::Text::Color(entry_color))
-                    .font(SARASA_MONO),
+                    .font(font),
             )
             .push(flag)
             .push(Text::new("  "));
