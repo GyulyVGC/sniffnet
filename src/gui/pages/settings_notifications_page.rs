@@ -38,7 +38,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let mut content = Column::new()
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(sniffer.style, sniffer.use_gradients, sniffer.language))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -449,7 +449,7 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
     .align_y(Vertical::Center)
 }
 
-pub fn settings_header(style: StyleType, language: Language) -> Container<'static, Message> {
+pub fn settings_header(style: StyleType, use_gradients: bool, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
@@ -496,7 +496,14 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Headers),
-    ))
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(
+                style,
+                if use_gradients {
+                    ContainerType::GradientHeader
+                } else {
+                    ContainerType::Headers
+                },
+            ),
+        ))
 }

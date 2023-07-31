@@ -25,6 +25,7 @@ use crate::{Language, StyleType};
 
 pub fn get_exit_overlay(
     style: StyleType,
+    use_gradients: bool,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
@@ -36,6 +37,7 @@ pub fn get_exit_overlay(
         .width(Length::Fill)
         .push(get_modal_header(
             style,
+            use_gradients,
             language,
             quit_analysis_translation(language),
         ))
@@ -57,6 +59,7 @@ pub fn get_exit_overlay(
 
 pub fn get_clear_all_overlay(
     style: StyleType,
+    use_gradients: bool,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
@@ -68,6 +71,7 @@ pub fn get_clear_all_overlay(
         .width(Length::Fill)
         .push(get_modal_header(
             style,
+            use_gradients,
             language,
             clear_all_translation(language),
         ))
@@ -89,6 +93,7 @@ pub fn get_clear_all_overlay(
 
 fn get_modal_header(
     style: StyleType,
+    use_gradients: bool,
     language: Language,
     title: String,
 ) -> Container<'static, Message> {
@@ -139,7 +144,14 @@ fn get_modal_header(
     .height(Length::Fixed(40.0))
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Headers),
+        ContainerStyleTuple(
+            style,
+            if use_gradients {
+                ContainerType::GradientHeader
+            } else {
+                ContainerType::Headers
+            },
+        ),
     ))
 }
 

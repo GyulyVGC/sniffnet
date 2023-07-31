@@ -17,6 +17,7 @@ use crate::{Language, StyleType};
 
 pub fn header(
     style: StyleType,
+    use_gradients: bool,
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
@@ -64,7 +65,14 @@ pub fn header(
     .align_y(Vertical::Center)
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Headers),
+        ContainerStyleTuple(
+            style,
+            if use_gradients {
+                ContainerType::GradientHeader
+            } else {
+                ContainerType::Headers
+            },
+        ),
     ))
 }
 

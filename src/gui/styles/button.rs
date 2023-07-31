@@ -2,9 +2,10 @@
 
 use iced::widget::button;
 use iced::widget::button::Appearance;
-use iced::{Background, Color, Vector};
+use iced::{Background, Color, Degrees, Gradient, Vector};
 
 use crate::gui::styles::style_constants::{get_starred_color, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::text::{highlight, TextType};
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
@@ -20,6 +21,7 @@ pub enum ButtonType {
     Neutral,
     Alert,
     Badge,
+    GradientAccent,
 }
 
 #[derive(Clone)]
@@ -37,19 +39,30 @@ impl button::StyleSheet for ButtonStyleTuple {
     fn active(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
         button::Appearance {
-            background: Some(Background::Color(match self {
-                ButtonStyleTuple(_, ButtonType::TabActive) => colors.primary,
-                ButtonStyleTuple(_, ButtonType::Starred) => get_starred_color(self.0),
-                ButtonStyleTuple(_, ButtonType::Badge) => colors.secondary,
-                ButtonStyleTuple(_, ButtonType::BorderedRound) => colors.round_containers,
+            background: Some(match self {
+                ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
+                ButtonStyleTuple(_, ButtonType::Starred) => {
+                    Background::Color(get_starred_color(self.0))
+                }
+                ButtonStyleTuple(_, ButtonType::Badge) => Background::Color(colors.secondary),
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => {
+                    Background::Color(colors.round_containers)
+                }
                 ButtonStyleTuple(_, ButtonType::Neutral | ButtonType::NotStarred) => {
-                    Color::TRANSPARENT
+                    Background::Color(Color::TRANSPARENT)
                 }
                 ButtonStyleTuple(_, ButtonType::BorderedRoundSelected) => {
-                    mix_colors(colors.primary, colors.buttons)
+                    Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
-                _ => colors.buttons,
-            })),
+                ButtonStyleTuple(_, ButtonType::GradientAccent) => {
+                    Background::Gradient(Gradient::Linear(
+                        iced::gradient::Linear::new(Degrees(225.0))
+                            .add_stop(0.0, colors.secondary)
+                            .add_stop(1.0, highlight(TextType::Subtitle, &colors)),
+                    ))
+                }
+                _ => Background::Color(colors.buttons),
+            }),
             border_radius: match self {
                 ButtonStyleTuple(
                     _,
@@ -78,7 +91,9 @@ impl button::StyleSheet for ButtonStyleTuple {
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
-                ButtonStyleTuple(_, ButtonType::Badge) => colors.text_headers,
+                ButtonStyleTuple(_, ButtonType::Badge | ButtonType::GradientAccent) => {
+                    colors.text_headers
+                }
                 _ => colors.text_body,
             },
             border_color: match self {
@@ -96,11 +111,20 @@ impl button::StyleSheet for ButtonStyleTuple {
                 ButtonType::Neutral => Vector::default(),
                 _ => Vector::new(0.0, 2.0),
             },
-            background: Some(Background::Color(match self {
-                ButtonStyleTuple(_, ButtonType::Starred) => get_starred_color(self.0),
-                ButtonStyleTuple(_, ButtonType::TabActive) => colors.primary,
-                _ => mix_colors(colors.primary, colors.buttons),
-            })),
+            background: Some(match self {
+                ButtonStyleTuple(_, ButtonType::Starred) => {
+                    Background::Color(get_starred_color(self.0))
+                }
+                ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
+                ButtonStyleTuple(_, ButtonType::GradientAccent) => {
+                    Background::Gradient(Gradient::Linear(
+                        iced::gradient::Linear::new(Degrees(225.0))
+                            .add_stop(0.0, colors.secondary)
+                            .add_stop(1.0, colors.outgoing),
+                    ))
+                }
+                _ => Background::Color(mix_colors(colors.primary, colors.buttons)),
+            }),
             border_radius: match self {
                 ButtonStyleTuple(
                     _,
@@ -133,6 +157,7 @@ impl button::StyleSheet for ButtonStyleTuple {
             },
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
+                ButtonStyleTuple(_, ButtonType::GradientAccent) => colors.text_headers,
                 _ => colors.text_body,
             },
         }

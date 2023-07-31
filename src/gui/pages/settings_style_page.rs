@@ -1,12 +1,13 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, Row, Text};
 use iced::{Alignment, Length};
-use iced_widget::{horizontal_space, vertical_space, Rule};
+use iced_widget::{horizontal_space, vertical_space, Checkbox, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::checkbox::{CheckboxStyleTuple, CheckboxType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
@@ -16,6 +17,7 @@ use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
     yeti_day_translation, yeti_night_translation,
 };
+use crate::translations::translations_2::color_gradients_translation;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Sniffer, StyleType};
 
@@ -24,7 +26,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(sniffer.style, sniffer.use_gradients, sniffer.language))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -47,6 +49,20 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Checkbox::new(
+                color_gradients_translation(sniffer.language),
+                sniffer.use_gradients,
+                |_| Message::ToggleGradients,
+            )
+            .spacing(5)
+            .size(18)
+            .font(font)
+            .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
+                CheckboxStyleTuple(sniffer.style, CheckboxType::Standard),
+            )),
         )
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
@@ -107,7 +123,7 @@ fn get_palette_container(
         .push(Text::new(description).font(font));
 
     Button::new(content)
-        .height(Length::Fixed(120.0))
+        .height(Length::Fixed(110.0))
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
@@ -129,22 +145,22 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
         Row::new()
             .padding(0)
             .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
-                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
                     RuleTuple(style, RuleType::PalettePrimary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
-                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
                     RuleTuple(style, RuleType::PaletteSecondary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
-                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
                     RuleTuple(style, RuleType::PaletteOutgoing),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
-                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
                     RuleTuple(style, RuleType::PaletteButtons),
                 )),
             )),
@@ -152,7 +168,7 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(50.0 + 1.7 * BORDER_WIDTH)
+    .height(40.0 + 2.0 * BORDER_WIDTH)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
         ContainerStyleTuple(style, ContainerType::Palette),
     ))

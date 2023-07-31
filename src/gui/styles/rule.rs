@@ -42,7 +42,7 @@ impl rule::StyleSheet for RuleTuple {
                 RuleType::PalettePrimary
                 | RuleType::PaletteSecondary
                 | RuleType::PaletteOutgoing
-                | RuleType::PaletteButtons => 50,
+                | RuleType::PaletteButtons => 40,
                 RuleType::Standard => 3,
             },
             radius: 0.0.into(),

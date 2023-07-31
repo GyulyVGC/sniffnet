@@ -85,4 +85,6 @@ pub enum Message {
     WindowFocused,
     /// Result after loading a custom font
     FontLoaded(Result<(), font::Error>),
+    /// Enable or disable gradients
+    ToggleGradients,
 }

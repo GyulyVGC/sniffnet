@@ -23,6 +23,7 @@ use crate::Language;
 
 pub fn footer(
     language: Language,
+    use_gradients: bool,
     style: StyleType,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message> {
@@ -54,7 +55,14 @@ pub fn footer(
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Headers),
+            ContainerStyleTuple(
+                style,
+                if use_gradients {
+                    ContainerType::GradientHeader
+                } else {
+                    ContainerType::Headers
+                },
+            ),
         ))
 }
 

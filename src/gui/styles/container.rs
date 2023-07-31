@@ -1,13 +1,14 @@
 //! Containers style
 
 use iced::widget::container::Appearance;
-use iced::Theme;
 use iced::{Background, Color};
+use iced::{Theme};
 
 use crate::gui::styles::style_constants::{
     get_color_mix_filter_badge, BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
 };
 use crate::{get_colors, StyleType};
+use crate::gui::styles::types::gradient_type::{get_gradient, GradientType};
 
 #[derive(Clone, Copy)]
 pub enum ContainerType {
@@ -20,6 +21,7 @@ pub enum ContainerType {
     Palette,
     Neutral,
     Alert,
+    GradientHeader,
 }
 
 #[derive(Clone)]
@@ -38,22 +40,31 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             text_color: Some(match self {
-                ContainerStyleTuple(_, ContainerType::Headers) => colors.text_headers,
+                ContainerStyleTuple(_, ContainerType::Headers | ContainerType::GradientHeader) => {
+                    colors.text_headers
+                }
                 _ => colors.text_body,
             }),
-            background: Some(Background::Color(match self {
-                ContainerStyleTuple(_, ContainerType::Headers) => colors.secondary,
-                ContainerStyleTuple(_, ContainerType::Tooltip) => colors.buttons,
-                ContainerStyleTuple(_, ContainerType::BorderedRound) => colors.round_containers,
-                ContainerStyleTuple(_, ContainerType::Neutral | ContainerType::Palette) => {
-                    Color::TRANSPARENT
+            background: Some(match self {
+                ContainerStyleTuple(_, ContainerType::Headers) => {
+                    Background::Color(colors.secondary)
                 }
-                ContainerStyleTuple(_, ContainerType::Badge) => Color {
+                ContainerStyleTuple(_, ContainerType::Tooltip) => Background::Color(colors.buttons),
+                ContainerStyleTuple(_, ContainerType::BorderedRound) => {
+                    Background::Color(colors.round_containers)
+                }
+                ContainerStyleTuple(_, ContainerType::Neutral | ContainerType::Palette) => {
+                    Background::Color(Color::TRANSPARENT)
+                }
+                ContainerStyleTuple(_, ContainerType::Badge) => Background::Color(Color {
                     a: get_color_mix_filter_badge(self.0),
                     ..colors.secondary
-                },
-                _ => colors.primary,
-            })),
+                }),
+                ContainerStyleTuple(_, ContainerType::GradientHeader) => {
+                    Background::Gradient(get_gradient(&colors, GradientType::Wild))
+                }
+                _ => Background::Color(colors.primary),
+            }),
             border_radius: match self {
                 ContainerStyleTuple(_, ContainerType::BorderedRound | ContainerType::Alert) => {
                     BORDER_ROUNDED_RADIUS.into()
@@ -65,7 +76,10 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
             border_width: match self {
                 ContainerStyleTuple(
                     _,
-                    ContainerType::Standard | ContainerType::Headers | ContainerType::Neutral,
+                    ContainerType::Standard
+                    | ContainerType::Headers
+                    | ContainerType::Neutral
+                    | ContainerType::GradientHeader,
                 ) => 0.0,
                 ContainerStyleTuple(_, ContainerType::Tooltip) => BORDER_WIDTH / 2.0,
                 ContainerStyleTuple(_, ContainerType::BorderedRound) => BORDER_WIDTH * 2.0,

@@ -62,7 +62,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
 
     let header_and_content = Column::new()
         .width(Length::Fill)
-        .push(page_header(sniffer.style, sniffer.language));
+        .push(page_header(sniffer.style, sniffer.use_gradients, sniffer.language));
 
     let mut source_caption = Row::new().spacing(10).push(
         Text::new(source_translation(sniffer.language))
@@ -133,7 +133,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         ))
 }
 
-fn page_header(style: StyleType, language: Language) -> Container<'static, Message> {
+fn page_header(style: StyleType, use_gradients: bool, language: Language) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     Container::new(
@@ -180,7 +180,14 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .height(Fixed(40.0))
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Headers),
+        ContainerStyleTuple(
+            style,
+            if use_gradients {
+                ContainerType::GradientHeader
+            } else {
+                ContainerType::Headers
+            },
+        ),
     ))
 }
 

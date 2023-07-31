@@ -53,8 +53,10 @@ pub struct Sniffer {
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
-    /// Application style (only values Day and Night are possible for this field)
+    /// Application style
     pub style: StyleType,
+    /// Wether gradients are enabled by the user
+    pub use_gradients: bool,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -105,6 +107,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             style: config_settings.style,
+            use_gradients: true,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
@@ -220,6 +223,7 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
+            Message::ToggleGradients => self.use_gradients = !self.use_gradients,
             _ => {}
         }
         Command::none()

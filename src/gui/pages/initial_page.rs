@@ -126,7 +126,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::GradientAccent).into())
     .on_press(Message::Start);
 
     let tooltip = start_translation(language).to_string();
