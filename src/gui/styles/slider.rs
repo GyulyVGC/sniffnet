@@ -1,6 +1,7 @@
 //! Slider style
 
 use iced::widget::slider::Appearance;
+use iced::BorderRadius;
 use iced_widget::slider::{Handle, HandleShape, Rail};
 
 use crate::get_colors;
@@ -22,7 +23,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
                 width: 3.0,
-                border_radius: Default::default(),
+                border_radius: BorderRadius::default(),
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 5.0 },
@@ -39,7 +40,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
                 width: 3.0,
-                border_radius: Default::default(),
+                border_radius: BorderRadius::default(),
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },
@@ -56,7 +57,7 @@ impl iced::widget::slider::StyleSheet for StyleTuple {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
                 width: 3.0,
-                border_radius: Default::default(),
+                border_radius: BorderRadius::default(),
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },

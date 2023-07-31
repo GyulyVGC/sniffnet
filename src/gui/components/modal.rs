@@ -8,7 +8,9 @@ use iced::alignment::{Alignment, Horizontal, Vertical};
 use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
 };
-use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size};
+use iced::{
+    event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Size,
+};
 use iced_widget::tooltip::Position;
 
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
@@ -381,7 +383,7 @@ where
         renderer.fill_quad(
             renderer::Quad {
                 bounds: layout.bounds(),
-                border_radius: Default::default(),
+                border_radius: BorderRadius::default(),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
             },

@@ -54,8 +54,8 @@ impl Default for Language {
 
 impl Language {
     pub(crate) const ROW1: [Language; 4] = [Language::EN, Language::DE, Language::EL, Language::ES];
-    pub(crate) const ROW2: [Language; 4] = [Language::FI, Language::FR, Language::IT, Language::KO,];
-    pub(crate) const ROW3: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU,];
+    pub(crate) const ROW2: [Language; 4] = [Language::FI, Language::FR, Language::IT, Language::KO];
+    pub(crate) const ROW3: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
     pub(crate) const ROW4: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
 
     pub fn get_radio_label(&self) -> &str {
