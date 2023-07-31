@@ -41,7 +41,7 @@ plotters = { version = "0.3.5", default_features = false, features = ["area_seri
 iced = { version = "0.9.0", features = ["tokio", "svg"] }
 iced_native = "0.10.3"
 iced_lazy = "0.6.1"
-plotters-iced = "0.8.0"
+plotters-iced = "0.9.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
 serde = { version = "1.0.177", default_features = false, features = ["derive"] }
