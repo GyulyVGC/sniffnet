@@ -180,6 +180,7 @@ pub fn get_color_mix_chart(style: StyleType) -> f64 {
     match style {
         StyleType::Night | StyleType::DeepSea => 0.3,
         StyleType::Day | StyleType::MonAmour => 0.8,
+        StyleType::Custom(style) => style.to_ext().color_mixing,
     }
 }
 
@@ -216,6 +217,7 @@ pub fn get_starred_color(style: StyleType) -> Color {
             b: 39.0 / 255.0,
             a: 0.8,
         },
+        StyleType::Custom(style) => style.to_ext().starred,
     }
 }
 
@@ -224,5 +226,6 @@ pub fn get_color_mix_filter_badge(style: StyleType) -> f32 {
         StyleType::Night | StyleType::DeepSea => 0.2,
         StyleType::Day => 0.7,
         StyleType::MonAmour => 0.5,
+        StyleType::Custom(style) => style.to_ext().badge_alpha,
     }
 }

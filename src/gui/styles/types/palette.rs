@@ -35,28 +35,13 @@ pub struct Palette {
     pub round_containers: Color,
 }
 
-/// Extension color for themes.
-pub struct PaletteExtension {
-    /// Color of favorites star
-    pub starred: Color,
-    /// Badge/logo alpha
-    pub badge_alpha: f32,
-    /// Traffic chart color mixing
-    pub color_mixing: f64
-}
-
-pub struct CustomPalette {
-    name: &'static str,
-    palette: Palette,
-    extension: PaletteExtension
-}
-
 pub fn get_colors(style: StyleType) -> Palette {
     match style {
         StyleType::Night => NIGHT_STYLE,
         StyleType::Day => DAY_STYLE,
         StyleType::DeepSea => DEEP_SEA_STYLE,
         StyleType::MonAmour => MON_AMOUR_STYLE,
+        StyleType::Custom(style) => style.to_palette()
     }
 }
 

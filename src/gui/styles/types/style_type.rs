@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::custom_palette::ExtraStyles;
+
 /// Used to specify the kind of style of the application
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
 pub enum StyleType {
@@ -7,6 +9,7 @@ pub enum StyleType {
     Day,
     DeepSea,
     MonAmour,
+    Custom(ExtraStyles)
 }
 
 impl Default for StyleType {
