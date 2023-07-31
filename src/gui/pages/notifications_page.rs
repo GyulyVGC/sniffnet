@@ -11,9 +11,11 @@ use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_FOOTER, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
@@ -94,12 +96,11 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .align_y(Vertical::Center),
             )
             .push(
-                Scrollable::new(logged_notifications).style(<StyleTuple as Into<
+                Scrollable::new(logged_notifications).style(<ScrollbarStyleTuple as Into<
                     iced::theme::Scrollable,
-                >>::into(StyleTuple(
-                    sniffer.style,
-                    ElementType::Standard,
-                ))),
+                >>::into(
+                    ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
+                )),
             )
             .push(
                 Container::new(get_button_clear_all(sniffer.style, sniffer.language))
@@ -113,8 +114,8 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(Column::new().push(tab_and_body))
         .height(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -193,8 +194,8 @@ fn packets_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::Tooltip),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(style, ContainerType::Tooltip),
             )),
         )
         .push(
@@ -209,12 +210,12 @@ fn packets_notification_log(
                 )
                 .push(
                     Text::new(packets_exceeded_translation(language))
-                        .style(StyleTuple(style, ElementType::Title))
+                        .style(TextStyleTuple(style, TextType::Title))
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
-                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .style(TextStyleTuple(style, TextType::Subtitle))
                         .size(FONT_SIZE_FOOTER)
                         .font(font),
                 ),
@@ -236,8 +237,8 @@ fn packets_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::BorderedRound),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::BorderedRound),
         ))
 }
 
@@ -277,8 +278,8 @@ fn bytes_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::Tooltip),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(style, ContainerType::Tooltip),
             )),
         )
         .push(
@@ -293,13 +294,13 @@ fn bytes_notification_log(
                 )
                 .push(
                     Text::new(bytes_exceeded_translation(language))
-                        .style(StyleTuple(style, ElementType::Title))
+                        .style(TextStyleTuple(style, TextType::Title))
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
                         .size(FONT_SIZE_FOOTER)
-                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .style(TextStyleTuple(style, TextType::Subtitle))
                         .font(font),
                 ),
         )
@@ -322,8 +323,8 @@ fn bytes_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::BorderedRound),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::BorderedRound),
         ))
 }
 
@@ -366,8 +367,8 @@ fn favorite_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::Tooltip),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(style, ContainerType::Tooltip),
             )),
         )
         .push(
@@ -382,7 +383,7 @@ fn favorite_notification_log(
                 )
                 .push(
                     Text::new(favorite_transmitted_translation(language))
-                        .style(StyleTuple(style, ElementType::Title))
+                        .style(TextStyleTuple(style, TextType::Title))
                         .font(font),
                 ),
         )
@@ -396,8 +397,8 @@ fn favorite_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::BorderedRound),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::BorderedRound),
         ))
 }
 
@@ -412,14 +413,14 @@ fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static
     .padding(10)
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::ShowModal(MyModal::ClearAll));
 
     Tooltip::new(content, clear_all_translation(language), Position::Top)
         .gap(5)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 

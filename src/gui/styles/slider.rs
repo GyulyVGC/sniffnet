@@ -4,17 +4,24 @@ use iced::widget::slider::Appearance;
 use iced::BorderRadius;
 use iced_widget::slider::{Handle, HandleShape, Rail};
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::BORDER_WIDTH;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Slider {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum SliderType {
+    Standard,
+}
+
+#[derive(Clone)]
+pub struct SliderStyleTuple(pub StyleType, pub SliderType);
+
+impl From<SliderStyleTuple> for iced::theme::Slider {
+    fn from(tuple: SliderStyleTuple) -> Self {
         iced::theme::Slider::Custom(Box::new(tuple))
     }
 }
 
-impl iced::widget::slider::StyleSheet for StyleTuple {
+impl iced::widget::slider::StyleSheet for SliderStyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> Appearance {

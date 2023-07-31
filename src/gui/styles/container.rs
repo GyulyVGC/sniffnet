@@ -4,60 +4,76 @@ use iced::widget::container::Appearance;
 use iced::Theme;
 use iced::{Background, Color};
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::{
     get_color_mix_filter_badge, BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
 };
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Container {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum ContainerType {
+    Standard,
+    Headers,
+    BorderedRound,
+    BorderedRoundSelected,
+    Tooltip,
+    Badge,
+    Palette,
+    Neutral,
+    Alert,
+}
+
+#[derive(Clone)]
+pub struct ContainerStyleTuple(pub StyleType, pub ContainerType);
+
+impl From<ContainerStyleTuple> for iced::theme::Container {
+    fn from(tuple: ContainerStyleTuple) -> Self {
         iced::theme::Container::Custom(Box::new(tuple))
     }
 }
 
-impl iced::widget::container::StyleSheet for StyleTuple {
+impl iced::widget::container::StyleSheet for ContainerStyleTuple {
     type Style = Theme;
 
     fn appearance(&self, _: &Self::Style) -> Appearance {
         let colors = get_colors(self.0);
         Appearance {
             text_color: Some(match self {
-                StyleTuple(_, ElementType::Headers) => colors.text_headers,
+                ContainerStyleTuple(_, ContainerType::Headers) => colors.text_headers,
                 _ => colors.text_body,
             }),
             background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::Headers) => colors.secondary,
-                StyleTuple(_, ElementType::Tooltip) => colors.buttons,
-                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
-                StyleTuple(_, ElementType::Neutral | ElementType::Palette) => Color::TRANSPARENT,
-                StyleTuple(_, ElementType::Badge) => Color {
+                ContainerStyleTuple(_, ContainerType::Headers) => colors.secondary,
+                ContainerStyleTuple(_, ContainerType::Tooltip) => colors.buttons,
+                ContainerStyleTuple(_, ContainerType::BorderedRound) => colors.round_containers,
+                ContainerStyleTuple(_, ContainerType::Neutral | ContainerType::Palette) => {
+                    Color::TRANSPARENT
+                }
+                ContainerStyleTuple(_, ContainerType::Badge) => Color {
                     a: get_color_mix_filter_badge(self.0),
                     ..colors.secondary
                 },
                 _ => colors.primary,
             })),
             border_radius: match self {
-                StyleTuple(_, ElementType::BorderedRound | ElementType::Alert) => {
+                ContainerStyleTuple(_, ContainerType::BorderedRound | ContainerType::Alert) => {
                     BORDER_ROUNDED_RADIUS.into()
                 }
-                StyleTuple(_, ElementType::Tooltip) => 7.0.into(),
-                StyleTuple(_, ElementType::Badge) => 100.0.into(),
+                ContainerStyleTuple(_, ContainerType::Tooltip) => 7.0.into(),
+                ContainerStyleTuple(_, ContainerType::Badge) => 100.0.into(),
                 _ => 0.0.into(),
             },
             border_width: match self {
-                StyleTuple(
+                ContainerStyleTuple(
                     _,
-                    ElementType::Standard | ElementType::Headers | ElementType::Neutral,
+                    ContainerType::Standard | ContainerType::Headers | ContainerType::Neutral,
                 ) => 0.0,
-                StyleTuple(_, ElementType::Tooltip) => BORDER_WIDTH / 2.0,
-                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
+                ContainerStyleTuple(_, ContainerType::Tooltip) => BORDER_WIDTH / 2.0,
+                ContainerStyleTuple(_, ContainerType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
-                StyleTuple(_, ElementType::Palette) => Color::BLACK,
+                ContainerStyleTuple(_, ContainerType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
+                ContainerStyleTuple(_, ContainerType::Palette) => Color::BLACK,
                 _ => colors.round_borders,
             },
         }

@@ -9,9 +9,10 @@ use iced_widget::{button, horizontal_space, lazy, vertical_space, Rule};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::rule::{RuleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -127,8 +128,8 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
         .height(Length::Fixed(500.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -157,15 +158,18 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Tooltip),
-                    )),
+                    .style(<ContainerStyleTuple as Into<
+                        iced::theme::Container,
+                    >>::into(ContainerStyleTuple(
+                        style,
+                        ContainerType::Tooltip,
+                    ))),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -175,8 +179,8 @@ fn page_header(style: StyleType, language: Language) -> Container<'static, Messa
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Headers),
     ))
 }
 
@@ -244,10 +248,10 @@ fn get_host_info_col(
 ) -> Column<'static, Message> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
-        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(<StyleTuple as Into<
+        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(<RuleTuple as Into<
             iced::theme::Rule,
         >>::into(
-            StyleTuple(style, ElementType::Standard),
+            RuleTuple(style, RuleType::Standard),
         )));
     }
     if r_dns.parse::<IpAddr>().is_err() {
@@ -314,9 +318,10 @@ fn get_src_or_dest_col(
                 .align_x(Horizontal::Center),
         )
         .push(
-            Rule::horizontal(10.0).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                StyleTuple(style, ElementType::Standard),
-            )),
+            Rule::horizontal(10.0).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
+                style,
+                RuleType::Standard,
+            ))),
         )
         .push(
             Text::new(format!(
@@ -346,8 +351,8 @@ fn assemble_widgets(
         Container::new(col)
             .padding(10)
             .width(Length::Fill)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::BorderedRound),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(style, ContainerType::BorderedRound),
             ))
     });
     Row::new()

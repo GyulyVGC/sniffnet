@@ -7,9 +7,9 @@ use crate::gui::components::radio::language_radios;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::translations::translations::languages_title_translation;
 use crate::{Language, Sniffer};
@@ -56,7 +56,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Fixed(15.0)))
         .push(
             languages_title_translation(sniffer.language)
-                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -69,8 +69,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
             )
             .padding(10.0)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::Badge),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(sniffer.style, ContainerType::Badge),
             )),
         );
     }
@@ -78,7 +78,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }

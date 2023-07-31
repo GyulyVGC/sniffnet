@@ -4,9 +4,9 @@ use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 
@@ -88,12 +88,12 @@ fn new_tab(
             Text::new(icon)
                 .font(ICONS)
                 .size(15)
-                .style(StyleTuple(
+                .style(TextStyleTuple(
                     style,
                     if active {
-                        ElementType::Title
+                        TextType::Title
                     } else {
-                        ElementType::Standard
+                        TextType::Standard
                     },
                 ))
                 .horizontal_alignment(alignment::Horizontal::Center)
@@ -103,12 +103,12 @@ fn new_tab(
             Text::new(label)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(StyleTuple(
+                .style(TextStyleTuple(
                     style,
                     if active {
-                        ElementType::Title
+                        TextType::Title
                     } else {
-                        ElementType::Standard
+                        TextType::Standard
                     },
                 ))
                 .horizontal_alignment(alignment::Horizontal::Center)
@@ -126,7 +126,7 @@ fn new_tab(
             )
             .padding(4)
             .height(Length::Fixed(20.0))
-            .style(StyleTuple(style, ElementType::Badge).into());
+            .style(ButtonStyleTuple(style, ButtonType::Badge).into());
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
@@ -139,12 +139,12 @@ fn new_tab(
         .height(Length::Fixed(35.0))
         .width(Length::FillPortion(1))
         .style(
-            StyleTuple(
+            ButtonStyleTuple(
                 style,
                 if active {
-                    ElementType::TabActive
+                    ButtonType::TabActive
                 } else {
-                    ElementType::TabInactive
+                    ButtonType::TabInactive
                 },
             )
             .into(),

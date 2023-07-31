@@ -13,9 +13,9 @@ use iced::{
 };
 use iced_widget::tooltip::Position;
 
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
@@ -50,8 +50,8 @@ pub fn get_exit_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Standard),
         ))
 }
 
@@ -82,8 +82,8 @@ pub fn get_clear_all_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Standard),
         ))
 }
 
@@ -117,15 +117,18 @@ fn get_modal_header(
                         .padding(2)
                         .height(Length::Fixed(20.0))
                         .width(Length::Fixed(20.0))
-                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Tooltip),
-                    )),
+                    .style(<ContainerStyleTuple as Into<
+                        iced::theme::Container,
+                    >>::into(ContainerStyleTuple(
+                        style,
+                        ContainerType::Tooltip,
+                    ))),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -135,8 +138,8 @@ fn get_modal_header(
     .align_y(Vertical::Center)
     .height(Length::Fixed(40.0))
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Headers),
     ))
 }
 
@@ -159,7 +162,7 @@ fn confirm_button_row(
             .padding(5)
             .height(Length::Fixed(40.0))
             .width(Length::Fixed(80.0))
-            .style(StyleTuple(style, ElementType::Alert).into())
+            .style(ButtonStyleTuple(style, ButtonType::Alert).into())
             .on_press(message),
         )
 }

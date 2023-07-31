@@ -2,6 +2,8 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#![allow(clippy::module_name_repetitions, clippy::too_many_lines)]
+
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 

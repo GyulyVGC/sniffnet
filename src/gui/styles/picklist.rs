@@ -5,17 +5,24 @@ use std::rc::Rc;
 use iced::widget::pick_list;
 use iced::Background;
 
-use crate::get_colors;
 use crate::gui::styles::types::palette::mix_colors;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::PickList {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum PicklistType {
+    Standard,
+}
+
+#[derive(Clone)]
+pub struct PicklistStyleTuple(pub StyleType, pub PicklistType);
+
+impl From<PicklistStyleTuple> for iced::theme::PickList {
+    fn from(tuple: PicklistStyleTuple) -> Self {
         iced::theme::PickList::Custom(Rc::new(tuple.clone()), Rc::new(tuple))
     }
 }
 
-impl iced::overlay::menu::StyleSheet for StyleTuple {
+impl iced::overlay::menu::StyleSheet for PicklistStyleTuple {
     type Style = iced::Theme;
 
     fn appearance(&self, _: &Self::Style) -> iced::overlay::menu::Appearance {
@@ -32,7 +39,7 @@ impl iced::overlay::menu::StyleSheet for StyleTuple {
     }
 }
 
-impl pick_list::StyleSheet for StyleTuple {
+impl pick_list::StyleSheet for PicklistStyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> pick_list::Appearance {

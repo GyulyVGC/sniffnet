@@ -19,9 +19,8 @@ use crate::countries::flags_pictures::{
     UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::get_font;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
@@ -44,7 +43,6 @@ pub fn get_country(address_to_lookup: &str, country_db_reader: &Reader<&[u8]>) -
     Country::ZZ // unknown
 }
 
-#[allow(clippy::too_many_lines)]
 fn get_flag_from_country(
     country: Country,
     width: f32,
@@ -66,7 +64,7 @@ fn get_flag_from_country(
         Country::AR => AR,
         Country::AS => AS,
         Country::AT => AT,
-        Country::AU => AU,
+        Country::AU | Country::HM => AU,
         Country::AW => AW,
         Country::AX => AX,
         Country::AZ => AZ,
@@ -79,11 +77,9 @@ fn get_flag_from_country(
         Country::BH => BH,
         Country::BI => BI,
         Country::BJ => BJ,
-        Country::BL => FR,
         Country::BM => BM,
         Country::BN => BN,
         Country::BO => BO,
-        Country::BQ => NL,
         Country::BR => BR,
         Country::BS => BS,
         Country::BT => BT,
@@ -128,19 +124,26 @@ fn get_flag_from_country(
         Country::FK => FK,
         Country::FM => FM,
         Country::FO => FO,
-        Country::FR => FR,
+        Country::FR
+        | Country::BL
+        | Country::GF
+        | Country::GP
+        | Country::MF
+        | Country::MQ
+        | Country::PM
+        | Country::RE
+        | Country::WF
+        | Country::YT => FR,
         Country::GA => GA,
         Country::GB => GB,
         Country::GD => GD,
         Country::GE => GE,
-        Country::GF => FR,
         Country::GG => GG,
         Country::GH => GH,
         Country::GI => GI,
         Country::GL => GL,
         Country::GM => GM,
         Country::GN => GN,
-        Country::GP => FR,
         Country::GQ => GQ,
         Country::GR => GR,
         Country::GS => GS,
@@ -149,7 +152,6 @@ fn get_flag_from_country(
         Country::GW => GW,
         Country::GY => GY,
         Country::HK => HK,
-        Country::HM => AU,
         Country::HN => HN,
         Country::HR => HR,
         Country::HT => HT,
@@ -194,7 +196,6 @@ fn get_flag_from_country(
         Country::MC => MC,
         Country::MD => MD,
         Country::ME => ME,
-        Country::MF => FR,
         Country::MG => MG,
         Country::MH => MH,
         Country::MK => MK,
@@ -203,7 +204,6 @@ fn get_flag_from_country(
         Country::MN => MN,
         Country::MO => MO,
         Country::MP => MP,
-        Country::MQ => FR,
         Country::MR => MR,
         Country::MS => MS,
         Country::MT => MT,
@@ -219,8 +219,8 @@ fn get_flag_from_country(
         Country::NF => NF,
         Country::NG => NG,
         Country::NI => NI,
-        Country::NL => NL,
-        Country::NO => NO,
+        Country::NL | Country::BQ => NL,
+        Country::NO | Country::SJ => NO,
         Country::NP => NP,
         Country::NR => NR,
         Country::NU => NU,
@@ -233,7 +233,6 @@ fn get_flag_from_country(
         Country::PH => PH,
         Country::PK => PK,
         Country::PL => PL,
-        Country::PM => FR,
         Country::PN => PN,
         Country::PR => PR,
         Country::PS => PS,
@@ -241,7 +240,6 @@ fn get_flag_from_country(
         Country::PW => PW,
         Country::PY => PY,
         Country::QA => QA,
-        Country::RE => FR,
         Country::RO => RO,
         Country::RS => RS,
         Country::RU => RU,
@@ -254,7 +252,6 @@ fn get_flag_from_country(
         Country::SG => SG,
         Country::SH => SH,
         Country::SI => SI,
-        Country::SJ => NO,
         Country::SK => SK,
         Country::SL => SL,
         Country::SM => SM,
@@ -285,8 +282,7 @@ fn get_flag_from_country(
         Country::TZ => TZ,
         Country::UA => UA,
         Country::UG => UG,
-        Country::UM => US,
-        Country::US => US,
+        Country::US | Country::UM => US,
         Country::UY => UY,
         Country::UZ => UZ,
         Country::VA => VA,
@@ -296,10 +292,8 @@ fn get_flag_from_country(
         Country::VI => VI,
         Country::VN => VN,
         Country::VU => VU,
-        Country::WF => FR,
         Country::WS => WS,
         Country::YE => YE,
-        Country::YT => FR,
         Country::ZA => ZA,
         Country::ZM => ZM,
         Country::ZW => ZW,
@@ -339,8 +333,8 @@ pub fn get_flag_tooltip(
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(get_font(style))
         .snap_within_viewport(true)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ));
 
     if width == FLAGS_WIDTH_SMALL {
@@ -377,7 +371,7 @@ pub fn get_computer_tooltip(
     Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(get_font(style))
         .snap_within_viewport(true)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }

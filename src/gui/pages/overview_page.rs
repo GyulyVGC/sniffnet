@@ -13,9 +13,12 @@ use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::rule::{RuleTuple, RuleType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
@@ -109,12 +112,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                 .push(
                                     traffic_rate_translation(sniffer.language)
                                         .font(font)
-                                        .style(StyleTuple(sniffer.style, ElementType::Title))
+                                        .style(TextStyleTuple(sniffer.style, TextType::Title))
                                         .size(FONT_SIZE_TITLE),
                                 )
                                 .push(
                                     Text::new(chart_info_string)
-                                        .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                                        .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                                         .font(font),
                                 ),
                         )
@@ -123,9 +126,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(sniffer.style, ElementType::BorderedRound),
-                ));
+                .style(
+                    <ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                        ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
+                    ),
+                );
 
                 let col_info = lazy(
                     (
@@ -164,9 +169,14 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     .padding([10, 5, 5, 5])
                                     .height(Length::Fill)
                                     .align_x(Horizontal::Center)
-                                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                                        StyleTuple(sniffer.style, ElementType::BorderedRound),
-                                    )),
+                                    .style(
+                                        <ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                                            ContainerStyleTuple(
+                                                sniffer.style,
+                                                ContainerType::BorderedRound,
+                                            ),
+                                        ),
+                                    ),
                             )
                             .push(col_chart),
                     )
@@ -189,8 +199,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -293,9 +303,9 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     row_report = row_report
         .push(col_host)
         .push(
-            Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+            Rule::vertical(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
                 sniffer.style,
-                ElementType::Standard,
+                RuleType::Standard,
             ))),
         )
         .push(col_app);
@@ -304,8 +314,8 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         Container::new(row_report)
             .height(Length::Fill)
             .width(Length::Fixed(1170.0))
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::BorderedRound),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
             )),
     )
 }
@@ -319,7 +329,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .push(
             Text::new(host_translation(sniffer.language))
                 .font(font)
-                .style(StyleTuple(sniffer.style, ElementType::Title))
+                .style(TextStyleTuple(sniffer.style, TextType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
@@ -348,12 +358,12 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
         .width(Length::Fixed(FLAGS_WIDTH_BIG))
         .style(
-            StyleTuple(
+            ButtonStyleTuple(
                 sniffer.style,
                 if data_info_host.is_favorite {
-                    ElementType::Starred
+                    ButtonType::Starred
                 } else {
-                    ElementType::NotStarred
+                    ButtonType::NotStarred
                 },
             )
             .into(),
@@ -401,10 +411,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Incoming),
+                                RuleTuple(sniffer.style, RuleType::Incoming),
                             )))
                     } else {
                         Row::new()
@@ -413,10 +423,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                                RuleTuple(sniffer.style, RuleType::Outgoing),
                             )))
                     } else {
                         Row::new()
@@ -446,7 +456,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     as_name: host.asn.name.clone(),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
         );
     }
 
@@ -461,9 +471,9 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
     col_host = col_host.push(
         Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
-            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
+            <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                 sniffer.style,
-                ElementType::Standard,
+                ScrollbarType::Standard,
             )),
         ),
     );
@@ -480,7 +490,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
-                .style(StyleTuple(sniffer.style, ElementType::Title))
+                .style(TextStyleTuple(sniffer.style, TextType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
@@ -533,10 +543,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Incoming),
+                                RuleTuple(sniffer.style, RuleType::Incoming),
                             )))
                     } else {
                         Row::new()
@@ -545,10 +555,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                StyleTuple(sniffer.style, ElementType::Outgoing),
+                                RuleTuple(sniffer.style, RuleType::Outgoing),
                             )))
                     } else {
                         Row::new()
@@ -562,14 +572,14 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     app: format!("{app:?}"),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
         );
     }
     col_app = col_app.push(
         Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
-            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
+            <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                 sniffer.style,
-                ElementType::Standard,
+                ScrollbarType::Standard,
             )),
         ),
     );
@@ -621,29 +631,33 @@ fn lazy_col_info(
                 .push(
                     Scrollable::new(col_device_filters)
                         .width(Length::FillPortion(1))
-                        .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
-                        )),
+                        .style(
+                            <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
+                                ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
+                            ),
+                        ),
                 )
                 .push(
-                    Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
+                    Rule::vertical(25).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                        RuleTuple(sniffer.style, RuleType::Standard),
                     )),
                 )
                 .push(col_data_representation),
         )
         .push(
-            Rule::horizontal(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
+            Rule::horizontal(25).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
                 sniffer.style,
-                ElementType::Standard,
+                RuleType::Standard,
             ))),
         )
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
-                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
-                )),
+                .style(
+                    <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
+                        ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
+                    ),
+                ),
         )
 }
 
@@ -666,7 +680,7 @@ fn col_device_filters(
         .push(
             Text::new(format!("{}:", network_adapter_translation(language),))
                 .font(font)
-                .style(StyleTuple(style, ElementType::Subtitle)),
+                .style(TextStyleTuple(style, TextType::Subtitle)),
         )
         .push(Text::new(format!("   {adapter_info}",)).font(font))
         .push(vertical_space(15))
@@ -683,7 +697,7 @@ fn col_data_representation(
         .width(Length::FillPortion(1))
         .push(
             Text::new(format!("{}:", data_representation_translation(language)))
-                .style(StyleTuple(style, ElementType::Subtitle))
+                .style(TextStyleTuple(style, TextType::Subtitle))
                 .font(font),
         )
         .push(chart_radios(chart_type, font, style, language))
@@ -714,7 +728,7 @@ fn col_bytes_packets(
             Column::new()
                 .push(
                     Text::new(format!("{}:", filtered_bytes_translation(language)))
-                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .style(TextStyleTuple(style, TextType::Subtitle))
                         .font(font),
                 )
                 .push(
@@ -740,7 +754,7 @@ fn col_bytes_packets(
             Column::new()
                 .push(
                     Text::new(format!("{}:", filtered_packets_translation(language)))
-                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .style(TextStyleTuple(style, TextType::Subtitle))
                         .font(font),
                 )
                 .push(
@@ -756,7 +770,7 @@ fn col_bytes_packets(
             Column::new()
                 .push(
                     Text::new(format!("{}:", dropped_packets_translation(language)))
-                        .style(StyleTuple(style, ElementType::Subtitle))
+                        .style(TextStyleTuple(style, TextType::Subtitle))
                         .font(font),
                 )
                 .push(Text::new(dropped_val).font(font)),

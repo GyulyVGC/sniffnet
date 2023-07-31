@@ -272,7 +272,6 @@ impl fmt::Display for Country {
 }
 
 impl Country {
-    #[allow(clippy::too_many_lines)]
     pub fn from_str(code: &str) -> Self {
         match code {
             "AD" => Country::AD,

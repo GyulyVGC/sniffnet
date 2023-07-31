@@ -13,11 +13,16 @@ use crate::gui::components::radio::{
 };
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::checkbox::{CheckboxStyleTuple, CheckboxType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
+use crate::gui::styles::slider::{SliderStyleTuple, SliderType};
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
 };
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text_input::{TextInputStyleTuple, TextInputType};
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
@@ -54,7 +59,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
-                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
@@ -89,9 +94,12 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.style,
                     )),
             )
-            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .style(
+                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
+                    sniffer.style,
+                    ScrollbarType::Standard,
+                )),
+            ),
         );
 
     content = content.push(volume_notification_col);
@@ -99,8 +107,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -135,8 +143,8 @@ fn get_packets_notify(
     )
     .size(18)
     .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(style, ElementType::Standard),
+    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
+        CheckboxStyleTuple(style, CheckboxType::Standard),
     ));
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
@@ -146,8 +154,8 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     } else {
@@ -172,8 +180,8 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     }
@@ -210,8 +218,8 @@ fn get_bytes_notify(
     )
     .size(18)
     .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(style, ElementType::Standard),
+    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
+        CheckboxStyleTuple(style, CheckboxType::Standard),
     ));
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
@@ -221,8 +229,8 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     } else {
@@ -247,8 +255,8 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     }
@@ -276,8 +284,8 @@ fn get_favorite_notify(
     )
     .size(18)
     .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(style, ElementType::Standard),
+    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
+        CheckboxStyleTuple(style, CheckboxType::Standard),
     ));
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
@@ -296,8 +304,8 @@ fn get_favorite_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     } else {
@@ -305,8 +313,8 @@ fn get_favorite_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(style, ContainerType::BorderedRound),
                 )),
         )
     }
@@ -341,8 +349,8 @@ fn input_group_packets(
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
-            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-                StyleTuple(style, ElementType::Standard),
+            .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
+                TextInputStyleTuple(style, TextInputType::Standard),
             )),
         )
         .push(
@@ -386,8 +394,8 @@ fn input_group_bytes(
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
-            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-                StyleTuple(style, ElementType::Standard),
+            .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
+                TextInputStyleTuple(style, TextInputType::Standard),
             )),
         )
         .push(
@@ -421,10 +429,9 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
                         Slider::new(0..=100, volume, Message::ChangeVolume)
                             .step(5)
                             .width(Fixed(200.0))
-                            .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
-                                style,
-                                ElementType::Standard,
-                            ))),
+                            .style(<SliderStyleTuple as Into<iced::theme::Slider>>::into(
+                                SliderStyleTuple(style, SliderType::Standard),
+                            )),
                     )
                     .push(horizontal_space(Length::Fixed(15.0)))
                     .push(
@@ -468,15 +475,18 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
                         .on_press(Message::CloseSettings),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Tooltip),
-                    )),
+                    .style(<ContainerStyleTuple as Into<
+                        iced::theme::Container,
+                    >>::into(ContainerStyleTuple(
+                        style,
+                        ContainerType::Tooltip,
+                    ))),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -486,7 +496,7 @@ pub fn settings_header(style: StyleType, language: Language) -> Container<'stati
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Headers),
     ))
 }

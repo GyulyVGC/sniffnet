@@ -5,8 +5,7 @@ use iced::widget::{Column, Text};
 use iced::Color;
 
 use crate::gui::styles::style_constants::get_font;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -42,7 +41,7 @@ pub fn get_active_filters_col(
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
-            .style(StyleTuple(style, ElementType::Subtitle)),
+            .style(TextStyleTuple(style, TextType::Subtitle)),
     );
     if filters.ip.eq(&IpVersion::Other)
         && filters.application.eq(&AppProtocol::Other)

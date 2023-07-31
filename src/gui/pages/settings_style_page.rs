@@ -6,9 +6,11 @@ use iced_widget::{horizontal_space, vertical_space, Rule};
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::rule::{RuleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
@@ -42,7 +44,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Length::Fixed(15.0)))
         .push(
             appearance_title_translation(sniffer.language)
-                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -84,8 +86,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Length::Fixed(400.0))
         .width(Length::Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -109,12 +111,12 @@ fn get_palette_container(
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
-            StyleTuple(
+            ButtonStyleTuple(
                 style,
                 if on_press.eq(&style) {
-                    ElementType::BorderedRoundSelected
+                    ButtonType::BorderedRoundSelected
                 } else {
-                    ElementType::BorderedRound
+                    ButtonType::BorderedRound
                 },
             )
             .into(),
@@ -127,23 +129,23 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
         Row::new()
             .padding(0)
             .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PalettePrimary),
+                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                    RuleTuple(style, RuleType::PalettePrimary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteSecondary),
+                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                    RuleTuple(style, RuleType::PaletteSecondary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteOutgoing),
+                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                    RuleTuple(style, RuleType::PaletteOutgoing),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteButtons),
+                Rule::horizontal(50).style(<RuleTuple as Into<iced::theme::Rule>>::into(
+                    RuleTuple(style, RuleType::PaletteButtons),
                 )),
             )),
     )
@@ -151,7 +153,7 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
     .height(50.0 + 1.7 * BORDER_WIDTH)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Palette),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Palette),
     ))
 }

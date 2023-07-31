@@ -4,17 +4,24 @@ use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::Theme;
 use iced::{Background, Color};
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Scrollable {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum ScrollbarType {
+    Standard,
+}
+
+#[derive(Clone)]
+pub struct ScrollbarStyleTuple(pub StyleType, pub ScrollbarType);
+
+impl From<ScrollbarStyleTuple> for iced::theme::Scrollable {
+    fn from(tuple: ScrollbarStyleTuple) -> Self {
         iced::theme::Scrollable::Custom(Box::new(tuple))
     }
 }
 
-impl iced::widget::scrollable::StyleSheet for StyleTuple {
+impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
     type Style = Theme;
 
     fn active(&self, _: &Self::Style) -> Scrollbar {

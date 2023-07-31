@@ -4,68 +4,86 @@ use iced::widget::button;
 use iced::widget::button::Appearance;
 use iced::{Background, Color, Vector};
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::{get_starred_color, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
-use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::palette::mix_colors;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Button {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum ButtonType {
+    Standard,
+    BorderedRound,
+    BorderedRoundSelected,
+    TabActive,
+    TabInactive,
+    Starred,
+    NotStarred,
+    Neutral,
+    Alert,
+    Badge,
+}
+
+#[derive(Clone)]
+pub struct ButtonStyleTuple(pub StyleType, pub ButtonType);
+
+impl From<ButtonStyleTuple> for iced::theme::Button {
+    fn from(tuple: ButtonStyleTuple) -> Self {
         iced::theme::Button::Custom(Box::new(tuple))
     }
 }
 
-impl button::StyleSheet for StyleTuple {
+impl button::StyleSheet for ButtonStyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> button::Appearance {
         let colors = get_colors(self.0);
         button::Appearance {
             background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::TabActive) => colors.primary,
-                StyleTuple(_, ElementType::Starred) => get_starred_color(self.0),
-                StyleTuple(_, ElementType::Badge) => colors.secondary,
-                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
-                StyleTuple(_, ElementType::Neutral | ElementType::NotStarred) => Color::TRANSPARENT,
-                StyleTuple(_, ElementType::BorderedRoundSelected) => {
+                ButtonStyleTuple(_, ButtonType::TabActive) => colors.primary,
+                ButtonStyleTuple(_, ButtonType::Starred) => get_starred_color(self.0),
+                ButtonStyleTuple(_, ButtonType::Badge) => colors.secondary,
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => colors.round_containers,
+                ButtonStyleTuple(_, ButtonType::Neutral | ButtonType::NotStarred) => {
+                    Color::TRANSPARENT
+                }
+                ButtonStyleTuple(_, ButtonType::BorderedRoundSelected) => {
                     mix_colors(colors.primary, colors.buttons)
                 }
                 _ => colors.buttons,
             })),
             border_radius: match self {
-                StyleTuple(
+                ButtonStyleTuple(
                     _,
-                    ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
+                    ButtonType::TabActive | ButtonType::TabInactive | ButtonType::Neutral,
                 ) => 0.0.into(),
-                StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
-                    12.0.into()
-                }
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0.into(),
+                ButtonStyleTuple(
+                    _,
+                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected,
+                ) => 12.0.into(),
+                ButtonStyleTuple(_, ButtonType::Starred | ButtonType::NotStarred) => 100.0.into(),
                 _ => BORDER_BUTTON_RADIUS.into(),
             },
             border_width: match self {
-                StyleTuple(
+                ButtonStyleTuple(
                     _,
-                    ElementType::TabActive
-                    | ElementType::TabInactive
-                    | ElementType::Starred
-                    | ElementType::NotStarred
-                    | ElementType::Neutral
-                    | ElementType::Badge,
+                    ButtonType::TabActive
+                    | ButtonType::TabInactive
+                    | ButtonType::Starred
+                    | ButtonType::NotStarred
+                    | ButtonType::Neutral
+                    | ButtonType::Badge,
                 ) => 0.0,
-                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
-                StyleTuple(_, ElementType::Starred) => Color::BLACK,
-                StyleTuple(_, ElementType::Badge) => colors.text_headers,
+                ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
+                ButtonStyleTuple(_, ButtonType::Badge) => colors.text_headers,
                 _ => colors.text_body,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
-                StyleTuple(_, ElementType::BorderedRound) => colors.round_borders,
+                ButtonStyleTuple(_, ButtonType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => colors.round_borders,
                 _ => colors.secondary,
             },
         }
@@ -75,45 +93,46 @@ impl button::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         button::Appearance {
             shadow_offset: match self.1 {
-                ElementType::Neutral => Vector::default(),
+                ButtonType::Neutral => Vector::default(),
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::Starred) => get_starred_color(self.0),
-                StyleTuple(_, ElementType::TabActive) => colors.primary,
+                ButtonStyleTuple(_, ButtonType::Starred) => get_starred_color(self.0),
+                ButtonStyleTuple(_, ButtonType::TabActive) => colors.primary,
                 _ => mix_colors(colors.primary, colors.buttons),
             })),
             border_radius: match self {
-                StyleTuple(
+                ButtonStyleTuple(
                     _,
-                    ElementType::TabActive | ElementType::TabInactive | ElementType::Neutral,
+                    ButtonType::TabActive | ButtonType::TabInactive | ButtonType::Neutral,
                 ) => 0.0.into(),
-                StyleTuple(_, ElementType::BorderedRound | ElementType::BorderedRoundSelected) => {
-                    12.0.into()
-                }
-                StyleTuple(_, ElementType::Starred | ElementType::NotStarred) => 100.0.into(),
+                ButtonStyleTuple(
+                    _,
+                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected,
+                ) => 12.0.into(),
+                ButtonStyleTuple(_, ButtonType::Starred | ButtonType::NotStarred) => 100.0.into(),
                 _ => BORDER_BUTTON_RADIUS.into(),
             },
             border_width: match self {
-                StyleTuple(
+                ButtonStyleTuple(
                     _,
-                    ElementType::Starred
-                    | ElementType::TabActive
-                    | ElementType::TabInactive
-                    | ElementType::BorderedRound,
+                    ButtonType::Starred
+                    | ButtonType::TabActive
+                    | ButtonType::TabInactive
+                    | ButtonType::BorderedRound,
                 ) => 0.0,
                 _ => BORDER_WIDTH,
             },
             border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
-                StyleTuple(
+                ButtonStyleTuple(_, ButtonType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
+                ButtonStyleTuple(
                     _,
-                    ElementType::BorderedRound | ElementType::Neutral | ElementType::NotStarred,
+                    ButtonType::BorderedRound | ButtonType::Neutral | ButtonType::NotStarred,
                 ) => colors.round_borders,
                 _ => colors.secondary,
             },
             text_color: match self {
-                StyleTuple(_, ElementType::Starred) => Color::BLACK,
+                ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
                 _ => colors.text_body,
             },
         }
