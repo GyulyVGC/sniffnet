@@ -1,4 +1,4 @@
-use iced::alignment::Horizontal;
+use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
@@ -520,6 +520,7 @@ fn button_clear_filter(
     button(
         Text::new("×")
             .font(font)
+            .vertical_alignment(Vertical::Center)
             .horizontal_alignment(Horizontal::Center)
             .size(15),
     )

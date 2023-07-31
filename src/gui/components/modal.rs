@@ -16,6 +16,7 @@ use iced_widget::tooltip::Position;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
@@ -25,7 +26,7 @@ use crate::{Language, StyleType};
 
 pub fn get_exit_overlay(
     style: StyleType,
-    use_gradients: bool,
+    color_gradient: GradientType,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
@@ -37,7 +38,7 @@ pub fn get_exit_overlay(
         .width(Length::Fill)
         .push(get_modal_header(
             style,
-            use_gradients,
+            color_gradient,
             language,
             quit_analysis_translation(language),
         ))
@@ -59,7 +60,7 @@ pub fn get_exit_overlay(
 
 pub fn get_clear_all_overlay(
     style: StyleType,
-    use_gradients: bool,
+    color_gradient: GradientType,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
@@ -71,7 +72,7 @@ pub fn get_clear_all_overlay(
         .width(Length::Fill)
         .push(get_modal_header(
             style,
-            use_gradients,
+            color_gradient,
             language,
             clear_all_translation(language),
         ))
@@ -93,7 +94,7 @@ pub fn get_clear_all_overlay(
 
 fn get_modal_header(
     style: StyleType,
-    use_gradients: bool,
+    color_gradient: GradientType,
     language: Language,
     title: String,
 ) -> Container<'static, Message> {
@@ -116,6 +117,7 @@ fn get_modal_header(
                         button(
                             Text::new("×")
                                 .font(font)
+                                .vertical_alignment(Vertical::Center)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
@@ -144,14 +146,7 @@ fn get_modal_header(
     .height(Length::Fixed(40.0))
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(
-            style,
-            if use_gradients {
-                ContainerType::GradientHeader
-            } else {
-                ContainerType::Headers
-            },
-        ),
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
     ))
 }
 

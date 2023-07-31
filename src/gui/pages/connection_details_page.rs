@@ -13,6 +13,7 @@ use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -60,9 +61,11 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         .cloned();
     drop(info_traffic_lock);
 
-    let header_and_content = Column::new()
-        .width(Length::Fill)
-        .push(page_header(sniffer.style, sniffer.use_gradients, sniffer.language));
+    let header_and_content = Column::new().width(Length::Fill).push(page_header(
+        sniffer.style,
+        sniffer.color_gradient,
+        sniffer.language,
+    ));
 
     let mut source_caption = Row::new().spacing(10).push(
         Text::new(source_translation(sniffer.language))
@@ -133,7 +136,11 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         ))
 }
 
-fn page_header(style: StyleType, use_gradients: bool, language: Language) -> Container<'static, Message> {
+fn page_header(
+    style: StyleType,
+    color_gradient: GradientType,
+    language: Language,
+) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     Container::new(
@@ -152,6 +159,7 @@ fn page_header(style: StyleType, use_gradients: bool, language: Language) -> Con
                         button(
                             Text::new("×")
                                 .font(font)
+                                .vertical_alignment(Vertical::Center)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
@@ -180,14 +188,7 @@ fn page_header(style: StyleType, use_gradients: bool, language: Language) -> Con
     .height(Fixed(40.0))
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(
-            style,
-            if use_gradients {
-                ContainerType::GradientHeader
-            } else {
-                ContainerType::Headers
-            },
-        ),
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
     ))
 }
 

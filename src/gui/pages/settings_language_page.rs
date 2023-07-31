@@ -36,7 +36,11 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.use_gradients, sniffer.language))
+        .push(settings_header(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,

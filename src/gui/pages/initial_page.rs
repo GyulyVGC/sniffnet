@@ -18,6 +18,7 @@ use crate::gui::styles::picklist::{PicklistStyleTuple, PicklistType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::translations::translations::{
@@ -48,7 +49,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(button_start(sniffer.style, sniffer.language))
+        .push(button_start(
+            sniffer.style,
+            sniffer.language,
+            sniffer.color_gradient,
+        ))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -115,7 +120,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         ))
 }
 
-fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn button_start(
+    style: StyleType,
+    language: Language,
+    color_gradient: GradientType,
+) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)
@@ -126,7 +135,7 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(ButtonStyleTuple(style, ButtonType::GradientAccent).into())
+    .style(ButtonStyleTuple(style, ButtonType::Gradient(color_gradient)).into())
     .on_press(Message::Start);
 
     let tooltip = start_translation(language).to_string();

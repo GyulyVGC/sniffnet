@@ -68,14 +68,14 @@ impl Application for Sniffer {
         let header = match status {
             Status::Init => header(
                 style,
-                self.use_gradients,
+                self.color_gradient,
                 false,
                 self.language,
                 self.last_opened_setting,
             ),
             Status::Running => header(
                 style,
-                self.use_gradients,
+                self.color_gradient,
                 true,
                 self.language,
                 self.last_opened_setting,
@@ -91,7 +91,12 @@ impl Application for Sniffer {
             },
         };
 
-        let footer = footer(self.language, self.use_gradients, style, &self.newer_release_available.clone());
+        let footer = footer(
+            self.language,
+            self.color_gradient,
+            style,
+            &self.newer_release_available.clone(),
+        );
 
         let content = Column::new().push(header).push(body).push(footer);
 
@@ -113,8 +118,12 @@ impl Application for Sniffer {
             }
             Some(modal) => {
                 let overlay = match modal {
-                    MyModal::Quit => get_exit_overlay(style, self.use_gradients, font, self.language),
-                    MyModal::ClearAll => get_clear_all_overlay(style, self.use_gradients, font, self.language),
+                    MyModal::Quit => {
+                        get_exit_overlay(style, self.color_gradient, font, self.language)
+                    }
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(style, self.color_gradient, font, self.language)
+                    }
                     MyModal::ConnectionDetails(connection_index) => {
                         connection_details_page(self, connection_index)
                     }

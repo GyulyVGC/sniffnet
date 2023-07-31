@@ -23,6 +23,7 @@ use crate::gui::styles::style_constants::{
 };
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::text_input::{TextInputStyleTuple, TextInputType};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
@@ -38,7 +39,11 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let mut content = Column::new()
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.use_gradients, sniffer.language))
+        .push(settings_header(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -449,7 +454,11 @@ fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<
     .align_y(Vertical::Center)
 }
 
-pub fn settings_header(style: StyleType, use_gradients: bool, language: Language) -> Container<'static, Message> {
+pub fn settings_header(
+    style: StyleType,
+    color_gradient: GradientType,
+    language: Language,
+) -> Container<'static, Message> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
@@ -469,6 +478,7 @@ pub fn settings_header(style: StyleType, use_gradients: bool, language: Language
                         button(
                             Text::new("×")
                                 .font(font)
+                                .vertical_alignment(Vertical::Center)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
@@ -496,14 +506,7 @@ pub fn settings_header(style: StyleType, use_gradients: bool, language: Language
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(
-                style,
-                if use_gradients {
-                    ContainerType::GradientHeader
-                } else {
-                    ContainerType::Headers
-                },
-            ),
-        ))
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
+    ))
 }

@@ -14,3 +14,12 @@ impl Default for StyleType {
         Self::Night
     }
 }
+
+impl StyleType {
+    pub fn is_nightly(self) -> bool {
+        match self {
+            StyleType::Night | StyleType::DeepSea => true,
+            StyleType::Day | StyleType::MonAmour => false,
+        }
+    }
+}

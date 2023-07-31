@@ -1,32 +1,94 @@
-use iced::{Color, Degrees, Gradient};
 use crate::gui::styles::types::palette::{mix_colors, Palette};
+use iced::{Color, Degrees, Gradient};
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
 pub enum GradientType {
-    /// An harmonious color gradient
+    /// A harmonious color gradient
+    #[default]
     Mild,
-    /// A crazy, good-looking color gradient
+    /// A crazy yet good-looking color gradient
     Wild,
+    /// No gradient applied
+    None,
 }
 
-const MID_GRAY: Color = Color {
-    r: 0.5,
-    g: 0.5,
-    b: 0.5,
-    a: 1.0
-};
-
-pub fn get_gradient(colors: &Palette, gradient_type: GradientType) -> Gradient {
+pub fn get_gradient_headers(
+    colors: &Palette,
+    gradient_type: GradientType,
+    is_nightly: bool,
+) -> Gradient {
+    let mix = if is_nightly {
+        Color::BLACK
+    } else {
+        Color::WHITE
+    };
     Gradient::Linear(
         iced::gradient::Linear::new(Degrees(180.0))
-            .add_stop(0.0, match gradient_type {
-                GradientType::Mild => {MID_GRAY}
-                GradientType::Wild => {colors.outgoing}
-            })
+            .add_stop(
+                0.0,
+                match gradient_type {
+                    GradientType::Mild => mix_colors(mix, colors.secondary),
+                    GradientType::Wild => colors.outgoing,
+                    GradientType::None => colors.secondary,
+                },
+            )
             .add_stop(0.3, colors.secondary)
             .add_stop(0.7, colors.secondary)
-            .add_stop(1.0, match gradient_type {
-                GradientType::Mild => {MID_GRAY}
-                GradientType::Wild => {colors.outgoing}
-            })
+            .add_stop(
+                1.0,
+                match gradient_type {
+                    GradientType::Mild => mix_colors(mix, colors.secondary),
+                    GradientType::Wild => colors.outgoing,
+                    GradientType::None => colors.secondary,
+                },
+            ),
+    )
+}
+
+pub fn get_gradient_buttons(
+    colors: &Palette,
+    gradient_type: GradientType,
+    is_nightly: bool,
+) -> Gradient {
+    let mix = if is_nightly {
+        Color::BLACK
+    } else {
+        Color::WHITE
+    };
+    Gradient::Linear(
+        iced::gradient::Linear::new(Degrees(225.0))
+            .add_stop(
+                0.0,
+                match gradient_type {
+                    GradientType::Mild => mix_colors(mix, colors.secondary),
+                    GradientType::Wild => colors.outgoing,
+                    GradientType::None => colors.secondary,
+                },
+            )
+            .add_stop(1.0, colors.secondary),
+    )
+}
+
+pub fn get_gradient_hovered_buttons(
+    colors: &Palette,
+    gradient_type: GradientType,
+    is_nightly: bool,
+) -> Gradient {
+    let mix = if is_nightly {
+        Color::BLACK
+    } else {
+        Color::WHITE
+    };
+    Gradient::Linear(
+        iced::gradient::Linear::new(Degrees(225.0))
+            .add_stop(0.0, colors.secondary)
+            .add_stop(
+                1.0,
+                match gradient_type {
+                    GradientType::Mild => mix_colors(mix, colors.secondary),
+                    GradientType::Wild => colors.outgoing,
+                    GradientType::None => colors.secondary,
+                },
+            ),
     )
 }

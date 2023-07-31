@@ -1,17 +1,18 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Button, Column, Container, Row, Text};
+use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced_widget::{horizontal_space, vertical_space, Checkbox, Rule};
+use iced_widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::checkbox::{CheckboxStyleTuple, CheckboxType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
@@ -19,14 +20,18 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::color_gradients_translation;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
-use crate::{Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.use_gradients, sniffer.language))
+        .push(settings_header(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -51,19 +56,11 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)))
-        .push(
-            Checkbox::new(
-                color_gradients_translation(sniffer.language),
-                sniffer.use_gradients,
-                |_| Message::ToggleGradients,
-            )
-            .spacing(5)
-            .size(18)
-            .font(font)
-            .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
-                CheckboxStyleTuple(sniffer.style, CheckboxType::Standard),
-            )),
-        )
+        .push(gradients_row(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Row::new()
@@ -105,6 +102,58 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
             ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
+}
+
+fn gradients_row(
+    style: StyleType,
+    color_gradient: GradientType,
+    language: Language,
+) -> Row<'static, Message> {
+    let font = get_font(style);
+    Row::new()
+        .align_items(Alignment::Center)
+        .spacing(10)
+        .push(Text::new(format!("{}:", color_gradients_translation(language))).font(font))
+        .push(
+            button(
+                Text::new("×")
+                    .font(font)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(15),
+            )
+            .padding(2)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::None) {
+                60.0
+            } else {
+                20.0
+            }))
+            .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+            .on_press(Message::GradientsSelection(GradientType::None)),
+        )
+        .push(
+            button("")
+                .height(20.0)
+                .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
+                    60.0
+                } else {
+                    20.0
+                }))
+                .on_press(Message::GradientsSelection(GradientType::Mild))
+                .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Mild)).into()),
+        )
+        .push(
+            button("")
+                .height(20.0)
+                .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
+                    60.0
+                } else {
+                    20.0
+                }))
+                .on_press(Message::GradientsSelection(GradientType::Wild))
+                .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Wild)).into()),
+        )
 }
 
 fn get_palette_container(

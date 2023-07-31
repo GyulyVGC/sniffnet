@@ -2,10 +2,12 @@
 
 use iced::widget::button;
 use iced::widget::button::Appearance;
-use iced::{Background, Color, Degrees, Gradient, Vector};
+use iced::{Background, Color, Vector};
 
 use crate::gui::styles::style_constants::{get_starred_color, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
-use crate::gui::styles::text::{highlight, TextType};
+use crate::gui::styles::types::gradient_type::{
+    get_gradient_buttons, get_gradient_hovered_buttons, GradientType,
+};
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
@@ -21,7 +23,7 @@ pub enum ButtonType {
     Neutral,
     Alert,
     Badge,
-    GradientAccent,
+    Gradient(GradientType),
 }
 
 #[derive(Clone)]
@@ -54,13 +56,12 @@ impl button::StyleSheet for ButtonStyleTuple {
                 ButtonStyleTuple(_, ButtonType::BorderedRoundSelected) => {
                     Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
-                ButtonStyleTuple(_, ButtonType::GradientAccent) => {
-                    Background::Gradient(Gradient::Linear(
-                        iced::gradient::Linear::new(Degrees(225.0))
-                            .add_stop(0.0, colors.secondary)
-                            .add_stop(1.0, highlight(TextType::Subtitle, &colors)),
-                    ))
+                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
+                    Background::Color(colors.buttons)
                 }
+                ButtonStyleTuple(_, ButtonType::Gradient(gradient_type)) => Background::Gradient(
+                    get_gradient_buttons(&colors, *gradient_type, self.0.is_nightly()),
+                ),
                 _ => Background::Color(colors.buttons),
             }),
             border_radius: match self {
@@ -91,7 +92,8 @@ impl button::StyleSheet for ButtonStyleTuple {
             shadow_offset: Vector::new(0.0, 0.0),
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
-                ButtonStyleTuple(_, ButtonType::Badge | ButtonType::GradientAccent) => {
+                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => colors.text_body,
+                ButtonStyleTuple(_, ButtonType::Badge | ButtonType::Gradient(_)) => {
                     colors.text_headers
                 }
                 _ => colors.text_body,
@@ -116,13 +118,12 @@ impl button::StyleSheet for ButtonStyleTuple {
                     Background::Color(get_starred_color(self.0))
                 }
                 ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
-                ButtonStyleTuple(_, ButtonType::GradientAccent) => {
-                    Background::Gradient(Gradient::Linear(
-                        iced::gradient::Linear::new(Degrees(225.0))
-                            .add_stop(0.0, colors.secondary)
-                            .add_stop(1.0, colors.outgoing),
-                    ))
+                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
+                    Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
+                ButtonStyleTuple(_, ButtonType::Gradient(gradient_type)) => Background::Gradient(
+                    get_gradient_hovered_buttons(&colors, *gradient_type, self.0.is_nightly()),
+                ),
                 _ => Background::Color(mix_colors(colors.primary, colors.buttons)),
             }),
             border_radius: match self {
@@ -157,7 +158,8 @@ impl button::StyleSheet for ButtonStyleTuple {
             },
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
-                ButtonStyleTuple(_, ButtonType::GradientAccent) => colors.text_headers,
+                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => colors.text_body,
+                ButtonStyleTuple(_, ButtonType::Gradient(_)) => colors.text_headers,
                 _ => colors.text_body,
             },
         }

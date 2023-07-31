@@ -13,6 +13,7 @@ use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
@@ -56,7 +57,7 @@ pub struct Sniffer {
     /// Application style
     pub style: StyleType,
     /// Wether gradients are enabled by the user
-    pub use_gradients: bool,
+    pub color_gradient: GradientType,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -107,7 +108,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             style: config_settings.style,
-            use_gradients: true,
+            color_gradient: GradientType::default(),
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
@@ -223,7 +224,7 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
-            Message::ToggleGradients => self.use_gradients = !self.use_gradients,
+            Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
             _ => {}
         }
         Command::none()

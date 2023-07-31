@@ -14,6 +14,7 @@ use iced_widget::tooltip::Position;
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,
 };
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
@@ -23,7 +24,7 @@ use crate::Language;
 
 pub fn footer(
     language: Language,
-    use_gradients: bool,
+    color_gradient: GradientType,
     style: StyleType,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message> {
@@ -55,14 +56,7 @@ pub fn footer(
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(
-                style,
-                if use_gradients {
-                    ContainerType::GradientHeader
-                } else {
-                    ContainerType::Headers
-                },
-            ),
+            ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
         ))
 }
 

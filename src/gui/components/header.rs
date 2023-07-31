@@ -11,13 +11,14 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, ICONS};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::{Language, StyleType};
 
 pub fn header(
     style: StyleType,
-    use_gradients: bool,
+    color_gradient: GradientType,
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
@@ -65,14 +66,7 @@ pub fn header(
     .align_y(Vertical::Center)
     .width(Length::Fill)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(
-            style,
-            if use_gradients {
-                ContainerType::GradientHeader
-            } else {
-                ContainerType::Headers
-            },
-        ),
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
     ))
 }
 
