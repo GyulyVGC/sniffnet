@@ -108,7 +108,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             style: config_settings.style,
-            color_gradient: GradientType::default(),
+            color_gradient: config_settings.color_gradient,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
@@ -404,6 +404,7 @@ impl Sniffer {
                 style: self.style,
                 notifications: self.notifications,
                 language: self.language,
+                color_gradient: self.color_gradient,
             };
             confy::store("sniffnet", "settings", store).unwrap_or(());
         }

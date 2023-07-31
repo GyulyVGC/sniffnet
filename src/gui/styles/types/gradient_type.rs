@@ -1,7 +1,8 @@
 use crate::gui::styles::types::palette::{mix_colors, Palette};
 use iced::{Color, Degrees, Gradient};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Default)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Default, Serialize, Deserialize)]
 pub enum GradientType {
     /// A harmonious color gradient
     #[default]
