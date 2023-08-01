@@ -3,7 +3,7 @@ use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length};
-use iced_widget::scrollable::{Direction, Properties};
+use iced_widget::scrollable::Direction;
 use iced_widget::tooltip::Position;
 use iced_widget::{button, horizontal_space, vertical_space, Rule};
 
@@ -182,8 +182,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     .height(Length::FillPortion(15))
                     .width(Length::Fill)
                     .direction(Direction::Both {
-                        vertical: Properties::new(),
-                        horizontal: Properties::new(),
+                        vertical: ScrollbarType::Standard.properties(),
+                        horizontal: ScrollbarType::Standard.properties(),
                     })
                     .style(
                         <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(

@@ -7,6 +7,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, lazy, vertical_space, Column, Container, Row, Scrollable, Text};
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
+use iced_widget::scrollable::Direction;
 use iced_widget::{horizontal_space, Rule};
 
 use crate::countries::country_utils::get_flag_tooltip;
@@ -469,12 +470,14 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     }
 
     col_host = col_host.push(
-        Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
-            <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
-                sniffer.style,
-                ScrollbarType::Standard,
-            )),
-        ),
+        Scrollable::new(Container::new(scroll_host).width(Length::Fill))
+            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .style(
+                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
+                    sniffer.style,
+                    ScrollbarType::Standard,
+                )),
+            ),
     );
 
     col_host
@@ -575,12 +578,14 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         );
     }
     col_app = col_app.push(
-        Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
-            <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
-                sniffer.style,
-                ScrollbarType::Standard,
-            )),
-        ),
+        Scrollable::new(Container::new(scroll_app).width(Length::Fill))
+            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .style(
+                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
+                    sniffer.style,
+                    ScrollbarType::Standard,
+                )),
+            ),
     );
 
     col_app
@@ -630,6 +635,7 @@ fn lazy_col_info(
                 .push(
                     Scrollable::new(col_device_filters)
                         .width(Length::FillPortion(1))
+                        .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
                         .style(
                             <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
                                 ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
@@ -651,6 +657,7 @@ fn lazy_col_info(
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
+                .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
                 .style(
                     <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
                         ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),

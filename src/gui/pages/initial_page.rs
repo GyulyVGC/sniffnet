@@ -8,6 +8,7 @@ use iced::widget::{
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
+use iced_widget::scrollable::Direction;
 use iced_widget::tooltip::Position;
 use pcap::Device;
 
@@ -217,6 +218,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                     )
                 },
             ))
+            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,

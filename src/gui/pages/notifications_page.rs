@@ -2,6 +2,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
+use iced_widget::scrollable::Direction;
 use iced_widget::tooltip::Position;
 use iced_widget::{button, vertical_space};
 
@@ -96,11 +97,13 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
                 .align_y(Vertical::Center),
             )
             .push(
-                Scrollable::new(logged_notifications).style(<ScrollbarStyleTuple as Into<
-                    iced::theme::Scrollable,
-                >>::into(
-                    ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
-                )),
+                Scrollable::new(logged_notifications)
+                    .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+                    .style(
+                        <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
+                            ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
+                        ),
+                    ),
             )
             .push(
                 Container::new(get_button_clear_all(sniffer.style, sniffer.language))

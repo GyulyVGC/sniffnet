@@ -5,6 +5,7 @@ use iced::widget::{
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
+use iced_widget::scrollable::Direction;
 use iced_widget::tooltip::Position;
 use iced_widget::Slider;
 
@@ -99,6 +100,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.style,
                     )),
             )
+            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,
