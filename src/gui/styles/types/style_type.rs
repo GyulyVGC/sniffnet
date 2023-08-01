@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::custom_palette::ExtraStyles;
+use super::custom_styles::ExtraStyles;
 
 /// Used to specify the kind of style of the application
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]

@@ -1,9 +1,21 @@
+mod dracula;
+
 use std::fmt;
 
 use iced::Color;
 use serde::{Deserialize, Serialize};
 
 use super::palette::Palette;
+
+/// Custom style with any relevant metadata
+pub struct CustomPalette {
+    /// Displayable name of the style (i.e. "Catppuccin (Mocha)")
+    name: &'static str,
+    /// Color scheme's palette
+    palette: Palette,
+    /// Extra colors such as the favorites star
+    extension: PaletteExtension,
+}
 
 /// Extension color for themes.
 pub struct PaletteExtension {
@@ -15,28 +27,26 @@ pub struct PaletteExtension {
     pub color_mixing: f64,
 }
 
-/// Custom style with any relevant metadata
-// pub struct CustomPalette {
-//    name: &'static str,
-//    palette: Palette,
-//    extension: PaletteExtension,
-//}
-
+/// Built in extra styles
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
 pub enum ExtraStyles {
     Dracula,
 }
 
 impl ExtraStyles {
+    /// [Palette] of the [ExtraStyles] variant
+    #[inline]
     pub fn to_palette(self) -> Palette {
         match self {
-            ExtraStyles::Dracula => unimplemented!(),
+            ExtraStyles::Dracula => dracula::dracula().palette,
         }
     }
 
+    /// Extension colors for the current [ExtraStyles] variant
+    #[inline]
     pub fn to_ext(self) -> PaletteExtension {
         match self {
-            ExtraStyles::Dracula => unimplemented!(),
+            ExtraStyles::Dracula => dracula::dracula().extension,
         }
     }
 }

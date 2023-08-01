@@ -1,4 +1,4 @@
-pub mod custom_palette;
+pub mod custom_styles;
 pub mod element_type;
 pub mod palette;
 pub mod style_tuple;
