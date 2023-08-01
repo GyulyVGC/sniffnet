@@ -22,6 +22,7 @@ pub enum ContainerType {
     Neutral,
     Alert,
     Gradient(GradientType),
+    Modal,
 }
 
 #[derive(Clone)]
@@ -40,16 +41,13 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             text_color: Some(match self {
-                ContainerStyleTuple(_, ContainerType::Headers | ContainerType::Gradient(_)) => {
-                    colors.text_headers
-                }
+                ContainerStyleTuple(_, ContainerType::Gradient(_)) => colors.text_headers,
                 _ => colors.text_body,
             }),
             background: Some(match self {
-                ContainerStyleTuple(
-                    _,
-                    ContainerType::Headers | ContainerType::Gradient(GradientType::None),
-                ) => Background::Color(colors.secondary),
+                ContainerStyleTuple(_, ContainerType::Gradient(GradientType::None)) => {
+                    Background::Color(colors.secondary)
+                }
                 ContainerStyleTuple(_, ContainerType::Tooltip) => Background::Color(colors.buttons),
                 ContainerStyleTuple(_, ContainerType::BorderedRound) => {
                     Background::Color(colors.round_containers)
@@ -74,6 +72,9 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
                 ContainerStyleTuple(_, ContainerType::BorderedRound | ContainerType::Alert) => {
                     BORDER_ROUNDED_RADIUS.into()
                 }
+                ContainerStyleTuple(_, ContainerType::Modal) => {
+                    [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
+                }
                 ContainerStyleTuple(_, ContainerType::Tooltip) => 7.0.into(),
                 ContainerStyleTuple(_, ContainerType::Badge) => 100.0.into(),
                 _ => 0.0.into(),
@@ -82,7 +83,7 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
                 ContainerStyleTuple(
                     _,
                     ContainerType::Standard
-                    | ContainerType::Headers
+                    | ContainerType::Modal
                     | ContainerType::Neutral
                     | ContainerType::Gradient(_),
                 ) => 0.0,

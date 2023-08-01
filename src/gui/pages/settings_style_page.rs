@@ -9,7 +9,7 @@ use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::rule::{RuleTuple, RuleType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -100,7 +100,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .height(Length::Fixed(400.0))
         .width(Length::Fixed(800.0))
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
+            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
         ))
 }
 
@@ -194,23 +194,23 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
         Row::new()
             .padding(0)
             .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
-                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                    RuleTuple(style, RuleType::PalettePrimary),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PalettePrimary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
-                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                    RuleTuple(style, RuleType::PaletteSecondary),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteSecondary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
-                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                    RuleTuple(style, RuleType::PaletteOutgoing),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteOutgoing),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
-                Rule::horizontal(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                    RuleTuple(style, RuleType::PaletteButtons),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteButtons),
                 )),
             )),
     )

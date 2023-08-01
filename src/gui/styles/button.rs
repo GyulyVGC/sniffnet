@@ -65,10 +65,10 @@ impl button::StyleSheet for ButtonStyleTuple {
                 _ => Background::Color(colors.buttons),
             }),
             border_radius: match self {
-                ButtonStyleTuple(
-                    _,
-                    ButtonType::TabActive | ButtonType::TabInactive | ButtonType::Neutral,
-                ) => 0.0.into(),
+                ButtonStyleTuple(_, ButtonType::Neutral) => 0.0.into(),
+                ButtonStyleTuple(_, ButtonType::TabActive | ButtonType::TabInactive) => {
+                    [0.0, 0.0, 30.0, 30.0].into()
+                }
                 ButtonStyleTuple(
                     _,
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected,
@@ -89,7 +89,10 @@ impl button::StyleSheet for ButtonStyleTuple {
                 ButtonStyleTuple(_, ButtonType::BorderedRound) => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
-            shadow_offset: Vector::new(0.0, 0.0),
+            shadow_offset: match self.1 {
+                ButtonType::TabActive => Vector::new(0.0, 2.0),
+                _ => Vector::new(0.0, 0.0),
+            },
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => colors.text_body,
@@ -111,6 +114,7 @@ impl button::StyleSheet for ButtonStyleTuple {
         button::Appearance {
             shadow_offset: match self.1 {
                 ButtonType::Neutral => Vector::default(),
+                ButtonType::TabActive => Vector::new(0.0, 3.0),
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(match self {
@@ -127,10 +131,10 @@ impl button::StyleSheet for ButtonStyleTuple {
                 _ => Background::Color(mix_colors(colors.primary, colors.buttons)),
             }),
             border_radius: match self {
-                ButtonStyleTuple(
-                    _,
-                    ButtonType::TabActive | ButtonType::TabInactive | ButtonType::Neutral,
-                ) => 0.0.into(),
+                ButtonStyleTuple(_, ButtonType::Neutral) => 0.0.into(),
+                ButtonStyleTuple(_, ButtonType::TabActive | ButtonType::TabInactive) => {
+                    [0.0, 0.0, 30.0, 30.0].into()
+                }
                 ButtonStyleTuple(
                     _,
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected,

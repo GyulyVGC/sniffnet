@@ -15,7 +15,7 @@ use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::rule::{RuleTuple, RuleType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
@@ -303,10 +303,9 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
     row_report = row_report
         .push(col_host)
         .push(
-            Rule::vertical(40).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
-                sniffer.style,
-                RuleType::Standard,
-            ))),
+            Rule::vertical(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                RuleStyleTuple(sniffer.style, RuleType::Standard),
+            )),
         )
         .push(col_app);
 
@@ -411,10 +410,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleStyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                RuleTuple(sniffer.style, RuleType::Incoming),
+                                RuleStyleTuple(sniffer.style, RuleType::Incoming),
                             )))
                     } else {
                         Row::new()
@@ -423,10 +422,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleStyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                RuleTuple(sniffer.style, RuleType::Outgoing),
+                                RuleStyleTuple(sniffer.style, RuleType::Outgoing),
                             )))
                     } else {
                         Row::new()
@@ -543,10 +542,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleStyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                RuleTuple(sniffer.style, RuleType::Incoming),
+                                RuleStyleTuple(sniffer.style, RuleType::Incoming),
                             )))
                     } else {
                         Row::new()
@@ -555,10 +554,10 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                         Row::new()
                             .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<RuleTuple as Into<
+                            .push(Rule::horizontal(1).style(<RuleStyleTuple as Into<
                                 iced::theme::Rule,
                             >>::into(
-                                RuleTuple(sniffer.style, RuleType::Outgoing),
+                                RuleStyleTuple(sniffer.style, RuleType::Outgoing),
                             )))
                     } else {
                         Row::new()
@@ -638,17 +637,16 @@ fn lazy_col_info(
                         ),
                 )
                 .push(
-                    Rule::vertical(25).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                        RuleTuple(sniffer.style, RuleType::Standard),
+                    Rule::vertical(25).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                        RuleStyleTuple(sniffer.style, RuleType::Standard),
                     )),
                 )
                 .push(col_data_representation),
         )
         .push(
-            Rule::horizontal(25).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
-                sniffer.style,
-                RuleType::Standard,
-            ))),
+            Rule::horizontal(25).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                RuleStyleTuple(sniffer.style, RuleType::Standard),
+            )),
         )
         .push(
             Scrollable::new(col_bytes_packets)

@@ -113,7 +113,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .height(Fixed(400.0))
         .width(Fixed(800.0))
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
+            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
         ))
 }
 

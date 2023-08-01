@@ -13,7 +13,7 @@ use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::checkbox::{CheckboxStyleTuple, CheckboxType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::picklist::{PicklistStyleTuple, PicklistType};
-use crate::gui::styles::rule::{RuleTuple, RuleType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
@@ -104,11 +104,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.style,
                         sniffer.language,
                     ))
-                    .push(
-                        Rule::vertical(25).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                            RuleTuple(sniffer.style, RuleType::Standard),
+                    .push(Rule::vertical(25).style(
+                        <RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
+                            sniffer.style,
+                            RuleType::Standard,
                         )),
-                    )
+                    ))
                     .push(
                         Column::new()
                             .spacing(10)
@@ -147,7 +148,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .align_items(Alignment::Center);
     col_report = col_report
         .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
-        .push(Rule::horizontal(20).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
+        .push(Rule::horizontal(20).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
             sniffer.style,
             RuleType::Standard,
         ))))
@@ -191,8 +192,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     ),
             )
             .push(
-                Rule::horizontal(20).style(<RuleTuple as Into<iced::theme::Rule>>::into(
-                    RuleTuple(sniffer.style, RuleType::Standard),
+                Rule::horizontal(20).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(sniffer.style, RuleType::Standard),
                 )),
             )
             .push(get_change_page_row(

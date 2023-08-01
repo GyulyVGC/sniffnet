@@ -11,7 +11,7 @@ use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::rule::{RuleTuple, RuleType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -256,11 +256,13 @@ fn get_host_info_col(
 ) -> Column<'static, Message> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
-        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(<RuleTuple as Into<
-            iced::theme::Rule,
-        >>::into(
-            RuleTuple(style, RuleType::Standard),
-        )));
+        host_info_col =
+            host_info_col.push(Rule::horizontal(10.0).style(<RuleStyleTuple as Into<
+                iced::theme::Rule,
+            >>::into(RuleStyleTuple(
+                style,
+                RuleType::Standard,
+            ))));
     }
     if r_dns.parse::<IpAddr>().is_err() {
         host_info_col = host_info_col
@@ -326,10 +328,9 @@ fn get_src_or_dest_col(
                 .align_x(Horizontal::Center),
         )
         .push(
-            Rule::horizontal(10.0).style(<RuleTuple as Into<iced::theme::Rule>>::into(RuleTuple(
-                style,
-                RuleType::Standard,
-            ))),
+            Rule::horizontal(10.0).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                RuleStyleTuple(style, RuleType::Standard),
+            )),
         )
         .push(
             Text::new(format!(

@@ -33,7 +33,7 @@ pub fn get_exit_overlay(
     let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
-        .padding(5)
+        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -54,7 +54,7 @@ pub fn get_exit_overlay(
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Standard),
+            ContainerStyleTuple(style, ContainerType::Modal),
         ))
 }
 
@@ -67,7 +67,7 @@ pub fn get_clear_all_overlay(
     let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
-        .padding(5)
+        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -88,7 +88,7 @@ pub fn get_clear_all_overlay(
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
         .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Standard),
+            ContainerStyleTuple(style, ContainerType::Modal),
         ))
 }
 

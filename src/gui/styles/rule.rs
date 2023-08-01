@@ -16,15 +16,15 @@ pub enum RuleType {
 }
 
 #[derive(Clone)]
-pub struct RuleTuple(pub StyleType, pub RuleType);
+pub struct RuleStyleTuple(pub StyleType, pub RuleType);
 
-impl From<RuleTuple> for iced::theme::Rule {
-    fn from(tuple: RuleTuple) -> Self {
+impl From<RuleStyleTuple> for iced::theme::Rule {
+    fn from(tuple: RuleStyleTuple) -> Self {
         iced::theme::Rule::Custom(Box::new(tuple))
     }
 }
 
-impl rule::StyleSheet for RuleTuple {
+impl rule::StyleSheet for RuleStyleTuple {
     type Style = iced::Theme;
 
     fn appearance(&self, _: &Self::Style) -> iced::widget::rule::Appearance {
