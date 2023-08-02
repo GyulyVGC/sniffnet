@@ -1,12 +1,13 @@
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Button, Column, Container, Row, Text};
-use iced::{Alignment, Length};
-use iced_native::widget::{horizontal_space, vertical_space, Rule};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::{Alignment, Element, Length};
+use iced_native::widget::{horizontal_space, vertical_space, Rule, Space};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::types::custom_styles::ExtraStyles;
 use crate::gui::styles::types::element_type::ElementType;
 use crate::gui::styles::types::style_tuple::StyleTuple;
 use crate::gui::types::message::Message;
@@ -19,7 +20,7 @@ use crate::{Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
-    let content = Column::new()
+    let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(sniffer.style, sniffer.language))
@@ -80,6 +81,13 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     MonAmour,
                 )),
         );
+
+    // Append custom styles to official styles.
+    content = content.push(vertical_space(Length::Fixed(10.0)));
+    for style in get_extra_styles(ExtraStyles::all_styles()) {
+        content = content.push(style);
+    }
+    let content = Scrollable::new(content);
 
     Container::new(content)
         .height(Length::Fixed(400.0))
@@ -154,4 +162,42 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
     .style(<StyleTuple as Into<iced::theme::Container>>::into(
         StyleTuple(style, ElementType::Palette),
     ))
+}
+
+// Buttons for each extra style arranged in rows of two
+fn get_extra_styles(styles: &[ExtraStyles]) -> Vec<Element<'static, Message>> {
+    // Map each extra style into a palette container
+    let mut styles = styles.iter().map(|&style| {
+        let name = style.to_string();
+        let description = "".to_owned();
+        let style = StyleType::Custom(style);
+        get_palette_container(style, name, description, style)
+    });
+
+    // The best way to do this would be with itertools, but that would introduce another dependency.
+    let mut children = Vec::with_capacity(styles.len());
+
+    // This handles the case where there aren't an even number of styles.
+    // [Iterator::zip] drops remainders. Itertools' `zip_longest` and the unstable array chunks API
+    // are both better solutions.
+    while let (Some(first), second) = (styles.next(), styles.next()) {
+        // Add both styles and the vertical space if there are two styles.
+        if let Some(second) = second {
+            children.extend([
+                Row::new()
+                    .push(first)
+                    .push(horizontal_space(Length::Fixed(15.0)))
+                    .push(second)
+                    .into(),
+                <Space as Into<Element<Message>>>::into(vertical_space(Length::Fixed(10.0))),
+            ]);
+        } else {
+            children.extend([
+                Row::new().push(first).into(),
+                <Space as Into<Element<Message>>>::into(vertical_space(Length::Fixed(10.0))),
+            ]);
+        }
+    }
+
+    children
 }

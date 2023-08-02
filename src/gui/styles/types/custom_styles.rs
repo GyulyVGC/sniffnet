@@ -49,6 +49,11 @@ impl ExtraStyles {
             ExtraStyles::Dracula => dracula::dracula().extension,
         }
     }
+
+    #[inline]
+    pub const fn all_styles() -> &'static [Self] {
+        &[ExtraStyles::Dracula]
+    }
 }
 
 impl fmt::Display for ExtraStyles {
