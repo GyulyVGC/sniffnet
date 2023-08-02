@@ -146,13 +146,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .height(Length::Fill)
         .width(Length::Fill)
         .align_items(Alignment::Center);
-    col_report = col_report
-        .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
-        .push(Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
-            sniffer.style,
-            RuleType::Standard,
-        ))))
-    ;
+
     let mut scroll_report = Column::new();
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
@@ -177,6 +171,11 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
     }
     if results_number > 0 {
         col_report = col_report
+            .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
+            .push(Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
+                sniffer.style,
+                RuleType::Standard,
+            ))))
             .push(
                 Scrollable::new(scroll_report)
                     .height(Length::FillPortion(15))
@@ -442,7 +441,7 @@ fn filter_input(
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
     button(
         Text::new(if increment { "j" } else { "i" })
-            .size(10.0)
+            .size(8.0)
             .font(ICONS)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),

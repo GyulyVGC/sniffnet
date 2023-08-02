@@ -672,8 +672,6 @@ fn col_device_filters(
     filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message> {
-    let font = get_font(style);
-
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
@@ -682,12 +680,11 @@ fn col_device_filters(
     let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
     Column::new()
-        .push(
-            Text::new(format!("{}:", network_adapter_translation(language),))
-                .font(font)
-                .style(TextStyleTuple(style, TextType::Subtitle)),
-        )
-        .push(Text::new(format!("   {adapter_info}",)).font(font))
+        .push(TextType::highlighted_subtitle_with_desc(
+            network_adapter_translation(language),
+            adapter_info,
+            style,
+        ))
         .push(vertical_space(15))
         .push(get_active_filters_col(filters, language, style))
 }
@@ -717,69 +714,46 @@ fn col_bytes_packets(
     filtered_bytes: u128,
     style: StyleType,
 ) -> Column<'static, Message> {
-    let font = get_font(style);
     let dropped_val = if dropped > 0 {
         format!(
-            "   {} {}",
+            "{} {}",
             dropped,
             of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
         )
     } else {
-        format!("   {}", none_translation(language))
+        none_translation(language).to_string()
     };
+    let bytes_value = if dropped > 0 {
+        get_formatted_bytes_string_with_b(filtered_bytes)
+    } else {
+        format!(
+            "{} {}",
+            &get_formatted_bytes_string_with_b(filtered_bytes),
+            of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
+        )
+    };
+
     Column::new()
         .spacing(15)
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", filtered_bytes_translation(language)))
-                        .style(TextStyleTuple(style, TextType::Subtitle))
-                        .font(font),
-                )
-                .push(
-                    if dropped > 0 {
-                        Text::new(format!(
-                            "   {}",
-                            &get_formatted_bytes_string_with_b(filtered_bytes)
-                        ))
-                    } else {
-                        Text::new(format!(
-                            "   {} {}",
-                            &get_formatted_bytes_string_with_b(filtered_bytes),
-                            of_total_translation(
-                                language,
-                                &get_percentage_string(all_bytes, filtered_bytes)
-                            )
-                        ))
-                    }
-                    .font(font),
-                ),
-        )
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", filtered_packets_translation(language)))
-                        .style(TextStyleTuple(style, TextType::Subtitle))
-                        .font(font),
-                )
-                .push(
-                    Text::new(format!(
-                        "   {} {}",
-                        filtered,
-                        of_total_translation(language, &get_percentage_string(total, filtered))
-                    ))
-                    .font(font),
-                ),
-        )
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", dropped_packets_translation(language)))
-                        .style(TextStyleTuple(style, TextType::Subtitle))
-                        .font(font),
-                )
-                .push(Text::new(dropped_val).font(font)),
-        )
+        .push(TextType::highlighted_subtitle_with_desc(
+            filtered_bytes_translation(language),
+            &bytes_value,
+            style,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            filtered_packets_translation(language),
+            &format!(
+                "{} {}",
+                filtered,
+                of_total_translation(language, &get_percentage_string(total, filtered))
+            ),
+            style,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            dropped_packets_translation(language),
+            &dropped_val,
+            style,
+        ))
 }
 
 fn get_bars_length(

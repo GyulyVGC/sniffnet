@@ -13,6 +13,7 @@ use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
@@ -67,19 +68,21 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         sniffer.language,
     ));
 
-    let mut source_caption = Row::new().spacing(10).push(
+    let mut source_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
         Text::new(source_translation(sniffer.language))
             .font(font)
-            .size(FONT_SIZE_TITLE),
+            .size(FONT_SIZE_TITLE)
+            .style(TextStyleTuple(sniffer.style, TextType::Title)),
     );
-    let mut dest_caption = Row::new().spacing(10).push(
+    let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(sniffer.language))
             .font(font)
-            .size(FONT_SIZE_TITLE),
+            .size(FONT_SIZE_TITLE)
+            .style(TextStyleTuple(sniffer.style, TextType::Title)),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
-        host_info_col = get_host_info_col(&r_dns, &host, sniffer.style, sniffer.language, font);
+        host_info_col = get_host_info_col(&r_dns, &host, sniffer.style, sniffer.language);
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(
             host.country,
@@ -106,7 +109,6 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         &val.mac_address1,
         sniffer.style,
         sniffer.language,
-        font,
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
@@ -115,7 +117,6 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         &val.mac_address2,
         sniffer.style,
         sniffer.language,
-        font,
     );
 
     if address_to_lookup.eq(&key.address1) {
@@ -124,7 +125,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(&key, &val, font, sniffer.language);
+    let col_info = col_info(&key, &val, font, sniffer.language, sniffer.style);
 
     let content = assemble_widgets(col_info, source_col, dest_col, sniffer.style);
 
@@ -197,6 +198,7 @@ fn col_info(
     val: &InfoAddressPortPair,
     font: Font,
     language: Language,
+    style: StyleType,
 ) -> Column<'static, Message> {
     Column::new()
         .spacing(10)
@@ -213,37 +215,34 @@ fn col_info(
                 .font(font),
             ),
         )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                transport_protocol_translation(language),
-                key.trans_protocol
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                application_protocol_translation(language),
-                val.app_protocol
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{} ({}):\n   {}\n   {} {}",
+        .push(TextType::highlighted_subtitle_with_desc(
+            transport_protocol_translation(language),
+            &key.trans_protocol.to_string(),
+            style,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            application_protocol_translation(language),
+            &val.app_protocol.to_string(),
+            style,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            &format!(
+                "{} ({})",
                 transmitted_data_translation(language),
                 if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
                     outgoing_translation(language).to_lowercase()
                 } else {
                     incoming_translation(language).to_lowercase()
-                },
+                }
+            ),
+            &format!(
+                "{}\n   {} {}",
                 get_formatted_bytes_string_with_b(val.transmitted_bytes),
                 val.transmitted_packets,
-                packets_translation(language),
-            ))
-            .font(font),
-        )
+                packets_translation(language)
+            ),
+            style,
+        ))
         .push(vertical_space(Length::FillPortion(1)))
 }
 
@@ -252,7 +251,6 @@ fn get_host_info_col(
     host: &Host,
     style: StyleType,
     language: Language,
-    font: Font,
 ) -> Column<'static, Message> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
@@ -265,19 +263,18 @@ fn get_host_info_col(
             ))));
     }
     if r_dns.parse::<IpAddr>().is_err() {
-        host_info_col = host_info_col
-            .push(Text::new(format!("{}:\n   {r_dns}", fqdn_translation(language))).font(font));
+        host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
+            fqdn_translation(language),
+            r_dns,
+            style,
+        ));
     }
     if !host.asn.name.is_empty() && host.asn.number > 0 {
-        host_info_col = host_info_col.push(
-            Text::new(format!(
-                "{}:\n   {} (ASN {})",
-                administrative_entity_translation(language),
-                host.asn.name,
-                host.asn.number
-            ))
-            .font(font),
-        );
+        host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
+            administrative_entity_translation(language),
+            &format!("{} (ASN {})", host.asn.name, host.asn.number),
+            style,
+        ));
     }
     host_info_col
 }
@@ -318,10 +315,9 @@ fn get_src_or_dest_col(
     mac: &str,
     style: StyleType,
     language: Language,
-    font: Font,
 ) -> Column<'static, Message> {
     Column::new()
-        .spacing(5)
+        .spacing(4)
         .push(
             Container::new(caption)
                 .width(Length::Fill)
@@ -332,22 +328,16 @@ fn get_src_or_dest_col(
                 RuleStyleTuple(style, RuleType::Standard),
             )),
         )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                socket_address_translation(language),
-                get_socket_address(ip, port)
-            ))
-            .font(font),
-        )
-        .push(
-            Text::new(format!(
-                "{}:\n   {}",
-                mac_address_translation(language),
-                mac
-            ))
-            .font(font),
-        )
+        .push(TextType::highlighted_subtitle_with_desc(
+            socket_address_translation(language),
+            &get_socket_address(ip, port),
+            style,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            mac_address_translation(language),
+            mac,
+            style,
+        ))
 }
 
 fn assemble_widgets(
@@ -358,7 +348,7 @@ fn assemble_widgets(
 ) -> Row<'static, Message> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)
-            .padding(10)
+            .padding(7)
             .width(Length::Fill)
             .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
                 ContainerStyleTuple(style, ContainerType::BorderedRound),

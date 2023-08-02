@@ -1,8 +1,11 @@
 //! Text style
 
 use iced::Color;
+use iced_widget::{Column, Text};
 
+use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::types::palette::Palette;
+use crate::gui::types::message::Message;
 use crate::{get_colors, StyleType};
 
 #[derive(Clone, Copy)]
@@ -10,6 +13,24 @@ pub enum TextType {
     Standard,
     Title,
     Subtitle,
+}
+
+/// Returns a formatted caption followed by subtitle, new line, tab, and desc
+impl TextType {
+    pub fn highlighted_subtitle_with_desc(
+        subtitle: &str,
+        desc: &str,
+        style: StyleType,
+    ) -> Column<'static, Message> {
+        let font = get_font(style);
+        Column::new()
+            .push(
+                Text::new(format!("{subtitle}:"))
+                    .style(TextStyleTuple(style, TextType::Subtitle))
+                    .font(font),
+            )
+            .push(Text::new(format!("   {desc}")).font(font))
+    }
 }
 
 #[derive(Clone)]
