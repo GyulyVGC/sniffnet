@@ -13,6 +13,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Minor aesthetic improvements (implemented part of the suggestions provided in [#119](https://github.com/GyulyVGC/sniffnet/issues/119))
 - Color palettes in settings page are now built as `Rule` widgets, without involving the use of external SVGs
 - Fixed `alt`+`tab` shortcut issue ([#298](https://github.com/GyulyVGC/sniffnet/pull/298) — fixes [#262](https://github.com/GyulyVGC/sniffnet/issues/262))
+- Use scrollable to make "active filters" visible when the selected adapter name is long (overview page)
 - Fixed problem that didn't allow opening links and the report file on operating systems different from Windows, macOS, and Linux
 - Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
 

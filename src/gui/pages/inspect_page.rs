@@ -182,8 +182,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     .height(Length::FillPortion(15))
                     .width(Length::Fill)
                     .direction(Direction::Both {
-                        vertical: ScrollbarType::Standard.properties(),
-                        horizontal: ScrollbarType::Standard.properties(),
+                        vertical: ScrollbarType::properties(),
+                        horizontal: ScrollbarType::properties(),
                     })
                     .style(
                         <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(

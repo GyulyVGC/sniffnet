@@ -10,7 +10,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
-use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -116,43 +116,57 @@ fn gradients_row(
         .push(Text::new(format!("{}:", color_gradients_translation(language))).font(font))
         .push(
             button(
-                Text::new("×")
-                    .font(font)
+                Text::new("x")
+                    .font(ICONS)
                     .vertical_alignment(Vertical::Center)
                     .horizontal_alignment(Horizontal::Center)
-                    .size(15),
+                    .size(12),
             )
-            .padding(2)
+            .padding(0)
             .height(20.0)
             .width(Fixed(if color_gradient.eq(&GradientType::None) {
                 60.0
             } else {
                 20.0
             }))
-            .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::None)).into())
             .on_press(Message::GradientsSelection(GradientType::None)),
         )
         .push(
-            button("")
-                .height(20.0)
-                .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
-                    60.0
-                } else {
-                    20.0
-                }))
-                .on_press(Message::GradientsSelection(GradientType::Mild))
-                .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Mild)).into()),
+            button(
+                Text::new("y")
+                    .font(ICONS)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(13),
+            )
+            .padding(0)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
+                60.0
+            } else {
+                20.0
+            }))
+            .on_press(Message::GradientsSelection(GradientType::Mild))
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Mild)).into()),
         )
         .push(
-            button("")
-                .height(20.0)
-                .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
-                    60.0
-                } else {
-                    20.0
-                }))
-                .on_press(Message::GradientsSelection(GradientType::Wild))
-                .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Wild)).into()),
+            button(
+                Text::new("z")
+                    .font(ICONS)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(13),
+            )
+            .padding(0)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
+                60.0
+            } else {
+                20.0
+            }))
+            .on_press(Message::GradientsSelection(GradientType::Wild))
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Wild)).into()),
         )
 }
 

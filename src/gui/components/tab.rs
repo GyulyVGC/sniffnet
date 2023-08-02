@@ -20,7 +20,11 @@ pub fn get_settings_tabs(
     language: Language,
 ) -> Row<'static, Message> {
     let font = get_font(style);
-    let mut tabs = Row::new().width(Length::Fill).align_items(Alignment::Start);
+    let mut tabs = Row::new()
+        .width(Length::Fill)
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);
@@ -47,7 +51,11 @@ pub fn get_pages_tabs(
     unread_notifications: usize,
 ) -> Row<'static, Message> {
     let font = get_font(style);
-    let mut tabs = Row::new().width(Length::Fill).align_items(Alignment::Start);
+    let mut tabs = Row::new()
+        .width(Length::Fill)
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);

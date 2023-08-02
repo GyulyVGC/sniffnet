@@ -218,7 +218,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                     )
                 },
             ))
-            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .direction(Direction::Vertical(ScrollbarType::properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,

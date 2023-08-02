@@ -100,7 +100,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.style,
                     )),
             )
-            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .direction(Direction::Vertical(ScrollbarType::properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,

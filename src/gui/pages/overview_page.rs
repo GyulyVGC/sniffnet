@@ -471,7 +471,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
 
     col_host = col_host.push(
         Scrollable::new(Container::new(scroll_host).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .direction(Direction::Vertical(ScrollbarType::properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,
@@ -579,7 +579,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     }
     col_app = col_app.push(
         Scrollable::new(Container::new(scroll_app).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+            .direction(Direction::Vertical(ScrollbarType::properties()))
             .style(
                 <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
                     sniffer.style,
@@ -635,7 +635,7 @@ fn lazy_col_info(
                 .push(
                     Scrollable::new(col_device_filters)
                         .width(Length::FillPortion(1))
-                        .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+                        .direction(Direction::Vertical(ScrollbarType::properties()))
                         .style(
                             <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
                                 ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
@@ -657,7 +657,7 @@ fn lazy_col_info(
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
-                .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+                .direction(Direction::Vertical(ScrollbarType::properties()))
                 .style(
                     <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
                         ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),

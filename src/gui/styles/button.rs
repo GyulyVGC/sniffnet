@@ -57,7 +57,7 @@ impl button::StyleSheet for ButtonStyleTuple {
                     Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
-                    Background::Color(colors.buttons)
+                    Background::Color(colors.secondary)
                 }
                 ButtonStyleTuple(_, ButtonType::Gradient(gradient_type)) => Background::Gradient(
                     get_gradient_buttons(&colors, *gradient_type, self.0.is_nightly()),
@@ -90,12 +90,11 @@ impl button::StyleSheet for ButtonStyleTuple {
                 _ => BORDER_WIDTH,
             },
             shadow_offset: match self.1 {
-                ButtonType::TabActive => Vector::new(0.0, 2.0),
+                ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 2.0),
                 _ => Vector::new(0.0, 0.0),
             },
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
-                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => colors.text_body,
                 ButtonStyleTuple(_, ButtonType::Badge | ButtonType::Gradient(_)) => {
                     colors.text_headers
                 }
@@ -114,7 +113,7 @@ impl button::StyleSheet for ButtonStyleTuple {
         button::Appearance {
             shadow_offset: match self.1 {
                 ButtonType::Neutral => Vector::default(),
-                ButtonType::TabActive => Vector::new(0.0, 3.0),
+                ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(match self {
@@ -123,7 +122,7 @@ impl button::StyleSheet for ButtonStyleTuple {
                 }
                 ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
-                    Background::Color(mix_colors(colors.primary, colors.buttons))
+                    Background::Color(mix_colors(colors.primary, colors.secondary))
                 }
                 ButtonStyleTuple(_, ButtonType::Gradient(gradient_type)) => Background::Gradient(
                     get_gradient_hovered_buttons(&colors, *gradient_type, self.0.is_nightly()),
@@ -162,7 +161,6 @@ impl button::StyleSheet for ButtonStyleTuple {
             },
             text_color: match self {
                 ButtonStyleTuple(_, ButtonType::Starred) => Color::BLACK,
-                ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => colors.text_body,
                 ButtonStyleTuple(_, ButtonType::Gradient(_)) => colors.text_headers,
                 _ => colors.text_body,
             },

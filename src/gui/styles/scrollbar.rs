@@ -5,7 +5,7 @@ use iced::Theme;
 use iced::{Background, Color};
 use iced_widget::scrollable::Properties;
 
-use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::BORDER_ROUNDED_RADIUS;
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
@@ -15,8 +15,8 @@ pub enum ScrollbarType {
 }
 
 impl ScrollbarType {
-    pub fn properties(self) -> Properties {
-        Properties::new().width(2).scroller_width(5).margin(3)
+    pub fn properties() -> Properties {
+        Properties::new().width(5).scroller_width(5).margin(3)
     }
 }
 
@@ -35,12 +35,12 @@ impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
     fn active(&self, _: &Self::Style) -> Scrollbar {
         let colors = get_colors(self.0);
         Scrollbar {
-            background: Some(Background::Color(colors.round_borders)),
-            border_radius: 0.0.into(),
+            background: Some(Background::Color(Color::TRANSPARENT)),
+            border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: colors.round_borders,
             scroller: Scroller {
-                color: colors.buttons,
+                color: colors.round_borders,
                 border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
@@ -52,8 +52,8 @@ impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
         let colors = get_colors(self.0);
         Scrollbar {
             background: Some(Background::Color(colors.round_borders)),
-            border_radius: 0.0.into(),
-            border_width: BORDER_WIDTH / 1.5,
+            border_radius: BORDER_ROUNDED_RADIUS.into(),
+            border_width: 0.0,
             border_color: colors.round_borders,
             scroller: Scroller {
                 color: if is_mouse_over_scrollbar {

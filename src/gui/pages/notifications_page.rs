@@ -98,7 +98,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
             )
             .push(
                 Scrollable::new(logged_notifications)
-                    .direction(Direction::Vertical(ScrollbarType::Standard.properties()))
+                    .direction(Direction::Vertical(ScrollbarType::properties()))
                     .style(
                         <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
                             ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
