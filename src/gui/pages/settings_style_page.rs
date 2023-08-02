@@ -231,7 +231,7 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(40.0 + 2.0 * BORDER_WIDTH)
+    .height(40.0 + 1.7 * BORDER_WIDTH)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
         ContainerStyleTuple(style, ContainerType::Palette),
     ))

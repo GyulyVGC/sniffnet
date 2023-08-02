@@ -147,8 +147,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .width(Length::Fill)
         .align_items(Alignment::Center);
     col_report = col_report
-        .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
-        .push(Rule::horizontal(20).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
+        .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
+        .push(Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
             sniffer.style,
             RuleType::Standard,
         ))))
@@ -192,7 +192,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
                     ),
             )
             .push(
-                Rule::horizontal(20).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
                     RuleStyleTuple(sniffer.style, RuleType::Standard),
                 )),
             )
@@ -447,8 +447,8 @@ fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, 
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
-    .padding(5)
-    .height(Length::Fixed(25.0))
+    .padding(2)
+    .height(Length::Fixed(20.0))
     .width(Length::Fixed(25.0))
     .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::UpdatePageNumber(increment))
@@ -466,6 +466,7 @@ fn get_change_page_row(
         .height(Length::FillPortion(2))
         .align_items(Alignment::Center)
         .spacing(10)
+        .padding(0)
         .push(if page_number > 1 {
             Container::new(get_button_change_page(style, false).width(25.0))
         } else {
