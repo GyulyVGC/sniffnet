@@ -7,8 +7,7 @@ use std::time::Duration;
 use iced::keyboard::{Event, KeyCode, Modifiers};
 use iced::widget::Column;
 use iced::Event::{Keyboard, Window};
-use iced::{executor, font, window, Application, Command, Element, Subscription, Theme};
-use iced_widget::runtime::futures::subscription;
+use iced::{executor, font, window, Application, Command, Element, Subscription, Theme, subscription};
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;

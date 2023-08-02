@@ -1,7 +1,7 @@
 //! Text style
 
 use iced::Color;
-use iced_widget::{Column, Text};
+use iced::widget::{Column, Text};
 
 use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::types::palette::Palette;

@@ -4,8 +4,8 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length};
-use iced_widget::tooltip::Position;
-use iced_widget::{button, horizontal_space, lazy, vertical_space, Rule};
+use iced::widget::tooltip::Position;
+use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

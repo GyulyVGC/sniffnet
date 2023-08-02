@@ -2,7 +2,7 @@
 
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
-use iced_widget::text::LineHeight;
+use iced::widget::text::LineHeight;
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};

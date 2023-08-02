@@ -7,9 +7,9 @@ use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Color, Font, Length};
-use iced_widget::horizontal_space;
-use iced_widget::text::LineHeight;
-use iced_widget::tooltip::Position;
+use iced::widget::horizontal_space;
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
 
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,

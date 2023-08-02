@@ -2,9 +2,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
-use iced_widget::scrollable::Direction;
-use iced_widget::tooltip::Position;
-use iced_widget::{button, vertical_space};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{button, vertical_space};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

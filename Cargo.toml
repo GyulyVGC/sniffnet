@@ -39,7 +39,6 @@ chrono = { version = "0.4.26", default_features = false, features = ["clock"] }
 indexmap = "2.0.0"
 plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
 iced = { version = "0.10.0", features = ["tokio", "svg", "advanced", "lazy"] }
-iced_widget = "0.1.2"
 plotters-iced = "0.9.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"

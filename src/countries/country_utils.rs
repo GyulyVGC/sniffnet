@@ -1,8 +1,8 @@
 use iced::widget::Tooltip;
 use iced::{Length, Renderer};
-use iced_widget::svg::Handle;
-use iced_widget::tooltip::Position;
-use iced_widget::Svg;
+use iced::widget::svg::Handle;
+use iced::widget::tooltip::Position;
+use iced::widget::Svg;
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 use crate::countries::flags_pictures::{

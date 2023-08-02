@@ -11,7 +11,7 @@ use iced::widget::{
 use iced::{
     event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Size,
 };
-use iced_widget::tooltip::Position;
+use iced::widget::tooltip::Position;
 
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};

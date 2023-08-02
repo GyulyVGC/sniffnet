@@ -3,7 +3,7 @@
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::Theme;
 use iced::{Background, Color};
-use iced_widget::scrollable::Properties;
+use iced::widget::scrollable::Properties;
 
 use crate::gui::styles::style_constants::BORDER_ROUNDED_RADIUS;
 use crate::gui::styles::types::palette::mix_colors;

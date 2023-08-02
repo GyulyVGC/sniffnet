@@ -1,7 +1,7 @@
 //! Slider style
 
 use iced::widget::slider::Appearance;
-use iced_widget::slider::{Handle, HandleShape, Rail};
+use iced::widget::slider::{Handle, HandleShape, Rail};
 
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::palette::mix_colors;
