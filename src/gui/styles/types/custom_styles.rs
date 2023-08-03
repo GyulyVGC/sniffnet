@@ -30,6 +30,7 @@ pub struct PaletteExtension {
 
 /// Built in extra styles
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
+#[serde(tag = "custom")]
 pub enum ExtraStyles {
     Dracula,
     Gruvbox,
