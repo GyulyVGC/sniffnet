@@ -2,15 +2,15 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, Container, Row, Text, Tooltip};
-use iced::{Alignment, Color, Font, Length};
 use iced::widget::horizontal_space;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
+use iced::widget::{button, Container, Row, Text, Tooltip};
+use iced::{Alignment, Color, Font, Length};
 
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,
 };

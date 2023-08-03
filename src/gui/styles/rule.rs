@@ -1,8 +1,9 @@
 //! Rule style
 
-use crate::{get_colors, StyleType};
 use iced::widget::rule;
 use iced::widget::rule::FillMode;
+
+use crate::{get_colors, StyleType};
 
 #[derive(Clone, Copy)]
 pub enum RuleType {

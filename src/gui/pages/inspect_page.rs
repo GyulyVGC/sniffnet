@@ -1,11 +1,11 @@
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length};
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;

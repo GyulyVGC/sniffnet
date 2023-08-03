@@ -4,11 +4,11 @@
 //! and overall statistics about the filtered traffic.
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
 use iced::widget::{button, lazy, vertical_space, Column, Container, Row, Scrollable, Text};
+use iced::widget::{horizontal_space, Rule};
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
-use iced::widget::scrollable::Direction;
-use iced::widget::{horizontal_space, Rule};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

@@ -1,6 +1,6 @@
+use iced::widget::horizontal_space;
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length};
-use iced::widget::horizontal_space;
 
 use crate::gui::styles::radio::{RadioStyleTuple, RadioType};
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;

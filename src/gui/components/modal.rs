@@ -3,15 +3,14 @@ use iced::advanced::overlay;
 use iced::advanced::renderer;
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{self, Clipboard, Shell};
-
 use iced::alignment::{Alignment, Horizontal, Vertical};
+use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
 };
 use iced::{
     event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Size,
 };
-use iced::widget::tooltip::Position;
 
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};

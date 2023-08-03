@@ -1,13 +1,13 @@
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::Slider;
 use iced::widget::{
     button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
     TextInput, Tooltip,
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::Slider;
 
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,

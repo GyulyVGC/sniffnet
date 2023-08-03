@@ -1,11 +1,11 @@
 //! GUI upper header
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
-use iced::widget::text::LineHeight;
-use iced::widget::tooltip::Position;
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};

@@ -2,15 +2,14 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, PickList, Row, Scrollable,
     Text, Tooltip,
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
-use iced::widget::scrollable::Direction;
-
-use iced::widget::tooltip::Position;
 use pcap::Device;
 
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
