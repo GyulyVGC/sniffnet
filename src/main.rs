@@ -1,12 +1,13 @@
 //! Module containing the entry point of application execution.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(clippy::module_name_repetitions, clippy::too_many_lines)]
 
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
 use iced::window::Position;
-use iced::{window, Application, Settings};
+use iced::{window, Application, Font, Settings};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -107,13 +108,12 @@ pub fn main() -> iced::Result {
         window: window::Settings {
             size: (1190, 670), // start size
             position: Position::Centered,
-            min_size: Some((1190, 600)), // min size allowed
+            min_size: Some((1190, 610)), // min size allowed
             max_size: None,
             visible: true,
             resizable: true,
             decorations: true,
             transparent: false,
-            always_on_top: false,
             icon: None,
             ..Default::default()
         },
@@ -125,13 +125,9 @@ pub fn main() -> iced::Result {
             &config_device,
             newer_release_available1,
         ),
-        default_font: Some(include_bytes!(
-            "../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf"
-        )),
+        default_font: Font::with_name("Sarasa Mono SC"),
         default_text_size: FONT_SIZE_BODY,
-        text_multithreading: true,
         antialiasing: false,
         exit_on_close_request: true,
-        try_opengles_first: false,
     })
 }

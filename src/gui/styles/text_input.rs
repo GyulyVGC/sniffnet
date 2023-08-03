@@ -4,31 +4,38 @@ use iced::widget::text_input;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
-use crate::get_colors;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::TextInput {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum TextInputType {
+    Standard,
+    Badge,
+}
+
+#[derive(Clone)]
+pub struct TextInputStyleTuple(pub StyleType, pub TextInputType);
+
+impl From<TextInputStyleTuple> for iced::theme::TextInput {
+    fn from(tuple: TextInputStyleTuple) -> Self {
         iced::theme::TextInput::Custom(Box::new(tuple))
     }
 }
 
-impl iced::widget::text_input::StyleSheet for StyleTuple {
+impl iced::widget::text_input::StyleSheet for TextInputStyleTuple {
     type Style = iced::Theme;
 
     fn active(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(self.0);
         Appearance {
             background: Background::Color(match self.1 {
-                ElementType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                TextInputType::Badge => Color::TRANSPARENT,
+                TextInputType::Standard => colors.buttons,
             }),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: match self.1 {
-                ElementType::Badge => Color::TRANSPARENT,
-                _ => colors.round_borders,
+                TextInputType::Badge => Color::TRANSPARENT,
+                TextInputType::Standard => colors.round_borders,
             },
             icon_color: colors.text_body,
         }
@@ -38,7 +45,7 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             background: Background::Color(colors.primary),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
             icon_color: colors.text_body,
@@ -73,10 +80,10 @@ impl iced::widget::text_input::StyleSheet for StyleTuple {
         let colors = get_colors(self.0);
         Appearance {
             background: Background::Color(match self.1 {
-                ElementType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                TextInputType::Badge => Color::TRANSPARENT,
+                TextInputType::Standard => colors.buttons,
             }),
-            border_radius: 0.0,
+            border_radius: 0.0.into(),
             border_width: 1.0,
             border_color: colors.secondary,
             icon_color: colors.text_body,

@@ -1,18 +1,23 @@
-use iced::alignment::Horizontal;
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{
-    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length};
-use iced_lazy::lazy;
-use iced_native::widget::scrollable::Properties;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{button, horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS, SARASA_MONO_SC_BOLD};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::checkbox::{CheckboxStyleTuple, CheckboxType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::picklist::{PicklistStyleTuple, PicklistType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text_input::{TextInputStyleTuple, TextInputType};
 use crate::gui::types::message::Message;
 use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::report::get_report_entries::get_searched_entries;
@@ -76,7 +81,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
     )
     .padding([3, 7])
     .font(font)
-    .style(StyleTuple(sniffer.style, ElementType::Standard));
+    .style(PicklistStyleTuple(sniffer.style, PicklistType::Standard));
 
     let report = lazy(
         (
@@ -99,35 +104,36 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
                         sniffer.style,
                         sniffer.language,
                     ))
-                    .push(
-                        Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                            StyleTuple(sniffer.style, ElementType::Standard),
+                    .push(Rule::vertical(25).style(
+                        <RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
+                            sniffer.style,
+                            RuleType::Standard,
                         )),
-                    )
+                    ))
                     .push(
                         Column::new()
                             .spacing(10)
                             .push(
                                 Text::new(sort_by_translation(sniffer.language))
                                     .font(font)
-                                    .style(StyleTuple(sniffer.style, ElementType::Title))
+                                    .style(TextStyleTuple(sniffer.style, TextType::Title))
                                     .size(FONT_SIZE_TITLE),
                             )
                             .push(picklist_sort),
                     ),
             )
-            .height(Length::Fixed(160.0))
+            .height(Length::Fixed(165.0))
             .padding(10)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(sniffer.style, ElementType::BorderedRound),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
             )),
         )
         .push(report);
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
         ))
 }
 
@@ -140,13 +146,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
         .height(Length::Fill)
         .width(Length::Fill)
         .align_items(Alignment::Center);
-    col_report = col_report
-        .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").font(font))
-        .push(Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-            sniffer.style,
-            ElementType::Standard,
-        ))))
-    ;
+
     let mut scroll_report = Column::new();
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
@@ -157,7 +157,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             .push(
                 Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
                     .style(iced::theme::Text::Color(entry_color))
-                    .font(SARASA_MONO_SC_BOLD),
+                    .font(font),
             )
             .push(flag)
             .push(Text::new("  "));
@@ -166,23 +166,33 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             button(entry_row)
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(val.index)))
-                .style(StyleTuple(sniffer.style, ElementType::Neutral).into()),
+                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
         );
     }
     if results_number > 0 {
         col_report = col_report
+            .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
+            .push(Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
+                sniffer.style,
+                RuleType::Standard,
+            ))))
             .push(
                 Scrollable::new(scroll_report)
                     .height(Length::FillPortion(15))
                     .width(Length::Fill)
-                    .horizontal_scroll(Properties::new())
-                    .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                        StyleTuple(sniffer.style, ElementType::Standard),
-                    )),
+                    .direction(Direction::Both {
+                        vertical: ScrollbarType::properties(),
+                        horizontal: ScrollbarType::properties(),
+                    })
+                    .style(
+                        <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
+                            ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
+                        ),
+                    ),
             )
             .push(
-                Rule::horizontal(20).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(sniffer.style, ElementType::Standard),
+                Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(sniffer.style, RuleType::Standard),
                 )),
             )
             .push(get_change_page_row(
@@ -217,8 +227,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             Container::new(col_report)
                 .padding([10, 7, 7, 7])
                 .width(Length::Fixed(1042.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(sniffer.style, ElementType::BorderedRound),
+                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                    ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
                 )),
         )
         .push(
@@ -242,7 +252,7 @@ fn filters_col(
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(search_filters_translation(language))
             .font(font)
-            .style(StyleTuple(style, ElementType::Title))
+            .style(TextStyleTuple(style, TextType::Title))
             .size(FONT_SIZE_TITLE),
     );
     if search_params.is_some_filter_active() {
@@ -272,18 +282,18 @@ fn filters_col(
                 .spacing(5)
                 .size(18)
                 .font(font)
-                .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-                    StyleTuple(style, ElementType::Badge),
+                .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
+                    CheckboxStyleTuple(style, CheckboxType::Standard),
                 )),
             )
             .padding([5, 8])
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(
                     style,
                     if search_params.only_favorites {
-                        ElementType::Badge
+                        ContainerType::Badge
                     } else {
-                        ElementType::Neutral
+                        ContainerType::Neutral
                     },
                 ),
             )),
@@ -394,13 +404,13 @@ fn filter_input(
         .padding([0, 5])
         .font(font)
         .width(Length::Fixed(width))
-        .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-            StyleTuple(
+        .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
+            TextInputStyleTuple(
                 style,
                 if is_filter_active {
-                    ElementType::Badge
+                    TextInputType::Badge
                 } else {
-                    ElementType::Standard
+                    TextInputType::Standard
                 },
             ),
         ));
@@ -416,13 +426,13 @@ fn filter_input(
 
     Container::new(content)
         .padding(5)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(
                 style,
                 if is_filter_active {
-                    ElementType::Badge
+                    ContainerType::Badge
                 } else {
-                    ElementType::Neutral
+                    ContainerType::Neutral
                 },
             ),
         ))
@@ -431,15 +441,15 @@ fn filter_input(
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
     button(
         Text::new(if increment { "j" } else { "i" })
-            .size(10.0)
+            .size(8.0)
             .font(ICONS)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
-    .padding(5)
-    .height(Length::Fixed(25.0))
+    .padding(2)
+    .height(Length::Fixed(20.0))
     .width(Length::Fixed(25.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::UpdatePageNumber(increment))
 }
 
@@ -455,6 +465,7 @@ fn get_change_page_row(
         .height(Length::FillPortion(2))
         .align_items(Alignment::Center)
         .spacing(10)
+        .padding(0)
         .push(if page_number > 1 {
             Container::new(get_button_change_page(style, false).width(25.0))
         } else {
@@ -484,20 +495,21 @@ fn get_button_open_report(
     let content = button(
         Text::new('8'.to_string())
             .font(ICONS)
+            .size(21)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::OpenReport);
 
     Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
         .gap(5)
         .font(font)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 
@@ -509,12 +521,13 @@ fn button_clear_filter(
     button(
         Text::new("×")
             .font(font)
+            .vertical_alignment(Vertical::Center)
             .horizontal_alignment(Horizontal::Center)
             .size(15),
     )
     .padding(2)
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(20.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::Search(new_search_parameters))
 }

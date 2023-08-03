@@ -1,28 +1,37 @@
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Text};
+use iced::Length::Fixed;
 use iced::{Alignment, Length};
-use iced_native::widget::{horizontal_space, vertical_space, Rule};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
+use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
     yeti_day_translation, yeti_night_translation,
 };
+use crate::translations::translations_2::color_gradients_translation;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
-use crate::{Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
     let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(sniffer.style, sniffer.language))
+        .push(settings_header(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
             [
                 SettingsPage::Notifications,
@@ -42,10 +51,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         .push(vertical_space(Length::Fixed(15.0)))
         .push(
             appearance_title_translation(sniffer.language)
-                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(gradients_row(
+            sniffer.style,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Row::new()
@@ -84,9 +99,75 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Length::Fixed(400.0))
         .width(Length::Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(sniffer.style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
         ))
+}
+
+fn gradients_row(
+    style: StyleType,
+    color_gradient: GradientType,
+    language: Language,
+) -> Row<'static, Message> {
+    let font = get_font(style);
+    Row::new()
+        .align_items(Alignment::Center)
+        .spacing(10)
+        .push(Text::new(format!("{}:", color_gradients_translation(language))).font(font))
+        .push(
+            button(
+                Text::new("x")
+                    .font(ICONS)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(12),
+            )
+            .padding(0)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::None) {
+                60.0
+            } else {
+                20.0
+            }))
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::None)).into())
+            .on_press(Message::GradientsSelection(GradientType::None)),
+        )
+        .push(
+            button(
+                Text::new("y")
+                    .font(ICONS)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(13),
+            )
+            .padding(0)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
+                60.0
+            } else {
+                20.0
+            }))
+            .on_press(Message::GradientsSelection(GradientType::Mild))
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Mild)).into()),
+        )
+        .push(
+            button(
+                Text::new("z")
+                    .font(ICONS)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .size(13),
+            )
+            .padding(0)
+            .height(20.0)
+            .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
+                60.0
+            } else {
+                20.0
+            }))
+            .on_press(Message::GradientsSelection(GradientType::Wild))
+            .style(ButtonStyleTuple(style, ButtonType::Gradient(GradientType::Wild)).into()),
+        )
 }
 
 fn get_palette_container(
@@ -105,16 +186,16 @@ fn get_palette_container(
         .push(Text::new(description).font(font));
 
     Button::new(content)
-        .height(Length::Fixed(120.0))
+        .height(Length::Fixed(110.0))
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
-            StyleTuple(
+            ButtonStyleTuple(
                 style,
                 if on_press.eq(&style) {
-                    ElementType::BorderedRoundSelected
+                    ButtonType::BorderedRoundSelected
                 } else {
-                    ElementType::BorderedRound
+                    ButtonType::BorderedRound
                 },
             )
             .into(),
@@ -127,31 +208,31 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
         Row::new()
             .padding(0)
             .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PalettePrimary),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PalettePrimary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteSecondary),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteSecondary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteOutgoing),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteOutgoing),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
-                Rule::horizontal(50).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                    StyleTuple(style, ElementType::PaletteButtons),
+                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                    RuleStyleTuple(style, RuleType::PaletteButtons),
                 )),
             )),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(50.0 + 1.7 * BORDER_WIDTH)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Palette),
+    .height(40.0 + 1.7 * BORDER_WIDTH)
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Palette),
     ))
 }

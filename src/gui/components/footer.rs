@@ -3,16 +3,17 @@
 use std::sync::{Arc, Mutex};
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::horizontal_space;
+use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Color, Font, Length};
-use iced_native::widget::horizontal_space;
-use iced_native::widget::tooltip::Position;
 
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,
 };
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
@@ -22,6 +23,7 @@ use crate::Language;
 
 pub fn footer(
     language: Language,
+    color_gradient: GradientType,
     style: StyleType,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message> {
@@ -52,8 +54,8 @@ pub fn footer(
         .width(Length::Fill)
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Headers),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
         ))
 }
 
@@ -61,19 +63,19 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('c'.to_string())
             .font(ICONS)
-            .size(18)
+            .size(17)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(content, "Website", Position::Top)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 
@@ -81,39 +83,40 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
-            .size(28)
+            .size(26)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(content, "GitHub", Position::Top)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 
 fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('❤'.to_string())
-            .size(28)
+            .size(23)
             .style(iced::theme::Text::Color(Color::from_rgb(1.0, 0.3, 0.5)))
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
+    .padding([2, 0, 0, 0])
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
     Tooltip::new(content, "Sponsor", Position::Top)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 
@@ -145,7 +148,7 @@ fn get_release_details(
             .padding(5)
             .height(Length::Fixed(35.0))
             .width(Length::Fixed(35.0))
-            .style(StyleTuple(style, ElementType::Alert).into())
+            .style(ButtonStyleTuple(style, ButtonType::Alert).into())
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
@@ -153,8 +156,8 @@ fn get_release_details(
                 Position::Top,
             )
             .font(get_font(style))
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(style, ElementType::Tooltip),
+            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+                ContainerStyleTuple(style, ContainerType::Tooltip),
             ));
             ret_val = ret_val
                 .push(horizontal_space(Length::Fixed(10.0)))
