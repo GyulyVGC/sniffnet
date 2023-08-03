@@ -1,6 +1,5 @@
 //! Tab buttons to be used in the various pages just under the header
 
-use iced::widget::text::LineHeight;
 use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
 
@@ -124,13 +123,12 @@ fn new_tab(
         if num > 0 {
             let notifications_badge = button(
                 Text::new(num.to_string())
-                    .line_height(LineHeight::Relative(1.0))
                     .font(get_font_headers(style))
                     .size(14)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),
             )
-            .padding(4)
+            .padding([2, 4, 0, 4])
             .height(Length::Fixed(20.0))
             .style(ButtonStyleTuple(style, ButtonType::Badge).into());
             content = content

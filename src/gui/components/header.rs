@@ -104,11 +104,10 @@ pub fn get_button_settings(
         Text::new("a")
             .font(ICONS)
             .size(20.5)
-            .line_height(LineHeight::Relative(1.0))
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
-    .padding(10)
+    .padding(0)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
     .style(ButtonStyleTuple(style, ButtonType::Standard).into())

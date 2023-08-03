@@ -4,7 +4,6 @@ use std::sync::{Arc, Mutex};
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::horizontal_space;
-use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Color, Font, Length};
@@ -104,12 +103,11 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
     let content = button(
         Text::new('❤'.to_string())
             .size(23)
-            .line_height(LineHeight::Relative(1.0))
             .style(iced::theme::Text::Color(Color::from_rgb(1.0, 0.3, 0.5)))
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
-    .padding([3, 0, 0, 0])
+    .padding([2, 0, 0, 0])
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
     .style(ButtonStyleTuple(style, ButtonType::Standard).into())
