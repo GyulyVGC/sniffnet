@@ -1,4 +1,5 @@
 mod dracula;
+mod gruvbox;
 
 use std::fmt;
 
@@ -31,6 +32,7 @@ pub struct PaletteExtension {
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
 pub enum ExtraStyles {
     Dracula,
+    Gruvbox,
 }
 
 impl ExtraStyles {
@@ -39,6 +41,7 @@ impl ExtraStyles {
     pub fn to_palette(self) -> Palette {
         match self {
             ExtraStyles::Dracula => dracula::dracula().palette,
+            ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().palette,
         }
     }
 
@@ -47,12 +50,13 @@ impl ExtraStyles {
     pub fn to_ext(self) -> PaletteExtension {
         match self {
             ExtraStyles::Dracula => dracula::dracula().extension,
+            ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().extension,
         }
     }
 
     #[inline]
     pub const fn all_styles() -> &'static [Self] {
-        &[ExtraStyles::Dracula]
+        &[ExtraStyles::Dracula, ExtraStyles::Gruvbox]
     }
 }
 
@@ -60,6 +64,7 @@ impl fmt::Display for ExtraStyles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             ExtraStyles::Dracula => write!(f, "Dracula"),
+            ExtraStyles::Gruvbox => write!(f, "Gruvbox (Dark)"),
         }
     }
 }
