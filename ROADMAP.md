@@ -9,7 +9,7 @@ Sections are sorted by relevance. <br>
 Elements inside a section are sorted by expected release date. <br>
 Known open problems are reported at the bottom of this file.
 
-### Major features
+## Major features
   
 Feature | Release | 
 -|-|
@@ -24,7 +24,7 @@ Malicious traffic detection | ❓(TBD)
 PIDs identification | ❓(TBD)
 Sniffnet agent to monitor a remote host | ❓(TBD)
 
-### Other features
+## Other features
   
 Feature | Release | 
 -|-|
@@ -41,7 +41,7 @@ Details about unassigned IPs | ❓(TBD)
 Custom TOML themes support | ❓(TBD)
 Additional details about each notification event | ❓(TBD)
 
-### Known problems
+## Known problems
 
 Solved problems will be removed. <br>
 This section only contains currently open problems.
@@ -52,6 +52,10 @@ This section only contains currently open problems.
   - too many notifications are delivered, related to similar events, in a short amount of time
 - Improve output report update strategy
   - currently the output is generated once per second
+- Using the default renderer in some environments can cause some layout problems:
+  - flags are not renderer correctly (they appear black)
+  - the UI screen glitches
+  - see [this section](https://github.com/GyulyVGC/sniffnet#troubleshooting) to solve
 - Improve packages
   - remove previous version of Sniffnet in Windows
   - solve problems related to osascript on macOS

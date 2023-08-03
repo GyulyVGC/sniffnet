@@ -145,7 +145,7 @@ fn get_release_details(
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center),
             )
-            .padding(5)
+            .padding(0)
             .height(Length::Fixed(35.0))
             .width(Length::Fixed(35.0))
             .style(ButtonStyleTuple(style, ButtonType::Alert).into())
