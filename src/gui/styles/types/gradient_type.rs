@@ -6,11 +6,11 @@ use crate::gui::styles::types::palette::{mix_colors, Palette};
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Default, Serialize, Deserialize)]
 pub enum GradientType {
     /// A harmonious color gradient
-    #[default]
     Mild,
     /// A crazy yet good-looking color gradient
     Wild,
     /// No gradient applied
+    #[default]
     None,
 }
 
