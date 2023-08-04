@@ -84,7 +84,7 @@ mod tests {
     use std::collections::VecDeque;
 
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
-    use crate::{ChartType, RunTimeData, TrafficChart};
+    use crate::{ChartType, Language, RunTimeData, StyleType, TrafficChart};
 
     #[test]
     fn test_chart_data_updates() {
@@ -162,12 +162,9 @@ mod tests {
             max_received_bytes: 21000,
             min_sent_packets: -1000,
             max_received_packets: 21000,
-            color_mix: 0.0,
-            color_incoming: Default::default(),
-            color_outgoing: Default::default(),
-            color_font: Default::default(),
+            language: Language::default(),
             chart_type: ChartType::Packets,
-            language: Default::default(),
+            style: StyleType::default(),
         };
         let mut runtime_data = RunTimeData {
             all_bytes: 0,

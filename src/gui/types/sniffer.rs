@@ -522,8 +522,6 @@ mod tests {
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::style_constants::get_color_mix_chart;
-    use crate::gui::styles::types::palette::to_rgb_color;
     use crate::gui::types::message::Message;
     use crate::networking::types::host::Host;
     use crate::notifications::types::logged_notification::{
@@ -534,8 +532,8 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        get_colors, AppProtocol, ByteMultiple, ChartType, InfoTraffic, IpVersion, Language,
-        ReportSortType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
+        AppProtocol, ByteMultiple, ChartType, InfoTraffic, IpVersion, Language, ReportSortType,
+        RunningPage, Sniffer, Status, StyleType, TransProtocol,
     };
 
     #[test]
@@ -659,94 +657,14 @@ mod tests {
 
         sniffer.update(Message::Style(StyleType::MonAmour));
         assert_eq!(sniffer.style, StyleType::MonAmour);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::MonAmour).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::MonAmour).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::MonAmour).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::MonAmour)
-        );
         sniffer.update(Message::Style(StyleType::Day));
         assert_eq!(sniffer.style, StyleType::Day);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::Day).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::Day).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::Day).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::Day)
-        );
         sniffer.update(Message::Style(StyleType::Night));
         assert_eq!(sniffer.style, StyleType::Night);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::Night).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::Night).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::Night).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::Night)
-        );
         sniffer.update(Message::Style(StyleType::DeepSea));
         assert_eq!(sniffer.style, StyleType::DeepSea);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::DeepSea)
-        );
         sniffer.update(Message::Style(StyleType::DeepSea));
         assert_eq!(sniffer.style, StyleType::DeepSea);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(StyleType::DeepSea).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(StyleType::DeepSea).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(StyleType::DeepSea).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(StyleType::DeepSea)
-        );
     }
 
     #[test]
