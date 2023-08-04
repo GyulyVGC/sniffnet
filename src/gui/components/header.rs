@@ -1,21 +1,24 @@
 //! GUI upper header
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
 
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::{Language, StyleType};
 
 pub fn header(
     style: StyleType,
+    color_gradient: GradientType,
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
@@ -23,6 +26,8 @@ pub fn header(
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
+        .vertical_alignment(Vertical::Center)
+        .line_height(LineHeight::Relative(1.0))
         .size(100);
 
     Container::new(
@@ -60,8 +65,8 @@ pub fn header(
     .height(Length::Fixed(95.0))
     .align_y(Vertical::Center)
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
     ))
 }
 
@@ -76,7 +81,7 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
     .padding(10)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -85,8 +90,8 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
         Position::Right,
     )
     .font(get_font(style))
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Tooltip),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Tooltip),
     ))
 }
 
@@ -98,18 +103,19 @@ pub fn get_button_settings(
     let content = button(
         Text::new("a")
             .font(ICONS)
+            .size(20.5)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
-    .padding(10)
+    .padding(0)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }

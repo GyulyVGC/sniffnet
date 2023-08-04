@@ -4,9 +4,9 @@ use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 
@@ -21,7 +21,9 @@ pub fn get_settings_tabs(
     let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center);
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);
@@ -50,7 +52,9 @@ pub fn get_pages_tabs(
     let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center);
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
     for (i, label) in labels.iter().enumerate() {
         let active = label.eq(&active);
@@ -88,12 +92,12 @@ fn new_tab(
             Text::new(icon)
                 .font(ICONS)
                 .size(15)
-                .style(StyleTuple(
+                .style(TextStyleTuple(
                     style,
                     if active {
-                        ElementType::Title
+                        TextType::Title
                     } else {
-                        ElementType::Standard
+                        TextType::Standard
                     },
                 ))
                 .horizontal_alignment(alignment::Horizontal::Center)
@@ -103,12 +107,12 @@ fn new_tab(
             Text::new(label)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(StyleTuple(
+                .style(TextStyleTuple(
                     style,
                     if active {
-                        ElementType::Title
+                        TextType::Title
                     } else {
-                        ElementType::Standard
+                        TextType::Standard
                     },
                 ))
                 .horizontal_alignment(alignment::Horizontal::Center)
@@ -120,13 +124,13 @@ fn new_tab(
             let notifications_badge = button(
                 Text::new(num.to_string())
                     .font(get_font_headers(style))
-                    .size(19)
+                    .size(14)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),
             )
-            .padding(4)
+            .padding([2, 4, 0, 4])
             .height(Length::Fixed(20.0))
-            .style(StyleTuple(style, ElementType::Badge).into());
+            .style(ButtonStyleTuple(style, ButtonType::Badge).into());
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
@@ -136,15 +140,16 @@ fn new_tab(
     content = content.push(horizontal_space(Length::FillPortion(1)));
 
     button(content)
-        .height(Length::Fixed(35.0))
+        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .padding(0)
         .width(Length::FillPortion(1))
         .style(
-            StyleTuple(
+            ButtonStyleTuple(
                 style,
                 if active {
-                    ElementType::TabActive
+                    ButtonType::TabActive
                 } else {
-                    ElementType::TabInactive
+                    ButtonType::TabInactive
                 },
             )
             .into(),

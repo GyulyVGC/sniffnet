@@ -55,6 +55,16 @@ impl ExtraStyles {
         }
     }
 
+    /// Theme is a night/dark style
+    #[inline]
+    pub const fn is_nightly(self) -> bool {
+        match self {
+            ExtraStyles::Dracula => true,
+            ExtraStyles::Gruvbox => true,
+        }
+    }
+
+    /// Slice of all implemented custom styles
     #[inline]
     pub const fn all_styles() -> &'static [Self] {
         &[ExtraStyles::Dracula, ExtraStyles::Gruvbox]

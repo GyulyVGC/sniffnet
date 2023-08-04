@@ -5,15 +5,23 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 
-- Added app `id` in order to correctly show the icon and app name on Linux Wayland (fixes [#292](https://github.com/GyulyVGC/sniffnet/issues/292))   
-- Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
+- Added option to set different types of color gradients for each of the available themes
+- Other aesthetic improvements (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more info):
+    - redesigned page tabs
+    - highlighted headings with different colors
+    - simplified scrollables style
+    - improvements to Deep Sea and Mon Amour color palettes
 - Added Finnish translation 🇫🇮 ([#310](https://github.com/GyulyVGC/sniffnet/pull/310))
-- Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
+- Added app `id` in order to correctly show the icon and app name on Linux Wayland (fixes [#292](https://github.com/GyulyVGC/sniffnet/issues/292))
+- Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
+- Migrated to [Iced 0.10](https://github.com/iced-rs/iced/releases/tag/0.10.0), that is now able to select the graphical renderer at runtime: a fallback one (`tiny-skia`) will be used in case the default one (`wgpu`) crashes ([#324](https://github.com/GyulyVGC/sniffnet/pull/324))
 - Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
-- Minor aesthetic improvements (implemented part of the suggestions provided in [#119](https://github.com/GyulyVGC/sniffnet/issues/119))
-- Color palettes in settings page are now built as `Rule` widgets, without involving the use of external SVGs
+- Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
+- Color palettes in settings page are now built as `Rule` widgets, without involving the use of external SVGs anymore
 - Fixed `alt`+`tab` shortcut issue ([#298](https://github.com/GyulyVGC/sniffnet/pull/298) — fixes [#262](https://github.com/GyulyVGC/sniffnet/issues/262))
 - Fixed problem that didn't allow opening links and the report file on operating systems different from Windows, macOS, and Linux
+- Use scrollable to make active filters visible when the selected adapter name is long (overview page)
+- Ensure no colored pixel is shown if the respective packets or bytes number is zero
 - Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
 
 

@@ -1,6 +1,9 @@
+use iced::font;
+
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
@@ -82,4 +85,8 @@ pub enum Message {
     ArrowPressed(bool),
     /// Emit when the main window be focused
     WindowFocused,
+    /// Result after loading a custom font
+    FontLoaded(Result<(), font::Error>),
+    /// Enable or disable gradients
+    GradientsSelection(GradientType),
 }

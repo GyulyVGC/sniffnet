@@ -1,15 +1,21 @@
+use iced::advanced::layout::{self, Layout};
+use iced::advanced::overlay;
+use iced::advanced::renderer;
+use iced::advanced::widget::{self, Widget};
+use iced::advanced::{self, Clipboard, Shell};
 use iced::alignment::{Alignment, Horizontal, Vertical};
+use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
 };
-use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size};
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::{self, Tree};
-use iced_native::{layout, overlay, renderer, Clipboard, Layout, Shell, Widget};
+use iced::{
+    event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Size,
+};
 
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
@@ -19,17 +25,19 @@ use crate::{Language, StyleType};
 
 pub fn get_exit_overlay(
     style: StyleType,
+    color_gradient: GradientType,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
     let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
-        .padding(5)
+        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
             style,
+            color_gradient,
             language,
             quit_analysis_translation(language),
         ))
@@ -44,24 +52,26 @@ pub fn get_exit_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Modal),
         ))
 }
 
 pub fn get_clear_all_overlay(
     style: StyleType,
+    color_gradient: GradientType,
     font: Font,
     language: Language,
 ) -> Container<'static, Message> {
     let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
-        .padding(5)
+        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
             style,
+            color_gradient,
             language,
             clear_all_translation(language),
         ))
@@ -76,13 +86,14 @@ pub fn get_clear_all_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Standard),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Modal),
         ))
 }
 
 fn get_modal_header(
     style: StyleType,
+    color_gradient: GradientType,
     language: Language,
     title: String,
 ) -> Container<'static, Message> {
@@ -105,21 +116,25 @@ fn get_modal_header(
                         button(
                             Text::new("×")
                                 .font(font)
+                                .vertical_alignment(Vertical::Center)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
                         .padding(2)
                         .height(Length::Fixed(20.0))
                         .width(Length::Fixed(20.0))
-                        .style(StyleTuple(style, ElementType::Standard).into())
+                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(style, ElementType::Tooltip),
-                    )),
+                    .style(<ContainerStyleTuple as Into<
+                        iced::theme::Container,
+                    >>::into(ContainerStyleTuple(
+                        style,
+                        ContainerType::Tooltip,
+                    ))),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -129,8 +144,8 @@ fn get_modal_header(
     .align_y(Vertical::Center)
     .height(Length::Fixed(40.0))
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(style, ElementType::Headers),
+    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
     ))
 }
 
@@ -153,7 +168,7 @@ fn confirm_button_row(
             .padding(5)
             .height(Length::Fixed(40.0))
             .width(Length::Fixed(80.0))
-            .style(StyleTuple(style, ElementType::Alert).into())
+            .style(ButtonStyleTuple(style, ButtonType::Alert).into())
             .on_press(message),
         )
 }
@@ -190,9 +205,20 @@ impl<'a, Message, Renderer> Modal<'a, Message, Renderer> {
 
 impl<'a, Message, Renderer> Widget<Message, Renderer> for Modal<'a, Message, Renderer>
 where
-    Renderer: iced_native::Renderer,
+    Renderer: advanced::Renderer,
     Message: Clone,
 {
+    fn children(&self) -> Vec<widget::Tree> {
+        vec![
+            widget::Tree::new(&self.base),
+            widget::Tree::new(&self.modal),
+        ]
+    }
+
+    fn diff(&self, tree: &mut widget::Tree) {
+        tree.diff_children(&[&self.base, &self.modal]);
+    }
+
     fn width(&self) -> Length {
         self.base.as_widget().width()
     }
@@ -205,14 +231,37 @@ where
         self.base.as_widget().layout(renderer, limits)
     }
 
+    fn on_event(
+        &mut self,
+        state: &mut widget::Tree,
+        event: Event,
+        layout: Layout<'_>,
+        cursor: mouse::Cursor,
+        renderer: &Renderer,
+        clipboard: &mut dyn Clipboard,
+        shell: &mut Shell<'_, Message>,
+        viewport: &Rectangle,
+    ) -> event::Status {
+        self.base.as_widget_mut().on_event(
+            &mut state.children[0],
+            event,
+            layout,
+            cursor,
+            renderer,
+            clipboard,
+            shell,
+            viewport,
+        )
+    }
+
     fn draw(
         &self,
-        state: &Tree,
+        state: &widget::Tree,
         renderer: &mut Renderer,
-        theme: &<Renderer as iced_native::Renderer>::Theme,
+        theme: &<Renderer as advanced::Renderer>::Theme,
         style: &renderer::Style,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         viewport: &Rectangle,
     ) {
         self.base.as_widget().draw(
@@ -221,72 +270,14 @@ where
             theme,
             style,
             layout,
-            cursor_position,
+            cursor,
             viewport,
         );
     }
 
-    fn children(&self) -> Vec<Tree> {
-        vec![Tree::new(&self.base), Tree::new(&self.modal)]
-    }
-
-    fn diff(&self, tree: &mut Tree) {
-        tree.diff_children(&[&self.base, &self.modal]);
-    }
-
-    fn operate(
-        &self,
-        state: &mut Tree,
-        layout: Layout<'_>,
-        renderer: &Renderer,
-        operation: &mut dyn widget::Operation<Message>,
-    ) {
-        self.base
-            .as_widget()
-            .operate(&mut state.children[0], layout, renderer, operation);
-    }
-
-    fn on_event(
-        &mut self,
-        state: &mut Tree,
-        event: Event,
-        layout: Layout<'_>,
-        cursor_position: Point,
-        renderer: &Renderer,
-        clipboard: &mut dyn Clipboard,
-        shell: &mut Shell<'_, Message>,
-    ) -> event::Status {
-        self.base.as_widget_mut().on_event(
-            &mut state.children[0],
-            event,
-            layout,
-            cursor_position,
-            renderer,
-            clipboard,
-            shell,
-        )
-    }
-
-    fn mouse_interaction(
-        &self,
-        state: &Tree,
-        layout: Layout<'_>,
-        cursor_position: Point,
-        viewport: &Rectangle,
-        renderer: &Renderer,
-    ) -> mouse::Interaction {
-        self.base.as_widget().mouse_interaction(
-            &state.children[0],
-            layout,
-            cursor_position,
-            viewport,
-            renderer,
-        )
-    }
-
     fn overlay<'b>(
         &'b mut self,
-        state: &'b mut Tree,
+        state: &'b mut widget::Tree,
         layout: Layout<'_>,
         _renderer: &Renderer,
     ) -> Option<overlay::Element<'b, Message, Renderer>> {
@@ -300,11 +291,40 @@ where
             }),
         ))
     }
+
+    fn mouse_interaction(
+        &self,
+        state: &widget::Tree,
+        layout: Layout<'_>,
+        cursor: mouse::Cursor,
+        viewport: &Rectangle,
+        renderer: &Renderer,
+    ) -> mouse::Interaction {
+        self.base.as_widget().mouse_interaction(
+            &state.children[0],
+            layout,
+            cursor,
+            viewport,
+            renderer,
+        )
+    }
+
+    fn operate(
+        &self,
+        state: &mut widget::Tree,
+        layout: Layout<'_>,
+        renderer: &Renderer,
+        operation: &mut dyn widget::Operation<Message>,
+    ) {
+        self.base
+            .as_widget()
+            .operate(&mut state.children[0], layout, renderer, operation);
+    }
 }
 
 struct Overlay<'a, 'b, Message, Renderer> {
     content: &'b mut Element<'a, Message, Renderer>,
-    tree: &'b mut Tree,
+    tree: &'b mut widget::Tree,
     size: Size,
     on_blur: Option<Message>,
 }
@@ -312,7 +332,7 @@ struct Overlay<'a, 'b, Message, Renderer> {
 impl<'a, 'b, Message, Renderer> overlay::Overlay<Message, Renderer>
     for Overlay<'a, 'b, Message, Renderer>
 where
-    Renderer: iced_native::Renderer,
+    Renderer: advanced::Renderer,
     Message: Clone,
 {
     fn layout(&self, renderer: &Renderer, _bounds: Size, position: Point) -> layout::Node {
@@ -329,23 +349,55 @@ where
         node
     }
 
+    fn on_event(
+        &mut self,
+        event: Event,
+        layout: Layout<'_>,
+        cursor: mouse::Cursor,
+        renderer: &Renderer,
+        clipboard: &mut dyn Clipboard,
+        shell: &mut Shell<'_, Message>,
+    ) -> event::Status {
+        let content_bounds = layout.children().next().unwrap().bounds();
+
+        if let Some(message) = self.on_blur.as_ref() {
+            if let Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) = &event {
+                if !cursor.is_over(content_bounds) {
+                    shell.publish(message.clone());
+                    return event::Status::Captured;
+                }
+            }
+        }
+
+        self.content.as_widget_mut().on_event(
+            self.tree,
+            event,
+            layout.children().next().unwrap(),
+            cursor,
+            renderer,
+            clipboard,
+            shell,
+            &layout.bounds(),
+        )
+    }
+
     fn draw(
         &self,
         renderer: &mut Renderer,
         theme: &Renderer::Theme,
         style: &renderer::Style,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
     ) {
         renderer.fill_quad(
             renderer::Quad {
                 bounds: layout.bounds(),
-                border_radius: renderer::BorderRadius::from(0.0),
+                border_radius: BorderRadius::default(),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
             },
             Color {
-                a: 0.8, // background opacity
+                a: 0.80,
                 ..Color::BLACK
             },
         );
@@ -356,7 +408,7 @@ where
             theme,
             style,
             layout.children().next().unwrap(),
-            cursor_position,
+            cursor,
             &layout.bounds(),
         );
     }
@@ -375,57 +427,36 @@ where
         );
     }
 
-    fn on_event(
-        &mut self,
-        event: Event,
-        layout: Layout<'_>,
-        cursor_position: Point,
-        renderer: &Renderer,
-        clipboard: &mut dyn Clipboard,
-        shell: &mut Shell<'_, Message>,
-    ) -> event::Status {
-        let content_bounds = layout.children().next().unwrap().bounds();
-
-        if let Some(message) = self.on_blur.as_ref() {
-            if let Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left)) = &event {
-                if !content_bounds.contains(cursor_position) {
-                    shell.publish(message.clone());
-                    return event::Status::Captured;
-                }
-            }
-        }
-
-        self.content.as_widget_mut().on_event(
-            self.tree,
-            event,
-            layout.children().next().unwrap(),
-            cursor_position,
-            renderer,
-            clipboard,
-            shell,
-        )
-    }
-
     fn mouse_interaction(
         &self,
         layout: Layout<'_>,
-        cursor_position: Point,
+        cursor: mouse::Cursor,
         viewport: &Rectangle,
         renderer: &Renderer,
     ) -> mouse::Interaction {
         self.content.as_widget().mouse_interaction(
             self.tree,
             layout.children().next().unwrap(),
-            cursor_position,
+            cursor,
             viewport,
             renderer,
         )
+    }
+
+    fn overlay<'c>(
+        &'c mut self,
+        layout: Layout<'_>,
+        renderer: &Renderer,
+    ) -> Option<overlay::Element<'c, Message, Renderer>> {
+        self.content
+            .as_widget_mut()
+            .overlay(self.tree, layout.children().next().unwrap(), renderer)
     }
 }
 
 impl<'a, Message, Renderer> From<Modal<'a, Message, Renderer>> for Element<'a, Message, Renderer>
 where
-    Renderer: 'a + iced_native::Renderer,
+    Renderer: 'a + advanced::Renderer,
     Message: 'a + Clone,
 {
     fn from(modal: Modal<'a, Message, Renderer>) -> Self {

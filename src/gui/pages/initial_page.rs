@@ -2,19 +2,24 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, PickList, Row, Scrollable,
     Text, Tooltip,
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Alignment, Font, Length};
-use iced_native::widget::tooltip::Position;
 use pcap::Device;
 
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
+use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
+use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
+use crate::gui::styles::picklist::{PicklistStyleTuple, PicklistType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::translations::translations::{
@@ -45,7 +50,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
         .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(button_start(sniffer.style, sniffer.language))
+        .push(button_start(
+            sniffer.style,
+            sniffer.language,
+            sniffer.color_gradient,
+        ))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -65,14 +74,14 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
     .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
     .font(font)
-    .style(StyleTuple(sniffer.style, ElementType::Standard));
+    .style(PicklistStyleTuple(sniffer.style, PicklistType::Standard));
     let col_app = Column::new()
         .width(FillPortion(8))
         .spacing(10)
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
-                .style(StyleTuple(sniffer.style, ElementType::Subtitle))
+                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(picklist_app);
@@ -85,7 +94,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             Row::new().push(
                 select_filters_translation(sniffer.language)
                     .font(font)
-                    .style(StyleTuple(sniffer.style, ElementType::Title))
+                    .style(TextStyleTuple(sniffer.style, TextType::Title))
                     .size(FONT_SIZE_TITLE),
             ),
         )
@@ -105,26 +114,29 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
             .push(filters),
     );
 
-    Container::new(body).height(Length::Fill).style(
-        <StyleTuple as Into<iced::theme::Container>>::into(StyleTuple(
-            sniffer.style,
-            ElementType::Standard,
-        )),
-    )
+    Container::new(body)
+        .height(Length::Fill)
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
+        ))
 }
 
-fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn button_start(
+    style: StyleType,
+    language: Language,
+    color_gradient: GradientType,
+) -> Tooltip<'static, Message> {
     let content = button(
         Text::new("S")
             .font(ICONS)
-            .size(FONT_SIZE_TITLE)
+            .size(25)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(StyleTuple(style, ElementType::Standard).into())
+    .style(ButtonStyleTuple(style, ButtonType::Gradient(color_gradient)).into())
     .on_press(Message::Start);
 
     let tooltip = start_translation(language).to_string();
@@ -132,8 +144,8 @@ fn button_start(style: StyleType, language: Language) -> Tooltip<'static, Messag
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(get_font(style))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(style, ElementType::Tooltip),
+        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
+            ContainerStyleTuple(style, ContainerType::Tooltip),
         ))
 }
 
@@ -178,7 +190,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
         .push(
             choose_adapters_translation(sniffer.language)
                 .font(font)
-                .style(StyleTuple(sniffer.style, ElementType::Title))
+                .style(TextStyleTuple(sniffer.style, TextType::Title))
                 .size(FONT_SIZE_TITLE),
         )
         .push(
@@ -192,12 +204,12 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                             .padding([20, 30])
                             .width(Length::Fill)
                             .style(
-                                StyleTuple(
+                                ButtonStyleTuple(
                                     sniffer.style,
                                     if name == sniffer.device.name {
-                                        ElementType::BorderedRoundSelected
+                                        ButtonType::BorderedRoundSelected
                                     } else {
-                                        ElementType::BorderedRound
+                                        ButtonType::BorderedRound
                                     },
                                 )
                                 .into(),
@@ -206,8 +218,12 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                     )
                 },
             ))
-            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                StyleTuple(sniffer.style, ElementType::Standard),
-            )),
+            .direction(Direction::Vertical(ScrollbarType::properties()))
+            .style(
+                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
+                    sniffer.style,
+                    ScrollbarType::Standard,
+                )),
+            ),
         )
 }

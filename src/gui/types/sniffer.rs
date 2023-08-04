@@ -6,14 +6,14 @@ use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use iced::window;
-use iced_native::Command;
+use iced::{window, Command};
 use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
@@ -54,8 +54,10 @@ pub struct Sniffer {
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
-    /// Application style (only values Day and Night are possible for this field)
+    /// Application style
     pub style: StyleType,
+    /// Wether gradients are enabled by the user
+    pub color_gradient: GradientType,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -106,6 +108,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             style: config_settings.style,
+            color_gradient: config_settings.color_gradient,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(config_settings.style, config_settings.language),
             report_sort_type: ReportSortType::MostRecent,
@@ -125,7 +128,6 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::TickInit => {}
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version) => self.filters.ip = version,
@@ -222,6 +224,8 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
+            Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
+            _ => {}
         }
         Command::none()
     }
@@ -400,6 +404,7 @@ impl Sniffer {
                 style: self.style,
                 notifications: self.notifications,
                 language: self.language,
+                color_gradient: self.color_gradient,
             };
             confy::store("sniffnet", "settings", store).unwrap_or(());
         }

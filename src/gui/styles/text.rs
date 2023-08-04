@@ -1,24 +1,53 @@
 //! Text style
 
+use iced::widget::{Column, Text};
 use iced::Color;
 
-use crate::get_colors;
-use crate::gui::styles::types::element_type::ElementType;
+use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::types::palette::Palette;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::types::message::Message;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Text {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum TextType {
+    Standard,
+    Title,
+    Subtitle,
+}
+
+/// Returns a formatted caption followed by subtitle, new line, tab, and desc
+impl TextType {
+    pub fn highlighted_subtitle_with_desc(
+        subtitle: &str,
+        desc: &str,
+        style: StyleType,
+    ) -> Column<'static, Message> {
+        let font = get_font(style);
+        Column::new()
+            .push(
+                Text::new(format!("{subtitle}:"))
+                    .style(TextStyleTuple(style, TextType::Subtitle))
+                    .font(font),
+            )
+            .push(Text::new(format!("   {desc}")).font(font))
+    }
+}
+
+#[derive(Clone)]
+pub struct TextStyleTuple(pub StyleType, pub TextType);
+
+impl From<TextStyleTuple> for iced::theme::Text {
+    fn from(tuple: TextStyleTuple) -> Self {
         let colors = get_colors(tuple.0);
         iced::theme::Text::Color(highlight(tuple.1, &colors))
     }
 }
 
 /// Returns the weighted average of two colors; color intensity is fixed to 100%
-pub fn highlight(element: ElementType, colors: &Palette) -> Color {
+pub fn highlight(element: TextType, colors: &Palette) -> Color {
     let color = colors.secondary;
     match element {
-        ElementType::Title => {
+        TextType::Title => {
             let (p1, c) = if colors.text_body.eq(&Color::BLACK) {
                 (0.9, 0.7)
             } else {
@@ -31,7 +60,7 @@ pub fn highlight(element: ElementType, colors: &Palette) -> Color {
                 a: 1.0,
             }
         }
-        ElementType::Subtitle => {
+        TextType::Subtitle => {
             let (p1, c) = if colors.text_body.eq(&Color::BLACK) {
                 (0.6, 0.7)
             } else {
@@ -44,6 +73,6 @@ pub fn highlight(element: ElementType, colors: &Palette) -> Color {
                 a: 1.0,
             }
         }
-        _ => colors.text_body,
+        TextType::Standard => colors.text_body,
     }
 }

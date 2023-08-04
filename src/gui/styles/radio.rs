@@ -3,17 +3,24 @@
 use iced::Background;
 use iced::Theme;
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::BORDER_WIDTH;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Radio {
-    fn from(tuple: StyleTuple) -> Self {
+#[derive(Clone, Copy)]
+pub enum RadioType {
+    Standard,
+}
+
+#[derive(Clone)]
+pub struct RadioStyleTuple(pub StyleType, pub RadioType);
+
+impl From<RadioStyleTuple> for iced::theme::Radio {
+    fn from(tuple: RadioStyleTuple) -> Self {
         iced::theme::Radio::Custom(Box::new(tuple))
     }
 }
 
-impl iced::widget::radio::StyleSheet for StyleTuple {
+impl iced::widget::radio::StyleSheet for RadioStyleTuple {
     type Style = Theme;
 
     fn active(&self, _: &Self::Style, is_selected: bool) -> iced::widget::radio::Appearance {
