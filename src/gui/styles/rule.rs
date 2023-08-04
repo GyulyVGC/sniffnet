@@ -43,7 +43,10 @@ impl rule::StyleSheet for RuleStyleTuple {
                 RuleType::PalettePrimary
                 | RuleType::PaletteSecondary
                 | RuleType::PaletteOutgoing
-                | RuleType::PaletteButtons => 40,
+                | RuleType::PaletteButtons => match self.0 {
+                    StyleType::Custom(_) => 25,
+                    _ => 40
+                },
                 RuleType::Standard => 3,
             },
             radius: 0.0.into(),

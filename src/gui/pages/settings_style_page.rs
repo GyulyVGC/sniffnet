@@ -3,6 +3,7 @@ use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Element, Length};
+use iced::widget::scrollable::Direction;
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -22,6 +23,7 @@ use crate::translations::translations::{
 use crate::translations::translations_2::color_gradients_translation;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -56,13 +58,17 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
+        .push(vertical_space(Length::Fixed(15.0)))
         .push(gradients_row(
             sniffer.style,
             sniffer.color_gradient,
             sniffer.language,
         ))
-        .push(vertical_space(Length::Fixed(10.0)))
+        .push(vertical_space(Length::Fixed(15.0)));
+
+    let mut styles_col =         Column::new()
+        .align_items(Alignment::Center)
+        .width(Length::Fill)
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -95,14 +101,18 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                     mon_amour_translation(sniffer.language).to_string(),
                     MonAmour,
                 )),
-        );
-
-    // Append custom styles to official styles.
-    content = content.push(vertical_space(Length::Fixed(10.0)));
-    for style in get_extra_styles(ExtraStyles::all_styles()) {
-        content = content.push(style);
+        )
+        .push(vertical_space(Length::Fixed(10.0)));
+    for style in get_extra_styles(ExtraStyles::all_styles(), sniffer.style) {
+        styles_col = styles_col.push(style);
     }
-    let content = Scrollable::new(content);
+
+    let styles_scroll = Scrollable::new(
+styles_col
+    ).direction(Direction::Vertical(ScrollbarType::properties()))
+        .style(ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard));
+
+    content = content.push(styles_scroll);
 
     Container::new(content)
         .height(Length::Fixed(400.0))
@@ -185,16 +195,25 @@ fn get_palette_container(
     on_press: StyleType,
 ) -> Button<'static, Message> {
     let font = get_font(style);
-    let content = Column::new()
+
+    let is_custom = match on_press {
+        StyleType::Custom(_) => true,
+        _ => false
+    };
+
+    let mut content = Column::new()
         .width(Length::Fill)
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(get_palette(on_press))
-        .push(Text::new(description).font(font));
+        .push(get_palette(on_press, is_custom));
+
+    if !is_custom {
+        content=content.push(Text::new(description).font(font))
+    }
 
     Button::new(content)
-        .height(Length::Fixed(110.0))
+        .height(Length::Fixed(if is_custom {75.0} else {  110.0}))
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
@@ -211,27 +230,29 @@ fn get_palette_container(
         .on_press(Message::Style(on_press))
 }
 
-fn get_palette(style: StyleType) -> Container<'static, Message> {
+fn get_palette(style: StyleType, is_custom: bool) -> Container<'static, Message> {
+    let height = if is_custom {25.0} else { 40.0 };
+
     Container::new(
         Row::new()
             .padding(0)
             .push(Row::new().padding(0).width(Length::Fixed(120.0)).push(
-                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(height).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
                     RuleStyleTuple(style, RuleType::PalettePrimary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(80.0)).push(
-                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(height).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
                     RuleStyleTuple(style, RuleType::PaletteSecondary),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(60.0)).push(
-                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(height).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
                     RuleStyleTuple(style, RuleType::PaletteOutgoing),
                 )),
             ))
             .push(Row::new().padding(0).width(Length::Fixed(40.0)).push(
-                Rule::horizontal(40).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
+                Rule::horizontal(height).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
                     RuleStyleTuple(style, RuleType::PaletteButtons),
                 )),
             )),
@@ -239,20 +260,20 @@ fn get_palette(style: StyleType) -> Container<'static, Message> {
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(40.0 + 1.7 * BORDER_WIDTH)
+    .height(height + 1.7 * BORDER_WIDTH)
     .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
         ContainerStyleTuple(style, ContainerType::Palette),
     ))
 }
 
 // Buttons for each extra style arranged in rows of two
-fn get_extra_styles(styles: &[ExtraStyles]) -> Vec<Element<'static, Message>> {
+fn get_extra_styles(styles: &[ExtraStyles], current_style: StyleType) -> Vec<Element<'static, Message>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
         let description = "".to_owned();
         let style = StyleType::Custom(style);
-        get_palette_container(style, name, description, style)
+        get_palette_container(current_style, name, description, style)
     });
 
     // The best way to do this would be with itertools, but that would introduce another dependency.
