@@ -1,5 +1,7 @@
+#![allow(clippy::unreadable_literal)]
+
 //! Dracula theme
-//! https://draculatheme.com/
+//! <https://draculatheme.com/>
 use iced::color;
 
 use super::{CustomPalette, Palette, PaletteExtension};

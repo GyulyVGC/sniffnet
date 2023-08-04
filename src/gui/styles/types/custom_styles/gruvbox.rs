@@ -1,5 +1,7 @@
+#![allow(clippy::unreadable_literal)]
+
 //! Gruvbox
-//! https://github.com/morhetz/gruvbox
+//! <https://github.com/morhetz/gruvbox>
 
 use iced::color;
 

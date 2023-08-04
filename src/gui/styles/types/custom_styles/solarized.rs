@@ -1,5 +1,7 @@
+#![allow(clippy::unreadable_literal)]
+
 //! Solarized
-//! https://ethanschoonover.com/solarized/
+//! <https://ethanschoonover.com/solarized/>
 use iced::color;
 
 use super::{CustomPalette, Palette, PaletteExtension};

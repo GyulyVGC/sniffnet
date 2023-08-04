@@ -39,7 +39,7 @@ pub enum ExtraStyles {
 }
 
 impl ExtraStyles {
-    /// [Palette] of the [ExtraStyles] variant
+    /// [`Palette`] of the [`ExtraStyles`] variant
     #[inline]
     pub fn to_palette(self) -> Palette {
         match self {
@@ -49,7 +49,7 @@ impl ExtraStyles {
         }
     }
 
-    /// Extension colors for the current [ExtraStyles] variant
+    /// Extension colors for the current [`ExtraStyles`] variant
     #[inline]
     pub fn to_ext(self) -> PaletteExtension {
         match self {
@@ -63,8 +63,7 @@ impl ExtraStyles {
     #[inline]
     pub const fn is_nightly(self) -> bool {
         match self {
-            ExtraStyles::Dracula => true,
-            ExtraStyles::Gruvbox => true,
+            ExtraStyles::Dracula | ExtraStyles::Gruvbox => true,
             ExtraStyles::SolarizedLight => false,
         }
     }

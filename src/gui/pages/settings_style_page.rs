@@ -1,9 +1,9 @@
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
 use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Element, Length};
-use iced::widget::scrollable::Direction;
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -11,6 +11,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
+use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::types::custom_styles::ExtraStyles;
@@ -23,7 +24,6 @@ use crate::translations::translations::{
 use crate::translations::translations_2::color_gradients_translation;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
-use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     let font = get_font(sniffer.style);
@@ -66,7 +66,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         ))
         .push(vertical_space(Length::Fixed(15.0)));
 
-    let mut styles_col =         Column::new()
+    let mut styles_col = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(
@@ -107,9 +107,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
         styles_col = styles_col.push(style);
     }
 
-    let styles_scroll = Scrollable::new(
-styles_col
-    ).direction(Direction::Vertical(ScrollbarType::properties()))
+    let styles_scroll = Scrollable::new(styles_col)
+        .direction(Direction::Vertical(ScrollbarType::properties()))
         .style(ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard));
 
     content = content.push(styles_scroll);
@@ -196,10 +195,7 @@ fn get_palette_container(
 ) -> Button<'static, Message> {
     let font = get_font(style);
 
-    let is_custom = match on_press {
-        StyleType::Custom(_) => true,
-        _ => false
-    };
+    let is_custom = matches!(on_press, StyleType::Custom(_));
 
     let mut content = Column::new()
         .width(Length::Fill)
@@ -209,11 +205,11 @@ fn get_palette_container(
         .push(get_palette(on_press, is_custom));
 
     if !is_custom {
-        content=content.push(Text::new(description).font(font))
+        content = content.push(Text::new(description).font(font));
     }
 
     Button::new(content)
-        .height(Length::Fixed(if is_custom {75.0} else {  110.0}))
+        .height(Length::Fixed(if is_custom { 75.0 } else { 110.0 }))
         .width(Length::Fixed(380.0))
         .padding(5)
         .style(
@@ -231,7 +227,7 @@ fn get_palette_container(
 }
 
 fn get_palette(style: StyleType, is_custom: bool) -> Container<'static, Message> {
-    let height = if is_custom {25.0} else { 40.0 };
+    let height = if is_custom { 25.0 } else { 40.0 };
 
     Container::new(
         Row::new()
@@ -267,11 +263,14 @@ fn get_palette(style: StyleType, is_custom: bool) -> Container<'static, Message>
 }
 
 // Buttons for each extra style arranged in rows of two
-fn get_extra_styles(styles: &[ExtraStyles], current_style: StyleType) -> Vec<Element<'static, Message>> {
+fn get_extra_styles(
+    styles: &[ExtraStyles],
+    current_style: StyleType,
+) -> Vec<Element<'static, Message>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
-        let description = "".to_owned();
+        let description = String::new();
         let style = StyleType::Custom(style);
         get_palette_container(current_style, name, description, style)
     });

@@ -24,7 +24,7 @@ impl StyleType {
         match self {
             StyleType::Night | StyleType::DeepSea => true,
             StyleType::Day | StyleType::MonAmour => false,
-            StyleType::Custom(style) => style.is_nightly()
+            StyleType::Custom(style) => style.is_nightly(),
         }
     }
 }

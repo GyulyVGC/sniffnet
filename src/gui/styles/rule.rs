@@ -45,7 +45,7 @@ impl rule::StyleSheet for RuleStyleTuple {
                 | RuleType::PaletteOutgoing
                 | RuleType::PaletteButtons => match self.0 {
                     StyleType::Custom(_) => 25,
-                    _ => 40
+                    _ => 40,
                 },
                 RuleType::Standard => 3,
             },

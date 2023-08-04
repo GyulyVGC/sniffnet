@@ -41,7 +41,7 @@ pub fn get_colors(style: StyleType) -> Palette {
         StyleType::Day => DAY_STYLE,
         StyleType::DeepSea => DEEP_SEA_STYLE,
         StyleType::MonAmour => MON_AMOUR_STYLE,
-        StyleType::Custom(style) => style.to_palette()
+        StyleType::Custom(style) => style.to_palette(),
     }
 }
 
