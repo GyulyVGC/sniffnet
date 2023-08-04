@@ -1,5 +1,6 @@
 mod dracula;
 mod gruvbox;
+mod solarized;
 
 use std::fmt;
 
@@ -34,6 +35,7 @@ pub struct PaletteExtension {
 pub enum ExtraStyles {
     Dracula,
     Gruvbox,
+    SolarizedLight,
 }
 
 impl ExtraStyles {
@@ -43,6 +45,7 @@ impl ExtraStyles {
         match self {
             ExtraStyles::Dracula => dracula::dracula().palette,
             ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().palette,
+            ExtraStyles::SolarizedLight => solarized::solarized_light().palette,
         }
     }
 
@@ -52,6 +55,7 @@ impl ExtraStyles {
         match self {
             ExtraStyles::Dracula => dracula::dracula().extension,
             ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().extension,
+            ExtraStyles::SolarizedLight => solarized::solarized_light().extension,
         }
     }
 
@@ -61,13 +65,18 @@ impl ExtraStyles {
         match self {
             ExtraStyles::Dracula => true,
             ExtraStyles::Gruvbox => true,
+            ExtraStyles::SolarizedLight => false,
         }
     }
 
     /// Slice of all implemented custom styles
     #[inline]
     pub const fn all_styles() -> &'static [Self] {
-        &[ExtraStyles::Dracula, ExtraStyles::Gruvbox]
+        &[
+            ExtraStyles::Dracula,
+            ExtraStyles::Gruvbox,
+            ExtraStyles::SolarizedLight,
+        ]
     }
 }
 
@@ -76,6 +85,7 @@ impl fmt::Display for ExtraStyles {
         match *self {
             ExtraStyles::Dracula => write!(f, "Dracula"),
             ExtraStyles::Gruvbox => write!(f, "Gruvbox (Dark)"),
+            ExtraStyles::SolarizedLight => write!(f, "Solarized (Light)"),
         }
     }
 }
