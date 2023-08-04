@@ -5,7 +5,6 @@ use std::collections::VecDeque;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
 use iced::Element;
-use plotters::style::RGBColor;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::gui::styles::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER};
@@ -35,12 +34,12 @@ pub struct TrafficChart {
     pub min_sent_packets: i64,
     /// Minimum number of received packets per time interval (computed on last 30 intervals)
     pub max_received_packets: i64,
-    pub color_mix: f64,
-    pub color_incoming: RGBColor,
-    pub color_outgoing: RGBColor,
-    pub color_font: RGBColor,
-    pub chart_type: ChartType,
+    /// Language used for the chart legend
     pub language: Language,
+    /// Packets or bytes
+    pub chart_type: ChartType,
+    /// Style of the chart
+    pub style: StyleType,
 }
 
 impl TrafficChart {
@@ -55,12 +54,9 @@ impl TrafficChart {
             max_received_bytes: 0,
             min_sent_packets: 0,
             max_received_packets: 0,
-            color_mix: get_color_mix_chart(style),
-            color_incoming: to_rgb_color(get_colors(style).secondary),
-            color_outgoing: to_rgb_color(get_colors(style).outgoing),
-            color_font: to_rgb_color(get_colors(style).text_body),
-            chart_type: ChartType::Bytes,
             language,
+            chart_type: ChartType::Bytes,
+            style,
         }
     }
 
@@ -79,11 +75,8 @@ impl TrafficChart {
         self.language = language;
     }
 
-    pub fn change_colors(&mut self, style: StyleType) {
-        self.color_font = to_rgb_color(get_colors(style).text_body);
-        self.color_incoming = to_rgb_color(get_colors(style).secondary);
-        self.color_outgoing = to_rgb_color(get_colors(style).outgoing);
-        self.color_mix = get_color_mix_chart(style);
+    pub fn change_style(&mut self, style: StyleType) {
+        self.style = style;
     }
 }
 
@@ -97,9 +90,10 @@ impl Chart<Message> for TrafficChart {
     ) {
         use plotters::prelude::*;
 
-        let font_weight = match self.color_font {
-            RGBColor(255, 255, 255) => FontStyle::Normal, // if white non-bold
-            _ => FontStyle::Bold,
+        let font_weight = if self.style.is_nightly() {
+            FontStyle::Normal
+        } else {
+            FontStyle::Bold
         };
 
         if self.ticks == 0 {
@@ -108,8 +102,11 @@ impl Chart<Message> for TrafficChart {
         let tot_seconds = self.ticks - 1;
         let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
 
-        let color_incoming = self.color_incoming;
-        let color_outgoing = self.color_outgoing;
+        let colors = get_colors(self.style);
+        let color_incoming = to_rgb_color(colors.secondary);
+        let color_outgoing = to_rgb_color(colors.outgoing);
+        let color_font = to_rgb_color(colors.text_body);
+        let color_mix = get_color_mix_chart(self.style);
 
         chart_builder
             .margin_right(30)
@@ -133,7 +130,7 @@ impl Chart<Message> for TrafficChart {
                         ("Sarasa Mono SC", 12)
                             .into_font()
                             .style(font_weight)
-                            .color(&self.color_font),
+                            .color(&color_font),
                     )
                     .y_labels(7)
                     .y_label_formatter(&|bytes| {
@@ -146,7 +143,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.received_bytes.iter().copied(),
                             0,
-                            color_incoming.mix(self.color_mix),
+                            color_incoming.mix(color_mix),
                         )
                         .border_style(
                             ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
@@ -162,7 +159,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.sent_bytes.iter().copied(),
                             0,
-                            color_outgoing.mix(self.color_mix),
+                            color_outgoing.mix(color_mix),
                         )
                         .border_style(
                             ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
@@ -182,7 +179,7 @@ impl Chart<Message> for TrafficChart {
                         ("Sarasa Mono SC", 13.5)
                             .into_font()
                             .style(font_weight)
-                            .color(&self.color_font),
+                            .color(&color_font),
                     )
                     .draw()
                     .expect("Error drawing graph");
@@ -203,7 +200,7 @@ impl Chart<Message> for TrafficChart {
                         ("Sarasa Mono SC", 12)
                             .into_font()
                             .style(font_weight)
-                            .color(&self.color_font),
+                            .color(&color_font),
                     )
                     .y_labels(7)
                     .y_label_formatter(&|packets| packets.abs().to_string())
@@ -214,7 +211,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.received_packets.iter().copied(),
                             0,
-                            color_incoming.mix(self.color_mix),
+                            color_incoming.mix(color_mix),
                         )
                         .border_style(
                             ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
@@ -230,7 +227,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.sent_packets.iter().copied(),
                             0,
-                            color_outgoing.mix(self.color_mix),
+                            color_outgoing.mix(color_mix),
                         )
                         .border_style(
                             ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
@@ -250,7 +247,7 @@ impl Chart<Message> for TrafficChart {
                         ("Sarasa Mono SC", 13.5)
                             .into_font()
                             .style(font_weight)
-                            .color(&self.color_font),
+                            .color(&color_font),
                     )
                     .draw()
                     .expect("Error drawing graph");

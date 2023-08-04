@@ -141,7 +141,7 @@ impl Sniffer {
             Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.style = style;
-                self.traffic_chart.change_colors(self.style);
+                self.traffic_chart.change_style(self.style);
             }
             Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),

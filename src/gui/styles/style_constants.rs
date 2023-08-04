@@ -2,10 +2,9 @@
 
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
-use plotters::style::RGBColor;
 
-use crate::gui::styles::types::palette::{to_rgb_color, Palette};
-use crate::{get_colors, StyleType};
+use crate::gui::styles::types::palette::Palette;
+use crate::StyleType;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -177,16 +176,18 @@ pub const SARASA_MONO: Font = Font {
 };
 
 pub fn get_font(style: StyleType) -> Font {
-    match to_rgb_color(get_colors(style).text_body) {
-        RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
+    if style.is_nightly() {
+        SARASA_MONO
+    } else {
+        SARASA_MONO_BOLD
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
-    match to_rgb_color(get_colors(style).text_headers) {
-        RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
+    if style.is_nightly() {
+        SARASA_MONO_BOLD
+    } else {
+        SARASA_MONO
     }
 }
 
