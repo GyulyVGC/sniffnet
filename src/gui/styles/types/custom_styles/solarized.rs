@@ -34,11 +34,11 @@ pub(super) fn solarized_dark() -> CustomPalette {
             primary: color!(0x002b36),          // base03
             secondary: color!(0x859900),        // green
             outgoing: color!(0x268bd2),         // blue
-            buttons: color!(0x586e75),          // base02
+            buttons: color!(0x073642),          // base02
             text_headers: color!(0x002b36),     // base03
             text_body: color!(0x839496),        // base0
             round_borders: color!(0xcb4b16),    // orange
-            round_containers: color!(0x586e75), // base2
+            round_containers: color!(0x073642), // base2
         },
         extension: PaletteExtension {
             starred: color!(0xb58900), // yellow

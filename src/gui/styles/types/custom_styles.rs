@@ -1,5 +1,6 @@
 mod dracula;
 mod gruvbox;
+mod nord;
 mod solarized;
 
 use std::fmt;
@@ -33,6 +34,7 @@ pub struct PaletteExtension {
 pub enum ExtraStyles {
     Dracula,
     Gruvbox,
+    Nord,
     SolarizedDark,
     SolarizedLight,
 }
@@ -44,6 +46,7 @@ impl ExtraStyles {
         match self {
             ExtraStyles::Dracula => dracula::dracula().palette,
             ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().palette,
+            ExtraStyles::Nord => nord::nord().palette,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().palette,
             ExtraStyles::SolarizedLight => solarized::solarized_light().palette,
         }
@@ -55,6 +58,7 @@ impl ExtraStyles {
         match self {
             ExtraStyles::Dracula => dracula::dracula().extension,
             ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().extension,
+            ExtraStyles::Nord => nord::nord().extension,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().extension,
             ExtraStyles::SolarizedLight => solarized::solarized_light().extension,
         }
@@ -64,7 +68,10 @@ impl ExtraStyles {
     #[inline]
     pub const fn is_nightly(self) -> bool {
         match self {
-            ExtraStyles::Dracula | ExtraStyles::Gruvbox | ExtraStyles::SolarizedDark => true,
+            ExtraStyles::Dracula
+            | ExtraStyles::Gruvbox
+            | ExtraStyles::Nord
+            | ExtraStyles::SolarizedDark => true,
             ExtraStyles::SolarizedLight => false,
         }
     }
@@ -75,6 +82,7 @@ impl ExtraStyles {
         &[
             ExtraStyles::Dracula,
             ExtraStyles::Gruvbox,
+            ExtraStyles::Nord,
             ExtraStyles::SolarizedDark,
             ExtraStyles::SolarizedLight,
         ]
@@ -86,6 +94,7 @@ impl fmt::Display for ExtraStyles {
         match *self {
             ExtraStyles::Dracula => write!(f, "Dracula"),
             ExtraStyles::Gruvbox => write!(f, "Gruvbox (Night)"),
+            ExtraStyles::Nord => write!(f, "Nord"),
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
         }
