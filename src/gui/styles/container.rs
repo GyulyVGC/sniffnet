@@ -5,7 +5,8 @@ use iced::Theme;
 use iced::{Background, Color};
 
 use crate::gui::styles::style_constants::{
-    get_color_mix_filter_badge, BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
+    get_alpha_chart_badge, get_alpha_round_borders, get_alpha_round_containers,
+    BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
 };
 use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
 use crate::{get_colors, StyleType};
@@ -49,14 +50,15 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
                     Background::Color(colors.secondary)
                 }
                 ContainerStyleTuple(_, ContainerType::Tooltip) => Background::Color(colors.buttons),
-                ContainerStyleTuple(_, ContainerType::BorderedRound) => {
-                    Background::Color(colors.round_containers)
-                }
+                ContainerStyleTuple(_, ContainerType::BorderedRound) => Background::Color(Color {
+                    a: get_alpha_round_containers(self.0),
+                    ..colors.buttons
+                }),
                 ContainerStyleTuple(_, ContainerType::Neutral | ContainerType::Palette) => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerStyleTuple(_, ContainerType::Badge) => Background::Color(Color {
-                    a: get_color_mix_filter_badge(self.0),
+                    a: get_alpha_chart_badge(self.0),
                     ..colors.secondary
                 }),
                 ContainerStyleTuple(_, ContainerType::Gradient(gradient_type)) => {
@@ -94,7 +96,10 @@ impl iced::widget::container::StyleSheet for ContainerStyleTuple {
             border_color: match self {
                 ContainerStyleTuple(_, ContainerType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
                 ContainerStyleTuple(_, ContainerType::Palette) => Color::BLACK,
-                _ => colors.round_borders,
+                _ => Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
             },
         }
     }

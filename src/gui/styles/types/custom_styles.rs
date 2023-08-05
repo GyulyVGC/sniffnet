@@ -23,9 +23,11 @@ pub struct PaletteExtension {
     /// Color of favorites star
     pub starred: Color,
     /// Badge/logo alpha
-    pub badge_alpha: f32,
-    /// Traffic chart color mixing
-    pub color_mixing: f64,
+    pub chart_badge_alpha: f32,
+    /// Round borders alpha
+    pub round_borders_alpha: f32,
+    /// Round containers alpha
+    pub round_containers_alpha: f32,
 }
 
 /// Built in extra styles

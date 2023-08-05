@@ -7,7 +7,7 @@ use iced::widget::{Column, Container};
 use iced::Element;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::style_constants::{get_color_mix_chart, CHARTS_LINE_BORDER};
+use crate::gui::styles::style_constants::{get_alpha_chart_badge, CHARTS_LINE_BORDER};
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -106,7 +106,7 @@ impl Chart<Message> for TrafficChart {
         let color_incoming = to_rgb_color(colors.secondary);
         let color_outgoing = to_rgb_color(colors.outgoing);
         let color_font = to_rgb_color(colors.text_body);
-        let color_mix = get_color_mix_chart(self.style);
+        let color_mix = get_alpha_chart_badge(self.style);
 
         chart_builder
             .margin_right(30)
@@ -143,7 +143,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.received_bytes.iter().copied(),
                             0,
-                            color_incoming.mix(color_mix),
+                            color_incoming.mix(color_mix.into()),
                         )
                         .border_style(
                             ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
@@ -159,7 +159,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.sent_bytes.iter().copied(),
                             0,
-                            color_outgoing.mix(color_mix),
+                            color_outgoing.mix(color_mix.into()),
                         )
                         .border_style(
                             ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
@@ -211,7 +211,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.received_packets.iter().copied(),
                             0,
-                            color_incoming.mix(color_mix),
+                            color_incoming.mix(color_mix.into()),
                         )
                         .border_style(
                             ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
@@ -227,7 +227,7 @@ impl Chart<Message> for TrafficChart {
                         AreaSeries::new(
                             self.sent_packets.iter().copied(),
                             0,
-                            color_outgoing.mix(color_mix),
+                            color_outgoing.mix(color_mix.into()),
                         )
                         .border_style(
                             ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),

@@ -2,7 +2,9 @@
 
 use iced::widget::rule;
 use iced::widget::rule::FillMode;
+use iced::Color;
 
+use crate::gui::styles::style_constants::get_alpha_round_borders;
 use crate::{get_colors, StyleType};
 
 #[derive(Clone, Copy)]
@@ -36,7 +38,10 @@ impl rule::StyleSheet for RuleStyleTuple {
                 RuleType::Outgoing | RuleType::PaletteOutgoing => colors.outgoing,
                 RuleType::PalettePrimary => colors.primary,
                 RuleType::PaletteButtons => colors.buttons,
-                RuleType::Standard => colors.round_borders,
+                RuleType::Standard => Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
             },
             width: match self.1 {
                 RuleType::Incoming | RuleType::Outgoing => 5,
