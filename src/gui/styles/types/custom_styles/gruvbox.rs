@@ -7,9 +7,9 @@ use iced::color;
 
 use super::{CustomPalette, Palette, PaletteExtension};
 
+/// Gruvbox (night style)
 pub(super) fn gruvbox_dark() -> CustomPalette {
     CustomPalette {
-        name: "Gruvbox (Dark)",
         palette: Palette {
             primary: color!(0x282828),          // bg
             secondary: color!(0xfe8019),        // orange

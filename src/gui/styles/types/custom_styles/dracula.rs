@@ -8,7 +8,6 @@ use super::{CustomPalette, Palette, PaletteExtension};
 
 pub(super) fn dracula() -> CustomPalette {
     CustomPalette {
-        name: "Dracula",
         palette: Palette {
             primary: color!(0x44475a),          // Current line
             secondary: color!(0xff79c6),        // Pink
