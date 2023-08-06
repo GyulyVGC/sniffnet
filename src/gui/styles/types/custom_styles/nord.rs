@@ -31,7 +31,7 @@ pub(super) fn nord_day() -> CustomPalette {
             primary: color!(0xeceff4),      // nord6
             secondary: color!(0x05e81ac),   // nord10
             outgoing: color!(0xb48ead),     // nord15
-            buttons: color!(0xd8dee9),      // nord4
+            buttons: color!(0x8FBCBB),      // nord7
             text_headers: color!(0xeceff4), // nord6
             text_body: color!(0x2e3440),    // nord0
         },

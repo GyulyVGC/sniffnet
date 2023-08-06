@@ -11,8 +11,8 @@ pub(super) fn solarized_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0xfdf6e3),      // base3
-            secondary: color!(0xdc322f),    // red
-            outgoing: color!(0x859900),     // green
+            secondary: color!(0x859900),    // green
+            outgoing: color!(0x268bd2),     // blue
             buttons: color!(0x93a1a1),      // base1
             text_headers: color!(0xfdf6e3), // base3
             text_body: color!(0x002b36),    // base03

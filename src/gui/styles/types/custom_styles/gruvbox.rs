@@ -39,10 +39,10 @@ pub(super) fn gruvbox_light() -> CustomPalette {
             text_body: color!(0x282828),    // fg
         },
         extension: PaletteExtension {
-            starred: color!(0xd79921), // yellow
+            starred: color!(0xd79921, 0.8), // yellow
             chart_badge_alpha: 0.75,
-            round_borders_alpha: 0.4,
-            round_containers_alpha: 0.15,
+            round_borders_alpha: 0.45,
+            round_containers_alpha: 0.2,
         },
     }
 }

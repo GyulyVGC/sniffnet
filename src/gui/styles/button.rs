@@ -45,7 +45,7 @@ impl button::StyleSheet for ButtonStyleTuple {
         let colors = get_colors(self.0);
         button::Appearance {
             background: Some(match self {
-                ButtonStyleTuple(_, ButtonType::TabActive) => {
+                ButtonStyleTuple(_, ButtonType::TabActive | ButtonType::BorderedRoundSelected) => {
                     Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
                 ButtonStyleTuple(_, ButtonType::Starred) => {
@@ -58,9 +58,6 @@ impl button::StyleSheet for ButtonStyleTuple {
                 }),
                 ButtonStyleTuple(_, ButtonType::Neutral | ButtonType::NotStarred) => {
                     Background::Color(Color::TRANSPARENT)
-                }
-                ButtonStyleTuple(_, ButtonType::BorderedRoundSelected) => {
-                    Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
                     Background::Color(colors.secondary)
