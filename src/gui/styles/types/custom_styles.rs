@@ -35,7 +35,8 @@ pub struct PaletteExtension {
 #[serde(tag = "custom")]
 pub enum ExtraStyles {
     Dracula,
-    Gruvbox,
+    GruvboxDark,
+    GruvboxLight,
     NordLight,
     NordDark,
     SolarizedDark,
@@ -48,7 +49,8 @@ impl ExtraStyles {
     pub fn to_palette(self) -> Palette {
         match self {
             ExtraStyles::Dracula => dracula::dracula().palette,
-            ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().palette,
+            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark().palette,
+            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light().palette,
             ExtraStyles::NordLight => nord::nord_day().palette,
             ExtraStyles::NordDark => nord::nord_night().palette,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().palette,
@@ -61,7 +63,8 @@ impl ExtraStyles {
     pub fn to_ext(self) -> PaletteExtension {
         match self {
             ExtraStyles::Dracula => dracula::dracula().extension,
-            ExtraStyles::Gruvbox => gruvbox::gruvbox_dark().extension,
+            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark().extension,
+            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light().extension,
             ExtraStyles::NordLight => nord::nord_day().extension,
             ExtraStyles::NordDark => nord::nord_night().extension,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().extension,
@@ -74,10 +77,12 @@ impl ExtraStyles {
     pub const fn is_nightly(self) -> bool {
         match self {
             ExtraStyles::Dracula
-            | ExtraStyles::Gruvbox
+            | ExtraStyles::GruvboxDark
             | ExtraStyles::NordDark
             | ExtraStyles::SolarizedDark => true,
-            ExtraStyles::NordLight | ExtraStyles::SolarizedLight => false,
+            ExtraStyles::GruvboxLight | ExtraStyles::NordLight | ExtraStyles::SolarizedLight => {
+                false
+            }
         }
     }
 
@@ -86,7 +91,8 @@ impl ExtraStyles {
     pub const fn all_styles() -> &'static [Self] {
         &[
             ExtraStyles::Dracula,
-            ExtraStyles::Gruvbox,
+            ExtraStyles::GruvboxDark,
+            ExtraStyles::GruvboxLight,
             ExtraStyles::NordLight,
             ExtraStyles::NordDark,
             ExtraStyles::SolarizedDark,
@@ -99,7 +105,8 @@ impl fmt::Display for ExtraStyles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             ExtraStyles::Dracula => write!(f, "Dracula"),
-            ExtraStyles::Gruvbox => write!(f, "Gruvbox (Night)"),
+            ExtraStyles::GruvboxDark => write!(f, "Gruvbox (Night)"),
+            ExtraStyles::GruvboxLight => write!(f, "Gruvbox (Day)"),
             ExtraStyles::NordLight => write!(f, "Nord (Day)"),
             ExtraStyles::NordDark => write!(f, "Nord (Night)"),
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),

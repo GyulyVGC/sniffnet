@@ -26,3 +26,23 @@ pub(super) fn gruvbox_dark() -> CustomPalette {
         },
     }
 }
+
+/// Gruvbox (day style)
+pub(super) fn gruvbox_light() -> CustomPalette {
+    CustomPalette {
+        palette: Palette {
+            primary: color!(0xfbf1c7),      // bg
+            secondary: color!(0xd65d0e),    // orange
+            outgoing: color!(0x689d6a),     // aqua
+            buttons: color!(0xd5c4a1),      // bg2
+            text_headers: color!(0xf9f5d7), // bg0_h
+            text_body: color!(0x282828),    // fg
+        },
+        extension: PaletteExtension {
+            starred: color!(0xd79921), // yellow
+            chart_badge_alpha: 0.75,
+            round_borders_alpha: 0.4,
+            round_containers_alpha: 0.15,
+        },
+    }
+}
