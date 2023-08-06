@@ -3,9 +3,10 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [UNRELEASED]
+## [1.2.2] - 2023-08-XX
 
-- Added option to set different types of color gradients for each of the available themes
+- Added option to set different shades of color gradients for each of the available themes
+- Added 8 new application themes: _Dracula_, _Gruvbox_ (Day and Night versions), _Nord_ (Day and Night versions), and _Solarized_ (Day and Night versions).
 - Other aesthetic improvements (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more info):
     - redesigned page tabs
     - highlighted headings with different colors
@@ -23,6 +24,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Use scrollable to make active filters visible when the selected adapter name is long (overview page)
 - Ensure no colored pixel is shown if the respective packets or bytes number is zero
 - Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
+- Where is Sniffnet heading next? See the new [roadmap of the project](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
 
 ## [1.2.1] - 2023-06-08
