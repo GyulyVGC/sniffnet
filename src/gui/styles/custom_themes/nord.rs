@@ -4,9 +4,10 @@
 //! <https://www.nordtheme.com/docs/colors-and-palettes>
 use iced::color;
 
-use super::{CustomPalette, Palette, PaletteExtension};
+use crate::gui::styles::types::custom_palette::{CustomPalette, PaletteExtension};
+use crate::gui::styles::types::palette::Palette;
 
-pub(super) fn nord_night() -> CustomPalette {
+pub(in crate::gui::styles) fn nord_dark() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0x2e3440),      // nord0
@@ -25,7 +26,7 @@ pub(super) fn nord_night() -> CustomPalette {
     }
 }
 
-pub(super) fn nord_day() -> CustomPalette {
+pub(in crate::gui::styles) fn nord_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0xeceff4),      // nord6

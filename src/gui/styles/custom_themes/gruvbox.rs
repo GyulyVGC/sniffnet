@@ -5,10 +5,11 @@
 
 use iced::color;
 
-use super::{CustomPalette, Palette, PaletteExtension};
+use crate::gui::styles::types::custom_palette::{CustomPalette, PaletteExtension};
+use crate::gui::styles::types::palette::Palette;
 
 /// Gruvbox (night style)
-pub(super) fn gruvbox_dark() -> CustomPalette {
+pub(in crate::gui::styles) fn gruvbox_dark() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0x282828),      // bg
@@ -28,7 +29,7 @@ pub(super) fn gruvbox_dark() -> CustomPalette {
 }
 
 /// Gruvbox (day style)
-pub(super) fn gruvbox_light() -> CustomPalette {
+pub(in crate::gui::styles) fn gruvbox_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0xfbf1c7),      // bg

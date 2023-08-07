@@ -4,10 +4,11 @@
 //! <https://ethanschoonover.com/solarized/>
 use iced::color;
 
-use super::{CustomPalette, Palette, PaletteExtension};
+use crate::gui::styles::types::custom_palette::{CustomPalette, PaletteExtension};
+use crate::gui::styles::types::palette::Palette;
 
 /// Solarized light (Day style)
-pub(super) fn solarized_light() -> CustomPalette {
+pub(in crate::gui::styles) fn solarized_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0xfdf6e3),      // base3
@@ -27,7 +28,7 @@ pub(super) fn solarized_light() -> CustomPalette {
 }
 
 /// Solarized dark (Night style)
-pub(super) fn solarized_dark() -> CustomPalette {
+pub(in crate::gui::styles) fn solarized_dark() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0x002b36),      // base03

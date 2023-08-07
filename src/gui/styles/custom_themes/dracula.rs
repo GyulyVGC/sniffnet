@@ -5,9 +5,10 @@
 //! Light style from: <https://github.com/AshGrowem/Dracula.min/>
 use iced::color;
 
-use super::{CustomPalette, Palette, PaletteExtension};
+use crate::gui::styles::types::custom_palette::{CustomPalette, PaletteExtension};
+use crate::gui::styles::types::palette::Palette;
 
-pub(super) fn dracula_dark() -> CustomPalette {
+pub(in crate::gui::styles) fn dracula_dark() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0x282a36),      // Background
@@ -27,7 +28,7 @@ pub(super) fn dracula_dark() -> CustomPalette {
 }
 
 // Light Darker variant
-pub(super) fn dracula_light() -> CustomPalette {
+pub(in crate::gui::styles) fn dracula_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
             primary: color!(0xf8f8f2),

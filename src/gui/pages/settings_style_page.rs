@@ -14,7 +14,7 @@ use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
 use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
-use crate::gui::styles::types::custom_styles::ExtraStyles;
+use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
