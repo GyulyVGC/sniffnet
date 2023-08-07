@@ -2,7 +2,7 @@
 
 //! Dracula theme
 //! <https://draculatheme.com/>
-//! Light style from: https://github.com/AshGrowem/Dracula.min/
+//! Light style from: <https://github.com/AshGrowem/Dracula.min/>
 use iced::color;
 
 use super::{CustomPalette, Palette, PaletteExtension};
@@ -26,21 +26,22 @@ pub(super) fn dracula_dark() -> CustomPalette {
     }
 }
 
+// Light Darker variant
 pub(super) fn dracula_light() -> CustomPalette {
     CustomPalette {
         palette: Palette {
-            primary: color!(0xf1f2ff),
-            secondary: color!(0xff79c6),
-            outgoing: color!(0x8be9fd),
-            buttons: color!(0xcbcee5),
-            text_headers: color!(0xf1f2ff),
+            primary: color!(0xf8f8f2),
+            secondary: color!(0x9f1670),
+            outgoing: color!(0x005d6f),
+            buttons: color!(0xc5c8de),
+            text_headers: color!(0xf8f8f2),
             text_body: color!(0x282a36),
         },
         extension: PaletteExtension {
-            starred: color!(0xf1fa8c, 0.7),
-            chart_badge_alpha: 0.25,
-            round_borders_alpha: 0.15,
-            round_containers_alpha: 0.05,
+            starred: color!(0xffb86c, 0.8),
+            chart_badge_alpha: 0.75,
+            round_borders_alpha: 0.45,
+            round_containers_alpha: 0.25,
         },
     }
 }
