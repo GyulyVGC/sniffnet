@@ -2,10 +2,9 @@
 
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
-use plotters::style::RGBColor;
 
-use crate::gui::styles::types::palette::{to_rgb_color, Palette};
-use crate::{get_colors, StyleType};
+use crate::gui::styles::types::palette::Palette;
+use crate::StyleType;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -33,14 +32,6 @@ pub const NIGHT_STYLE: Palette = Palette {
     outgoing: SECONDARY_DAY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
-    round_borders: Color {
-        a: 0.3,
-        ..Color::BLACK
-    },
-    round_containers: Color {
-        a: 0.2,
-        ..Color::BLACK
-    },
 };
 
 // day theme
@@ -64,14 +55,6 @@ pub const DAY_STYLE: Palette = Palette {
     outgoing: SECONDARY_NIGHT,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
-    round_borders: Color {
-        a: 0.25,
-        ..Color::BLACK
-    },
-    round_containers: Color {
-        a: 0.1,
-        ..Color::BLACK
-    },
 };
 
 // deep sea theme
@@ -106,14 +89,6 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
     outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
-    round_borders: Color {
-        a: 0.1,
-        ..SECONDARY_DEEP_SEA
-    },
-    round_containers: Color {
-        a: 0.03,
-        ..SECONDARY_DEEP_SEA
-    },
 };
 
 // mon amour theme
@@ -148,14 +123,6 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
-    round_borders: Color {
-        a: 0.6,
-        ..BUTTONS_MON_AMOUR
-    },
-    round_containers: Color {
-        a: 0.3,
-        ..BUTTONS_MON_AMOUR
-    },
 };
 
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =
@@ -177,23 +144,18 @@ pub const SARASA_MONO: Font = Font {
 };
 
 pub fn get_font(style: StyleType) -> Font {
-    match to_rgb_color(get_colors(style).text_body) {
-        RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
+    if style.is_nightly() {
+        SARASA_MONO
+    } else {
+        SARASA_MONO_BOLD
     }
 }
 
 pub fn get_font_headers(style: StyleType) -> Font {
-    match to_rgb_color(get_colors(style).text_headers) {
-        RGBColor(255, 255, 255) => SARASA_MONO,
-        _ => SARASA_MONO_BOLD,
-    }
-}
-
-pub fn get_color_mix_chart(style: StyleType) -> f64 {
-    match style {
-        StyleType::Night | StyleType::DeepSea => 0.3,
-        StyleType::Day | StyleType::MonAmour => 0.8,
+    if style.is_nightly() {
+        SARASA_MONO_BOLD
+    } else {
+        SARASA_MONO
     }
 }
 
@@ -228,13 +190,32 @@ pub fn get_starred_color(style: StyleType) -> Color {
             b: 39.0 / 255.0,
             a: 0.8,
         },
+        StyleType::Custom(style) => style.to_ext().starred,
     }
 }
 
-pub fn get_color_mix_filter_badge(style: StyleType) -> f32 {
+pub fn get_alpha_chart_badge(style: StyleType) -> f32 {
     match style {
         StyleType::Night | StyleType::DeepSea => 0.2,
-        StyleType::Day => 0.7,
+        StyleType::Day | StyleType::MonAmour => 0.8,
+        StyleType::Custom(style) => style.to_ext().chart_badge_alpha,
+    }
+}
+
+pub fn get_alpha_round_borders(style: StyleType) -> f32 {
+    match style {
+        StyleType::Night | StyleType::DeepSea => 0.35,
+        StyleType::Day => 0.45,
         StyleType::MonAmour => 0.5,
+        StyleType::Custom(style) => style.to_ext().round_borders_alpha,
+    }
+}
+
+pub fn get_alpha_round_containers(style: StyleType) -> f32 {
+    match style {
+        StyleType::Night | StyleType::MonAmour => 0.25,
+        StyleType::Day => 0.2,
+        StyleType::DeepSea => 0.15,
+        StyleType::Custom(style) => style.to_ext().round_containers_alpha,
     }
 }

@@ -3,8 +3,9 @@
 use std::rc::Rc;
 
 use iced::widget::pick_list;
-use iced::Background;
+use iced::{Background, Color};
 
+use crate::gui::styles::style_constants::get_alpha_round_borders;
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
@@ -51,7 +52,10 @@ impl pick_list::StyleSheet for PicklistStyleTuple {
             background: Background::Color(colors.buttons),
             border_radius: 0.0.into(),
             border_width: 1.0,
-            border_color: colors.round_borders,
+            border_color: Color {
+                a: get_alpha_round_borders(self.0),
+                ..colors.buttons
+            },
         }
     }
 

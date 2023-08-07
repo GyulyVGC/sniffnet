@@ -5,7 +5,7 @@ use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::Theme;
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::BORDER_ROUNDED_RADIUS;
+use crate::gui::styles::style_constants::{get_alpha_round_borders, BORDER_ROUNDED_RADIUS};
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
@@ -38,9 +38,15 @@ impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
             background: Some(Background::Color(Color::TRANSPARENT)),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
-            border_color: colors.round_borders,
+            border_color: Color {
+                a: get_alpha_round_borders(self.0),
+                ..colors.buttons
+            },
             scroller: Scroller {
-                color: colors.round_borders,
+                color: Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
                 border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: 0.0,
                 border_color: Color::TRANSPARENT,
@@ -51,10 +57,16 @@ impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
     fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let colors = get_colors(self.0);
         Scrollbar {
-            background: Some(Background::Color(colors.round_borders)),
+            background: Some(Background::Color(Color {
+                a: get_alpha_round_borders(self.0),
+                ..colors.buttons
+            })),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
-            border_color: colors.round_borders,
+            border_color: Color {
+                a: get_alpha_round_borders(self.0),
+                ..colors.buttons
+            },
             scroller: Scroller {
                 color: if is_mouse_over_scrollbar {
                     colors.secondary
