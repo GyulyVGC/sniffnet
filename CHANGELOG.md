@@ -6,7 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 ## [1.2.2] - 2023-08-XX
 
 - Added option to set different shades of color gradients for each of the available themes
-- Added 8 new application themes: _Dracula_, _Gruvbox_ (Day and Night versions), _Nord_ (Day and Night versions), and _Solarized_ (Day and Night versions).
+- Added new application themes: _Dracula_, _Gruvbox_, _Nord_, and _Solarized_ (each theme comes with a light and dark variant, for a total of 8 new color schemes).
 - Other aesthetic improvements (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more info):
     - redesigned page tabs
     - highlighted headings with different colors
