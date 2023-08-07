@@ -42,7 +42,6 @@ pub enum ExtraStyles {
 
 impl ExtraStyles {
     /// [`Palette`] of the [`ExtraStyles`] variant
-    #[inline]
     pub fn to_palette(self) -> Palette {
         match self {
             ExtraStyles::DraculaLight => dracula::dracula_light().palette,
@@ -57,7 +56,6 @@ impl ExtraStyles {
     }
 
     /// Extension colors for the current [`ExtraStyles`] variant
-    #[inline]
     pub fn to_ext(self) -> PaletteExtension {
         match self {
             ExtraStyles::DraculaLight => dracula::dracula_light().extension,
@@ -72,7 +70,6 @@ impl ExtraStyles {
     }
 
     /// Theme is a night/dark style
-    #[inline]
     pub const fn is_nightly(self) -> bool {
         match self {
             ExtraStyles::DraculaDark
@@ -87,7 +84,6 @@ impl ExtraStyles {
     }
 
     /// Slice of all implemented custom styles
-    #[inline]
     pub const fn all_styles() -> &'static [Self] {
         &[
             ExtraStyles::DraculaDark,

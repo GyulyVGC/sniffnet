@@ -37,7 +37,6 @@ pub struct TextStyleTuple(pub StyleType, pub TextType);
 
 impl From<TextStyleTuple> for iced::theme::Text {
     fn from(tuple: TextStyleTuple) -> Self {
-        //let colors = get_colors(tuple.0);
         iced::theme::Text::Color(highlight(tuple.0, tuple.1))
     }
 }

@@ -103,8 +103,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
                 )),
         )
         .push(vertical_space(Length::Fixed(10.0)));
-    for style in get_extra_styles(ExtraStyles::all_styles(), sniffer.style) {
-        styles_col = styles_col.push(style);
+    for children in get_extra_palettes(ExtraStyles::all_styles(), sniffer.style) {
+        styles_col = styles_col.push(children);
     }
 
     let styles_scroll = Scrollable::new(styles_col)
@@ -263,7 +263,7 @@ fn get_palette(style: StyleType, is_custom: bool) -> Container<'static, Message>
 }
 
 // Buttons for each extra style arranged in rows of two
-fn get_extra_styles(
+fn get_extra_palettes(
     styles: &[ExtraStyles],
     current_style: StyleType,
 ) -> Vec<Element<'static, Message>> {
