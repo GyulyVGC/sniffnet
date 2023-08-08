@@ -4,6 +4,7 @@ use iced::widget::text_input;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
+use crate::gui::styles::style_constants::get_alpha_round_borders;
 use crate::{get_colors, StyleType};
 
 #[derive(Clone, Copy)]
@@ -35,7 +36,10 @@ impl iced::widget::text_input::StyleSheet for TextInputStyleTuple {
             border_width: 1.0,
             border_color: match self.1 {
                 TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => colors.round_borders,
+                TextInputType::Standard => Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
             },
             icon_color: colors.text_body,
         }

@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇮🇷&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇮&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
 
 </div>
 
@@ -45,7 +45,7 @@ Sniffnet is **completely free, open-source software** which needs lots of effort
 
 If you appreciate Sniffnet, [**consider sponsoring**](https://github.com/sponsors/GyulyVGC):
 ***your support will allow me to dedicate more and more time to this project***,
-constantly expanding it including **new features and functionalities**.<br/>
+constantly expanding it including [**new features and functionalities**](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md). <br/>
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
 
@@ -217,7 +217,8 @@ sudo sniffnet
 
   <summary>MacOS dependencies&emsp;<img alt="" src="https://user-images.githubusercontent.com/100347457/193474398-7637e269-3e92-44bc-87c0-8ea18ca95693.png" width="35px"/></summary>
 
-  MacOS natively has all the dependencies you need to build and run Sniffnet!
+  MacOS natively has all the dependencies you need to build and run Sniffnet! <br>
+  However, remember to run the app with administrator privileges: this is needed to analyse the activity of your network device.
 
 </details>
 
@@ -371,41 +372,16 @@ The currently usable hotkeys are reported in the following.
 
 Most of the errors that can occur are likely due to your system missing required `pcap` dependencies,
 necessary to correctly analyze a network adapter. <br>
-Check the [required dependencies](#required-dependencies) section for instructions on how to proceed.
-
-Note that most Linux system also need this dependency (required to build the library used to play sounds):
-
-```sh
-sudo apt-get install libasound2-dev
-```
-
-Some Linux systems also need `libfontconfig`, see issue [#18](https://github.com/GyulyVGC/sniffnet/issues/18) for a reference.
-
-> **Note**
->
-> View issues labeled with [`missing-dependencies`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3A%22missing+dependency%22+) to see how those problems have been solved by others.
-
-### Installers incompatibilities
-
-If you have problems after having installed Sniffnet through the provided installers,
-it could be due to your OS not being compatible with the pre-built binaries I generated for you. <br>
-Reach out to me, and I'll try to generate an installer for your specific operating system.
-
-> **Warning**
->
-> The DEB package for Linux is built on the latest version of Ubuntu and in some cases may not be compatible with Debian. <br/>
-> See issue [#199](https://github.com/GyulyVGC/sniffnet/issues/199) for a reference.
+Check the [required dependencies](#required-dependencies) section for instructions on how to proceed, depending on your operating system.
 
 ### Rendering problems
 
-In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
-may cause some problems that could prevent you from running Sniffnet. <br>
-In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
-branch, which uses the `glow` renderer.
-
-> **Note**
->
-> View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
+In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
+the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced) 
+may cause problems (some icons are completely black, or the interface may glitch). <br>
+In these cases, you can try building the application from the [`tiny-skia-renderer`](https://github.com/GyulyVGC/sniffnet/tree/tiny-skia-renderer) 
+branch, which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment (remember to build it in release mode, since it's less performant than `wgpu`). <br>
+If you are unable to build it yourself, contact me, and I'll provide you a copy.
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 

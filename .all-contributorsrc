@@ -361,6 +361,16 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "joshuamegnauth54",
+      "name": "Joshua Megnauth",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48846352?v=4",
+      "profile": "https://joshuamegnauth54.github.io/",
+      "contributions": [
+        "code",
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7,

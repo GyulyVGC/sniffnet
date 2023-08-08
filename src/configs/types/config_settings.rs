@@ -9,8 +9,9 @@ use crate::{Language, StyleType};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct ConfigSettings {
-    pub style: StyleType,
     pub color_gradient: GradientType,
     pub language: Language,
     pub notifications: Notifications,
+    // StyleType should be last in order to deserialize as a table properly
+    pub style: StyleType,
 }

@@ -4,7 +4,10 @@ use iced::widget::button;
 use iced::widget::button::Appearance;
 use iced::{Background, Color, Vector};
 
-use crate::gui::styles::style_constants::{get_starred_color, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::{
+    get_alpha_round_borders, get_alpha_round_containers, get_starred_color, BORDER_BUTTON_RADIUS,
+    BORDER_WIDTH,
+};
 use crate::gui::styles::types::gradient_type::{
     get_gradient_buttons, get_gradient_hovered_buttons, GradientType,
 };
@@ -42,19 +45,19 @@ impl button::StyleSheet for ButtonStyleTuple {
         let colors = get_colors(self.0);
         button::Appearance {
             background: Some(match self {
-                ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
+                ButtonStyleTuple(_, ButtonType::TabActive | ButtonType::BorderedRoundSelected) => {
+                    Background::Color(mix_colors(colors.primary, colors.buttons))
+                }
                 ButtonStyleTuple(_, ButtonType::Starred) => {
                     Background::Color(get_starred_color(self.0))
                 }
                 ButtonStyleTuple(_, ButtonType::Badge) => Background::Color(colors.secondary),
-                ButtonStyleTuple(_, ButtonType::BorderedRound) => {
-                    Background::Color(colors.round_containers)
-                }
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => Background::Color(Color {
+                    a: get_alpha_round_containers(self.0),
+                    ..colors.buttons
+                }),
                 ButtonStyleTuple(_, ButtonType::Neutral | ButtonType::NotStarred) => {
                     Background::Color(Color::TRANSPARENT)
-                }
-                ButtonStyleTuple(_, ButtonType::BorderedRoundSelected) => {
-                    Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
                     Background::Color(colors.secondary)
@@ -102,7 +105,10 @@ impl button::StyleSheet for ButtonStyleTuple {
             },
             border_color: match self {
                 ButtonStyleTuple(_, ButtonType::Alert) => Color::new(0.8, 0.15, 0.15, 1.0),
-                ButtonStyleTuple(_, ButtonType::BorderedRound) => colors.round_borders,
+                ButtonStyleTuple(_, ButtonType::BorderedRound) => Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
                 _ => colors.secondary,
             },
         }
@@ -120,7 +126,6 @@ impl button::StyleSheet for ButtonStyleTuple {
                 ButtonStyleTuple(_, ButtonType::Starred) => {
                     Background::Color(get_starred_color(self.0))
                 }
-                ButtonStyleTuple(_, ButtonType::TabActive) => Background::Color(colors.primary),
                 ButtonStyleTuple(_, ButtonType::Gradient(GradientType::None)) => {
                     Background::Color(mix_colors(colors.primary, colors.secondary))
                 }
@@ -156,7 +161,10 @@ impl button::StyleSheet for ButtonStyleTuple {
                 ButtonStyleTuple(
                     _,
                     ButtonType::BorderedRound | ButtonType::Neutral | ButtonType::NotStarred,
-                ) => colors.round_borders,
+                ) => Color {
+                    a: get_alpha_round_borders(self.0),
+                    ..colors.buttons
+                },
                 _ => colors.secondary,
             },
             text_color: match self {

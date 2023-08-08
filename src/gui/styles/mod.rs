@@ -1,6 +1,7 @@
 pub mod button;
 pub mod checkbox;
 pub mod container;
+pub mod custom_themes;
 pub mod picklist;
 pub mod radio;
 pub mod rule;
