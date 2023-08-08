@@ -3,19 +3,19 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 
-## [1.2.2] - 2023-08-XX
+## [1.2.2] - 2023-08-08
 
 - Added option to set different shades of color gradients for each of the available themes
-- Added new application themes: _Dracula_, _Gruvbox_, _Nord_, and _Solarized_ (each theme comes with a light and dark variant, for a total of 8 new color schemes).
+- Added new application themes: _Dracula_, _Gruvbox_, _Nord_, and _Solarized_ ([#330](https://github.com/GyulyVGC/sniffnet/pull/330))
 - Other aesthetic improvements (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more info):
     - redesigned page tabs
     - highlighted headings with different colors
     - simplified scrollables style
     - improvements to Deep Sea and Mon Amour color palettes
 - Added Finnish translation 🇫🇮 ([#310](https://github.com/GyulyVGC/sniffnet/pull/310))
-- Added app `id` in order to correctly show the icon and app name on Linux Wayland (fixes [#292](https://github.com/GyulyVGC/sniffnet/issues/292))
 - Added support for `--help` and `--version` command line arguments ([#272](https://github.com/GyulyVGC/sniffnet/pull/272))
 - Migrated to [Iced 0.10](https://github.com/iced-rs/iced/releases/tag/0.10.0), that is now able to select the graphical renderer at runtime: a fallback one (`tiny-skia`) will be used in case the default one (`wgpu`) crashes ([#324](https://github.com/GyulyVGC/sniffnet/pull/324))
+- Added app `id` in order to correctly show the icon and app name on Linux Wayland (fixes [#292](https://github.com/GyulyVGC/sniffnet/issues/292))
 - Restructured issue templates to let users open issues in a more efficient and effective way ([#285](https://github.com/GyulyVGC/sniffnet/pull/285))
 - Updated French translation to v1.2 ([#279](https://github.com/GyulyVGC/sniffnet/pull/279))
 - Color palettes in settings page are now built as `Rule` widgets, without involving the use of external SVGs anymore
