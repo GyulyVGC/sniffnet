@@ -65,9 +65,7 @@ pub fn header(
     .height(Length::Fixed(95.0))
     .align_y(Vertical::Center)
     .width(Length::Fill)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
-    ))
+    .style(ContainerType::Gradient(color_gradient))
 }
 
 fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Message> {
@@ -90,9 +88,7 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
         Position::Right,
     )
     .font(get_font(style))
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Tooltip),
-    ))
+    .style( ContainerType::Tooltip)
 }
 
 pub fn get_button_settings(
@@ -115,7 +111,5 @@ pub fn get_button_settings(
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style( ContainerType::Tooltip)
 }

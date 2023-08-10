@@ -132,9 +132,7 @@ fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
         .height(Length::Fixed(500.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
-        ))
+        .style(ContainerType::Standard)
 }
 
 fn page_header(
@@ -173,12 +171,8 @@ fn page_header(
                         Position::Right,
                     )
                     .font(font)
-                    .style(<ContainerStyleTuple as Into<
-                        iced::theme::Container,
-                    >>::into(ContainerStyleTuple(
-                        style,
-                        ContainerType::Tooltip,
-                    ))),
+                    .style(ContainerType::Tooltip,
+                    ),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -188,9 +182,7 @@ fn page_header(
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
-    ))
+    .style(ContainerType::Gradient(color_gradient))
 }
 
 fn col_info(
@@ -350,9 +342,7 @@ fn assemble_widgets(
         Container::new(col)
             .padding(7)
             .width(Length::Fill)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(style, ContainerType::BorderedRound),
-            ))
+            .style(ContainerType::BorderedRound)
     });
     Row::new()
         .padding([0, 10])

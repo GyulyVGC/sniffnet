@@ -52,9 +52,7 @@ pub fn get_exit_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Modal),
-        ))
+        .style(ContainerType::Modal)
 }
 
 pub fn get_clear_all_overlay(
@@ -86,9 +84,7 @@ pub fn get_clear_all_overlay(
     Container::new(content)
         .height(Length::Fixed(160.0))
         .width(Length::Fixed(450.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Modal),
-        ))
+        .style(ContainerType::Modal)
 }
 
 fn get_modal_header(
@@ -129,12 +125,8 @@ fn get_modal_header(
                         Position::Right,
                     )
                     .font(font)
-                    .style(<ContainerStyleTuple as Into<
-                        iced::theme::Container,
-                    >>::into(ContainerStyleTuple(
-                        style,
-                        ContainerType::Tooltip,
-                    ))),
+                    .style(
+                        ContainerType::Tooltip, ),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -144,9 +136,7 @@ fn get_modal_header(
     .align_y(Vertical::Center)
     .height(Length::Fixed(40.0))
     .width(Length::Fill)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
-    ))
+    .style(ContainerType::Gradient(color_gradient))
 }
 
 fn confirm_button_row(

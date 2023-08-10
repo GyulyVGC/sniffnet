@@ -5,11 +5,10 @@
 use std::time::Duration;
 
 use iced::keyboard::{Event, KeyCode, Modifiers};
-use iced::widget::Column;
+use iced::widget::{Column, Container, Row};
 use iced::Event::{Keyboard, Window};
-use iced::{
-    executor, font, subscription, window, Application, Command, Element, Subscription, Theme,
-};
+use iced::{executor, font, subscription, window, Application, Command, Element, Subscription, Renderer, Theme, Settings};
+use iced::application::StyleSheet;
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -31,6 +30,7 @@ use crate::gui::styles::style_constants::{
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::gui::types::status::Status;
+use crate::StyleType;
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -38,7 +38,7 @@ pub const PERIOD_TICK: u64 = 1000;
 impl Application for Sniffer {
     type Executor = executor::Default;
     type Message = Message;
-    type Theme = Theme;
+    type Theme = StyleType;
     type Flags = Sniffer;
 
     fn new(flags: Sniffer) -> (Sniffer, Command<Message>) {
@@ -178,5 +178,9 @@ impl Application for Sniffer {
             }
         };
         Subscription::batch([hot_keys_subscription, time_subscription])
+    }
+
+    fn theme(&self) -> Self::Theme {
+        self.style
     }
 }

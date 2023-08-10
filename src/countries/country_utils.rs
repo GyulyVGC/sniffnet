@@ -333,9 +333,7 @@ pub fn get_flag_tooltip(
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(get_font(style))
         .snap_within_viewport(true)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ));
+        .style(ContainerType::Tooltip);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -371,7 +369,5 @@ pub fn get_computer_tooltip(
     Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(get_font(style))
         .snap_within_viewport(true)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }

@@ -54,9 +54,7 @@ pub fn footer(
         .width(Length::Fill)
         .align_y(Vertical::Center)
         .align_x(Horizontal::Center)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
-        ))
+        .style(ContainerType::Gradient(color_gradient))
 }
 
 fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
@@ -74,9 +72,7 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
 
     Tooltip::new(content, "Website", Position::Top)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }
 
 fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
@@ -94,9 +90,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
 
     Tooltip::new(content, "GitHub", Position::Top)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }
 
 fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
@@ -115,9 +109,7 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
 
     Tooltip::new(content, "Sponsor", Position::Top)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style( ContainerType::Tooltip)
 }
 
 fn get_release_details(
@@ -156,9 +148,7 @@ fn get_release_details(
                 Position::Top,
             )
             .font(get_font(style))
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(style, ContainerType::Tooltip),
-            ));
+            .style(ContainerType::Tooltip);
             ret_val = ret_val
                 .push(horizontal_space(Length::Fixed(10.0)))
                 .push(tooltip);

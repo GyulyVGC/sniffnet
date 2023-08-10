@@ -116,9 +116,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Length::Fixed(400.0))
         .width(Length::Fixed(800.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
-        ))
+        .style(ContainerType::Modal)
 }
 
 fn gradients_row(
@@ -257,9 +255,7 @@ fn get_palette(style: StyleType, is_custom: bool) -> Container<'static, Message>
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
     .height(height + 1.7 * BORDER_WIDTH)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Palette),
-    ))
+    .style( ContainerType::Palette)
 }
 
 // Buttons for each extra style arranged in rows of two

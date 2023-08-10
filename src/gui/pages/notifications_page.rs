@@ -117,9 +117,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(Column::new().push(tab_and_body))
         .height(Length::Fill)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
-        ))
+        .style(ContainerType::Standard)
 }
 
 fn body_no_notifications_set(
@@ -197,9 +195,7 @@ fn packets_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(style, ContainerType::Tooltip),
-            )),
+            .style(ContainerType::Tooltip)
         )
         .push(
             Column::new()
@@ -240,9 +236,7 @@ fn packets_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::BorderedRound),
-        ))
+        .style(ContainerType::BorderedRound)
 }
 
 fn bytes_notification_log(
@@ -281,9 +275,7 @@ fn bytes_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(style, ContainerType::Tooltip),
-            )),
+            .style(ContainerType::Tooltip)
         )
         .push(
             Column::new()
@@ -326,9 +318,7 @@ fn bytes_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::BorderedRound),
-        ))
+        .style( ContainerType::BorderedRound)
 }
 
 fn favorite_notification_log(
@@ -370,9 +360,7 @@ fn favorite_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(style, ContainerType::Tooltip),
-            )),
+            .style( ContainerType::Tooltip)
         )
         .push(
             Column::new()
@@ -400,9 +388,7 @@ fn favorite_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::BorderedRound),
-        ))
+        .style(ContainerType::BorderedRound)
 }
 
 fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
@@ -422,9 +408,7 @@ fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static
     Tooltip::new(content, clear_all_translation(language), Position::Top)
         .gap(5)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }
 
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message> {

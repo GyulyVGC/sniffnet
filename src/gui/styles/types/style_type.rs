@@ -1,4 +1,9 @@
+use iced::{application, Background, Color};
+use iced::application::Appearance;
+use iced::widget::{container, text};
 use serde::{Deserialize, Serialize};
+use crate::get_colors;
+use crate::gui::styles::container::ContainerType;
 
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 
@@ -16,6 +21,18 @@ pub enum StyleType {
 impl Default for StyleType {
     fn default() -> Self {
         Self::Night
+    }
+}
+
+impl application::StyleSheet for StyleType {
+    type Style = ();
+
+    fn appearance(&self, _: &Self::Style) -> Appearance {
+        let colors = get_colors(*self);
+        Appearance {
+            background_color: colors.primary,
+            text_color: colors.text_body
+        }
     }
 }
 

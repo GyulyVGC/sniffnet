@@ -124,17 +124,12 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             )
             .height(Length::Fixed(165.0))
             .padding(10)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
-            )),
+            .style(ContainerType::BorderedRound)
         )
         .push(report);
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
-        ))
 }
 
 fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
@@ -227,9 +222,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             Container::new(col_report)
                 .padding([10, 7, 7, 7])
                 .width(Length::Fixed(1042.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
-                )),
+                .style( ContainerType::BorderedRound)
         )
         .push(
             Container::new(get_button_open_report(
@@ -287,16 +280,13 @@ fn filters_col(
                 )),
             )
             .padding([5, 8])
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(
-                    style,
+            .style(
                     if search_params.only_favorites {
                         ContainerType::Badge
                     } else {
                         ContainerType::Neutral
-                    },
-                ),
-            )),
+                    }
+                )
         )
         .push(
             Row::new()
@@ -426,16 +416,13 @@ fn filter_input(
 
     Container::new(content)
         .padding(5)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(
-                style,
+        .style(
                 if is_filter_active {
                     ContainerType::Badge
                 } else {
                     ContainerType::Neutral
-                },
-            ),
-        ))
+                }
+            )
 }
 
 fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
@@ -508,9 +495,7 @@ fn get_button_open_report(
     Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
         .gap(5)
         .font(font)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style( ContainerType::Tooltip)
 }
 
 fn button_clear_filter(

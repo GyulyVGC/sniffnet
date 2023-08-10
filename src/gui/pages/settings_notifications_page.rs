@@ -114,9 +114,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
-        ))
+        .style( ContainerType::Modal)
 }
 
 fn get_packets_notify(
@@ -161,9 +159,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style( ContainerType::BorderedRound)
         )
     } else {
         let input_row = Row::new()
@@ -187,9 +183,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style( ContainerType::BorderedRound)
         )
     }
 }
@@ -236,9 +230,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style( ContainerType::BorderedRound)
         )
     } else {
         let input_row = Row::new()
@@ -262,9 +254,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound)
         )
     }
 }
@@ -311,18 +301,14 @@ fn get_favorite_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style( ContainerType::BorderedRound)
         )
     } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                    ContainerStyleTuple(style, ContainerType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound)
         )
     }
 }
@@ -493,12 +479,8 @@ pub fn settings_header(
                         Position::Right,
                     )
                     .font(font)
-                    .style(<ContainerStyleTuple as Into<
-                        iced::theme::Container,
-                    >>::into(ContainerStyleTuple(
-                        style,
-                        ContainerType::Tooltip,
-                    ))),
+                    .style(
+                        ContainerType::Tooltip)
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -508,7 +490,5 @@ pub fn settings_header(
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-        ContainerStyleTuple(style, ContainerType::Gradient(color_gradient)),
-    ))
+    .style(ContainerType::Gradient(color_gradient))
 }

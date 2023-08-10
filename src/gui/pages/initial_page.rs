@@ -116,9 +116,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(body)
         .height(Length::Fill)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
-        ))
+        .style( ContainerType::Standard)
 }
 
 fn button_start(
@@ -144,9 +142,7 @@ fn button_start(
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(get_font(style))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {

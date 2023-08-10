@@ -128,9 +128,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
                 .style(
-                    <ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                        ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
-                    ),
+                    ContainerType::BorderedRound
                 );
 
                 let col_info = lazy(
@@ -171,13 +169,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     .height(Length::Fill)
                                     .align_x(Horizontal::Center)
                                     .style(
-                                        <ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                                            ContainerStyleTuple(
-                                                sniffer.style,
                                                 ContainerType::BorderedRound,
-                                            ),
-                                        ),
-                                    ),
+                                            )
                             )
                             .push(col_chart),
                     )
@@ -200,9 +193,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(Column::new().push(tab_and_body.push(body)))
         .height(Length::Fill)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Standard),
-        ))
 }
 
 fn body_no_packets(
@@ -314,9 +304,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         Container::new(row_report)
             .height(Length::Fill)
             .width(Length::Fixed(1170.0))
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(sniffer.style, ContainerType::BorderedRound),
-            )),
+            .style(ContainerType::BorderedRound)
     )
 }
 

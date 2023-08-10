@@ -73,16 +73,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
             )
             .padding(10.0)
-            .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-                ContainerStyleTuple(sniffer.style, ContainerType::Badge),
-            )),
+            .style( ContainerType::Badge)
         );
     }
 
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(sniffer.style, ContainerType::Modal),
-        ))
+        .style(ContainerType::Modal)
 }
