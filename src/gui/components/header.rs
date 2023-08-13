@@ -5,7 +5,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Length};
+use iced::{Alignment, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
@@ -22,7 +22,7 @@ pub fn header(
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let logo = Text::new('A'.to_string())
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
@@ -68,7 +68,10 @@ pub fn header(
     .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_reset(
+    style: StyleType,
+    language: Language,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('C'.to_string())
             .font(ICONS)
@@ -79,7 +82,7 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
     .padding(10)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -88,14 +91,14 @@ fn get_button_reset(style: StyleType, language: Language) -> Tooltip<'static, Me
         Position::Right,
     )
     .font(get_font(style))
-    .style( ContainerType::Tooltip)
+    .style(ContainerType::Tooltip)
 }
 
 pub fn get_button_settings(
     style: StyleType,
     language: Language,
     open_overlay: SettingsPage,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new("a")
             .font(ICONS)
@@ -106,10 +109,10 @@ pub fn get_button_settings(
     .padding(0)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
         .font(get_font(style))
-        .style( ContainerType::Tooltip)
+        .style(ContainerType::Tooltip)
 }

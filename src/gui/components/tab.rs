@@ -1,7 +1,7 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::widget::{button, horizontal_space, Button, Row, Text};
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
@@ -17,7 +17,7 @@ pub fn get_settings_tabs(
     active: SettingsPage,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
@@ -48,7 +48,7 @@ pub fn get_pages_tabs(
     style: StyleType,
     language: Language,
     unread_notifications: usize,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
@@ -84,7 +84,7 @@ fn new_tab(
     style: StyleType,
     font: Font,
     unread: Option<usize>,
-) -> Button<'static, Message> {
+) -> Button<'static, Message, Renderer<StyleType>> {
     let mut content = Row::new()
         .align_items(Alignment::Center)
         .push(horizontal_space(Length::FillPortion(1)))
@@ -130,7 +130,7 @@ fn new_tab(
             )
             .padding([2, 4, 0, 4])
             .height(Length::Fixed(20.0))
-            .style(ButtonStyleTuple(style, ButtonType::Badge).into());
+            .style(ButtonType::Badge);
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
@@ -143,16 +143,10 @@ fn new_tab(
         .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
         .padding(0)
         .width(Length::FillPortion(1))
-        .style(
-            ButtonStyleTuple(
-                style,
-                if active {
-                    ButtonType::TabActive
-                } else {
-                    ButtonType::TabInactive
-                },
-            )
-            .into(),
-        )
+        .style(if active {
+            ButtonType::TabActive
+        } else {
+            ButtonType::TabInactive
+        })
         .on_press(action)
 }

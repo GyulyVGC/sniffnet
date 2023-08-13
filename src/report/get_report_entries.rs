@@ -1,3 +1,4 @@
+use iced::Renderer;
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -12,7 +13,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
+use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer, StyleType};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
@@ -22,7 +23,7 @@ pub fn get_searched_entries(
     Vec<(
         AddressPortPair,
         InfoAddressPortPair,
-        Tooltip<'static, Message>,
+        Tooltip<'static, Message, Renderer<StyleType>>,
     )>,
     usize,
 ) {

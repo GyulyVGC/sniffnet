@@ -326,7 +326,7 @@ pub fn get_flag_tooltip(
     traffic_type: TrafficType,
     language: Language,
     style: StyleType,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let (content, tooltip) =
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
@@ -347,7 +347,7 @@ pub fn get_computer_tooltip(
     traffic_type: TrafficType,
     language: Language,
     style: StyleType,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, traffic_type) {
             (true, _) => COMPUTER,

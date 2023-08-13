@@ -6,7 +6,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::horizontal_space;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
-use iced::{Alignment, Color, Font, Length};
+use iced::{Alignment, Color, Font, Length, Renderer};
 
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
@@ -26,7 +26,7 @@ pub fn footer(
     color_gradient: GradientType,
     style: StyleType,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font_footer = get_font_headers(style);
 
     let release_details_row =
@@ -57,7 +57,7 @@ pub fn footer(
         .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_website(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('c'.to_string())
             .font(ICONS)
@@ -67,7 +67,7 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(content, "Website", Position::Top)
@@ -75,7 +75,7 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message> {
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_github(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
@@ -85,7 +85,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
     )
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(content, "GitHub", Position::Top)
@@ -93,7 +93,7 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message> {
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
+fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('❤'.to_string())
             .size(23)
@@ -104,12 +104,12 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message> {
     .padding([2, 0, 0, 0])
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
     Tooltip::new(content, "Sponsor", Position::Top)
         .font(get_font(style))
-        .style( ContainerType::Tooltip)
+        .style(ContainerType::Tooltip)
 }
 
 fn get_release_details(
@@ -117,7 +117,7 @@ fn get_release_details(
     style: StyleType,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
         .height(Length::Fill)
@@ -140,7 +140,7 @@ fn get_release_details(
             .padding(0)
             .height(Length::Fixed(35.0))
             .width(Length::Fixed(35.0))
-            .style(ButtonStyleTuple(style, ButtonType::Alert).into())
+            .style(ButtonType::Alert)
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,

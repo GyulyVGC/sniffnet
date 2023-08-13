@@ -1,9 +1,9 @@
 //! Containers style
 
+use iced::theme::Container;
 use iced::widget::container::Appearance;
 use iced::Theme;
 use iced::{Background, Color};
-use iced::theme::Container;
 
 use crate::gui::styles::style_constants::{
     get_alpha_chart_badge, get_alpha_round_borders, get_alpha_round_containers,
@@ -31,6 +31,12 @@ pub enum ContainerType {
 #[derive(Clone)]
 pub struct ContainerStyleTuple(pub StyleType, pub ContainerType);
 
+// impl From<ContainerType> for iced::theme::Container {
+//     fn from(value: ContainerType) -> Self {
+//         iced::theme::Container::Custom(Box::new(value))
+//     }
+// }
+
 impl iced::widget::container::StyleSheet for StyleType {
     type Style = ContainerType;
 
@@ -42,9 +48,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                 _ => colors.text_body,
             }),
             background: Some(match style {
-                ContainerType::Gradient(GradientType::None) => {
-                    Background::Color(colors.secondary)
-                }
+                ContainerType::Gradient(GradientType::None) => Background::Color(colors.secondary),
                 ContainerType::Tooltip => Background::Color(colors.buttons),
                 ContainerType::BorderedRound => Background::Color(Color {
                     a: get_alpha_round_containers(*self),
@@ -57,32 +61,26 @@ impl iced::widget::container::StyleSheet for StyleType {
                     a: get_alpha_chart_badge(*self),
                     ..colors.secondary
                 }),
-                ContainerType::Gradient(gradient_type) => {
-                    Background::Gradient(get_gradient_headers(
-                        &colors,
-                        *gradient_type,
-                        self.is_nightly(),
-                    ))
-                }
+                ContainerType::Gradient(gradient_type) => Background::Gradient(
+                    get_gradient_headers(&colors, *gradient_type, self.is_nightly()),
+                ),
                 _ => Background::Color(colors.primary),
             }),
             border_radius: match style {
-                ContainerType::BorderedRound | ContainerType::Alert => {
-                    BORDER_ROUNDED_RADIUS.into()
-                }
-               ContainerType::Modal => {
+                ContainerType::BorderedRound | ContainerType::Alert => BORDER_ROUNDED_RADIUS.into(),
+                ContainerType::Modal => {
                     [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
                 }
                 ContainerType::Tooltip => 7.0.into(),
-               ContainerType::Badge => 100.0.into(),
+                ContainerType::Badge => 100.0.into(),
                 _ => 0.0.into(),
             },
             border_width: match style {
-                    ContainerType::Standard
-                    | ContainerType::Modal
-                    | ContainerType::Neutral
-                    | ContainerType::Gradient(_) => 0.0,
-               ContainerType::Tooltip => BORDER_WIDTH / 2.0,
+                ContainerType::Standard
+                | ContainerType::Modal
+                | ContainerType::Neutral
+                | ContainerType::Gradient(_) => 0.0,
+                ContainerType::Tooltip => BORDER_WIDTH / 2.0,
                 ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },

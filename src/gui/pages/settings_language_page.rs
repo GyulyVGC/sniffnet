@@ -1,7 +1,7 @@
 use iced::widget::vertical_space;
 use iced::widget::{Column, Container, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Length};
+use iced::{Alignment, Length, Renderer};
 
 use crate::gui::components::radio::language_radios;
 use crate::gui::components::tab::get_settings_tabs;
@@ -12,9 +12,9 @@ use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::translations::translations::languages_title_translation;
-use crate::{Language, Sniffer};
+use crate::{Language, Sniffer, StyleType};
 
-pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let language_active = sniffer.language;
@@ -73,7 +73,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
             )
             .padding(10.0)
-            .style( ContainerType::Badge)
+            .style(ContainerType::Badge),
         );
     }
 

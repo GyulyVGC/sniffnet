@@ -1,14 +1,16 @@
 //! Text style
 
+use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
-use iced::Color;
+use iced::{Color, Renderer};
 
 use crate::gui::styles::style_constants::get_font;
 use crate::gui::types::message::Message;
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum TextType {
+    #[default]
     Standard,
     Title,
     Subtitle,
@@ -20,12 +22,12 @@ impl TextType {
         subtitle: &str,
         desc: &str,
         style: StyleType,
-    ) -> Column<'static, Message> {
+    ) -> Column<'static, Message, Renderer<StyleType>> {
         let font = get_font(style);
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))
-                    .style(TextStyleTuple(style, TextType::Subtitle))
+                    .style(TextType::Subtitle)
                     .font(font),
             )
             .push(Text::new(format!("   {desc}")).font(font))
@@ -38,6 +40,16 @@ pub struct TextStyleTuple(pub StyleType, pub TextType);
 impl From<TextStyleTuple> for iced::theme::Text {
     fn from(tuple: TextStyleTuple) -> Self {
         iced::theme::Text::Color(highlight(tuple.0, tuple.1))
+    }
+}
+
+impl iced::widget::text::StyleSheet for StyleType {
+    type Style = TextType;
+
+    fn appearance(&self, style: Self::Style) -> Appearance {
+        Appearance {
+            color: Some(highlight(*self, style)),
+        }
     }
 }
 

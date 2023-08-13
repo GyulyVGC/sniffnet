@@ -9,7 +9,7 @@ use iced::widget::{
     Text, Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length, Renderer};
 use pcap::Device;
 
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
@@ -29,7 +29,7 @@ use crate::translations::translations::{
 use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let col_adapter = get_col_adapter(sniffer, font);
@@ -116,14 +116,14 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message> {
 
     Container::new(body)
         .height(Length::Fill)
-        .style( ContainerType::Standard)
+        .style(ContainerType::Standard)
 }
 
 fn button_start(
     style: StyleType,
     language: Language,
     color_gradient: GradientType,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new("S")
             .font(ICONS)
@@ -134,7 +134,7 @@ fn button_start(
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(ButtonStyleTuple(style, ButtonType::Gradient(color_gradient)).into())
+    .style(ButtonType::Gradient(color_gradient))
     .on_press(Message::Start);
 
     let tooltip = start_translation(language).to_string();
@@ -145,7 +145,7 @@ fn button_start(
         .style(ContainerType::Tooltip)
 }
 
-fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
+fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<StyleType>> {
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
         let mut dev_str = String::new();
@@ -199,17 +199,11 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message> {
                         Button::new(Text::new(description).font(font))
                             .padding([20, 30])
                             .width(Length::Fill)
-                            .style(
-                                ButtonStyleTuple(
-                                    sniffer.style,
-                                    if name == sniffer.device.name {
-                                        ButtonType::BorderedRoundSelected
-                                    } else {
-                                        ButtonType::BorderedRound
-                                    },
-                                )
-                                .into(),
-                            )
+                            .style(if name == sniffer.device.name {
+                                ButtonType::BorderedRoundSelected
+                            } else {
+                                ButtonType::BorderedRound
+                            })
                             .on_press(Message::AdapterSelection(name)),
                     )
                 },

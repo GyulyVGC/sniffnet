@@ -1,9 +1,9 @@
-use iced::{application, Background, Color};
-use iced::application::Appearance;
-use iced::widget::{container, text};
-use serde::{Deserialize, Serialize};
 use crate::get_colors;
 use crate::gui::styles::container::ContainerType;
+use iced::application::Appearance;
+use iced::widget::{container, text};
+use iced::{application, Background, Color};
+use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 
@@ -31,7 +31,7 @@ impl application::StyleSheet for StyleType {
         let colors = get_colors(*self);
         Appearance {
             background_color: colors.primary,
-            text_color: colors.text_body
+            text_color: colors.text_body,
         }
     }
 }

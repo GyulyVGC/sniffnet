@@ -4,7 +4,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{button, vertical_space};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -32,7 +32,7 @@ use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
-pub fn notifications_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let notifications = sniffer.notifications;
     let font = get_font(sniffer.style);
 
@@ -124,7 +124,7 @@ fn body_no_notifications_set(
     style: StyleType,
     font: Font,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .padding(5)
         .spacing(5)
@@ -148,7 +148,7 @@ fn body_no_notifications_received(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .padding(5)
         .spacing(5)
@@ -168,7 +168,7 @@ fn packets_notification_log(
     logged_notification: PacketsThresholdExceeded,
     language: Language,
     style: StyleType,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let threshold_str = format!(
         "{}: {} {}",
@@ -195,7 +195,7 @@ fn packets_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(ContainerType::Tooltip)
+            .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -243,7 +243,7 @@ fn bytes_notification_log(
     logged_notification: BytesThresholdExceeded,
     language: Language,
     style: StyleType,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(": ");
@@ -275,7 +275,7 @@ fn bytes_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style(ContainerType::Tooltip)
+            .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -318,14 +318,14 @@ fn bytes_notification_log(
         .height(Length::Fixed(120.0))
         .width(Length::Fixed(800.0))
         .padding(10)
-        .style( ContainerType::BorderedRound)
+        .style(ContainerType::BorderedRound)
 }
 
 fn favorite_notification_log(
     logged_notification: FavoriteTransmitted,
     language: Language,
     style: StyleType,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let domain = logged_notification.host.domain;
     let country = logged_notification.host.country;
@@ -360,7 +360,7 @@ fn favorite_notification_log(
                 Position::FollowCursor,
             )
             .font(font)
-            .style( ContainerType::Tooltip)
+            .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -391,7 +391,10 @@ fn favorite_notification_log(
         .style(ContainerType::BorderedRound)
 }
 
-fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static, Message> {
+fn get_button_clear_all(
+    style: StyleType,
+    language: Language,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('h'.to_string())
             .font(ICONS)
@@ -402,7 +405,7 @@ fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static
     .padding(10)
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::ShowModal(MyModal::ClearAll));
 
     Tooltip::new(content, clear_all_translation(language), Position::Top)
@@ -411,7 +414,7 @@ fn get_button_clear_all(style: StyleType, language: Language) -> Tooltip<'static
         .style(ContainerType::Tooltip)
 }
 
-fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message> {
+fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new()
         .width(Length::Fixed(830.0))
         .padding(5)

@@ -1,8 +1,10 @@
+use crate::StyleType;
 use iced::widget::Text;
+use iced::Renderer;
 
 use crate::translations::types::language::Language;
 
-pub fn choose_adapters_translation(language: Language) -> Text<'static> {
+pub fn choose_adapters_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Select network adapter to inspect",
         Language::IT => "Seleziona la scheda di rete da ispezionare",
@@ -46,7 +48,7 @@ pub fn application_protocol_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn select_filters_translation(language: Language) -> Text<'static> {
+pub fn select_filters_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Select filters to be applied on network traffic",
         Language::IT => "Seleziona i filtri da applicare al traffico di rete",
@@ -129,7 +131,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn ip_version_translation(language: Language) -> Text<'static> {
+pub fn ip_version_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "IP version",
         Language::IT => "Versione IP",
@@ -172,7 +174,7 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn traffic_rate_translation(language: Language) -> Text<'static> {
+pub fn traffic_rate_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Traffic rate",
         Language::IT => "Intensità del traffico",
@@ -194,7 +196,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static> {
     })
 }
 
-// pub fn relevant_connections_translation(language: Language) -> Text<'static> {
+// pub fn relevant_connections_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
 //     Text::new(match language {
 //         Language::EN => "Relevant connections:",
 //         Language::IT => "Connessioni rilevanti:",
@@ -237,7 +239,7 @@ pub fn settings_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn yes_translation(language: Language) -> Text<'static> {
+pub fn yes_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Yes",
         Language::IT => "Sì",
@@ -258,7 +260,7 @@ pub fn yes_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn ask_quit_translation(language: Language) -> Text<'static> {
+pub fn ask_quit_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Are you sure you want to quit this analysis?",
         Language::IT => "Sei sicuro di voler interrompere questa analisi?",
@@ -302,7 +304,7 @@ pub fn quit_analysis_translation(language: Language) -> String {
     }
 }
 
-pub fn ask_clear_all_translation(language: Language) -> Text<'static> {
+pub fn ask_clear_all_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Are you sure you want to clear notifications?",
         Language::IT => "Sei sicuro di voler eliminare le notifiche?",
@@ -390,7 +392,10 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'static> {
+pub fn no_addresses_translation(
+    language: Language,
+    adapter: &str,
+) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                  Network adapter: {adapter}\n\n\
@@ -446,7 +451,10 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
     })
 }
 
-pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
+pub fn waiting_translation(
+    language: Language,
+    adapter: &str,
+) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                  Network adapter: {adapter}\n\n\
@@ -502,7 +510,10 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static> {
     })
 }
 
-pub fn some_observed_translation(language: Language, observed: u128) -> Text<'static> {
+pub fn some_observed_translation(
+    language: Language,
+    observed: u128,
+) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => format!("Total intercepted packets: {observed}\n\n\
                                  Filtered packets: 0\n\n\
@@ -637,7 +648,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
     }
 }
 
-// pub fn filtered_application_translation(language: Language) -> Text<'static> {
+// pub fn filtered_application_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
 //         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
@@ -658,7 +669,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //     })
 // }
 
-// pub fn no_favorites_translation(language: Language) -> Text<'static> {
+// pub fn no_favorites_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
 //     Text::new(match language {
 //         Language::EN => "Nothing to show at the moment.\n\
 //                          To add a connection to your favorites, click on the star symbol near the connection.",
@@ -695,7 +706,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //     })
 // }
 
-pub fn error_translation(language: Language, error: &str) -> Text<'static> {
+pub fn error_translation(language: Language, error: &str) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => format!(
             "An error occurred! \n\n\
@@ -993,7 +1004,7 @@ pub fn bytes_report_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn notifications_title_translation(language: Language) -> Text<'static> {
+pub fn notifications_title_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Customize your notifications",
         Language::IT => "Personalizza le tue notifiche",
@@ -1015,7 +1026,7 @@ pub fn notifications_title_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn appearance_title_translation(language: Language) -> Text<'static> {
+pub fn appearance_title_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Choose your favorite theme",
         Language::IT => "Scegli il tuo tema preferito",
@@ -1037,7 +1048,7 @@ pub fn appearance_title_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn languages_title_translation(language: Language) -> Text<'static> {
+pub fn languages_title_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "Select your language",
         Language::IT => "Seleziona la lingua",
@@ -1642,7 +1653,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
+pub fn no_notifications_set_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => "You haven't enabled notifications yet!\n\n\
                                  After enabling them, this page will display a log of your notifications\n\n\
@@ -1698,7 +1709,9 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static> {
     })
 }
 
-pub fn no_notifications_received_translation(language: Language) -> Text<'static> {
+pub fn no_notifications_received_translation(
+    language: Language,
+) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {
         Language::EN => {
             "Nothing to see at the moment...\n\n\

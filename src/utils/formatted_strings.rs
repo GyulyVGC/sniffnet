@@ -2,7 +2,7 @@ use std::net::IpAddr;
 use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
-use iced::Color;
+use iced::{Color, Renderer};
 
 use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::text::{TextStyleTuple, TextType};
@@ -35,13 +35,13 @@ pub fn get_active_filters_col(
     filters: &Filters,
     language: Language,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
 
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
-            .style(TextStyleTuple(style, TextType::Subtitle)),
+            .style(TextType::Subtitle),
     );
     if filters.ip.eq(&IpVersion::Other)
         && filters.application.eq(&AppProtocol::Other)

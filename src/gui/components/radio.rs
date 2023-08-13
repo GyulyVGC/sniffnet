@@ -1,6 +1,6 @@
 use iced::widget::horizontal_space;
 use iced::widget::{Column, Radio, Row, Text};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::styles::radio::{RadioStyleTuple, RadioType};
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
@@ -20,7 +20,7 @@ pub fn ip_version_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().spacing(10).padding(0).push(
         ip_version_translation(language)
             .font(font)
@@ -51,7 +51,7 @@ pub fn transport_protocol_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().spacing(10).push(
         Text::new(transport_protocol_translation(language))
             .font(font)
@@ -82,7 +82,7 @@ pub fn language_radios(
     collection: &[Language],
     font: Font,
     style: StyleType,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
     for option in collection {
         ret_val =
@@ -118,7 +118,7 @@ pub fn sound_packets_threshold_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -154,7 +154,7 @@ pub fn sound_bytes_threshold_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -190,7 +190,7 @@ pub fn sound_favorite_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -226,7 +226,7 @@ pub fn chart_radios(
     font: Font,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new()
         .padding([0, 0, 0, 25])
         .spacing(5)

@@ -5,7 +5,7 @@ use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -31,7 +31,7 @@ use crate::utils::formatted_strings::{get_connection_color, get_open_report_tool
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let mut body = Column::new()
@@ -124,15 +124,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message> {
             )
             .height(Length::Fixed(165.0))
             .padding(10)
-            .style(ContainerType::BorderedRound)
+            .style(ContainerType::BorderedRound),
         )
         .push(report);
 
-    Container::new(Column::new().push(tab_and_body.push(body)))
-        .height(Length::Fill)
+    Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
+fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
@@ -161,7 +160,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             button(entry_row)
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(val.index)))
-                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
+                .style(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -222,7 +221,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message> {
             Container::new(col_report)
                 .padding([10, 7, 7, 7])
                 .width(Length::Fixed(1042.0))
-                .style( ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
         .push(
             Container::new(get_button_open_report(
@@ -238,7 +237,7 @@ fn filters_col(
     search_params: &SearchParameters,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let search_params2 = search_params.clone();
 
@@ -280,13 +279,11 @@ fn filters_col(
                 )),
             )
             .padding([5, 8])
-            .style(
-                    if search_params.only_favorites {
-                        ContainerType::Badge
-                    } else {
-                        ContainerType::Neutral
-                    }
-                )
+            .style(if search_params.only_favorites {
+                ContainerType::Badge
+            } else {
+                ContainerType::Neutral
+            }),
         )
         .push(
             Row::new()
@@ -344,7 +341,7 @@ fn filter_input(
     search_params: SearchParameters,
     font: Font,
     style: StyleType,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let is_filter_active = !filter_value.is_empty();
 
     let button_clear = button_clear_filter(
@@ -416,16 +413,17 @@ fn filter_input(
 
     Container::new(content)
         .padding(5)
-        .style(
-                if is_filter_active {
-                    ContainerType::Badge
-                } else {
-                    ContainerType::Neutral
-                }
-            )
+        .style(if is_filter_active {
+            ContainerType::Badge
+        } else {
+            ContainerType::Neutral
+        })
 }
 
-fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, Message> {
+fn get_button_change_page(
+    style: StyleType,
+    increment: bool,
+) -> Button<'static, Message, Renderer<StyleType>> {
     button(
         Text::new(if increment { "j" } else { "i" })
             .size(8.0)
@@ -436,7 +434,7 @@ fn get_button_change_page(style: StyleType, increment: bool) -> Button<'static, 
     .padding(2)
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(25.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::UpdatePageNumber(increment))
 }
 
@@ -447,7 +445,7 @@ fn get_change_page_row(
     start_entry_num: usize,
     end_entry_num: usize,
     results_number: usize,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     Row::new()
         .height(Length::FillPortion(2))
         .align_items(Alignment::Center)
@@ -478,7 +476,7 @@ fn get_button_open_report(
     style: StyleType,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('8'.to_string())
             .font(ICONS)
@@ -489,20 +487,20 @@ fn get_button_open_report(
     .padding(10)
     .height(Length::Fixed(50.0))
     .width(Length::Fixed(75.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::OpenReport);
 
     Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
         .gap(5)
         .font(font)
-        .style( ContainerType::Tooltip)
+        .style(ContainerType::Tooltip)
 }
 
 fn button_clear_filter(
     new_search_parameters: SearchParameters,
     style: StyleType,
     font: Font,
-) -> Button<'static, Message> {
+) -> Button<'static, Message, Renderer<StyleType>> {
     button(
         Text::new("×")
             .font(font)
@@ -513,6 +511,6 @@ fn button_clear_filter(
     .padding(2)
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(20.0))
-    .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+    .style(ButtonType::Standard)
     .on_press(Message::Search(new_search_parameters))
 }

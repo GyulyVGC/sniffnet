@@ -7,7 +7,7 @@ use iced::widget::{
     TextInput, Tooltip,
 };
 use iced::Length::Fixed;
-use iced::{Alignment, Length};
+use iced::{Alignment, Length, Renderer};
 
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
@@ -36,7 +36,7 @@ use crate::translations::translations::{
 };
 use crate::{Language, Sniffer, StyleType};
 
-pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let mut content = Column::new()
         .width(Length::Fill)
@@ -114,14 +114,14 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style( ContainerType::Modal)
+        .style(ContainerType::Modal)
 }
 
 fn get_packets_notify(
     packets_notification: PacketsNotification,
     language: Language,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let checkbox = Checkbox::new(
         packets_threshold_translation(language),
@@ -159,7 +159,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style( ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     } else {
         let input_row = Row::new()
@@ -183,7 +183,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style( ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     }
 }
@@ -192,7 +192,7 @@ fn get_bytes_notify(
     bytes_notification: BytesNotification,
     language: Language,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let checkbox = Checkbox::new(
         bytes_threshold_translation(language),
@@ -230,7 +230,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style( ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     } else {
         let input_row = Row::new()
@@ -254,7 +254,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     }
 }
@@ -263,7 +263,7 @@ fn get_favorite_notify(
     favorite_notification: FavoriteNotification,
     language: Language,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let checkbox = Checkbox::new(
         favorite_notification_translation(language),
@@ -301,14 +301,14 @@ fn get_favorite_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style( ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(ContainerType::BorderedRound)
+                .style(ContainerType::BorderedRound),
         )
     }
 }
@@ -317,7 +317,7 @@ fn input_group_packets(
     packets_notification: PacketsNotification,
     style: StyleType,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
@@ -361,7 +361,7 @@ fn input_group_bytes(
     bytes_notification: BytesNotification,
     style: StyleType,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let mut info_str = per_second_translation(language).to_string();
     info_str.push_str(specify_multiples_translation(language));
@@ -402,7 +402,11 @@ fn input_group_bytes(
         .align_y(Vertical::Center)
 }
 
-fn volume_slider(language: Language, style: StyleType, volume: u8) -> Container<'static, Message> {
+fn volume_slider(
+    language: Language,
+    style: StyleType,
+    volume: u8,
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     Container::new(
         Column::new()
@@ -446,7 +450,7 @@ pub fn settings_header(
     style: StyleType,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
@@ -473,14 +477,13 @@ pub fn settings_header(
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+                        .style(ButtonType::Standard)
                         .on_press(Message::CloseSettings),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(
-                        ContainerType::Tooltip)
+                    .style(ContainerType::Tooltip),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),

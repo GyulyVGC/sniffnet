@@ -23,28 +23,28 @@ impl ScrollbarType {
 #[derive(Clone)]
 pub struct ScrollbarStyleTuple(pub StyleType, pub ScrollbarType);
 
-impl From<ScrollbarStyleTuple> for iced::theme::Scrollable {
-    fn from(tuple: ScrollbarStyleTuple) -> Self {
-        iced::theme::Scrollable::Custom(Box::new(tuple))
-    }
-}
+// impl From<ScrollbarStyleTuple> for iced::theme::Scrollable {
+//     fn from(tuple: ScrollbarStyleTuple) -> Self {
+//         iced::theme::Scrollable::Custom(Box::new(tuple))
+//     }
+// }
 
-impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
-    type Style = Theme;
+impl iced::widget::scrollable::StyleSheet for StyleType {
+    type Style = ScrollbarType;
 
-    fn active(&self, _: &Self::Style) -> Scrollbar {
-        let colors = get_colors(self.0);
+    fn active(&self, style: &Self::Style) -> Scrollbar {
+        let colors = get_colors(*self);
         Scrollbar {
             background: Some(Background::Color(Color::TRANSPARENT)),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: Color {
-                a: get_alpha_round_borders(self.0),
+                a: get_alpha_round_borders(*self),
                 ..colors.buttons
             },
             scroller: Scroller {
                 color: Color {
-                    a: get_alpha_round_borders(self.0),
+                    a: get_alpha_round_borders(*self),
                     ..colors.buttons
                 },
                 border_radius: BORDER_ROUNDED_RADIUS.into(),
@@ -54,17 +54,17 @@ impl iced::widget::scrollable::StyleSheet for ScrollbarStyleTuple {
         }
     }
 
-    fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
-        let colors = get_colors(self.0);
+    fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
+        let colors = get_colors(*self);
         Scrollbar {
             background: Some(Background::Color(Color {
-                a: get_alpha_round_borders(self.0),
+                a: get_alpha_round_borders(*self),
                 ..colors.buttons
             })),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: Color {
-                a: get_alpha_round_borders(self.0),
+                a: get_alpha_round_borders(*self),
                 ..colors.buttons
             },
             scroller: Scroller {

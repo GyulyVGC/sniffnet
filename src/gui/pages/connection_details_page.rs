@@ -5,7 +5,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -33,14 +33,20 @@ use crate::translations::translations_2::{
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::{Language, Sniffer, StyleType};
 
-pub fn connection_details_page(sniffer: &Sniffer, connection_index: usize) -> Container<Message> {
+pub fn connection_details_page(
+    sniffer: &Sniffer,
+    connection_index: usize,
+) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
         sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
         move |_| page_content(sniffer, connection_index),
     ))
 }
 
-fn page_content(sniffer: &Sniffer, connection_index: usize) -> Container<'static, Message> {
+fn page_content(
+    sniffer: &Sniffer,
+    connection_index: usize,
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let info_traffic_lock = sniffer
@@ -139,7 +145,7 @@ fn page_header(
     style: StyleType,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     Container::new(
@@ -165,14 +171,13 @@ fn page_header(
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+                        .style(ButtonType::Standard)
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(ContainerType::Tooltip,
-                    ),
+                    .style(ContainerType::Tooltip),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -191,7 +196,7 @@ fn col_info(
     font: Font,
     language: Language,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .spacing(10)
         .padding([0, 0, 0, 40])
@@ -243,7 +248,7 @@ fn get_host_info_col(
     host: &Host,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
         host_info_col =
@@ -275,7 +280,7 @@ fn get_local_tooltip(
     sniffer: &Sniffer,
     address_to_lookup: &str,
     key: &AddressPortPair,
-) -> Tooltip<'static, Message> {
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
     get_computer_tooltip(
         is_my_address(
@@ -301,13 +306,13 @@ fn get_local_tooltip(
 }
 
 fn get_src_or_dest_col(
-    caption: Row<'static, Message>,
+    caption: Row<'static, Message, Renderer<StyleType>>,
     ip: &String,
     port: u16,
     mac: &str,
     style: StyleType,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .spacing(4)
         .push(
@@ -333,11 +338,11 @@ fn get_src_or_dest_col(
 }
 
 fn assemble_widgets(
-    col_info: Column<'static, Message>,
-    source_col: Column<'static, Message>,
-    dest_col: Column<'static, Message>,
+    col_info: Column<'static, Message, Renderer<StyleType>>,
+    source_col: Column<'static, Message, Renderer<StyleType>>,
+    dest_col: Column<'static, Message, Renderer<StyleType>>,
     style: StyleType,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)
             .padding(7)

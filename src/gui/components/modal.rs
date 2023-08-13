@@ -9,7 +9,8 @@ use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
 };
 use iced::{
-    event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Size,
+    event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Renderer,
+    Size,
 };
 
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
@@ -28,7 +29,7 @@ pub fn get_exit_overlay(
     color_gradient: GradientType,
     font: Font,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let row_buttons = confirm_button_row(language, font, style, Message::Reset);
 
     let content = Column::new()
@@ -60,7 +61,7 @@ pub fn get_clear_all_overlay(
     color_gradient: GradientType,
     font: Font,
     language: Language,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
 
     let content = Column::new()
@@ -92,7 +93,7 @@ fn get_modal_header(
     color_gradient: GradientType,
     language: Language,
     title: String,
-) -> Container<'static, Message> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
@@ -119,14 +120,13 @@ fn get_modal_header(
                         .padding(2)
                         .height(Length::Fixed(20.0))
                         .width(Length::Fixed(20.0))
-                        .style(ButtonStyleTuple(style, ButtonType::Standard).into())
+                        .style(ButtonType::Standard)
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(
-                        ContainerType::Tooltip, ),
+                    .style(ContainerType::Tooltip),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -144,7 +144,7 @@ fn confirm_button_row(
     font: Font,
     style: StyleType,
     message: Message,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     Row::new()
         .height(Length::Fill)
         .align_items(Alignment::Center)
@@ -158,7 +158,7 @@ fn confirm_button_row(
             .padding(5)
             .height(Length::Fixed(40.0))
             .width(Length::Fixed(80.0))
-            .style(ButtonStyleTuple(style, ButtonType::Alert).into())
+            .style(ButtonType::Alert)
             .on_press(message),
         )
 }

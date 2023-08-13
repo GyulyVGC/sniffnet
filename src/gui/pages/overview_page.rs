@@ -8,7 +8,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::{button, lazy, vertical_space, Column, Container, Row, Scrollable, Text};
 use iced::widget::{horizontal_space, Rule};
 use iced::Length::{Fill, FillPortion};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -43,7 +43,7 @@ use crate::utils::formatted_strings::{
 use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
+pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let mut body = Column::new();
@@ -127,9 +127,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 .width(Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center)
-                .style(
-                    ContainerType::BorderedRound
-                );
+                .style(ContainerType::BorderedRound);
 
                 let col_info = lazy(
                     (
@@ -168,9 +166,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                                     .padding([10, 5, 5, 5])
                                     .height(Length::Fill)
                                     .align_x(Horizontal::Center)
-                                    .style(
-                                                ContainerType::BorderedRound,
-                                            )
+                                    .style(ContainerType::BorderedRound),
                             )
                             .push(col_chart),
                     )
@@ -191,8 +187,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         );
     }
 
-    Container::new(Column::new().push(tab_and_body.push(body)))
-        .height(Length::Fill)
+    Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
 fn body_no_packets(
@@ -200,7 +195,7 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let adapter_name = device.name.clone();
     let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
@@ -237,7 +232,7 @@ fn body_no_observed(
     style: StyleType,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(style);
 
     let tot_packets_text = some_observed_translation(language, observed)
@@ -263,7 +258,7 @@ fn body_pcap_error(
     waiting: &str,
     language: Language,
     font: Font,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .horizontal_alignment(Horizontal::Center)
@@ -282,7 +277,7 @@ fn body_pcap_error(
         .push(vertical_space(FillPortion(2)))
 }
 
-fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
+fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> {
     let mut row_report = Row::new()
         .padding(10)
         .height(Length::Fill)
@@ -304,11 +299,11 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
         Container::new(row_report)
             .height(Length::Fill)
             .width(Length::Fixed(1170.0))
-            .style(ContainerType::BorderedRound)
+            .style(ContainerType::BorderedRound),
     )
 }
 
-fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
+fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -345,17 +340,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .padding(0)
         .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
         .width(Length::Fixed(FLAGS_WIDTH_BIG))
-        .style(
-            ButtonStyleTuple(
-                sniffer.style,
-                if data_info_host.is_favorite {
-                    ButtonType::Starred
-                } else {
-                    ButtonType::NotStarred
-                },
-            )
-            .into(),
-        )
+        .style(if data_info_host.is_favorite {
+            ButtonType::Starred
+        } else {
+            ButtonType::NotStarred
+        })
         .on_press(Message::AddOrRemoveFavorite(
             host.clone(),
             !data_info_host.is_favorite,
@@ -444,7 +433,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     as_name: host.asn.name.clone(),
                     ..SearchParameters::default()
                 }))
-                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
+                .style(ButtonType::Neutral),
         );
     }
 
@@ -471,7 +460,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     col_host
 }
 
-fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
+fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -562,7 +551,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     app: format!("{app:?}"),
                     ..SearchParameters::default()
                 }))
-                .style(ButtonStyleTuple(sniffer.style, ButtonType::Neutral).into()),
+                .style(ButtonType::Neutral),
         );
     }
     col_app = col_app.push(
@@ -584,7 +573,7 @@ fn lazy_col_info(
     filtered: u128,
     dropped: u32,
     sniffer: &Sniffer,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
@@ -659,7 +648,7 @@ fn col_device_filters(
     style: StyleType,
     filters: &Filters,
     device: &MyDevice,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
@@ -682,7 +671,7 @@ fn col_data_representation(
     font: Font,
     style: StyleType,
     chart_type: ChartType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .width(Length::FillPortion(1))
         .push(
@@ -701,7 +690,7 @@ fn col_bytes_packets(
     all_bytes: u128,
     filtered_bytes: u128,
     style: StyleType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let dropped_val = if dropped > 0 {
         format!(
             "{} {}",

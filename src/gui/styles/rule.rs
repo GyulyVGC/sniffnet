@@ -21,34 +21,34 @@ pub enum RuleType {
 #[derive(Clone)]
 pub struct RuleStyleTuple(pub StyleType, pub RuleType);
 
-impl From<RuleStyleTuple> for iced::theme::Rule {
-    fn from(tuple: RuleStyleTuple) -> Self {
-        iced::theme::Rule::Custom(Box::new(tuple))
-    }
-}
+// impl From<RuleStyleTuple> for iced::theme::Rule {
+//     fn from(tuple: RuleStyleTuple) -> Self {
+//         iced::theme::Rule::Custom(Box::new(tuple))
+//     }
+// }
 
-impl rule::StyleSheet for RuleStyleTuple {
-    type Style = iced::Theme;
+impl rule::StyleSheet for StyleType {
+    type Style = RuleType;
 
-    fn appearance(&self, _: &Self::Style) -> iced::widget::rule::Appearance {
-        let colors = get_colors(self.0);
+    fn appearance(&self, style: &Self::Style) -> iced::widget::rule::Appearance {
+        let colors = get_colors(*self);
         iced::widget::rule::Appearance {
-            color: match self.1 {
+            color: match style {
                 RuleType::Incoming | RuleType::PaletteSecondary => colors.secondary,
                 RuleType::Outgoing | RuleType::PaletteOutgoing => colors.outgoing,
                 RuleType::PalettePrimary => colors.primary,
                 RuleType::PaletteButtons => colors.buttons,
                 RuleType::Standard => Color {
-                    a: get_alpha_round_borders(self.0),
+                    a: get_alpha_round_borders(*self),
                     ..colors.buttons
                 },
             },
-            width: match self.1 {
+            width: match style {
                 RuleType::Incoming | RuleType::Outgoing => 5,
                 RuleType::PalettePrimary
                 | RuleType::PaletteSecondary
                 | RuleType::PaletteOutgoing
-                | RuleType::PaletteButtons => match self.0 {
+                | RuleType::PaletteButtons => match self {
                     StyleType::Custom(_) => 25,
                     _ => 40,
                 },
