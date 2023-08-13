@@ -13,12 +13,6 @@ pub enum CheckboxType {
 #[derive(Clone)]
 pub struct CheckboxStyleTuple(pub StyleType, pub CheckboxType);
 
-// impl From<CheckboxStyleTuple> for iced::theme::Checkbox {
-//     fn from(tuple: CheckboxStyleTuple) -> Self {
-//         iced::theme::Checkbox::Custom(Box::new(tuple))
-//     }
-// }
-
 impl iced::widget::checkbox::StyleSheet for StyleType {
     type Style = CheckboxType;
 

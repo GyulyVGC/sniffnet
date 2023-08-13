@@ -15,12 +15,6 @@ pub enum SliderType {
 #[derive(Clone)]
 pub struct SliderStyleTuple(pub StyleType, pub SliderType);
 
-// impl From<SliderStyleTuple> for iced::theme::Slider {
-//     fn from(tuple: SliderStyleTuple) -> Self {
-//         iced::theme::Slider::Custom(Box::new(tuple))
-//     }
-// }
-
 impl iced::widget::slider::StyleSheet for StyleType {
     type Style = SliderType;
 

@@ -21,12 +21,6 @@ pub enum RuleType {
 #[derive(Clone)]
 pub struct RuleStyleTuple(pub StyleType, pub RuleType);
 
-// impl From<RuleStyleTuple> for iced::theme::Rule {
-//     fn from(tuple: RuleStyleTuple) -> Self {
-//         iced::theme::Rule::Custom(Box::new(tuple))
-//     }
-// }
-
 impl rule::StyleSheet for StyleType {
     type Style = RuleType;
 

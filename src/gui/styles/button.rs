@@ -33,12 +33,6 @@ pub enum ButtonType {
 #[derive(Clone)]
 pub struct ButtonStyleTuple(pub StyleType, pub ButtonType);
 
-// impl From<ButtonType> for iced::theme::Button {
-//     fn from(value: ButtonType) -> Self {
-//         iced::theme::Button::Custom(Box::new(value))
-//     }
-// }
-
 impl button::StyleSheet for StyleType {
     type Style = ButtonType;
 

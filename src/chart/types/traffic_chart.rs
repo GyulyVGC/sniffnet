@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
-use iced::Element;
+use iced::{Element, Renderer};
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::gui::styles::style_constants::{get_alpha_chart_badge, CHARTS_LINE_BORDER};
@@ -60,7 +60,7 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self) -> Element<Message> {
+    pub fn view(&self) -> Element<Message, Renderer<StyleType>> {
         Container::new(Column::new().push(ChartWidget::new(self)))
             .align_x(Horizontal::Left)
             .align_y(Vertical::Bottom)

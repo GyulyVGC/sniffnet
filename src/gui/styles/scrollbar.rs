@@ -23,12 +23,6 @@ impl ScrollbarType {
 #[derive(Clone)]
 pub struct ScrollbarStyleTuple(pub StyleType, pub ScrollbarType);
 
-// impl From<ScrollbarStyleTuple> for iced::theme::Scrollable {
-//     fn from(tuple: ScrollbarStyleTuple) -> Self {
-//         iced::theme::Scrollable::Custom(Box::new(tuple))
-//     }
-// }
-
 impl iced::widget::scrollable::StyleSheet for StyleType {
     type Style = ScrollbarType;
 

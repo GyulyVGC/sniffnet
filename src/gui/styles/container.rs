@@ -31,12 +31,6 @@ pub enum ContainerType {
 #[derive(Clone)]
 pub struct ContainerStyleTuple(pub StyleType, pub ContainerType);
 
-// impl From<ContainerType> for iced::theme::Container {
-//     fn from(value: ContainerType) -> Self {
-//         iced::theme::Container::Custom(Box::new(value))
-//     }
-// }
-
 impl iced::widget::container::StyleSheet for StyleType {
     type Style = ContainerType;
 

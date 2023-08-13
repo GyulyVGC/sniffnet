@@ -16,12 +16,6 @@ pub enum TextInputType {
 #[derive(Clone)]
 pub struct TextInputStyleTuple(pub StyleType, pub TextInputType);
 
-// impl From<TextInputStyleTuple> for iced::theme::TextInput {
-//     fn from(tuple: TextInputStyleTuple) -> Self {
-//         iced::theme::TextInput::Custom(Box::new(tuple))
-//     }
-// }
-
 impl iced::widget::text_input::StyleSheet for StyleType {
     type Style = TextInputType;
 
