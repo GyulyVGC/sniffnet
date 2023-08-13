@@ -138,7 +138,7 @@ fn page_content(
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
         .height(Length::Fixed(500.0))
-        .style(ContainerType::Standard)
+        .style(ContainerType::Modal)
 }
 
 fn page_header(

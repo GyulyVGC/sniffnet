@@ -19,9 +19,6 @@ pub enum RuleType {
     Outgoing,
 }
 
-#[derive(Clone)]
-pub struct RuleStyleTuple(pub StyleType, pub RuleType);
-
 impl rule::StyleSheet for StyleType {
     type Style = RuleType;
 
@@ -48,6 +45,44 @@ impl rule::StyleSheet for StyleType {
                     _ => 40,
                 },
                 RuleType::Standard => 3,
+            },
+            radius: 0.0.into(),
+            fill_mode: FillMode::Full,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct RuleStyleTuple(pub StyleType, pub RuleType);
+
+impl From<RuleStyleTuple> for RuleType {
+    fn from(value: RuleStyleTuple) -> Self {
+        value.1
+    }
+}
+
+impl rule::StyleSheet for RuleStyleTuple {
+    type Style = ();
+
+    fn appearance(&self, _: &Self::Style) -> iced::widget::rule::Appearance {
+        let colors = get_colors(self.0);
+        iced::widget::rule::Appearance {
+            color: match self.1 {
+                RuleType::PaletteSecondary => colors.secondary,
+                RuleType::PaletteOutgoing => colors.outgoing,
+                RuleType::PalettePrimary => colors.primary,
+                RuleType::PaletteButtons => colors.buttons,
+                _ => Color::TRANSPARENT,
+            },
+            width: match self.1 {
+                RuleType::PalettePrimary
+                | RuleType::PaletteSecondary
+                | RuleType::PaletteOutgoing
+                | RuleType::PaletteButtons => match self.0 {
+                    StyleType::Custom(_) => 25,
+                    _ => 40,
+                },
+               _ => 0,
             },
             radius: 0.0.into(),
             fill_mode: FillMode::Full,

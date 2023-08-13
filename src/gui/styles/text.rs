@@ -8,7 +8,7 @@ use crate::gui::styles::style_constants::get_font;
 use crate::gui::types::message::Message;
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, PartialEq)]
 pub enum TextType {
     #[default]
     Standard,
@@ -47,7 +47,7 @@ impl iced::widget::text::StyleSheet for StyleType {
     fn appearance(&self, style: Self::Style) -> Appearance {
         let colors = get_colors(*self);
         Appearance {
-            color: Some(highlight(*self, style)),
+            color: if style == TextType::Standard {None} else {  Some(highlight(*self, style))},
         }
     }
 }
@@ -80,6 +80,6 @@ pub fn highlight(style: StyleType, element: TextType) -> Color {
         TextType::Outgoing => colors.outgoing,
         TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
         TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
-        TextType::Standard => colors.text_body,
+        _ => colors.text_body,
     }
 }

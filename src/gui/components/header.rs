@@ -27,6 +27,8 @@ pub fn header(
         .font(ICONS)
         .horizontal_alignment(Horizontal::Center)
         .vertical_alignment(Vertical::Center)
+        .width(FillPortion(6))
+        .height(Length::Fill)
         .line_height(LineHeight::Relative(1.0))
         .size(100);
 
@@ -44,18 +46,7 @@ pub fn header(
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             })
-            .push(
-                Container::new(
-                    Row::new()
-                        .height(Length::Fill)
-                        .align_items(Alignment::Center)
-                        .push(logo),
-                )
-                .width(FillPortion(6))
-                .height(Length::Fill)
-                .align_y(Vertical::Center)
-                .align_x(Horizontal::Center),
-            )
+            .push(logo)
             .push(
                 Container::new(get_button_settings(style, language, last_opened_setting))
                     .width(FillPortion(1))
