@@ -49,7 +49,7 @@ fn get_flag_from_country(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<Renderer>, String) {
+) -> (Svg<Renderer<StyleType>>, String) {
     let mut tooltip = country.to_string();
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         Country::AD => AD,

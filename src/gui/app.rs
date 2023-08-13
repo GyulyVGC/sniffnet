@@ -65,87 +65,79 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        container(header(
-            self.style,
-            self.color_gradient,
-            false,
+        let status = *self.status_pair.0.lock().unwrap();
+        let style = self.style;
+        let font = get_font(style);
+
+        let header = match status {
+            Status::Init => header(
+                style,
+                self.color_gradient,
+                false,
+                self.language,
+                self.last_opened_setting,
+            ),
+            Status::Running => header(
+                style,
+                self.color_gradient,
+                true,
+                self.language,
+                self.last_opened_setting,
+            ),
+        };
+
+        let body = match status {
+            Status::Init => initial_page(self),
+            Status::Running => match self.running_page {
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            },
+        };
+
+        let footer = footer(
             self.language,
-            self.last_opened_setting,
-        ))
-        .into()
-        // let status = *self.status_pair.0.lock().unwrap();
-        // let style = self.style;
-        // let font = get_font(style);
-        //
-        // let header = match status {
-        //     Status::Init => header(
-        //         style,
-        //         self.color_gradient,
-        //         false,
-        //         self.language,
-        //         self.last_opened_setting,
-        //     ),
-        //     Status::Running => header(
-        //         style,
-        //         self.color_gradient,
-        //         true,
-        //         self.language,
-        //         self.last_opened_setting,
-        //     ),
-        // };
-        //
-        // let body = match status {
-        //     Status::Init => initial_page(self),
-        //     Status::Running => match self.running_page {
-        //         RunningPage::Overview => overview_page(self),
-        //         RunningPage::Inspect => inspect_page(self),
-        //         RunningPage::Notifications => notifications_page(self),
-        //     },
-        // };
-        //
-        // let footer = footer(
-        //     self.language,
-        //     self.color_gradient,
-        //     style,
-        //     &self.newer_release_available.clone(),
-        // );
-        //
-        // let content = Column::new().push(header).push(body).push(footer);
-        //
-        // match self.modal {
-        //     None => {
-        //         if let Some(settings_page) = self.settings_page {
-        //             let overlay = match settings_page {
-        //                 SettingsPage::Notifications => settings_notifications_page(self),
-        //                 SettingsPage::Appearance => settings_style_page(self),
-        //                 SettingsPage::Language => settings_language_page(self),
-        //             };
-        //
-        //             Modal::new(content, overlay)
-        //                 .on_blur(Message::CloseSettings)
-        //                 .into()
-        //         } else {
-        //             content.into()
-        //         }
-        //     }
-        //     Some(modal) => {
-        //         let overlay = match modal {
-        //             MyModal::Quit => {
-        //                 get_exit_overlay(style, self.color_gradient, font, self.language)
-        //             }
-        //             MyModal::ClearAll => {
-        //                 get_clear_all_overlay(style, self.color_gradient, font, self.language)
-        //             }
-        //             MyModal::ConnectionDetails(connection_index) => {
-        //                 connection_details_page(self, connection_index)
-        //             }
-        //         };
-        //
-        //         Modal::new(content, overlay)
-        //             .on_blur(Message::HideModal)
-        //             .into()
-        //     }
-        // }
+            self.color_gradient,
+            style,
+            &self.newer_release_available.clone(),
+        );
+
+        let content = Column::new().push(header).push(body).push(footer);
+
+        match self.modal {
+            None => {
+                if let Some(settings_page) = self.settings_page {
+                    let overlay = match settings_page {
+                        SettingsPage::Notifications => settings_notifications_page(self),
+                        SettingsPage::Appearance => settings_style_page(self),
+                        SettingsPage::Language => settings_language_page(self),
+                    };
+
+                    Modal::new(content, overlay)
+                        .on_blur(Message::CloseSettings)
+                        .into()
+                } else {
+                    content.into()
+                }
+            }
+            Some(modal) => {
+                let overlay = match modal {
+                    MyModal::Quit => {
+                        get_exit_overlay(style, self.color_gradient, font, self.language)
+                    }
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(style, self.color_gradient, font, self.language)
+                    }
+                    MyModal::ConnectionDetails(connection_index) => {
+                        connection_details_page(self, connection_index)
+                    }
+                };
+
+                Modal::new(content, overlay)
+                    .on_blur(Message::HideModal)
+                    .into()
+            }
+        }
     }
 
     fn subscription(&self) -> Subscription<Message> {

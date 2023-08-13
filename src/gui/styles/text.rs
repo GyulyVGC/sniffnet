@@ -47,13 +47,7 @@ impl iced::widget::text::StyleSheet for StyleType {
     fn appearance(&self, style: Self::Style) -> Appearance {
         let colors = get_colors(*self);
         Appearance {
-            color: match style {
-                TextType::Incoming => Some(colors.secondary),
-                TextType::Outgoing => Some(colors.outgoing),
-                TextType::Danger => Some(Color::from_rgb(0.8, 0.15, 0.15)),
-                TextType::Sponsor => Some(Color::from_rgb(1.0, 0.3, 0.5)),
-                _ => Some(highlight(*self, style)),
-            },
+            color: Some(highlight(*self, style)),
         }
     }
 }
@@ -82,6 +76,10 @@ pub fn highlight(style: StyleType, element: TextType) -> Color {
                 a: 1.0,
             }
         }
+        TextType::Incoming => colors.secondary,
+        TextType::Outgoing => colors.outgoing,
+        TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
+        TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
         TextType::Standard => colors.text_body,
     }
 }
