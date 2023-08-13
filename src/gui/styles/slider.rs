@@ -15,17 +15,17 @@ pub enum SliderType {
 #[derive(Clone)]
 pub struct SliderStyleTuple(pub StyleType, pub SliderType);
 
-impl From<SliderStyleTuple> for iced::theme::Slider {
-    fn from(tuple: SliderStyleTuple) -> Self {
-        iced::theme::Slider::Custom(Box::new(tuple))
-    }
-}
+// impl From<SliderStyleTuple> for iced::theme::Slider {
+//     fn from(tuple: SliderStyleTuple) -> Self {
+//         iced::theme::Slider::Custom(Box::new(tuple))
+//     }
+// }
 
-impl iced::widget::slider::StyleSheet for SliderStyleTuple {
-    type Style = iced::Theme;
+impl iced::widget::slider::StyleSheet for StyleType {
+    type Style = SliderType;
 
     fn active(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(*self);
         Appearance {
             rail: Rail {
                 colors: (mix_colors(colors.secondary, colors.buttons), colors.buttons),
@@ -42,7 +42,7 @@ impl iced::widget::slider::StyleSheet for SliderStyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(*self);
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),
@@ -59,7 +59,7 @@ impl iced::widget::slider::StyleSheet for SliderStyleTuple {
     }
 
     fn dragging(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(*self);
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, colors.buttons),

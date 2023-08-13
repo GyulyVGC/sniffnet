@@ -65,7 +65,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
-                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
+                .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
@@ -101,12 +101,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
                     )),
             )
             .direction(Direction::Vertical(ScrollbarType::properties()))
-            .style(
-                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
-                    sniffer.style,
-                    ScrollbarType::Standard,
-                )),
-            ),
+            .style(ScrollbarType::Standard),
         );
 
     content = content.push(volume_notification_col);
@@ -148,9 +143,7 @@ fn get_packets_notify(
     )
     .size(18)
     .font(font)
-    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
-        CheckboxStyleTuple(style, CheckboxType::Standard),
-    ));
+    .style(CheckboxType::Standard);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
@@ -219,9 +212,7 @@ fn get_bytes_notify(
     )
     .size(18)
     .font(font)
-    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
-        CheckboxStyleTuple(style, CheckboxType::Standard),
-    ));
+    .style(CheckboxType::Standard);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
@@ -281,9 +272,7 @@ fn get_favorite_notify(
     )
     .size(18)
     .font(font)
-    .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
-        CheckboxStyleTuple(style, CheckboxType::Standard),
-    ));
+    .style(CheckboxType::Standard);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
@@ -342,9 +331,7 @@ fn input_group_packets(
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
-            .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
-                TextInputStyleTuple(style, TextInputType::Standard),
-            )),
+            .style(TextInputType::Standard),
         )
         .push(
             Text::new(per_second_translation(language))
@@ -387,9 +374,7 @@ fn input_group_bytes(
             .padding([0, 0, 0, 10])
             .font(font)
             .width(Length::Fixed(100.0))
-            .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
-                TextInputStyleTuple(style, TextInputType::Standard),
-            )),
+            .style(TextInputType::Standard),
         )
         .push(
             Text::new(info_str)
@@ -426,9 +411,7 @@ fn volume_slider(
                         Slider::new(0..=100, volume, Message::ChangeVolume)
                             .step(5)
                             .width(Fixed(200.0))
-                            .style(<SliderStyleTuple as Into<iced::theme::Slider>>::into(
-                                SliderStyleTuple(style, SliderType::Standard),
-                            )),
+                            .style(SliderType::Standard),
                     )
                     .push(horizontal_space(Length::Fixed(15.0)))
                     .push(
