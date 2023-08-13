@@ -5,8 +5,9 @@ use iced::Background;
 
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum CheckboxType {
+    #[default]
     Standard,
 }
 

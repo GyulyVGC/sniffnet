@@ -24,7 +24,7 @@ pub fn ip_version_radios(
     let mut ret_val = Column::new().spacing(10).padding(0).push(
         ip_version_translation(language)
             .font(font)
-            .style(TextStyleTuple(style, TextType::Subtitle))
+            .style(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in IpVersion::ALL {
@@ -38,9 +38,7 @@ pub fn ip_version_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val
@@ -55,7 +53,7 @@ pub fn transport_protocol_radios(
     let mut ret_val = Column::new().spacing(10).push(
         Text::new(transport_protocol_translation(language))
             .font(font)
-            .style(TextStyleTuple(style, TextType::Subtitle))
+            .style(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in TransProtocol::ALL {
@@ -69,9 +67,7 @@ pub fn transport_protocol_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val
@@ -85,30 +81,27 @@ pub fn language_radios(
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
     for option in collection {
-        ret_val =
-            ret_val.push(
-                Row::new().align_items(Alignment::Center).push(
-                    Row::new()
-                        .align_items(Alignment::Center)
-                        .width(Length::Fixed(180.0))
-                        .push(
-                            Radio::new(
-                                format!("{} ({:?})", option.get_radio_label(), option),
-                                *option,
-                                Some(active),
-                                Message::LanguageSelection,
-                            )
-                            .spacing(7)
-                            .font(font)
-                            .size(15)
-                            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                                RadioStyleTuple(style, RadioType::Standard),
-                            )),
+        ret_val = ret_val.push(
+            Row::new().align_items(Alignment::Center).push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .width(Length::Fixed(180.0))
+                    .push(
+                        Radio::new(
+                            format!("{} ({:?})", option.get_radio_label(), option),
+                            *option,
+                            Some(active),
+                            Message::LanguageSelection,
                         )
-                        .push(horizontal_space(Length::Fixed(8.0)))
-                        .push(option.get_flag()),
-                ),
-            );
+                        .spacing(7)
+                        .font(font)
+                        .size(15)
+                        .style(RadioType::Standard),
+                    )
+                    .push(horizontal_space(Length::Fixed(8.0)))
+                    .push(option.get_flag()),
+            ),
+        );
     }
     ret_val
 }
@@ -141,9 +134,7 @@ pub fn sound_packets_threshold_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val
@@ -177,9 +168,7 @@ pub fn sound_bytes_threshold_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val
@@ -213,9 +202,7 @@ pub fn sound_favorite_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val
@@ -242,9 +229,7 @@ pub fn chart_radios(
             .spacing(7)
             .font(font)
             .size(15)
-            .style(<RadioStyleTuple as Into<iced::theme::Radio>>::into(
-                RadioStyleTuple(style, RadioType::Standard),
-            )),
+            .style(RadioType::Standard),
         );
     }
     ret_val

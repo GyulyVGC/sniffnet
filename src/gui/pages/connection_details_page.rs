@@ -78,13 +78,13 @@ fn page_content(
         Text::new(source_translation(sniffer.language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextStyleTuple(sniffer.style, TextType::Title)),
+            .style(TextType::Title),
     );
     let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(sniffer.language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextStyleTuple(sniffer.style, TextType::Title)),
+            .style(TextType::Title),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
@@ -251,13 +251,7 @@ fn get_host_info_col(
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
-        host_info_col =
-            host_info_col.push(Rule::horizontal(10.0).style(<RuleStyleTuple as Into<
-                iced::theme::Rule,
-            >>::into(RuleStyleTuple(
-                style,
-                RuleType::Standard,
-            ))));
+        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(RuleType::Standard));
     }
     if r_dns.parse::<IpAddr>().is_err() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
@@ -320,11 +314,7 @@ fn get_src_or_dest_col(
                 .width(Length::Fill)
                 .align_x(Horizontal::Center),
         )
-        .push(
-            Rule::horizontal(10.0).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
-                RuleStyleTuple(style, RuleType::Standard),
-            )),
-        )
+        .push(Rule::horizontal(10.0).style(RuleType::Standard))
         .push(TextType::highlighted_subtitle_with_desc(
             socket_address_translation(language),
             &get_socket_address(ip, port),

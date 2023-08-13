@@ -99,11 +99,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
             .push(
                 Scrollable::new(logged_notifications)
                     .direction(Direction::Vertical(ScrollbarType::properties()))
-                    .style(
-                        <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
-                            ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
-                        ),
-                    ),
+                    .style(ScrollbarType::Standard),
             )
             .push(
                 Container::new(get_button_clear_all(sniffer.style, sniffer.language))
@@ -209,12 +205,12 @@ fn packets_notification_log(
                 )
                 .push(
                     Text::new(packets_exceeded_translation(language))
-                        .style(TextStyleTuple(style, TextType::Title))
+                        .style(TextType::Title)
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
-                        .style(TextStyleTuple(style, TextType::Subtitle))
+                        .style(TextType::Subtitle)
                         .size(FONT_SIZE_FOOTER)
                         .font(font),
                 ),
@@ -289,13 +285,13 @@ fn bytes_notification_log(
                 )
                 .push(
                     Text::new(bytes_exceeded_translation(language))
-                        .style(TextStyleTuple(style, TextType::Title))
+                        .style(TextType::Title)
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
                         .size(FONT_SIZE_FOOTER)
-                        .style(TextStyleTuple(style, TextType::Subtitle))
+                        .style(TextType::Subtitle)
                         .font(font),
                 ),
         )
@@ -374,7 +370,7 @@ fn favorite_notification_log(
                 )
                 .push(
                     Text::new(favorite_transmitted_translation(language))
-                        .style(TextStyleTuple(style, TextType::Title))
+                        .style(TextType::Title)
                         .font(font),
                 ),
         )

@@ -74,14 +74,14 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
     .font(font)
-    .style(PicklistStyleTuple(sniffer.style, PicklistType::Standard));
+    .style(PicklistType::Standard);
     let col_app = Column::new()
         .width(FillPortion(8))
         .spacing(10)
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
-                .style(TextStyleTuple(sniffer.style, TextType::Subtitle))
+                .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(picklist_app);
@@ -94,7 +94,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             Row::new().push(
                 select_filters_translation(sniffer.language)
                     .font(font)
-                    .style(TextStyleTuple(sniffer.style, TextType::Title))
+                    .style(TextType::Title)
                     .size(FONT_SIZE_TITLE),
             ),
         )
@@ -186,7 +186,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<St
         .push(
             choose_adapters_translation(sniffer.language)
                 .font(font)
-                .style(TextStyleTuple(sniffer.style, TextType::Title))
+                .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(
@@ -209,11 +209,6 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<St
                 },
             ))
             .direction(Direction::Vertical(ScrollbarType::properties()))
-            .style(
-                <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(ScrollbarStyleTuple(
-                    sniffer.style,
-                    ScrollbarType::Standard,
-                )),
-            ),
+            .style(ScrollbarType::Standard),
         )
 }

@@ -9,8 +9,9 @@ use crate::gui::styles::style_constants::{get_alpha_round_borders, BORDER_ROUNDE
 use crate::gui::styles::types::palette::mix_colors;
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum ScrollbarType {
+    #[default]
     Standard,
 }
 

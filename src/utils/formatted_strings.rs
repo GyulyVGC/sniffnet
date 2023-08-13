@@ -64,15 +64,6 @@ pub fn get_active_filters_col(
     ret_val
 }
 
-/// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_direction: TrafficDirection, style: StyleType) -> Color {
-    if traffic_direction == TrafficDirection::Outgoing {
-        get_colors(style).outgoing
-    } else {
-        get_colors(style).secondary
-    }
-}
-
 /// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
 pub fn get_formatted_bytes_string(bytes: u128) -> String {
     let mut multiple_transmitted = String::new();

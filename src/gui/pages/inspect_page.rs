@@ -20,6 +20,7 @@ use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::text_input::{TextInputStyleTuple, TextInputType};
 use crate::gui::types::message::Message;
 use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::translations::translations::application_protocol_translation;
 use crate::translations::translations_2::{
@@ -27,7 +28,7 @@ use crate::translations::translations_2::{
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
     showing_results_translation, sort_by_translation,
 };
-use crate::utils::formatted_strings::{get_connection_color, get_open_report_tooltip};
+use crate::utils::formatted_strings::get_open_report_tooltip;
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
@@ -81,7 +82,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     )
     .padding([3, 7])
     .font(font)
-    .style(PicklistStyleTuple(sniffer.style, PicklistType::Standard));
+    .style(PicklistType::Standard);
 
     let report = lazy(
         (
@@ -104,19 +105,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
                         sniffer.style,
                         sniffer.language,
                     ))
-                    .push(Rule::vertical(25).style(
-                        <RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
-                            sniffer.style,
-                            RuleType::Standard,
-                        )),
-                    ))
+                    .push(Rule::vertical(25).style(RuleType::Standard))
                     .push(
                         Column::new()
                             .spacing(10)
                             .push(
                                 Text::new(sort_by_translation(sniffer.language))
                                     .font(font)
-                                    .style(TextStyleTuple(sniffer.style, TextType::Title))
+                                    .style(TextType::Title)
                                     .size(FONT_SIZE_TITLE),
                             )
                             .push(picklist_sort),
@@ -145,12 +141,16 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for (key, val, flag) in search_results {
-        let entry_color = get_connection_color(val.traffic_direction, sniffer.style);
+        let entry_text_type = if val.traffic_direction == TrafficDirection::Outgoing {
+            TextType::Outgoing
+        } else {
+            TextType::Incoming
+        };
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
                 Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
-                    .style(iced::theme::Text::Color(entry_color))
+                    .style(entry_text_type)
                     .font(font),
             )
             .push(flag)
@@ -166,10 +166,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
     if results_number > 0 {
         col_report = col_report
             .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
-            .push(Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(RuleStyleTuple(
-                sniffer.style,
-                RuleType::Standard,
-            ))))
+            .push(Rule::horizontal(5).style(
+                RuleType::Standard))
             .push(
                 Scrollable::new(scroll_report)
                     .height(Length::FillPortion(15))
@@ -178,16 +176,10 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
                     })
-                    .style(
-                        <ScrollbarStyleTuple as Into<iced::theme::Scrollable>>::into(
-                            ScrollbarStyleTuple(sniffer.style, ScrollbarType::Standard),
-                        ),
-                    ),
+                    .style(ScrollbarType::Standard)
             )
             .push(
-                Rule::horizontal(5).style(<RuleStyleTuple as Into<iced::theme::Rule>>::into(
-                    RuleStyleTuple(sniffer.style, RuleType::Standard),
-                )),
+                Rule::horizontal(5).style(RuleType::Standard)
             )
             .push(get_change_page_row(
                 sniffer.style,
@@ -244,7 +236,7 @@ fn filters_col(
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(search_filters_translation(language))
             .font(font)
-            .style(TextStyleTuple(style, TextType::Title))
+            .style(TextType::Title)
             .size(FONT_SIZE_TITLE),
     );
     if search_params.is_some_filter_active() {
@@ -274,9 +266,7 @@ fn filters_col(
                 .spacing(5)
                 .size(18)
                 .font(font)
-                .style(<CheckboxStyleTuple as Into<iced::theme::Checkbox>>::into(
-                    CheckboxStyleTuple(style, CheckboxType::Standard),
-                )),
+                .style(CheckboxType::Standard),
             )
             .padding([5, 8])
             .style(if search_params.only_favorites {
@@ -391,16 +381,11 @@ fn filter_input(
         .padding([0, 5])
         .font(font)
         .width(Length::Fixed(width))
-        .style(<TextInputStyleTuple as Into<iced::theme::TextInput>>::into(
-            TextInputStyleTuple(
-                style,
-                if is_filter_active {
-                    TextInputType::Badge
-                } else {
-                    TextInputType::Standard
-                },
-            ),
-        ));
+        .style(if is_filter_active {
+            TextInputType::Badge
+        } else {
+            TextInputType::Standard
+        });
 
     let mut content = Row::new()
         .spacing(5)

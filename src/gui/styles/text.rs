@@ -12,8 +12,12 @@ use crate::{get_colors, StyleType};
 pub enum TextType {
     #[default]
     Standard,
+    Incoming,
+    Outgoing,
     Title,
     Subtitle,
+    Danger,
+    Sponsor,
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -37,18 +41,19 @@ impl TextType {
 #[derive(Clone)]
 pub struct TextStyleTuple(pub StyleType, pub TextType);
 
-impl From<TextStyleTuple> for iced::theme::Text {
-    fn from(tuple: TextStyleTuple) -> Self {
-        iced::theme::Text::Color(highlight(tuple.0, tuple.1))
-    }
-}
-
 impl iced::widget::text::StyleSheet for StyleType {
     type Style = TextType;
 
     fn appearance(&self, style: Self::Style) -> Appearance {
+        let colors = get_colors(*self);
         Appearance {
-            color: Some(highlight(*self, style)),
+            color: match style {
+                TextType::Incoming => Some(colors.secondary),
+                TextType::Outgoing => Some(colors.outgoing),
+                TextType::Danger => Some(Color::from_rgb(0.8, 0.15, 0.15)),
+                TextType::Sponsor => Some(Color::from_rgb(1.0, 0.3, 0.5)),
+                _ => Some(highlight(*self, style)),
+            },
         }
     }
 }

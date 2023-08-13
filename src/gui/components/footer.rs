@@ -13,6 +13,7 @@ use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::style_constants::{
     get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,
 };
+use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
@@ -97,7 +98,7 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message, Renderer<St
     let content = button(
         Text::new('❤'.to_string())
             .size(23)
-            .style(iced::theme::Text::Color(Color::from_rgb(1.0, 0.3, 0.5)))
+            .style(TextType::Sponsor)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
@@ -132,7 +133,7 @@ fn get_release_details(
             // a newer release is available on GitHub
             let button = button(
                 Text::new('!'.to_string())
-                    .style(iced::theme::Text::Color(Color::from_rgb(0.8, 0.15, 0.15)))
+                    .style(TextType::Danger)
                     .size(28)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center),

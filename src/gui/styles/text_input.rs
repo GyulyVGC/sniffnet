@@ -7,8 +7,9 @@ use iced::{Background, Color};
 use crate::gui::styles::style_constants::get_alpha_round_borders;
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum TextInputType {
+    #[default]
     Standard,
     Badge,
 }
