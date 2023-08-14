@@ -1,7 +1,5 @@
 //! Picklists style
 
-use std::rc::Rc;
-
 use iced::widget::pick_list;
 use iced::{Background, Color};
 

@@ -19,8 +19,7 @@ use crate::countries::flags_pictures::{
     UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::style_constants::get_font;
+use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{

@@ -1,8 +1,8 @@
-use iced::Renderer;
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
 use iced::widget::Tooltip;
+use iced::Renderer;
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_SMALL;

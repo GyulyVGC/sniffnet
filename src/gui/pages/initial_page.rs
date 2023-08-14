@@ -13,12 +13,11 @@ use iced::{alignment, Alignment, Font, Length, Renderer};
 use pcap::Device;
 
 use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::picklist::{PicklistStyleTuple, PicklistType};
-use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;

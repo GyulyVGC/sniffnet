@@ -1,8 +1,6 @@
 //! Containers style
 
-use iced::theme::Container;
 use iced::widget::container::Appearance;
-use iced::Theme;
 use iced::{Background, Color};
 
 use crate::gui::styles::style_constants::{

@@ -4,13 +4,11 @@
 
 use std::time::Duration;
 
-use iced::application::StyleSheet;
 use iced::keyboard::{Event, KeyCode, Modifiers};
-use iced::widget::{container, Column, Container, Row};
+use iced::widget::Column;
 use iced::Event::{Keyboard, Window};
 use iced::{
-    executor, font, subscription, window, Application, Command, Element, Renderer, Settings,
-    Subscription, Theme,
+    executor, font, subscription, window, Application, Command, Element, Renderer, Subscription,
 };
 
 use crate::gui::components::footer::footer;

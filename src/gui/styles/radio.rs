@@ -1,7 +1,6 @@
 //! Radios style
 
 use iced::Background;
-use iced::Theme;
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::{get_colors, StyleType};

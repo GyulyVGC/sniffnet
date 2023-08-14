@@ -1,10 +1,8 @@
-use crate::get_colors;
-use crate::gui::styles::container::ContainerType;
+use iced::application;
 use iced::application::Appearance;
-use iced::widget::{container, text};
-use iced::{application, Background, Color};
 use serde::{Deserialize, Serialize};
 
+use crate::get_colors;
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 
 /// Used to specify the kind of style of the application

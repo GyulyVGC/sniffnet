@@ -2,7 +2,6 @@
 
 use iced::widget::scrollable::Properties;
 use iced::widget::scrollable::{Scrollbar, Scroller};
-use iced::Theme;
 use iced::{Background, Color};
 
 use crate::gui::styles::style_constants::{get_alpha_round_borders, BORDER_ROUNDED_RADIUS};

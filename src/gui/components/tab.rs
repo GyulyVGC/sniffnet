@@ -4,9 +4,9 @@ use iced::widget::{button, horizontal_space, Button, Row, Text};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 

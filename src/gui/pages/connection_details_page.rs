@@ -9,11 +9,9 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
+use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};

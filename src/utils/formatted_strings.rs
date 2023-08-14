@@ -2,17 +2,15 @@ use std::net::IpAddr;
 use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
-use iced::{Color, Font, Renderer};
+use iced::{Font, Renderer};
 
-use crate::gui::styles::style_constants::get_font;
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
-use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
     active_filters_translation, none_translation, open_report_translation,
 };
-use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtocol};
+use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");

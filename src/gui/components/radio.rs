@@ -2,9 +2,8 @@ use iced::widget::horizontal_space;
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Length, Renderer};
 
-use crate::gui::styles::radio::{RadioStyleTuple, RadioType};
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,

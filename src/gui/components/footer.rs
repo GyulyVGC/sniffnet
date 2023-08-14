@@ -6,13 +6,11 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::horizontal_space;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
-use iced::{Alignment, Color, Font, Length, Renderer};
+use iced::{Alignment, Font, Length, Renderer};
 
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS,
-};
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;

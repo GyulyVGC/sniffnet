@@ -12,11 +12,10 @@ use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
-use crate::gui::styles::text::{TextStyleTuple, TextType};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,

@@ -13,9 +13,9 @@ use iced::{
     Size,
 };
 
-use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
