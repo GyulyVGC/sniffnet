@@ -221,7 +221,7 @@ fn get_palette_container(
 fn get_palette(
     style: StyleType,
     is_custom: bool,
-) -> Container<'static, Message, Renderer<RuleStyleTuple>> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let height = if is_custom { 25.0 } else { 40.0 };
 
     Container::new(
@@ -231,25 +231,25 @@ fn get_palette(
                 Row::new()
                     .padding(0)
                     .width(Length::Fixed(120.0))
-                    .push(Rule::horizontal(height).style(RuleStyleTuple(style, RuleType::PalettePrimary))),
+                    .push(Rule::horizontal(height).style(RuleType::PalettePrimary(style))),
             )
             .push(
                 Row::new()
                     .padding(0)
                     .width(Length::Fixed(80.0))
-                    .push(Rule::horizontal(height).style(RuleStyleTuple(style, RuleType::PaletteSecondary))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteSecondary(style))),
             )
             .push(
                 Row::new()
                     .padding(0)
                     .width(Length::Fixed(60.0))
-                    .push(Rule::horizontal(height).style(RuleStyleTuple(style,RuleType::PaletteOutgoing))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteOutgoing(style))),
             )
             .push(
                 Row::new()
                     .padding(0)
                     .width(Length::Fixed(40.0))
-                    .push(Rule::horizontal(height).style(RuleStyleTuple(style, RuleType::PaletteButtons))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteButtons(style))),
             ),
     )
     .align_x(Horizontal::Center)

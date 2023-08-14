@@ -47,7 +47,11 @@ impl iced::widget::text::StyleSheet for StyleType {
     fn appearance(&self, style: Self::Style) -> Appearance {
         let colors = get_colors(*self);
         Appearance {
-            color: if style == TextType::Standard {None} else {  Some(highlight(*self, style))},
+            color: if style == TextType::Standard {
+                None
+            } else {
+                Some(highlight(*self, style))
+            },
         }
     }
 }
