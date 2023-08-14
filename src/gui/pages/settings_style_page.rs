@@ -41,20 +41,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
             sniffer.language,
         ))
         .push(get_settings_tabs(
-            [
-                SettingsPage::Notifications,
-                SettingsPage::Appearance,
-                SettingsPage::Language,
-            ],
-            &["7 ", "K ", "c "],
-            &[
-                Message::OpenSettings(SettingsPage::Notifications),
-                Message::TickInit,
-                Message::OpenSettings(SettingsPage::Language),
-            ],
             SettingsPage::Appearance,
             font,
-            font_headers,
             sniffer.language,
         ))
         .push(vertical_space(Length::Fixed(15.0)))

@@ -81,6 +81,6 @@ pub fn highlight(style: StyleType, element: TextType) -> Color {
         TextType::Outgoing => colors.outgoing,
         TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
         TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
-        _ => colors.text_body,
+        TextType::Standard => colors.text_body,
     }
 }

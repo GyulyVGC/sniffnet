@@ -44,7 +44,6 @@ impl button::StyleSheet for StyleType {
                     Background::Color(mix_colors(colors.primary, colors.buttons))
                 }
                 ButtonType::Starred => Background::Color(get_starred_color(*self)),
-                ButtonType::Badge => Background::Color(colors.secondary),
                 ButtonType::BorderedRound => Background::Color(Color {
                     a: get_alpha_round_containers(*self),
                     ..colors.buttons
@@ -52,7 +51,9 @@ impl button::StyleSheet for StyleType {
                 ButtonType::Neutral | ButtonType::NotStarred => {
                     Background::Color(Color::TRANSPARENT)
                 }
-                ButtonType::Gradient(GradientType::None) => Background::Color(colors.secondary),
+                ButtonType::Gradient(GradientType::None) | ButtonType::Badge => {
+                    Background::Color(colors.secondary)
+                }
                 ButtonType::Gradient(gradient_type) => Background::Gradient(get_gradient_buttons(
                     &colors,
                     *gradient_type,

@@ -41,17 +41,6 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
         .height(Length::Fill);
 
     let tabs = get_pages_tabs(
-        [
-            RunningPage::Overview,
-            RunningPage::Inspect,
-            RunningPage::Notifications,
-        ],
-        &["d ", "5 ", "7 "],
-        &[
-            Message::ChangeRunningPage(RunningPage::Overview),
-            Message::ChangeRunningPage(RunningPage::Inspect),
-            Message::TickInit,
-        ],
         RunningPage::Notifications,
         font,
         font_headers,

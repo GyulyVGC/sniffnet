@@ -76,17 +76,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
-                    [
-                        RunningPage::Overview,
-                        RunningPage::Inspect,
-                        RunningPage::Notifications,
-                    ],
-                    &["d ", "5 ", "7 "],
-                    &[
-                        Message::TickInit,
-                        Message::ChangeRunningPage(RunningPage::Inspect),
-                        Message::ChangeRunningPage(RunningPage::Notifications),
-                    ],
                     RunningPage::Overview,
                     font,
                     font_headers,

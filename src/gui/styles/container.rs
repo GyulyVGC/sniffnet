@@ -54,7 +54,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                     get_gradient_headers(&colors, *gradient_type, self.is_nightly()),
                 ),
                 ContainerType::Modal => Background::Color(colors.primary),
-                _ => Background::Color(Color::TRANSPARENT),
+                ContainerType::Standard => Background::Color(Color::TRANSPARENT),
             }),
             border_radius: match style {
                 ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),

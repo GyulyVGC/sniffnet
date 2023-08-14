@@ -1,33 +1,21 @@
 use std::cmp::{min, Ordering};
 use std::sync::{Arc, Mutex};
 
-use iced::widget::Tooltip;
-use iced::Renderer;
-
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_SMALL;
 use crate::gui::styles::style_constants::get_font;
-use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer, StyleType};
+use crate::report::types::report_entry::ReportEntry;
+use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
-pub fn get_searched_entries(
-    sniffer: &Sniffer,
-) -> (
-    Vec<(
-        AddressPortPair,
-        InfoAddressPortPair,
-        Tooltip<'static, Message, Renderer<StyleType>>,
-    )>,
-    usize,
-) {
+pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
@@ -125,7 +113,11 @@ pub fn get_searched_entries(
                     sniffer.language,
                     get_font(sniffer.style),
                 );
-                (key_val.0.clone(), key_val.1.clone(), flag)
+                ReportEntry {
+                    key: key_val.0.clone(),
+                    val: key_val.1.clone(),
+                    tooltip: flag,
+                }
             })
             .collect(),
         all_results.len(),

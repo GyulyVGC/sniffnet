@@ -42,17 +42,6 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let mut tab_and_body = Column::new().height(Length::Fill);
 
     let tabs = get_pages_tabs(
-        [
-            RunningPage::Overview,
-            RunningPage::Inspect,
-            RunningPage::Notifications,
-        ],
-        &["d ", "5 ", "7 "],
-        &[
-            Message::ChangeRunningPage(RunningPage::Overview),
-            Message::TickInit,
-            Message::ChangeRunningPage(RunningPage::Notifications),
-        ],
         RunningPage::Inspect,
         font,
         font_headers,
@@ -134,8 +123,8 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
     let mut scroll_report = Column::new();
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
-    for (key, val, flag) in search_results {
-        let entry_text_type = if val.traffic_direction == TrafficDirection::Outgoing {
+    for report_entry in search_results {
+        let entry_text_type = if report_entry.val.traffic_direction == TrafficDirection::Outgoing {
             TextType::Outgoing
         } else {
             TextType::Incoming
@@ -143,17 +132,23 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!("  {}{}  ", key.print_gui(), val.print_gui()))
-                    .style(entry_text_type)
-                    .font(font),
+                Text::new(format!(
+                    "  {}{}  ",
+                    report_entry.key.print_gui(),
+                    report_entry.val.print_gui()
+                ))
+                .style(entry_text_type)
+                .font(font),
             )
-            .push(flag)
+            .push(report_entry.tooltip)
             .push(Text::new("  "));
 
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)
-                .on_press(Message::ShowModal(MyModal::ConnectionDetails(val.index)))
+                .on_press(Message::ShowModal(MyModal::ConnectionDetails(
+                    report_entry.val.index,
+                )))
                 .style(ButtonType::Neutral),
         );
     }
