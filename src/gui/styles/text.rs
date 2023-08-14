@@ -36,9 +36,6 @@ impl TextType {
     }
 }
 
-#[derive(Clone)]
-pub struct TextStyleTuple(pub StyleType, pub TextType);
-
 impl iced::widget::text::StyleSheet for StyleType {
     type Style = TextType;
 

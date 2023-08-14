@@ -20,9 +20,6 @@ impl ScrollbarType {
     }
 }
 
-#[derive(Clone)]
-pub struct ScrollbarStyleTuple(pub StyleType, pub ScrollbarType);
-
 impl iced::widget::scrollable::StyleSheet for StyleType {
     type Style = ScrollbarType;
 

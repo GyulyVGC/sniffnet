@@ -30,9 +30,6 @@ pub enum ButtonType {
     Gradient(GradientType),
 }
 
-#[derive(Clone)]
-pub struct ButtonStyleTuple(pub StyleType, pub ButtonType);
-
 impl button::StyleSheet for StyleType {
     type Style = ButtonType;
 

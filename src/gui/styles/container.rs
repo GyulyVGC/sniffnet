@@ -23,9 +23,6 @@ pub enum ContainerType {
     Modal,
 }
 
-#[derive(Clone)]
-pub struct ContainerStyleTuple(pub StyleType, pub ContainerType);
-
 impl iced::widget::container::StyleSheet for StyleType {
     type Style = ContainerType;
 

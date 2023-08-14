@@ -53,6 +53,3 @@ impl rule::StyleSheet for StyleType {
         }
     }
 }
-
-#[derive(Clone)]
-pub struct RuleStyleTuple(pub StyleType, pub RuleType);

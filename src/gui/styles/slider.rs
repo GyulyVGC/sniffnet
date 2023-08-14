@@ -13,9 +13,6 @@ pub enum SliderType {
     Standard,
 }
 
-#[derive(Clone)]
-pub struct SliderStyleTuple(pub StyleType, pub SliderType);
-
 impl iced::widget::slider::StyleSheet for StyleType {
     type Style = SliderType;
 

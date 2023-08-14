@@ -11,9 +11,6 @@ pub enum CheckboxType {
     Standard,
 }
 
-#[derive(Clone)]
-pub struct CheckboxStyleTuple(pub StyleType, pub CheckboxType);
-
 impl iced::widget::checkbox::StyleSheet for StyleType {
     type Style = CheckboxType;
 

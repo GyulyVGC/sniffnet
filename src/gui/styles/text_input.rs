@@ -14,9 +14,6 @@ pub enum TextInputType {
     Badge,
 }
 
-#[derive(Clone)]
-pub struct TextInputStyleTuple(pub StyleType, pub TextInputType);
-
 impl iced::widget::text_input::StyleSheet for StyleType {
     type Style = TextInputType;
 

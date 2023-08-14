@@ -13,9 +13,6 @@ pub enum PicklistType {
     Standard,
 }
 
-#[derive(Clone)]
-pub struct PicklistStyleTuple(pub StyleType, pub PicklistType);
-
 impl iced::overlay::menu::StyleSheet for StyleType {
     type Style = PicklistType;
 

@@ -11,9 +11,6 @@ pub enum RadioType {
     Standard,
 }
 
-#[derive(Clone)]
-pub struct RadioStyleTuple(pub StyleType, pub RadioType);
-
 impl iced::widget::radio::StyleSheet for StyleType {
     type Style = RadioType;
 
