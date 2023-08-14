@@ -48,6 +48,7 @@ fn page_content(
     connection_index: usize,
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
 
     let info_traffic_lock = sniffer
         .info_traffic
@@ -69,7 +70,8 @@ fn page_content(
     drop(info_traffic_lock);
 
     let header_and_content = Column::new().width(Length::Fill).push(page_header(
-        sniffer.style,
+        font,
+        font_headers,
         sniffer.color_gradient,
         sniffer.language,
     ));
@@ -88,7 +90,7 @@ fn page_content(
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
-        host_info_col = get_host_info_col(&r_dns, &host, sniffer.style, sniffer.language);
+        host_info_col = get_host_info_col(&r_dns, &host, font, sniffer.language);
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(
             host.country,
@@ -96,7 +98,7 @@ fn page_content(
             host_info.is_local,
             host_info.traffic_type,
             sniffer.language,
-            sniffer.style,
+            font,
         );
         let computer = get_local_tooltip(sniffer, &address_to_lookup, &key);
         if address_to_lookup.eq(&key.address1) {
@@ -113,7 +115,7 @@ fn page_content(
         &key.address1,
         key.port1,
         &val.mac_address1,
-        sniffer.style,
+        font,
         sniffer.language,
     );
     let mut dest_col = get_src_or_dest_col(
@@ -121,7 +123,7 @@ fn page_content(
         &key.address2,
         key.port2,
         &val.mac_address2,
-        sniffer.style,
+        font,
         sniffer.language,
     );
 
@@ -131,9 +133,9 @@ fn page_content(
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(&key, &val, font, sniffer.language, sniffer.style);
+    let col_info = col_info(&key, &val, font, sniffer.language);
 
-    let content = assemble_widgets(col_info, source_col, dest_col, sniffer.style);
+    let content = assemble_widgets(col_info, source_col, dest_col);
 
     Container::new(header_and_content.push(content))
         .width(Length::Fixed(1000.0))
@@ -142,18 +144,18 @@ fn page_content(
 }
 
 fn page_header(
-    style: StyleType,
+    font: Font,
+    font_headers: Font,
     color_gradient: GradientType,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new(connection_details_translation(language))
-                    .font(get_font_headers(style))
+                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
@@ -171,7 +173,6 @@ fn page_header(
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(ButtonType::Standard)
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
@@ -195,7 +196,6 @@ fn col_info(
     val: &InfoAddressPortPair,
     font: Font,
     language: Language,
-    style: StyleType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .spacing(10)
@@ -215,12 +215,12 @@ fn col_info(
         .push(TextType::highlighted_subtitle_with_desc(
             transport_protocol_translation(language),
             &key.trans_protocol.to_string(),
-            style,
+            font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
             application_protocol_translation(language),
             &val.app_protocol.to_string(),
-            style,
+            font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
             &format!(
@@ -238,7 +238,7 @@ fn col_info(
                 val.transmitted_packets,
                 packets_translation(language)
             ),
-            style,
+            font,
         ))
         .push(vertical_space(Length::FillPortion(1)))
 }
@@ -246,25 +246,25 @@ fn col_info(
 fn get_host_info_col(
     r_dns: &str,
     host: &Host,
-    style: StyleType,
+    font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
-        host_info_col = host_info_col.push(Rule::horizontal(10.0).style(RuleType::Standard));
+        host_info_col = host_info_col.push(Rule::horizontal(10.0));
     }
     if r_dns.parse::<IpAddr>().is_err() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
             fqdn_translation(language),
             r_dns,
-            style,
+            font,
         ));
     }
     if !host.asn.name.is_empty() && host.asn.number > 0 {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
             administrative_entity_translation(language),
             &format!("{} (ASN {})", host.asn.name, host.asn.number),
-            style,
+            font,
         ));
     }
     host_info_col
@@ -295,7 +295,7 @@ fn get_local_tooltip(
             TrafficDirection::Outgoing,
         ),
         sniffer.language,
-        sniffer.style,
+        get_font(sniffer.style),
     )
 }
 
@@ -304,7 +304,7 @@ fn get_src_or_dest_col(
     ip: &String,
     port: u16,
     mac: &str,
-    style: StyleType,
+    font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
@@ -314,16 +314,16 @@ fn get_src_or_dest_col(
                 .width(Length::Fill)
                 .align_x(Horizontal::Center),
         )
-        .push(Rule::horizontal(10.0).style(RuleType::Standard))
+        .push(Rule::horizontal(10.0))
         .push(TextType::highlighted_subtitle_with_desc(
             socket_address_translation(language),
             &get_socket_address(ip, port),
-            style,
+            font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
             mac_address_translation(language),
             mac,
-            style,
+            font,
         ))
 }
 
@@ -331,7 +331,6 @@ fn assemble_widgets(
     col_info: Column<'static, Message, Renderer<StyleType>>,
     source_col: Column<'static, Message, Renderer<StyleType>>,
     dest_col: Column<'static, Message, Renderer<StyleType>>,
-    style: StyleType,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)

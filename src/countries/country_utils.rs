@@ -2,7 +2,7 @@ use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
 use iced::widget::Svg;
 use iced::widget::Tooltip;
-use iced::{Length, Renderer};
+use iced::{Font, Length, Renderer};
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 use crate::countries::flags_pictures::{
@@ -325,13 +325,13 @@ pub fn get_flag_tooltip(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
+    font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let (content, tooltip) =
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
         .style(ContainerType::Tooltip);
 
@@ -346,7 +346,7 @@ pub fn get_computer_tooltip(
     is_my_address: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
+    font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, traffic_type) {
@@ -367,7 +367,7 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
         .style(ContainerType::Tooltip)
 }

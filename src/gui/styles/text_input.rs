@@ -40,7 +40,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         }
     }
 
-    fn focused(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
+    fn focused(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(*self);
         Appearance {
             background: Background::Color(colors.primary),

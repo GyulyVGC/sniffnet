@@ -25,13 +25,12 @@ use crate::Language;
 pub fn footer(
     language: Language,
     color_gradient: GradientType,
-    style: StyleType,
+    font: Font,
+    font_footer: Font,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let font_footer = get_font_headers(style);
-
     let release_details_row =
-        get_release_details(language, style, font_footer, newer_release_available);
+        get_release_details(language, font, font_footer, newer_release_available);
 
     let footer_row = Row::new()
         .spacing(10)
@@ -39,9 +38,9 @@ pub fn footer(
         .padding([0, 20])
         .align_items(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_website(style))
-        .push(get_button_github(style))
-        .push(get_button_sponsor(style))
+        .push(get_button_website(font))
+        .push(get_button_github(font))
+        .push(get_button_sponsor(font))
         .push(
             Text::new("Made with ❤ by Giuliano Bellini")
                 .width(Length::FillPortion(1))
@@ -58,7 +57,7 @@ pub fn footer(
         .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_website(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_website(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('c'.to_string())
             .font(ICONS)
@@ -68,15 +67,14 @@ fn get_button_website(style: StyleType) -> Tooltip<'static, Message, Renderer<St
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(content, "Website", Position::Top)
-        .font(get_font(style))
+        .font(font)
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_github(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_github(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('H'.to_string())
             .font(ICONS)
@@ -86,15 +84,14 @@ fn get_button_github(style: StyleType) -> Tooltip<'static, Message, Renderer<Sty
     )
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
-    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(content, "GitHub", Position::Top)
-        .font(get_font(style))
+        .font(font)
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('❤'.to_string())
             .size(23)
@@ -105,17 +102,16 @@ fn get_button_sponsor(style: StyleType) -> Tooltip<'static, Message, Renderer<St
     .padding([2, 0, 0, 0])
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
-    .style(ButtonType::Standard)
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
     Tooltip::new(content, "Sponsor", Position::Top)
-        .font(get_font(style))
+        .font(font)
         .style(ContainerType::Tooltip)
 }
 
 fn get_release_details(
     language: Language,
-    style: StyleType,
+    font: Font,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Result<bool, String>>>,
 ) -> Row<'static, Message, Renderer<StyleType>> {
@@ -148,7 +144,7 @@ fn get_release_details(
                 new_version_available_translation(language),
                 Position::Top,
             )
-            .font(get_font(style))
+            .font(font)
             .style(ContainerType::Tooltip);
             ret_val = ret_val
                 .push(horizontal_space(Length::Fixed(10.0)))

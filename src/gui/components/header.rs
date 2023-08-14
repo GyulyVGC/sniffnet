@@ -5,7 +5,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Length, Renderer};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
@@ -17,7 +17,7 @@ use crate::translations::translations::{quit_analysis_translation, settings_tran
 use crate::{Language, StyleType};
 
 pub fn header(
-    style: StyleType,
+    font: Font,
     color_gradient: GradientType,
     back_button: bool,
     language: Language,
@@ -38,7 +38,7 @@ pub fn header(
             .width(Length::Fill)
             .align_items(Alignment::Center)
             .push(if back_button {
-                Container::new(get_button_reset(style, language))
+                Container::new(get_button_reset(font, language))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center)
             } else {
@@ -48,7 +48,7 @@ pub fn header(
             })
             .push(logo)
             .push(
-                Container::new(get_button_settings(style, language, last_opened_setting))
+                Container::new(get_button_settings(font, language, last_opened_setting))
                     .width(FillPortion(1))
                     .align_x(Horizontal::Center),
             ),
@@ -60,7 +60,7 @@ pub fn header(
 }
 
 fn get_button_reset(
-    style: StyleType,
+    font: Font,
     language: Language,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
@@ -73,7 +73,6 @@ fn get_button_reset(
     .padding(10)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(ButtonType::Standard)
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -81,12 +80,12 @@ fn get_button_reset(
         quit_analysis_translation(language),
         Position::Right,
     )
-    .font(get_font(style))
+    .font(font)
     .style(ContainerType::Tooltip)
 }
 
 pub fn get_button_settings(
-    style: StyleType,
+    font: Font,
     language: Language,
     open_overlay: SettingsPage,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
@@ -100,10 +99,9 @@ pub fn get_button_settings(
     .padding(0)
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(60.0))
-    .style(ButtonType::Standard)
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
-        .font(get_font(style))
+        .font(font)
         .style(ContainerType::Tooltip)
 }

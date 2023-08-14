@@ -3,7 +3,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Element, Length, Renderer};
+use iced::{Alignment, Element, Font, Length, Renderer};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -12,7 +12,9 @@ use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
-use crate::gui::styles::style_constants::{get_font, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::style_constants::{
+    get_font, get_font_headers, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS,
+};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -27,11 +29,14 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
+
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
-            sniffer.style,
+            font,
+            font_headers,
             sniffer.color_gradient,
             sniffer.language,
         ))
@@ -48,7 +53,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                 Message::OpenSettings(SettingsPage::Language),
             ],
             SettingsPage::Appearance,
-            sniffer.style,
+            font,
+            font_headers,
             sniffer.language,
         ))
         .push(vertical_space(Length::Fixed(15.0)))
@@ -60,7 +66,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         )
         .push(vertical_space(Length::Fixed(15.0)))
         .push(gradients_row(
-            sniffer.style,
+            font,
             sniffer.color_gradient,
             sniffer.language,
         ))
@@ -107,9 +113,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         styles_col = styles_col.push(children);
     }
 
-    let styles_scroll = Scrollable::new(styles_col)
-        .direction(Direction::Vertical(ScrollbarType::properties()))
-        .style(ScrollbarType::Standard);
+    let styles_scroll =
+        Scrollable::new(styles_col).direction(Direction::Vertical(ScrollbarType::properties()));
 
     content = content.push(styles_scroll);
 
@@ -120,11 +125,10 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
 }
 
 fn gradients_row(
-    style: StyleType,
+    font: Font,
     color_gradient: GradientType,
     language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
     Row::new()
         .align_items(Alignment::Center)
         .spacing(10)

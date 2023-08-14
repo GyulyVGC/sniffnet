@@ -16,14 +16,11 @@ use crate::{get_colors, StyleType};
 pub enum ContainerType {
     #[default]
     Standard,
-    Headers,
     BorderedRound,
-    BorderedRoundSelected,
     Tooltip,
     Badge,
     Palette,
     Neutral,
-    Alert,
     Gradient(GradientType),
     Modal,
 }
@@ -62,7 +59,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                 _ => Background::Color(Color::TRANSPARENT),
             }),
             border_radius: match style {
-                ContainerType::BorderedRound | ContainerType::Alert => BORDER_ROUNDED_RADIUS.into(),
+                ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
                 ContainerType::Modal => {
                     [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
                 }
@@ -80,7 +77,6 @@ impl iced::widget::container::StyleSheet for StyleType {
                 _ => BORDER_WIDTH,
             },
             border_color: match style {
-                ContainerType::Alert => Color::new(1.0, 0.0, 0.0, 1.0),
                 ContainerType::Palette => Color::BLACK,
                 _ => Color {
                     a: get_alpha_round_borders(*self),

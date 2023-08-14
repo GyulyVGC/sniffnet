@@ -2,7 +2,7 @@
 
 use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
-use iced::{Color, Renderer};
+use iced::{Color, Font, Renderer};
 
 use crate::gui::styles::style_constants::get_font;
 use crate::gui::types::message::Message;
@@ -25,9 +25,8 @@ impl TextType {
     pub fn highlighted_subtitle_with_desc(
         subtitle: &str,
         desc: &str,
-        style: StyleType,
+        font: Font,
     ) -> Column<'static, Message, Renderer<StyleType>> {
-        let font = get_font(style);
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))
@@ -45,7 +44,6 @@ impl iced::widget::text::StyleSheet for StyleType {
     type Style = TextType;
 
     fn appearance(&self, style: Self::Style) -> Appearance {
-        let colors = get_colors(*self);
         Appearance {
             color: if style == TextType::Standard {
                 None

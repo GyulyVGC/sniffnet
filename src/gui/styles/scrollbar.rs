@@ -27,7 +27,7 @@ pub struct ScrollbarStyleTuple(pub StyleType, pub ScrollbarType);
 impl iced::widget::scrollable::StyleSheet for StyleType {
     type Style = ScrollbarType;
 
-    fn active(&self, style: &Self::Style) -> Scrollbar {
+    fn active(&self, _: &Self::Style) -> Scrollbar {
         let colors = get_colors(*self);
         Scrollbar {
             background: Some(Background::Color(Color::TRANSPARENT)),
@@ -49,7 +49,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
         }
     }
 
-    fn hovered(&self, style: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
+    fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let colors = get_colors(*self);
         Scrollbar {
             background: Some(Background::Color(Color {

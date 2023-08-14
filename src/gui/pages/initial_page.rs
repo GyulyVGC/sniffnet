@@ -35,26 +35,21 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let col_adapter = get_col_adapter(sniffer, font);
 
     let ip_active = sniffer.filters.ip;
-    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.style, sniffer.language);
+    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.language);
     let col_ip = Column::new()
         .spacing(10)
         .width(FillPortion(5))
         .push(col_ip_radio);
 
     let transport_active = sniffer.filters.transport;
-    let col_transport_radio =
-        transport_protocol_radios(transport_active, font, sniffer.style, sniffer.language);
+    let col_transport_radio = transport_protocol_radios(transport_active, font, sniffer.language);
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
         .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(button_start(
-            sniffer.style,
-            sniffer.language,
-            sniffer.color_gradient,
-        ))
+        .push(button_start(font, sniffer.language, sniffer.color_gradient))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -73,8 +68,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     )
     .padding([3, 7])
     .placeholder(all_translation(sniffer.language))
-    .font(font)
-    .style(PicklistType::Standard);
+    .font(font);
     let col_app = Column::new()
         .width(FillPortion(8))
         .spacing(10)
@@ -114,13 +108,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             .push(filters),
     );
 
-    Container::new(body)
-        .height(Length::Fill)
-        .style(ContainerType::Standard)
+    Container::new(body).height(Length::Fill)
 }
 
 fn button_start(
-    style: StyleType,
+    font: Font,
     language: Language,
     color_gradient: GradientType,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
@@ -141,7 +133,7 @@ fn button_start(
     //tooltip.push_str(" [⏎]");
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
-        .font(get_font(style))
+        .font(font)
         .style(ContainerType::Tooltip)
 }
 
@@ -208,7 +200,6 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<St
                     )
                 },
             ))
-            .direction(Direction::Vertical(ScrollbarType::properties()))
-            .style(ScrollbarType::Standard),
+            .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }

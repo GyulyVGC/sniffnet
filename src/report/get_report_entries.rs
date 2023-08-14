@@ -6,6 +6,7 @@ use iced::widget::Tooltip;
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_SMALL;
+use crate::gui::styles::style_constants::get_font;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -122,7 +123,7 @@ pub fn get_searched_entries(
                     host_info.is_local,
                     host_info.traffic_type,
                     sniffer.language,
-                    sniffer.style,
+                    get_font(sniffer.style),
                 );
                 (key_val.0.clone(), key_val.1.clone(), flag)
             })

@@ -15,10 +15,10 @@ pub fn get_settings_tabs(
     icons: &[&str],
     actions: &[Message],
     active: SettingsPage,
-    style: StyleType,
+    font: Font,
+    font_headers: Font,
     language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Start)
@@ -32,8 +32,8 @@ pub fn get_settings_tabs(
             (*icons.get(i).unwrap()).to_string(),
             actions.get(i).unwrap().clone(),
             active,
-            style,
             font,
+            font_headers,
             None,
         ));
     }
@@ -45,11 +45,11 @@ pub fn get_pages_tabs(
     icons: &[&str],
     actions: &[Message],
     active: RunningPage,
-    style: StyleType,
+    font: Font,
+    font_headers: Font,
     language: Language,
     unread_notifications: usize,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Start)
@@ -68,8 +68,8 @@ pub fn get_pages_tabs(
             (*icons.get(i).unwrap()).to_string(),
             actions.get(i).unwrap().clone(),
             active,
-            style,
             font,
+            font_headers,
             unread,
         ));
     }
@@ -81,8 +81,8 @@ fn new_tab(
     icon: String,
     action: Message,
     active: bool,
-    style: StyleType,
     font: Font,
+    font_headers: Font,
     unread: Option<usize>,
 ) -> Button<'static, Message, Renderer<StyleType>> {
     let mut content = Row::new()
@@ -117,7 +117,7 @@ fn new_tab(
         if num > 0 {
             let notifications_badge = button(
                 Text::new(num.to_string())
-                    .font(get_font_headers(style))
+                    .font(font_headers)
                     .size(14)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),

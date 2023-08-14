@@ -25,19 +25,20 @@ use crate::translations::translations::{
 use crate::{Language, StyleType};
 
 pub fn get_exit_overlay(
-    style: StyleType,
     color_gradient: GradientType,
     font: Font,
+    font_headers: Font,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let row_buttons = confirm_button_row(language, font, style, Message::Reset);
+    let row_buttons = confirm_button_row(language, font, Message::Reset);
 
     let content = Column::new()
         .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
-            style,
+            font,
+            font_headers,
             color_gradient,
             language,
             quit_analysis_translation(language),
@@ -57,19 +58,20 @@ pub fn get_exit_overlay(
 }
 
 pub fn get_clear_all_overlay(
-    style: StyleType,
     color_gradient: GradientType,
     font: Font,
+    font_headers: Font,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let row_buttons = confirm_button_row(language, font, style, Message::ClearAllNotifications);
+    let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
 
     let content = Column::new()
         .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
-            style,
+            font,
+            font_headers,
             color_gradient,
             language,
             clear_all_translation(language),
@@ -89,12 +91,12 @@ pub fn get_clear_all_overlay(
 }
 
 fn get_modal_header(
-    style: StyleType,
+    font: Font,
+    font_headers: Font,
     color_gradient: GradientType,
     language: Language,
     title: String,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
     Container::new(
@@ -102,7 +104,7 @@ fn get_modal_header(
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new(title)
-                    .font(get_font_headers(style))
+                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
@@ -120,7 +122,6 @@ fn get_modal_header(
                         .padding(2)
                         .height(Length::Fixed(20.0))
                         .width(Length::Fixed(20.0))
-                        .style(ButtonType::Standard)
                         .on_press(Message::HideModal),
                         tooltip,
                         Position::Right,
@@ -142,7 +143,6 @@ fn get_modal_header(
 fn confirm_button_row(
     language: Language,
     font: Font,
-    style: StyleType,
     message: Message,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     Row::new()

@@ -8,7 +8,7 @@ use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::translations::translations::languages_title_translation;
@@ -16,16 +16,13 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
 
     let language_active = sniffer.language;
-    let row_language_radio_1 =
-        language_radios(language_active, &Language::ROW1, font, sniffer.style);
-    let row_language_radio_2 =
-        language_radios(language_active, &Language::ROW2, font, sniffer.style);
-    let row_language_radio_3 =
-        language_radios(language_active, &Language::ROW3, font, sniffer.style);
-    let row_language_radio_4 =
-        language_radios(language_active, &Language::ROW4, font, sniffer.style);
+    let row_language_radio_1 = language_radios(language_active, &Language::ROW1, font);
+    let row_language_radio_2 = language_radios(language_active, &Language::ROW2, font);
+    let row_language_radio_3 = language_radios(language_active, &Language::ROW3, font);
+    let row_language_radio_4 = language_radios(language_active, &Language::ROW4, font);
     let col_language_radio_all = Column::new()
         .spacing(10)
         .push(row_language_radio_1)
@@ -37,7 +34,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
-            sniffer.style,
+            font,
+            font_headers,
             sniffer.color_gradient,
             sniffer.language,
         ))
@@ -54,7 +52,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
                 Message::TickInit,
             ],
             SettingsPage::Language,
-            sniffer.style,
+            font,
+            font_headers,
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))

@@ -2,7 +2,7 @@ use std::net::IpAddr;
 use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
-use iced::{Color, Renderer};
+use iced::{Color, Font, Renderer};
 
 use crate::gui::styles::style_constants::get_font;
 use crate::gui::styles::text::{TextStyleTuple, TextType};
@@ -34,10 +34,8 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
 pub fn get_active_filters_col(
     filters: &Filters,
     language: Language,
-    style: StyleType,
+    font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
-
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)

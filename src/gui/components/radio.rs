@@ -18,7 +18,6 @@ use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
 pub fn ip_version_radios(
     active: IpVersion,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().spacing(10).padding(0).push(
@@ -37,8 +36,7 @@ pub fn ip_version_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val
@@ -47,7 +45,6 @@ pub fn ip_version_radios(
 pub fn transport_protocol_radios(
     active: TransProtocol,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().spacing(10).push(
@@ -66,8 +63,7 @@ pub fn transport_protocol_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val
@@ -77,7 +73,6 @@ pub fn language_radios(
     active: Language,
     collection: &[Language],
     font: Font,
-    style: StyleType,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
     for option in collection {
@@ -95,8 +90,7 @@ pub fn language_radios(
                         )
                         .spacing(7)
                         .font(font)
-                        .size(15)
-                        .style(RadioType::Standard),
+                        .size(15),
                     )
                     .push(horizontal_space(Length::Fixed(8.0)))
                     .push(option.get_flag()),
@@ -109,7 +103,6 @@ pub fn language_radios(
 pub fn sound_packets_threshold_radios(
     packets_notification: PacketsNotification,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
@@ -133,8 +126,7 @@ pub fn sound_packets_threshold_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val
@@ -143,7 +135,6 @@ pub fn sound_packets_threshold_radios(
 pub fn sound_bytes_threshold_radios(
     bytes_notification: BytesNotification,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
@@ -167,8 +158,7 @@ pub fn sound_bytes_threshold_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val
@@ -177,7 +167,6 @@ pub fn sound_bytes_threshold_radios(
 pub fn sound_favorite_radios(
     favorite_notification: FavoriteNotification,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
@@ -201,8 +190,7 @@ pub fn sound_favorite_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val
@@ -211,7 +199,6 @@ pub fn sound_favorite_radios(
 pub fn chart_radios(
     active: ChartType,
     font: Font,
-    style: StyleType,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new()
@@ -228,8 +215,7 @@ pub fn chart_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(RadioType::Standard),
+            .size(15),
         );
     }
     ret_val

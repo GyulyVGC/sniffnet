@@ -28,7 +28,7 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{
-    get_font, ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES,
+    get_font, get_font_headers, ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES,
 };
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
@@ -66,19 +66,19 @@ impl Application for Sniffer {
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
         let status = *self.status_pair.0.lock().unwrap();
-        let style = self.style;
-        let font = get_font(style);
+        let font = get_font(self.style);
+        let font_headers = get_font_headers(self.style);
 
         let header = match status {
             Status::Init => header(
-                style,
+                font,
                 self.color_gradient,
                 false,
                 self.language,
                 self.last_opened_setting,
             ),
             Status::Running => header(
-                style,
+                font,
                 self.color_gradient,
                 true,
                 self.language,
@@ -98,7 +98,8 @@ impl Application for Sniffer {
         let footer = footer(
             self.language,
             self.color_gradient,
-            style,
+            font,
+            font_headers,
             &self.newer_release_available.clone(),
         );
 
@@ -123,11 +124,14 @@ impl Application for Sniffer {
             Some(modal) => {
                 let overlay = match modal {
                     MyModal::Quit => {
-                        get_exit_overlay(style, self.color_gradient, font, self.language)
+                        get_exit_overlay(self.color_gradient, font, font_headers, self.language)
                     }
-                    MyModal::ClearAll => {
-                        get_clear_all_overlay(style, self.color_gradient, font, self.language)
-                    }
+                    MyModal::ClearAll => get_clear_all_overlay(
+                        self.color_gradient,
+                        font,
+                        font_headers,
+                        self.language,
+                    ),
                     MyModal::ConnectionDetails(connection_index) => {
                         connection_details_page(self, connection_index)
                     }

@@ -18,7 +18,7 @@ use crate::gui::styles::button::{ButtonStyleTuple, ButtonType};
 use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
 use crate::gui::styles::rule::{RuleStyleTuple, RuleType};
 use crate::gui::styles::scrollbar::{ScrollbarStyleTuple, ScrollbarType};
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::text::{TextStyleTuple, TextType};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
@@ -45,6 +45,7 @@ use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -67,7 +68,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                 body = body_no_observed(
                     &sniffer.filters,
                     observed,
-                    sniffer.style,
+                    font,
                     sniffer.language,
                     &sniffer.waiting,
                 );
@@ -87,7 +88,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                         Message::ChangeRunningPage(RunningPage::Notifications),
                     ],
                     RunningPage::Overview,
-                    sniffer.style,
+                    font,
+                    font_headers,
                     sniffer.language,
                     sniffer.unread_notifications,
                 );
@@ -229,12 +231,10 @@ fn body_no_packets(
 fn body_no_observed(
     filters: &Filters,
     observed: u128,
-    style: StyleType,
+    font: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
-
     let tot_packets_text = some_observed_translation(language, observed)
         .horizontal_alignment(Horizontal::Center)
         .font(font);
@@ -248,7 +248,7 @@ fn body_no_observed(
         .push(Text::new('V'.to_string()).font(ICONS).size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(tot_packets_text)
-        .push(get_active_filters_col(filters, language, style))
+        .push(get_active_filters_col(filters, language, font))
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
@@ -288,7 +288,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleTyp
 
     row_report = row_report
         .push(col_host)
-        .push(Rule::vertical(40).style(RuleType::Standard))
+        .push(Rule::vertical(40))
         .push(col_app);
 
     Row::new().push(
@@ -408,7 +408,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                 data_info_host.is_local,
                 data_info_host.traffic_type,
                 sniffer.language,
-                sniffer.style,
+                font,
             ))
             .push(host_bar);
 
@@ -436,8 +436,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 
     col_host = col_host.push(
         Scrollable::new(Container::new(scroll_host).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::properties()))
-            .style(ScrollbarType::Standard),
+            .direction(Direction::Vertical(ScrollbarType::properties())),
     );
 
     col_host
@@ -531,8 +530,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
     }
     col_app = col_app.push(
         Scrollable::new(Container::new(scroll_app).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::properties()))
-            .style(ScrollbarType::Standard),
+            .direction(Direction::Vertical(ScrollbarType::properties())),
     );
 
     col_app
@@ -549,19 +547,11 @@ fn lazy_col_info(
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters = col_device_filters(
-        sniffer.language,
-        sniffer.style,
-        &sniffer.filters,
-        &sniffer.device,
-    );
+    let col_device_filters =
+        col_device_filters(sniffer.language, font, &sniffer.filters, &sniffer.device);
 
-    let col_data_representation = col_data_representation(
-        sniffer.language,
-        font,
-        sniffer.style,
-        sniffer.traffic_chart.chart_type,
-    );
+    let col_data_representation =
+        col_data_representation(sniffer.language, font, sniffer.traffic_chart.chart_type);
 
     let col_bytes_packets = col_bytes_packets(
         sniffer.language,
@@ -570,7 +560,7 @@ fn lazy_col_info(
         filtered,
         all_bytes,
         filtered_bytes,
-        sniffer.style,
+        font,
     );
 
     Column::new()
@@ -582,24 +572,22 @@ fn lazy_col_info(
                 .push(
                     Scrollable::new(col_device_filters)
                         .width(Length::FillPortion(1))
-                        .direction(Direction::Vertical(ScrollbarType::properties()))
-                        .style(ScrollbarType::Standard),
+                        .direction(Direction::Vertical(ScrollbarType::properties())),
                 )
-                .push(Rule::vertical(25).style(RuleType::Standard))
+                .push(Rule::vertical(25))
                 .push(col_data_representation),
         )
-        .push(Rule::horizontal(25).style(RuleType::Standard))
+        .push(Rule::horizontal(25))
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
-                .direction(Direction::Vertical(ScrollbarType::properties()))
-                .style(ScrollbarType::Standard),
+                .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }
 
 fn col_device_filters(
     language: Language,
-    style: StyleType,
+    font: Font,
     filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message, Renderer<StyleType>> {
@@ -614,16 +602,15 @@ fn col_device_filters(
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
             adapter_info,
-            style,
+            font,
         ))
         .push(vertical_space(15))
-        .push(get_active_filters_col(filters, language, style))
+        .push(get_active_filters_col(filters, language, font))
 }
 
 fn col_data_representation(
     language: Language,
     font: Font,
-    style: StyleType,
     chart_type: ChartType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
@@ -633,7 +620,7 @@ fn col_data_representation(
                 .style(TextType::Subtitle)
                 .font(font),
         )
-        .push(chart_radios(chart_type, font, style, language))
+        .push(chart_radios(chart_type, font, language))
 }
 
 fn col_bytes_packets(
@@ -643,7 +630,7 @@ fn col_bytes_packets(
     filtered: u128,
     all_bytes: u128,
     filtered_bytes: u128,
-    style: StyleType,
+    font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let dropped_val = if dropped > 0 {
         format!(
@@ -669,7 +656,7 @@ fn col_bytes_packets(
         .push(TextType::highlighted_subtitle_with_desc(
             filtered_bytes_translation(language),
             &bytes_value,
-            style,
+            font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
             filtered_packets_translation(language),
@@ -678,12 +665,12 @@ fn col_bytes_packets(
                 filtered,
                 of_total_translation(language, &get_percentage_string(total, filtered))
             ),
-            style,
+            font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
             dropped_packets_translation(language),
             &dropped_val,
-            style,
+            font,
         ))
 }
 
