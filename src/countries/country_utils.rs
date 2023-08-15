@@ -2,7 +2,7 @@ use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
 use iced::widget::Svg;
 use iced::widget::Tooltip;
-use iced::{Length, Renderer};
+use iced::{Font, Length, Renderer};
 use maxminddb::{geoip2, MaxMindDBError, Reader};
 
 use crate::countries::flags_pictures::{
@@ -19,8 +19,7 @@ use crate::countries::flags_pictures::{
     UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
-use crate::gui::styles::container::{ContainerStyleTuple, ContainerType};
-use crate::gui::styles::style_constants::get_font;
+use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
@@ -49,7 +48,8 @@ fn get_flag_from_country(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<Renderer>, String) {
+) -> (Svg<Renderer<StyleType>>, String) {
+    #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         Country::AD => AD,
@@ -325,17 +325,15 @@ pub fn get_flag_tooltip(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
-) -> Tooltip<'static, Message> {
+    font: Font,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let (content, tooltip) =
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ));
+        .style(ContainerType::Tooltip);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -348,8 +346,8 @@ pub fn get_computer_tooltip(
     is_my_address: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: StyleType,
-) -> Tooltip<'static, Message> {
+    font: Font,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, traffic_type) {
             (true, _) => COMPUTER,
@@ -369,9 +367,7 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
-        .style(<ContainerStyleTuple as Into<iced::theme::Container>>::into(
-            ContainerStyleTuple(style, ContainerType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }

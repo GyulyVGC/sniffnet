@@ -1,29 +1,23 @@
 //! Checkbox style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::checkbox::Appearance;
 use iced::Background;
 
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub enum CheckboxType {
+    #[default]
     Standard,
 }
 
-#[derive(Clone)]
-pub struct CheckboxStyleTuple(pub StyleType, pub CheckboxType);
-
-impl From<CheckboxStyleTuple> for iced::theme::Checkbox {
-    fn from(tuple: CheckboxStyleTuple) -> Self {
-        iced::theme::Checkbox::Custom(Box::new(tuple))
-    }
-}
-
-impl iced::widget::checkbox::StyleSheet for CheckboxStyleTuple {
-    type Style = iced::Theme;
+impl iced::widget::checkbox::StyleSheet for StyleType {
+    type Style = CheckboxType;
 
     fn active(&self, _: &Self::Style, is_checked: bool) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(*self);
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,
@@ -35,7 +29,7 @@ impl iced::widget::checkbox::StyleSheet for CheckboxStyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style, _is_checked: bool) -> Appearance {
-        let colors = get_colors(self.0);
+        let colors = get_colors(*self);
         Appearance {
             background: Background::Color(colors.buttons),
             icon_color: colors.text_body,

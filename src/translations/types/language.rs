@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::countries::flags_pictures::{
     CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA,
 };
+use crate::StyleType;
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]
@@ -84,7 +85,7 @@ impl Language {
         }
     }
 
-    pub fn get_flag(self) -> Svg<Renderer> {
+    pub fn get_flag(self) -> Svg<Renderer<StyleType>> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
             Language::DE => DE,
