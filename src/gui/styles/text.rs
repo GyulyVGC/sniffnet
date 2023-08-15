@@ -1,17 +1,22 @@
 //! Text style
 
+use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
-use iced::Color;
+use iced::{Color, Font, Renderer};
 
-use crate::gui::styles::style_constants::get_font;
 use crate::gui::types::message::Message;
 use crate::{get_colors, StyleType};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default, PartialEq)]
 pub enum TextType {
+    #[default]
     Standard,
+    Incoming,
+    Outgoing,
     Title,
     Subtitle,
+    Danger,
+    Sponsor,
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -19,25 +24,29 @@ impl TextType {
     pub fn highlighted_subtitle_with_desc(
         subtitle: &str,
         desc: &str,
-        style: StyleType,
-    ) -> Column<'static, Message> {
-        let font = get_font(style);
+        font: Font,
+    ) -> Column<'static, Message, Renderer<StyleType>> {
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))
-                    .style(TextStyleTuple(style, TextType::Subtitle))
+                    .style(TextType::Subtitle)
                     .font(font),
             )
             .push(Text::new(format!("   {desc}")).font(font))
     }
 }
 
-#[derive(Clone)]
-pub struct TextStyleTuple(pub StyleType, pub TextType);
+impl iced::widget::text::StyleSheet for StyleType {
+    type Style = TextType;
 
-impl From<TextStyleTuple> for iced::theme::Text {
-    fn from(tuple: TextStyleTuple) -> Self {
-        iced::theme::Text::Color(highlight(tuple.0, tuple.1))
+    fn appearance(&self, style: Self::Style) -> Appearance {
+        Appearance {
+            color: if style == TextType::Standard {
+                None
+            } else {
+                Some(highlight(*self, style))
+            },
+        }
     }
 }
 
@@ -65,6 +74,10 @@ pub fn highlight(style: StyleType, element: TextType) -> Color {
                 a: 1.0,
             }
         }
+        TextType::Incoming => colors.secondary,
+        TextType::Outgoing => colors.outgoing,
+        TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
+        TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
         TextType::Standard => colors.text_body,
     }
 }

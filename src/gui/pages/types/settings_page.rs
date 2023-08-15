@@ -1,7 +1,12 @@
+use iced::widget::Text;
+use iced::Renderer;
+
+use crate::gui::styles::style_constants::ICONS;
+use crate::gui::types::message::Message;
 use crate::translations::translations::{
     language_translation, notifications_translation, style_translation,
 };
-use crate::Language;
+use crate::{Language, StyleType};
 
 /// This enum defines the current running page.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -15,6 +20,12 @@ pub enum SettingsPage {
 }
 
 impl SettingsPage {
+    pub const ALL: [SettingsPage; 3] = [
+        SettingsPage::Notifications,
+        SettingsPage::Appearance,
+        SettingsPage::Language,
+    ];
+
     pub fn get_tab_label(&self, language: Language) -> &str {
         match self {
             SettingsPage::Notifications => notifications_translation(language),
@@ -37,6 +48,19 @@ impl SettingsPage {
             SettingsPage::Appearance => SettingsPage::Notifications,
             SettingsPage::Language => SettingsPage::Appearance,
         }
+    }
+
+    pub fn icon(self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
+        let char = match self {
+            SettingsPage::Notifications => "7",
+            SettingsPage::Appearance => "K",
+            SettingsPage::Language => "c",
+        };
+        Text::new(char).font(ICONS)
+    }
+
+    pub fn action(self) -> Message {
+        Message::OpenSettings(self)
     }
 }
 

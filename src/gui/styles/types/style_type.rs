@@ -1,5 +1,8 @@
+use iced::application;
+use iced::application::Appearance;
 use serde::{Deserialize, Serialize};
 
+use crate::get_colors;
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 
 /// Used to specify the kind of style of the application
@@ -16,6 +19,18 @@ pub enum StyleType {
 impl Default for StyleType {
     fn default() -> Self {
         Self::Night
+    }
+}
+
+impl application::StyleSheet for StyleType {
+    type Style = ();
+
+    fn appearance(&self, _: &Self::Style) -> Appearance {
+        let colors = get_colors(*self);
+        Appearance {
+            background_color: colors.primary,
+            text_color: colors.text_body,
+        }
     }
 }
 
