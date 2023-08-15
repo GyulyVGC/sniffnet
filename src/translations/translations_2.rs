@@ -20,6 +20,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::RO => "O versiune nouă este disponibilă!",
         Language::PL => "Nowsza wersja jest dostępna!",
         Language::FR => "Une nouvelle version est disponible!",
+        Language::JP => "新しいバージョンが利用可能になりました!",
         _ => "A newer version is available!",
     }
 }
@@ -62,6 +63,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::RO => "Detalii conexiune",
         Language::PL => "Szczegóły połączenia",
         Language::FR => "Détails de la connexion",
+        Language::JP => "接続の詳細",
         _ => "Connection details",
     }
 }
@@ -83,6 +85,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
         Language::RO => "Pachete pierdute",
         Language::PL => "Utracone pakiety",
         Language::FR => "Packets perdus",
+        Language::JP => "ドロップしたパケット",
         _ => "Dropped packets",
     }
 }
@@ -104,6 +107,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::RO => "Reprezentarea datelor",
         Language::PL => "Reprezentacja danych",
         Language::FR => "Représentation de données",
+        Language::JP => "データ表示",
         _ => "Data representation",
     }
 }
@@ -125,6 +129,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::RO => "Host rețea",
         Language::PL => "Host sieciowy",
         Language::FR => "Host réseaux",
+        Language::JP => "ネットワーク ホスト",
         _ => "Network host",
     }
 }
@@ -146,6 +151,7 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
         Language::RO => "Doar primele 30 de host-uri sunt afișate aici",
         Language::PL => "Tylko 30 pierwszych hostów jest wyświetlanych",
         Language::FR => "Seuls les 30 premiers hôtes sont affichés ici",
+        Language::JP => "上位 30 件のホストのみが表示されます",
         _ => "Only the top 30 hosts are displayed here",
     }
 }
@@ -210,6 +216,7 @@ pub fn unknown_translation(language: Language) -> String {
         Language::RO => "Locație necunoscută",
         Language::PL => "Nieznana lokalizacja",
         Language::FR => "Localisation inconnue",
+        Language::JP => "不明なロケーション",
         _ => "Unknown location",
     }
     .to_string()
@@ -232,6 +239,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         Language::RO => "Adaptorul dvs. de rețea",
         Language::PL => "Twój adapter sieciowy",
         Language::FR => "Votre carte réseau",
+        Language::JP => "自身のネットワーク アダプター",
         _ => "Your network adapter",
     }
     .to_string()
@@ -254,6 +262,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::RO => "Adresa socket-ului",
         Language::PL => "Adres gniazda",
         Language::FR => "Adresse du socket",
+        Language::JP => "ソケット アドレス",
         _ => "Socket address",
     }
 }
@@ -275,6 +284,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::RO => "Adresa MAC",
         Language::PL => "Adres MAC",
         Language::FR => "Adresse MAC",
+        Language::JP => "MAC アドレス",
         _ => "MAC address",
     }
 }
@@ -296,6 +306,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::RO => "Sursă",
         Language::PL => "Źródło",
         Language::FR => "Source",
+        Language::JP => "送信元",
         _ => "Source",
     }
 }
@@ -316,6 +327,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::RO => "Destinație",
         Language::PL => "Miejsce docelowe", // Depending on context these two are also valid: "Przeznaczenie" / "Cel"
         Language::FR => "Destination",
+        Language::JP => "送信先",
         _ => "Destination",
     }
 }
@@ -332,7 +344,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         // Language::FA => "نام دامنه جامع الشرایط",
         Language::ES => "Nombre de dominio completo",
         Language::KO => "절대 도메인 네임",
-        Language::ZH => "FQDN",
+        Language::ZH | Language::JP => "FQDN",
         Language::UK => "Повністю визначене доменне ім'я",
         Language::RO => "Nume de domeniu complet calificat",
         Language::PL => "Pełna nazwa domeny",
@@ -358,6 +370,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::RO => "Numele sistemului autonom",
         Language::PL => "Nazwa autonomicznego systemu",
         Language::FR => "Nom du système autonome",
+        Language::JP => "AS 名",
         _ => "Autonomous System name",
     }
 }
@@ -379,6 +392,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::RO => "Date transmise",
         Language::PL => "Przesłane dane",
         Language::FR => "Données transmises",
+        Language::JP => "転送データ",
         _ => "Transmitted data",
     }
 }
@@ -400,6 +414,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::RO => "Țară",
         Language::PL => "Kraj",
         Language::FR => "Pays",
+        Language::JP => "国",
         _ => "Country",
     }
 }
@@ -421,6 +436,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::RO => "Nume domeniu",
         Language::PL => "Nazwa domeny",
         Language::FR => "Nom de domaine",
+        Language::JP => "ドメイン名",
         _ => "Domain name",
     }
 }
@@ -442,6 +458,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::RO => "Arată doar favorite",
         Language::PL => "Pokaż tylko ulubione",
         Language::FR => "Afficher uniquement les favoris",
+        Language::JP => "お気に入りのみを表示する",
         _ => "Only show favorites",
     }
 }
@@ -463,6 +480,7 @@ pub fn search_filters_translation(language: Language) -> &'static str {
         Language::RO => "Filtre de căutare",
         Language::PL => "Filtry wyszukiwania",
         Language::FR => "Filtres de recherche",
+        Language::JP => "検索フィルター",
         _ => "Search filters",
     }
 }
@@ -484,6 +502,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::RO => "Niciun rezultat disponibil conform filtrelor de căutare specificate",
         Language::PL => "Brak wyników zgodnych z określonymi filtrami wyszukiwania",
         Language::FR => "Aucun résultat disponible selon les filtres de recherche spécifiés",
+        Language::JP => "指定されたフィルター条件で表示できる結果はありません",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -510,6 +529,7 @@ pub fn showing_results_translation(
         Language::RO => format!("Se afișează {start}-{end} din {total} rezultate"),
         Language::PL => format!("Wyświetlanie {start}-{end} z {total} wyników"),
         Language::FR => format!("Affichage de {start}-{end} de {total} résultats totaux"),
+        Language::JP => format!("{start} から {end} までの結果の合計: {total}"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -532,6 +552,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::RO => "Aplicați gradient de culoare",
         Language::PL => "Zastosuj gradient kolorów",
         Language::FR => "Appliquer des gradients de couleur",
+        Language::JP => "グラデーションを適用する",
         _ => "Apply color gradients",
     }
 }
