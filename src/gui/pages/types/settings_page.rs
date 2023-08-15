@@ -1,11 +1,10 @@
-use iced::widget::Text;
 use iced::Renderer;
 
-use crate::gui::styles::style_constants::ICONS;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     language_translation, notifications_translation, style_translation,
 };
+use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
 /// This enum defines the current running page.
@@ -51,12 +50,12 @@ impl SettingsPage {
     }
 
     pub fn icon(self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
-        let char = match self {
-            SettingsPage::Notifications => "7",
-            SettingsPage::Appearance => "K",
-            SettingsPage::Language => "c",
-        };
-        Text::new(char).font(ICONS)
+        match self {
+            SettingsPage::Notifications => Icon::Notification,
+            SettingsPage::Appearance => Icon::HalfSun,
+            SettingsPage::Language => Icon::Globe,
+        }
+        .to_text()
     }
 
     pub fn action(self) -> Message {

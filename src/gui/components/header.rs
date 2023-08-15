@@ -3,16 +3,16 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Container, Row, Text, Tooltip};
+use iced::widget::{button, Container, Row, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::ICONS;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
+use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
 pub fn header(
@@ -22,8 +22,8 @@ pub fn header(
     language: Language,
     last_opened_setting: SettingsPage,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let logo = Text::new('A'.to_string())
-        .font(ICONS)
+    let logo = Icon::Sniffnet
+        .to_text()
         .horizontal_alignment(Horizontal::Center)
         .vertical_alignment(Vertical::Center)
         .width(FillPortion(6))
@@ -63,8 +63,8 @@ fn get_button_reset(
     language: Language,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new('C'.to_string())
-            .font(ICONS)
+        Icon::ArrowBack
+            .to_text()
             .size(20)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
@@ -89,8 +89,8 @@ pub fn get_button_settings(
     open_overlay: SettingsPage,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new("a")
-            .font(ICONS)
+        Icon::Settings
+            .to_text()
             .size(20.5)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),

@@ -18,7 +18,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
@@ -40,6 +40,7 @@ use crate::translations::translations_2::{
 use crate::utils::formatted_strings::{
     get_active_filters_col, get_formatted_bytes_string_with_b, get_percentage_string,
 };
+use crate::utils::types::icon::Icon;
 use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
@@ -190,14 +191,14 @@ fn body_no_packets(
     let adapter_name = device.name.clone();
     let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
-            Text::new('T'.to_string()).font(ICONS).size(60),
+            Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &adapter_name)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
     } else {
         (
-            Text::new(waiting.len().to_string()).font(ICONS).size(60),
+            Icon::get_hourglass(waiting.len()).size(60),
             waiting_translation(language, &adapter_name)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
@@ -234,7 +235,7 @@ fn body_no_observed(
         .spacing(10)
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
-        .push(Text::new('V'.to_string()).font(ICONS).size(60))
+        .push(Icon::Funnel.to_text().size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(tot_packets_text)
         .push(get_active_filters_col(filters, language, font))
@@ -259,7 +260,7 @@ fn body_pcap_error(
         .spacing(10)
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
-        .push(Text::new('U'.to_string()).font(ICONS).size(60))
+        .push(Icon::Error.to_text().size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(error_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
@@ -316,8 +317,8 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         );
 
         let star_button = button(
-            Text::new('g'.to_string())
-                .font(ICONS)
+            Icon::Star
+                .to_text()
                 .size(20)
                 .horizontal_alignment(Horizontal::Center)
                 .vertical_alignment(Vertical::Center),

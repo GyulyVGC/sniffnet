@@ -13,7 +13,7 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, BORDER_WIDTH, FONT_SIZE_SUBTITLE, ICONS,
+    get_font, get_font_headers, BORDER_WIDTH, FONT_SIZE_SUBTITLE,
 };
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::custom_palette::ExtraStyles;
@@ -24,6 +24,7 @@ use crate::translations::translations::{
     yeti_day_translation, yeti_night_translation,
 };
 use crate::translations::translations_2::color_gradients_translation;
+use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 
@@ -123,8 +124,8 @@ fn gradients_row(
         .push(Text::new(format!("{}:", color_gradients_translation(language))).font(font))
         .push(
             button(
-                Text::new("x")
-                    .font(ICONS)
+                Icon::Forbidden
+                    .to_text()
                     .vertical_alignment(Vertical::Center)
                     .horizontal_alignment(Horizontal::Center)
                     .size(12),
@@ -141,8 +142,8 @@ fn gradients_row(
         )
         .push(
             button(
-                Text::new("y")
-                    .font(ICONS)
+                Icon::Waves
+                    .to_text()
                     .vertical_alignment(Vertical::Center)
                     .horizontal_alignment(Horizontal::Center)
                     .size(13),
@@ -159,8 +160,8 @@ fn gradients_row(
         )
         .push(
             button(
-                Text::new("z")
-                    .font(ICONS)
+                Icon::Lightning
+                    .to_text()
                     .vertical_alignment(Vertical::Center)
                     .horizontal_alignment(Horizontal::Center)
                     .size(13),

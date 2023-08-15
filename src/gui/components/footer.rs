@@ -10,13 +10,14 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
 use crate::utils::formatted_strings::APP_VERSION;
+use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::Language;
 
@@ -57,8 +58,8 @@ pub fn footer(
 
 fn get_button_website(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new('c'.to_string())
-            .font(ICONS)
+        Icon::Globe
+            .to_text()
             .size(17)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
@@ -74,8 +75,8 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, Renderer<StyleTyp
 
 fn get_button_github(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new('H'.to_string())
-            .font(ICONS)
+        Icon::GitHub
+            .to_text()
             .size(26)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),

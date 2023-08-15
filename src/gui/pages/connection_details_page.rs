@@ -10,7 +10,7 @@ use iced::{Alignment, Font, Length, Renderer};
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -29,6 +29,7 @@ use crate::translations::translations_2::{
     transmitted_data_translation,
 };
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
+use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
 pub fn connection_details_page(
@@ -201,7 +202,7 @@ fn col_info(
         .width(Length::FillPortion(2))
         .push(vertical_space(Length::FillPortion(1)))
         .push(
-            Row::new().spacing(5).push(Text::new("9").font(ICONS)).push(
+            Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
                     "{} - {}",
                     val.initial_timestamp.to_string().get(11..19).unwrap(),
@@ -350,7 +351,7 @@ fn assemble_widgets(
                 .spacing(5)
                 .push(vertical_space(Length::FillPortion(1)))
                 .push(source_container)
-                .push(Text::new(":").font(ICONS))
+                .push(Icon::ArrowsDown.to_text())
                 .push(dest_container)
                 .push(vertical_space(Length::FillPortion(1))),
         )

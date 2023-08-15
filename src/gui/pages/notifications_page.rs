@@ -14,7 +14,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER, ICONS};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::logged_notification::{
@@ -28,6 +28,7 @@ use crate::translations::translations::{
     threshold_translation,
 };
 use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
+use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
@@ -171,7 +172,7 @@ fn packets_notification_log(
         .spacing(30)
         .push(
             Tooltip::new(
-                Text::new("e").font(ICONS).size(80),
+                Icon::PacketsThreshold.to_text().size(80),
                 packets_exceeded_translation(language),
                 Position::FollowCursor,
             )
@@ -185,7 +186,7 @@ fn packets_notification_log(
                 .push(
                     Row::new()
                         .spacing(5)
-                        .push(Text::new("9").font(ICONS))
+                        .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
                 .push(
@@ -250,7 +251,7 @@ fn bytes_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Text::new("f").font(ICONS).size(80),
+                Icon::BytesThreshold.to_text().size(80),
                 bytes_exceeded_translation(language),
                 Position::FollowCursor,
             )
@@ -264,7 +265,7 @@ fn bytes_notification_log(
                 .push(
                     Row::new()
                         .spacing(5)
-                        .push(Text::new("9").font(ICONS))
+                        .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
                 .push(
@@ -334,7 +335,7 @@ fn favorite_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Text::new("g").font(ICONS).size(80),
+                Icon::Star.to_text().size(80),
                 favorite_transmitted_translation(language),
                 Position::FollowCursor,
             )
@@ -348,7 +349,7 @@ fn favorite_notification_log(
                 .push(
                     Row::new()
                         .spacing(5)
-                        .push(Text::new("9").font(ICONS))
+                        .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
                 .push(
@@ -375,8 +376,8 @@ fn get_button_clear_all(
     language: Language,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new('h'.to_string())
-            .font(ICONS)
+        Icon::Bin
+            .to_text()
             .size(20)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),

@@ -1,10 +1,9 @@
-use iced::widget::Text;
 use iced::Renderer;
 
-use crate::gui::styles::style_constants::ICONS;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{notifications_translation, overview_translation};
 use crate::translations::translations_2::inspect_translation;
+use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
 /// This enum defines the current running page.
@@ -50,12 +49,12 @@ impl RunningPage {
     }
 
     pub fn icon(self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
-        let char = match self {
-            RunningPage::Overview => "d",
-            RunningPage::Inspect => "5",
-            RunningPage::Notifications => "7",
-        };
-        Text::new(char).font(ICONS)
+        match self {
+            RunningPage::Overview => Icon::Overview,
+            RunningPage::Inspect => Icon::Inspect,
+            RunningPage::Notifications => Icon::Notification,
+        }
+        .to_text()
     }
 
     pub fn action(self) -> Message {

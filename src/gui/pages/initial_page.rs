@@ -16,7 +16,7 @@ use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -25,6 +25,7 @@ use crate::translations::translations::{
     address_translation, addresses_translation, all_translation, application_protocol_translation,
     choose_adapters_translation, select_filters_translation, start_translation,
 };
+use crate::utils::types::icon::Icon;
 use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
@@ -116,8 +117,8 @@ fn button_start(
     color_gradient: GradientType,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new("S")
-            .font(ICONS)
+        Icon::Rocket
+            .to_text()
             .size(25)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),

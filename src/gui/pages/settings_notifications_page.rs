@@ -17,7 +17,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
+    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
 };
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -30,6 +30,7 @@ use crate::translations::translations::{
     notifications_title_translation, packets_threshold_translation, per_second_translation,
     settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
 };
+use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -370,11 +371,11 @@ fn volume_slider(
             .push(
                 Row::new()
                     .push(
-                        Text::new('Y'.to_string())
+                        Icon::AudioMute
+                            .to_text()
                             .width(Fixed(30.0))
                             .vertical_alignment(Vertical::Center)
-                            .size(20)
-                            .font(ICONS),
+                            .size(20),
                     )
                     .push(
                         Slider::new(0..=100, volume, Message::ChangeVolume)
@@ -383,10 +384,10 @@ fn volume_slider(
                     )
                     .push(horizontal_space(Length::Fixed(15.0)))
                     .push(
-                        Text::new("Z")
+                        Icon::AudioHigh
+                            .to_text()
                             .vertical_alignment(Vertical::Center)
-                            .size(20)
-                            .font(ICONS),
+                            .size(20),
                     ),
             ),
     )

@@ -12,7 +12,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -26,6 +26,7 @@ use crate::translations::translations_2::{
     showing_results_translation, sort_by_translation,
 };
 use crate::utils::formatted_strings::get_open_report_tooltip;
+use crate::utils::types::icon::Icon;
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
@@ -184,7 +185,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
                 .padding(20)
                 .align_items(Alignment::Center)
                 .push(vertical_space(Length::FillPortion(1)))
-                .push(Text::new('V'.to_string()).font(ICONS).size(60))
+                .push(Icon::Funnel.to_text().size(60))
                 .push(vertical_space(Length::Fixed(15.0)))
                 .push(Text::new(no_search_results_translation(sniffer.language)).font(font))
                 .push(vertical_space(Length::FillPortion(2))),
@@ -378,11 +379,15 @@ fn filter_input(
 
 fn get_button_change_page(increment: bool) -> Button<'static, Message, Renderer<StyleType>> {
     button(
-        Text::new(if increment { "j" } else { "i" })
-            .size(8.0)
-            .font(ICONS)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+        if increment {
+            Icon::ArrowRight
+        } else {
+            Icon::ArrowLeft
+        }
+        .to_text()
+        .size(8.0)
+        .horizontal_alignment(alignment::Horizontal::Center)
+        .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(2)
     .height(Length::Fixed(20.0))
@@ -429,8 +434,8 @@ fn get_button_open_report(
     font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
-        Text::new('8'.to_string())
-            .font(ICONS)
+        Icon::File
+            .to_text()
             .size(21)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center),
