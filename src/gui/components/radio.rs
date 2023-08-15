@@ -19,7 +19,7 @@ pub fn ip_version_radios(
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().spacing(10).padding(0).push(
+    let mut ret_val = Column::new().spacing(10).push(
         ip_version_translation(language)
             .font(font)
             .style(TextType::Subtitle)

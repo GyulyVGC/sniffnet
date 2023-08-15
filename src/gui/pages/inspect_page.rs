@@ -407,7 +407,6 @@ fn get_change_page_row(
         .height(Length::FillPortion(2))
         .align_items(Alignment::Center)
         .spacing(10)
-        .padding(0)
         .push(if page_number > 1 {
             Container::new(get_button_change_page(false).width(25.0))
         } else {

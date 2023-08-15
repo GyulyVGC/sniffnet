@@ -1,5 +1,7 @@
 //! Scrollbars style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::scrollable::Properties;
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Color};

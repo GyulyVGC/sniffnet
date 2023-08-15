@@ -1,5 +1,7 @@
 //! SVG style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::svg::Appearance;
 
 use crate::StyleType;

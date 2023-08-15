@@ -1,5 +1,7 @@
 //! Slider style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::slider::Appearance;
 use iced::widget::slider::{Handle, HandleShape, Rail};
 

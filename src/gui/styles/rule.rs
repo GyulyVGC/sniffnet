@@ -1,5 +1,7 @@
 //! Rule style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::rule;
 use iced::widget::rule::FillMode;
 use iced::Color;

@@ -5,7 +5,9 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, lazy, vertical_space, Column, Container, Row, Scrollable, Text};
+use iced::widget::{
+    button, lazy, vertical_space, Button, Column, Container, Row, Scrollable, Text,
+};
 use iced::widget::{horizontal_space, Rule};
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Renderer};
@@ -24,6 +26,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
@@ -247,56 +250,20 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     let font = get_font(sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut col_host = Column::new()
-        .width(Length::Fixed(width + 11.0))
-        .push(
-            Text::new(host_translation(sniffer.language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(vertical_space(Length::Fixed(10.0)));
-
     let mut scroll_host = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
     for (host, data_info_host) in &entries {
-        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
+        let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
             &entries.get(0).unwrap().1.data_info.clone(),
             &data_info_host.data_info,
         );
 
-        let star_button = button(
-            Icon::Star
-                .to_text()
-                .size(20)
-                .horizontal_alignment(Horizontal::Center)
-                .vertical_alignment(Vertical::Center),
-        )
-        .padding(0)
-        .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
-        .width(Length::Fixed(FLAGS_WIDTH_BIG))
-        .style(if data_info_host.is_favorite {
-            ButtonType::Starred
-        } else {
-            ButtonType::NotStarred
-        })
-        .on_press(Message::AddOrRemoveFavorite(
-            host.clone(),
-            !data_info_host.is_favorite,
-        ));
-
-        // normalize smaller values
-        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-            incoming_bar_len = 3.0;
-        }
-        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-            outgoing_bar_len = 3.0;
-        }
+        let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
         let host_bar = Column::new()
             .width(Length::Fixed(width))
@@ -326,7 +293,6 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                 Row::new()
                     .push(if incoming_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
                             .push(Rule::horizontal(1).style(RuleType::Incoming))
                     } else {
@@ -334,7 +300,6 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                     })
                     .push(if outgoing_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
                             .push(Rule::horizontal(1).style(RuleType::Outgoing))
                     } else {
@@ -369,21 +334,27 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         );
     }
 
-    if entries.len() == 30 {
+    if entries.len() > 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
             Text::new(only_top_30_hosts_translation(sniffer.language))
                 .font(font)
-                .horizontal_alignment(Horizontal::Center)
-                .font(font),
+                .horizontal_alignment(Horizontal::Center),
         );
     }
 
-    col_host = col_host.push(
-        Scrollable::new(Container::new(scroll_host).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-    );
-
-    col_host
+    Column::new()
+        .width(Length::Fixed(width + 11.0))
+        .push(
+            Text::new(host_translation(sniffer.language))
+                .font(font)
+                .style(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Scrollable::new(Container::new(scroll_host).width(Length::Fill))
+                .direction(Direction::Vertical(ScrollbarType::properties())),
+        )
 }
 
 fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
@@ -418,14 +389,6 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
         }
 
-        // normalize smaller values
-        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-            incoming_bar_len = 3.0;
-        }
-        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-            outgoing_bar_len = 3.0;
-        }
-
         let content = Column::new()
             .spacing(1)
             .width(Length::Fixed(width))
@@ -446,7 +409,6 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
                 Row::new()
                     .push(if incoming_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
                             .push(Rule::horizontal(1).style(RuleType::Incoming))
                     } else {
@@ -454,7 +416,6 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
                     })
                     .push(if outgoing_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
                             .push(Rule::horizontal(1).style(RuleType::Outgoing))
                     } else {
@@ -672,7 +633,7 @@ fn get_bars_length(
     data_info: &DataInfo,
 ) -> (f32, f32) {
     #[allow(clippy::cast_precision_loss)]
-    match chart_type {
+    let (mut incoming_bar_len, mut outgoing_bar_len) = match chart_type {
         ChartType::Packets => (
             tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
             tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
@@ -681,5 +642,34 @@ fn get_bars_length(
             tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
             tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
         ),
+    };
+
+    // normalize smaller values
+    if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
+        incoming_bar_len = 3.0;
     }
+    if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+        outgoing_bar_len = 3.0;
+    }
+
+    (incoming_bar_len, outgoing_bar_len)
+}
+
+fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Renderer<StyleType>> {
+    button(
+        Icon::Star
+            .to_text()
+            .size(20)
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
+    )
+    .padding(0)
+    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
+    .width(Length::Fixed(FLAGS_WIDTH_BIG))
+    .style(if is_favorite {
+        ButtonType::Starred
+    } else {
+        ButtonType::NotStarred
+    })
+    .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }

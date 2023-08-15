@@ -1,5 +1,7 @@
 //! Containers style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::container::Appearance;
 use iced::{Background, Color};
 

@@ -1,5 +1,7 @@
 //! Radios style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::Background;
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;

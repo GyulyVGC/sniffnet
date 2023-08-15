@@ -219,28 +219,23 @@ fn get_palette(
 
     Container::new(
         Row::new()
-            .padding(0)
             .push(
                 Row::new()
-                    .padding(0)
                     .width(Length::Fixed(120.0))
                     .push(Rule::horizontal(height).style(RuleType::PalettePrimary(style))),
             )
             .push(
                 Row::new()
-                    .padding(0)
                     .width(Length::Fixed(80.0))
                     .push(Rule::horizontal(height).style(RuleType::PaletteSecondary(style))),
             )
             .push(
                 Row::new()
-                    .padding(0)
                     .width(Length::Fixed(60.0))
                     .push(Rule::horizontal(height).style(RuleType::PaletteOutgoing(style))),
             )
             .push(
                 Row::new()
-                    .padding(0)
                     .width(Length::Fixed(40.0))
                     .push(Rule::horizontal(height).style(RuleType::PaletteButtons(style))),
             ),

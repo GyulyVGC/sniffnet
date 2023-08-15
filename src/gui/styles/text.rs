@@ -1,5 +1,7 @@
 //! Text style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
 use iced::{Color, Font, Renderer};

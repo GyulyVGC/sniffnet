@@ -33,7 +33,6 @@ pub fn get_exit_overlay(
     let row_buttons = confirm_button_row(language, font, Message::Reset);
 
     let content = Column::new()
-        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
@@ -66,7 +65,6 @@ pub fn get_clear_all_overlay(
     let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
 
     let content = Column::new()
-        .padding(0)
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(

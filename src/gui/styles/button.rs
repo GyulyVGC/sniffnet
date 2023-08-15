@@ -1,5 +1,7 @@
 //! Buttons style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::button;
 use iced::widget::button::Appearance;
 use iced::{Background, Color, Vector};

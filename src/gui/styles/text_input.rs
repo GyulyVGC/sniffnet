@@ -1,5 +1,7 @@
 //! Text Input style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::text_input;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
