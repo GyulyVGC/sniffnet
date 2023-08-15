@@ -85,43 +85,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let mut chart_info_string = String::from("(");
-                chart_info_string.push_str(
-                    if sniffer.traffic_chart.chart_type.eq(&ChartType::Packets) {
-                        packets_chart_translation(sniffer.language)
-                    } else {
-                        bytes_chart_translation(sniffer.language)
-                    },
-                );
-                chart_info_string.push(')');
-                let col_chart = Container::new(
-                    Column::new()
-                        .align_items(Alignment::Center)
-                        .push(
-                            Row::new()
-                                .padding([10, 0, 15, 0])
-                                .spacing(10)
-                                .align_items(Alignment::Center)
-                                .push(
-                                    traffic_rate_translation(sniffer.language)
-                                        .font(font)
-                                        .style(TextType::Title)
-                                        .size(FONT_SIZE_TITLE),
-                                )
-                                .push(
-                                    Text::new(chart_info_string)
-                                        .style(TextType::Subtitle)
-                                        .font(font),
-                                ),
-                        )
-                        .push(sniffer.traffic_chart.view()),
-                )
-                .width(Fill)
-                .align_x(Horizontal::Center)
-                .align_y(Vertical::Center)
-                .style(ContainerType::BorderedRound);
+                let container_chart = container_chart(sniffer, font);
 
-                let col_info = lazy(
+                let container_info = lazy(
                     (
                         total,
                         sniffer.style,
@@ -132,7 +98,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                 );
 
                 let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
-                let row_report = lazy(
+                let container_report = lazy(
                     (
                         filtered,
                         num_favorites,
@@ -152,21 +118,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                         Row::new()
                             .spacing(10)
                             .height(FillPortion(5))
-                            .push(
-                                Container::new(col_info)
-                                    .width(Length::Fixed(400.0))
-                                    .padding([10, 5, 5, 5])
-                                    .height(Length::Fill)
-                                    .align_x(Horizontal::Center)
-                                    .style(ContainerType::BorderedRound),
-                            )
-                            .push(col_chart),
+                            .push(container_info)
+                            .push(container_chart),
                     )
-                    .push(
-                        Container::new(row_report)
-                            .align_x(Horizontal::Center)
-                            .height(FillPortion(4)),
-                    );
+                    .push(container_report);
             }
         }
     } else {
@@ -267,7 +222,7 @@ fn body_pcap_error(
         .push(vertical_space(FillPortion(2)))
 }
 
-fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> {
+fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let mut row_report = Row::new()
         .padding(10)
         .height(Length::Fill)
@@ -281,12 +236,11 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleTyp
         .push(Rule::vertical(40))
         .push(col_app);
 
-    Row::new().push(
-        Container::new(row_report)
-            .height(Length::Fill)
-            .width(Length::Fixed(1170.0))
-            .style(ContainerType::BorderedRound),
-    )
+    Container::new(row_report)
+        .height(FillPortion(4))
+        .width(Length::Fixed(1170.0))
+        .style(ContainerType::BorderedRound)
+        .align_x(Horizontal::Center)
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
@@ -531,7 +485,7 @@ fn lazy_col_info(
     filtered: u128,
     dropped: u32,
     sniffer: &Sniffer,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
@@ -553,7 +507,7 @@ fn lazy_col_info(
         font,
     );
 
-    Column::new()
+    let content = Column::new()
         .align_items(Alignment::Center)
         .padding([5, 10])
         .push(
@@ -572,7 +526,54 @@ fn lazy_col_info(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
-        )
+        );
+
+    Container::new(content)
+        .width(Length::Fixed(400.0))
+        .padding([10, 5, 5, 5])
+        .height(Length::Fill)
+        .align_x(Horizontal::Center)
+        .style(ContainerType::BorderedRound)
+}
+
+fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer<StyleType>> {
+    let traffic_chart = &sniffer.traffic_chart;
+    let language = sniffer.language;
+
+    let mut chart_info_string = String::from("(");
+    chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {
+        packets_chart_translation(language)
+    } else {
+        bytes_chart_translation(language)
+    });
+    chart_info_string.push(')');
+
+    Container::new(
+        Column::new()
+            .align_items(Alignment::Center)
+            .push(
+                Row::new()
+                    .padding([10, 0, 15, 0])
+                    .spacing(10)
+                    .align_items(Alignment::Center)
+                    .push(
+                        traffic_rate_translation(language)
+                            .font(font)
+                            .style(TextType::Title)
+                            .size(FONT_SIZE_TITLE),
+                    )
+                    .push(
+                        Text::new(chart_info_string)
+                            .style(TextType::Subtitle)
+                            .font(font),
+                    ),
+            )
+            .push(traffic_chart.view()),
+    )
+    .width(Fill)
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .style(ContainerType::BorderedRound)
 }
 
 fn col_device_filters(

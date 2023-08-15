@@ -49,6 +49,7 @@ fn get_flag_from_country(
     traffic_type: TrafficType,
     language: Language,
 ) -> (Svg<Renderer<StyleType>>, String) {
+    #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         Country::AD => AD,
