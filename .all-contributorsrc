@@ -372,6 +372,16 @@
         "code",
         "design"
       ]
+    },
+    {
+      "login": "bdantas",
+      "name": "GNUser",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5084088?v=4",
+      "profile": "https://github.com/bdantas",
+      "contributions": [
+        "doc",
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
