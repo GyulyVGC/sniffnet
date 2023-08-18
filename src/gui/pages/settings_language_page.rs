@@ -23,12 +23,16 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
     let row_language_radio_2 = language_radios(language_active, &Language::ROW2, font);
     let row_language_radio_3 = language_radios(language_active, &Language::ROW3, font);
     let row_language_radio_4 = language_radios(language_active, &Language::ROW4, font);
+    let row_language_radio_5 = language_radios(language_active, &Language::ROW5, font);
     let col_language_radio_all = Column::new()
         .spacing(10)
+        .align_items(Alignment::Center)
         .push(row_language_radio_1)
+        .push(vertical_space(0))
         .push(row_language_radio_2)
         .push(row_language_radio_3)
-        .push(row_language_radio_4);
+        .push(row_language_radio_4)
+        .push(row_language_radio_5);
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -51,7 +55,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(40.0)))
+        .push(vertical_space(Fixed(25.0)))
         .push(col_language_radio_all);
 
     if [Language::EL, Language::PT].contains(&sniffer.language) {
