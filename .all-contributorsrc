@@ -382,6 +382,15 @@
         "doc",
         "platform"
       ]
+    },
+    {
+      "login": "hirotake111",
+      "name": "hirotake111",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6666092?v=4",
+      "profile": "https://github.com/hirotake111",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
