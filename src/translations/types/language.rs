@@ -46,7 +46,7 @@ pub enum Language {
     /// Finnish
     FI,
     /// Japanese
-    JP,
+    JA,
 }
 
 impl Default for Language {
@@ -56,11 +56,11 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const ROW1: [Language; 4] = [Language::EN, Language::DE, Language::EL, Language::ES];
-    pub(crate) const ROW2: [Language; 4] = [Language::FI, Language::FR, Language::IT, Language::KO];
-    pub(crate) const ROW3: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
-    pub(crate) const ROW4: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
-    pub(crate) const ROW5: [Language; 1] = [Language::JP];
+    pub(crate) const ROW1: [Language; 1] = [Language::EN];
+    pub(crate) const ROW2: [Language; 4] = [Language::DE, Language::EL, Language::ES, Language::FI];
+    pub(crate) const ROW3: [Language; 4] = [Language::FR, Language::IT, Language::JA, Language::KO];
+    pub(crate) const ROW4: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
+    pub(crate) const ROW5: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
@@ -81,7 +81,7 @@ impl Language {
             // Language::FA => "فارسی",
             Language::SV => "Svenska",
             Language::FI => "Suomi",
-            Language::JP => "日本語",
+            Language::JA => "日本語",
         }
     }
 
@@ -104,7 +104,7 @@ impl Language {
             // Language::FA => IR,
             Language::SV => SE,
             Language::FI => FI,
-            Language::JP => JP,
+            Language::JA => JP,
         })))
         .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }
