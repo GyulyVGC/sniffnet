@@ -42,6 +42,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::ZH => "检查",
         Language::UK => "Інспектувати",
         Language::RO => "Inspectați",
+        Language::JA => "検査",
         _ => "Inspect",
     }
 }
@@ -173,6 +174,7 @@ pub fn sort_by_translation(language: Language) -> &'static str {
         Language::RO => "Filtrează după",
         Language::PL => "Sortuj według",
         Language::FR => "Trier par",
+        Language::JA => "ソート",
         _ => "Sort by",
     }
 }
@@ -194,6 +196,7 @@ pub fn local_translation(language: Language) -> String {
         Language::RO => "Rețea locală",
         Language::PL => "Sieć lokalna",
         Language::FR => "Réseau local",
+        Language::JA => "ローカル ネットワーク",
         _ => "Local network",
     }
     .to_string()
@@ -529,7 +532,7 @@ pub fn showing_results_translation(
         Language::RO => format!("Se afișează {start}-{end} din {total} rezultate"),
         Language::PL => format!("Wyświetlanie {start}-{end} z {total} wyników"),
         Language::FR => format!("Affichage de {start}-{end} de {total} résultats totaux"),
-        Language::JA => format!("{start} から {end} までの結果の合計: {total}"),
+        Language::JA => format!("{total} 件中の {start}-{end} 件を表示"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }

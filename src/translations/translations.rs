@@ -636,7 +636,7 @@ pub fn filtered_bytes_translation(language: Language) -> &'static str {
         // Language::FA => "بایت های صاف شده",
         Language::SV => "Filtrerade bytes",
         Language::FI => "Suodatettuja tavuja",
-        Language::JA => "フィルタリングされたバイト数",
+        Language::JA => "フィルタリングされたバイト",
     }
 }
 
@@ -888,7 +888,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::EL => "πακέτα",
         // Language::FA => "بسته ها",
         Language::FI => "paketit",
-        Language::JA => "パケット数",
+        Language::JA => "パケット",
     }
 }
 
@@ -976,7 +976,7 @@ pub fn recent_report_translation(language: Language) -> &'static str {
         // Language::FA => "آخرین",
         Language::SV => "senaste",
         Language::FI => "viimeisin",
-        Language::JA => "最新",
+        Language::JA => "新しい順",
     }
 }
 
@@ -1226,7 +1226,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         // Language::FA => "شیرجه رفتن در آمد و شد شبکه",
         Language::SV => "För att dyka ned i nätverkstrafiken",
         Language::FI => "Sukeltaaksesi verkkoliikenteeseen",
-        Language::JA => "ネットワーク トラフィックにダイブする",
+        Language::JA => "ネットワーク トラフィックにダイブ",
     }
 }
 
@@ -1425,7 +1425,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         // Language::FA => "به من اطلاع بده وقتی آستانه یک بایت فراتر رفت",
         Language::SV => "Notifiera mig när en gräns för bytes har överstigits",
         Language::FI => "Ilmoita minulle, kun tavuraja on ylittynyt",
-        Language::JA => "バイト量の閾値を調査した場合に通知する",
+        Language::JA => "バイト量の閾値を超過した場合に通知する",
     }
 }
 
@@ -1469,7 +1469,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         // Language::FA => "؛ شما همچنین می توانید 'M'، 'K' و 'G' را تعیین کنید",
         Language::SV => "; du kan också ange 'K', 'M' och 'G'",
         Language::FI => "; voit myös määrittää 'K', 'M' tai 'G'",
-        Language::JA => "; 'K', 'M', 'G' を選択できます",
+        Language::JA => "; 'K', 'M', 'G' が選択可能です",
     }
 }
 
