@@ -2,6 +2,7 @@
 
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
+use plotters::prelude::FontStyle;
 
 use crate::gui::styles::types::palette::Palette;
 use crate::StyleType;
@@ -148,6 +149,14 @@ pub fn get_font(style: StyleType) -> Font {
         SARASA_MONO
     } else {
         SARASA_MONO_BOLD
+    }
+}
+
+pub fn get_font_weight(style: StyleType) -> FontStyle {
+    if style.is_nightly() {
+        FontStyle::Normal
+    } else {
+        FontStyle::Bold
     }
 }
 

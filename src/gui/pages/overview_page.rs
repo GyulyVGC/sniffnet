@@ -334,7 +334,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         );
     }
 
-    if entries.len() > 30 {
+    if entries.len() >= 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
             Text::new(only_top_30_hosts_translation(sniffer.language))
                 .font(font)
@@ -476,7 +476,7 @@ fn lazy_col_info(
                 .height(Length::Fixed(120.0))
                 .push(
                     Scrollable::new(col_device_filters)
-                        .width(Length::FillPortion(1))
+                        .width(Length::Fill)
                         .direction(Direction::Vertical(ScrollbarType::properties())),
                 )
                 .push(Rule::vertical(25))
@@ -551,6 +551,7 @@ fn col_device_filters(
     let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
     Column::new()
+        .width(Length::FillPortion(1))
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
             adapter_info,

@@ -5,9 +5,12 @@ use std::collections::VecDeque;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
 use iced::{Element, Renderer};
+use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::style_constants::{get_alpha_chart_badge, CHARTS_LINE_BORDER};
+use crate::gui::styles::style_constants::{
+    get_alpha_chart_badge, get_font_weight, CHARTS_LINE_BORDER,
+};
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -88,13 +91,7 @@ impl Chart<Message> for TrafficChart {
         _state: &Self::State,
         mut chart_builder: ChartBuilder<DB>,
     ) {
-        use plotters::prelude::*;
-
-        let font_weight = if self.style.is_nightly() {
-            FontStyle::Normal
-        } else {
-            FontStyle::Bold
-        };
+        let font_weight = get_font_weight(self.style);
 
         if self.ticks == 0 {
             return;
@@ -114,144 +111,88 @@ impl Chart<Message> for TrafficChart {
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
-        match self.chart_type {
-            ChartType::Bytes => {
-                //display bytes chart
-                let mut chart = chart_builder
-                    .build_cartesian_2d(
-                        first_time_displayed..tot_seconds,
-                        self.min_sent_bytes..self.max_received_bytes,
-                    )
-                    .expect("Error drawing bytes chart");
+        let mut chart = chart_builder
+            .build_cartesian_2d(
+                first_time_displayed..tot_seconds,
+                if self.chart_type.eq(&ChartType::Packets) {
+                    self.min_sent_packets..self.max_received_packets
+                } else {
+                    self.min_sent_bytes..self.max_received_bytes
+                },
+            )
+            .expect("Error drawing packets chart");
 
-                chart
-                    .configure_mesh()
-                    .label_style(
-                        ("Sarasa Mono SC", 12)
-                            .into_font()
-                            .style(font_weight)
-                            .color(&color_font),
-                    )
-                    .y_labels(7)
-                    .y_label_formatter(&|bytes| {
-                        get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
-                    })
-                    .draw()
-                    .unwrap();
-                chart
-                    .draw_series(
-                        AreaSeries::new(
-                            self.received_bytes.iter().copied(),
-                            0,
-                            color_incoming.mix(color_mix.into()),
-                        )
-                        .border_style(
-                            ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
-                        ),
-                    )
-                    .expect("Error drawing graph")
-                    .label(incoming_translation(self.language))
-                    .legend(move |(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
-                    });
-                chart
-                    .draw_series(
-                        AreaSeries::new(
-                            self.sent_bytes.iter().copied(),
-                            0,
-                            color_outgoing.mix(color_mix.into()),
-                        )
-                        .border_style(
-                            ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
-                        ),
-                    )
-                    .expect("Error drawing graph")
-                    .label(outgoing_translation(self.language))
-                    .legend(move |(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
-                    });
-                chart
-                    .configure_series_labels()
-                    .position(SeriesLabelPosition::UpperRight)
-                    .background_style(BLACK.mix(0.3))
-                    .border_style(BLACK.mix(0.6))
-                    .label_font(
-                        ("Sarasa Mono SC", 13.5)
-                            .into_font()
-                            .style(font_weight)
-                            .color(&color_font),
-                    )
-                    .draw()
-                    .expect("Error drawing graph");
-            }
+        // Mesh
+        chart
+            .configure_mesh()
+            .label_style(
+                ("Sarasa Mono SC", 12)
+                    .into_font()
+                    .style(font_weight)
+                    .color(&color_font),
+            )
+            .y_labels(7)
+            .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
+                &|packets| packets.abs().to_string()
+            } else {
+                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
+            })
+            .draw()
+            .unwrap();
 
-            ChartType::Packets => {
-                //display packets chart
-                let mut chart = chart_builder
-                    .build_cartesian_2d(
-                        first_time_displayed..tot_seconds,
-                        self.min_sent_packets..self.max_received_packets,
-                    )
-                    .expect("Error drawing packets chart");
+        // Incoming series
+        chart
+            .draw_series(
+                AreaSeries::new(
+                    if self.chart_type.eq(&ChartType::Packets) {
+                        self.received_packets.iter().copied()
+                    } else {
+                        self.received_bytes.iter().copied()
+                    },
+                    0,
+                    color_incoming.mix(color_mix.into()),
+                )
+                .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
+            )
+            .expect("Error drawing graph")
+            .label(incoming_translation(self.language))
+            .legend(move |(x, y)| {
+                Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
+            });
 
-                chart
-                    .configure_mesh()
-                    .label_style(
-                        ("Sarasa Mono SC", 12)
-                            .into_font()
-                            .style(font_weight)
-                            .color(&color_font),
-                    )
-                    .y_labels(7)
-                    .y_label_formatter(&|packets| packets.abs().to_string())
-                    .draw()
-                    .unwrap();
-                chart
-                    .draw_series(
-                        AreaSeries::new(
-                            self.received_packets.iter().copied(),
-                            0,
-                            color_incoming.mix(color_mix.into()),
-                        )
-                        .border_style(
-                            ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER),
-                        ),
-                    )
-                    .expect("Error drawing graph")
-                    .label(incoming_translation(self.language))
-                    .legend(move |(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
-                    });
-                chart
-                    .draw_series(
-                        AreaSeries::new(
-                            self.sent_packets.iter().copied(),
-                            0,
-                            color_outgoing.mix(color_mix.into()),
-                        )
-                        .border_style(
-                            ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER),
-                        ),
-                    )
-                    .expect("Error drawing graph")
-                    .label(outgoing_translation(self.language))
-                    .legend(move |(x, y)| {
-                        Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
-                    });
-                chart
-                    .configure_series_labels()
-                    .position(SeriesLabelPosition::UpperRight)
-                    .background_style(BLACK.mix(0.3))
-                    .border_style(BLACK.mix(0.6))
-                    .label_font(
-                        ("Sarasa Mono SC", 13.5)
-                            .into_font()
-                            .style(font_weight)
-                            .color(&color_font),
-                    )
-                    .draw()
-                    .expect("Error drawing graph");
-            }
-        }
+        // Outgoing series
+        chart
+            .draw_series(
+                AreaSeries::new(
+                    if self.chart_type.eq(&ChartType::Packets) {
+                        self.sent_packets.iter().copied()
+                    } else {
+                        self.sent_bytes.iter().copied()
+                    },
+                    0,
+                    color_outgoing.mix(color_mix.into()),
+                )
+                .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
+            )
+            .expect("Error drawing graph")
+            .label(outgoing_translation(self.language))
+            .legend(move |(x, y)| {
+                Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
+            });
+
+        // Legend
+        chart
+            .configure_series_labels()
+            .position(SeriesLabelPosition::UpperRight)
+            .background_style(BLACK.mix(0.3))
+            .border_style(BLACK.mix(0.6))
+            .label_font(
+                ("Sarasa Mono SC", 13.5)
+                    .into_font()
+                    .style(font_weight)
+                    .color(&color_font),
+            )
+            .draw()
+            .expect("Error drawing graph");
     }
 }
