@@ -30,7 +30,7 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
 
 /// Computes the String representing the active filters
 pub fn get_active_filters_col(
-    filters: &Filters,
+    filters: Filters,
     language: Language,
     font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {

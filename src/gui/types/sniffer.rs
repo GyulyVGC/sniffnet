@@ -331,7 +331,7 @@ impl Sniffer {
         if pcap_error.is_none() {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
-            let filters = self.filters.clone();
+            let filters = self.filters;
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -340,7 +340,7 @@ impl Sniffer {
                         &current_capture_id,
                         &device,
                         cap.unwrap(),
-                        &filters,
+                        filters,
                         &info_traffic_mutex,
                     );
                 })

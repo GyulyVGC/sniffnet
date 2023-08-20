@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{Ethernet2Header, IpHeader, TransportHeader};
+use etherparse::{Ethernet2Header, IpHeader, PacketHeaders, TransportHeader};
 use maxminddb::Reader;
 use pcap::{Active, Address, Capture, Device};
 
@@ -12,6 +12,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
@@ -22,35 +23,80 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
 
+/// Calls methods to analyze link, network, and transport headers.
+/// Returns the relevant collected information.
+pub fn analyze_headers(
+    headers: PacketHeaders,
+    mac_addresses: &mut (String, String),
+    exchanged_bytes: &mut u128,
+    protocols: &mut Filters,
+) -> Option<AddressPortPair> {
+    let mut address1 = String::new();
+    let mut address2 = String::new();
+    let mut port1 = 0;
+    let mut port2 = 0;
+
+    if !analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1) {
+        return None;
+    }
+
+    if !analyze_network_header(
+        headers.ip,
+        exchanged_bytes,
+        &mut protocols.ip,
+        &mut address1,
+        &mut address2,
+    ) {
+        return None;
+    }
+
+    if !analyze_transport_header(
+        headers.transport,
+        &mut port1,
+        &mut port2,
+        &mut protocols.application,
+        &mut protocols.transport,
+    ) {
+        return None;
+    }
+
+    Some(AddressPortPair::new(
+        address1.clone(),
+        port1,
+        address2.clone(),
+        port2,
+        protocols.transport,
+    ))
+}
+
 /// This function analyzes the data link layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
-pub fn analyze_link_header(
+/// Returns false if packet has to be skipped.
+fn analyze_link_header(
     link_header: Option<Ethernet2Header>,
     mac_address1: &mut String,
     mac_address2: &mut String,
-    skip_packet: &mut bool,
-) {
+) -> bool {
     match link_header {
         Some(header) => {
             *mac_address1 = mac_from_dec_to_hex(header.source);
             *mac_address2 = mac_from_dec_to_hex(header.destination);
+            true
         }
-        _ => {
-            *skip_packet = true;
-        }
+        _ => false,
     }
 }
 
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
-pub fn analyze_network_header(
+/// Returns false if packet has to be skipped.
+fn analyze_network_header(
     network_header: Option<IpHeader>,
     exchanged_bytes: &mut u128,
     network_protocol: &mut IpVersion,
     address1: &mut String,
     address2: &mut String,
-    skip_packet: &mut bool,
-) {
+) -> bool {
     match network_header {
         Some(IpHeader::Version4(ipv4header, _)) => {
             *network_protocol = IpVersion::IPv4;
@@ -65,29 +111,29 @@ pub fn analyze_network_header(
                 .replace(',', ".")
                 .replace(' ', "");
             *exchanged_bytes = u128::from(ipv4header.payload_len);
+            true
         }
         Some(IpHeader::Version6(ipv6header, _)) => {
             *network_protocol = IpVersion::IPv6;
             *address1 = ipv6_from_long_dec_to_short_hex(ipv6header.source);
             *address2 = ipv6_from_long_dec_to_short_hex(ipv6header.destination);
             *exchanged_bytes = u128::from(ipv6header.payload_length);
+            true
         }
-        _ => {
-            *skip_packet = true;
-        }
+        _ => false,
     }
 }
 
 /// This function analyzes the transport layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
-pub fn analyze_transport_header(
+/// Returns false if packet has to be skipped.
+fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
     port1: &mut u16,
     port2: &mut u16,
     application_protocol: &mut AppProtocol,
     transport_protocol: &mut TransProtocol,
-    skip_packet: &mut bool,
-) {
+) -> bool {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
             *port1 = udp_header.source_port;
@@ -97,6 +143,7 @@ pub fn analyze_transport_header(
             if (*application_protocol).eq(&AppProtocol::Other) {
                 *application_protocol = from_port_to_application_protocol(*port2);
             }
+            true
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
             *port1 = tcp_header.source_port;
@@ -106,10 +153,9 @@ pub fn analyze_transport_header(
             if (*application_protocol).eq(&AppProtocol::Other) {
                 *application_protocol = from_port_to_application_protocol(*port2);
             }
+            true
         }
-        _ => {
-            *skip_packet = true;
-        }
+        _ => false,
     }
 }
 
