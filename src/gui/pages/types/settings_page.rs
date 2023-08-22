@@ -7,7 +7,7 @@ use crate::translations::translations::{
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
-/// This enum defines the current running page.
+/// This enum defines the current settings page.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum SettingsPage {
     /// Settings Notifications page.
@@ -16,13 +16,16 @@ pub enum SettingsPage {
     Appearance,
     /// Settings Language page.
     Language,
+    /// Advanced settings.
+    Advanced,
 }
 
 impl SettingsPage {
-    pub const ALL: [SettingsPage; 3] = [
+    pub const ALL: [SettingsPage; 4] = [
         SettingsPage::Notifications,
         SettingsPage::Appearance,
         SettingsPage::Language,
+        SettingsPage::Advanced,
     ];
 
     pub fn get_tab_label(&self, language: Language) -> &str {
@@ -30,6 +33,7 @@ impl SettingsPage {
             SettingsPage::Notifications => notifications_translation(language),
             SettingsPage::Appearance => style_translation(language),
             SettingsPage::Language => language_translation(language),
+            SettingsPage::Advanced => "",
         }
     }
 
@@ -37,15 +41,17 @@ impl SettingsPage {
         match self {
             SettingsPage::Notifications => SettingsPage::Appearance,
             SettingsPage::Appearance => SettingsPage::Language,
-            SettingsPage::Language => SettingsPage::Notifications,
+            SettingsPage::Language => SettingsPage::Advanced,
+            SettingsPage::Advanced => SettingsPage::Notifications,
         }
     }
 
     pub fn previous(self) -> Self {
         match self {
-            SettingsPage::Notifications => SettingsPage::Language,
+            SettingsPage::Notifications => SettingsPage::Advanced,
             SettingsPage::Appearance => SettingsPage::Notifications,
             SettingsPage::Language => SettingsPage::Appearance,
+            SettingsPage::Advanced => SettingsPage::Language,
         }
     }
 
@@ -54,6 +60,7 @@ impl SettingsPage {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,
             SettingsPage::Language => Icon::Globe,
+            SettingsPage::Advanced => Icon::Advanced,
         }
         .to_text()
     }

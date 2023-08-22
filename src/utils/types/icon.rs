@@ -5,6 +5,7 @@ use crate::gui::styles::style_constants::ICONS;
 use crate::StyleType;
 
 pub enum Icon {
+    Advanced,
     ArrowBack,
     ArrowLeft,
     ArrowRight,
@@ -40,6 +41,7 @@ pub enum Icon {
 impl Icon {
     pub fn to_text(&self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
         Text::new(match self {
+            Icon::Advanced => "Q",
             Icon::ArrowBack => "C",
             Icon::ArrowLeft => "i",
             Icon::ArrowRight => "j",

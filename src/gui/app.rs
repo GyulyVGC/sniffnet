@@ -4,11 +4,13 @@
 
 use std::time::Duration;
 
+use iced::application::StyleSheet;
 use iced::keyboard::{Event, KeyCode, Modifiers};
 use iced::widget::Column;
 use iced::Event::{Keyboard, Window};
 use iced::{
-    executor, font, subscription, window, Application, Command, Element, Renderer, Subscription,
+    executor, font, subscription, window, Application, Command, Element, Renderer, Settings,
+    Subscription,
 };
 
 use crate::gui::components::footer::footer;
@@ -20,6 +22,7 @@ use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::settings_advanced_page::settings_advanced_page;
 use crate::gui::pages::settings_language_page::settings_language_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
@@ -110,6 +113,7 @@ impl Application for Sniffer {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
                         SettingsPage::Language => settings_language_page(self),
+                        SettingsPage::Advanced => settings_advanced_page(self),
                     };
 
                     Modal::new(content, overlay)
@@ -187,5 +191,9 @@ impl Application for Sniffer {
 
     fn theme(&self) -> Self::Theme {
         self.style
+    }
+
+    fn scale_factor(&self) -> f64 {
+        self.scale_factor
     }
 }

@@ -86,6 +86,8 @@ pub struct Sniffer {
     pub selected_connection: usize,
     /// Record the timestamp of last window focus
     pub last_focus_time: std::time::Instant,
+    /// Scale factor of the UI
+    pub scale_factor: f64,
 }
 
 impl Sniffer {
@@ -123,6 +125,7 @@ impl Sniffer {
             page_number: 1,
             selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
+            scale_factor: 1.0,
         }
     }
 
@@ -225,6 +228,7 @@ impl Sniffer {
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
             Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
+            Message::ChangeScaleFactor(scale_factor) => self.scale_factor = scale_factor,
             _ => {}
         }
         Command::none()

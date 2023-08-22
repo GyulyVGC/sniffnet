@@ -134,7 +134,7 @@ fn new_settings_tab(
     language: Language,
     font: Font,
 ) -> Button<'static, Message, Renderer<StyleType>> {
-    let content = Row::new()
+    let mut content = Row::new()
         .align_items(Alignment::Center)
         .push(horizontal_space(Length::FillPortion(1)))
         .push(
@@ -147,9 +147,9 @@ fn new_settings_tab(
                 })
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
-        )
-        .push(horizontal_space(10))
-        .push(
+        );
+    if page.ne(&SettingsPage::Advanced) {
+        content = content.push(horizontal_space(10)).push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
@@ -160,13 +160,18 @@ fn new_settings_tab(
                 })
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
-        )
-        .push(horizontal_space(Length::FillPortion(1)));
+        );
+    }
+    content = content.push(horizontal_space(Length::FillPortion(1)));
 
     button(content)
         .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
         .padding(0)
-        .width(Length::FillPortion(1))
+        .width(if page.eq(&SettingsPage::Advanced) {
+            Length::Fixed(40.0)
+        } else {
+            Length::FillPortion(1)
+        })
         .style(if active {
             ButtonType::TabActive
         } else {

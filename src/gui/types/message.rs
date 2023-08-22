@@ -89,4 +89,6 @@ pub enum Message {
     FontLoaded(Result<(), font::Error>),
     /// Enable or disable gradients
     GradientsSelection(GradientType),
+    /// Set UI scale factor
+    ChangeScaleFactor(f64),
 }
