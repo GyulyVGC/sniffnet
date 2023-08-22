@@ -8,6 +8,7 @@ use std::{panic, process, thread};
 use iced::window::Position;
 use iced::{window, Application, Font, Settings};
 
+use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::parse_cli_args;
@@ -70,19 +71,33 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    let config_settings = if let Ok(setting) = confy::load::<ConfigSettings>("sniffnet", "settings")
-    {
-        setting
-    } else {
-        confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
-        ConfigSettings::default()
-    };
+    let config_settings =
+        if let Ok(settings) = confy::load::<ConfigSettings>("sniffnet", "settings") {
+            settings
+        } else {
+            confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
+            ConfigSettings::default()
+        };
 
     let config_device = if let Ok(device) = confy::load::<ConfigDevice>("sniffnet", "device") {
         device
     } else {
         confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
         ConfigDevice::default()
+    };
+
+    let config_advanced_settings = if let Ok(advanced_settings) =
+        confy::load::<ConfigAdvancedSettings>("sniffnet", "advanced_settings")
+    {
+        advanced_settings
+    } else {
+        confy::store(
+            "sniffnet",
+            "advanced_settings",
+            ConfigAdvancedSettings::default(),
+        )
+        .unwrap_or(());
+        ConfigAdvancedSettings::default()
     };
 
     thread::Builder::new()
@@ -122,6 +137,7 @@ pub fn main() -> iced::Result {
             status_pair1,
             &config_settings,
             &config_device,
+            config_advanced_settings,
             newer_release_available1,
         ),
         default_font: Font::with_name("Sarasa Mono SC"),

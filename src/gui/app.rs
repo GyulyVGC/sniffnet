@@ -4,13 +4,11 @@
 
 use std::time::Duration;
 
-use iced::application::StyleSheet;
 use iced::keyboard::{Event, KeyCode, Modifiers};
 use iced::widget::Column;
 use iced::Event::{Keyboard, Window};
 use iced::{
-    executor, font, subscription, window, Application, Command, Element, Renderer, Settings,
-    Subscription,
+    executor, font, subscription, window, Application, Command, Element, Renderer, Subscription,
 };
 
 use crate::gui::components::footer::footer;
@@ -194,6 +192,6 @@ impl Application for Sniffer {
     }
 
     fn scale_factor(&self) -> f64 {
-        self.scale_factor
+        self.advanced_settings.scale_factor
     }
 }

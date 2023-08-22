@@ -78,19 +78,21 @@ mod tests {
     fn test_previous_settings_page() {
         assert_eq!(
             SettingsPage::Notifications.previous(),
-            SettingsPage::Language
+            SettingsPage::Advanced
         );
         assert_eq!(
             SettingsPage::Appearance.previous(),
             SettingsPage::Notifications
         );
         assert_eq!(SettingsPage::Language.previous(), SettingsPage::Appearance);
+        assert_eq!(SettingsPage::Advanced.previous(), SettingsPage::Language);
     }
 
     #[test]
     fn test_next_settings_page() {
         assert_eq!(SettingsPage::Notifications.next(), SettingsPage::Appearance);
         assert_eq!(SettingsPage::Appearance.next(), SettingsPage::Language);
-        assert_eq!(SettingsPage::Language.next(), SettingsPage::Notifications);
+        assert_eq!(SettingsPage::Language.next(), SettingsPage::Advanced);
+        assert_eq!(SettingsPage::Advanced.next(), SettingsPage::Notifications);
     }
 }

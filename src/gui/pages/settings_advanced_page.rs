@@ -8,13 +8,10 @@ use crate::gui::types::message::Message;
 use crate::translations::translations_3::{
     advanced_settings_translation, scale_factor_translation,
 };
-use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{
-    horizontal_space, vertical_space, Column, Container, Row, Slider, VerticalSlider,
-};
+use iced::widget::{vertical_space, Column, Container, Slider};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
@@ -47,7 +44,7 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         .push(scale_factor_slider(
             sniffer.language,
             font,
-            sniffer.scale_factor,
+            sniffer.advanced_settings.scale_factor,
         ));
 
     Container::new(content)
@@ -67,7 +64,7 @@ fn scale_factor_slider(
             .align_items(Alignment::Center)
             .push(
                 Text::new(format!(
-                    "{}: {scale_factor:.2}",
+                    "{}: x{scale_factor:.2}",
                     scale_factor_translation(language)
                 ))
                 .font(font),
@@ -76,7 +73,7 @@ fn scale_factor_slider(
                 Slider::new(0.5..=1.5, scale_factor, Message::ChangeScaleFactor)
                     .step(0.05)
                     .width(Fixed(150.0)),
-            )
+            ),
     )
     .padding(5)
     .width(Length::FillPortion(1))

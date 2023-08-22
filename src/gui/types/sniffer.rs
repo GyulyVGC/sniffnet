@@ -30,7 +30,10 @@ use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_report_path;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{
+    ConfigAdvancedSettings, ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType,
+    TrafficChart,
+};
 
 /// Struct on which the gui is based
 ///
@@ -86,8 +89,8 @@ pub struct Sniffer {
     pub selected_connection: usize,
     /// Record the timestamp of last window focus
     pub last_focus_time: std::time::Instant,
-    /// Scale factor of the UI
-    pub scale_factor: f64,
+    /// Advanced settings
+    pub advanced_settings: ConfigAdvancedSettings,
 }
 
 impl Sniffer {
@@ -97,6 +100,7 @@ impl Sniffer {
         status_pair: Arc<(Mutex<Status>, Condvar)>,
         config_settings: &ConfigSettings,
         config_device: &ConfigDevice,
+        config_advanced_settings: ConfigAdvancedSettings,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
@@ -125,7 +129,7 @@ impl Sniffer {
             page_number: 1,
             selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
-            scale_factor: 1.0,
+            advanced_settings: config_advanced_settings,
         }
     }
 
@@ -228,7 +232,9 @@ impl Sniffer {
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
             Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
-            Message::ChangeScaleFactor(scale_factor) => self.scale_factor = scale_factor,
+            Message::ChangeScaleFactor(multiplier) => {
+                self.advanced_settings.scale_factor = multiplier;
+            }
             _ => {}
         }
         Command::none()
@@ -404,13 +410,14 @@ impl Sniffer {
         if self.settings_page.is_some() {
             self.last_opened_setting = self.settings_page.unwrap();
             self.settings_page = None;
-            let store = ConfigSettings {
+            let settings = ConfigSettings {
                 style: self.style,
                 notifications: self.notifications,
                 language: self.language,
                 color_gradient: self.color_gradient,
             };
-            confy::store("sniffnet", "settings", store).unwrap_or(());
+            confy::store("sniffnet", "settings", settings).unwrap_or(());
+            confy::store("sniffnet", "advanced_settings", self.advanced_settings).unwrap_or(());
         }
     }
 
@@ -548,6 +555,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -568,6 +576,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
             &Default::default(),
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
@@ -592,6 +601,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -614,6 +624,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -632,6 +643,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
             &Default::default(),
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
@@ -654,6 +666,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
             &Default::default(),
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
@@ -679,6 +692,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -699,6 +713,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
             &Default::default(),
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
@@ -897,6 +912,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -991,6 +1007,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1013,6 +1030,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
+            &Default::default(),
             &Default::default(),
             &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
@@ -1183,6 +1201,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.runtime_data.logged_notifications =
@@ -1212,6 +1231,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            &Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
@@ -1232,7 +1252,7 @@ mod tests {
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         sniffer.update(Message::SwitchPage(false));
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Advanced));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         sniffer.update(Message::SwitchPage(true));
