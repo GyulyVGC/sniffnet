@@ -91,4 +91,6 @@ pub enum Message {
     GradientsSelection(GradientType),
     /// Set UI scale factor
     ChangeScaleFactor(f64),
+    /// Restore default advanced settings
+    RestoreDefaults,
 }

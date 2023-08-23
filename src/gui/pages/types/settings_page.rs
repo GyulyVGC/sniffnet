@@ -60,7 +60,7 @@ impl SettingsPage {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,
             SettingsPage::Language => Icon::Globe,
-            SettingsPage::Advanced => Icon::Advanced,
+            SettingsPage::Advanced => Icon::Dots,
         }
         .to_text()
     }

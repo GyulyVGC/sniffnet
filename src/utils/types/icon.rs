@@ -5,7 +5,6 @@ use crate::gui::styles::style_constants::ICONS;
 use crate::StyleType;
 
 pub enum Icon {
-    Advanced,
     ArrowBack,
     ArrowLeft,
     ArrowRight,
@@ -15,6 +14,7 @@ pub enum Icon {
     Bin,
     BytesThreshold,
     Clock,
+    Dots,
     Error,
     File,
     Forbidden,
@@ -30,6 +30,7 @@ pub enum Icon {
     Notification,
     Overview,
     PacketsThreshold,
+    Restore,
     Rocket,
     Settings,
     Sniffnet,
@@ -41,7 +42,6 @@ pub enum Icon {
 impl Icon {
     pub fn to_text(&self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
         Text::new(match self {
-            Icon::Advanced => "Q",
             Icon::ArrowBack => "C",
             Icon::ArrowLeft => "i",
             Icon::ArrowRight => "j",
@@ -51,6 +51,7 @@ impl Icon {
             Icon::Bin => "h",
             Icon::BytesThreshold => "f",
             Icon::Clock => "9",
+            Icon::Dots => "R",
             Icon::Error => "U",
             Icon::File => "8",
             Icon::Forbidden => "x",
@@ -66,6 +67,7 @@ impl Icon {
             Icon::Notification => "7",
             Icon::Overview => "d",
             Icon::PacketsThreshold => "e",
+            Icon::Restore => "E",
             Icon::Rocket => "S",
             Icon::Settings => "a",
             Icon::Sniffnet => "A",

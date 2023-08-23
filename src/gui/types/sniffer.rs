@@ -235,6 +235,7 @@ impl Sniffer {
             Message::ChangeScaleFactor(multiplier) => {
                 self.advanced_settings.scale_factor = multiplier;
             }
+            Message::RestoreDefaults => self.advanced_settings = ConfigAdvancedSettings::default(),
             _ => {}
         }
         Command::none()
@@ -555,7 +556,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -578,7 +579,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -601,7 +602,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -624,7 +625,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -645,7 +646,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -668,7 +669,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -692,7 +693,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -715,7 +716,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         // remove 1
@@ -912,7 +913,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1007,7 +1008,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1032,7 +1033,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1201,7 +1202,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.runtime_data.logged_notifications =
@@ -1231,7 +1232,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
-            &Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));

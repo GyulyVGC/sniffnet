@@ -17,3 +17,11 @@ pub fn scale_factor_translation(language: Language) -> &'static str {
         _ => "Scale factor",
     }
 }
+
+pub fn restore_defaults_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Restore defaults",
+        Language::IT => "Ripristina valori predefiniti",
+        _ => "Restore defaults",
+    }
+}

@@ -168,7 +168,7 @@ fn new_settings_tab(
         .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
         .padding(0)
         .width(if page.eq(&SettingsPage::Advanced) {
-            Length::Fixed(40.0)
+            Length::Fixed(45.0)
         } else {
             Length::FillPortion(1)
         })
