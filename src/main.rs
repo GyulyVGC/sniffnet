@@ -7,10 +7,10 @@ use std::{panic, process, thread};
 
 #[cfg(target_os = "linux")]
 use iced::window::PlatformSpecific;
-use iced::window::Position;
 use iced::{window, Application, Font, Settings};
 
 use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
+use crate::configs::types::config_window::{ConfigWindow, ToPosition};
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::parse_cli_args;
@@ -102,6 +102,13 @@ pub fn main() -> iced::Result {
         ConfigAdvancedSettings::default()
     };
 
+    let config_window = if let Ok(window) = confy::load::<ConfigWindow>("sniffnet", "window") {
+        window
+    } else {
+        confy::store("sniffnet", "window", ConfigWindow::default()).unwrap_or(());
+        ConfigWindow::default()
+    };
+
     thread::Builder::new()
         .name("thread_check_updates".to_string())
         .spawn(move || {
@@ -122,8 +129,8 @@ pub fn main() -> iced::Result {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some("sniffnet".to_string()),
         window: window::Settings {
-            size: (1190, 670), // start size
-            position: Position::Centered,
+            size: config_window.size, // start size
+            position: config_window.position.to_position(),
             min_size: Some((800, 500)), // min size allowed
             max_size: None,
             visible: true,
@@ -144,6 +151,7 @@ pub fn main() -> iced::Result {
             &config_settings,
             &config_device,
             config_advanced_settings,
+            config_window,
             newer_release_available1,
         ),
         default_font: Font::with_name("Sarasa Mono SC"),

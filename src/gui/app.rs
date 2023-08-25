@@ -50,7 +50,6 @@ impl Application for Sniffer {
                 font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
                 font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
                 font::load(ICONS_BYTES).map(Message::FontLoaded),
-                iced::window::maximize(true),
             ]),
         )
     }
@@ -146,8 +145,15 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
-        let hot_keys_subscription = subscription::events_with(|event, _| match event {
+        let window_events_subscription = subscription::events_with(|event, _| match event {
             Window(window::Event::Focused) => Some(Message::WindowFocused),
+            Window(window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
+            Window(window::Event::Resized { width, height }) => {
+                Some(Message::WindowResized(width, height))
+            }
+            _ => None,
+        });
+        let hot_keys_subscription = subscription::events_with(|event, _| match event {
             Keyboard(Event::KeyPressed {
                 key_code,
                 modifiers,
@@ -184,7 +190,11 @@ impl Application for Sniffer {
                 iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
             }
         };
-        Subscription::batch([hot_keys_subscription, time_subscription])
+        Subscription::batch([
+            window_events_subscription,
+            hot_keys_subscription,
+            time_subscription,
+        ])
     }
 
     fn theme(&self) -> Self::Theme {

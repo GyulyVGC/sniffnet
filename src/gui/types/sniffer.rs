@@ -10,6 +10,7 @@ use iced::{window, Command};
 use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
+use crate::configs::types::config_window::ConfigWindow;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -91,6 +92,8 @@ pub struct Sniffer {
     pub last_focus_time: std::time::Instant,
     /// Advanced settings
     pub advanced_settings: ConfigAdvancedSettings,
+    /// Position and size of the app window
+    pub window: ConfigWindow,
 }
 
 impl Sniffer {
@@ -101,6 +104,7 @@ impl Sniffer {
         config_settings: &ConfigSettings,
         config_device: &ConfigDevice,
         config_advanced_settings: ConfigAdvancedSettings,
+        config_window: ConfigWindow,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
@@ -130,6 +134,7 @@ impl Sniffer {
             selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
             advanced_settings: config_advanced_settings,
+            window: config_window,
         }
     }
 
@@ -236,6 +241,18 @@ impl Sniffer {
                 self.advanced_settings.scale_factor = multiplier;
             }
             Message::RestoreDefaults => self.advanced_settings = ConfigAdvancedSettings::default(),
+            Message::WindowMoved(x, y) => {
+                self.window.position = (x, y);
+                confy::store("sniffnet", "window", self.window).unwrap_or(());
+            }
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Message::WindowResized(width, height) => {
+                let scaled_width = (f64::from(width) * self.advanced_settings.scale_factor) as u32;
+                let scaled_height =
+                    (f64::from(height) * self.advanced_settings.scale_factor) as u32;
+                self.window.size = (scaled_width, scaled_height);
+                confy::store("sniffnet", "window", self.window).unwrap_or(());
+            }
             _ => {}
         }
         Command::none()
@@ -557,6 +574,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -579,6 +597,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -603,6 +622,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -626,6 +646,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -646,6 +667,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -669,6 +691,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -694,6 +717,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -716,6 +740,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -914,6 +939,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1009,6 +1035,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1033,6 +1060,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1203,6 +1231,7 @@ mod tests {
             &Default::default(),
             &Default::default(),
             Default::default(),
+            Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.runtime_data.logged_notifications =
@@ -1232,6 +1261,7 @@ mod tests {
             Arc::new((Mutex::new(Status::Init), Default::default())),
             &Default::default(),
             &Default::default(),
+            Default::default(),
             Default::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );

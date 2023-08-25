@@ -93,4 +93,8 @@ pub enum Message {
     ChangeScaleFactor(f64),
     /// Restore default advanced settings
     RestoreDefaults,
+    /// The app window position has been changed
+    WindowMoved(i32, i32),
+    /// The app window size has been changed
+    WindowResized(u32, u32),
 }

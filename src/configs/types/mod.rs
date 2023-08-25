@@ -1,3 +1,4 @@
 pub mod config_advanced_settings;
 pub mod config_device;
 pub mod config_settings;
+pub mod config_window;
