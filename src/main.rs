@@ -11,6 +11,7 @@ use iced::{window, Application, Font, Settings};
 
 use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
 use crate::configs::types::config_window::{ConfigWindow, ToPosition};
+use crate::configs::types::configs::Configs;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::parse_cli_args;
@@ -73,41 +74,7 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    let config_settings =
-        if let Ok(settings) = confy::load::<ConfigSettings>("sniffnet", "settings") {
-            settings
-        } else {
-            confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
-            ConfigSettings::default()
-        };
-
-    let config_device = if let Ok(device) = confy::load::<ConfigDevice>("sniffnet", "device") {
-        device
-    } else {
-        confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
-        ConfigDevice::default()
-    };
-
-    let config_advanced_settings = if let Ok(advanced_settings) =
-        confy::load::<ConfigAdvancedSettings>("sniffnet", "advanced_settings")
-    {
-        advanced_settings
-    } else {
-        confy::store(
-            "sniffnet",
-            "advanced_settings",
-            ConfigAdvancedSettings::default(),
-        )
-        .unwrap_or(());
-        ConfigAdvancedSettings::default()
-    };
-
-    let config_window = if let Ok(window) = confy::load::<ConfigWindow>("sniffnet", "window") {
-        window
-    } else {
-        confy::store("sniffnet", "window", ConfigWindow::default()).unwrap_or(());
-        ConfigWindow::default()
-    };
+    let configs = Configs::load();
 
     thread::Builder::new()
         .name("thread_check_updates".to_string())
@@ -129,8 +96,8 @@ pub fn main() -> iced::Result {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some("sniffnet".to_string()),
         window: window::Settings {
-            size: config_window.size, // start size
-            position: config_window.position.to_position(),
+            size: configs.window.size, // start size
+            position: configs.window.position.to_position(),
             min_size: Some((800, 500)), // min size allowed
             max_size: None,
             visible: true,
@@ -148,10 +115,7 @@ pub fn main() -> iced::Result {
             current_capture_id1,
             mutex_map1,
             status_pair1,
-            &config_settings,
-            &config_device,
-            config_advanced_settings,
-            config_window,
+            &configs,
             newer_release_available1,
         ),
         default_font: Font::with_name("Sarasa Mono SC"),

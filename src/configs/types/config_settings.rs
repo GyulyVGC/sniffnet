@@ -15,3 +15,14 @@ pub struct ConfigSettings {
     // StyleType should be last in order to deserialize as a table properly
     pub style: StyleType,
 }
+
+impl ConfigSettings {
+    pub fn load() -> Self {
+        if let Ok(settings) = confy::load::<ConfigSettings>("sniffnet", "settings") {
+            settings
+        } else {
+            confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
+            ConfigSettings::default()
+        }
+    }
+}

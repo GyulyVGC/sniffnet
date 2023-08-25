@@ -7,6 +7,17 @@ pub struct ConfigWindow {
     pub size: (u32, u32),
 }
 
+impl ConfigWindow {
+    pub fn load() -> Self {
+        if let Ok(window) = confy::load::<ConfigWindow>("sniffnet", "window") {
+            window
+        } else {
+            confy::store("sniffnet", "window", ConfigWindow::default()).unwrap_or(());
+            ConfigWindow::default()
+        }
+    }
+}
+
 impl Default for ConfigWindow {
     fn default() -> Self {
         Self {
