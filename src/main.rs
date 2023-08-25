@@ -5,6 +5,8 @@
 use std::sync::{Arc, Condvar, Mutex};
 use std::{panic, process, thread};
 
+#[cfg(target_os = "linux")]
+use iced::window::PlatformSpecific;
 use iced::window::Position;
 use iced::{window, Application, Font, Settings};
 
@@ -129,6 +131,10 @@ pub fn main() -> iced::Result {
             decorations: true,
             transparent: false,
             icon: None,
+            #[cfg(target_os = "linux")]
+            platform_specific: PlatformSpecific {
+                application_id: "sniffnet".to_string(),
+            },
             ..Default::default()
         },
         flags: Sniffer::new(
