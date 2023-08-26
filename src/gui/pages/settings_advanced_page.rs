@@ -4,6 +4,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
+use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_3::{
     advanced_settings_translation, restore_defaults_translation, scale_factor_translation,
@@ -13,7 +14,7 @@ use crate::{ConfigAdvancedSettings, Language, Sniffer, StyleType};
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
-use iced::widget::{button, vertical_space, Column, Container, Row, Slider, Tooltip};
+use iced::widget::{button, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
@@ -36,12 +37,20 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))
-        .push(title_row(sniffer.language, font, sniffer.advanced_settings))
+        .push(title_row(
+            sniffer.language,
+            font,
+            &sniffer.advanced_settings,
+        ))
         .push(vertical_space(Fixed(5.0)))
         .push(scale_factor_slider(
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
+        ))
+        .push(mmdb_country_input(
+            font,
+            &sniffer.advanced_settings.mmdb_country,
         ));
 
     Container::new(content)
@@ -53,7 +62,7 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
 fn title_row(
     language: Language,
     font: Font,
-    advanced_settings: ConfigAdvancedSettings,
+    advanced_settings: &ConfigAdvancedSettings,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(advanced_settings_translation(language))
@@ -70,7 +79,7 @@ fn title_row(
                         .to_text()
                         .vertical_alignment(Vertical::Center)
                         .horizontal_alignment(Horizontal::Center)
-                        .size(15),
+                        .size(17),
                 )
                 .padding(2)
                 .height(Fixed(25.0))
@@ -114,4 +123,30 @@ fn scale_factor_slider(
     .height(Length::Fill)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
+}
+
+fn mmdb_country_input(
+    font: Font,
+    custom_path: &str,
+) -> Container<'static, Message, Renderer<StyleType>> {
+    let is_error = if custom_path.is_empty() {
+        false
+    } else {
+        maxminddb::Reader::open_readfile(custom_path.clone()).is_err()
+    };
+
+    let input = TextInput::new("-", custom_path)
+        .on_input(Message::CustomCountryDb)
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(200.0))
+        .style(if is_error {
+            TextInputType::Error
+        } else {
+            TextInputType::Standard
+        });
+
+    Container::new(input)
+        .padding(5)
+        .style(ContainerType::Neutral)
 }

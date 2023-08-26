@@ -3,9 +3,11 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ConfigAdvancedSettings {
     pub scale_factor: f64,
+    pub mmdb_country: String,
+    // pub mmdb_asn: String,
 }
 
 impl ConfigAdvancedSettings {
@@ -28,6 +30,9 @@ impl ConfigAdvancedSettings {
 
 impl Default for ConfigAdvancedSettings {
     fn default() -> Self {
-        ConfigAdvancedSettings { scale_factor: 1.0 }
+        ConfigAdvancedSettings {
+            scale_factor: 1.0,
+            mmdb_country: String::new(),
+        }
     }
 }

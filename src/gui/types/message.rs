@@ -97,4 +97,6 @@ pub enum Message {
     WindowMoved(i32, i32),
     /// The app window size has been changed
     WindowResized(u32, u32),
+    /// The country MMDB custom path has been updated
+    CustomCountryDb(String),
 }

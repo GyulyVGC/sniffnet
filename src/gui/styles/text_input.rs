@@ -14,6 +14,7 @@ pub enum TextInputType {
     #[default]
     Standard,
     Badge,
+    Error,
 }
 
 impl iced::widget::text_input::StyleSheet for StyleType {
@@ -24,28 +25,38 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => colors.buttons,
+                _ => colors.buttons,
             }),
             border_radius: 0.0.into(),
-            border_width: 1.0,
+            border_width: match style {
+                TextInputType::Error => 2.0,
+                _ => 1.0,
+            },
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 TextInputType::Standard => Color {
                     a: get_alpha_round_borders(*self),
                     ..colors.buttons
                 },
+                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
             },
             icon_color: colors.text_body,
         }
     }
 
-    fn focused(&self, _: &Self::Style) -> iced::widget::text_input::Appearance {
+    fn focused(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(*self);
         Appearance {
             background: Background::Color(colors.primary),
             border_radius: 0.0.into(),
-            border_width: 1.0,
-            border_color: colors.secondary,
+            border_width: match style {
+                TextInputType::Error => 2.0,
+                _ => 1.0,
+            },
+            border_color: match style {
+                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                _ => colors.secondary,
+            },
             icon_color: colors.text_body,
         }
     }
@@ -79,11 +90,17 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => colors.buttons,
+                _ => colors.buttons,
             }),
             border_radius: 0.0.into(),
-            border_width: 1.0,
-            border_color: colors.secondary,
+            border_width: match style {
+                TextInputType::Error => 2.0,
+                _ => 1.0,
+            },
+            border_color: match style {
+                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                _ => colors.secondary,
+            },
             icon_color: colors.text_body,
         }
     }

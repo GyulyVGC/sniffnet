@@ -29,9 +29,34 @@ use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
-pub fn get_country(address_to_lookup: &str, country_db_reader: &Reader<&[u8]>) -> Country {
-    let country_result: Result<geoip2::Country, MaxMindDBError> =
-        country_db_reader.lookup(address_to_lookup.parse().unwrap());
+pub fn mmdb_country_reader(
+    mmdb_country_path: String,
+) -> (Reader<&'static [u8]>, Option<Reader<Vec<u8>>>) {
+    let default_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
+    if mmdb_country_path.is_empty() {
+        (default_reader, None)
+    } else {
+        let custom_reader_result = maxminddb::Reader::open_readfile(mmdb_country_path);
+        if let Ok(custom_reader) = custom_reader_result {
+            return (default_reader, Some(custom_reader));
+        }
+        (default_reader, None)
+    }
+}
+
+pub fn get_country(
+    address_to_lookup: &str,
+    country_db_readers: &(Reader<&[u8]>, Option<Reader<Vec<u8>>>),
+) -> Country {
+    let (default_reader, custom_reader) = country_db_readers;
+    let country_result: Result<geoip2::Country, MaxMindDBError> = if custom_reader.is_some() {
+        custom_reader
+            .as_ref()
+            .unwrap()
+            .lookup(address_to_lookup.parse().unwrap())
+    } else {
+        default_reader.lookup(address_to_lookup.parse().unwrap())
+    };
     if let Ok(res1) = country_result {
         if let Some(res2) = res1.country {
             if let Some(res3) = res2.iso_code {

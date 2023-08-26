@@ -7,7 +7,7 @@ use std::thread;
 use etherparse::PacketHeaders;
 use pcap::{Active, Capture};
 
-use crate::countries::country_utils::COUNTRY_MMDB;
+use crate::countries::country_utils::mmdb_country_reader;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
@@ -26,10 +26,11 @@ pub fn parse_packets(
     mut cap: Capture<Active>,
     filters: Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
+    mmdb_country_path: String,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
-    let country_db_reader = Arc::new(maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap());
+    let country_db_readers = Arc::new(mmdb_country_reader(mmdb_country_path));
     let asn_db_reader = Arc::new(maxminddb::Reader::from_source(ASN_MMDB).unwrap());
 
     loop {
@@ -123,7 +124,7 @@ pub fn parse_packets(
                                     let key2 = key.clone();
                                     let info_traffic2 = info_traffic_mutex.clone();
                                     let device2 = device.clone();
-                                    let country_db_reader2 = country_db_reader.clone();
+                                    let country_db_readers_2 = country_db_readers.clone();
                                     let asn_db_reader2 = asn_db_reader.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
@@ -133,7 +134,7 @@ pub fn parse_packets(
                                                 &key2,
                                                 new_info.traffic_direction,
                                                 &device2,
-                                                &country_db_reader2,
+                                                &country_db_readers_2,
                                                 &asn_db_reader2,
                                             );
                                         })

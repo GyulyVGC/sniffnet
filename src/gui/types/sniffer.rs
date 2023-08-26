@@ -130,7 +130,7 @@ impl Sniffer {
             page_number: 1,
             selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
-            advanced_settings: configs.advanced_settings,
+            advanced_settings: configs.advanced_settings.clone(),
             window: configs.window,
         }
     }
@@ -250,6 +250,7 @@ impl Sniffer {
                 self.window.size = (scaled_width, scaled_height);
                 confy::store("sniffnet", "window", self.window).unwrap_or(());
             }
+            Message::CustomCountryDb(db) => self.advanced_settings.mmdb_country = db,
             _ => {}
         }
         Command::none()
@@ -357,6 +358,7 @@ impl Sniffer {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters;
+            let mmdb_country_path = self.advanced_settings.mmdb_country.clone();
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -367,6 +369,7 @@ impl Sniffer {
                         cap.unwrap(),
                         filters,
                         &info_traffic_mutex,
+                        mmdb_country_path,
                     );
                 })
                 .unwrap();
@@ -432,7 +435,12 @@ impl Sniffer {
                 color_gradient: self.color_gradient,
             };
             confy::store("sniffnet", "settings", settings).unwrap_or(());
-            confy::store("sniffnet", "advanced_settings", self.advanced_settings).unwrap_or(());
+            confy::store(
+                "sniffnet",
+                "advanced_settings",
+                self.advanced_settings.clone(),
+            )
+            .unwrap_or(());
         }
     }
 

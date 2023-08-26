@@ -67,7 +67,7 @@ impl Icon {
             Icon::Notification => "7",
             Icon::Overview => "d",
             Icon::PacketsThreshold => "e",
-            Icon::Restore => "E",
+            Icon::Restore => "k",
             Icon::Rocket => "S",
             Icon::Settings => "a",
             Icon::Sniffnet => "A",
