@@ -60,7 +60,7 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
 /// Finds the minimum y value to be displayed in chart
 fn get_min(deque: &VecDeque<(u32, i64)>) -> i64 {
     let mut min = 0;
-    for (_, x) in deque.iter() {
+    for (_, x) in deque {
         if *x < min {
             min = *x;
         }
@@ -71,7 +71,7 @@ fn get_min(deque: &VecDeque<(u32, i64)>) -> i64 {
 /// Finds the maximum y value to be displayed in chart
 fn get_max(deque: &VecDeque<(u32, i64)>) -> i64 {
     let mut max = 0;
-    for (_, x) in deque.iter() {
+    for (_, x) in deque {
         if *x > max {
             max = *x;
         }

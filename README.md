@@ -159,7 +159,7 @@ pkgin install sniffnet
 </details>
 <details>
 
-  <summary>on Tiny Core Linux x86_64 port (a.k.a. Core Pure 64)</summary>
+  <summary>on Tiny Core Linux</summary>
 
 You can install Sniffnet from the official repository with:
 
