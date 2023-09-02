@@ -17,4 +17,11 @@ impl Configs {
             window: ConfigWindow::load(),
         }
     }
+
+    pub fn store(self) {
+        self.settings.store();
+        self.device.store();
+        self.advanced_settings.store();
+        self.window.store();
+    }
 }

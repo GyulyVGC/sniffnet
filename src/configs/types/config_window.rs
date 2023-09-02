@@ -16,6 +16,10 @@ impl ConfigWindow {
             ConfigWindow::default()
         }
     }
+
+    pub fn store(self) {
+        confy::store("sniffnet", "window", self).unwrap_or(());
+    }
 }
 
 impl Default for ConfigWindow {

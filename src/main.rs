@@ -121,6 +121,6 @@ pub fn main() -> iced::Result {
         default_font: Font::with_name("Sarasa Mono SC"),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,
-        exit_on_close_request: true,
+        exit_on_close_request: false,
     })
 }

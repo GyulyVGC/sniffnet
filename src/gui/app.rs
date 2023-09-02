@@ -151,6 +151,7 @@ impl Application for Sniffer {
             Window(window::Event::Resized { width, height }) => {
                 Some(Message::WindowResized(width, height))
             }
+            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,
         });
         let hot_keys_subscription = subscription::events_with(|event, _| match event {

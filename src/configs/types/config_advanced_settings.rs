@@ -26,6 +26,10 @@ impl ConfigAdvancedSettings {
             ConfigAdvancedSettings::default()
         }
     }
+
+    pub fn store(self) {
+        confy::store("sniffnet", "advanced_settings", self).unwrap_or(());
+    }
 }
 
 impl Default for ConfigAdvancedSettings {

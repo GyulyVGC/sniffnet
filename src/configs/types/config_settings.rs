@@ -25,4 +25,8 @@ impl ConfigSettings {
             ConfigSettings::default()
         }
     }
+
+    pub fn store(self) {
+        confy::store("sniffnet", "settings", self).unwrap_or(());
+    }
 }

@@ -31,6 +31,10 @@ impl ConfigDevice {
         }
     }
 
+    pub fn store(self) {
+        confy::store("sniffnet", "device", self).unwrap_or(());
+    }
+
     pub fn to_my_device(&self) -> MyDevice {
         for device in Device::list().unwrap() {
             if device.name.eq(&self.device_name) {

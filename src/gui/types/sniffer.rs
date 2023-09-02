@@ -135,6 +135,22 @@ impl Sniffer {
         }
     }
 
+    pub fn get_configs(&self) -> Configs {
+        Configs {
+            settings: ConfigSettings {
+                style: self.style,
+                notifications: self.notifications,
+                language: self.language,
+                color_gradient: self.color_gradient,
+            },
+            device: ConfigDevice {
+                device_name: self.last_device_name_sniffed.clone(),
+            },
+            advanced_settings: self.advanced_settings.clone(),
+            window: self.window,
+        }
+    }
+
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
             Message::TickRun => return self.refresh_data(),
@@ -170,7 +186,7 @@ impl Sniffer {
                     self.settings_page = Some(self.last_opened_setting);
                 }
             }
-            Message::CloseSettings => self.close_and_save_settings(),
+            Message::CloseSettings => self.close_settings(),
             Message::ChangeRunningPage(running_page) => {
                 self.running_page = running_page;
                 if running_page.eq(&RunningPage::Notifications) {
@@ -240,7 +256,6 @@ impl Sniffer {
             Message::RestoreDefaults => self.advanced_settings = ConfigAdvancedSettings::default(),
             Message::WindowMoved(x, y) => {
                 self.window.position = (x, y);
-                confy::store("sniffnet", "window", self.window).unwrap_or(());
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
@@ -248,9 +263,12 @@ impl Sniffer {
                 let scaled_height =
                     (f64::from(height) * self.advanced_settings.scale_factor) as u32;
                 self.window.size = (scaled_width, scaled_height);
-                confy::store("sniffnet", "window", self.window).unwrap_or(());
             }
             Message::CustomCountryDb(db) => self.advanced_settings.mmdb_country = db,
+            Message::CloseRequested => {
+                self.get_configs().store();
+                return iced::window::close();
+            }
             _ => {}
         }
         Command::none()
@@ -286,14 +304,6 @@ impl Sniffer {
         // update ConfigDevice stored if different from last sniffed device
         if current_device_name.ne(&self.last_device_name_sniffed) {
             self.last_device_name_sniffed = current_device_name.clone();
-            confy::store(
-                "sniffnet",
-                "device",
-                ConfigDevice {
-                    device_name: current_device_name,
-                },
-            )
-            .unwrap_or(());
         }
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications)
@@ -424,23 +434,10 @@ impl Sniffer {
         drop(info_traffic);
     }
 
-    fn close_and_save_settings(&mut self) {
-        if self.settings_page.is_some() {
-            self.last_opened_setting = self.settings_page.unwrap();
+    fn close_settings(&mut self) {
+        if let Some(page) = self.settings_page {
+            self.last_opened_setting = page;
             self.settings_page = None;
-            let settings = ConfigSettings {
-                style: self.style,
-                notifications: self.notifications,
-                language: self.language,
-                color_gradient: self.color_gradient,
-            };
-            confy::store("sniffnet", "settings", settings).unwrap_or(());
-            confy::store(
-                "sniffnet",
-                "advanced_settings",
-                self.advanced_settings.clone(),
-            )
-            .unwrap_or(());
         }
     }
 
