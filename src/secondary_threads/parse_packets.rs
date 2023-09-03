@@ -15,7 +15,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
-use crate::utils::asn::ASN_MMDB;
+use crate::utils::asn::mmdb_asn_reader;
 use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
@@ -27,11 +27,12 @@ pub fn parse_packets(
     filters: Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     mmdb_country_path: String,
+    mmdb_asn_path: String,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let country_db_readers = Arc::new(mmdb_country_reader(mmdb_country_path));
-    let asn_db_reader = Arc::new(maxminddb::Reader::from_source(ASN_MMDB).unwrap());
+    let asn_db_readers = Arc::new(mmdb_asn_reader(mmdb_asn_path));
 
     loop {
         match cap.next_packet() {
@@ -125,7 +126,7 @@ pub fn parse_packets(
                                     let info_traffic2 = info_traffic_mutex.clone();
                                     let device2 = device.clone();
                                     let country_db_readers_2 = country_db_readers.clone();
-                                    let asn_db_reader2 = asn_db_reader.clone();
+                                    let asn_db_readers_2 = asn_db_readers.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
                                         .spawn(move || {
@@ -135,7 +136,7 @@ pub fn parse_packets(
                                                 new_info.traffic_direction,
                                                 &device2,
                                                 &country_db_readers_2,
-                                                &asn_db_reader2,
+                                                &asn_db_readers_2,
                                             );
                                         })
                                         .unwrap();

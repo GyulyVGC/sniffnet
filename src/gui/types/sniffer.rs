@@ -86,8 +86,6 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// Currently selected connection for inspection of its details
-    pub selected_connection: usize,
     /// Record the timestamp of last window focus
     pub last_focus_time: std::time::Instant,
     /// Advanced settings
@@ -128,7 +126,6 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
             advanced_settings: configs.advanced_settings.clone(),
             window: configs.window,
@@ -265,6 +262,7 @@ impl Sniffer {
                 self.window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => self.advanced_settings.mmdb_country = db,
+            Message::CustomAsnDb(db) => self.advanced_settings.mmdb_asn = db,
             Message::CloseRequested => {
                 self.get_configs().store();
                 return iced::window::close();
@@ -369,6 +367,7 @@ impl Sniffer {
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters;
             let mmdb_country_path = self.advanced_settings.mmdb_country.clone();
+            let mmdb_asn_path = self.advanced_settings.mmdb_asn.clone();
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -380,6 +379,7 @@ impl Sniffer {
                         filters,
                         &info_traffic_mutex,
                         mmdb_country_path,
+                        mmdb_asn_path,
                     );
                 })
                 .unwrap();

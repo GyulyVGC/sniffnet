@@ -248,7 +248,7 @@ pub fn reverse_dns_lookup(
     traffic_direction: TrafficDirection,
     my_device: &MyDevice,
     country_db_readers: &(Reader<&[u8]>, Option<Reader<Vec<u8>>>),
-    asn_db_reader: &Reader<&[u8]>,
+    asn_db_readers: &(Reader<&[u8]>, Option<Reader<Vec<u8>>>),
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
@@ -264,7 +264,7 @@ pub fn reverse_dns_lookup(
     );
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
     let country = get_country(&address_to_lookup, country_db_readers);
-    let asn = asn(&address_to_lookup, asn_db_reader);
+    let asn = asn(&address_to_lookup, asn_db_readers);
     let r_dns = if let Ok(result) = lookup_result {
         if result.is_empty() {
             address_to_lookup.clone()

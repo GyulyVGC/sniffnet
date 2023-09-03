@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct ConfigAdvancedSettings {
     pub scale_factor: f64,
     pub mmdb_country: String,
-    // pub mmdb_asn: String,
+    pub mmdb_asn: String,
 }
 
 impl ConfigAdvancedSettings {
@@ -37,6 +37,7 @@ impl Default for ConfigAdvancedSettings {
         ConfigAdvancedSettings {
             scale_factor: 1.0,
             mmdb_country: String::new(),
+            mmdb_asn: String::new(),
         }
     }
 }

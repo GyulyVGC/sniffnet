@@ -6,11 +6,13 @@ use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
+use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    advanced_settings_translation, restore_defaults_translation, scale_factor_translation,
+    advanced_settings_translation, info_mmdb_paths_translation, mmdb_paths_translation,
+    params_not_editable_translation, restore_defaults_translation, scale_factor_translation,
 };
 use crate::utils::types::icon::Icon;
-use crate::{ConfigAdvancedSettings, Language, Sniffer, StyleType};
+use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
@@ -22,7 +24,9 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
     let font = get_font(sniffer.style);
     let font_headers = get_font_headers(sniffer.style);
 
-    let content = Column::new()
+    let is_editable = sniffer.status_pair.0.lock().unwrap().eq(&Status::Init);
+
+    let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
@@ -47,11 +51,23 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
-        ))
-        .push(mmdb_country_input(
-            font,
-            &sniffer.advanced_settings.mmdb_country,
         ));
+
+    if !is_editable {
+        content = content.push(
+            Container::new(Text::new(params_not_editable_translation(sniffer.language)).font(font))
+                .padding(10.0)
+                .style(ContainerType::Badge),
+        );
+    }
+
+    content = content.push(mmdb_settings(
+        is_editable,
+        sniffer.language,
+        font,
+        &sniffer.advanced_settings.mmdb_country,
+        &sniffer.advanced_settings.mmdb_asn,
+    ));
 
     Container::new(content)
         .height(Fixed(400.0))
@@ -66,7 +82,7 @@ fn title_row(
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(advanced_settings_translation(language))
-            .style(TextType::Subtitle)
+            .style(TextType::Title)
             .font(font)
             .size(FONT_SIZE_SUBTITLE),
     );
@@ -120,23 +136,81 @@ fn scale_factor_slider(
     )
     .padding(5)
     .width(Length::FillPortion(1))
-    .height(Length::Fill)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
 
-fn mmdb_country_input(
+fn mmdb_settings(
+    is_editable: bool,
+    language: Language,
     font: Font,
+    country_path: &str,
+    asn_path: &str,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    Column::new()
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(
+            Row::new()
+                .spacing(10)
+                .push(
+                    Text::new(mmdb_paths_translation(language))
+                        .font(font)
+                        .style(TextType::Subtitle),
+                )
+                .push(
+                    Tooltip::new(
+                        button(
+                            Text::new("i")
+                                .font(font)
+                                .vertical_alignment(Vertical::Center)
+                                .horizontal_alignment(Horizontal::Center)
+                                .size(15),
+                        )
+                        .padding(2)
+                        .height(Fixed(20.0))
+                        .width(Fixed(20.0)),
+                        info_mmdb_paths_translation(language),
+                        Position::Top,
+                    )
+                    .font(font)
+                    .style(ContainerType::Tooltip),
+                ),
+        )
+        .push(
+            Row::new()
+                .spacing(20)
+                .push(mmdb_input(
+                    is_editable,
+                    font,
+                    Message::CustomCountryDb,
+                    country_path,
+                    country_translation(language),
+                ))
+                .push(mmdb_input(
+                    is_editable,
+                    font,
+                    Message::CustomAsnDb,
+                    asn_path,
+                    "ASN",
+                )),
+        )
+}
+
+fn mmdb_input(
+    is_editable: bool,
+    font: Font,
+    message: fn(String) -> Message,
     custom_path: &str,
-) -> Container<'static, Message, Renderer<StyleType>> {
+    caption: &str,
+) -> Row<'static, Message, Renderer<StyleType>> {
     let is_error = if custom_path.is_empty() {
         false
     } else {
         maxminddb::Reader::open_readfile(custom_path.clone()).is_err()
     };
 
-    let input = TextInput::new("-", custom_path)
-        .on_input(Message::CustomCountryDb)
+    let mut input = TextInput::new("-", custom_path)
         .padding([0, 5])
         .font(font)
         .width(Length::Fixed(200.0))
@@ -146,7 +220,12 @@ fn mmdb_country_input(
             TextInputType::Standard
         });
 
-    Container::new(input)
-        .padding(5)
-        .style(ContainerType::Neutral)
+    if is_editable {
+        input = input.on_input(message);
+    }
+
+    Row::new()
+        .spacing(5)
+        .push(Text::new(format!("{caption}:")).font(font))
+        .push(input)
 }

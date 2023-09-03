@@ -99,6 +99,8 @@ pub enum Message {
     WindowResized(u32, u32),
     /// The country MMDB custom path has been updated
     CustomCountryDb(String),
+    /// The ASN MMDB custom path has been updated
+    CustomAsnDb(String),
     /// Save the configurations of the app and quit
     CloseRequested,
 }
