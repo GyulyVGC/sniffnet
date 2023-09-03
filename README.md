@@ -159,7 +159,7 @@ pkgin install sniffnet
 </details>
 <details>
 
-  <summary>on Tiny Core Linux x86_64 port (a.k.a. Core Pure 64)</summary>
+  <summary>on Tiny Core Linux</summary>
 
 You can install Sniffnet from the official repository with:
 
@@ -389,10 +389,13 @@ Check the [required dependencies](#required-dependencies) section for instructio
 
 In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
 the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced) 
-may cause problems (some icons are completely black, or the interface may glitch). <br>
-In these cases, you can try building the application from the [`tiny-skia-renderer`](https://github.com/GyulyVGC/sniffnet/tree/tiny-skia-renderer) 
-branch, which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment (remember to build it in release mode, since it's less performant than `wgpu`). <br>
-If you are unable to build it yourself, contact me, and I'll provide you a copy.
+may cause problems (country icons are completely black, or the interface glitches). <br>
+In these cases you can download an alternative version of the application, 
+which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
+[Windows](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640695) |
+[macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |
+[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640693) |
+[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640696)
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
