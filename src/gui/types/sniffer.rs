@@ -2,6 +2,7 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
+use std::path::PathBuf;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -29,7 +30,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::get_report_path;
+use crate::utils::formatted_strings::{get_default_report_directory, push_pcap_file_name};
 use crate::utils::types::web_page::WebPage;
 use crate::{
     ConfigAdvancedSettings, ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData,
@@ -263,6 +264,10 @@ impl Sniffer {
             }
             Message::CustomCountryDb(db) => self.advanced_settings.mmdb_country = db,
             Message::CustomAsnDb(db) => self.advanced_settings.mmdb_asn = db,
+            Message::CustomReportDirectory(directory) => {
+                let path = push_pcap_file_name(PathBuf::from(directory));
+                self.advanced_settings.output_path = path;
+            }
             Message::CloseRequested => {
                 self.get_configs().store();
                 return iced::window::close();
@@ -314,7 +319,7 @@ impl Sniffer {
 
     fn open_report_file(&mut self) {
         if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
-            let report_path = get_report_path();
+            let report_path = get_default_report_directory();
             #[cfg(target_os = "windows")]
             std::process::Command::new("explorer")
                 .arg(report_path)

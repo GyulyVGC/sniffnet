@@ -6,6 +6,7 @@ use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
 };
 use iced::{alignment, Alignment, Font, Length, Renderer};
+use std::path::Path;
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -204,8 +205,12 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
                 .style(ContainerType::BorderedRound),
         )
         .push(
-            Container::new(get_button_open_report(sniffer.language, font))
-                .width(Length::FillPortion(1)),
+            Container::new(get_button_open_report(
+                &sniffer.advanced_settings.output_path,
+                sniffer.language,
+                font,
+            ))
+            .width(Length::FillPortion(1)),
         )
 }
 
@@ -429,6 +434,7 @@ fn get_change_page_row(
 }
 
 fn get_button_open_report(
+    output_path: &Path,
     language: Language,
     font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
@@ -444,10 +450,14 @@ fn get_button_open_report(
     .width(Length::Fixed(75.0))
     .on_press(Message::OpenReport);
 
-    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
-        .gap(5)
-        .font(font)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        get_open_report_tooltip(output_path, language),
+        Position::Top,
+    )
+    .gap(5)
+    .font(font)
+    .style(ContainerType::Tooltip)
 }
 
 fn button_clear_filter(

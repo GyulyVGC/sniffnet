@@ -1,13 +1,16 @@
 //! Module defining the `ConfigAdvancedSettings` struct, which allows to save and reload
 //! the application advanced settings.
 
+use crate::utils::formatted_strings::get_default_report_directory;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ConfigAdvancedSettings {
     pub scale_factor: f64,
     pub mmdb_country: String,
     pub mmdb_asn: String,
+    pub output_path: PathBuf,
 }
 
 impl ConfigAdvancedSettings {
@@ -38,6 +41,7 @@ impl Default for ConfigAdvancedSettings {
             scale_factor: 1.0,
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
+            output_path: get_default_report_directory(),
         }
     }
 }

@@ -30,7 +30,6 @@ use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::trans_protocol::TransProtocol;
 use report::types::report_sort_type::ReportSortType;
-use secondary_threads::write_report_file::sleep_and_write_report_loop;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
@@ -55,13 +54,13 @@ pub fn main() -> iced::Result {
     parse_cli_args();
 
     let current_capture_id1 = Arc::new(Mutex::new(0));
-    let current_capture_id2 = current_capture_id1.clone();
+    // let current_capture_id2 = current_capture_id1.clone();
 
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
-    let mutex_map2 = mutex_map1.clone();
+    // let mutex_map2 = mutex_map1.clone();
 
     let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
-    let status_pair2 = status_pair1.clone();
+    // let status_pair2 = status_pair1.clone();
 
     let newer_release_available1 = Arc::new(Mutex::new(Err(String::new())));
     let newer_release_available2 = newer_release_available1.clone();
@@ -83,12 +82,12 @@ pub fn main() -> iced::Result {
         })
         .unwrap();
 
-    thread::Builder::new()
-        .name("thread_write_report".to_string())
-        .spawn(move || {
-            sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
-        })
-        .unwrap();
+    // thread::Builder::new()
+    //     .name("thread_write_report".to_string())
+    //     .spawn(move || {
+    //         sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
+    //     })
+    //     .unwrap();
 
     print_cli_welcome_message();
 

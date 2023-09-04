@@ -8,17 +8,22 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    advanced_settings_translation, info_mmdb_paths_translation, mmdb_paths_translation,
-    params_not_editable_translation, restore_defaults_translation, scale_factor_translation,
+    advanced_settings_translation, file_path_translation, info_mmdb_paths_translation,
+    mmdb_paths_translation, params_not_editable_translation, restore_defaults_translation,
+    scale_factor_translation,
 };
+use crate::utils::formatted_strings::get_default_report_directory;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
-use iced::widget::{button, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip};
+use iced::widget::{
+    button, horizontal_space, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip,
+};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
+use std::path::PathBuf;
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
@@ -61,13 +66,20 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         );
     }
 
-    content = content.push(mmdb_settings(
-        is_editable,
-        sniffer.language,
-        font,
-        &sniffer.advanced_settings.mmdb_country,
-        &sniffer.advanced_settings.mmdb_asn,
-    ));
+    content = content
+        .push(report_path_setting(
+            is_editable,
+            sniffer.language,
+            font,
+            sniffer.advanced_settings.output_path.clone(),
+        ))
+        .push(mmdb_settings(
+            is_editable,
+            sniffer.language,
+            font,
+            &sniffer.advanced_settings.mmdb_country,
+            &sniffer.advanced_settings.mmdb_asn,
+        ));
 
     Container::new(content)
         .height(Fixed(400.0))
@@ -138,6 +150,42 @@ fn scale_factor_slider(
     .width(Length::FillPortion(1))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
+}
+
+fn report_path_setting(
+    is_editable: bool,
+    language: Language,
+    font: Font,
+    mut path: PathBuf,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    let default_directory = &get_default_report_directory().to_string_lossy().to_string();
+    path.pop();
+    let custom_directory = &path.to_string_lossy().to_string();
+    let is_error = if custom_directory.is_empty() {
+        false
+    } else {
+        true
+    };
+
+    let mut input = TextInput::new(default_directory, custom_directory)
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(200.0))
+        .style(if is_error {
+            TextInputType::Error
+        } else {
+            TextInputType::Standard
+        });
+
+    if is_editable {
+        input = input.on_input(Message::CustomReportDirectory);
+    }
+
+    Row::new()
+        .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
+        .push(horizontal_space(5))
+        .push(input)
+        .push(Text::new("/sniffnet.pcap").font(font))
 }
 
 fn mmdb_settings(

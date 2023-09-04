@@ -58,3 +58,11 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         _ => "The following parameters can't be modified during the analysis",
     }
 }
+
+pub fn file_path_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "File path",
+        Language::IT => "Percorso del file",
+        _ => "File path",
+    }
+}
