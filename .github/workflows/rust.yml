@@ -22,7 +22,7 @@ jobs:
     name: MacOS (fmt, build, clippy, test)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -51,7 +51,7 @@ jobs:
     name: Linux (fmt, build, clippy, test)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -84,7 +84,7 @@ jobs:
     name: Windows (fmt, build, clippy, test)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
