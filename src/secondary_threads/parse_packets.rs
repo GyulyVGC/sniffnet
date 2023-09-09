@@ -31,8 +31,8 @@ pub fn parse_packets(
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
-    let country_db_readers = Arc::new(mmdb_country_reader(mmdb_country_path));
-    let asn_db_readers = Arc::new(mmdb_asn_reader(mmdb_asn_path));
+    let country_db_reader = Arc::new(mmdb_country_reader(mmdb_country_path));
+    let asn_db_reader = Arc::new(mmdb_asn_reader(mmdb_asn_path));
 
     loop {
         match cap.next_packet() {
@@ -125,8 +125,8 @@ pub fn parse_packets(
                                     let key2 = key.clone();
                                     let info_traffic2 = info_traffic_mutex.clone();
                                     let device2 = device.clone();
-                                    let country_db_readers_2 = country_db_readers.clone();
-                                    let asn_db_readers_2 = asn_db_readers.clone();
+                                    let country_db_reader_2 = country_db_reader.clone();
+                                    let asn_db_reader_2 = asn_db_reader.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
                                         .spawn(move || {
@@ -135,8 +135,8 @@ pub fn parse_packets(
                                                 &key2,
                                                 new_info.traffic_direction,
                                                 &device2,
-                                                &country_db_readers_2,
-                                                &asn_db_readers_2,
+                                                &country_db_reader_2,
+                                                &asn_db_reader_2,
                                             );
                                         })
                                         .unwrap();
