@@ -9,8 +9,8 @@ pub enum MmdbReader {
     Custom(Reader<Vec<u8>>),
 }
 
-pub fn mmdb_asn_reader(mmdb_asn_path: String) -> MmdbReader {
-    let default_reader = maxminddb::Reader::from_source(ASN_MMDB).unwrap();
+pub fn mmdb_reader(mmdb_asn_path: &String, default_mmdb: &'static [u8]) -> MmdbReader {
+    let default_reader = maxminddb::Reader::from_source(default_mmdb).unwrap();
     if mmdb_asn_path.is_empty() {
         MmdbReader::Default(default_reader)
     } else {

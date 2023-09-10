@@ -12,6 +12,7 @@ use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::ConfigWindow;
+use crate::countries::country_utils::COUNTRY_MMDB;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -30,6 +31,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
+use crate::utils::asn::{mmdb_reader, MmdbReader, ASN_MMDB};
 use crate::utils::formatted_strings::{get_default_report_directory, push_pcap_file_name};
 use crate::utils::types::web_page::WebPage;
 use crate::{
@@ -93,6 +95,10 @@ pub struct Sniffer {
     pub advanced_settings: ConfigAdvancedSettings,
     /// Position and size of the app window
     pub window: ConfigWindow,
+    /// MMDB reader for countries
+    pub country_mmdb_reader: Arc<MmdbReader>,
+    /// MMDB reader for ASN
+    pub asn_mmdb_reader: Arc<MmdbReader>,
 }
 
 impl Sniffer {
@@ -130,6 +136,11 @@ impl Sniffer {
             last_focus_time: std::time::Instant::now(),
             advanced_settings: configs.advanced_settings.clone(),
             window: configs.window,
+            country_mmdb_reader: Arc::new(mmdb_reader(
+                &configs.advanced_settings.mmdb_country,
+                COUNTRY_MMDB,
+            )),
+            asn_mmdb_reader: Arc::new(mmdb_reader(&configs.advanced_settings.mmdb_asn, ASN_MMDB)),
         }
     }
 
@@ -262,8 +273,14 @@ impl Sniffer {
                     (f64::from(height) * self.advanced_settings.scale_factor) as u32;
                 self.window.size = (scaled_width, scaled_height);
             }
-            Message::CustomCountryDb(db) => self.advanced_settings.mmdb_country = db,
-            Message::CustomAsnDb(db) => self.advanced_settings.mmdb_asn = db,
+            Message::CustomCountryDb(db) => {
+                self.advanced_settings.mmdb_country = db.clone();
+                self.country_mmdb_reader = Arc::new(mmdb_reader(&db, COUNTRY_MMDB));
+            }
+            Message::CustomAsnDb(db) => {
+                self.advanced_settings.mmdb_asn = db.clone();
+                self.asn_mmdb_reader = Arc::new(mmdb_reader(&db, ASN_MMDB));
+            }
             Message::CustomReportDirectory(directory) => {
                 let path = push_pcap_file_name(PathBuf::from(directory));
                 self.advanced_settings.output_path = path;
@@ -371,8 +388,8 @@ impl Sniffer {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters;
-            let mmdb_country_path = self.advanced_settings.mmdb_country.clone();
-            let mmdb_asn_path = self.advanced_settings.mmdb_asn.clone();
+            let country_mmdb_reader = self.country_mmdb_reader.clone();
+            let asn_mmdb_reader = self.country_mmdb_reader.clone();
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -383,8 +400,8 @@ impl Sniffer {
                         cap.unwrap(),
                         filters,
                         &info_traffic_mutex,
-                        mmdb_country_path,
-                        mmdb_asn_path,
+                        &country_mmdb_reader,
+                        &asn_mmdb_reader,
                     );
                 })
                 .unwrap();

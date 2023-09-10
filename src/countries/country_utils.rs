@@ -30,19 +30,6 @@ use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
-pub fn mmdb_country_reader(mmdb_country_path: String) -> MmdbReader {
-    let default_reader = maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap();
-    if mmdb_country_path.is_empty() {
-        MmdbReader::Default(default_reader)
-    } else {
-        let custom_reader_result = maxminddb::Reader::open_readfile(mmdb_country_path);
-        if let Ok(custom_reader) = custom_reader_result {
-            return MmdbReader::Custom(custom_reader);
-        }
-        MmdbReader::Default(default_reader)
-    }
-}
-
 pub fn get_country(address_to_lookup: &str, country_db_reader: &MmdbReader) -> Country {
     let country_result: Result<geoip2::Country, MaxMindDBError> = match country_db_reader {
         MmdbReader::Default(reader) => reader.lookup(address_to_lookup.parse().unwrap()),

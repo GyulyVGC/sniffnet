@@ -12,6 +12,7 @@ use crate::translations::translations_3::{
     mmdb_paths_translation, params_not_editable_translation, restore_defaults_translation,
     scale_factor_translation,
 };
+use crate::utils::asn::MmdbReader;
 use crate::utils::formatted_strings::get_default_report_directory;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
@@ -24,6 +25,7 @@ use iced::widget::{
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 use std::path::PathBuf;
+use std::sync::Arc;
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
@@ -79,6 +81,8 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             font,
             &sniffer.advanced_settings.mmdb_country,
             &sniffer.advanced_settings.mmdb_asn,
+            &sniffer.country_mmdb_reader,
+            &sniffer.asn_mmdb_reader,
         ));
 
     Container::new(content)
@@ -194,6 +198,8 @@ fn mmdb_settings(
     font: Font,
     country_path: &str,
     asn_path: &str,
+    country_reader: &Arc<MmdbReader>,
+    asn_reader: &Arc<MmdbReader>,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .spacing(5)
@@ -233,6 +239,7 @@ fn mmdb_settings(
                     font,
                     Message::CustomCountryDb,
                     country_path,
+                    country_reader,
                     country_translation(language),
                 ))
                 .push(mmdb_input(
@@ -240,6 +247,7 @@ fn mmdb_settings(
                     font,
                     Message::CustomAsnDb,
                     asn_path,
+                    asn_reader,
                     "ASN",
                 )),
         )
@@ -250,12 +258,16 @@ fn mmdb_input(
     font: Font,
     message: fn(String) -> Message,
     custom_path: &str,
+    mmdb_reader: &Arc<MmdbReader>,
     caption: &str,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let is_error = if custom_path.is_empty() {
         false
     } else {
-        maxminddb::Reader::open_readfile(custom_path.clone()).is_err()
+        match **mmdb_reader {
+            MmdbReader::Default(_) => true,
+            MmdbReader::Custom(_) => false,
+        }
     };
 
     let mut input = TextInput::new("-", custom_path)
