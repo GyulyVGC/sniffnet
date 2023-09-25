@@ -1,117 +1,97 @@
 //! Tab buttons to be used in the various pages just under the header
-use std::sync::Arc;
 
 use iced::widget::{button, horizontal_space, Button, Row, Text};
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 
 pub fn get_settings_tabs(
-    labels: [SettingsPage; 3],
-    icons: &[&str],
-    actions: &[Message],
     active: SettingsPage,
-    style: &Arc<StyleType>,
+    font: Font,
     language: Language,
-) -> Row<'static, Message> {
-    let font = get_font(style);
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center);
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
-    for (i, label) in labels.iter().enumerate() {
-        let active = label.eq(&active);
-        tabs = tabs.push(new_tab(
-            (*label).get_tab_label(language).to_string(),
-            (*icons.get(i).unwrap()).to_string(),
-            actions.get(i).unwrap().clone(),
-            active,
-            style,
-            font,
-            None,
-        ));
+    for page in &SettingsPage::ALL {
+        let active = page.eq(&active);
+        tabs = tabs.push(new_settings_tab(*page, active, language, font));
     }
     tabs
 }
 
 pub fn get_pages_tabs(
-    labels: [RunningPage; 3],
-    icons: &[&str],
-    actions: &[Message],
     active: RunningPage,
-    style: &Arc<StyleType>,
+    font: Font,
+    font_headers: Font,
     language: Language,
     unread_notifications: usize,
-) -> Row<'static, Message> {
-    let font = get_font(style);
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center);
+        .align_items(Alignment::Start)
+        .spacing(2)
+        .padding([0, 3]);
 
-    for (i, label) in labels.iter().enumerate() {
-        let active = label.eq(&active);
-        let unread = if label.eq(&RunningPage::Notifications) {
+    for page in &RunningPage::ALL {
+        let active = page.eq(&active);
+        let unread = if page.eq(&RunningPage::Notifications) {
             Some(unread_notifications)
         } else {
             None
         };
-        tabs = tabs.push(new_tab(
-            (*label).get_tab_label(language).to_string(),
-            (*icons.get(i).unwrap()).to_string(),
-            actions.get(i).unwrap().clone(),
+        tabs = tabs.push(new_page_tab(
+            *page,
             active,
-            style,
+            language,
             font,
+            font_headers,
             unread,
         ));
     }
     tabs
 }
 
-fn new_tab(
-    label: String,
-    icon: String,
-    action: Message,
+fn new_page_tab(
+    page: RunningPage,
     active: bool,
-    style: &Arc<StyleType>,
+    language: Language,
     font: Font,
+    font_headers: Font,
     unread: Option<usize>,
-) -> Button<'static, Message> {
+) -> Button<'static, Message, Renderer<StyleType>> {
     let mut content = Row::new()
         .align_items(Alignment::Center)
         .push(horizontal_space(Length::FillPortion(1)))
         .push(
-            Text::new(icon)
-                .font(ICONS)
+            page.icon()
                 .size(15)
-                .style(StyleTuple(
-                    Arc::clone(style),
-                    if active {
-                        ElementType::Title
-                    } else {
-                        ElementType::Standard
-                    },
-                ))
+                .style(if active {
+                    TextType::Title
+                } else {
+                    TextType::Standard
+                })
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
+        .push(horizontal_space(10))
         .push(
-            Text::new(label)
+            Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(StyleTuple(
-                    Arc::clone(style),
-                    if active {
-                        ElementType::Title
-                    } else {
-                        ElementType::Standard
-                    },
-                ))
+                .style(if active {
+                    TextType::Title
+                } else {
+                    TextType::Standard
+                })
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         );
@@ -120,14 +100,14 @@ fn new_tab(
         if num > 0 {
             let notifications_badge = button(
                 Text::new(num.to_string())
-                    .font(get_font_headers(style))
-                    .size(19)
+                    .font(font_headers)
+                    .size(14)
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center),
             )
-            .padding(4)
+            .padding([2, 4, 0, 4])
             .height(Length::Fixed(20.0))
-            .style(StyleTuple(Arc::clone(style), ElementType::Badge).into());
+            .style(ButtonType::Badge);
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
@@ -137,18 +117,65 @@ fn new_tab(
     content = content.push(horizontal_space(Length::FillPortion(1)));
 
     button(content)
-        .height(Length::Fixed(35.0))
+        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .padding(0)
         .width(Length::FillPortion(1))
-        .style(
-            StyleTuple(
-                Arc::clone(style),
-                if active {
-                    ElementType::TabActive
+        .style(if active {
+            ButtonType::TabActive
+        } else {
+            ButtonType::TabInactive
+        })
+        .on_press(page.action())
+}
+
+fn new_settings_tab(
+    page: SettingsPage,
+    active: bool,
+    language: Language,
+    font: Font,
+) -> Button<'static, Message, Renderer<StyleType>> {
+    let mut content = Row::new()
+        .align_items(Alignment::Center)
+        .push(horizontal_space(Length::FillPortion(1)))
+        .push(
+            page.icon()
+                .size(15)
+                .style(if active {
+                    TextType::Title
                 } else {
-                    ElementType::TabInactive
-                },
-            )
-            .into(),
-        )
-        .on_press(action)
+                    TextType::Standard
+                })
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        );
+    if page.ne(&SettingsPage::Advanced) {
+        content = content.push(horizontal_space(10)).push(
+            Text::new(page.get_tab_label(language).to_string())
+                .font(font)
+                .size(FONT_SIZE_SUBTITLE)
+                .style(if active {
+                    TextType::Title
+                } else {
+                    TextType::Standard
+                })
+                .horizontal_alignment(alignment::Horizontal::Center)
+                .vertical_alignment(alignment::Vertical::Center),
+        );
+    }
+    content = content.push(horizontal_space(Length::FillPortion(1)));
+
+    button(content)
+        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .padding(0)
+        .width(if page.eq(&SettingsPage::Advanced) {
+            Length::Fixed(45.0)
+        } else {
+            Length::FillPortion(1)
+        })
+        .style(if active {
+            ButtonType::TabActive
+        } else {
+            ButtonType::TabInactive
+        })
+        .on_press(page.action())
 }

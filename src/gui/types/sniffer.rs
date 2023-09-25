@@ -2,19 +2,21 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
+use std::path::PathBuf;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use iced::window;
-use iced_native::Command;
+use iced::{window, Command};
 use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
+use crate::configs::types::config_window::ConfigWindow;
+use crate::countries::country_utils::COUNTRY_MMDB;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::types::custom_style::CustomStyle;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
 use crate::networking::manage_packets::get_capture_result;
@@ -29,9 +31,13 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::get_report_path;
+use crate::utils::asn::{mmdb_reader, MmdbReader, ASN_MMDB};
+use crate::utils::formatted_strings::{get_default_report_directory, push_pcap_file_name};
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigDevice, ConfigSettings, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{
+    ConfigAdvancedSettings, ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData,
+    StyleType, TrafficChart,
+};
 
 /// Struct on which the gui is based
 ///
@@ -55,10 +61,10 @@ pub struct Sniffer {
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
-    /// Application style (only values Day and Night are possible for this field)
-    pub style: Arc<StyleType>,
-    /// Receiver for custom style path input on the settings page
-    pub style_path_update: Option<String>,
+    /// Application style
+    pub style: StyleType,
+    /// Wether gradients are enabled by the user
+    pub color_gradient: GradientType,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -83,10 +89,16 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// Currently selected connection for inspection of its details
-    pub selected_connection: usize,
     /// Record the timestamp of last window focus
     pub last_focus_time: std::time::Instant,
+    /// Advanced settings
+    pub advanced_settings: ConfigAdvancedSettings,
+    /// Position and size of the app window
+    pub window: ConfigWindow,
+    /// MMDB reader for countries
+    pub country_mmdb_reader: Arc<MmdbReader>,
+    /// MMDB reader for ASN
+    pub asn_mmdb_reader: Arc<MmdbReader>,
 }
 
 impl Sniffer {
@@ -94,8 +106,7 @@ impl Sniffer {
         current_capture_id: Arc<Mutex<u16>>,
         info_traffic: Arc<Mutex<InfoTraffic>>,
         status_pair: Arc<(Mutex<Status>, Condvar)>,
-        config_settings: &ConfigSettings,
-        config_device: &ConfigDevice,
+        configs: &Configs,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
@@ -104,32 +115,53 @@ impl Sniffer {
             status_pair,
             newer_release_available,
             runtime_data: RunTimeData::new(),
-            device: config_device.to_my_device(),
-            last_device_name_sniffed: config_device.device_name.clone(),
+            device: configs.device.to_my_device(),
+            last_device_name_sniffed: configs.device.device_name.clone(),
             filters: Filters::default(),
             pcap_error: None,
-            style: Arc::clone(&config_settings.style),
-            style_path_update: None,
+            style: configs.settings.style,
+            color_gradient: configs.settings.color_gradient,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(&config_settings.style, config_settings.language),
+            traffic_chart: TrafficChart::new(configs.settings.style, configs.settings.language),
             report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
-            notifications: config_settings.notifications,
+            notifications: configs.settings.notifications,
             running_page: RunningPage::Overview,
-            language: config_settings.language,
+            language: configs.settings.language,
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            selected_connection: 0,
             last_focus_time: std::time::Instant::now(),
+            advanced_settings: configs.advanced_settings.clone(),
+            window: configs.window,
+            country_mmdb_reader: Arc::new(mmdb_reader(
+                &configs.advanced_settings.mmdb_country,
+                COUNTRY_MMDB,
+            )),
+            asn_mmdb_reader: Arc::new(mmdb_reader(&configs.advanced_settings.mmdb_asn, ASN_MMDB)),
+        }
+    }
+
+    pub fn get_configs(&self) -> Configs {
+        Configs {
+            settings: ConfigSettings {
+                style: self.style,
+                notifications: self.notifications,
+                language: self.language,
+                color_gradient: self.color_gradient,
+            },
+            device: ConfigDevice {
+                device_name: self.last_device_name_sniffed.clone(),
+            },
+            advanced_settings: self.advanced_settings.clone(),
+            window: self.window,
         }
     }
 
     pub fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::TickInit => {}
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version) => self.filters.ip = version,
@@ -143,29 +175,7 @@ impl Sniffer {
             Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.style = style;
-                self.traffic_chart.change_colors(&self.style);
-            }
-            Message::UpdateStylePath(value) => {
-                if let Some(path) = &mut self.style_path_update {
-                    *path = value
-                } else {
-                    self.style_path_update.replace(value);
-                }
-            }
-            Message::PasteCustomStyle(path) => {
-                self.style_path_update.replace(path);
-                return self.update(Message::LoadCustomStyle);
-            }
-            Message::LoadCustomStyle => {
-                // Purposefully ignoring the error because this bit of code will be called on on_input repeatedly.
-                // This entire bit of code should be much cleaner once we use file dialogs
-                // dbg!(&self.style_path_update);
-                let style =
-                    CustomStyle::from_file(self.style_path_update.as_deref().unwrap_or_default())
-                        .map(|style| Arc::new(StyleType::Custom(style)));
-                if let Ok(style) = style {
-                    return self.update(Message::Style(style));
-                }
+                self.traffic_chart.change_style(self.style);
             }
             Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
@@ -185,7 +195,7 @@ impl Sniffer {
                     self.settings_page = Some(self.last_opened_setting);
                 }
             }
-            Message::CloseSettings => self.close_and_save_settings(),
+            Message::CloseSettings => self.close_settings(),
             Message::ChangeRunningPage(running_page) => {
                 self.running_page = running_page;
                 if running_page.eq(&RunningPage::Notifications) {
@@ -248,6 +258,38 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
+            Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
+            Message::ChangeScaleFactor(multiplier) => {
+                self.advanced_settings.scale_factor = multiplier;
+            }
+            Message::RestoreDefaults => self.advanced_settings = ConfigAdvancedSettings::default(),
+            Message::WindowMoved(x, y) => {
+                self.window.position = (x, y);
+            }
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Message::WindowResized(width, height) => {
+                let scaled_width = (f64::from(width) * self.advanced_settings.scale_factor) as u32;
+                let scaled_height =
+                    (f64::from(height) * self.advanced_settings.scale_factor) as u32;
+                self.window.size = (scaled_width, scaled_height);
+            }
+            Message::CustomCountryDb(db) => {
+                self.advanced_settings.mmdb_country = db.clone();
+                self.country_mmdb_reader = Arc::new(mmdb_reader(&db, COUNTRY_MMDB));
+            }
+            Message::CustomAsnDb(db) => {
+                self.advanced_settings.mmdb_asn = db.clone();
+                self.asn_mmdb_reader = Arc::new(mmdb_reader(&db, ASN_MMDB));
+            }
+            Message::CustomReportDirectory(directory) => {
+                let path = push_pcap_file_name(PathBuf::from(directory));
+                self.advanced_settings.output_path = path;
+            }
+            Message::CloseRequested => {
+                self.get_configs().store();
+                return iced::window::close();
+            }
+            _ => {}
         }
         Command::none()
     }
@@ -282,14 +324,6 @@ impl Sniffer {
         // update ConfigDevice stored if different from last sniffed device
         if current_device_name.ne(&self.last_device_name_sniffed) {
             self.last_device_name_sniffed = current_device_name.clone();
-            confy::store(
-                "sniffnet",
-                "device",
-                ConfigDevice {
-                    device_name: current_device_name,
-                },
-            )
-            .unwrap_or(());
         }
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications)
@@ -302,7 +336,7 @@ impl Sniffer {
 
     fn open_report_file(&mut self) {
         if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
-            let report_path = get_report_path();
+            let report_path = get_default_report_directory();
             #[cfg(target_os = "windows")]
             std::process::Command::new("explorer")
                 .arg(report_path)
@@ -348,12 +382,14 @@ impl Sniffer {
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
-        self.traffic_chart = TrafficChart::new(&self.style, self.language);
+        self.traffic_chart = TrafficChart::new(self.style, self.language);
 
         if pcap_error.is_none() {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
-            let filters = self.filters.clone();
+            let filters = self.filters;
+            let country_mmdb_reader = self.country_mmdb_reader.clone();
+            let asn_mmdb_reader = self.country_mmdb_reader.clone();
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -362,8 +398,10 @@ impl Sniffer {
                         &current_capture_id,
                         &device,
                         cap.unwrap(),
-                        &filters,
+                        filters,
                         &info_traffic_mutex,
+                        &country_mmdb_reader,
+                        &asn_mmdb_reader,
                     );
                 })
                 .unwrap();
@@ -418,16 +456,10 @@ impl Sniffer {
         drop(info_traffic);
     }
 
-    fn close_and_save_settings(&mut self) {
-        if self.settings_page.is_some() {
-            self.last_opened_setting = self.settings_page.unwrap();
+    fn close_settings(&mut self) {
+        if let Some(page) = self.settings_page {
+            self.last_opened_setting = page;
             self.settings_page = None;
-            let store = ConfigSettings {
-                style: Arc::clone(&self.style),
-                notifications: self.notifications,
-                language: self.language,
-            };
-            confy::store("sniffnet", "settings", store).unwrap_or(());
         }
     }
 
@@ -543,8 +575,6 @@ mod tests {
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::style_constants::get_color_mix_chart;
-    use crate::gui::styles::types::palette::to_rgb_color;
     use crate::gui::types::message::Message;
     use crate::networking::types::host::Host;
     use crate::notifications::types::logged_notification::{
@@ -555,7 +585,7 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        get_colors, AppProtocol, ByteMultiple, ChartType, InfoTraffic, IpVersion, Language,
+        AppProtocol, ByteMultiple, ChartType, Configs, InfoTraffic, IpVersion, Language,
         ReportSortType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
     };
 
@@ -565,8 +595,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -587,8 +616,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -609,8 +637,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -631,8 +658,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -651,8 +677,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -673,101 +698,20 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
-        sniffer.update(Message::Style(Arc::new(StyleType::MonAmour)));
-        assert_eq!(*sniffer.style, StyleType::MonAmour);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(&StyleType::MonAmour).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(&StyleType::MonAmour).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(&StyleType::MonAmour).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(&StyleType::MonAmour)
-        );
-        sniffer.update(Message::Style(Arc::new(StyleType::Day)));
-        assert_eq!(*sniffer.style, StyleType::Day);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(&StyleType::Day).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(&StyleType::Day).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(&StyleType::Day).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(&StyleType::Day)
-        );
-        sniffer.update(Message::Style(Arc::new(StyleType::Night)));
-        assert_eq!(*sniffer.style, StyleType::Night);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(&StyleType::Night).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(&StyleType::Night).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(&StyleType::Night).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(&StyleType::Night)
-        );
-        sniffer.update(Message::Style(Arc::new(StyleType::DeepSea)));
-        assert_eq!(*sniffer.style, StyleType::DeepSea);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(&StyleType::DeepSea).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(&StyleType::DeepSea).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(&StyleType::DeepSea).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(&StyleType::DeepSea)
-        );
-        sniffer.update(Message::Style(Arc::new(StyleType::DeepSea)));
-        assert_eq!(*sniffer.style, StyleType::DeepSea);
-        assert_eq!(
-            sniffer.traffic_chart.color_font,
-            to_rgb_color(get_colors(&StyleType::DeepSea).text_body)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_outgoing,
-            to_rgb_color(get_colors(&StyleType::DeepSea).outgoing)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_incoming,
-            to_rgb_color(get_colors(&StyleType::DeepSea).secondary)
-        );
-        assert_eq!(
-            sniffer.traffic_chart.color_mix,
-            get_color_mix_chart(&StyleType::DeepSea)
-        );
+        sniffer.update(Message::Style(StyleType::MonAmour));
+        assert_eq!(sniffer.style, StyleType::MonAmour);
+        sniffer.update(Message::Style(StyleType::Day));
+        assert_eq!(sniffer.style, StyleType::Day);
+        sniffer.update(Message::Style(StyleType::Night));
+        assert_eq!(sniffer.style, StyleType::Night);
+        sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.style, StyleType::DeepSea);
+        sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.style, StyleType::DeepSea);
     }
 
     #[test]
@@ -776,8 +720,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -798,8 +741,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         // remove 1
@@ -994,8 +936,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1088,8 +1029,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1112,8 +1052,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
 
@@ -1280,8 +1219,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.runtime_data.logged_notifications =
@@ -1309,8 +1247,7 @@ mod tests {
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
             Arc::new((Mutex::new(Status::Init), Default::default())),
-            &Default::default(),
-            &Default::default(),
+            &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
@@ -1331,7 +1268,7 @@ mod tests {
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         sniffer.update(Message::SwitchPage(false));
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Advanced));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         sniffer.update(Message::SwitchPage(true));

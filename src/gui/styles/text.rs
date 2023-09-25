@@ -1,29 +1,65 @@
 //! Text style
 
-use iced::Color;
+#![allow(clippy::module_name_repetitions)]
 
-use crate::get_colors;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::palette::Palette;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use iced::widget::text::Appearance;
+use iced::widget::{Column, Text};
+use iced::{Color, Font, Renderer};
 
-impl From<StyleTuple> for iced::theme::Text {
-    fn from(tuple: StyleTuple) -> Self {
-        let colors = get_colors(&tuple.0);
-        iced::theme::Text::Color(highlight(tuple.1, colors))
+use crate::gui::types::message::Message;
+use crate::{get_colors, StyleType};
+
+#[derive(Clone, Copy, Default, PartialEq)]
+pub enum TextType {
+    #[default]
+    Standard,
+    Incoming,
+    Outgoing,
+    Title,
+    Subtitle,
+    Danger,
+    Sponsor,
+}
+
+/// Returns a formatted caption followed by subtitle, new line, tab, and desc
+impl TextType {
+    pub fn highlighted_subtitle_with_desc(
+        subtitle: &str,
+        desc: &str,
+        font: Font,
+    ) -> Column<'static, Message, Renderer<StyleType>> {
+        Column::new()
+            .push(
+                Text::new(format!("{subtitle}:"))
+                    .style(TextType::Subtitle)
+                    .font(font),
+            )
+            .push(Text::new(format!("   {desc}")).font(font))
+    }
+}
+
+impl iced::widget::text::StyleSheet for StyleType {
+    type Style = TextType;
+
+    fn appearance(&self, style: Self::Style) -> Appearance {
+        Appearance {
+            color: if style == TextType::Standard {
+                None
+            } else {
+                Some(highlight(*self, style))
+            },
+        }
     }
 }
 
 /// Returns the weighted average of two colors; color intensity is fixed to 100%
-pub fn highlight(element: ElementType, colors: &Palette) -> Color {
+pub fn highlight(style: StyleType, element: TextType) -> Color {
+    let colors = get_colors(style);
     let color = colors.secondary;
+    let is_nightly = style.is_nightly();
     match element {
-        ElementType::Title => {
-            let (p1, c) = if colors.text_body.eq(&Color::BLACK) {
-                (0.9, 0.7)
-            } else {
-                (0.6, 1.0)
-            };
+        TextType::Title => {
+            let (p1, c) = if is_nightly { (0.6, 1.0) } else { (0.9, 0.7) };
             Color {
                 r: c * (1.0 - p1) + color.r * p1,
                 g: c * (1.0 - p1) + color.g * p1,
@@ -31,12 +67,8 @@ pub fn highlight(element: ElementType, colors: &Palette) -> Color {
                 a: 1.0,
             }
         }
-        ElementType::Subtitle => {
-            let (p1, c) = if colors.text_body.eq(&Color::BLACK) {
-                (0.6, 0.7)
-            } else {
-                (0.4, 1.0)
-            };
+        TextType::Subtitle => {
+            let (p1, c) = if is_nightly { (0.4, 1.0) } else { (0.6, 0.7) };
             Color {
                 r: c * (1.0 - p1) + color.r * p1,
                 g: c * (1.0 - p1) + color.g * p1,
@@ -44,6 +76,10 @@ pub fn highlight(element: ElementType, colors: &Palette) -> Color {
                 a: 1.0,
             }
         }
-        _ => colors.text_body,
+        TextType::Incoming => colors.secondary,
+        TextType::Outgoing => colors.outgoing,
+        TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
+        TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
+        TextType::Standard => colors.text_body,
     }
 }

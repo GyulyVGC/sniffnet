@@ -8,7 +8,7 @@ use std::thread;
 use std::time::Duration;
 
 use crate::gui::types::status::Status;
-use crate::utils::formatted_strings::get_report_path;
+use crate::utils::formatted_strings::get_default_report_directory;
 use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it sleeps for 1 second and then
@@ -20,7 +20,7 @@ pub fn sleep_and_write_report_loop(
 ) {
     let cvar = &status_pair.1;
 
-    let path_report = get_report_path();
+    let path_report = get_default_report_directory();
 
     let mut capture_id = *current_capture_id.lock().unwrap();
 

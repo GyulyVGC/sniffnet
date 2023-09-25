@@ -1,11 +1,12 @@
+use iced::widget::svg::Handle;
+use iced::widget::Svg;
 use iced::{Length, Renderer};
-use iced_native::svg::Handle;
-use iced_native::widget::Svg;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IR, IT, KR, PL, PT, RO, RU, SE, TR, UA,
+    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA,
 };
+use crate::StyleType;
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash, PartialOrd, Ord)]
@@ -38,12 +39,14 @@ pub enum Language {
     RU,
     /// Greek
     EL,
-    /// Persian
-    FA,
+    // /// Persian
+    // FA,
     /// Swedish
     SV,
     /// Finnish
     FI,
+    /// Japanese
+    JA,
 }
 
 impl Default for Language {
@@ -53,11 +56,11 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const ROW1: [Language; 4] = [Language::EN, Language::DE, Language::EL, Language::ES];
-    pub(crate) const ROW2: [Language; 4] = [Language::FA, Language::FI, Language::FR, Language::IT];
-    pub(crate) const ROW3: [Language; 4] = [Language::KO, Language::PL, Language::PT, Language::RO];
-    pub(crate) const ROW4: [Language; 4] = [Language::RU, Language::SV, Language::TR, Language::UK];
-    pub(crate) const ROW5: [Language; 1] = [Language::ZH];
+    pub(crate) const ROW1: [Language; 1] = [Language::EN];
+    pub(crate) const ROW2: [Language; 4] = [Language::DE, Language::EL, Language::ES, Language::FI];
+    pub(crate) const ROW3: [Language; 4] = [Language::FR, Language::IT, Language::JA, Language::KO];
+    pub(crate) const ROW4: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
+    pub(crate) const ROW5: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
@@ -75,13 +78,14 @@ impl Language {
             Language::RU => "Русский",
             Language::PT => "Português",
             Language::EL => "Ελληνικά",
-            Language::FA => "فارسی",
+            // Language::FA => "فارسی",
             Language::SV => "Svenska",
             Language::FI => "Suomi",
+            Language::JA => "日本語",
         }
     }
 
-    pub fn get_flag(self) -> Svg<Renderer> {
+    pub fn get_flag(self) -> Svg<Renderer<StyleType>> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
             Language::DE => DE,
@@ -97,9 +101,10 @@ impl Language {
             Language::TR => TR,
             Language::UK => UA,
             Language::EL => GR,
-            Language::FA => IR,
+            // Language::FA => IR,
             Language::SV => SE,
             Language::FI => FI,
+            Language::JA => JP,
         })))
         .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }

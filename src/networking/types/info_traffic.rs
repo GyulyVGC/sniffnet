@@ -10,6 +10,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::AppProtocol;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
@@ -65,6 +66,18 @@ impl InfoTraffic {
             addresses_waiting_resolution: HashMap::new(),
             addresses_resolved: HashMap::new(),
             hosts: HashMap::new(),
+        }
+    }
+
+    pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {
+        if traffic_direction == TrafficDirection::Outgoing {
+            //increment number of sent packets and bytes
+            self.tot_sent_packets += 1;
+            self.tot_sent_bytes += bytes;
+        } else {
+            //increment number of received packets and bytes
+            self.tot_received_packets += 1;
+            self.tot_received_bytes += bytes;
         }
     }
 }

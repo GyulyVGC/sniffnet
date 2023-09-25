@@ -1,12 +1,9 @@
-use std::sync::Arc;
-
+use iced::widget::horizontal_space;
 use iced::widget::{Column, Radio, Row, Text};
-use iced::{Alignment, Font, Length};
-use iced_native::widget::horizontal_space;
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
@@ -20,13 +17,12 @@ use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
 pub fn ip_version_radios(
     active: IpVersion,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Column<'static, Message> {
-    let mut ret_val = Column::new().spacing(10).padding(0).push(
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let mut ret_val = Column::new().spacing(10).push(
         ip_version_translation(language)
             .font(font)
-            .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+            .style(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in IpVersion::ALL {
@@ -39,11 +35,7 @@ pub fn ip_version_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
@@ -52,13 +44,12 @@ pub fn ip_version_radios(
 pub fn transport_protocol_radios(
     active: TransProtocol,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().spacing(10).push(
         Text::new(transport_protocol_translation(language))
             .font(font)
-            .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+            .style(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     for option in TransProtocol::ALL {
@@ -71,11 +62,7 @@ pub fn transport_protocol_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
@@ -85,8 +72,7 @@ pub fn language_radios(
     active: Language,
     collection: &[Language],
     font: Font,
-    style: &Arc<StyleType>,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
     for option in collection {
         ret_val = ret_val.push(
@@ -103,13 +89,7 @@ pub fn language_radios(
                         )
                         .spacing(7)
                         .font(font)
-                        .size(15)
-                        .style(
-                            <StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                                Arc::clone(style),
-                                ElementType::Standard,
-                            )),
-                        ),
+                        .size(15),
                     )
                     .push(horizontal_space(Length::Fixed(8.0)))
                     .push(option.get_flag()),
@@ -122,9 +102,8 @@ pub fn language_radios(
 pub fn sound_packets_threshold_radios(
     packets_notification: PacketsNotification,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -146,11 +125,7 @@ pub fn sound_packets_threshold_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
@@ -159,9 +134,8 @@ pub fn sound_packets_threshold_radios(
 pub fn sound_bytes_threshold_radios(
     bytes_notification: BytesNotification,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -183,11 +157,7 @@ pub fn sound_bytes_threshold_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
@@ -196,9 +166,8 @@ pub fn sound_bytes_threshold_radios(
 pub fn sound_favorite_radios(
     favorite_notification: FavoriteNotification,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Row<'static, Message> {
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .spacing(20)
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -220,11 +189,7 @@ pub fn sound_favorite_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
@@ -233,9 +198,8 @@ pub fn sound_favorite_radios(
 pub fn chart_radios(
     active: ChartType,
     font: Font,
-    style: &Arc<StyleType>,
     language: Language,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new()
         .padding([0, 0, 0, 25])
         .spacing(5)
@@ -250,48 +214,8 @@ pub fn chart_radios(
             )
             .spacing(7)
             .font(font)
-            .size(15)
-            .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-                Arc::clone(style),
-                ElementType::Standard,
-            ))),
+            .size(15),
         );
     }
     ret_val
 }
-
-// pub fn report_radios(
-//     active: ReportType,
-//     font: Font,
-//     style: Arc<StyleType>,
-//     language: Language,
-// ) -> Row<'static, Message> {
-//     let mut ret_val = Row::new()
-//         .padding([10, 0, 15, 5])
-//         .spacing(20)
-//         .align_items(Alignment::Center)
-//         .push(
-//             relevant_connections_translation(language)
-//                 .font(font)
-//                 .size(FONT_SIZE_TITLE),
-//         );
-//     for option in ReportType::ALL {
-//         ret_val = ret_val.push(
-//             Radio::new(
-//                 option.get_radio_label(language),
-//                 option,
-//                 Some(active),
-//                 Message::ReportSelection,
-//             )
-//             .spacing(7)
-//             .font(font)
-//             .size(15)
-//             .style(<StyleTuple as Into<iced::theme::Radio>>::into(StyleTuple(
-//                 Arc::clone(style),
-//                 ElementType::Standard,
-//             ))),
-//         );
-//     }
-//     ret_val = ret_val.push(horizontal_space(Length::Fixed(120.0)));
-//     ret_val
-// }

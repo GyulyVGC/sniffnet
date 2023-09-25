@@ -1,8 +1,9 @@
-use std::sync::Arc;
+use iced::font;
 
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
@@ -41,13 +42,7 @@ pub enum Message {
     /// Stop sniffing process and return to initial page
     Reset,
     /// Change application style
-    Style(Arc<StyleType>),
-    /// Update custom style path
-    UpdateStylePath(String),
-    /// Handle a custom style path
-    PasteCustomStyle(String),
-    /// Load custom style from a path
-    LoadCustomStyle,
+    Style(StyleType),
     /// Manage waiting time
     Waiting,
     /// Displays a modal
@@ -90,4 +85,24 @@ pub enum Message {
     ArrowPressed(bool),
     /// Emit when the main window be focused
     WindowFocused,
+    /// Result after loading a custom font
+    FontLoaded(Result<(), font::Error>),
+    /// Enable or disable gradients
+    GradientsSelection(GradientType),
+    /// Set UI scale factor
+    ChangeScaleFactor(f64),
+    /// Restore default advanced settings
+    RestoreDefaults,
+    /// The app window position has been changed
+    WindowMoved(i32, i32),
+    /// The app window size has been changed
+    WindowResized(u32, u32),
+    /// The country MMDB custom path has been updated
+    CustomCountryDb(String),
+    /// The ASN MMDB custom path has been updated
+    CustomAsnDb(String),
+    /// The directory for the output report has been updated
+    CustomReportDirectory(String),
+    /// Save the configurations of the app and quit
+    CloseRequested,
 }

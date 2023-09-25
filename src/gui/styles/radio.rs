@@ -1,23 +1,23 @@
 //! Radios style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::Background;
-use iced::Theme;
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::BORDER_WIDTH;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Radio {
-    fn from(tuple: StyleTuple) -> Self {
-        iced::theme::Radio::Custom(Box::new(tuple))
-    }
+#[derive(Clone, Copy, Default)]
+pub enum RadioType {
+    #[default]
+    Standard,
 }
 
-impl iced::widget::radio::StyleSheet for StyleTuple {
-    type Style = Theme;
+impl iced::widget::radio::StyleSheet for StyleType {
+    type Style = RadioType;
 
     fn active(&self, _: &Self::Style, is_selected: bool) -> iced::widget::radio::Appearance {
-        let colors = get_colors(&self.0);
+        let colors = get_colors(*self);
         iced::widget::radio::Appearance {
             background: Background::Color(colors.buttons),
             dot_color: colors.secondary,
@@ -28,7 +28,7 @@ impl iced::widget::radio::StyleSheet for StyleTuple {
     }
 
     fn hovered(&self, _: &Self::Style, _is_selected: bool) -> iced::widget::radio::Appearance {
-        let colors = get_colors(&self.0);
+        let colors = get_colors(*self);
         iced::widget::radio::Appearance {
             background: Background::Color(colors.buttons),
             dot_color: colors.secondary,

@@ -178,7 +178,8 @@
       "profile": "http://orhun.dev",
       "contributions": [
         "doc",
-        "platform"
+        "platform",
+        "financial"
       ]
     },
     {
@@ -360,6 +361,44 @@
       "profile": "https://github.com/glitsj16",
       "contributions": [
         "platform"
+      ]
+    },
+    {
+      "login": "joshuamegnauth54",
+      "name": "Joshua Megnauth",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48846352?v=4",
+      "profile": "https://joshuamegnauth54.github.io/",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "bdantas",
+      "name": "GNUser",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5084088?v=4",
+      "profile": "https://github.com/bdantas",
+      "contributions": [
+        "doc",
+        "platform"
+      ]
+    },
+    {
+      "login": "hirotake111",
+      "name": "hirotake111",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6666092?v=4",
+      "profile": "https://github.com/hirotake111",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "dutyrok",
+      "name": "Alexandr Shashkin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/68692503?v=4",
+      "profile": "https://github.com/dutyrok",
+      "contributions": [
+        "bug"
       ]
     }
   ],

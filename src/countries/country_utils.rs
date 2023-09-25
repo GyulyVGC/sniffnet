@@ -1,42 +1,40 @@
-use std::sync::Arc;
-
+use iced::widget::svg::Handle;
+use iced::widget::tooltip::Position;
+use iced::widget::Svg;
 use iced::widget::Tooltip;
-use iced::{Length, Renderer};
-use iced_native::svg::Handle;
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::Svg;
-use maxminddb::{geoip2, MaxMindDBError, Reader};
+use iced::{Font, Length, Renderer};
+use maxminddb::{geoip2, MaxMindDBError};
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
-    BJ, BL, BM, BN, BO, BQ, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK,
-    CL, CM, CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH,
-    ER, ES, ET, FI, FJ, FK, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA, GB, GD, GE, GF, GG,
-    GH, GI, GL, GM, GN, GP, GQ, GR, GS, GT, GU, GW, GY, HK, HM, HN, HOME, HR, HT, HU, ID, IE, IL,
-    IM, IN, IO, IQ, IR, IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB,
-    LC, LI, LK, LR, LS, LT, LU, LV, LY, MA, MC, MD, ME, MF, MG, MH, MK, ML, MM, MN, MO, MP, MQ, MR,
-    MS, MT, MU, MULTICAST, MV, MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM,
-    PA, PE, PF, PG, PH, PK, PL, PM, PN, PR, PS, PT, PW, PY, QA, RE, RO, RS, RU, RW, SA, SB, SC, SD,
-    SE, SG, SH, SI, SJ, SK, SL, SM, SN, SO, SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK,
-    TL, TM, TN, TO, TR, TT, TV, TW, TZ, UA, UG, UM, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN,
-    VU, WF, WS, YE, YT, ZA, ZM, ZW,
+    BJ, BM, BN, BO, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK, CL, CM,
+    CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH, ER, ES,
+    ET, FI, FJ, FK, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA, GB, GD, GE, GG, GH, GI, GL,
+    GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID, IE, IL, IM, IN, IO, IQ, IR,
+    IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB, LC, LI, LK, LR, LS,
+    LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR, MS, MT, MU, MULTICAST, MV,
+    MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, PA, PE, PF, PG, PH, PK, PL,
+    PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG, SH, SI, SK, SL, SM, SN, SO,
+    SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TR, TT, TV, TW, TZ, UA,
+    UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
-use crate::gui::styles::style_constants::get_font;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
     local_translation, unknown_translation, your_network_adapter_translation,
 };
+use crate::utils::asn::MmdbReader;
 use crate::{Language, StyleType};
 
 pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
 
-pub fn get_country(address_to_lookup: &str, country_db_reader: &Reader<&[u8]>) -> Country {
-    let country_result: Result<geoip2::Country, MaxMindDBError> =
-        country_db_reader.lookup(address_to_lookup.parse().unwrap());
+pub fn get_country(address_to_lookup: &str, country_db_reader: &MmdbReader) -> Country {
+    let country_result: Result<geoip2::Country, MaxMindDBError> = match country_db_reader {
+        MmdbReader::Default(reader) => reader.lookup(address_to_lookup.parse().unwrap()),
+        MmdbReader::Custom(reader) => reader.lookup(address_to_lookup.parse().unwrap()),
+    };
     if let Ok(res1) = country_result {
         if let Some(res2) = res1.country {
             if let Some(res3) = res2.iso_code {
@@ -47,14 +45,14 @@ pub fn get_country(address_to_lookup: &str, country_db_reader: &Reader<&[u8]>) -
     Country::ZZ // unknown
 }
 
-#[allow(clippy::too_many_lines)]
 fn get_flag_from_country(
     country: Country,
     width: f32,
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<Renderer>, String) {
+) -> (Svg<Renderer<StyleType>>, String) {
+    #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         Country::AD => AD,
@@ -69,7 +67,7 @@ fn get_flag_from_country(
         Country::AR => AR,
         Country::AS => AS,
         Country::AT => AT,
-        Country::AU => AU,
+        Country::AU | Country::HM => AU,
         Country::AW => AW,
         Country::AX => AX,
         Country::AZ => AZ,
@@ -82,11 +80,9 @@ fn get_flag_from_country(
         Country::BH => BH,
         Country::BI => BI,
         Country::BJ => BJ,
-        Country::BL => BL,
         Country::BM => BM,
         Country::BN => BN,
         Country::BO => BO,
-        Country::BQ => BQ,
         Country::BR => BR,
         Country::BS => BS,
         Country::BT => BT,
@@ -131,19 +127,26 @@ fn get_flag_from_country(
         Country::FK => FK,
         Country::FM => FM,
         Country::FO => FO,
-        Country::FR => FR,
+        Country::FR
+        | Country::BL
+        | Country::GF
+        | Country::GP
+        | Country::MF
+        | Country::MQ
+        | Country::PM
+        | Country::RE
+        | Country::WF
+        | Country::YT => FR,
         Country::GA => GA,
         Country::GB => GB,
         Country::GD => GD,
         Country::GE => GE,
-        Country::GF => GF,
         Country::GG => GG,
         Country::GH => GH,
         Country::GI => GI,
         Country::GL => GL,
         Country::GM => GM,
         Country::GN => GN,
-        Country::GP => GP,
         Country::GQ => GQ,
         Country::GR => GR,
         Country::GS => GS,
@@ -152,7 +155,6 @@ fn get_flag_from_country(
         Country::GW => GW,
         Country::GY => GY,
         Country::HK => HK,
-        Country::HM => HM,
         Country::HN => HN,
         Country::HR => HR,
         Country::HT => HT,
@@ -197,7 +199,6 @@ fn get_flag_from_country(
         Country::MC => MC,
         Country::MD => MD,
         Country::ME => ME,
-        Country::MF => MF,
         Country::MG => MG,
         Country::MH => MH,
         Country::MK => MK,
@@ -206,7 +207,6 @@ fn get_flag_from_country(
         Country::MN => MN,
         Country::MO => MO,
         Country::MP => MP,
-        Country::MQ => MQ,
         Country::MR => MR,
         Country::MS => MS,
         Country::MT => MT,
@@ -222,8 +222,8 @@ fn get_flag_from_country(
         Country::NF => NF,
         Country::NG => NG,
         Country::NI => NI,
-        Country::NL => NL,
-        Country::NO => NO,
+        Country::NL | Country::BQ => NL,
+        Country::NO | Country::SJ => NO,
         Country::NP => NP,
         Country::NR => NR,
         Country::NU => NU,
@@ -236,7 +236,6 @@ fn get_flag_from_country(
         Country::PH => PH,
         Country::PK => PK,
         Country::PL => PL,
-        Country::PM => PM,
         Country::PN => PN,
         Country::PR => PR,
         Country::PS => PS,
@@ -244,7 +243,6 @@ fn get_flag_from_country(
         Country::PW => PW,
         Country::PY => PY,
         Country::QA => QA,
-        Country::RE => RE,
         Country::RO => RO,
         Country::RS => RS,
         Country::RU => RU,
@@ -257,7 +255,6 @@ fn get_flag_from_country(
         Country::SG => SG,
         Country::SH => SH,
         Country::SI => SI,
-        Country::SJ => SJ,
         Country::SK => SK,
         Country::SL => SL,
         Country::SM => SM,
@@ -288,8 +285,7 @@ fn get_flag_from_country(
         Country::TZ => TZ,
         Country::UA => UA,
         Country::UG => UG,
-        Country::UM => UM,
-        Country::US => US,
+        Country::US | Country::UM => US,
         Country::UY => UY,
         Country::UZ => UZ,
         Country::VA => VA,
@@ -299,10 +295,8 @@ fn get_flag_from_country(
         Country::VI => VI,
         Country::VN => VN,
         Country::VU => VU,
-        Country::WF => WF,
         Country::WS => WS,
         Country::YE => YE,
-        Country::YT => YT,
         Country::ZA => ZA,
         Country::ZM => ZM,
         Country::ZW => ZW,
@@ -334,17 +328,15 @@ pub fn get_flag_tooltip(
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Tooltip<'static, Message> {
+    font: Font,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let (content, tooltip) =
         get_flag_from_country(country, width, is_local, traffic_type, language);
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(Arc::clone(style), ElementType::Tooltip),
-        ));
+        .style(ContainerType::Tooltip);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -357,8 +349,8 @@ pub fn get_computer_tooltip(
     is_my_address: bool,
     traffic_type: TrafficType,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Tooltip<'static, Message> {
+    font: Font,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, traffic_type) {
             (true, _) => COMPUTER,
@@ -378,9 +370,7 @@ pub fn get_computer_tooltip(
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(get_font(style))
+        .font(font)
         .snap_within_viewport(true)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(Arc::clone(style), ElementType::Tooltip),
-        ))
+        .style(ContainerType::Tooltip)
 }

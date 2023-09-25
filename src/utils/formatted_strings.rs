@@ -1,20 +1,16 @@
 use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
 
 use iced::widget::{Column, Text};
-use iced::Color;
+use iced::{Font, Renderer};
 
-use crate::gui::styles::style_constants::get_font;
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
-use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
     active_filters_translation, none_translation, open_report_translation,
 };
-use crate::{get_colors, AppProtocol, IpVersion, Language, StyleType, TransProtocol};
+use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -34,16 +30,14 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
 
 /// Computes the String representing the active filters
 pub fn get_active_filters_col(
-    filters: &Filters,
+    filters: Filters,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Column<'static, Message> {
-    let font = get_font(style);
-
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
-            .style(StyleTuple(Arc::clone(style), ElementType::Subtitle)),
+            .style(TextType::Subtitle),
     );
     if filters.ip.eq(&IpVersion::Other)
         && filters.application.eq(&AppProtocol::Other)
@@ -64,15 +58,6 @@ pub fn get_active_filters_col(
         ret_val = ret_val.push(Text::new(format!("   {filters_string}")).font(font));
     }
     ret_val
-}
-
-/// Returns the color to be used for a specific connection of the relevant connections table in gui run page
-pub fn get_connection_color(traffic_direction: TrafficDirection, style: &StyleType) -> Color {
-    if traffic_direction == TrafficDirection::Outgoing {
-        get_colors(style).outgoing
-    } else {
-        get_colors(style).secondary
-    }
 }
 
 /// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
@@ -117,26 +102,29 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
     bytes_string
 }
 
-pub fn get_report_path() -> PathBuf {
+/// Returns the default directory to use for the output report file
+pub fn get_default_report_directory() -> PathBuf {
     if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
         config_path.pop();
-        config_path.push("report.txt");
         config_path
     } else {
-        let mut report_path = PathBuf::from(std::env::var_os("HOME").unwrap());
-        report_path.push("sniffnet_report.txt");
-        report_path
+        PathBuf::from(std::env::var_os("HOME").unwrap())
     }
 }
 
-pub fn get_open_report_tooltip(language: Language) -> String {
-    let open_report_translation = open_report_translation(language).to_string();
+pub fn push_pcap_file_name(mut directory: PathBuf) -> PathBuf {
+    directory.push("sniffnet.pcap");
+    directory
+}
+
+pub fn get_open_report_tooltip(output_path: &Path, language: Language) -> String {
+    let open_report_translation = open_report_translation(language);
     //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
-    let report_path = get_report_path().to_string_lossy().to_string();
+    let string_path = output_path.to_string_lossy().to_string();
     format!(
-        "{:^len$}\n{report_path}",
+        "{:^len$}\n{string_path}",
         open_report_translation,
-        len = report_path.len()
+        len = string_path.len()
     )
 }
 

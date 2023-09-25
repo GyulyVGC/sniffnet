@@ -3,26 +3,30 @@
 //! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
-use std::sync::Arc;
-
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{button, vertical_space, Column, Container, Row, Scrollable, Text};
+use iced::widget::scrollable::Direction;
+use iced::widget::{
+    button, lazy, vertical_space, Button, Column, Container, Row, Scrollable, Text,
+};
+use iced::widget::{horizontal_space, Rule};
 use iced::Length::{Fill, FillPortion};
-use iced::{Alignment, Font, Length};
-use iced_lazy::lazy;
-use iced_native::widget::{horizontal_space, Rule};
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_TITLE, ICONS};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
+use crate::gui::styles::scrollbar::ScrollbarType;
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
@@ -39,11 +43,13 @@ use crate::translations::translations_2::{
 use crate::utils::formatted_strings::{
     get_active_filters_col, get_formatted_bytes_string_with_b, get_percentage_string,
 };
+use crate::utils::types::icon::Icon;
 use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(&sniffer.style);
+pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -64,9 +70,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
                 body = body_no_observed(
-                    &sniffer.filters,
+                    sniffer.filters,
                     observed,
-                    &sniffer.style,
+                    font,
                     sniffer.language,
                     &sniffer.waiting,
                 );
@@ -74,72 +80,20 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
-                    [
-                        RunningPage::Overview,
-                        RunningPage::Inspect,
-                        RunningPage::Notifications,
-                    ],
-                    &["d ", "5 ", "7 "],
-                    &[
-                        Message::TickInit,
-                        Message::ChangeRunningPage(RunningPage::Inspect),
-                        Message::ChangeRunningPage(RunningPage::Notifications),
-                    ],
                     RunningPage::Overview,
-                    &sniffer.style,
+                    font,
+                    font_headers,
                     sniffer.language,
                     sniffer.unread_notifications,
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let mut chart_info_string = String::from("(");
-                chart_info_string.push_str(
-                    if sniffer.traffic_chart.chart_type.eq(&ChartType::Packets) {
-                        packets_chart_translation(sniffer.language)
-                    } else {
-                        bytes_chart_translation(sniffer.language)
-                    },
-                );
-                chart_info_string.push(')');
-                let col_chart = Container::new(
-                    Column::new()
-                        .align_items(Alignment::Center)
-                        .push(
-                            Row::new()
-                                .padding([10, 0, 15, 0])
-                                .spacing(10)
-                                .align_items(Alignment::Center)
-                                .push(
-                                    traffic_rate_translation(sniffer.language)
-                                        .font(font)
-                                        .style(StyleTuple(
-                                            Arc::clone(&sniffer.style),
-                                            ElementType::Title,
-                                        ))
-                                        .size(FONT_SIZE_TITLE),
-                                )
-                                .push(
-                                    Text::new(chart_info_string)
-                                        .style(StyleTuple(
-                                            Arc::clone(&sniffer.style),
-                                            ElementType::Subtitle,
-                                        ))
-                                        .font(font),
-                                ),
-                        )
-                        .push(sniffer.traffic_chart.view()),
-                )
-                .width(Fill)
-                .align_x(Horizontal::Center)
-                .align_y(Vertical::Center)
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
-                ));
+                let container_chart = container_chart(sniffer, font);
 
-                let col_info = lazy(
+                let container_info = lazy(
                     (
                         total,
-                        Arc::clone(&sniffer.style),
+                        sniffer.style,
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
@@ -147,11 +101,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                 );
 
                 let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
-                let row_report = lazy(
+                let container_report = lazy(
                     (
                         filtered,
                         num_favorites,
-                        Arc::clone(&sniffer.style),
+                        sniffer.style,
                         sniffer.language,
                         sniffer.traffic_chart.chart_type,
                     ),
@@ -167,26 +121,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
                         Row::new()
                             .spacing(10)
                             .height(FillPortion(5))
-                            .push(
-                                Container::new(col_info)
-                                    .width(Length::Fixed(400.0))
-                                    .padding([10, 5, 5, 5])
-                                    .height(Length::Fill)
-                                    .align_x(Horizontal::Center)
-                                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                                        StyleTuple(
-                                            Arc::clone(&sniffer.style),
-                                            ElementType::BorderedRound,
-                                        ),
-                                    )),
-                            )
-                            .push(col_chart),
+                            .push(container_info)
+                            .push(container_chart),
                     )
-                    .push(
-                        Container::new(row_report)
-                            .align_x(Horizontal::Center)
-                            .height(FillPortion(4)),
-                    );
+                    .push(container_report);
             }
         }
     } else {
@@ -199,11 +137,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message> {
         );
     }
 
-    Container::new(Column::new().push(tab_and_body.push(body)))
-        .height(Length::Fill)
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-        ))
+    Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
 fn body_no_packets(
@@ -211,18 +145,18 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     let adapter_name = device.name.clone();
     let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
-            Text::new('T'.to_string()).font(ICONS).size(60),
+            Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &adapter_name)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
     } else {
         (
-            Text::new(waiting.len().to_string()).font(ICONS).size(60),
+            Icon::get_hourglass(waiting.len()).size(60),
             waiting_translation(language, &adapter_name)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
@@ -243,14 +177,12 @@ fn body_no_packets(
 }
 
 fn body_no_observed(
-    filters: &Filters,
+    filters: Filters,
     observed: u128,
-    style: &Arc<StyleType>,
+    font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message> {
-    let font = get_font(style);
-
+) -> Column<'static, Message, Renderer<StyleType>> {
     let tot_packets_text = some_observed_translation(language, observed)
         .horizontal_alignment(Horizontal::Center)
         .font(font);
@@ -261,10 +193,10 @@ fn body_no_observed(
         .spacing(10)
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
-        .push(Text::new('V'.to_string()).font(ICONS).size(60))
+        .push(Icon::Funnel.to_text().size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(tot_packets_text)
-        .push(get_active_filters_col(filters, language, style))
+        .push(get_active_filters_col(filters, language, font))
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
@@ -274,7 +206,7 @@ fn body_pcap_error(
     waiting: &str,
     language: Language,
     font: Font,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .horizontal_alignment(Horizontal::Center)
@@ -286,14 +218,14 @@ fn body_pcap_error(
         .spacing(10)
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
-        .push(Text::new('U'.to_string()).font(ICONS).size(60))
+        .push(Icon::Error.to_text().size(60))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(error_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
 
-fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
+fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let mut row_report = Row::new()
         .padding(10)
         .height(Length::Fill)
@@ -304,37 +236,19 @@ fn lazy_row_report(sniffer: &Sniffer) -> Row<'static, Message> {
 
     row_report = row_report
         .push(col_host)
-        .push(
-            Rule::vertical(40).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-                Arc::clone(&sniffer.style),
-                ElementType::Standard,
-            ))),
-        )
+        .push(Rule::vertical(40))
         .push(col_app);
 
-    Row::new().push(
-        Container::new(row_report)
-            .height(Length::Fill)
-            .width(Length::Fixed(1170.0))
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(Arc::clone(&sniffer.style), ElementType::BorderedRound),
-            )),
-    )
+    Container::new(row_report)
+        .height(FillPortion(4))
+        .width(Length::Fixed(1170.0))
+        .style(ContainerType::BorderedRound)
+        .align_x(Horizontal::Center)
 }
 
-fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
-    let font = get_font(&sniffer.style);
+fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
-
-    let mut col_host = Column::new()
-        .width(Length::Fixed(width + 11.0))
-        .push(
-            Text::new(host_translation(sniffer.language))
-                .font(font)
-                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(vertical_space(Length::Fixed(10.0)));
 
     let mut scroll_host = Column::new()
         .width(Length::Fixed(width))
@@ -342,46 +256,14 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
 
     for (host, data_info_host) in &entries {
-        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
+        let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
             &entries.get(0).unwrap().1.data_info.clone(),
             &data_info_host.data_info,
         );
 
-        let star_button = button(
-            Text::new('g'.to_string())
-                .font(ICONS)
-                .size(20)
-                .horizontal_alignment(Horizontal::Center)
-                .vertical_alignment(Vertical::Center),
-        )
-        .padding(0)
-        .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
-        .width(Length::Fixed(FLAGS_WIDTH_BIG))
-        .style(
-            StyleTuple(
-                Arc::clone(&sniffer.style),
-                if data_info_host.is_favorite {
-                    ElementType::Starred
-                } else {
-                    ElementType::NotStarred
-                },
-            )
-            .into(),
-        )
-        .on_press(Message::AddOrRemoveFavorite(
-            host.clone(),
-            !data_info_host.is_favorite,
-        ));
-
-        // normalize smaller values
-        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-            incoming_bar_len = 3.0;
-        }
-        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-            outgoing_bar_len = 3.0;
-        }
+        let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
         let host_bar = Column::new()
             .width(Length::Fixed(width))
@@ -411,25 +293,15 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 Row::new()
                     .push(if incoming_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
-                            )))
+                            .push(Rule::horizontal(1).style(RuleType::Incoming))
                     } else {
                         Row::new()
                     })
                     .push(if outgoing_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
-                            )))
+                            .push(Rule::horizontal(1).style(RuleType::Outgoing))
                     } else {
                         Row::new()
                     }),
@@ -445,7 +317,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 data_info_host.is_local,
                 data_info_host.traffic_type,
                 sniffer.language,
-                &sniffer.style,
+                font,
             ))
             .push(host_bar);
 
@@ -458,33 +330,35 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     as_name: host.asn.name.clone(),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Neutral).into()),
+                .style(ButtonType::Neutral),
         );
     }
 
-    if entries.len() == 30 {
+    if entries.len() >= 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
             Text::new(only_top_30_hosts_translation(sniffer.language))
                 .font(font)
-                .horizontal_alignment(Horizontal::Center)
-                .font(font),
+                .horizontal_alignment(Horizontal::Center),
         );
     }
 
-    col_host = col_host.push(
-        Scrollable::new(Container::new(scroll_host).width(Length::Fill)).style(
-            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
-                Arc::clone(&sniffer.style),
-                ElementType::Standard,
-            )),
-        ),
-    );
-
-    col_host
+    Column::new()
+        .width(Length::Fixed(width + 11.0))
+        .push(
+            Text::new(host_translation(sniffer.language))
+                .font(font)
+                .style(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Scrollable::new(Container::new(scroll_host).width(Length::Fill))
+                .direction(Direction::Vertical(ScrollbarType::properties())),
+        )
 }
 
-fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
-    let font = get_font(&sniffer.style);
+fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_app = Column::new()
@@ -492,7 +366,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
         .push(
             Text::new(application_protocol_translation(sniffer.language))
                 .font(font)
-                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Title))
+                .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
@@ -515,14 +389,6 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
         }
 
-        // normalize smaller values
-        if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-            incoming_bar_len = 3.0;
-        }
-        if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-            outgoing_bar_len = 3.0;
-        }
-
         let content = Column::new()
             .spacing(1)
             .width(Length::Fixed(width))
@@ -543,25 +409,15 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                 Row::new()
                     .push(if incoming_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Incoming),
-                            )))
+                            .push(Rule::horizontal(1).style(RuleType::Incoming))
                     } else {
                         Row::new()
                     })
                     .push(if outgoing_bar_len > 0.0 {
                         Row::new()
-                            .padding(0)
                             .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(<StyleTuple as Into<
-                                iced::theme::Rule,
-                            >>::into(
-                                StyleTuple(Arc::clone(&sniffer.style), ElementType::Outgoing),
-                            )))
+                            .push(Rule::horizontal(1).style(RuleType::Outgoing))
                     } else {
                         Row::new()
                     }),
@@ -574,16 +430,12 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message> {
                     app: format!("{app:?}"),
                     ..SearchParameters::default()
                 }))
-                .style(StyleTuple(Arc::clone(&sniffer.style), ElementType::Neutral).into()),
+                .style(ButtonType::Neutral),
         );
     }
     col_app = col_app.push(
-        Scrollable::new(Container::new(scroll_app).width(Length::Fill)).style(
-            <StyleTuple as Into<iced::theme::Scrollable>>::into(StyleTuple(
-                Arc::clone(&sniffer.style),
-                ElementType::Standard,
-            )),
-        ),
+        Scrollable::new(Container::new(scroll_app).width(Length::Fill))
+            .direction(Direction::Vertical(ScrollbarType::properties())),
     );
 
     col_app
@@ -594,25 +446,17 @@ fn lazy_col_info(
     filtered: u128,
     dropped: u32,
     sniffer: &Sniffer,
-) -> Column<'static, Message> {
-    let font = get_font(&sniffer.style);
+) -> Container<'static, Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters = col_device_filters(
-        sniffer.language,
-        &sniffer.style,
-        &sniffer.filters,
-        &sniffer.device,
-    );
+    let col_device_filters =
+        col_device_filters(sniffer.language, font, sniffer.filters, &sniffer.device);
 
-    let col_data_representation = col_data_representation(
-        sniffer.language,
-        font,
-        &sniffer.style,
-        sniffer.traffic_chart.chart_type,
-    );
+    let col_data_representation =
+        col_data_representation(sniffer.language, font, sniffer.traffic_chart.chart_type);
 
     let col_bytes_packets = col_bytes_packets(
         sniffer.language,
@@ -621,10 +465,10 @@ fn lazy_col_info(
         filtered,
         all_bytes,
         filtered_bytes,
-        &sniffer.style,
+        font,
     );
 
-    Column::new()
+    let content = Column::new()
         .align_items(Alignment::Center)
         .padding([5, 10])
         .push(
@@ -632,41 +476,73 @@ fn lazy_col_info(
                 .height(Length::Fixed(120.0))
                 .push(
                     Scrollable::new(col_device_filters)
-                        .width(Length::FillPortion(1))
-                        .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-                        )),
+                        .width(Length::Fill)
+                        .direction(Direction::Vertical(ScrollbarType::properties())),
                 )
-                .push(
-                    Rule::vertical(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(
-                        StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-                    )),
-                )
+                .push(Rule::vertical(25))
                 .push(col_data_representation),
         )
-        .push(
-            Rule::horizontal(25).style(<StyleTuple as Into<iced::theme::Rule>>::into(StyleTuple(
-                Arc::clone(&sniffer.style),
-                ElementType::Standard,
-            ))),
-        )
+        .push(Rule::horizontal(25))
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
-                .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                    StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-                )),
-        )
+                .direction(Direction::Vertical(ScrollbarType::properties())),
+        );
+
+    Container::new(content)
+        .width(Length::Fixed(400.0))
+        .padding([10, 5, 5, 5])
+        .height(Length::Fill)
+        .align_x(Horizontal::Center)
+        .style(ContainerType::BorderedRound)
+}
+
+fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer<StyleType>> {
+    let traffic_chart = &sniffer.traffic_chart;
+    let language = sniffer.language;
+
+    let mut chart_info_string = String::from("(");
+    chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {
+        packets_chart_translation(language)
+    } else {
+        bytes_chart_translation(language)
+    });
+    chart_info_string.push(')');
+
+    Container::new(
+        Column::new()
+            .align_items(Alignment::Center)
+            .push(
+                Row::new()
+                    .padding([10, 0, 15, 0])
+                    .spacing(10)
+                    .align_items(Alignment::Center)
+                    .push(
+                        traffic_rate_translation(language)
+                            .font(font)
+                            .style(TextType::Title)
+                            .size(FONT_SIZE_TITLE),
+                    )
+                    .push(
+                        Text::new(chart_info_string)
+                            .style(TextType::Subtitle)
+                            .font(font),
+                    ),
+            )
+            .push(traffic_chart.view()),
+    )
+    .width(Fill)
+    .align_x(Horizontal::Center)
+    .align_y(Vertical::Center)
+    .style(ContainerType::BorderedRound)
 }
 
 fn col_device_filters(
     language: Language,
-    style: &Arc<StyleType>,
-    filters: &Filters,
+    font: Font,
+    filters: Filters,
     device: &MyDevice,
-) -> Column<'static, Message> {
-    let font = get_font(style);
-
+) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
@@ -675,30 +551,29 @@ fn col_device_filters(
     let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
     Column::new()
-        .push(
-            Text::new(format!("{}:", network_adapter_translation(language),))
-                .font(font)
-                .style(StyleTuple(Arc::clone(style), ElementType::Subtitle)),
-        )
-        .push(Text::new(format!("   {adapter_info}",)).font(font))
+        .width(Length::FillPortion(1))
+        .push(TextType::highlighted_subtitle_with_desc(
+            network_adapter_translation(language),
+            adapter_info,
+            font,
+        ))
         .push(vertical_space(15))
-        .push(get_active_filters_col(filters, language, style))
+        .push(get_active_filters_col(filters, language, font))
 }
 
 fn col_data_representation(
     language: Language,
     font: Font,
-    style: &Arc<StyleType>,
     chart_type: ChartType,
-) -> Column<'static, Message> {
+) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .width(Length::FillPortion(1))
         .push(
             Text::new(format!("{}:", data_representation_translation(language)))
-                .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
+                .style(TextType::Subtitle)
                 .font(font),
         )
-        .push(chart_radios(chart_type, font, style, language))
+        .push(chart_radios(chart_type, font, language))
 }
 
 fn col_bytes_packets(
@@ -708,71 +583,48 @@ fn col_bytes_packets(
     filtered: u128,
     all_bytes: u128,
     filtered_bytes: u128,
-    style: &Arc<StyleType>,
-) -> Column<'static, Message> {
-    let font = get_font(style);
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
     let dropped_val = if dropped > 0 {
         format!(
-            "   {} {}",
+            "{} {}",
             dropped,
             of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
         )
     } else {
-        format!("   {}", none_translation(language))
+        none_translation(language).to_string()
     };
+    let bytes_value = if dropped > 0 {
+        get_formatted_bytes_string_with_b(filtered_bytes)
+    } else {
+        format!(
+            "{} {}",
+            &get_formatted_bytes_string_with_b(filtered_bytes),
+            of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
+        )
+    };
+
     Column::new()
         .spacing(15)
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", filtered_bytes_translation(language)))
-                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
-                        .font(font),
-                )
-                .push(
-                    if dropped > 0 {
-                        Text::new(format!(
-                            "   {}",
-                            &get_formatted_bytes_string_with_b(filtered_bytes)
-                        ))
-                    } else {
-                        Text::new(format!(
-                            "   {} {}",
-                            &get_formatted_bytes_string_with_b(filtered_bytes),
-                            of_total_translation(
-                                language,
-                                &get_percentage_string(all_bytes, filtered_bytes)
-                            )
-                        ))
-                    }
-                    .font(font),
-                ),
-        )
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", filtered_packets_translation(language)))
-                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
-                        .font(font),
-                )
-                .push(
-                    Text::new(format!(
-                        "   {} {}",
-                        filtered,
-                        of_total_translation(language, &get_percentage_string(total, filtered))
-                    ))
-                    .font(font),
-                ),
-        )
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", dropped_packets_translation(language)))
-                        .style(StyleTuple(Arc::clone(style), ElementType::Subtitle))
-                        .font(font),
-                )
-                .push(Text::new(dropped_val).font(font)),
-        )
+        .push(TextType::highlighted_subtitle_with_desc(
+            filtered_bytes_translation(language),
+            &bytes_value,
+            font,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            filtered_packets_translation(language),
+            &format!(
+                "{} {}",
+                filtered,
+                of_total_translation(language, &get_percentage_string(total, filtered))
+            ),
+            font,
+        ))
+        .push(TextType::highlighted_subtitle_with_desc(
+            dropped_packets_translation(language),
+            &dropped_val,
+            font,
+        ))
 }
 
 fn get_bars_length(
@@ -782,7 +634,7 @@ fn get_bars_length(
     data_info: &DataInfo,
 ) -> (f32, f32) {
     #[allow(clippy::cast_precision_loss)]
-    match chart_type {
+    let (mut incoming_bar_len, mut outgoing_bar_len) = match chart_type {
         ChartType::Packets => (
             tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
             tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
@@ -791,5 +643,34 @@ fn get_bars_length(
             tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
             tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
         ),
+    };
+
+    // normalize smaller values
+    if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
+        incoming_bar_len = 3.0;
     }
+    if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+        outgoing_bar_len = 3.0;
+    }
+
+    (incoming_bar_len, outgoing_bar_len)
+}
+
+fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Renderer<StyleType>> {
+    button(
+        Icon::Star
+            .to_text()
+            .size(20)
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
+    )
+    .padding(0)
+    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
+    .width(Length::Fixed(FLAGS_WIDTH_BIG))
+    .style(if is_favorite {
+        ButtonType::Starred
+    } else {
+        ButtonType::NotStarred
+    })
+    .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }

@@ -1,64 +1,84 @@
 //! Containers style
 
+#![allow(clippy::module_name_repetitions)]
+
 use iced::widget::container::Appearance;
-use iced::Theme;
 use iced::{Background, Color};
 
-use crate::get_colors;
 use crate::gui::styles::style_constants::{
-    get_color_mix_filter_badge, BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
+    get_alpha_chart_badge, get_alpha_round_borders, get_alpha_round_containers,
+    BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
 };
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
+use crate::{get_colors, StyleType};
 
-impl From<StyleTuple> for iced::theme::Container {
-    fn from(tuple: StyleTuple) -> Self {
-        iced::theme::Container::Custom(Box::new(tuple))
-    }
+#[derive(Clone, Copy, Default)]
+pub enum ContainerType {
+    #[default]
+    Standard,
+    BorderedRound,
+    Tooltip,
+    Badge,
+    Palette,
+    Neutral,
+    Gradient(GradientType),
+    Modal,
 }
 
-impl iced::widget::container::StyleSheet for StyleTuple {
-    type Style = Theme;
+impl iced::widget::container::StyleSheet for StyleType {
+    type Style = ContainerType;
 
-    fn appearance(&self, _: &Self::Style) -> Appearance {
-        let colors = get_colors(&self.0);
+    fn appearance(&self, style: &Self::Style) -> Appearance {
+        let colors = get_colors(*self);
         Appearance {
-            text_color: Some(match self {
-                StyleTuple(_, ElementType::Headers) => colors.text_headers,
+            text_color: Some(match style {
+                ContainerType::Gradient(_) => colors.text_headers,
                 _ => colors.text_body,
             }),
-            background: Some(Background::Color(match self {
-                StyleTuple(_, ElementType::Headers) => colors.secondary,
-                StyleTuple(_, ElementType::Tooltip) => colors.buttons,
-                StyleTuple(_, ElementType::BorderedRound) => colors.round_containers,
-                StyleTuple(_, ElementType::Neutral | ElementType::Palette) => Color::TRANSPARENT,
-                StyleTuple(_, ElementType::Badge) => Color {
-                    a: get_color_mix_filter_badge(&self.0),
-                    ..colors.secondary
-                },
-                _ => colors.primary,
-            })),
-            border_radius: match self {
-                StyleTuple(_, ElementType::BorderedRound | ElementType::Alert) => {
-                    BORDER_ROUNDED_RADIUS
+            background: Some(match style {
+                ContainerType::Gradient(GradientType::None) => Background::Color(colors.secondary),
+                ContainerType::Tooltip => Background::Color(colors.buttons),
+                ContainerType::BorderedRound => Background::Color(Color {
+                    a: get_alpha_round_containers(*self),
+                    ..colors.buttons
+                }),
+                ContainerType::Neutral | ContainerType::Palette => {
+                    Background::Color(Color::TRANSPARENT)
                 }
-                StyleTuple(_, ElementType::Tooltip) => 7.0,
-                StyleTuple(_, ElementType::Badge) => 100.0,
-                _ => 0.0,
+                ContainerType::Badge => Background::Color(Color {
+                    a: get_alpha_chart_badge(*self),
+                    ..colors.secondary
+                }),
+                ContainerType::Gradient(gradient_type) => Background::Gradient(
+                    get_gradient_headers(&colors, *gradient_type, self.is_nightly()),
+                ),
+                ContainerType::Modal => Background::Color(colors.primary),
+                ContainerType::Standard => Background::Color(Color::TRANSPARENT),
+            }),
+            border_radius: match style {
+                ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
+                ContainerType::Modal => {
+                    [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
+                }
+                ContainerType::Tooltip => 7.0.into(),
+                ContainerType::Badge => 100.0.into(),
+                _ => 0.0.into(),
             },
-            border_width: match self {
-                StyleTuple(
-                    _,
-                    ElementType::Standard | ElementType::Headers | ElementType::Neutral,
-                ) => 0.0,
-                StyleTuple(_, ElementType::Tooltip) => BORDER_WIDTH / 2.0,
-                StyleTuple(_, ElementType::BorderedRound) => BORDER_WIDTH * 2.0,
+            border_width: match style {
+                ContainerType::Standard
+                | ContainerType::Modal
+                | ContainerType::Neutral
+                | ContainerType::Gradient(_) => 0.0,
+                ContainerType::Tooltip => BORDER_WIDTH / 2.0,
+                ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
-            border_color: match self {
-                StyleTuple(_, ElementType::Alert) => Color::new(1.0, 0.0, 0.0, 1.0),
-                StyleTuple(_, ElementType::Palette) => Color::BLACK,
-                _ => colors.round_borders,
+            border_color: match style {
+                ContainerType::Palette => Color::BLACK,
+                _ => Color {
+                    a: get_alpha_round_borders(*self),
+                    ..colors.buttons
+                },
             },
         }
     }

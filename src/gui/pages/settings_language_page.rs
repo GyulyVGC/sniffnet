@@ -1,38 +1,34 @@
-use std::sync::Arc;
-
+use iced::widget::vertical_space;
 use iced::widget::{Column, Container, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Length};
-use iced_native::widget::vertical_space;
+use iced::{Alignment, Length, Renderer};
 
 use crate::gui::components::radio::language_radios;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE};
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::languages_title_translation;
-use crate::{Language, Sniffer};
+use crate::{Language, Sniffer, StyleType};
 
-pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(&sniffer.style);
+pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
 
     let language_active = sniffer.language;
-    let row_language_radio_1 =
-        language_radios(language_active, &Language::ROW1, font, &sniffer.style);
-    let row_language_radio_2 =
-        language_radios(language_active, &Language::ROW2, font, &sniffer.style);
-    let row_language_radio_3 =
-        language_radios(language_active, &Language::ROW3, font, &sniffer.style);
-    let row_language_radio_4 =
-        language_radios(language_active, &Language::ROW4, font, &sniffer.style);
-    let row_language_radio_5 =
-        language_radios(language_active, &Language::ROW5, font, &sniffer.style);
+    let row_language_radio_1 = language_radios(language_active, &Language::ROW1, font);
+    let row_language_radio_2 = language_radios(language_active, &Language::ROW2, font);
+    let row_language_radio_3 = language_radios(language_active, &Language::ROW3, font);
+    let row_language_radio_4 = language_radios(language_active, &Language::ROW4, font);
+    let row_language_radio_5 = language_radios(language_active, &Language::ROW5, font);
     let col_language_radio_all = Column::new()
         .spacing(10)
+        .align_items(Alignment::Center)
         .push(row_language_radio_1)
+        .push(vertical_space(0))
         .push(row_language_radio_2)
         .push(row_language_radio_3)
         .push(row_language_radio_4)
@@ -41,34 +37,25 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(&sniffer.style, sniffer.language))
+        .push(settings_header(
+            font,
+            font_headers,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
-            [
-                SettingsPage::Notifications,
-                SettingsPage::Appearance,
-                SettingsPage::Language,
-            ],
-            &["7 ", "K ", "c "],
-            &[
-                Message::OpenSettings(SettingsPage::Notifications),
-                Message::OpenSettings(SettingsPage::Appearance),
-                Message::TickInit,
-            ],
             SettingsPage::Language,
-            &sniffer.style,
+            font,
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))
         .push(
             languages_title_translation(sniffer.language)
-                .style(StyleTuple(
-                    Arc::clone(&sniffer.style),
-                    ElementType::Subtitle,
-                ))
+                .style(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Fixed(40.0)))
+        .push(vertical_space(Fixed(25.0)))
         .push(col_language_radio_all);
 
     if [Language::EL, Language::PT].contains(&sniffer.language) {
@@ -77,16 +64,12 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message> {
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
             )
             .padding(10.0)
-            .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                StyleTuple(Arc::clone(&sniffer.style), ElementType::Badge),
-            )),
+            .style(ContainerType::Badge),
         );
     }
 
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-        ))
+        .style(ContainerType::Modal)
 }

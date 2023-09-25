@@ -1,24 +1,45 @@
+use iced::application;
+use iced::application::Appearance;
 use serde::{Deserialize, Serialize};
 
-use super::custom_style::{deserialize_from_path, serialize_to_path, CustomStyle};
+use crate::get_colors;
+use crate::gui::styles::types::custom_palette::ExtraStyles;
 
 /// Used to specify the kind of style of the application
-#[derive(Clone, Serialize, Deserialize, Debug, Hash, PartialEq)]
-#[serde(tag = "style", content = "path")]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
+#[serde(tag = "style", content = "name")]
 pub enum StyleType {
     Night,
     Day,
     DeepSea,
     MonAmour,
-    #[serde(
-        serialize_with = "serialize_to_path",
-        deserialize_with = "deserialize_from_path"
-    )]
-    Custom(CustomStyle),
+    Custom(ExtraStyles),
 }
 
 impl Default for StyleType {
     fn default() -> Self {
         Self::Night
+    }
+}
+
+impl application::StyleSheet for StyleType {
+    type Style = ();
+
+    fn appearance(&self, _: &Self::Style) -> Appearance {
+        let colors = get_colors(*self);
+        Appearance {
+            background_color: colors.primary,
+            text_color: colors.text_body,
+        }
+    }
+}
+
+impl StyleType {
+    pub fn is_nightly(self) -> bool {
+        match self {
+            StyleType::Night | StyleType::DeepSea => true,
+            StyleType::Day | StyleType::MonAmour => false,
+            StyleType::Custom(style) => style.is_nightly(),
+        }
     }
 }

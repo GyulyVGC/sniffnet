@@ -1,25 +1,26 @@
-use std::sync::Arc;
-
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::Slider;
 use iced::widget::{
     button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
     TextInput, Tooltip,
 };
 use iced::Length::Fixed;
-use iced::{Alignment, Length};
-use iced_native::widget::tooltip::Position;
-use iced_native::widget::Slider;
+use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
 };
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
+    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
 };
-use crate::gui::styles::types::element_type::ElementType;
-use crate::gui::styles::types::style_tuple::StyleTuple;
+use crate::gui::styles::text::TextType;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
@@ -29,37 +30,31 @@ use crate::translations::translations::{
     notifications_title_translation, packets_threshold_translation, per_second_translation,
     settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
 };
+use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
-pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
-    let font = get_font(&sniffer.style);
+pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+    let font = get_font(sniffer.style);
+    let font_headers = get_font_headers(sniffer.style);
+
     let mut content = Column::new()
         .width(Length::Fill)
-        .push(settings_header(&sniffer.style, sniffer.language))
+        .push(settings_header(
+            font,
+            font_headers,
+            sniffer.color_gradient,
+            sniffer.language,
+        ))
         .push(get_settings_tabs(
-            [
-                SettingsPage::Notifications,
-                SettingsPage::Appearance,
-                SettingsPage::Language,
-            ],
-            &["7 ", "K ", "c "],
-            &[
-                Message::TickInit,
-                Message::OpenSettings(SettingsPage::Appearance),
-                Message::OpenSettings(SettingsPage::Language),
-            ],
             SettingsPage::Notifications,
-            &sniffer.style,
+            font,
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))
         .push(
             notifications_title_translation(sniffer.language)
                 .font(font)
-                .style(StyleTuple(
-                    Arc::clone(&sniffer.style),
-                    ElementType::Subtitle,
-                ))
+                .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
@@ -71,7 +66,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
         .width(Length::Fill)
         .push(volume_slider(
             sniffer.language,
-            &sniffer.style,
+            font,
             sniffer.notifications.volume,
         ))
         .push(
@@ -81,22 +76,20 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
                     .push(get_packets_notify(
                         sniffer.notifications.packets_notification,
                         sniffer.language,
-                        &sniffer.style,
+                        font,
                     ))
                     .push(get_bytes_notify(
                         sniffer.notifications.bytes_notification,
                         sniffer.language,
-                        &sniffer.style,
+                        font,
                     ))
                     .push(get_favorite_notify(
                         sniffer.notifications.favorite_notification,
                         sniffer.language,
-                        &sniffer.style,
+                        font,
                     )),
             )
-            .style(<StyleTuple as Into<iced::theme::Scrollable>>::into(
-                StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-            )),
+            .direction(Direction::Vertical(ScrollbarType::properties())),
         );
 
     content = content.push(volume_notification_col);
@@ -104,17 +97,14 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message> {
     Container::new(content)
         .height(Fixed(400.0))
         .width(Fixed(800.0))
-        .style(<StyleTuple as Into<iced::theme::Container>>::into(
-            StyleTuple(Arc::clone(&sniffer.style), ElementType::Standard),
-        ))
+        .style(ContainerType::Modal)
 }
 
 fn get_packets_notify(
     packets_notification: PacketsNotification,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Column<'static, Message> {
-    let font = get_font(style);
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
     let checkbox = Checkbox::new(
         packets_threshold_translation(language),
         packets_notification.threshold.is_some(),
@@ -139,10 +129,7 @@ fn get_packets_notify(
         },
     )
     .size(18)
-    .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(Arc::clone(style), ElementType::Standard),
-    ));
+    .font(font);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
@@ -151,22 +138,19 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     } else {
         let input_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
-            .push(input_group_packets(packets_notification, style, language));
+            .push(input_group_packets(packets_notification, font, language));
         let sound_row =
             Row::new()
                 .push(horizontal_space(Fixed(50.0)))
                 .push(sound_packets_threshold_radios(
                     packets_notification,
                     font,
-                    style,
                     language,
                 ));
         ret_val = ret_val
@@ -177,9 +161,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     }
 }
@@ -187,9 +169,8 @@ fn get_packets_notify(
 fn get_bytes_notify(
     bytes_notification: BytesNotification,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Column<'static, Message> {
-    let font = get_font(style);
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
     let checkbox = Checkbox::new(
         bytes_threshold_translation(language),
         bytes_notification.threshold.is_some(),
@@ -214,10 +195,7 @@ fn get_bytes_notify(
         },
     )
     .size(18)
-    .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(Arc::clone(style), ElementType::Standard),
-    ));
+    .font(font);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
@@ -226,22 +204,19 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     } else {
         let input_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
-            .push(input_group_bytes(bytes_notification, style, language));
+            .push(input_group_bytes(bytes_notification, font, language));
         let sound_row =
             Row::new()
                 .push(horizontal_space(Fixed(50.0)))
                 .push(sound_bytes_threshold_radios(
                     bytes_notification,
                     font,
-                    style,
                     language,
                 ));
         ret_val = ret_val
@@ -252,9 +227,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     }
 }
@@ -262,9 +235,8 @@ fn get_bytes_notify(
 fn get_favorite_notify(
     favorite_notification: FavoriteNotification,
     language: Language,
-    style: &Arc<StyleType>,
-) -> Column<'static, Message> {
-    let font = get_font(style);
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
     let checkbox = Checkbox::new(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
@@ -280,49 +252,36 @@ fn get_favorite_notify(
         },
     )
     .size(18)
-    .font(font)
-    .style(<StyleTuple as Into<iced::theme::Checkbox>>::into(
-        StyleTuple(Arc::clone(style), ElementType::Standard),
-    ));
+    .font(font);
 
     let mut ret_val = Column::new().spacing(5).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
         let sound_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
-            .push(sound_favorite_radios(
-                favorite_notification,
-                font,
-                style,
-                language,
-            ));
+            .push(sound_favorite_radios(favorite_notification, font, language));
         ret_val = ret_val.push(vertical_space(Fixed(5.0))).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(Fixed(700.0))
-                .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                    StyleTuple(Arc::clone(style), ElementType::BorderedRound),
-                )),
+                .style(ContainerType::BorderedRound),
         )
     }
 }
 
 fn input_group_packets(
     packets_notification: PacketsNotification,
-    style: &Arc<StyleType>,
+    font: Font,
     language: Language,
-) -> Container<'static, Message> {
-    let font = get_font(style);
+) -> Container<'static, Message, Renderer<StyleType>> {
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
         .spacing(10)
@@ -345,10 +304,7 @@ fn input_group_packets(
             })
             .padding([0, 0, 0, 10])
             .font(font)
-            .width(Length::Fixed(100.0))
-            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-                StyleTuple(Arc::clone(style), ElementType::Standard),
-            )),
+            .width(Length::Fixed(100.0)),
         )
         .push(
             Text::new(per_second_translation(language))
@@ -363,10 +319,9 @@ fn input_group_packets(
 
 fn input_group_bytes(
     bytes_notification: BytesNotification,
-    style: &Arc<StyleType>,
+    font: Font,
     language: Language,
-) -> Container<'static, Message> {
-    let font = get_font(style);
+) -> Container<'static, Message, Renderer<StyleType>> {
     let mut info_str = per_second_translation(language).to_string();
     info_str.push_str(specify_multiples_translation(language));
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
@@ -390,10 +345,7 @@ fn input_group_bytes(
             })
             .padding([0, 0, 0, 10])
             .font(font)
-            .width(Length::Fixed(100.0))
-            .style(<StyleTuple as Into<iced::theme::TextInput>>::into(
-                StyleTuple(Arc::clone(style), ElementType::Standard),
-            )),
+            .width(Length::Fixed(100.0)),
         )
         .push(
             Text::new(info_str)
@@ -408,10 +360,9 @@ fn input_group_bytes(
 
 fn volume_slider(
     language: Language,
-    style: &Arc<StyleType>,
+    font: Font,
     volume: u8,
-) -> Container<'static, Message> {
-    let font = get_font(style);
+) -> Container<'static, Message, Renderer<StyleType>> {
     Container::new(
         Column::new()
             .spacing(5)
@@ -420,27 +371,23 @@ fn volume_slider(
             .push(
                 Row::new()
                     .push(
-                        Text::new('Y'.to_string())
+                        Icon::AudioMute
+                            .to_text()
                             .width(Fixed(30.0))
                             .vertical_alignment(Vertical::Center)
-                            .size(20)
-                            .font(ICONS),
+                            .size(20),
                     )
                     .push(
                         Slider::new(0..=100, volume, Message::ChangeVolume)
                             .step(5)
-                            .width(Fixed(200.0))
-                            .style(<StyleTuple as Into<iced::theme::Slider>>::into(StyleTuple(
-                                Arc::clone(style),
-                                ElementType::Standard,
-                            ))),
+                            .width(Fixed(200.0)),
                     )
                     .push(horizontal_space(Length::Fixed(15.0)))
                     .push(
-                        Text::new("Z")
+                        Icon::AudioHigh
+                            .to_text()
                             .vertical_alignment(Vertical::Center)
-                            .size(20)
-                            .font(ICONS),
+                            .size(20),
                     ),
             ),
     )
@@ -451,8 +398,12 @@ fn volume_slider(
     .align_y(Vertical::Center)
 }
 
-pub fn settings_header(style: &Arc<StyleType>, language: Language) -> Container<'static, Message> {
-    let font = get_font(style);
+pub fn settings_header(
+    font: Font,
+    font_headers: Font,
+    color_gradient: GradientType,
+    language: Language,
+) -> Container<'static, Message, Renderer<StyleType>> {
     let tooltip = hide_translation(language).to_string();
     //tooltip.push_str(" [esc]");
     Container::new(
@@ -460,7 +411,7 @@ pub fn settings_header(style: &Arc<StyleType>, language: Language) -> Container<
             .push(horizontal_space(Length::FillPortion(1)))
             .push(
                 Text::new(settings_translation(language))
-                    .font(get_font_headers(style))
+                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .horizontal_alignment(Horizontal::Center),
@@ -471,21 +422,19 @@ pub fn settings_header(style: &Arc<StyleType>, language: Language) -> Container<
                         button(
                             Text::new("×")
                                 .font(font)
+                                .vertical_alignment(Vertical::Center)
                                 .horizontal_alignment(Horizontal::Center)
                                 .size(15),
                         )
                         .padding(2)
                         .height(Fixed(20.0))
                         .width(Fixed(20.0))
-                        .style(StyleTuple(Arc::clone(style), ElementType::Standard).into())
                         .on_press(Message::CloseSettings),
                         tooltip,
                         Position::Right,
                     )
                     .font(font)
-                    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-                        StyleTuple(Arc::clone(style), ElementType::Tooltip),
-                    )),
+                    .style(ContainerType::Tooltip),
                 )
                 .width(Length::FillPortion(1))
                 .align_x(Horizontal::Center),
@@ -495,7 +444,5 @@ pub fn settings_header(style: &Arc<StyleType>, language: Language) -> Container<
     .align_y(Vertical::Center)
     .height(Fixed(40.0))
     .width(Length::Fill)
-    .style(<StyleTuple as Into<iced::theme::Container>>::into(
-        StyleTuple(Arc::clone(style), ElementType::Headers),
-    ))
+    .style(ContainerType::Gradient(color_gradient))
 }

@@ -1,6 +1,6 @@
 [package]
 name        = "sniffnet"
-version     = "1.2.1"
+version     = "1.2.2"
 authors     = [ "Giuliano Bellini" ]
 edition     = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -35,26 +35,29 @@ strip = true
 [dependencies]
 pcap = "1.1.0"
 etherparse = "0.13.0"
-chrono = { version = "0.4.26", default_features = false, features = ["clock"] }
+chrono = { version = "0.4.28", default_features = false, features = ["clock"] }
 indexmap = "2.0.0"
 plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
-iced = { version = "0.9.0", features = ["tokio", "svg"] }
-iced_native = "0.10.3"
-iced_lazy = "0.6.1"
-plotters-iced = "0.8.0"
+iced = { version = "0.10.0", features = ["tokio", "svg", "advanced", "lazy"] }
+plotters-iced = "0.9.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
-serde = { version = "1.0.175", default_features = false, features = ["derive", "rc"] }
+serde = { version = "1.0.188", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
-reqwest = { version = "0.11.18", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 dns-lookup = "2.0.2"
-toml = "0.7.4"
+toml = "0.8.0"
+
+[target.'cfg(target_arch = "powerpc64")'.dependencies]
+reqwest = { version = "0.11.20", features = ["json", "blocking"] }
+
+[target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
+reqwest = { version = "0.11.20", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
-rstest = "0.18.1"
-serde_test = "1.0.171"
+serde_test = "1.0.176"
+rstest = "0.18.2"
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 

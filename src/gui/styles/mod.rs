@@ -1,12 +1,14 @@
 pub mod button;
 pub mod checkbox;
 pub mod container;
+pub mod custom_themes;
 pub mod picklist;
 pub mod radio;
 pub mod rule;
 pub mod scrollbar;
 pub mod slider;
 pub mod style_constants;
+pub mod svg;
 pub mod text;
 pub mod text_input;
 pub mod types;
