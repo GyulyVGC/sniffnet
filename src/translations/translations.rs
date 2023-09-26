@@ -1880,11 +1880,3 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::JA => "最新の通知 30 件のみ表示されます",
     }
 }
-
-pub fn custom_theme_path(language: Language) -> &'static str {
-    // Currently only English because it's a new text
-    match language {
-        Language::EN => "Path to a custom theme and hit enter!",
-        _ => custom_theme_path(Language::EN),
-    }
-}

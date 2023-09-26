@@ -2,7 +2,9 @@
 
 use iced::Color;
 use plotters::style::RGBColor;
+use serde::Deserialize;
 
+use super::color_remote::deserialize_color;
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
@@ -16,18 +18,25 @@ use crate::StyleType;
 /// - `secondary` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
+#[derive(Debug, Deserialize)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
+    #[serde(deserialize_with = "deserialize_color")]
     pub primary: Color,
     /// Secondary color of the GUI (incoming connections, header, footer, buttons' borders, radio selection)
+    #[serde(deserialize_with = "deserialize_color")]
     pub secondary: Color,
     /// Color of outgoing connections
+    #[serde(deserialize_with = "deserialize_color")]
     pub outgoing: Color,
     /// Color of active buttons (when not hovered) and inactive tabs
+    #[serde(deserialize_with = "deserialize_color")]
     pub buttons: Color,
     /// Color of header and footer text
+    #[serde(deserialize_with = "deserialize_color")]
     pub text_headers: Color,
     /// Color of body and buttons text
+    #[serde(deserialize_with = "deserialize_color")]
     pub text_body: Color,
 }
 

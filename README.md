@@ -377,27 +377,18 @@ The currently usable hotkeys are reported in the following.
 
   <summary>See details</summary>
 
-  Custom themes are specified as a TOML file that may be loaded from anywhere. Themes support multilingual
-  descriptions.
+  Custom themes are specified as a TOML file.
 
   The TOML must follow this format:
   ```toml
   name = "Catppuccin (Mocha)"
 
-  [description]
-  EN = "Catppuccin is a colorful, medium contrast pastel theme.\nhttps://github.com/catppuccin/catppuccin"
-  # Contributed by Emilia
-  HU = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin"
-  # Contributed by Bartosz
-  PL = "Catppuccin to kolorowy i pastelowy motyw o średnim kontraście.\nhttps://github.com/catppuccin/catppuccin"
-
   # Color palettes are in RGBA hexadecimal where the alpha is optional.
   [palette]
   primary = "#1e1e2e"          # Base
   secondary = "#89b4fa"        # Blue
-  buttons = "#313244"          # Surface0
-  incoming = "#89b4fa"         # Blue
   outgoing = "#f5c2e7"         # Pink
+  buttons = "#313244"          # Surface0
   text_headers = "#11111b"     # Crust
   text_body = "#cdd6f4"        # Text
   round_borders = "#74c7ec"    # Sapphire
@@ -438,7 +429,7 @@ branch, which uses the `glow` renderer.
 ||||||| ec3c96f
 In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause some problems that could prevent you from running Sniffnet. <br>
-In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer) 
+In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer)
 branch, which uses the `glow` renderer.
 
 > **Note**
@@ -446,9 +437,9 @@ branch, which uses the `glow` renderer.
 > View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
 =======
 In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
-the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced) 
+the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause problems (country icons are completely black, or the interface glitches). <br>
-In these cases you can download an alternative version of the application, 
+In these cases you can download an alternative version of the application,
 which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
 [Windows](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640695) |
 [macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |
