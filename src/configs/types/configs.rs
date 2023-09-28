@@ -1,3 +1,5 @@
+use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
+use crate::gui::styles::types::style_type::StyleType;
 use crate::{ConfigAdvancedSettings, ConfigDevice, ConfigSettings, ConfigWindow};
 
 #[derive(Default)]
@@ -10,10 +12,19 @@ pub struct Configs {
 
 impl Configs {
     pub fn load() -> Self {
+        let mut settings = ConfigSettings::load();
+        let advanced_settings = ConfigAdvancedSettings::load();
+
+        if let Some(style_path) = &advanced_settings.style_path {
+            settings.style = CustomPalette::from_file(style_path)
+                .map(|palette| StyleType::Custom(ExtraStyles::CustomToml(palette)))
+                .unwrap_or_default()
+        }
+
         Configs {
-            settings: ConfigSettings::load(),
+            settings,
             device: ConfigDevice::load(),
-            advanced_settings: ConfigAdvancedSettings::load(),
+            advanced_settings,
             window: ConfigWindow::load(),
         }
     }

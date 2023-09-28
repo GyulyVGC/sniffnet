@@ -1,21 +1,24 @@
 use std::fmt;
 use std::fs::{self, File};
+use std::hash::{Hash, Hasher};
 use std::io::{self, BufReader, Read};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use iced::Color;
 use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
 
-use super::color_remote::deserialize_color;
+use super::color_remote::{color_hash, deserialize_color};
 use crate::gui::styles::custom_themes::{dracula, gruvbox, nord, solarized};
 use crate::gui::styles::types::palette::Palette;
+
+const FLOAT_PRECISION: f32 = 10000.0;
 
 /// Custom style with any relevant metadata
 // NOTE: This is flattened for ergonomics. With flatten, both [Palette] and [PaletteExtension] can be
 // defined in the TOML as a single entity rather than two separate tables. This is intentional because
 // the separation between palette and its extension is an implementation detail that shouldn't be exposed
 // to custom theme designers.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 pub struct CustomPalette {
     /// Base colors for the theme
     #[serde(flatten)]
@@ -26,7 +29,7 @@ pub struct CustomPalette {
 }
 
 /// Extension color for themes.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 pub struct PaletteExtension {
     /// Color of favorites star
     #[serde(deserialize_with = "deserialize_color")]
@@ -37,6 +40,8 @@ pub struct PaletteExtension {
     pub round_borders_alpha: f32,
     /// Round containers alpha
     pub round_containers_alpha: f32,
+    /// Nightly (dark) style
+    pub nightly: bool,
 }
 
 impl CustomPalette {
@@ -46,10 +51,9 @@ impl CustomPalette {
     /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
     pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
     where
-        P: Into<String>,
+        P: AsRef<Path>,
     {
         // Try to open the file at `path`
-        let path = path.into();
         let mut toml_reader = File::open(path)
             .map_err(DeErrorTrait::custom)
             .map(BufReader::new)?;
@@ -88,8 +92,49 @@ impl CustomPalette {
     }
 }
 
+impl Hash for CustomPalette {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Self { palette, extension } = self;
+
+        let Palette {
+            primary,
+            secondary,
+            outgoing,
+            buttons,
+            text_headers,
+            text_body,
+        } = palette;
+
+        color_hash(*primary, state);
+        color_hash(*secondary, state);
+        color_hash(*outgoing, state);
+        color_hash(*buttons, state);
+        color_hash(*text_headers, state);
+        color_hash(*text_body, state);
+
+        extension.hash(state)
+    }
+}
+
+impl Hash for PaletteExtension {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Self {
+            starred,
+            chart_badge_alpha,
+            round_borders_alpha,
+            round_containers_alpha,
+            ..
+        } = self;
+
+        color_hash(*starred, state);
+        ((*chart_badge_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
+        ((*round_borders_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
+        ((*round_containers_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
+    }
+}
+
 /// Built in extra styles
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "custom")]
 pub enum ExtraStyles {
     DraculaDark,
@@ -100,6 +145,8 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
+    #[serde(skip)]
+    CustomToml(CustomPalette),
 }
 
 impl ExtraStyles {
@@ -114,6 +161,7 @@ impl ExtraStyles {
             ExtraStyles::NordDark => nord::nord_dark().palette,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().palette,
             ExtraStyles::SolarizedLight => solarized::solarized_light().palette,
+            ExtraStyles::CustomToml(user) => user.palette,
         }
     }
 
@@ -128,21 +176,13 @@ impl ExtraStyles {
             ExtraStyles::NordDark => nord::nord_dark().extension,
             ExtraStyles::SolarizedDark => solarized::solarized_dark().extension,
             ExtraStyles::SolarizedLight => solarized::solarized_light().extension,
+            ExtraStyles::CustomToml(user) => user.extension,
         }
     }
 
     /// Theme is a night/dark style
-    pub const fn is_nightly(self) -> bool {
-        match self {
-            ExtraStyles::DraculaDark
-            | ExtraStyles::GruvboxDark
-            | ExtraStyles::NordDark
-            | ExtraStyles::SolarizedDark => true,
-            ExtraStyles::DraculaLight
-            | ExtraStyles::GruvboxLight
-            | ExtraStyles::NordLight
-            | ExtraStyles::SolarizedLight => false,
-        }
+    pub fn is_nightly(self) -> bool {
+        self.to_ext().nightly
     }
 
     /// Slice of all implemented custom styles
@@ -171,6 +211,8 @@ impl fmt::Display for ExtraStyles {
             ExtraStyles::NordDark => write!(f, "Nord (Night)"),
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
+            // Custom style names aren't used anywhere so this shouldn't be reached
+            _ => unreachable!(),
         }
     }
 }

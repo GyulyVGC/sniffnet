@@ -11,6 +11,7 @@ pub struct ConfigAdvancedSettings {
     pub mmdb_country: String,
     pub mmdb_asn: String,
     pub output_path: PathBuf,
+    pub style_path: Option<PathBuf>
 }
 
 impl ConfigAdvancedSettings {
@@ -42,6 +43,7 @@ impl Default for ConfigAdvancedSettings {
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
             output_path: get_default_report_directory(),
+            style_path: None
         }
     }
 }

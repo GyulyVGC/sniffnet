@@ -23,6 +23,7 @@ pub(in crate::gui::styles) fn dracula_dark() -> CustomPalette {
             round_borders_alpha: 0.1,
             round_containers_alpha: 0.04,
             chart_badge_alpha: 0.15,
+            nightly: true
         },
     }
 }
@@ -43,6 +44,7 @@ pub(in crate::gui::styles) fn dracula_light() -> CustomPalette {
             chart_badge_alpha: 0.75,
             round_borders_alpha: 0.45,
             round_containers_alpha: 0.25,
+            nightly: true
         },
     }
 }

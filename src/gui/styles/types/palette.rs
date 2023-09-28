@@ -18,7 +18,7 @@ use crate::StyleType;
 /// - `secondary` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
     #[serde(deserialize_with = "deserialize_color")]
