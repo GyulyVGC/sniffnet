@@ -24,7 +24,7 @@ use iced::widget::{
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -83,6 +83,12 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             &sniffer.advanced_settings.mmdb_asn,
             &sniffer.country_mmdb_reader,
             &sniffer.asn_mmdb_reader,
+        ))
+        .push(custom_style_settings(
+            is_editable,
+            font,
+            sniffer.advanced_settings.style_path.as_deref(),
+            "",
         ));
 
     Container::new(content)
@@ -282,6 +288,37 @@ fn mmdb_input(
 
     if is_editable {
         input = input.on_input(message);
+    }
+
+    Row::new()
+        .spacing(5)
+        .push(Text::new(format!("{caption}:")).font(font))
+        .push(input)
+}
+
+fn custom_style_settings(
+    is_editable: bool,
+    font: Font,
+    custom_path: Option<&Path>,
+    caption: &str,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    let is_error = if custom_path.is_some() { false } else { true };
+
+    let mut input = TextInput::new(
+        "-",
+        &custom_path.map(Path::to_string_lossy).unwrap_or_default(),
+    )
+    .padding([0, 5])
+    .font(font)
+    .width(Length::Fixed(200.0))
+    .style(if is_error {
+        TextInputType::Error
+    } else {
+        TextInputType::Standard
+    });
+
+    if is_editable {
+        input = input.on_input(Message::LoadStyle);
     }
 
     Row::new()

@@ -43,6 +43,8 @@ pub enum Message {
     Reset,
     /// Change application style
     Style(StyleType),
+    /// Deserialize a style from a path
+    LoadStyle(String),
     /// Manage waiting time
     Waiting,
     /// Displays a modal
