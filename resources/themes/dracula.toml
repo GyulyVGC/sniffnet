@@ -1,18 +1,12 @@
-# https://draculatheme.com/contribute
-name = "Dracula"
-
-[description]
-EN = "Dark theme for high productivity"
-
 [palette]
-primary = "#44475a"          # Current line
-secondary = "#ff79c6"        # Pink
-buttons = "#6272a4"          # Comment
-outgoing = "#8be9fd"         # Cyan
-text_headers = "#44475a"     # Current line
-text_body = "#f8f8f2"        # Foreground
-round_borders = "#bd93f9"    # Purple
-round_containers = "#44475a" # Current line
-starred = "#f1fa8c"          # Yellow
-badge_alpha = 0.75
-color_mix_chart = 0.3
+primary = "#44475a"           # Current line
+secondary = "#ff79c6"         # Pink
+buttons = "#6272a4"           # Comment
+outgoing = "#8be9fd"          # Cyan
+text_headers = "#282a36"      # Background
+text_body = "#f8f8f2"         # Foreground
+starred = "#f1fa8cb2"         # Yellow
+round_borders_alpha = 0.1
+round_containers_alpha = 0.04
+chart_badge_alpha = 0.15
+nightly = true

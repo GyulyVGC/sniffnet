@@ -16,9 +16,12 @@ impl Configs {
         let advanced_settings = ConfigAdvancedSettings::load();
 
         if let Some(style_path) = &advanced_settings.style_path {
-            settings.style = CustomPalette::from_file(style_path)
+            // Don't clobber the previously set style if the path is broken
+            if let Ok(style) = CustomPalette::from_file(style_path)
                 .map(|palette| StyleType::Custom(ExtraStyles::CustomToml(palette)))
-                .unwrap_or_default()
+            {
+                settings.style = style;
+            }
         }
 
         Configs {
