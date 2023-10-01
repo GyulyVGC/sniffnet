@@ -381,23 +381,22 @@ The currently usable hotkeys are reported in the following.
 
   The TOML must follow this format:
   ```toml
-  name = "Catppuccin (Mocha)"
-
   # Color palettes are in RGBA hexadecimal where the alpha is optional.
-  [palette]
-  primary = "#1e1e2e"          # Base
-  secondary = "#89b4fa"        # Blue
-  outgoing = "#f5c2e7"         # Pink
-  buttons = "#313244"          # Surface0
-  text_headers = "#11111b"     # Crust
-  text_body = "#cdd6f4"        # Text
-  round_borders = "#74c7ec"    # Sapphire
-  round_containers = "#585b70" # Surface 2
-  starred = "#f9e2af"          # Yellow
+  primary = "#1e1e2e"           # Base
+  secondary = "#89b4fa"         # Blue
+  buttons = "#313244"           # Surface0
+  outgoing = "#f5c2e7"          # Pink
+  text_headers = "#11111b"      # Crust
+  text_body = "#cdd6f4"         # Text
+  starred = "#f9e2af"           # Yellow
 
   # Alpha channels are floats within [0.0, 1.0]
-  badge_alpha = 0.75
-  color_mix_chart = 0.3
+  round_borders_alpha = 0.1
+  round_containers_alpha = 0.15
+  chart_badge_alpha = 0.75
+
+  # Night or dark themes should be specified here
+  nightly = true
   ```
 
   The example theme above uses colors from [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
