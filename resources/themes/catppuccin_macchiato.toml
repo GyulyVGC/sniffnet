@@ -1,20 +1,12 @@
 # https://github.com/catppuccin/catppuccin
-name = "Catppuccin (Macchiato)"
-
-[description]
-EN = "Soothing pastel theme for the high-spirited!"
-# Contributed by Bartosz
-PL = "Kojący pastelowy motyw dla porywczych"
-
-[palette]
-primary = "#24273a"          # Base
-secondary = "#f5bde6"        # Pink
-buttons = "#363a4f"          # Surface0
-outgoing = "#c6a0f6"         # Mauve
-text_headers = "#181926"     # Crust
-text_body = "#cad3f5"        # Text
-round_borders = "#b7bdf8"    # Lavender
-round_containers = "#1e2030" # Mantle
-starred = "#eed49f"          # Yellow
-badge_alpha = 0.75
-color_mix_chart = 0.3
+primary = "#24273a"           # Base
+secondary = "#f5bde6"         # Pink
+buttons = "#363a4f"           # Surface0
+outgoing = "#c6a0f6"          # Mauve
+text_headers = "#181926"      # Crust
+text_body = "#cad3f5"         # Text
+starred = "#eed49f"           # Yellow
+round_borders_alpha = 0.1
+round_containers_alpha = 0.15
+chart_badge_alpha = 0.75
+nightly = true

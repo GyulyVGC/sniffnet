@@ -88,7 +88,7 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             is_editable,
             font,
             sniffer.advanced_settings.style_path.as_deref(),
-            "",
+            "Custom style",
         ));
 
     Container::new(content)
@@ -302,7 +302,8 @@ fn custom_style_settings(
     custom_path: Option<&Path>,
     caption: &str,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let is_error = if custom_path.is_some() { false } else { true };
+    let is_error = custom_path
+        .is_some_and(|path| path.extension().map_or(true, |ext| ext != "toml") || !path.exists());
 
     let mut input = TextInput::new(
         "-",

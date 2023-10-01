@@ -1,22 +1,12 @@
-# https://github.com/catppuccin/catppuccin
-name = "Catppuccin (Latte)"
-
-[description]
-EN = "Soothing pastel theme for the high-spirited!"
-# Contributed by Emilia
-# HU = "Catpuccin egy színes, közepes kontrasztú, pasztell téma.\nhttps://github.com/catppuccin/catppuccin"
-# Contributed by Bartosz
-PL = "Kojący pastelowy motyw dla porywczych"
-
-[palette]
-primary = "#eff1f5"          # Base
-secondary = "#1e66f5"        # Blue
-buttons = "#ccd0da"          # Surface0
-outgoing = "#ea76cb"         # Pink
-text_headers = "#dce0e8"     # Crust
-text_body = "#4c4f69"        # Text
-round_borders = "#7287fd"    # Lavender
-round_containers = "#e6e9ef" # Mantle
-starred = "#df8e1d"          # Yellow
-badge_alpha = 0.75
-color_mix_chart = 0.3
+# https://github.com/catppuccin/catppuccin"
+primary = "#eff1f5"           # Base
+secondary = "#1e66f5"         # Blue
+buttons = "#ccd0da"           # Surface0
+outgoing = "#ea76cb"          # Pink
+text_headers = "#dce0e8"      # Crust
+text_body = "#4c4f69"         # Text
+starred = "#df8e1d"           # Yellow
+round_borders_alpha = 0.15
+round_containers_alpha = 0.25
+chart_badge_alpha = 0.75
+nightly = false
