@@ -1,8 +1,8 @@
 use std::fmt;
-use std::fs::{self, File};
+use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::io::{self, BufReader, Read};
-use std::path::{Path, PathBuf};
+use std::io::{BufReader, Read};
+use std::path::Path;
 
 use iced::Color;
 use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
@@ -64,31 +64,7 @@ impl CustomPalette {
             .read_to_string(&mut style_toml)
             .map_err(DeErrorTrait::custom)?;
 
-        // Deserialize it and store `path` into the resulting struct
-        // toml::de::from_str::<CustomPalette>(&style_toml).map(|mut style| {
-        //     style.path = path;
-        //     style
-        // })
-
         toml::de::from_str(&style_toml)
-    }
-
-    /// Load [CustomStyle]s from a directory.
-    ///
-    /// # Errors
-    /// [io::Error] is only returned if `dir` can't be read. A best effort is made to read any styles
-    /// present in the directory.
-    ///
-    /// Styles that cannot be read are ignored.
-    pub fn from_dir<P>(dir: P) -> Result<impl Iterator<Item = Self>, io::Error>
-    where
-        P: Into<PathBuf>,
-    {
-        let iter = fs::read_dir(dir.into())?.filter_map(|entry| {
-            let entry = entry.ok()?.path();
-            Self::from_file(entry.to_str()?).ok()
-        });
-        Ok(iter)
     }
 }
 
@@ -219,39 +195,20 @@ impl fmt::Display for ExtraStyles {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        deserialize_from_path, serialize_to_path, CustomPalette, Palette, PaletteExtension,
-    };
-    use crate::{translations::types::language::Language, StyleType};
+    use super::{CustomPalette, Palette, PaletteExtension};
     use iced::color;
-    use serde::{Deserialize, Serialize};
-    use serde_test::{assert_tokens, Token};
-    use std::collections::BTreeMap;
 
-    // Convenience struct for testing
-    #[derive(Debug, PartialEq, Deserialize, Serialize)]
-    #[serde(transparent)]
-    struct StyleForTests(
-        #[serde(
-            deserialize_with = "deserialize_from_path",
-            serialize_with = "serialize_to_path"
-        )]
-        CustomPalette,
-    );
-
-    // Test items
-
-    // Replace with const format when it's stable
-    fn style_path() -> String {
+    fn style_path(name: &str) -> String {
         format!(
-            "{}/resources/themes/catppuccin_mocha.toml",
-            env!("CARGO_MANIFEST_DIR")
+            "{}/resources/themes/{}.toml",
+            env!("CARGO_MANIFEST_DIR"),
+            name
         )
     }
 
     // NOTE: This has to be updated if `resources/themes/catppuccin_mocha.toml` changes
-    fn catppuccin_style() -> StyleForTests {
-        StyleForTests(CustomPalette {
+    fn catppuccin_style() -> CustomPalette {
+        CustomPalette {
             palette: Palette {
                 primary: color!(30, 30, 46),
                 secondary: color!(137, 180, 250),
@@ -259,66 +216,23 @@ mod tests {
                 outgoing: color!(245, 194, 231),
                 text_headers: color!(17, 17, 27),
                 text_body: color!(205, 214, 244),
-                round_borders: color!(180, 190, 254),
-                round_containers: color!(24, 24, 37),
             },
             extension: PaletteExtension {
                 starred: color!(249, 226, 175),
-                badge_alpha: 0.75,
-                color_mix_chart: 0.3,
+                round_borders_alpha: 0.1,
+                round_containers_alpha: 0.15,
+                chart_badge_alpha: 0.75,
+                nightly: true,
             },
-        })
+        }
     }
 
-    // Test that split deserialization works for `CustomStyle`.
-    // This is different than testing that `StyleType` properly deserializes.
     #[test]
-    fn test_customstyle_split_de() {
-        let style_test = catppuccin_style();
-        // This is only used for the test which requires an &'static str.
-        let path: &'static str = Box::leak(style_path().into_boxed_str());
-        assert_tokens(&style_test, &[Token::String(path)]);
-    }
+    fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
+        let style = catppuccin_style();
+        let style_de = CustomPalette::from_file(style_path("catppuccin_mocha"))?;
 
-    // Ensure that StyleType itself still deserializes properly
-    #[test]
-    fn test_styletype_unit_split_de() {
-        // Unit variant without a struct
-        assert_tokens(
-            &StyleType::DeepSea,
-            &[
-                Token::Struct {
-                    name: "StyleType",
-                    len: 1,
-                },
-                Token::Str("style"),
-                Token::Str("DeepSea"),
-                Token::StructEnd,
-            ],
-        );
-    }
-
-    // Test that StyleType::Custom successfully deserializes.
-    // Originally, StyleType::Custom did not ser/de correctly because of how TOML
-    // handles enums.
-    #[test]
-    fn test_styletype_custom_split_de() {
-        // CustomStyle
-        // This is only used for the test so leaking it is fine.
-        let path = &*Box::leak(style_path().into_boxed_str());
-        assert_tokens(
-            &StyleType::Custom(catppuccin_style().0),
-            &[
-                Token::Struct {
-                    name: "StyleType",
-                    len: 2,
-                },
-                Token::Str("style"),
-                Token::Str("Custom"),
-                Token::Str("path"),
-                Token::Str(path),
-                Token::StructEnd,
-            ],
-        );
+        assert_eq!(style, style_de);
+        Ok(())
     }
 }
