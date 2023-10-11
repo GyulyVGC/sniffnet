@@ -24,6 +24,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, Renderer
         Language::SV => "Välj nätverksadapter att inspektera",
         Language::FI => "Valitse tarkasteltava verkkosovitin",
         Language::JA => "使用するネットワーク アダプターを選択してください",
+        Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
     })
 }
 
@@ -47,6 +48,7 @@ pub fn application_protocol_translation(language: Language) -> &'static str {
         Language::SV => "Applikationsprotokoll",
         Language::FI => "Sovellusprotokolla",
         Language::JA => "アプリケーション プロトコル",
+        Language::UZ => "Ilova protokoli",
     }
 }
 
@@ -70,6 +72,7 @@ pub fn select_filters_translation(language: Language) -> Text<'static, Renderer<
         Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
         Language::FI => "Valitse suodattimet verkkoliikenteelle",
         Language::JA => "トラフィックに適用するフィルターを選択してください",
+        Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
     })
 }
 
@@ -90,6 +93,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::SV => "Starta!",
         Language::FI => "Aloita!",
         Language::JA => "開始！",
+        Language::UZ => "Boshlash !"
     }
 }
 
@@ -111,6 +115,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::SV => "Adress",
         Language::FI => "Osoite",
         Language::JA => "アドレス",
+        Language::UZ => "Manzil",
     }
 }
 
@@ -134,6 +139,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::SV => "Adresser",
         Language::FI => "Osoitteet",
         Language::JA => "アドレス",
+        Language::UZ => "Manzillar",
     }
 }
 
@@ -157,6 +163,8 @@ pub fn ip_version_translation(language: Language) -> Text<'static, Renderer<Styl
         Language::SV => "IP-version",
         Language::FI => "IP-versio",
         Language::JA => "IP バージョン",
+        Language::UZ => "IP versiyasi",
+
     })
 }
 
@@ -179,6 +187,7 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::SV => "Transportprotokoll",
         Language::FI => "Kuljetusprotokolla",
         Language::JA => "トランスポート プロトコル",
+        Language::UZ => "Transport protokoli",
     }
 }
 
@@ -202,6 +211,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, Renderer<St
         Language::SV => "Datafrekvens",
         Language::FI => "Liikennemäärä",
         Language::JA => "トラフィック レート",
+        Language::UZ => "Trafik tezligi",
     })
 }
 
@@ -223,6 +233,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, Renderer<St
 //         Language::EL => "Σχετικές συνδέσεις:",
 //         Language::FA => "پیوند های خویشاوند:",
 //         Language::SE => "Relevanta anslutningar:",
+        //    Language::UZ => "Tegishli ulanishlar:",
 //     })
 // }
 
@@ -246,6 +257,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::SV => "Inställningar",
         Language::FI => "Asetukset",
         Language::JA => "設定",
+        Language::UZ => "Sozlamalar",
     }
 }
 
@@ -268,6 +280,7 @@ pub fn yes_translation(language: Language) -> Text<'static, Renderer<StyleType>>
         // Language::FA => "بله",
         Language::FI => "Kyllä",
         Language::JA => "はい",
+        Language::UZ => "Ha",
     })
 }
 
@@ -291,6 +304,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, Renderer<StyleT
         Language::SV => "Är du säker på att du vill avsluta analysen?",
         Language::FI => "Haluatko varmasti lopettaa analyysin?",
         Language::JA => "分析を終了しますか？",
+        Language::UZ => "Tahlildan chiqishga ishonchingiz komilmi?"
     })
 }
 
@@ -314,6 +328,8 @@ pub fn quit_analysis_translation(language: Language) -> String {
         Language::SV => "Avsluta analys".to_string(),
         Language::FI => "Lopeta analyysi".to_string(),
         Language::JA => "分析の終了".to_string(),
+        Language::UZ => "Tahlildan chiqish".to_string(),
+
     }
 }
 
@@ -337,6 +353,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, Renderer<S
         Language::SV => "Är du säker på att du vill radera notifikationerna?",
         Language::FI => "Haluatko varmasti tyhjentää ilmoitukset?",
         Language::JA => "すべての通知を削除します。よろしいですか？",
+        Language::UZ => "Haqiqatan ham bildirishnomalarni tozalamoqchimisiz?",
     })
 }
 
@@ -360,6 +377,7 @@ pub fn clear_all_translation(language: Language) -> String {
         Language::SV => "Radera alla".to_string(),
         Language::FI => "Tyhjennä kaikki".to_string(),
         Language::JA => "すべて削除".to_string(),
+        Language::UZ => "Barchasini tozalash".to_string(),
     }
 }
 
@@ -383,6 +401,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::SV => "Göm",
         Language::FI => "Piilota",
         Language::JA => "隠す",
+        Language::UZ => "Yashirish",
     }
 }
 
@@ -406,6 +425,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::SV => "Nätverksadapter",
         Language::FI => "Verkkosovitin",
         Language::JA => "ネットワーク アダプター",
+        Language::UZ => "Tarmoq adapteri",
     }
 }
 
@@ -468,6 +488,9 @@ pub fn no_addresses_translation(
         Language::JA => format!("選択されたアダプターが有効なアドレスを持っていないため、トラフィックを観測できていません...\n\n\
                                 ネットワーク アダプター: {adapter}\n\n\
                                 インターネットに接続しているか確認し、別のネットワーク アダプターを試してください。"),
+        Language::UZ => format!("Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo‘q...\n\n\
+                                Tarmoq adapteri: {adapter}\n\n\
+                                Internetga ulanganingizga ishonchingiz komil bo'lsa, boshqa adapterni tanlashga harakat qiling"),
     })
 }
 
@@ -530,6 +553,10 @@ pub fn waiting_translation(
         Language::JA => format!("トラフィックがまだ観測できていません。ネットワーク パケットを待っています...\n\n\
                                  ネットワーク アダプター: {adapter}\n\n\
                                  インターネットに接続していて、正しいアダプターを選択していますか?"),
+        Language::UZ => format!(
+            "Hali hech qanday trafik aniqlanmadi. Tarmoq paketlari kutilmoqda...\n\n\
+            Tarmoq adapteri: {adapter}\n\n\
+            Internetga ulanganingizga va to'g'ri adapterni tanlaganingizga ishonchingiz komilmi?"),
     })
 }
 
@@ -592,6 +619,10 @@ pub fn some_observed_translation(
         Language::JA => format!("取得したパケット数: {observed}\n\n\
                                  フィルター後のパケット数: 0\n\n\
                                  パケットは取得できていますが、設定されたフィルタリングにより表示されません..."),
+        Language::UZ => format!(
+            "Jami ushlangan paketlar: {observed}\n\n\
+            Filtrlangan paketlar: 0\n\n\
+            Tarmoq paketlari ushlandi, lekin ularning hech biri belgilangan filtrlarga mos kelmadi..."),
     })
 }
 
@@ -615,6 +646,7 @@ pub fn filtered_packets_translation(language: Language) -> &'static str {
         Language::SV => "Filtrerade paket",
         Language::FI => "Suodatettuja paketteja",
         Language::JA => "フィルタリングされたパケット",
+        Language::UZ => "Filtrlangan paketlar",
     }
 }
 
@@ -637,6 +669,7 @@ pub fn filtered_bytes_translation(language: Language) -> &'static str {
         Language::SV => "Filtrerade bytes",
         Language::FI => "Suodatettuja tavuja",
         Language::JA => "フィルタリングされたバイト",
+        Language::UZ => "Filtrlangan baytlar",
     }
 }
 
@@ -674,6 +707,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
         Language::SV => format!("({percentage} av totalen)"),
         Language::FI => format!("({percentage} kokonaismäärästä)"),
         Language::JA => format!("(トータル: {percentage} )"),
+        Language::UZ => format!("(Jami: {percentage} )"),
     }
 }
 
@@ -695,6 +729,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //         Language::EL => "Φιλτραρισμένα πακέτα ανά πρωτόκολλο εφαρμογής:",
 //         Language::FA => "بسته های صاف شده برای هر پیوندنامهٔ درخواست:",
 //         Language::SE => "Filtrerade paket per applikationsprotokoll:",
+//         Language::UZ => "Har bir dastur protokoli uchun filtrlangan paketlar:",
 //     })
 // }
 
@@ -732,6 +767,8 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //                         برای افزودن یک پیوند به پسندیده های خود، روی نشان ستاره کنار پیوند کلیک کنید.",
 //         Language::SE => "Inget att visa för tillfälet.\n\
 //                          För att lägga till anslutningar till dina favoriter, klicka på stjärnsymbolen nära anslutningen.",
+//         Language::UZ => "Ayni paytda ko‘rsatiladigan hech narsa yo‘q.\n\
+//         Ulanishni sevimlilar ro'yhatiga qo'shish uchun ulanish yaqinidagi yulduzcha belgisini bosing."
 //     })
 // }
 
@@ -809,6 +846,9 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Rende
             "エラーが発生しました! \n\n\
                                 {error}"
         ),
+        Language::UZ => format!(
+            "Xatolik yuz berdi!\n\n
+                                {error}"),
     })
 }
 
@@ -831,6 +871,7 @@ pub fn both_translation(language: Language) -> &'static str {
         Language::SV => "båda",
         Language::FI => "molemmat",
         Language::JA => "両方",
+        Language::UZ => "ikkalasi ham",
     }
 }
 
@@ -845,6 +886,7 @@ pub fn both_translation(language: Language) -> &'static str {
 //         Language::RU => "Все протоколы",
 //         Language::FA => "همهٔ پیوندنامه ها",
 //         Language::SE => "Alla protokoll",
+//         Language::SE => "Barcha protokollar" 
 //     }
 // }
 
@@ -867,6 +909,7 @@ pub fn all_translation(language: Language) -> &'static str {
         Language::SV => "Alla",
         Language::FI => "Kaikki",
         Language::JA => "すべて",
+        Language::UZ => "Barchasi",
     }
 }
 
@@ -889,6 +932,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         // Language::FA => "بسته ها",
         Language::FI => "paketit",
         Language::JA => "パケット",
+        Language::UZ => "paketlar",
     }
 }
 
@@ -912,6 +956,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::SV => "paket per sekund",
         Language::FI => "pakettia sekunnissa",
         Language::JA => "1 秒あたりのパケット数",
+        Language::UZ => "paket soniyasiga",
     }
 }
 
@@ -932,6 +977,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         // Language::FA => "بایت ها",
         Language::FI => "tavua",
         Language::JA => "バイト",
+        Language::UZ => "bayt",
     }
 }
 
@@ -954,6 +1000,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::SV => "bytes per sekund",
         Language::FI => "tavua sekunnissa",
         Language::JA => "1 秒あたりのバイト量",
+        Language::UZ => "bayt soniyasiga",
     }
 }
 
@@ -977,6 +1024,7 @@ pub fn recent_report_translation(language: Language) -> &'static str {
         Language::SV => "senaste",
         Language::FI => "viimeisin",
         Language::JA => "新しい順",
+        Language::UZ => "eng so'nggi",
     }
 }
 
@@ -1000,6 +1048,7 @@ pub fn packets_report_translation(language: Language) -> &'static str {
         Language::SV => "flest paket",
         Language::FI => "eniten paketteja",
         Language::JA => "パケット数の多い順",
+        Language::UZ => "eng ko'p paketlar",
     }
 }
 
@@ -1023,6 +1072,7 @@ pub fn bytes_report_translation(language: Language) -> &'static str {
         Language::SV => "flest bytes",
         Language::FI => "eniten tavuja",
         Language::JA => "バイト量の多い順",
+        Language::UZ => "eng ko'p bayt",
     }
 }
 
@@ -1043,6 +1093,7 @@ pub fn bytes_report_translation(language: Language) -> &'static str {
 //         Language::EL => "αγαπημένα",
 //         Language::FA => "پسندیده ها",
 //         Language::SE => "favoriter",
+//         Language::UZ => "sevimlilar",
 //     }
 // }
 
@@ -1066,6 +1117,7 @@ pub fn notifications_title_translation(language: Language) -> Text<'static, Rend
         Language::SV => "Anpassa dina notifikationer",
         Language::FI => "Muokkaa ilmoituksiasi",
         Language::JA => "通知のカスタマイズ",
+        Language::UZ => "Bildirishnomalaringizni sozlang",
     })
 }
 
@@ -1089,6 +1141,7 @@ pub fn appearance_title_translation(language: Language) -> Text<'static, Rendere
         Language::SV => "Välj ditt favorittema",
         Language::FI => "Valitse suosikkiteemasi",
         Language::JA => "テーマを選択してください",
+        Language::UZ => "Sevimli mavzuingizni tanlang",
     })
 }
 
@@ -1112,6 +1165,7 @@ pub fn languages_title_translation(language: Language) -> Text<'static, Renderer
         Language::SV => "Välj ditt språk",
         Language::FI => "Valitse kielesi",
         Language::JA => "表示言語を選択してください",
+        Language::UZ => "Tilingizni tanlang",
     })
 }
 
@@ -1135,6 +1189,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::SV => "Aktiva filter",
         Language::FI => "Aktiiviset suodattimet",
         Language::JA => "適用されているフィルター",
+        Language::UZ => "Faol filtrlar",
     }
 }
 
@@ -1158,6 +1213,7 @@ pub fn none_translation(language: Language) -> String {
         Language::SV => "inga",
         Language::FI => "ei mitään",
         Language::JA => "なし",
+        Language::UZ => "hech biri",
     }
     .to_string()
 }
@@ -1182,6 +1238,7 @@ pub fn yeti_night_translation(language: Language) -> &'static str {
         Language::SV => "Sniffnets ursprungliga mörka tema",
         Language::FI => "Sniffnetin alkuperäinen tumma teema",
         Language::JA => "Sniffnet のオリジナル テーマ",
+        Language::UZ => "Sniffnet-ning asl qora mavzusi",
     }
 }
 
@@ -1204,6 +1261,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::SV => "Sniffnets ursprungliga ljusa tema",
         Language::FI => "Sniffnetin alkuperäinen vaalea teema",
         Language::JA => "Sniffnet のオリジナル ライト テーマ",
+        Language::UZ => "Sniffnet-ning asl oq mavzusi"
     }
 }
 
@@ -1227,6 +1285,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         Language::SV => "För att dyka ned i nätverkstrafiken",
         Language::FI => "Sukeltaaksesi verkkoliikenteeseen",
         Language::JA => "ネットワーク トラフィックにダイブ",
+        Language::UZ => "Tarmoq trafigiga qo'shilish uchun",
     }
 }
 
@@ -1250,6 +1309,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::SV => "Ljuvligt tema gjort för drömmare",
         Language::FI => "Ihana teema unelmoijille",
         Language::JA => "ドリーマーのためのテーマ",
+        Language::UZ => "Xayolparastlar uchun yaratilgan chiroyli mavzu",
     }
 }
 
@@ -1273,6 +1333,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::SV => "Inkommande",
         Language::FI => "Saapuva",
         Language::JA => "受信",
+        Language::UZ => "Kiruvchi",
     }
 }
 
@@ -1296,6 +1357,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::SV => "Utgående",
         Language::FI => "Lähtevä",
         Language::JA => "送信",
+        Language::UZ => "Chiquvchi",
     }
 }
 
@@ -1317,6 +1379,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         // Language::FA => "اعلان ها",
         Language::SV => "Notifikationer",
         Language::FI => "Ilmoitukset",
+        Language::UZ => "Bildirishnomalar",
     }
 }
 
@@ -1334,6 +1397,7 @@ pub fn style_translation(language: Language) -> &'static str {
         // Language::FA => "شیوه",
         Language::FI => "Tyyli",
         Language::JA => "スタイル",
+        Language::UZ => "Uslub",
     }
 }
 
@@ -1357,6 +1421,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::SV => "Språk",
         Language::FI => "Kieli",
         Language::JA => "表示言語",
+        Language::UZ => "Til",
     }
 }
 
@@ -1380,6 +1445,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::SV => "Översikt",
         Language::FI => "Yleiskatsaus",
         Language::JA => "概要",
+        Language::UZ => "Ko'rib chiqish",
     }
 }
 
@@ -1403,6 +1469,8 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
         Language::SV => "Notifiera mig när en paketgräns har överstigits",
         Language::FI => "Ilmoita minulle, kun pakettiraja on ylittynyt",
         Language::JA => "パケット数の閾値を超過した場合に通知する",
+        Language::UZ => "Paket chegarasi oshib ketganda xabar bering",
+
     }
 }
 
@@ -1426,6 +1494,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::SV => "Notifiera mig när en gräns för bytes har överstigits",
         Language::FI => "Ilmoita minulle, kun tavuraja on ylittynyt",
         Language::JA => "バイト量の閾値を超過した場合に通知する",
+        Language::UZ => "Bayt chegarasi oshib ketganda menga xabar bering"
     }
 }
 
@@ -1447,6 +1516,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         // Language::FA => "(در ثانیه)",
         Language::SV => "(per sekund)",
         Language::FI => "(sekunnissa)",
+        Language::UZ => "(soniyasiga)",
     }
 }
 
@@ -1470,6 +1540,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::SV => "; du kan också ange 'K', 'M' och 'G'",
         Language::FI => "; voit myös määrittää 'K', 'M' tai 'G'",
         Language::JA => "; 'K', 'M', 'G' が選択可能です",
+        Language::UZ => "; 'K', 'M' va 'G' ni ham belgilashingiz mumkin",
     }
 }
 
@@ -1495,6 +1566,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         Language::SV => "Notifiera mig när ny data utbyts av mina favoriter",
         Language::FI => "Ilmoita minulle, kun suosikkini vaihtavat uusia tietoja",
         Language::JA => "お気に入りに指定したホストに関してデータ送受信があった場合に通知する",
+        Language::UZ => "Sevimlilar ro'yhatidan yangi ma'lumotlar almashganda xabar bering",
     }
 }
 
@@ -1518,6 +1590,7 @@ pub fn threshold_translation(language: Language) -> String {
         Language::SV => "Gräns".to_string(),
         Language::FI => "Raja".to_string(),
         Language::JA => "閾値".to_string(),
+        Language::UZ => "Eshik".to_string(),
     }
 }
 
@@ -1537,6 +1610,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         // Language::FA => "حجم",
         Language::SV => "Volym",
         Language::FI => "Äänenvoimakkuus",
+        Language::UZ => "Ovoz balandligi",
     }
 }
 
@@ -1558,6 +1632,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         // Language::FA => "صدا",
         Language::SV => "Ljud",
         Language::FI => "Ääni",
+        Language::UZ => "Ovoz",
     }
 }
 
@@ -1581,6 +1656,7 @@ pub fn open_report_translation(language: Language) -> &'static str {
         Language::SV => "Öppna fullständig rapport",
         Language::FI => "Avaa koko raportti",
         Language::JA => "詳細なレポートを開く",
+        Language::UZ => "To'liq hisobotni ochish",
     }
 }
 
@@ -1604,6 +1680,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::SV => "Gräns för bytes överskriden!",
         Language::FI => "Tavuraja ylitetty!",
         Language::JA => "バイト量の閾値を調査しました!",
+        Language::UZ => "Bayt chegarasidan oshib ketdi!",
     }
 }
 
@@ -1627,6 +1704,7 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
         Language::SV => format!("{value} har utbytts"),
         Language::FI => format!("{value} on vaihdettu"),
         Language::JA => format!("{value} の送受信が発生しました"),
+        Language::UZ => format!("{value} ma'lumot almashinuvi"),
     }
 }
 
@@ -1650,6 +1728,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::SV => "Paketgräns överskriden!",
         Language::FI => "Pakettiraja ylitetty!",
         Language::JA => "パケット数のしきい値を超過しました!",
+        Language::UZ => "Paket chegarasidan oshib ketdi!",
     }
 }
 
@@ -1694,6 +1773,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
             npackets => format!("{npackets} pakettia vaihdettu"),
         },
         Language::JA => format!("{value} パケットの送受信が発生しました"),
+        Language::UZ => format!("{value} paket uzatildi"),
     }
 }
 
@@ -1717,6 +1797,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::SV => "Ny data utbytt av favoriter!",
         Language::FI => "Uusia tietoja vaihdettu suosikeista!",
         Language::JA => "お気に入りのホストで新しいデータ送受信が発生しました!",
+        Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi!"
     }
 }
 
@@ -1776,6 +1857,9 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static, Ren
         Language::JA => "まだ通知を有効にしていません!\n\n\
                                  有効化後、このページ上で通知のログが確認できます。\n\n\
                                  通知設定は設定画面から変更可能です:",
+        Language::UZ => "Siz hali bildirishnomalarni yoqmagansiz!\n\n\
+                        Ularni faollashtirgandan so'ng, bu sahifada bildirishnomalaringiz jurnali ko'rsatiladi\n\n\
+                        Sozlamalardan bildirishnomalarni yoqishingiz mumkin:",
     })
 }
 
@@ -1854,6 +1938,10 @@ pub fn no_notifications_received_translation(
         Language::JA => {
             "通知はまだ何もありません...\n\n\
                                  通知があると、ここに表示されます"
+        },
+        Language::UZ => {
+            "Ayni paytda ko'rsatiladigan hech narsa yo'q...\n\n\
+                                Bildirishnomalar kelganda, ular shu yerda ko'rsatiladi"
         }
     })
 }
@@ -1878,5 +1966,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::SV => "Endast de senaste 30 notifikationerna visas",
         Language::FI => "Vain viimeiset 30 ilmoitusta näytetään",
         Language::JA => "最新の通知 30 件のみ表示されます",
+        Language::UZ => "Faqat oxirgi 30 ta bildirishnoma ko'rsatiladi",
     }
 }

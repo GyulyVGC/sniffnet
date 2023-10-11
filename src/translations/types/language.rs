@@ -4,7 +4,7 @@ use iced::{Length, Renderer};
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA,
+    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ
 };
 use crate::StyleType;
 
@@ -47,6 +47,8 @@ pub enum Language {
     FI,
     /// Japanese
     JA,
+    /// O'zbek tili
+    UZ,
 }
 
 impl Default for Language {
@@ -56,7 +58,7 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const ROW1: [Language; 1] = [Language::EN];
+    pub(crate) const ROW1: [Language; 2] = [Language::EN, Language::UZ];
     pub(crate) const ROW2: [Language; 4] = [Language::DE, Language::EL, Language::ES, Language::FI];
     pub(crate) const ROW3: [Language; 4] = [Language::FR, Language::IT, Language::JA, Language::KO];
     pub(crate) const ROW4: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
@@ -82,6 +84,7 @@ impl Language {
             Language::SV => "Svenska",
             Language::FI => "Suomi",
             Language::JA => "日本語",
+            Language::UZ => "O'zbek tili"
         }
     }
 
@@ -105,6 +108,7 @@ impl Language {
             Language::SV => SE,
             Language::FI => FI,
             Language::JA => JP,
+            Language::UZ => UZ,
         })))
         .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }
