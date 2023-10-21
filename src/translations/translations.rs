@@ -885,7 +885,7 @@ pub fn both_translation(language: Language) -> &'static str {
 //         Language::RU => "Все протоколы",
 //         Language::FA => "همهٔ پیوندنامه ها",
 //         Language::SE => "Alla protokoll",
-//         Language::SE => "Barcha protokollar"
+//         Language::UZ => "Barcha protokollar"
 //     }
 // }
 
