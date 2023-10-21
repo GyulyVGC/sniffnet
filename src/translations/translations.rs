@@ -93,7 +93,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::SV => "Starta!",
         Language::FI => "Aloita!",
         Language::JA => "開始！",
-        Language::UZ => "Boshlash !"
+        Language::UZ => "Boshlash !",
     }
 }
 
@@ -164,7 +164,6 @@ pub fn ip_version_translation(language: Language) -> Text<'static, Renderer<Styl
         Language::FI => "IP-versio",
         Language::JA => "IP バージョン",
         Language::UZ => "IP versiyasi",
-
     })
 }
 
@@ -233,7 +232,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, Renderer<St
 //         Language::EL => "Σχετικές συνδέσεις:",
 //         Language::FA => "پیوند های خویشاوند:",
 //         Language::SE => "Relevanta anslutningar:",
-        //    Language::UZ => "Tegishli ulanishlar:",
+//    Language::UZ => "Tegishli ulanishlar:",
 //     })
 // }
 
@@ -304,7 +303,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, Renderer<StyleT
         Language::SV => "Är du säker på att du vill avsluta analysen?",
         Language::FI => "Haluatko varmasti lopettaa analyysin?",
         Language::JA => "分析を終了しますか？",
-        Language::UZ => "Tahlildan chiqishga ishonchingiz komilmi?"
+        Language::UZ => "Tahlildan chiqishga ishonchingiz komilmi?",
     })
 }
 
@@ -329,7 +328,6 @@ pub fn quit_analysis_translation(language: Language) -> String {
         Language::FI => "Lopeta analyysi".to_string(),
         Language::JA => "分析の終了".to_string(),
         Language::UZ => "Tahlildan chiqish".to_string(),
-
     }
 }
 
@@ -848,7 +846,8 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Rende
         ),
         Language::UZ => format!(
             "Xatolik yuz berdi!\n\n
-                                {error}"),
+                                {error}"
+        ),
     })
 }
 
@@ -886,7 +885,7 @@ pub fn both_translation(language: Language) -> &'static str {
 //         Language::RU => "Все протоколы",
 //         Language::FA => "همهٔ پیوندنامه ها",
 //         Language::SE => "Alla protokoll",
-//         Language::SE => "Barcha protokollar" 
+//         Language::SE => "Barcha protokollar"
 //     }
 // }
 
@@ -972,12 +971,11 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::ZH => "网络流量",
         Language::RO => "octeți",
         Language::KO => "바이트",
-        Language::TR => "bayt",
+        Language::TR | Language::UZ => "bayt",
         Language::RU => "байтов",
         // Language::FA => "بایت ها",
         Language::FI => "tavua",
         Language::JA => "バイト",
-        Language::UZ => "bayt",
     }
 }
 
@@ -1261,7 +1259,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::SV => "Sniffnets ursprungliga ljusa tema",
         Language::FI => "Sniffnetin alkuperäinen vaalea teema",
         Language::JA => "Sniffnet のオリジナル ライト テーマ",
-        Language::UZ => "Sniffnet-ning asl oq mavzusi"
+        Language::UZ => "Sniffnet-ning asl oq mavzusi",
     }
 }
 
@@ -1470,7 +1468,6 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
         Language::FI => "Ilmoita minulle, kun pakettiraja on ylittynyt",
         Language::JA => "パケット数の閾値を超過した場合に通知する",
         Language::UZ => "Paket chegarasi oshib ketganda xabar bering",
-
     }
 }
 
@@ -1494,7 +1491,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::SV => "Notifiera mig när en gräns för bytes har överstigits",
         Language::FI => "Ilmoita minulle, kun tavuraja on ylittynyt",
         Language::JA => "バイト量の閾値を超過した場合に通知する",
-        Language::UZ => "Bayt chegarasi oshib ketganda menga xabar bering"
+        Language::UZ => "Bayt chegarasi oshib ketganda menga xabar bering",
     }
 }
 
@@ -1797,7 +1794,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::SV => "Ny data utbytt av favoriter!",
         Language::FI => "Uusia tietoja vaihdettu suosikeista!",
         Language::JA => "お気に入りのホストで新しいデータ送受信が発生しました!",
-        Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi!"
+        Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi!",
     }
 }
 
@@ -1938,7 +1935,7 @@ pub fn no_notifications_received_translation(
         Language::JA => {
             "通知はまだ何もありません...\n\n\
                                  通知があると、ここに表示されます"
-        },
+        }
         Language::UZ => {
             "Ayni paytda ko'rsatiladigan hech narsa yo'q...\n\n\
                                 Bildirishnomalar kelganda, ular shu yerda ko'rsatiladi"

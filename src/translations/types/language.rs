@@ -4,7 +4,7 @@ use iced::{Length, Renderer};
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ
+    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ,
 };
 use crate::StyleType;
 
@@ -84,7 +84,7 @@ impl Language {
             Language::SV => "Svenska",
             Language::FI => "Suomi",
             Language::JA => "日本語",
-            Language::UZ => "O'zbek tili"
+            Language::UZ => "O'zbek tili",
         }
     }
 
