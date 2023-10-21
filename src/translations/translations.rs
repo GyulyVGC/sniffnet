@@ -93,7 +93,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::SV => "Starta!",
         Language::FI => "Aloita!",
         Language::JA => "開始！",
-        Language::UZ => "Boshlash !",
+        Language::UZ => "Boshlash!",
     }
 }
 
@@ -845,7 +845,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Rende
                                 {error}"
         ),
         Language::UZ => format!(
-            "Xatolik yuz berdi!\n\n
+            "Xatolik yuz berdi!\n\n\
                                 {error}"
         ),
     })
@@ -1307,7 +1307,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::SV => "Ljuvligt tema gjort för drömmare",
         Language::FI => "Ihana teema unelmoijille",
         Language::JA => "ドリーマーのためのテーマ",
-        Language::UZ => "Xayolparastlar uchun yaratilgan chiroyli mavzu",
+        Language::UZ => "Xayolparastlar uchun chiroyli mavzu",
     }
 }
 
