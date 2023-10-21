@@ -486,7 +486,7 @@ pub fn no_addresses_translation(
         Language::JA => format!("選択されたアダプターが有効なアドレスを持っていないため、トラフィックを観測できていません...\n\n\
                                 ネットワーク アダプター: {adapter}\n\n\
                                 インターネットに接続しているか確認し、別のネットワーク アダプターを試してください。"),
-        Language::UZ => format!("Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo‘q...\n\n\
+        Language::UZ => format!("Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo'q...\n\n\
                                 Tarmoq adapteri: {adapter}\n\n\
                                 Internetga ulanganingizga ishonchingiz komil bo'lsa, boshqa adapterni tanlashga harakat qiling"),
     })
@@ -765,7 +765,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //                         برای افزودن یک پیوند به پسندیده های خود، روی نشان ستاره کنار پیوند کلیک کنید.",
 //         Language::SE => "Inget att visa för tillfälet.\n\
 //                          För att lägga till anslutningar till dina favoriter, klicka på stjärnsymbolen nära anslutningen.",
-//         Language::UZ => "Ayni paytda ko‘rsatiladigan hech narsa yo‘q.\n\
+//         Language::UZ => "Ayni paytda ko'rsatiladigan hech narsa yo'q.\n\
 //         Ulanishni sevimlilar ro'yhatiga qo'shish uchun ulanish yaqinidagi yulduzcha belgisini bosing."
 //     })
 // }

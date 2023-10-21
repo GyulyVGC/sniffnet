@@ -47,7 +47,7 @@ pub enum Language {
     FI,
     /// Japanese
     JA,
-    /// O'zbek tili
+    /// Uzbek
     UZ,
 }
 
@@ -58,11 +58,12 @@ impl Default for Language {
 }
 
 impl Language {
-    pub(crate) const ROW1: [Language; 2] = [Language::EN, Language::UZ];
-    pub(crate) const ROW2: [Language; 4] = [Language::DE, Language::EL, Language::ES, Language::FI];
-    pub(crate) const ROW3: [Language; 4] = [Language::FR, Language::IT, Language::JA, Language::KO];
-    pub(crate) const ROW4: [Language; 4] = [Language::PL, Language::PT, Language::RO, Language::RU];
-    pub(crate) const ROW5: [Language; 4] = [Language::SV, Language::TR, Language::UK, Language::ZH];
+    pub(crate) const ROW1: [Language; 3] = [Language::EN, Language::DE, Language::EL];
+    pub(crate) const ROW2: [Language; 3] = [Language::ES, Language::FI, Language::FR];
+    pub(crate) const ROW3: [Language; 3] = [Language::IT, Language::JA, Language::KO];
+    pub(crate) const ROW4: [Language; 3] = [Language::PL, Language::PT, Language::RO];
+    pub(crate) const ROW5: [Language; 3] = [Language::RU, Language::SV, Language::TR];
+    pub(crate) const ROW6: [Language; 3] = [Language::UK, Language::UZ, Language::ZH];
 
     pub fn get_radio_label(&self) -> &str {
         match self {
@@ -84,7 +85,7 @@ impl Language {
             Language::SV => "Svenska",
             Language::FI => "Suomi",
             Language::JA => "日本語",
-            Language::UZ => "O'zbek tili",
+            Language::UZ => "O'zbekcha",
         }
     }
 
