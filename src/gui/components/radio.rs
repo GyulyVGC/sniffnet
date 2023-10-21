@@ -79,7 +79,7 @@ pub fn language_radios(
             Row::new().align_items(Alignment::Center).push(
                 Row::new()
                     .align_items(Alignment::Center)
-                    .width(Length::Fixed(180.0))
+                    .width(Length::Fixed(200.0))
                     .push(
                         Radio::new(
                             format!("{} ({:?})", option.get_radio_label(), option),
@@ -91,7 +91,7 @@ pub fn language_radios(
                         .font(font)
                         .size(15),
                     )
-                    .push(horizontal_space(Length::Fixed(8.0)))
+                    .push(horizontal_space(Length::Fixed(15.0)))
                     .push(option.get_flag()),
             ),
         );
