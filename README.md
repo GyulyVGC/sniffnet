@@ -121,6 +121,32 @@ brew install sniffnet
 
 </details>
 
+<details>
+
+  <summary>from Nixpkgs</summary>
+
+  You can install [Sniffnet Nix package](https://search.nixos.org/packages?channel=23.05&show=sniffnet&from=0&size=50&sort=relevance&type=packages&query=sniffnet) in your system with:
+
+  ```nix
+  environment.systemPackages = [
+    pkgs.sniffnet
+  ];
+```
+
+  You can install it in your home using [Home Manager](https://github.com/nix-community/home-manager) with:
+
+  ```nix
+  home.packages = [
+    pkgs.sniffnet
+  ];
+```
+
+  You can install it in a shell with:
+  ```sh
+nix-shell -p sniffnet
+```
+
+</details>
 
 <details>
 
