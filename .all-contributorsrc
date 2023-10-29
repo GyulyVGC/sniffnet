@@ -418,6 +418,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "clr-cera",
+      "name": "clr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/93736542?v=4",
+      "profile": "https://github.com/clr-cera",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
