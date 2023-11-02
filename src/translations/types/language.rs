@@ -4,7 +4,7 @@ use iced::{Length, Renderer};
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ,
+    CN, DE, ES, FI, FLAGS_WIDTH_SMALL, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, BR,
 };
 use crate::StyleType;
 
@@ -31,7 +31,7 @@ pub enum Language {
     RO,
     /// Korean
     KO,
-    /// Portuguese
+    /// European Portuguese
     PT,
     /// Turkish
     TR,
@@ -49,6 +49,8 @@ pub enum Language {
     JA,
     /// Uzbek
     UZ,
+    /// Brazilian Portuguese
+    BR,
 }
 
 impl Default for Language {
@@ -79,13 +81,14 @@ impl Language {
             Language::KO => "한국어",
             Language::TR => "Türkçe",
             Language::RU => "Русский",
-            Language::PT => "Português",
+            Language::PT => "Português Europeu",
             Language::EL => "Ελληνικά",
             // Language::FA => "فارسی",
             Language::SV => "Svenska",
             Language::FI => "Suomi",
             Language::JA => "日本語",
             Language::UZ => "O'zbekcha",
+            Language::BR => "Português Brasileiro",
         }
     }
 
@@ -110,6 +113,7 @@ impl Language {
             Language::FI => FI,
             Language::JA => JP,
             Language::UZ => UZ,
+            Language::BR => BR,
         })))
         .width(Length::Fixed(FLAGS_WIDTH_SMALL))
     }
