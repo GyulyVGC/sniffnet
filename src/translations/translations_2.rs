@@ -23,7 +23,6 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::JA => "新しいバージョンが利用可能になりました!",
         Language::UZ => "Yangi versiya mavjud!",
         Language::PT => "Uma nova versão está disponível!",
-        _ => "A newer version is available!",
     }
 }
 

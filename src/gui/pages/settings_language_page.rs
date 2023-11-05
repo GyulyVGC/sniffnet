@@ -59,7 +59,7 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         .push(vertical_space(Fixed(25.0)))
         .push(col_language_radio_all);
 
-    if [Language::EL, Language::PT].contains(&sniffer.language) {
+    if sniffer.language.eq(&Language::EL) {
         content = content.push(vertical_space(Fixed(20.0))).push(
             Container::new(
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
