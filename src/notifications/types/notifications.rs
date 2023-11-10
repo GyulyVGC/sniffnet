@@ -58,7 +58,7 @@ impl Default for PacketsNotification {
 impl PacketsNotification {
     /// Arbitrary string constructor. Will fallback values to existing notification if set, default() otherwise
     pub fn from(value: &str, existing: Option<Self>) -> Self {
-        let default = existing.unwrap_or(Self::default());
+        let default = existing.unwrap_or_default();
 
         let new_threshold = if value.is_empty() {
             0
@@ -99,7 +99,7 @@ impl Default for BytesNotification {
 impl BytesNotification {
     /// Arbitrary string constructor. Will fallback values to existing notification if set, default() otherwise
     pub fn from(value: &str, existing: Option<Self>) -> Self {
-        let default = existing.unwrap_or(Self::default());
+        let default = existing.unwrap_or_default();
 
         let mut byte_multiple_inserted = ByteMultiple::B;
         let new_threshold = if value.is_empty() {

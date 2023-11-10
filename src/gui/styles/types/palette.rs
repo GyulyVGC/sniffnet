@@ -4,11 +4,12 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::Deserialize;
 
-use super::color_remote::deserialize_color;
 use crate::gui::styles::style_constants::{
     DAY_STYLE, DEEP_SEA_STYLE, MON_AMOUR_STYLE, NIGHT_STYLE,
 };
 use crate::StyleType;
+
+use super::color_remote::deserialize_color;
 
 /// Set of colors to apply to GUI
 ///

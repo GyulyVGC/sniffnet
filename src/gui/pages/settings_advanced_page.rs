@@ -1,3 +1,15 @@
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+
+use iced::advanced::widget::Text;
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::tooltip::Position;
+use iced::widget::{
+    button, horizontal_space, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip,
+};
+use iced::Length::Fixed;
+use iced::{Alignment, Font, Length, Renderer};
+
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -16,16 +28,6 @@ use crate::utils::asn::MmdbReader;
 use crate::utils::formatted_strings::get_default_report_directory;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
-use iced::advanced::widget::Text;
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip,
-};
-use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer};
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
@@ -171,11 +173,8 @@ fn report_path_setting(
     let default_directory = &get_default_report_directory().to_string_lossy().to_string();
     path.pop();
     let custom_directory = &path.to_string_lossy().to_string();
-    let is_error = if custom_directory.is_empty() {
-        false
-    } else {
-        true
-    };
+    // to be updated.........!!!
+    let is_error = !custom_directory.is_empty();
 
     let mut input = TextInput::new(default_directory, custom_directory)
         .padding([0, 5])

@@ -182,10 +182,10 @@ impl Sniffer {
                 self.traffic_chart.change_style(self.style);
             }
             Message::LoadStyle(path) => {
-                self.advanced_settings.style_path = if !path.is_empty() {
-                    Some(path.into())
-                } else {
+                self.advanced_settings.style_path = if path.is_empty() {
                     None
+                } else {
+                    Some(path.into())
                 };
 
                 if let Some(path) = self.advanced_settings.style_path.as_deref() {

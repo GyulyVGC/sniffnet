@@ -9,7 +9,6 @@ use pcap::{Active, Address, Capture, Device};
 use crate::countries::country_utils::get_country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
-use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -284,7 +283,7 @@ pub fn reverse_dns_lookup(
     let other_data = info_traffic_lock
         .addresses_waiting_resolution
         .remove(&address_to_lookup)
-        .unwrap_or(DataInfo::default());
+        .unwrap_or_default();
     // insert the newly resolved host in the collections, with the data it exchanged so far
     info_traffic_lock
         .addresses_resolved

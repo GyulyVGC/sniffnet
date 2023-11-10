@@ -7,9 +7,10 @@ use std::path::Path;
 use iced::Color;
 use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
 
-use super::color_remote::{color_hash, deserialize_color};
 use crate::gui::styles::custom_themes::{dracula, gruvbox, nord, solarized};
 use crate::gui::styles::types::palette::Palette;
+
+use super::color_remote::{color_hash, deserialize_color};
 
 const FLOAT_PRECISION: f32 = 10000.0;
 
@@ -45,7 +46,7 @@ pub struct PaletteExtension {
 }
 
 impl CustomPalette {
-    /// Deserialize [CustomPalette] from `path`.
+    /// Deserialize [`CustomPalette`] from `path`.
     ///
     /// # Arguments
     /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
@@ -88,7 +89,7 @@ impl Hash for CustomPalette {
         color_hash(*text_headers, state);
         color_hash(*text_body, state);
 
-        extension.hash(state)
+        extension.hash(state);
     }
 }
 
@@ -103,8 +104,11 @@ impl Hash for PaletteExtension {
         } = self;
 
         color_hash(*starred, state);
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         ((*chart_badge_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         ((*round_borders_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         ((*round_containers_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
     }
 }
@@ -188,15 +192,16 @@ impl fmt::Display for ExtraStyles {
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
             // Custom style names aren't used anywhere so this shouldn't be reached
-            _ => unreachable!(),
+            ExtraStyles::CustomToml(_) => unreachable!(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{CustomPalette, Palette, PaletteExtension};
     use iced::color;
+
+    use super::{CustomPalette, Palette, PaletteExtension};
 
     fn style_path(name: &str) -> String {
         format!(

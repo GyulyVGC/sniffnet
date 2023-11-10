@@ -1,16 +1,17 @@
-//! Remote implemention of [serde::Deserialize] and [serde::Serialize] for [iced::Color].
+//! Remote implemention of [`serde::Deserialize`] and [`serde::Serialize`] for [`iced::Color`].
 //!
 //! This implementation deserializes hexadecimal RGB(A) as string to float RGB(A) and back.
 //! NOTE: The alpha channel is optional and defaults to #ff or 1.0.
 //! `#ffffffff` deserializes to `1.0`, `1.0`, `1.0`, `1.0`.
 //! `1.0`, `1.0`, `1.0`, `1.0` serializes to #ffffffff
 
+use std::hash::{Hash, Hasher};
+
 use iced::Color;
 use serde::{
     de::{Error as DeErrorTrait, Unexpected},
-    Deserialize, Deserializer, Serializer,
+    Deserialize, Deserializer,
 };
-use std::hash::{Hash, Hasher};
 
 // #aabbcc is seven bytes long
 const HEX_STR_BASE_LEN: usize = 7;
@@ -52,7 +53,7 @@ where
                     .and_then(|s| {
                         u8::from_str_radix(s, 16)
                             .map_err(DeErrorTrait::custom)
-                            .map(|rgb| rgb as f32 / 255.0)
+                            .map(|rgb| f32::from(rgb) / 255.0)
                     })
             })
             .collect::<Result<Vec<f32>, _>>()?;
@@ -73,7 +74,7 @@ where
     }
 }
 
-/// Hash delegate for [iced::Color] that hashes RGBA in lieu of floats.
+/// Hash delegate for [`iced::Color`] that hashes RGBA in lieu of floats.
 #[inline]
 pub(super) fn color_hash<H: Hasher>(color: Color, state: &mut H) {
     // Hash isn't implemented for floats, so I hash the color as RGBA instead.
@@ -81,35 +82,36 @@ pub(super) fn color_hash<H: Hasher>(color: Color, state: &mut H) {
     color.hash(state);
 }
 
-/// Serialize [iced::Color] as a hex string.
-#[inline]
-pub(super) fn serialize_color<S>(color: &Color, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    // iced::Color to [u8; 4]
-    let color = color.into_rgba8();
-
-    // [u8; 4] to hex string, precluding the alpha if it's 0xff.
-    let hex_color = if color[3] != 255 {
-        format!(
-            "#{:02x}{:02x}{:02x}{:02x}",
-            color[0], color[1], color[2], color[3]
-        )
-    } else {
-        format!("#{:02x}{:02x}{:02x}", color[0], color[1], color[2])
-    };
-
-    // Serialize the hex string
-    serializer.serialize_str(&hex_color)
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{deserialize_color, serialize_color};
     use iced::Color;
-    use serde::{Deserialize, Serialize};
+    use serde::{Deserialize, Serialize, Serializer};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
+
+    use super::deserialize_color;
+
+    /// Serialize [`iced::Color`] as a hex string.
+    #[inline]
+    fn serialize_color<S>(color: &Color, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // iced::Color to [u8; 4]
+        let color = color.into_rgba8();
+
+        // [u8; 4] to hex string, precluding the alpha if it's 0xff.
+        let hex_color = if color[3] != 255 {
+            format!(
+                "#{:02x}{:02x}{:02x}{:02x}",
+                color[0], color[1], color[2], color[3]
+            )
+        } else {
+            format!("#{:02x}{:02x}{:02x}", color[0], color[1], color[2])
+        };
+
+        // Serialize the hex string
+        serializer.serialize_str(&hex_color)
+    }
 
     // https://github.com/catppuccin/catppuccin
     const CATPPUCCIN_PINK_HEX: &str = "#f5c2e7";
