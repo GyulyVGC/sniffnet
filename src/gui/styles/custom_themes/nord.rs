@@ -42,7 +42,7 @@ pub(in crate::gui::styles) fn nord_light() -> CustomPalette {
             chart_badge_alpha: 0.6,
             round_borders_alpha: 0.35,
             round_containers_alpha: 0.15,
-            nightly: true,
+            nightly: false,
         },
     }
 }
