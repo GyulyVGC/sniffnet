@@ -245,7 +245,7 @@ sudo sniffnet
 - 🌍 get information about the country of the remote hosts (IP geolocation)
 - ⭐ save your favorite network hosts
 - 🔉 set custom notifications to inform you when defined network events occur
-- 🎨 choose the style that fits you the most from 4 different available themes plus custom theme support
+- 🎨 choose the style that fits you the most from 12 different available themes, plus custom theme support
 - 🕵️ inspect each of your network connections in real time
 - 📁 save complete textual reports with detailed information for each network connection:
   * source and destination IP addresses
@@ -416,25 +416,6 @@ Check the [required dependencies](#required-dependencies) section for instructio
 
 ### Rendering problems
 
-<<<<<<< HEAD
-In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
-may cause some problems that could prevent you from running Sniffnet. <br>
-In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer)
-branch, which uses the `glow` renderer.
-
-> **Note**
->
-> View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
-||||||| ec3c96f
-In some cases, especially if you are running on an old architecture, the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
-may cause some problems that could prevent you from running Sniffnet. <br>
-In this case, you can try building the application from the [`glow-renderer`](https://github.com/GyulyVGC/sniffnet/tree/glow-renderer)
-branch, which uses the `glow` renderer.
-
-> **Note**
->
-> View issues labeled with [`renderer`](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+label%3Arenderer) to see how those problems have been solved by others.
-=======
 In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
 the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause problems (country icons are completely black, or the interface glitches). <br>
@@ -444,7 +425,6 @@ which is based on `tiny-skia`, a CPU-only software renderer that should work pro
 [macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |
 [Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640693) |
 [Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640696)
->>>>>>> upstream/advanced-settings
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
