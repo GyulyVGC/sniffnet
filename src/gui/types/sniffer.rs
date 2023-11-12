@@ -175,25 +175,14 @@ impl Sniffer {
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
-                // Reset the path for custom styles so that the newly chosen theme loads when sniffnet starts
-                // Without this, the custom style will always be set on launch regardless of a set theme
-                self.advanced_settings.style_path = None;
                 self.style = style;
                 self.traffic_chart.change_style(self.style);
             }
             Message::LoadStyle(path) => {
-                self.advanced_settings.style_path = if path.is_empty() {
-                    None
-                } else {
-                    Some(path.into())
-                };
-
-                if let Some(path) = self.advanced_settings.style_path.as_deref() {
-                    if let Ok(palette) = CustomPalette::from_file(path) {
-                        let style = StyleType::Custom(ExtraStyles::CustomToml(palette));
-                        self.style = style;
-                        self.traffic_chart.change_style(self.style);
-                    }
+                self.advanced_settings.style_path = path.clone().into();
+                if let Ok(palette) = CustomPalette::from_file(path) {
+                    self.style = StyleType::Custom(ExtraStyles::CustomToml(palette));
+                    self.traffic_chart.change_style(self.style);
                 }
             }
             Message::Waiting => self.update_waiting_dots(),

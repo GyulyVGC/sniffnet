@@ -10,7 +10,7 @@ use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
 use crate::gui::styles::custom_themes::{dracula, gruvbox, nord, solarized};
 use crate::gui::styles::types::palette::Palette;
 
-use super::color_remote::{color_hash, deserialize_color};
+use super::color_remote::{color_hash, deserialize_color, serialize_color};
 
 const FLOAT_PRECISION: f32 = 10000.0;
 
@@ -19,7 +19,7 @@ const FLOAT_PRECISION: f32 = 10000.0;
 // defined in the TOML as a single entity rather than two separate tables. This is intentional because
 // the separation between palette and its extension is an implementation detail that shouldn't be exposed
 // to custom theme designers.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct CustomPalette {
     /// Base colors for the theme
     #[serde(flatten)]
@@ -30,10 +30,13 @@ pub struct CustomPalette {
 }
 
 /// Extension color for themes.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
 pub struct PaletteExtension {
     /// Color of favorites star
-    #[serde(deserialize_with = "deserialize_color")]
+    #[serde(
+        deserialize_with = "deserialize_color",
+        serialize_with = "serialize_color"
+    )]
     pub starred: Color,
     /// Badge/logo alpha
     pub chart_badge_alpha: f32,
@@ -125,7 +128,6 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
-    #[serde(skip)]
     CustomToml(CustomPalette),
 }
 
@@ -223,10 +225,10 @@ mod tests {
                 text_body: color!(205, 214, 244),
             },
             extension: PaletteExtension {
-                starred: color!(249, 226, 175),
-                round_borders_alpha: 0.1,
+                starred: color!(249, 226, 175, 0.6666667),
+                round_borders_alpha: 0.3,
                 round_containers_alpha: 0.15,
-                chart_badge_alpha: 0.75,
+                chart_badge_alpha: 0.2,
                 nightly: true,
             },
         }

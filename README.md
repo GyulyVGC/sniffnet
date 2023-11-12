@@ -381,21 +381,21 @@ The currently usable hotkeys are reported in the following.
 
   The TOML must follow this format:
   ```toml
-  # Color palettes are in RGBA hexadecimal where the alpha is optional.
-  primary = "#1e1e2e"           # Base
-  secondary = "#89b4fa"         # Blue
-  buttons = "#313244"           # Surface0
-  outgoing = "#f5c2e7"          # Pink
-  text_headers = "#11111b"      # Crust
-  text_body = "#cdd6f4"         # Text
-  starred = "#f9e2af"           # Yellow
+  # Colors are in RGB/RGBA hexadecimal.
+  primary = "#1e1e2e"           # Background
+  secondary = "#89b4fa"         # Headers / incoming connections
+  buttons = "#313244"           # Buttons
+  outgoing = "#f5c2e7"          # Outgoing connections
+  text_headers = "#11111b"      # Text headers
+  text_body = "#cdd6f4"         # Text body
+  starred = "#f9e2afaa"         # Favorites
 
-  # Alpha channels are floats within [0.0, 1.0]
-  round_borders_alpha = 0.1
-  round_containers_alpha = 0.15
-  chart_badge_alpha = 0.75
+  # The following parameters are in the range [0.0, 1.0].
+  round_borders_alpha = 0.3     # Borders opacity
+  round_containers_alpha = 0.15 # Containers opacity
+  chart_badge_alpha = 0.2       # Chart opacity
 
-  # Night or dark themes should be specified here
+  # Set to true if the theme is dark, false if it's light.
   nightly = true
   ```
 

@@ -10,7 +10,7 @@ use std::hash::{Hash, Hasher};
 use iced::Color;
 use serde::{
     de::{Error as DeErrorTrait, Unexpected},
-    Deserialize, Deserializer,
+    Deserialize, Deserializer, Serializer,
 };
 
 // #aabbcc is seven bytes long
@@ -82,36 +82,36 @@ pub(super) fn color_hash<H: Hasher>(color: Color, state: &mut H) {
     color.hash(state);
 }
 
+/// Serialize [`iced::Color`] as a hex string.
+#[inline]
+pub(super) fn serialize_color<S>(color: &Color, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    // iced::Color to [u8; 4]
+    let color = color.into_rgba8();
+
+    // [u8; 4] to hex string, precluding the alpha if it's 0xff.
+    let hex_color = if color[3] == 255 {
+        format!("#{:02x}{:02x}{:02x}", color[0], color[1], color[2])
+    } else {
+        format!(
+            "#{:02x}{:02x}{:02x}{:02x}",
+            color[0], color[1], color[2], color[3]
+        )
+    };
+
+    // Serialize the hex string
+    serializer.serialize_str(&hex_color)
+}
+
 #[cfg(test)]
 mod tests {
     use iced::Color;
-    use serde::{Deserialize, Serialize, Serializer};
+    use serde::{Deserialize, Serialize};
     use serde_test::{assert_de_tokens_error, assert_tokens, Token};
 
-    use super::deserialize_color;
-
-    /// Serialize [`iced::Color`] as a hex string.
-    #[inline]
-    fn serialize_color<S>(color: &Color, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // iced::Color to [u8; 4]
-        let color = color.into_rgba8();
-
-        // [u8; 4] to hex string, precluding the alpha if it's 0xff.
-        let hex_color = if color[3] != 255 {
-            format!(
-                "#{:02x}{:02x}{:02x}{:02x}",
-                color[0], color[1], color[2], color[3]
-            )
-        } else {
-            format!("#{:02x}{:02x}{:02x}", color[0], color[1], color[2])
-        };
-
-        // Serialize the hex string
-        serializer.serialize_str(&hex_color)
-    }
+    use super::{deserialize_color, serialize_color};
 
     // https://github.com/catppuccin/catppuccin
     const CATPPUCCIN_PINK_HEX: &str = "#f5c2e7";

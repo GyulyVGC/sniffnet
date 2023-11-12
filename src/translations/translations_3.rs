@@ -66,3 +66,11 @@ pub fn file_path_translation(language: Language) -> &'static str {
         _ => "File path",
     }
 }
+
+pub fn custom_style_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Custom style",
+        Language::IT => "Stile personalizzato",
+        _ => "Custom style",
+    }
+}

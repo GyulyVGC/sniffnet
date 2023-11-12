@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use iced::advanced::widget::Text;
@@ -17,12 +17,13 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
+use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    advanced_settings_translation, file_path_translation, info_mmdb_paths_translation,
-    mmdb_paths_translation, params_not_editable_translation, restore_defaults_translation,
-    scale_factor_translation,
+    advanced_settings_translation, custom_style_translation, file_path_translation,
+    info_mmdb_paths_translation, mmdb_paths_translation, params_not_editable_translation,
+    restore_defaults_translation, scale_factor_translation,
 };
 use crate::utils::asn::MmdbReader;
 use crate::utils::formatted_strings::get_default_report_directory;
@@ -60,6 +61,11 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
+        ))
+        .push(custom_style_settings(
+            sniffer.language,
+            font,
+            &sniffer.advanced_settings.style_path,
         ));
 
     if !is_editable {
@@ -85,12 +91,6 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             &sniffer.advanced_settings.mmdb_asn,
             &sniffer.country_mmdb_reader,
             &sniffer.asn_mmdb_reader,
-        ))
-        .push(custom_style_settings(
-            is_editable,
-            font,
-            sniffer.advanced_settings.style_path.as_deref(),
-            "Custom style",
         ));
 
     Container::new(content)
@@ -296,33 +296,32 @@ fn mmdb_input(
 }
 
 fn custom_style_settings(
-    is_editable: bool,
+    language: Language,
     font: Font,
-    custom_path: Option<&Path>,
-    caption: &str,
+    custom_path: &PathBuf,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let is_error = custom_path
-        .is_some_and(|path| path.extension().map_or(true, |ext| ext != "toml") || !path.exists());
+    let path_str = &custom_path.to_string_lossy().to_string();
 
-    let mut input = TextInput::new(
-        "-",
-        &custom_path.map(Path::to_string_lossy).unwrap_or_default(),
-    )
-    .padding([0, 5])
-    .font(font)
-    .width(Length::Fixed(200.0))
-    .style(if is_error {
-        TextInputType::Error
+    let is_error = if path_str.is_empty() {
+        false
     } else {
-        TextInputType::Standard
-    });
+        CustomPalette::from_file(custom_path).is_err()
+    };
 
-    if is_editable {
-        input = input.on_input(Message::LoadStyle);
-    }
+    let input = TextInput::new("-", path_str)
+        .on_input(Message::LoadStyle)
+        .on_submit(Message::LoadStyle(path_str.clone()))
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(200.0))
+        .style(if is_error {
+            TextInputType::Error
+        } else {
+            TextInputType::Standard
+        });
 
     Row::new()
         .spacing(5)
-        .push(Text::new(format!("{caption}:")).font(font))
+        .push(Text::new(format!("{}:", custom_style_translation(language))).font(font))
         .push(input)
 }
