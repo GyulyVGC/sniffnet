@@ -23,6 +23,7 @@ pub(in crate::gui::styles) fn solarized_light() -> CustomPalette {
             chart_badge_alpha: 0.75,
             round_borders_alpha: 0.35,
             round_containers_alpha: 0.15,
+            nightly: false,
         },
     }
 }
@@ -43,6 +44,7 @@ pub(in crate::gui::styles) fn solarized_dark() -> CustomPalette {
             chart_badge_alpha: 0.25,
             round_borders_alpha: 0.15,
             round_containers_alpha: 0.08,
+            nightly: true,
         },
     }
 }

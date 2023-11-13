@@ -16,6 +16,7 @@ use crate::countries::country_utils::COUNTRY_MMDB;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
@@ -176,6 +177,13 @@ impl Sniffer {
             Message::Style(style) => {
                 self.style = style;
                 self.traffic_chart.change_style(self.style);
+            }
+            Message::LoadStyle(path) => {
+                self.advanced_settings.style_path = path.clone().into();
+                if let Ok(palette) = CustomPalette::from_file(path) {
+                    self.style = StyleType::Custom(ExtraStyles::CustomToml(palette));
+                    self.traffic_chart.change_style(self.style);
+                }
             }
             Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),

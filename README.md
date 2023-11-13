@@ -1,12 +1,12 @@
 <p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
-<p align="center"> 
+<p align="center">
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
 &nbsp;
 <a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?&logo=rust&color=blue"/></a> <br>
 </p>
 
-<p align="center"> 
+<p align="center">
 Application to comfortably monitor your Internet traffic <br>
 Multithreaded, cross-platform, reliable <br>
 🌐 <a href="https://www.sniffnet.net">www.sniffnet.net</a>
@@ -78,17 +78,17 @@ You can install Sniffnet in one of the following ways:
 [32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)
 
   ### macOS
-  
+
   - [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) |
 [Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
 
   ### Linux
 
   - deb: [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) |
-[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) | 
+[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) |
 [i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) |
 [armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
-  
+
   - rpm: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) |
 [aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
 
@@ -245,7 +245,7 @@ sudo sniffnet
 - 🌍 get information about the country of the remote hosts (IP geolocation)
 - ⭐ save your favorite network hosts
 - 🔉 set custom notifications to inform you when defined network events occur
-- 🎨 choose the style that fits you the most from 4 different available themes
+- 🎨 choose the style that fits you the most from 12 different available themes, plus custom theme support
 - 🕵️ inspect each of your network connections in real time
 - 📁 save complete textual reports with detailed information for each network connection:
   * source and destination IP addresses
@@ -267,13 +267,13 @@ sudo sniffnet
   Geolocation and network providers (ASN) refer to the remote IP address of each connection. They are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
 
   > **Note**
-  > 
+  >
   > The MMDB (MaxMind database) format has been developed especially for IP lookup.<br>
   > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.<br>
   > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
-  > 
+  >
   > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
-  
+
   This file format potentially allows Sniffnet to execute hundreds of different IP lookups in a matter of a few milliseconds.
 
 </details>
@@ -284,23 +284,23 @@ sudo sniffnet
 <details>
 
   <summary>See details</summary>
-  
+
   <br>
-  
+
   Application layer protocols are inferred from the transport port numbers,
   following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
 
   Please, remember that this is just a convention:
 
   > **Warning**
-  > 
+  >
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
   > However, many unofficial uses of well-known port numbers occur in practice.
 
   The following table reports the port-to-service mappings used by Sniffnet,
   chosen from the most common assignments by IANA.
-  
+
 <div align="center">
 
 |Port number(s)|Application protocol  |  Description |
@@ -372,6 +372,35 @@ The currently usable hotkeys are reported in the following.
 
 </details>
 
+## Custom themes
+<details>
+
+  <summary>See details</summary>
+
+  Custom themes are specified as a TOML file.
+
+  The TOML must follow this format:
+  ```toml
+  # Colors are in RGB/RGBA hexadecimal.
+  primary = "#1e1e2e"           # Background
+  secondary = "#89b4fa"         # Headers / incoming connections
+  buttons = "#313244"           # Buttons
+  outgoing = "#f5c2e7"          # Outgoing connections
+  text_headers = "#11111b"      # Text headers
+  text_body = "#cdd6f4"         # Text body
+  starred = "#f9e2afaa"         # Favorites
+
+  # The following parameters are in the range [0.0, 1.0].
+  round_borders_alpha = 0.3     # Borders opacity
+  round_containers_alpha = 0.15 # Containers opacity
+  chart_badge_alpha = 0.2       # Chart opacity
+
+  # Set to true if the theme is dark, false if it's light.
+  nightly = true
+  ```
+
+  The example theme above uses colors from [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
+</details>
 
 ## Troubleshooting
 
@@ -388,9 +417,9 @@ Check the [required dependencies](#required-dependencies) section for instructio
 ### Rendering problems
 
 In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
-the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced) 
+the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause problems (country icons are completely black, or the interface glitches). <br>
-In these cases you can download an alternative version of the application, 
+In these cases you can download an alternative version of the application,
 which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
 [Windows](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640695) |
 [macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |

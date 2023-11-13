@@ -9,9 +9,6 @@ use std::{panic, process, thread};
 use iced::window::PlatformSpecific;
 use iced::{window, Application, Font, Settings};
 
-use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
-use crate::configs::types::config_window::{ConfigWindow, ToPosition};
-use crate::configs::types::configs::Configs;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::parse_cli_args;
@@ -33,6 +30,9 @@ use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
+use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
+use crate::configs::types::config_window::{ConfigWindow, ToPosition};
+use crate::configs::types::configs::Configs;
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;

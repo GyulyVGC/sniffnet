@@ -1,21 +1,6 @@
-use crate::gui::components::tab::get_settings_tabs;
-use crate::gui::pages::settings_notifications_page::settings_header;
-use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
-use crate::gui::styles::text::TextType;
-use crate::gui::styles::text_input::TextInputType;
-use crate::gui::types::message::Message;
-use crate::translations::translations_2::country_translation;
-use crate::translations::translations_3::{
-    advanced_settings_translation, file_path_translation, info_mmdb_paths_translation,
-    mmdb_paths_translation, params_not_editable_translation, restore_defaults_translation,
-    scale_factor_translation,
-};
-use crate::utils::asn::MmdbReader;
-use crate::utils::formatted_strings::get_default_report_directory;
-use crate::utils::types::icon::Icon;
-use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
@@ -24,8 +9,26 @@ use iced::widget::{
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
-use std::path::PathBuf;
-use std::sync::Arc;
+
+use crate::gui::components::tab::get_settings_tabs;
+use crate::gui::pages::settings_notifications_page::settings_header;
+use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::text::TextType;
+use crate::gui::styles::text_input::TextInputType;
+use crate::gui::styles::types::custom_palette::CustomPalette;
+use crate::gui::types::message::Message;
+use crate::translations::translations_2::country_translation;
+use crate::translations::translations_3::{
+    advanced_settings_translation, custom_style_translation, file_path_translation,
+    info_mmdb_paths_translation, mmdb_paths_translation, params_not_editable_translation,
+    restore_defaults_translation, scale_factor_translation,
+};
+use crate::utils::asn::MmdbReader;
+use crate::utils::formatted_strings::get_default_report_directory;
+use crate::utils::types::icon::Icon;
+use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
@@ -58,6 +61,11 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
+        ))
+        .push(custom_style_settings(
+            sniffer.language,
+            font,
+            &sniffer.advanced_settings.style_path,
         ));
 
     if !is_editable {
@@ -165,11 +173,8 @@ fn report_path_setting(
     let default_directory = &get_default_report_directory().to_string_lossy().to_string();
     path.pop();
     let custom_directory = &path.to_string_lossy().to_string();
-    let is_error = if custom_directory.is_empty() {
-        false
-    } else {
-        true
-    };
+    // to be updated.........!!!
+    let is_error = !custom_directory.is_empty();
 
     let mut input = TextInput::new(default_directory, custom_directory)
         .padding([0, 5])
@@ -287,5 +292,36 @@ fn mmdb_input(
     Row::new()
         .spacing(5)
         .push(Text::new(format!("{caption}:")).font(font))
+        .push(input)
+}
+
+fn custom_style_settings(
+    language: Language,
+    font: Font,
+    custom_path: &PathBuf,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    let path_str = &custom_path.to_string_lossy().to_string();
+
+    let is_error = if path_str.is_empty() {
+        false
+    } else {
+        CustomPalette::from_file(custom_path).is_err()
+    };
+
+    let input = TextInput::new("-", path_str)
+        .on_input(Message::LoadStyle)
+        .on_submit(Message::LoadStyle(path_str.clone()))
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(200.0))
+        .style(if is_error {
+            TextInputType::Error
+        } else {
+            TextInputType::Standard
+        });
+
+    Row::new()
+        .spacing(5)
+        .push(Text::new(format!("{}:", custom_style_translation(language))).font(font))
         .push(input)
 }
