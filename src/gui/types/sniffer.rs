@@ -397,7 +397,7 @@ impl Sniffer {
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters;
             let country_mmdb_reader = self.country_mmdb_reader.clone();
-            let asn_mmdb_reader = self.country_mmdb_reader.clone();
+            let asn_mmdb_reader = self.asn_mmdb_reader.clone();
             self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
