@@ -3,8 +3,8 @@ use crate::utils::formatted_strings::APP_VERSION;
 /// Parse CLI arguments, and exit if `--help`, `--version`, or an
 /// unknown argument was supplied
 pub fn parse_cli_args() {
-    let args = std::env::args().skip(1);
-    for arg in args {
+    let mut args = std::env::args().skip(1);
+    if let Some(arg) = args.next() {
         match arg.as_str() {
             "--help" | "-h" => print_help(),
             "--version" | "-v" => print_version(),
