@@ -419,10 +419,10 @@ the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause problems (country icons are completely black, or the interface glitches). <br>
 In these cases you can download an alternative version of the application, 
 which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
-[Windows](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640695) |
-[macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |
-[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640693) |
-[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640696)
+[Windows](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225849) |
+[macOS](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225848) |
+[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225847) |
+[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225850)
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
