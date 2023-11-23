@@ -53,7 +53,8 @@ A special mention goes to these awesome organizations and folks who are sponsori
 <a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="GitHub"/></a>&nbsp;&nbsp;
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="75px" alt="Cthulu201"/></a>&nbsp;&nbsp;
 <a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
-<a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="75px" alt="ZEROF"/></a>
+<a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="75px" alt="ZEROF"/></a>&nbsp;&nbsp;
+<a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="75px" alt="Jan Walter"/></a>
 </p>
 
 
