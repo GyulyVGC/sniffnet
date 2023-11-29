@@ -45,6 +45,7 @@ confy = "0.5.1"
 serde = { version = "1.0.193", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.3", default_features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
+toml = "0.8.8"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
 reqwest = { version = "0.11.22", default-features = false, features = ["json", "blocking", "rustls-tls"] }
