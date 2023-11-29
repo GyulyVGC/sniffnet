@@ -35,23 +35,22 @@ strip = true
 [dependencies]
 pcap = "1.1.0"
 etherparse = "0.13.0"
-chrono = { version = "0.4.28", default_features = false, features = ["clock"] }
-indexmap = "2.0.0"
+chrono = { version = "0.4.31", default_features = false, features = ["clock"] }
+indexmap = "2.1.0"
 plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
 iced = { version = "0.10.0", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.9.0"
 maxminddb = "0.23.0"
 confy = "0.5.1"
-serde = { version = "1.0.188", default_features = false, features = ["derive"] }
-rodio = { version = "0.17.1", default_features = false, features = ["mp3"] }
-dns-lookup = "2.0.2"
-toml = "0.8.0"
-
-[target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.11.20", features = ["json", "blocking"] }
+serde = { version = "1.0.193", default_features = false, features = ["derive"] }
+rodio = { version = "0.17.3", default_features = false, features = ["mp3"] }
+dns-lookup = "2.0.4"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.11.20", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+reqwest = { version = "0.11.22", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+
+[target.'cfg(target_arch = "powerpc64")'.dependencies]
+reqwest = { version = "0.11.22", features = ["json", "blocking"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 

@@ -24,15 +24,16 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
     let row_language_radio_3 = language_radios(language_active, &Language::ROW3, font);
     let row_language_radio_4 = language_radios(language_active, &Language::ROW4, font);
     let row_language_radio_5 = language_radios(language_active, &Language::ROW5, font);
+    let row_language_radio_6 = language_radios(language_active, &Language::ROW6, font);
     let col_language_radio_all = Column::new()
-        .spacing(10)
+        .spacing(12)
         .align_items(Alignment::Center)
         .push(row_language_radio_1)
-        .push(vertical_space(0))
         .push(row_language_radio_2)
         .push(row_language_radio_3)
         .push(row_language_radio_4)
-        .push(row_language_radio_5);
+        .push(row_language_radio_5)
+        .push(row_language_radio_6);
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -58,8 +59,8 @@ pub fn settings_language_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         .push(vertical_space(Fixed(25.0)))
         .push(col_language_radio_all);
 
-    if [Language::EL, Language::PT].contains(&sniffer.language) {
-        content = content.push(vertical_space(Fixed(40.0))).push(
+    if sniffer.language.eq(&Language::EL) {
+        content = content.push(vertical_space(Fixed(20.0))).push(
             Container::new(
                 Text::new("The selected language is not fully updated to version 1.2").font(font),
             )

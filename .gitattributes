@@ -9,6 +9,7 @@
 *.mp3               binary
 *.rtf               binary
 *.mmdb              binary
+*.pdf               binary
 
 *.rs                diff=rust
 *.md                diff=markdown

@@ -52,7 +52,9 @@ A special mention goes to these awesome organizations and folks who are sponsori
 <p align="center">
 <a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="GitHub"/></a>&nbsp;&nbsp;
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="75px" alt="Cthulu201"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="Tiansheng Li"/></a>
+<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
+<a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="75px" alt="ZEROF"/></a>&nbsp;&nbsp;
+<a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="75px" alt="Jan Walter"/></a>
 </p>
 
 
@@ -121,6 +123,32 @@ brew install sniffnet
 
 </details>
 
+<details>
+
+  <summary>from Nixpkgs</summary>
+
+  You can install [Sniffnet Nix package](https://search.nixos.org/packages?channel=23.05&show=sniffnet&from=0&size=50&sort=relevance&type=packages&query=sniffnet) adding the following Nix code to your NixOS Configuration, usually located in `/etc/nixos/configuration.nix`:
+
+  ```nix
+  environment.systemPackages = [
+    pkgs.sniffnet
+  ];
+```
+
+  Alternatively, you can install it in your home using [Home Manager](https://github.com/nix-community/home-manager) with:
+
+  ```nix
+  home.packages = [
+    pkgs.sniffnet
+  ];
+```
+
+  Alternatively, you can try it in a shell with:
+  ```sh
+nix-shell -p sniffnet
+```
+
+</details>
 
 <details>
 
@@ -421,10 +449,10 @@ the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
 may cause problems (country icons are completely black, or the interface glitches). <br>
 In these cases you can download an alternative version of the application,
 which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
-[Windows](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640695) |
-[macOS](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640694) |
-[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640693) |
-[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/14909529200/artifacts/849640696)
+[Windows](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225849) |
+[macOS](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225848) |
+[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225847) |
+[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225850)
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 

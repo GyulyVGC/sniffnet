@@ -400,6 +400,34 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "msaf94",
+      "name": "Safaraliev Maxim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27451267?v=4",
+      "profile": "https://github.com/msaf94",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Mkadir",
+      "name": "Muhammadali Hakimov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/69618539?v=4",
+      "profile": "https://github.com/Mkadir",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "clr-cera",
+      "name": "clr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/93736542?v=4",
+      "profile": "https://github.com/clr-cera",
+      "contributions": [
+        "doc",
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
