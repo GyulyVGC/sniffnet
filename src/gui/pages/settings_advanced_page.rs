@@ -19,13 +19,13 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::types::message::Message;
+use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     advanced_settings_translation, custom_style_translation, file_path_translation,
     info_mmdb_paths_translation, mmdb_paths_translation, params_not_editable_translation,
     restore_defaults_translation, scale_factor_translation,
 };
-use crate::utils::asn::MmdbReader;
 use crate::utils::formatted_strings::get_default_report_directory;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};

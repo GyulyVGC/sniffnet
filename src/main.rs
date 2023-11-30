@@ -40,6 +40,7 @@ mod cli;
 mod configs;
 mod countries;
 mod gui;
+mod mmdb;
 mod networking;
 mod notifications;
 mod report;

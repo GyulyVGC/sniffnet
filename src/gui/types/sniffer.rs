@@ -12,7 +12,6 @@ use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::ConfigWindow;
-use crate::countries::country_utils::COUNTRY_MMDB;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -20,6 +19,9 @@ use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::status::Status;
+use crate::mmdb::asn::ASN_MMDB;
+use crate::mmdb::country::COUNTRY_MMDB;
+use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -32,7 +34,6 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
-use crate::utils::asn::{mmdb_reader, MmdbReader, ASN_MMDB};
 use crate::utils::formatted_strings::{get_default_report_directory, push_pcap_file_name};
 use crate::utils::types::web_page::WebPage;
 use crate::{
@@ -137,11 +138,14 @@ impl Sniffer {
             last_focus_time: std::time::Instant::now(),
             advanced_settings: configs.advanced_settings.clone(),
             window: configs.window,
-            country_mmdb_reader: Arc::new(mmdb_reader(
+            country_mmdb_reader: Arc::new(MmdbReader::from(
                 &configs.advanced_settings.mmdb_country,
                 COUNTRY_MMDB,
             )),
-            asn_mmdb_reader: Arc::new(mmdb_reader(&configs.advanced_settings.mmdb_asn, ASN_MMDB)),
+            asn_mmdb_reader: Arc::new(MmdbReader::from(
+                &configs.advanced_settings.mmdb_asn,
+                ASN_MMDB,
+            )),
         }
     }
 
@@ -283,11 +287,11 @@ impl Sniffer {
             }
             Message::CustomCountryDb(db) => {
                 self.advanced_settings.mmdb_country = db.clone();
-                self.country_mmdb_reader = Arc::new(mmdb_reader(&db, COUNTRY_MMDB));
+                self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
                 self.advanced_settings.mmdb_asn = db.clone();
-                self.asn_mmdb_reader = Arc::new(mmdb_reader(&db, ASN_MMDB));
+                self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             Message::CustomReportDirectory(directory) => {
                 let path = push_pcap_file_name(PathBuf::from(directory));

@@ -3,7 +3,6 @@ use iced::widget::tooltip::Position;
 use iced::widget::Svg;
 use iced::widget::Tooltip;
 use iced::{Font, Length, Renderer};
-use maxminddb::{geoip2, MaxMindDBError};
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
@@ -25,25 +24,7 @@ use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
     local_translation, unknown_translation, your_network_adapter_translation,
 };
-use crate::utils::asn::MmdbReader;
 use crate::{Language, StyleType};
-
-pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Country.mmdb");
-
-pub fn get_country(address_to_lookup: &str, country_db_reader: &MmdbReader) -> Country {
-    let country_result: Result<geoip2::Country, MaxMindDBError> = match country_db_reader {
-        MmdbReader::Default(reader) => reader.lookup(address_to_lookup.parse().unwrap()),
-        MmdbReader::Custom(reader) => reader.lookup(address_to_lookup.parse().unwrap()),
-    };
-    if let Ok(res1) = country_result {
-        if let Some(res2) = res1.country {
-            if let Some(res3) = res2.iso_code {
-                return Country::from_str(res3);
-            }
-        }
-    }
-    Country::ZZ // unknown
-}
 
 fn get_flag_from_country(
     country: Country,
