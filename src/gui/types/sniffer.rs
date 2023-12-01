@@ -3,7 +3,7 @@
 
 use std::collections::{HashSet, VecDeque};
 use std::path::PathBuf;
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -18,7 +18,6 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
-use crate::gui::types::status::Status;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
@@ -34,7 +33,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::{get_default_report_directory, push_pcap_file_name};
+use crate::utils::formatted_strings::push_pcap_file_name;
 use crate::utils::types::web_page::WebPage;
 use crate::{
     ConfigAdvancedSettings, ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData,
@@ -49,8 +48,6 @@ pub struct Sniffer {
     pub current_capture_id: Arc<Mutex<u16>>,
     /// Capture data updated by thread parsing packets
     pub info_traffic: Arc<Mutex<InfoTraffic>>,
-    /// Status of the application (init or running) and the associated condition variable
-    pub status_pair: Arc<(Mutex<Status>, Condvar)>,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Arc<Mutex<Result<bool, String>>>,
     /// Traffic data displayed in GUI
@@ -107,14 +104,12 @@ impl Sniffer {
     pub fn new(
         current_capture_id: Arc<Mutex<u16>>,
         info_traffic: Arc<Mutex<InfoTraffic>>,
-        status_pair: Arc<(Mutex<Status>, Condvar)>,
         configs: &Configs,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
             current_capture_id,
             info_traffic,
-            status_pair,
             newer_release_available,
             runtime_data: RunTimeData::new(),
             device: configs.device.to_my_device(),
@@ -130,7 +125,7 @@ impl Sniffer {
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
             notifications: configs.settings.notifications,
-            running_page: RunningPage::Overview,
+            running_page: RunningPage::Init,
             language: configs.settings.language,
             unread_notifications: 0,
             search: SearchParameters::default(),
@@ -174,7 +169,6 @@ impl Sniffer {
             Message::AppProtocolSelection(protocol) => self.filters.application = protocol,
             Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => self.report_sort_type = sort,
-            Message::OpenReport => self.open_report_file(),
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
@@ -346,28 +340,6 @@ impl Sniffer {
         Command::none()
     }
 
-    fn open_report_file(&mut self) {
-        if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
-            let report_path = get_default_report_directory();
-            #[cfg(target_os = "windows")]
-            std::process::Command::new("explorer")
-                .arg(report_path)
-                .spawn()
-                .unwrap();
-            #[cfg(target_os = "macos")]
-            std::process::Command::new("open")
-                .arg("-t")
-                .arg(report_path)
-                .spawn()
-                .unwrap();
-            #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
-            std::process::Command::new("xdg-open")
-                .arg(report_path)
-                .spawn()
-                .unwrap();
-        }
-    }
-
     fn open_web(web_page: &WebPage) {
         let url = web_page.get_url();
         #[cfg(target_os = "windows")]
@@ -390,11 +362,11 @@ impl Sniffer {
         let device = self.device.clone();
         let (pcap_error, cap) = get_capture_result(&device);
         self.pcap_error = pcap_error.clone();
-        *self.status_pair.0.lock().unwrap() = Status::Running;
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
         self.traffic_chart = TrafficChart::new(self.style, self.language);
+        self.running_page = RunningPage::Overview;
 
         if pcap_error.is_none() {
             // no pcap error
@@ -402,7 +374,6 @@ impl Sniffer {
             let filters = self.filters;
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.status_pair.1.notify_all();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -421,8 +392,7 @@ impl Sniffer {
     }
 
     fn reset(&mut self) -> Command<Message> {
-        *self.status_pair.0.lock().unwrap() = Status::Init;
-        self.running_page = RunningPage::Overview;
+        self.running_page = RunningPage::Init;
         *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
         self.pcap_error = None;
         self.report_sort_type = ReportSortType::MostRecent;
@@ -496,11 +466,7 @@ impl Sniffer {
     }
 
     fn switch_page(&mut self, next: bool) {
-        match (
-            *self.status_pair.0.lock().unwrap(),
-            self.settings_page,
-            self.modal,
-        ) {
+        match (self.running_page, self.settings_page, self.modal) {
             (_, Some(current_setting), None) => {
                 // Settings opened
                 if next {
@@ -509,7 +475,11 @@ impl Sniffer {
                     self.settings_page = Some(current_setting.previous());
                 }
             }
-            (Status::Running, None, None) => {
+            (
+                RunningPage::Inspect | RunningPage::Notifications | RunningPage::Overview,
+                None,
+                None,
+            ) => {
                 // Running with no overlays
                 if self.runtime_data.tot_sent_packets + self.runtime_data.tot_received_packets > 0 {
                     // Running with no overlays and some packets filtered
@@ -528,7 +498,7 @@ impl Sniffer {
     }
 
     fn shortcut_return(&mut self) -> Command<Message> {
-        if self.status_pair.0.lock().unwrap().eq(&Status::Init)
+        if self.running_page.eq(&RunningPage::Init)
             && self.settings_page.is_none()
             && self.modal.is_none()
         {
@@ -552,7 +522,7 @@ impl Sniffer {
 
     // also called when backspace key is pressed on a running state
     fn reset_button_pressed(&mut self) -> Command<Message> {
-        if self.status_pair.0.lock().unwrap().eq(&Status::Running) {
+        if self.running_page.ne(&RunningPage::Init) {
             return if self.info_traffic.lock().unwrap().all_packets == 0
                 && self.settings_page.is_none()
             {
@@ -565,8 +535,7 @@ impl Sniffer {
     }
 
     fn shortcut_ctrl_d(&mut self) -> Command<Message> {
-        if self.status_pair.0.lock().unwrap().eq(&Status::Running)
-            && self.running_page.eq(&RunningPage::Notifications)
+        if self.running_page.eq(&RunningPage::Notifications)
             && !self.runtime_data.logged_notifications.is_empty()
         {
             return self.update(Message::ShowModal(MyModal::ClearAll));
@@ -598,7 +567,7 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::{
         AppProtocol, ByteMultiple, ChartType, Configs, InfoTraffic, IpVersion, Language,
-        ReportSortType, RunningPage, Sniffer, Status, StyleType, TransProtocol,
+        ReportSortType, RunningPage, Sniffer, StyleType, TransProtocol,
     };
 
     #[test]
@@ -606,7 +575,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -627,7 +595,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -648,7 +615,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -669,7 +635,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -688,7 +653,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -709,7 +673,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -731,7 +694,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -752,7 +714,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -947,7 +908,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1040,7 +1000,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1063,7 +1022,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1230,7 +1188,6 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1258,41 +1215,37 @@ mod tests {
         let mut sniffer = Sniffer::new(
             Arc::new(Mutex::new(0)),
             Arc::new(Mutex::new(InfoTraffic::new())),
-            Arc::new((Mutex::new(Status::Init), Default::default())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
         sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
-        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         // nothing changes
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Init);
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         // switch settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(false));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Advanced));
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, RunningPage::Init);
         // change state to running
-        *sniffer.status_pair.0.lock().unwrap() = Status::Running;
-        assert_eq!(*sniffer.status_pair.0.lock().unwrap(), Status::Running);
+        sniffer.running_page = RunningPage::Overview;
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Overview);

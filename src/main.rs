@@ -2,7 +2,7 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::{Arc, Condvar, Mutex};
+use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
 
 #[cfg(target_os = "linux")]
@@ -20,7 +20,6 @@ use gui::styles::types::palette::get_colors;
 use gui::styles::types::style_type::StyleType;
 use gui::types::runtime_data::RunTimeData;
 use gui::types::sniffer::Sniffer;
-use gui::types::status::Status;
 use networking::types::app_protocol::AppProtocol;
 use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
@@ -60,9 +59,6 @@ pub fn main() -> iced::Result {
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     // let mutex_map2 = mutex_map1.clone();
 
-    let status_pair1 = Arc::new((Mutex::new(Status::Init), Condvar::new()));
-    // let status_pair2 = status_pair1.clone();
-
     let newer_release_available1 = Arc::new(Mutex::new(Err(String::new())));
     let newer_release_available2 = newer_release_available1.clone();
 
@@ -82,13 +78,6 @@ pub fn main() -> iced::Result {
             set_newer_release_status(&newer_release_available2);
         })
         .unwrap();
-
-    // thread::Builder::new()
-    //     .name("thread_write_report".to_string())
-    //     .spawn(move || {
-    //         sleep_and_write_report_loop(&current_capture_id2, &mutex_map2, &status_pair2);
-    //     })
-    //     .unwrap();
 
     print_cli_welcome_message();
 
@@ -114,7 +103,6 @@ pub fn main() -> iced::Result {
         flags: Sniffer::new(
             current_capture_id1,
             mutex_map1,
-            status_pair1,
             &configs,
             newer_release_available1,
         ),

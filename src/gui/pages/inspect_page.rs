@@ -1,11 +1,8 @@
-use std::path::Path;
-
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{
-    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput,
 };
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
@@ -27,7 +24,6 @@ use crate::translations::translations_2::{
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
     showing_results_translation, sort_by_translation,
 };
-use crate::utils::formatted_strings::get_open_report_tooltip;
 use crate::utils::types::icon::Icon;
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
@@ -113,7 +109,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> {
+fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
@@ -194,25 +190,12 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
         );
     }
 
-    Row::new()
-        .spacing(15)
-        .align_items(Alignment::Center)
-        .width(Length::Fill)
-        .push(horizontal_space(Length::FillPortion(1)))
-        .push(
-            Container::new(col_report)
-                .padding([10, 7, 7, 7])
-                .width(Length::Fixed(1042.0))
-                .style(ContainerType::BorderedRound),
-        )
-        .push(
-            Container::new(get_button_open_report(
-                &sniffer.advanced_settings.output_path,
-                sniffer.language,
-                font,
-            ))
-            .width(Length::FillPortion(1)),
-        )
+    Container::new(col_report)
+        .align_y(Vertical::Center)
+        .align_x(Horizontal::Center)
+        .padding([10, 7, 7, 7])
+        .width(Length::Fixed(1042.0))
+        .style(ContainerType::BorderedRound)
 }
 
 fn filters_col(
@@ -432,33 +415,6 @@ fn get_change_page_row(
         } else {
             Container::new(horizontal_space(25.0))
         })
-}
-
-fn get_button_open_report(
-    output_path: &Path,
-    language: Language,
-    font: Font,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let content = button(
-        Icon::File
-            .to_text()
-            .size(21)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .padding(10)
-    .height(Length::Fixed(50.0))
-    .width(Length::Fixed(75.0))
-    .on_press(Message::OpenReport);
-
-    Tooltip::new(
-        content,
-        get_open_report_tooltip(output_path, language),
-        Position::Top,
-    )
-    .gap(5)
-    .font(font)
-    .style(ContainerType::Tooltip)
 }
 
 fn button_clear_filter(

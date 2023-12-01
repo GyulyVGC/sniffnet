@@ -31,7 +31,6 @@ use crate::gui::styles::style_constants::{
 };
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::gui::types::status::Status;
 use crate::StyleType;
 
 /// Update period (milliseconds)
@@ -63,34 +62,22 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let status = *self.status_pair.0.lock().unwrap();
         let font = get_font(self.style);
         let font_headers = get_font_headers(self.style);
 
-        let header = match status {
-            Status::Init => header(
-                font,
-                self.color_gradient,
-                false,
-                self.language,
-                self.last_opened_setting,
-            ),
-            Status::Running => header(
-                font,
-                self.color_gradient,
-                true,
-                self.language,
-                self.last_opened_setting,
-            ),
-        };
+        let header = header(
+            font,
+            self.color_gradient,
+            self.running_page.ne(&RunningPage::Init),
+            self.language,
+            self.last_opened_setting,
+        );
 
-        let body = match status {
-            Status::Init => initial_page(self),
-            Status::Running => match self.running_page {
-                RunningPage::Overview => overview_page(self),
-                RunningPage::Inspect => inspect_page(self),
-                RunningPage::Notifications => notifications_page(self),
-            },
+        let body = match self.running_page {
+            RunningPage::Init => initial_page(self),
+            RunningPage::Overview => overview_page(self),
+            RunningPage::Inspect => inspect_page(self),
+            RunningPage::Notifications => notifications_page(self),
         };
 
         let footer = footer(
@@ -161,7 +148,6 @@ impl Application for Sniffer {
             }) => match modifiers {
                 Modifiers::COMMAND => match key_code {
                     KeyCode::Q => Some(Message::Quit),
-                    KeyCode::O => Some(Message::OpenReport),
                     KeyCode::Comma => Some(Message::OpenLastSettings),
                     KeyCode::Backspace => Some(Message::ResetButtonPressed),
                     KeyCode::D => Some(Message::CtrlDPressed),
@@ -183,14 +169,12 @@ impl Application for Sniffer {
             },
             _ => None,
         });
-        let time_subscription = match *self.status_pair.0.lock().unwrap() {
-            Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
-            }
-            Status::Init => {
-                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
-            }
+        let time_subscription = if self.running_page.eq(&RunningPage::Init) {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
+        } else {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
         };
+
         Subscription::batch([
             window_events_subscription,
             hot_keys_subscription,

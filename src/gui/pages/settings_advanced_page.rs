@@ -29,13 +29,13 @@ use crate::translations::translations_3::{
 };
 use crate::utils::formatted_strings::get_default_report_directory;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigAdvancedSettings, Language, Sniffer, Status, StyleType};
+use crate::{ConfigAdvancedSettings, Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let font_headers = get_font_headers(sniffer.style);
 
-    let is_editable = sniffer.status_pair.0.lock().unwrap().eq(&Status::Init);
+    let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
     let mut content = Column::new()
         .align_items(Alignment::Center)

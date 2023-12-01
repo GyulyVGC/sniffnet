@@ -33,8 +33,6 @@ pub enum Message {
     ReportSortSelection(ReportSortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
-    /// Open Sniffnet's complete textual report
-    OpenReport,
     /// Open the supplied web page
     OpenWebPage(WebPage),
     /// Start sniffing packets
