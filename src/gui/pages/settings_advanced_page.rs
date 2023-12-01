@@ -5,7 +5,8 @@ use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip,
+    button, horizontal_space, lazy, vertical_space, Column, Container, Row, Slider, TextInput,
+    Tooltip,
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
@@ -62,11 +63,13 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             font,
             sniffer.advanced_settings.scale_factor,
         ))
-        .push(custom_style_settings(
-            sniffer.language,
-            font,
-            &sniffer.advanced_settings.style_path,
-        ));
+        .push(lazy(&sniffer.advanced_settings.style_path, move |_| {
+            lazy_custom_style_settings(
+                sniffer.language,
+                font,
+                &sniffer.advanced_settings.style_path,
+            )
+        }));
 
     if !is_editable {
         content = content.push(
@@ -295,22 +298,20 @@ fn mmdb_input(
         .push(input)
 }
 
-fn custom_style_settings(
+fn lazy_custom_style_settings(
     language: Language,
     font: Font,
-    custom_path: &PathBuf,
+    custom_path: &str,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let path_str = &custom_path.to_string_lossy().to_string();
-
-    let is_error = if path_str.is_empty() {
+    let is_error = if custom_path.is_empty() {
         false
     } else {
         CustomPalette::from_file(custom_path).is_err()
     };
 
-    let input = TextInput::new("-", path_str)
+    let input = TextInput::new("-", custom_path)
         .on_input(Message::LoadStyle)
-        .on_submit(Message::LoadStyle(path_str.clone()))
+        .on_submit(Message::LoadStyle(custom_path.to_string()))
         .padding([0, 5])
         .font(font)
         .width(Length::Fixed(200.0))

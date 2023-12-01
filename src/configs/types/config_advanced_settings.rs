@@ -12,8 +12,8 @@ pub struct ConfigAdvancedSettings {
     pub scale_factor: f64,
     pub mmdb_country: String,
     pub mmdb_asn: String,
+    pub style_path: String,
     pub output_path: PathBuf,
-    pub style_path: PathBuf,
 }
 
 impl ConfigAdvancedSettings {
@@ -44,8 +44,8 @@ impl Default for ConfigAdvancedSettings {
             scale_factor: 1.0,
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
+            style_path: String::new(),
             output_path: get_default_report_directory(),
-            style_path: PathBuf::new(),
         }
     }
 }
