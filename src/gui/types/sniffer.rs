@@ -102,13 +102,12 @@ pub struct Sniffer {
 
 impl Sniffer {
     pub fn new(
-        info_traffic: Arc<Mutex<InfoTraffic>>,
         configs: &Configs,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
             current_capture_id: Arc::new(Mutex::new(0)),
-            info_traffic,
+            info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
             newer_release_available,
             runtime_data: RunTimeData::new(),
             device: configs.device.to_my_device(),
@@ -572,8 +571,6 @@ mod tests {
     #[test]
     fn test_correctly_update_ip_version() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -592,8 +589,6 @@ mod tests {
     #[test]
     fn test_correctly_update_transport_protocol() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -612,8 +607,6 @@ mod tests {
     #[test]
     fn test_correctly_update_application_protocol() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -632,8 +625,6 @@ mod tests {
     #[test]
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -650,8 +641,6 @@ mod tests {
     #[test]
     fn test_correctly_update_report_kind() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -670,8 +659,6 @@ mod tests {
     #[test]
     fn test_correctly_update_style() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -691,8 +678,6 @@ mod tests {
     #[test]
     fn test_waiting_dots_update() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -711,8 +696,6 @@ mod tests {
     #[test]
     fn test_modify_favorite_connections() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -905,8 +888,6 @@ mod tests {
     #[test]
     fn test_show_and_hide_modal_and_settings() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -997,8 +978,6 @@ mod tests {
     #[test]
     fn test_correctly_update_language() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1019,8 +998,6 @@ mod tests {
     #[test]
     fn test_correctly_update_notification_settings() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1185,8 +1162,6 @@ mod tests {
     #[test]
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
@@ -1212,8 +1187,6 @@ mod tests {
     #[test]
     fn test_correctly_switch_running_and_notification_pages() {
         let mut sniffer = Sniffer::new(
-            Arc::new(Mutex::new(0)),
-            Arc::new(Mutex::new(InfoTraffic::new())),
             &Configs::default(),
             Arc::new(Mutex::new(Err(String::new()))),
         );
