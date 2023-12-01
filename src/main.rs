@@ -53,9 +53,6 @@ mod utils;
 pub fn main() -> iced::Result {
     parse_cli_args();
 
-    let current_capture_id1 = Arc::new(Mutex::new(0));
-    // let current_capture_id2 = current_capture_id1.clone();
-
     let mutex_map1 = Arc::new(Mutex::new(InfoTraffic::new()));
     // let mutex_map2 = mutex_map1.clone();
 
@@ -100,12 +97,7 @@ pub fn main() -> iced::Result {
             },
             ..Default::default()
         },
-        flags: Sniffer::new(
-            current_capture_id1,
-            mutex_map1,
-            &configs,
-            newer_release_available1,
-        ),
+        flags: Sniffer::new(mutex_map1, &configs, newer_release_available1),
         default_font: Font::with_name("Sarasa Mono SC"),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,

@@ -45,7 +45,7 @@ use crate::{
 /// It contains gui statuses and network traffic statistics to be shared among the different threads
 pub struct Sniffer {
     /// Capture number, incremented at every new run
-    pub current_capture_id: Arc<Mutex<u16>>,
+    pub current_capture_id: Arc<Mutex<usize>>,
     /// Capture data updated by thread parsing packets
     pub info_traffic: Arc<Mutex<InfoTraffic>>,
     /// Reports if a newer release of the software is available on GitHub
@@ -102,13 +102,12 @@ pub struct Sniffer {
 
 impl Sniffer {
     pub fn new(
-        current_capture_id: Arc<Mutex<u16>>,
         info_traffic: Arc<Mutex<InfoTraffic>>,
         configs: &Configs,
         newer_release_available: Arc<Mutex<Result<bool, String>>>,
     ) -> Self {
         Self {
-            current_capture_id,
+            current_capture_id: Arc::new(Mutex::new(0)),
             info_traffic,
             newer_release_available,
             runtime_data: RunTimeData::new(),

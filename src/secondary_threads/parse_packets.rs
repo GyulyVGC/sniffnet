@@ -20,7 +20,7 @@ use crate::InfoTraffic;
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
-    current_capture_id: &Arc<Mutex<u16>>,
+    current_capture_id: &Arc<Mutex<usize>>,
     device: &MyDevice,
     mut cap: Capture<Active>,
     filters: Filters,
