@@ -26,10 +26,8 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: DateTime<Local>,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: DateTime<Local>,
-    /// Set of application layer protocols carried by the associated address:port pair.
+    /// Application layer protocol carried by the associated address:port pair.
     pub app_protocol: AppProtocol,
-    /// Check if source or destination is an IPv6 address longer than 25 bytes (used for layout)
-    pub very_long_address: bool,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
 }
@@ -44,19 +42,8 @@ impl Default for InfoAddressPortPair {
             initial_timestamp: DateTime::default(),
             final_timestamp: DateTime::default(),
             app_protocol: AppProtocol::Other,
-            very_long_address: false,
             traffic_direction: TrafficDirection::default(),
         }
-    }
-}
-
-impl InfoAddressPortPair {
-    pub fn print_gui(&self) -> String {
-        self.to_string()
-            .get(0..35)
-            .unwrap()
-            .to_string()
-            .replace('|', "")
     }
 }
 
@@ -69,27 +56,10 @@ impl fmt::Display for InfoAddressPortPair {
             _ => self.app_protocol.to_string(),
         };
 
-        if self.very_long_address {
-            write!(
-                f,
-                "{:^9}|{:>10}  |{:>9}   | {} | {} |",
-                app_string,
-                self.transmitted_packets,
-                bytes_string,
-                self.initial_timestamp.to_string().get(0..19).unwrap(),
-                self.final_timestamp.to_string().get(0..19).unwrap()
-            )
-        } else {
-            write!(
-                f,
-                "{:^9}|{:>10}  |{:>9}   | {} | {} |{}",
-                app_string,
-                self.transmitted_packets,
-                bytes_string,
-                self.initial_timestamp.to_string().get(0..19).unwrap(),
-                self.final_timestamp.to_string().get(0..19).unwrap(),
-                " ".repeat(40)
-            )
-        }
+        write!(
+            f,
+            "{:^9}{:>10}  {:>9}   ",
+            app_string, self.transmitted_packets, bytes_string,
+        )
     }
 }

@@ -131,13 +131,9 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!(
-                    "  {}{}  ",
-                    report_entry.key.print_gui(),
-                    report_entry.val.print_gui()
-                ))
-                .style(entry_text_type)
-                .font(font),
+                Text::new(format!("  {}{}  ", report_entry.key, report_entry.val))
+                    .style(entry_text_type)
+                    .font(font),
             )
             .push(report_entry.tooltip)
             .push(Text::new("  "));

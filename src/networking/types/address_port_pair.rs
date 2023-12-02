@@ -42,10 +42,6 @@ impl AddressPortPair {
             trans_protocol,
         }
     }
-
-    pub fn print_gui(&self) -> String {
-        self.to_string().replace('|', "")
-    }
 }
 
 impl fmt::Display for AddressPortPair {
@@ -53,13 +49,13 @@ impl fmt::Display for AddressPortPair {
         if self.address1.len() > 25 || self.address2.len() > 25 {
             write!(
                 f,
-                "|{:^45}|{:>8}  |{:^45}|{:>8}  |   {}   |",
+                "{:^45}{:>8}  {:^45}{:>8}     {}   ",
                 self.address1, self.port1, self.address2, self.port2, self.trans_protocol
             )
         } else {
             write!(
                 f,
-                "|{:^25}|{:>8}  |{:^25}|{:>8}  |   {}   |",
+                "{:^25}{:>8}  {:^25}{:>8}     {}   ",
                 self.address1, self.port1, self.address2, self.port2, self.trans_protocol
             )
         }

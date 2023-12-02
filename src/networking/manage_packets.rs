@@ -169,9 +169,6 @@ pub fn modify_or_insert_in_map(
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
-    let source_ip = &key.address1;
-    let destination_ip = &key.address2;
-    let very_long_address = source_ip.len() > 25 || destination_ip.len() > 25;
 
     if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key
@@ -188,6 +185,8 @@ pub fn modify_or_insert_in_map(
             }
         }
         // determine traffic direction
+        let source_ip = &key.address1;
+        let destination_ip = &key.address2;
         traffic_direction =
             get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
     };
@@ -212,7 +211,6 @@ pub fn modify_or_insert_in_map(
             initial_timestamp: now,
             final_timestamp: now,
             app_protocol: application_protocol,
-            very_long_address,
             traffic_direction,
         })
         .clone();
