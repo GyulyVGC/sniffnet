@@ -36,7 +36,6 @@ strip = true
 pcap = "1.1.0"
 etherparse = "0.13.0"
 chrono = { version = "0.4.31", default_features = false, features = ["clock"] }
-indexmap = "2.1.0"
 plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
 iced = { version = "0.10.0", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.9.0"

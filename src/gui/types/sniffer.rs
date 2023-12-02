@@ -464,8 +464,8 @@ impl Sniffer {
     }
 
     fn switch_page(&mut self, next: bool) {
-        match (self.running_page, self.settings_page, self.modal) {
-            (_, Some(current_setting), None) => {
+        match (self.running_page, self.settings_page, self.modal.is_none()) {
+            (_, Some(current_setting), true) => {
                 // Settings opened
                 if next {
                     self.settings_page = Some(current_setting.next());
@@ -476,7 +476,7 @@ impl Sniffer {
             (
                 RunningPage::Inspect | RunningPage::Notifications | RunningPage::Overview,
                 None,
-                None,
+                true,
             ) => {
                 // Running with no overlays
                 if self.runtime_data.tot_sent_packets + self.runtime_data.tot_received_packets > 0 {

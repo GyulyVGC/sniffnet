@@ -146,7 +146,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
             button(entry_row)
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    report_entry.val.index,
+                    report_entry.key,
                 )))
                 .style(ButtonType::Neutral),
         );

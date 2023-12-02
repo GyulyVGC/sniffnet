@@ -34,17 +34,17 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
-    connection_index: usize,
+    key: AddressPortPair,
 ) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
         sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
-        move |_| page_content(sniffer, connection_index),
+        move |_| page_content(sniffer, &key),
     ))
 }
 
 fn page_content(
     sniffer: &Sniffer,
-    connection_index: usize,
+    key: &AddressPortPair,
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let font_headers = get_font_headers(sniffer.style);
@@ -53,11 +53,8 @@ fn page_content(
         .info_traffic
         .lock()
         .expect("Error acquiring mutex\n\r");
-    let key_val: (&AddressPortPair, &InfoAddressPortPair) =
-        info_traffic_lock.map.get_index(connection_index).unwrap();
-    let key = key_val.0.clone();
-    let val = key_val.1.clone();
-    let address_to_lookup = get_address_to_lookup(&key, val.traffic_direction);
+    let val = info_traffic_lock.map.get(key).unwrap().clone();
+    let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = info_traffic_lock
         .addresses_resolved
         .get(&address_to_lookup)
@@ -99,7 +96,7 @@ fn page_content(
             sniffer.language,
             font,
         );
-        let computer = get_local_tooltip(sniffer, &address_to_lookup, &key);
+        let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
             dest_caption = dest_caption.push(computer);
@@ -132,7 +129,7 @@ fn page_content(
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(&key, &val, font, sniffer.language);
+    let col_info = col_info(key, &val, font, sniffer.language);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 

@@ -30,8 +30,6 @@ pub struct InfoAddressPortPair {
     pub app_protocol: AppProtocol,
     /// Check if source or destination is an IPv6 address longer than 25 bytes (used for layout)
     pub very_long_address: bool,
-    /// Integer corresponding to the index inside the connections map
-    pub index: usize,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
 }
@@ -48,7 +46,6 @@ impl Default for InfoAddressPortPair {
             app_protocol: AppProtocol::Other,
             very_long_address: false,
             traffic_direction: TrafficDirection::default(),
-            index: 0,
         }
     }
 }

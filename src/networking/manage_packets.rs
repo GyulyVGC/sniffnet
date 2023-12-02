@@ -173,15 +173,7 @@ pub fn modify_or_insert_in_map(
     let destination_ip = &key.address2;
     let very_long_address = source_ip.len() > 25 || destination_ip.len() > 25;
 
-    let len = info_traffic_mutex.lock().unwrap().map.len();
-    let index = info_traffic_mutex
-        .lock()
-        .unwrap()
-        .map
-        .get_index_of(key)
-        .unwrap_or(len);
-
-    if index == len {
+    if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key
 
         // update device addresses
@@ -222,11 +214,8 @@ pub fn modify_or_insert_in_map(
             app_protocol: application_protocol,
             very_long_address,
             traffic_direction,
-            index,
         })
         .clone();
-
-    info_traffic.addresses_last_interval.insert(index);
 
     if let Some(host_info) = info_traffic
         .addresses_resolved

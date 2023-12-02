@@ -90,7 +90,7 @@ impl Application for Sniffer {
 
         let content = Column::new().push(header).push(body).push(footer);
 
-        match self.modal {
+        match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay = match settings_page {
@@ -118,9 +118,7 @@ impl Application for Sniffer {
                         font_headers,
                         self.language,
                     ),
-                    MyModal::ConnectionDetails(connection_index) => {
-                        connection_details_page(self, connection_index)
-                    }
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 };
 
                 Modal::new(content, overlay)

@@ -3,8 +3,6 @@
 
 use std::collections::{HashMap, HashSet};
 
-use indexmap::IndexMap;
-
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -30,9 +28,7 @@ pub struct InfoTraffic {
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Map of the filtered traffic
-    pub map: IndexMap<AddressPortPair, InfoAddressPortPair>,
-    /// Set with the addresses of the last time interval
-    pub addresses_last_interval: HashSet<usize>,
+    pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
     /// Collection of favorite hosts that exchanged data in the last interval
@@ -58,8 +54,7 @@ impl InfoTraffic {
             all_packets: 0,
             all_bytes: 0,
             dropped_packets: 0,
-            map: IndexMap::new(),
-            addresses_last_interval: HashSet::new(),
+            map: HashMap::new(),
             favorite_hosts: HashSet::new(),
             favorites_last_interval: HashSet::new(),
             app_protocols: HashMap::new(),
