@@ -428,6 +428,9 @@ The currently usable hotkeys are reported in the following.
   ```
 
   The example theme above uses colors from [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
+
+  To use a custom theme for your instance of Sniffnet, specify the path of your TOML file in the application's 
+  advanced settings (accessible from the top right corner of the app).
 </details>
 
 ## Troubleshooting

@@ -33,7 +33,6 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::push_pcap_file_name;
 use crate::utils::types::web_page::WebPage;
 use crate::{
     ConfigAdvancedSettings, ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData,
@@ -285,8 +284,7 @@ impl Sniffer {
                 self.advanced_settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            Message::CustomReportDirectory(directory) => {
-                let path = push_pcap_file_name(PathBuf::from(directory));
+            Message::CustomReport(path) => {
                 self.advanced_settings.output_path = path;
             }
             Message::CloseRequested => {
@@ -391,7 +389,7 @@ impl Sniffer {
 
     fn reset(&mut self) -> Command<Message> {
         self.running_page = RunningPage::Init;
-        *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous capture and to rewrite output file
+        *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous captures
         self.pcap_error = None;
         self.report_sort_type = ReportSortType::MostRecent;
         self.unread_notifications = 0;

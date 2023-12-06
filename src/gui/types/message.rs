@@ -101,8 +101,8 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
-    /// The directory for the output report has been updated
-    CustomReportDirectory(String),
+    /// The path for the output report has been updated
+    CustomReport(String),
     /// Save the configurations of the app and quit
     CloseRequested,
 }

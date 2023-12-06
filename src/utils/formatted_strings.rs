@@ -1,5 +1,6 @@
+use std::fs::File;
 use std::net::IpAddr;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
 use iced::{Font, Renderer};
@@ -7,13 +8,13 @@ use iced::{Font, Renderer};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
-use crate::translations::translations::{
-    active_filters_translation, none_translation, open_report_translation,
-};
+use crate::translations::translations::{active_filters_translation, none_translation};
 use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+pub const PCAP_FILE_NAME: &str = "sniffnet.pcap";
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
@@ -102,30 +103,34 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
     bytes_string
 }
 
-/// Returns the default directory to use for the output report file
-pub fn get_default_report_directory() -> PathBuf {
-    if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
-        config_path.pop();
-        config_path
+/// Returns the default report path
+pub fn get_default_report_file_path() -> String {
+    return if let Ok(mut config_path) =
+        confy::get_configuration_file_path("sniffnet", PCAP_FILE_NAME)
+    {
+        config_path.to_string_lossy().to_string()
     } else {
-        PathBuf::from(std::env::var_os("HOME").unwrap())
+        std::env::var_os("HOME")
+            .unwrap()
+            .to_string_lossy()
+            .to_string()
+    };
+}
+
+/// Returns the file to use for the output PCAP report
+/// It tries and fallbacks in the order: custom path, configs path, home directory path
+// /// This function also updates the custom path text input
+pub fn set_report_file_to_use(custom_path: &str) -> File {
+    if let Ok(custom_file) = File::create(custom_path) {
+        return custom_file;
+    } else if let Ok(mut config_path) =
+        confy::get_configuration_file_path("sniffnet", PCAP_FILE_NAME)
+    {
+        if let Ok(file) = File::create(config_path) {
+            return file;
+        }
     }
-}
-
-pub fn push_pcap_file_name(mut directory: PathBuf) -> PathBuf {
-    directory.push("sniffnet.pcap");
-    directory
-}
-
-pub fn get_open_report_tooltip(output_path: &Path, language: Language) -> String {
-    let open_report_translation = open_report_translation(language);
-    //open_report_translation.push_str(&format!(" [{}+O]", get_command_key()));
-    let string_path = output_path.to_string_lossy().to_string();
-    format!(
-        "{:^len$}\n{string_path}",
-        open_report_translation,
-        len = string_path.len()
-    )
+    File::create(PathBuf::from(std::env::var_os("HOME").unwrap())).unwrap()
 }
 
 pub fn print_cli_welcome_message() {

@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use iced::advanced::widget::Text;
@@ -27,7 +26,7 @@ use crate::translations::translations_3::{
     info_mmdb_paths_translation, mmdb_paths_translation, params_not_editable_translation,
     restore_defaults_translation, scale_factor_translation,
 };
-use crate::utils::formatted_strings::get_default_report_directory;
+use crate::utils::formatted_strings::get_default_report_file_path;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigAdvancedSettings, Language, RunningPage, Sniffer, StyleType};
 
@@ -171,33 +170,22 @@ fn report_path_setting(
     is_editable: bool,
     language: Language,
     font: Font,
-    mut path: PathBuf,
+    custom_path: String,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let default_directory = &get_default_report_directory().to_string_lossy().to_string();
-    path.pop();
-    let custom_directory = &path.to_string_lossy().to_string();
-    // to be updated.........!!!
-    let is_error = !custom_directory.is_empty();
-
-    let mut input = TextInput::new(default_directory, custom_directory)
+    let mut input = TextInput::new(&get_default_report_file_path(), &custom_path)
         .padding([0, 5])
         .font(font)
-        .width(Length::Fixed(200.0))
-        .style(if is_error {
-            TextInputType::Error
-        } else {
-            TextInputType::Standard
-        });
+        .width(Length::Fixed(500.0))
+        .style(TextInputType::Standard);
 
     if is_editable {
-        input = input.on_input(Message::CustomReportDirectory);
+        input = input.on_input(Message::CustomReport);
     }
 
     Row::new()
         .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
         .push(horizontal_space(5))
         .push(input)
-        .push(Text::new("/sniffnet.pcap").font(font))
 }
 
 fn mmdb_settings(
