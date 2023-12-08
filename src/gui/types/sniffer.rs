@@ -2,7 +2,6 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;

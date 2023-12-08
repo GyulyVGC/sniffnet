@@ -1,6 +1,4 @@
-use std::fs::File;
 use std::net::IpAddr;
-use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
 use iced::{Font, Renderer};
@@ -105,9 +103,9 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
 
 /// Returns the default report path
 pub fn get_default_report_file_path() -> String {
-    return if let Ok(mut config_path) =
-        confy::get_configuration_file_path("sniffnet", PCAP_FILE_NAME)
-    {
+    return if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
+        config_path.pop();
+        config_path.push(PCAP_FILE_NAME);
         config_path.to_string_lossy().to_string()
     } else {
         std::env::var_os("HOME")
@@ -117,21 +115,23 @@ pub fn get_default_report_file_path() -> String {
     };
 }
 
-/// Returns the file to use for the output PCAP report
-/// It tries and fallbacks in the order: custom path, configs path, home directory path
-// /// This function also updates the custom path text input
-pub fn set_report_file_to_use(custom_path: &str) -> File {
-    if let Ok(custom_file) = File::create(custom_path) {
-        return custom_file;
-    } else if let Ok(mut config_path) =
-        confy::get_configuration_file_path("sniffnet", PCAP_FILE_NAME)
-    {
-        if let Ok(file) = File::create(config_path) {
-            return file;
-        }
-    }
-    File::create(PathBuf::from(std::env::var_os("HOME").unwrap())).unwrap()
-}
+// /// Returns the file to use for the output PCAP report
+// /// It tries and fallbacks in the order: custom path, configs path, home directory path
+// // /// This function also updates the custom path text input TODO!
+// pub fn set_report_file_to_use(custom_path: &str) -> File {
+//     if let Ok(custom_file) = File::create(custom_path) {
+//         return custom_file;
+//     } else if let Ok(mut config_path) =
+//         confy::get_configuration_file_path("sniffnet", "file")
+//     {
+//         config_path.pop();
+//         config_path.push(PCAP_FILE_NAME);
+//         if let Ok(file) = File::create(config_path) {
+//             return file;
+//         }
+//     }
+//     File::create(PathBuf::from(std::env::var_os("HOME").unwrap())).unwrap()
+// }
 
 pub fn print_cli_welcome_message() {
     print!(
