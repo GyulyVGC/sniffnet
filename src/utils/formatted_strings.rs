@@ -1,4 +1,5 @@
 use std::net::IpAddr;
+use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
 use iced::{Font, Renderer};
@@ -108,10 +109,9 @@ pub fn get_default_report_file_path() -> String {
         config_path.push(PCAP_FILE_NAME);
         config_path.to_string_lossy().to_string()
     } else {
-        std::env::var_os("HOME")
-            .unwrap()
-            .to_string_lossy()
-            .to_string()
+        let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
+        path.push(PCAP_FILE_NAME);
+        path.to_string_lossy().to_string()
     };
 }
 
@@ -130,7 +130,9 @@ pub fn get_default_report_file_path() -> String {
 //             return file;
 //         }
 //     }
-//     File::create(PathBuf::from(std::env::var_os("HOME").unwrap())).unwrap()
+//     let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
+//     path.push(PCAP_FILE_NAME);
+//     File::create(path).unwrap()
 // }
 
 pub fn print_cli_welcome_message() {
