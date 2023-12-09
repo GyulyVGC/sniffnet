@@ -2,9 +2,22 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- The size of text and widgets can now be customised by setting a proper scale factor value (fixes [#202](https://github.com/GyulyVGC/sniffnet/issues/202) and [#344](https://github.com/GyulyVGC/sniffnet/issues/344))
+- Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286))
+- Added Japanese translation 🇯🇵 ([#343](https://github.com/GyulyVGC/sniffnet/pull/343))
+- Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))
+- Window size and position are now remembered, so that Sniffnet can reopen with the same window properties
+- Users can now provide custom paths for MMDB files to allow using the commercial versions of the country and ASN databases (fixes [#243](https://github.com/GyulyVGC/sniffnet/issues/243))
+- The app's configurations are now stored only on application close, instead of needlessly store them each time the settings popup is closed
+- The textual output report is not generated anymore
+- Updated Portuguese translation to v1.2 ([#398](https://github.com/GyulyVGC/sniffnet/pull/398))
+- Cleaned code implementing the concept of first class theming ([#339](https://github.com/GyulyVGC/sniffnet/pull/339))
+- Added documentation about Sniffnet installation on Nix and Tiny Core Linux (respectively [#394](https://github.com/GyulyVGC/sniffnet/pull/394) and [#341](https://github.com/GyulyVGC/sniffnet/pull/341))
+- Fixed a build failure on `powerpc64` ([#356](https://github.com/GyulyVGC/sniffnet/pull/356) — fixes [#353](https://github.com/GyulyVGC/sniffnet/issues/353))
+- Fixed a typo in Russian translation ([#389](https://github.com/GyulyVGC/sniffnet/pull/389))
 
 ## [1.2.2] - 2023-08-08
-
 - Added option to set different shades of color gradients for each of the available themes
 - Added new application themes: _Dracula_, _Gruvbox_, _Nord_, and _Solarized_ ([#330](https://github.com/GyulyVGC/sniffnet/pull/330))
 - Other aesthetic improvements (see [#119](https://github.com/GyulyVGC/sniffnet/issues/119) for more info):
@@ -26,9 +39,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Minor fix to Chinese translation ([#271](https://github.com/GyulyVGC/sniffnet/pull/271))
 - Where is Sniffnet heading next? See the new [roadmap of the project](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
-
 ## [1.2.1] - 2023-06-08
-
 - Considerably refined the app packaging strategy (see [#246](https://github.com/GyulyVGC/sniffnet/pull/246) for more details), fixing various related issues ([#199](https://github.com/GyulyVGC/sniffnet/issues/199), [#220](https://github.com/GyulyVGC/sniffnet/issues/220), [#223](https://github.com/GyulyVGC/sniffnet/issues/223), [#224](https://github.com/GyulyVGC/sniffnet/issues/224), [#225](https://github.com/GyulyVGC/sniffnet/issues/225), [#242](https://github.com/GyulyVGC/sniffnet/issues/242))
 - Added button to clear all the current search filters quickly in inspect page
 - Added Swedish translation 🇸🇪 ([#213](https://github.com/GyulyVGC/sniffnet/pull/213))
@@ -53,9 +64,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - docs ([#235](https://github.com/GyulyVGC/sniffnet/pull/235))
 - Solved a minor problem that caused flags to be slightly misaligned in inspect page table
 
-
 ## [1.2.0] - 2023-05-18
-
 - Introduced host-based analysis: instead of just showing IP addresses, now host names and network providers are available for a quicker and more meaningful traffic interpretation 
   * Added rDNS (reverse DNS) lookups to find out network host names
   * Added ASN (Autonomous System name and number) lookups to find out the entity managing a given IP address (fixes [#62](https://github.com/GyulyVGC/sniffnet/issues/62))
@@ -77,9 +86,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added unit tests for `chart` and started unit tests for `gui` modules ([#132](https://github.com/GyulyVGC/sniffnet/pull/132))
 - Fixed problem that let users switch page pressing the tab key even if no packets were received
 
-
 ## [1.1.4] - 2023-04-18
-
 - Added new translations of the GUI:
   * Portuguese 🇵🇹 ([#134](https://github.com/GyulyVGC/sniffnet/pull/134))
   * Russian 🇷🇺 ([#151](https://github.com/GyulyVGC/sniffnet/pull/151))
@@ -92,9 +99,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Modified `dependabot` configuration to update GitHub Actions as needed ([#141](https://github.com/GyulyVGC/sniffnet/pull/141))
 - Fixed problem causing a crash on macOS when starting Sniffnet's Homebrew package or building from source in release mode ([#109](https://github.com/GyulyVGC/sniffnet/issues/109) - [#137](https://github.com/GyulyVGC/sniffnet/issues/137))
 
-
 ## [1.1.3] - 2023-04-04
-
 - Added Romanian translation 🇷🇴 ([#113](https://github.com/GyulyVGC/sniffnet/pull/113))
 - Added feature to warn you when a newer version of Sniffnet is available on GitHub 🆕 ([#118](https://github.com/GyulyVGC/sniffnet/pull/118))
 - Added badge on tab bar to show unread notifications count 🔉
@@ -107,9 +112,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Refactored and cleaned code modules ([#123](https://github.com/GyulyVGC/sniffnet/pull/123))
 - Fixed header alignment
 
-
 ## [1.1.2] - 2023-03-18
-
 - Added new translations of the GUI, bringing the total number of supported languages to 8!
   * German 🇩🇪 ([#87](https://github.com/GyulyVGC/sniffnet/pull/87))
   * Simplified Chinese 🇨🇳 ([#89](https://github.com/GyulyVGC/sniffnet/pull/89) - [#93](https://github.com/GyulyVGC/sniffnet/pull/93))
@@ -119,9 +122,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Changed GUI font to `sarasa-gothic-mono` to support the introduction of Simplified Chinese language
 - Minor improvements to Overview page proportions and paddings
 
-
 ## [1.1.1] - 2023-02-25
-
 - Added new translations of the GUI!
   * French 🇫🇷 ([#64](https://github.com/GyulyVGC/sniffnet/pull/64) - [#67](https://github.com/GyulyVGC/sniffnet/pull/67))
   * Spanish 🇪🇦 ([#70](https://github.com/GyulyVGC/sniffnet/pull/70))
@@ -134,9 +135,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - When multiple favorite connections are featured per time interval, now it's possible to receive more than one favorite notification referred to the same timestamp
 - Fixed problem that was causing the Application Protocol picklist placeholder not being translated
 
-
 ## [1.1.0] - 2023-02-07
-
 - Added Custom Notifications to inform the user when defined network events occur:
   * data intensity exceeded a defined packets per second rate
   * data intensity exceeded a defined bytes per second rate
@@ -155,73 +154,53 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fixed issue [#48](https://github.com/GyulyVGC/sniffnet/issues/48) adding a horizontal scrollable to the report view
 
 
-
 ## [1.0.1] - 2022-11-30
-
 - Substituted command `open` with command `xdg-open` on Linux systems to solve the problem described in issues [#13](https://github.com/GyulyVGC/sniffnet/issues/13) and [#23](https://github.com/GyulyVGC/sniffnet/issues/23)
 - Introduced a constraint on minimum window height to avoid problem described in issue [#12](https://github.com/GyulyVGC/sniffnet/issues/12)
 - Added some tests on `AppProtocol` and improved GitHub workflows
 
-
 ## [1.0.0] - 2022-11-21
-
 - The application is no longer just a command line interface: Sniffnet has now a whole graphical user interface!
   * Charts and traffic statistics are now constantly updated and shown interactively in the GUI
   * Users don't have to worry about command line options anymore: it is now possible to comfortably specify adapters and filters through the GUI
   * Sniffnet is now more accessible, available in real-time, easy to use and aesthetically pleasing thanks to its new interface
 - In order to reach out as many people as possible, I created [installers](https://github.com/GyulyVGC/sniffnet/releases) for Windows, macOS and Linux, to make it easier to install Sniffnet for those that still doesn't have Rust on their machines
 
-
 ## [0.5.0] - 2022-10-02
-
 - Optimized textual report updates: only changed entries are rewritten (file `report.txt`)
 - Textual report elements are now ordered by timestamp instead of number of packets
 - Report header with statistics is now written on a separate textual file (file `statistics.txt`)
 - Removed command line option `--verbose` because considered redundant
 - Removed command line option `--minimum-packets` because not meaningful anymore
 
-
 ## [0.4.1] - 2022-09-27
-
 - Changed the default textual report representation
 - Added command line option `-v` to set the textual report representation to the former one (verbose mode)
 - Sniffnet now also considers the transport layer protocol to define textual report elements (now defined by the network 5-tuple)
 
-
 ## [0.4.0] - 2022-09-11
-
 - Added feature to produce a graphical report with the number of packets per second and the number of bits per seconds, incoming and outgoing
 - Added multicast addresses recognition
 - Reports are not updated if the application is paused
 
-
 ## [0.3.2] - 2022-09-07
-
 - Changed output report structure: each element now corresponds to a couple of network [address:port]
 - When application is resumed after pause, the buffer containing packets is reinitialized
 
-
 ## [0.3.1] - 2022-08-31
-
 - Added devices' description when application is launched with the `-d` option
 - Introduced feature to measure write timings and added a BufWriter to improve write performance
 - Fixed standard output colors for Windows systems
 
-
 ## [0.3.0] - 2022-08-29
-
 - Added global statistics: number of [address:port] pairs and sniffed packets
 - Added statistics on the number of packets for each application layer protocol
 - Fixed application layer protocols filtering
 
-
 ## [0.2.1] - 2022-08-26
-
 - Removed img folder and uploaded pictures on cloud
 
-
 ## [0.2.0] - 2022-08-24
-  
 - Added command line option `--app` to filter application layer protocols
 - Added feature to recognize local vs remote addresses 
 - Added function to parse IPv6 addresses
@@ -229,17 +208,11 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Changed the way application layer protocols are retrieved
 - Improved textual report format
 
-
 ## [0.1.2] - 2022-08-18
-  
 - Added video tutorial about the application
 
-
 ## [0.1.1] - 2022-08-17
-  
 - Fixed README errors
 
-
 ## [0.1.0] - 2022-08-17
-  
 - Sniffnet first release
