@@ -3,10 +3,7 @@ use std::sync::Arc;
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
-use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Column, Container, Row, Slider, TextInput,
-    Tooltip,
-};
+use iced::widget::{button, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
@@ -17,18 +14,14 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
-use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::types::message::Message;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    advanced_settings_translation, custom_style_translation, file_path_translation,
-    info_mmdb_paths_translation, mmdb_paths_translation, params_not_editable_translation,
-    restore_defaults_translation, scale_factor_translation,
+    advanced_settings_translation, info_mmdb_paths_translation, mmdb_paths_translation,
+    params_not_editable_translation, scale_factor_translation,
 };
-use crate::utils::formatted_strings::get_default_report_file_path;
-use crate::utils::types::icon::Icon;
-use crate::{ConfigAdvancedSettings, Language, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
@@ -51,40 +44,34 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
         ))
         .push(vertical_space(Fixed(15.0)))
-        .push(title_row(
-            sniffer.language,
-            font,
-            &sniffer.advanced_settings,
-        ))
-        .push(vertical_space(Fixed(5.0)))
+        .push(title_row(sniffer.language, font))
+        .push(vertical_space(Fixed(10.0)))
         .push(scale_factor_slider(
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
         ))
-        .push(lazy(&sniffer.advanced_settings.style_path, move |_| {
-            lazy_custom_style_settings(
-                sniffer.language,
-                font,
-                &sniffer.advanced_settings.style_path,
-            )
-        }));
+        .push(vertical_space(Fixed(10.0)));
 
     if !is_editable {
-        content = content.push(
-            Container::new(Text::new(params_not_editable_translation(sniffer.language)).font(font))
+        content = content
+            .push(
+                Container::new(
+                    Text::new(params_not_editable_translation(sniffer.language)).font(font),
+                )
                 .padding(10.0)
                 .style(ContainerType::Badge),
-        );
+            )
+            .push(vertical_space(Fixed(10.0)));
     }
 
     content = content
-        .push(report_path_setting(
-            is_editable,
-            sniffer.language,
-            font,
-            sniffer.advanced_settings.output_path.clone(),
-        ))
+        // .push(report_path_setting(
+        //     is_editable,
+        //     sniffer.language,
+        //     font,
+        //     &sniffer.advanced_settings.output_path,
+        // ))
         .push(mmdb_settings(
             is_editable,
             sniffer.language,
@@ -101,41 +88,13 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         .style(ContainerType::Modal)
 }
 
-fn title_row(
-    language: Language,
-    font: Font,
-    advanced_settings: &ConfigAdvancedSettings,
-) -> Row<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center).push(
+fn title_row(language: Language, font: Font) -> Row<'static, Message, Renderer<StyleType>> {
+    Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(advanced_settings_translation(language))
             .style(TextType::Title)
             .font(font)
             .size(FONT_SIZE_SUBTITLE),
-    );
-
-    if advanced_settings.ne(&ConfigAdvancedSettings::default()) {
-        ret_val = ret_val.push(
-            Tooltip::new(
-                button(
-                    Icon::Restore
-                        .to_text()
-                        .vertical_alignment(Vertical::Center)
-                        .horizontal_alignment(Horizontal::Center)
-                        .size(17),
-                )
-                .padding(2)
-                .height(Fixed(25.0))
-                .width(Fixed(25.0))
-                .on_press(Message::RestoreDefaults),
-                restore_defaults_translation(language),
-                Position::Right,
-            )
-            .font(font)
-            .style(ContainerType::Tooltip),
-        );
-    }
-
-    ret_val
+    )
 }
 
 fn scale_factor_slider(
@@ -160,33 +119,31 @@ fn scale_factor_slider(
                     .width(Fixed(150.0)),
             ),
     )
-    .padding(5)
-    .width(Length::FillPortion(1))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
 
-fn report_path_setting(
-    is_editable: bool,
-    language: Language,
-    font: Font,
-    custom_path: String,
-) -> Row<'static, Message, Renderer<StyleType>> {
-    let mut input = TextInput::new(&get_default_report_file_path(), &custom_path)
-        .padding([0, 5])
-        .font(font)
-        .width(Length::Fixed(500.0))
-        .style(TextInputType::Standard);
-
-    if is_editable {
-        input = input.on_input(Message::CustomReport);
-    }
-
-    Row::new()
-        .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
-        .push(horizontal_space(5))
-        .push(input)
-}
+// fn report_path_setting(
+//     is_editable: bool,
+//     language: Language,
+//     font: Font,
+//     custom_path: &str,
+// ) -> Row<'static, Message, Renderer<StyleType>> {
+//     let mut input = TextInput::new(&get_default_report_file_path(), custom_path)
+//         .padding([0, 5])
+//         .font(font)
+//         .width(Length::Fixed(500.0))
+//         .style(TextInputType::Standard);
+//
+//     if is_editable {
+//         input = input.on_input(Message::CustomReport);
+//     }
+//
+//     Row::new()
+//         .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
+//         .push(horizontal_space(5))
+//         .push(input)
+// }
 
 fn mmdb_settings(
     is_editable: bool,
@@ -283,34 +240,5 @@ fn mmdb_input(
     Row::new()
         .spacing(5)
         .push(Text::new(format!("{caption}:")).font(font))
-        .push(input)
-}
-
-fn lazy_custom_style_settings(
-    language: Language,
-    font: Font,
-    custom_path: &str,
-) -> Row<'static, Message, Renderer<StyleType>> {
-    let is_error = if custom_path.is_empty() {
-        false
-    } else {
-        CustomPalette::from_file(custom_path).is_err()
-    };
-
-    let input = TextInput::new("-", custom_path)
-        .on_input(Message::LoadStyle)
-        .on_submit(Message::LoadStyle(custom_path.to_string()))
-        .padding([0, 5])
-        .font(font)
-        .width(Length::Fixed(200.0))
-        .style(if is_error {
-            TextInputType::Error
-        } else {
-            TextInputType::Standard
-        });
-
-    Row::new()
-        .spacing(5)
-        .push(Text::new(format!("{}:", custom_style_translation(language))).font(font))
         .push(input)
 }

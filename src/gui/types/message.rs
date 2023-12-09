@@ -91,8 +91,6 @@ pub enum Message {
     GradientsSelection(GradientType),
     /// Set UI scale factor
     ChangeScaleFactor(f64),
-    /// Restore default advanced settings
-    RestoreDefaults,
     /// The app window position has been changed
     WindowMoved(i32, i32),
     /// The app window size has been changed
@@ -101,8 +99,8 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
-    /// The path for the output report has been updated
-    CustomReport(String),
+    // /// The path for the output report has been updated
+    // CustomReport(String),
     /// Save the configurations of the app and quit
     CloseRequested,
 }

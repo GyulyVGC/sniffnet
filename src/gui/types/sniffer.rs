@@ -264,7 +264,6 @@ impl Sniffer {
             Message::ChangeScaleFactor(multiplier) => {
                 self.advanced_settings.scale_factor = multiplier;
             }
-            Message::RestoreDefaults => self.advanced_settings = ConfigAdvancedSettings::default(),
             Message::WindowMoved(x, y) => {
                 self.window.position = (x, y);
             }
@@ -283,9 +282,9 @@ impl Sniffer {
                 self.advanced_settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            Message::CustomReport(path) => {
-                self.advanced_settings.output_path = path;
-            }
+            // Message::CustomReport(path) => {
+            //     self.advanced_settings.output_path = path;
+            // }
             Message::CloseRequested => {
                 self.get_configs().store();
                 return iced::window::close();

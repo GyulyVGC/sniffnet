@@ -1,6 +1,6 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, vertical_space, Rule};
+use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, TextInput};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Element, Font, Length, Renderer};
@@ -16,7 +16,8 @@ use crate::gui::styles::style_constants::{
     get_font, get_font_headers, BORDER_WIDTH, FONT_SIZE_SUBTITLE,
 };
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::types::custom_palette::ExtraStyles;
+use crate::gui::styles::text_input::TextInputType;
+use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
@@ -24,6 +25,7 @@ use crate::translations::translations::{
     yeti_day_translation, yeti_night_translation,
 };
 use crate::translations::translations_2::color_gradients_translation;
+use crate::translations::translations_3::custom_style_translation;
 use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
@@ -101,6 +103,19 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
     for children in get_extra_palettes(ExtraStyles::all_styles(), sniffer.style) {
         styles_col = styles_col.push(children);
     }
+    styles_col = styles_col
+        .push(lazy(
+            (&sniffer.advanced_settings.style_path, sniffer.style),
+            move |_| {
+                lazy_custom_style_input(
+                    sniffer.language,
+                    font,
+                    &sniffer.advanced_settings.style_path,
+                    sniffer.style,
+                )
+            },
+        ))
+        .push(vertical_space(10));
 
     let styles_scroll =
         Scrollable::new(styles_col).direction(Direction::Vertical(ScrollbarType::properties()));
@@ -290,4 +305,48 @@ fn get_extra_palettes(
     }
 
     children
+}
+
+fn lazy_custom_style_input(
+    language: Language,
+    font: Font,
+    custom_path: &str,
+    style: StyleType,
+) -> Button<'static, Message, Renderer<StyleType>> {
+    let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
+
+    let is_error = if custom_path.is_empty() {
+        false
+    } else {
+        CustomPalette::from_file(custom_path).is_err()
+    };
+
+    let input = TextInput::new("-", custom_path)
+        .on_input(Message::LoadStyle)
+        .on_submit(Message::LoadStyle(custom_path.to_string()))
+        .padding([0, 5])
+        .font(font)
+        .width(Length::Fixed(300.0))
+        .style(if is_error {
+            TextInputType::Error
+        } else {
+            TextInputType::Standard
+        });
+
+    let content = Column::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(custom_style_translation(language)).font(font))
+        .push(input);
+
+    Button::new(content)
+        .height(Length::Fixed(75.0))
+        .width(Length::Fixed(380.0))
+        .padding([10, 0, 5, 0])
+        .style(if is_custom_toml_style_set {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::LoadStyle(custom_path.to_string()))
 }

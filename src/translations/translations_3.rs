@@ -18,14 +18,6 @@ pub fn scale_factor_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn restore_defaults_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Restore defaults",
-        Language::IT => "Ripristina valori predefiniti",
-        _ => "Restore defaults",
-    }
-}
-
 pub fn mmdb_paths_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database file paths (MMDB format)",
@@ -59,13 +51,13 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn file_path_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "File path",
-        Language::IT => "Percorso del file",
-        _ => "File path",
-    }
-}
+// pub fn file_path_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "File path",
+//         Language::IT => "Percorso del file",
+//         _ => "File path",
+//     }
+// }
 
 pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
