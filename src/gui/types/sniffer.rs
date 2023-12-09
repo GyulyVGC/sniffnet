@@ -47,7 +47,7 @@ pub struct Sniffer {
     /// Capture data updated by thread parsing packets
     pub info_traffic: Arc<Mutex<InfoTraffic>>,
     /// Reports if a newer release of the software is available on GitHub
-    pub newer_release_available: Arc<Mutex<Result<bool, String>>>,
+    pub newer_release_available: Arc<Mutex<Option<bool>>>,
     /// Traffic data displayed in GUI
     pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed
@@ -99,10 +99,7 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub fn new(
-        configs: &Configs,
-        newer_release_available: Arc<Mutex<Result<bool, String>>>,
-    ) -> Self {
+    pub fn new(configs: &Configs, newer_release_available: Arc<Mutex<Option<bool>>>) -> Self {
         Self {
             current_capture_id: Arc::new(Mutex::new(0)),
             info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
@@ -566,10 +563,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_ip_version() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.filters.ip, IpVersion::Other);
         sniffer.update(Message::IpVersionSelection(IpVersion::IPv6));
@@ -584,10 +578,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_transport_protocol() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.filters.transport, TransProtocol::Other);
         sniffer.update(Message::TransportProtocolSelection(TransProtocol::UDP));
@@ -602,10 +593,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_application_protocol() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.filters.application, AppProtocol::Other);
         sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTPS));
@@ -620,10 +608,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_chart_kind() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
         sniffer.update(Message::ChartSelection(ChartType::Packets));
@@ -636,10 +621,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_report_kind() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
         sniffer.update(Message::ReportSortSelection(ReportSortType::MostBytes));
@@ -654,10 +636,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_style() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         sniffer.update(Message::Style(StyleType::MonAmour));
         assert_eq!(sniffer.style, StyleType::MonAmour);
@@ -673,10 +652,7 @@ mod tests {
 
     #[test]
     fn test_waiting_dots_update() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.waiting, ".".to_string());
         sniffer.update(Message::Waiting);
@@ -691,10 +667,7 @@ mod tests {
 
     #[test]
     fn test_modify_favorite_connections() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
         // remove 1
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -883,10 +856,7 @@ mod tests {
 
     #[test]
     fn test_show_and_hide_modal_and_settings() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
@@ -973,10 +943,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_language() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         assert_eq!(sniffer.language, Language::EN);
         assert_eq!(sniffer.traffic_chart.language, Language::EN);
@@ -993,10 +960,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_notification_settings() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
         // initial default state
         assert_eq!(sniffer.notifications.volume, 60);
@@ -1157,10 +1121,7 @@ mod tests {
 
     #[test]
     fn test_clear_all_notifications() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
         sniffer.runtime_data.logged_notifications =
             VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
                 PacketsThresholdExceeded {
@@ -1182,10 +1143,7 @@ mod tests {
 
     #[test]
     fn test_correctly_switch_running_and_notification_pages() {
-        let mut sniffer = Sniffer::new(
-            &Configs::default(),
-            Arc::new(Mutex::new(Err(String::new()))),
-        );
+        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
         sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status

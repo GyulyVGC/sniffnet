@@ -53,7 +53,7 @@ mod utils;
 pub fn main() -> iced::Result {
     parse_cli_args();
 
-    let newer_release_available1 = Arc::new(Mutex::new(Err(String::new())));
+    let newer_release_available1 = Arc::new(Mutex::new(None));
     let newer_release_available2 = newer_release_available1.clone();
 
     // to kill the main thread as soon as a secondary thread panics
