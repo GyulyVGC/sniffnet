@@ -213,21 +213,21 @@ mod tests {
         )
     }
 
-    // NOTE: This has to be updated if `resources/themes/catppuccin_mocha.toml` changes
+    // NOTE: This has to be updated if `resources/themes/catppuccin.toml` changes
     fn catppuccin_style() -> CustomPalette {
         CustomPalette {
             palette: Palette {
-                primary: color!(30, 30, 46),
-                secondary: color!(137, 180, 250),
-                buttons: color!(49, 50, 68),
-                outgoing: color!(245, 194, 231),
-                text_headers: color!(17, 17, 27),
-                text_body: color!(205, 214, 244),
+                primary: color!(0x30, 0x34, 0x46),
+                secondary: color!(0xa6, 0xd1, 0x89),
+                buttons: color!(0x41, 0x45, 0x59),
+                outgoing: color!(0xf4, 0xb8, 0xe4),
+                text_headers: color!(0x23, 0x26, 0x34),
+                text_body: color!(0xc6, 0xd0, 0xf5),
             },
             extension: PaletteExtension {
-                starred: color!(249, 226, 175, 0.6666667),
-                round_borders_alpha: 0.3,
-                round_containers_alpha: 0.15,
+                starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
+                round_borders_alpha: 0.4,
+                round_containers_alpha: 0.25,
                 chart_badge_alpha: 0.2,
                 nightly: true,
             },
@@ -237,7 +237,7 @@ mod tests {
     #[test]
     fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
         let style = catppuccin_style();
-        let style_de = CustomPalette::from_file(style_path("catppuccin_mocha"))?;
+        let style_de = CustomPalette::from_file(style_path("catppuccin"))?;
 
         assert_eq!(style, style_de);
         Ok(())

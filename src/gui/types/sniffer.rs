@@ -560,8 +560,8 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        AppProtocol, ByteMultiple, ChartType, Configs, InfoTraffic, IpVersion, Language,
-        ReportSortType, RunningPage, Sniffer, StyleType, TransProtocol,
+        AppProtocol, ByteMultiple, ChartType, Configs, IpVersion, Language, ReportSortType,
+        RunningPage, Sniffer, StyleType, TransProtocol,
     };
 
     #[test]

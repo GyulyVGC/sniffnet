@@ -410,24 +410,24 @@ The currently usable hotkeys are reported in the following.
   The TOML must follow this format:
   ```toml
   # Colors are in RGB/RGBA hexadecimal.
-  primary = "#1e1e2e"           # Background
-  secondary = "#89b4fa"         # Headers / incoming connections
-  buttons = "#313244"           # Buttons
-  outgoing = "#f5c2e7"          # Outgoing connections
-  text_headers = "#11111b"      # Text headers
-  text_body = "#cdd6f4"         # Text body
-  starred = "#f9e2afaa"         # Favorites
+  primary = "#303446"           # Background
+  secondary = "#a6d189"         # Headers / incoming connections
+  buttons = "#414559"           # Buttons
+  outgoing = "#f4b8e4"          # Outgoing connections
+  text_headers = "#232634"      # Text headers
+  text_body = "#c6d0f5"         # Text body
+  starred = "#e5c890aa"         # Favorites
 
   # The following parameters are in the range [0.0, 1.0].
-  round_borders_alpha = 0.3     # Borders opacity
-  round_containers_alpha = 0.15 # Containers opacity
+  round_borders_alpha = 0.4     # Borders opacity
+  round_containers_alpha = 0.25 # Containers opacity
   chart_badge_alpha = 0.2       # Chart opacity
 
   # Set to true if the theme is dark, false if it's light.
   nightly = true
   ```
 
-  The example theme above uses colors from [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
+  The example theme above uses colors from [Catppuccin](https://github.com/catppuccin/catppuccin).
 
   To use a custom theme for your instance of Sniffnet, specify the path of your TOML file in the application's 
   settings (at the bottom of the style tab).
