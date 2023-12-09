@@ -315,10 +315,11 @@ fn lazy_custom_style_input(
 ) -> Button<'static, Message, Renderer<StyleType>> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
+    let custom_palette = CustomPalette::from_file(custom_path);
     let is_error = if custom_path.is_empty() {
         false
     } else {
-        CustomPalette::from_file(custom_path).is_err()
+        custom_palette.is_err()
     };
 
     let input = TextInput::new("-", custom_path)
@@ -333,14 +334,29 @@ fn lazy_custom_style_input(
             TextInputType::Standard
         });
 
-    let content = Column::new()
+    let mut content = Column::new()
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(custom_style_translation(language)).font(font))
         .push(input);
 
+    if is_custom_toml_style_set {
+        content = content.push(get_palette(style, true));
+    } else if let Ok(palette) = custom_palette {
+        content = content.push(get_palette(
+            StyleType::Custom(ExtraStyles::CustomToml(palette)),
+            true,
+        ));
+    }
+
     Button::new(content)
-        .height(Length::Fixed(75.0))
+        .height(Length::Fixed(
+            if custom_palette.is_ok() || is_custom_toml_style_set {
+                110.0
+            } else {
+                75.0
+            },
+        ))
         .width(Length::Fixed(380.0))
         .padding([10, 0, 5, 0])
         .style(if is_custom_toml_style_set {
