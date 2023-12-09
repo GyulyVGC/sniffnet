@@ -72,6 +72,7 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
         //     font,
         //     &sniffer.advanced_settings.output_path,
         // ))
+        // .push(vertical_space(Fixed(10.0)));
         .push(mmdb_settings(
             is_editable,
             sniffer.language,
@@ -102,21 +103,22 @@ fn scale_factor_slider(
     font: Font,
     scale_factor: f64,
 ) -> Container<'static, Message, Renderer<StyleType>> {
+    #[allow(clippy::cast_possible_truncation)]
+    let slider_width = 150.0 / scale_factor as f32;
     Container::new(
         Column::new()
             .spacing(5)
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!(
-                    "{}: x{scale_factor:.2}",
-                    scale_factor_translation(language)
-                ))
-                .font(font),
+                Text::new(scale_factor_translation(language))
+                    .style(TextType::Subtitle)
+                    .font(font),
             )
+            .push(Text::new(format!("x{scale_factor:.2}")).font(font))
             .push(
                 Slider::new(0.5..=1.5, scale_factor, Message::ChangeScaleFactor)
                     .step(0.05)
-                    .width(Fixed(150.0)),
+                    .width(Fixed(slider_width)),
             ),
     )
     .align_x(Horizontal::Center)
