@@ -99,8 +99,8 @@ fn row_language_scale_factor(
     scale_factor: f64,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     Row::new()
-        .align_items(Alignment::Center)
-        .height(Length::Fixed(80.0))
+        .align_items(Alignment::Start)
+        .height(Length::Fixed(90.0))
         .push(language_picklist(language, font))
         .push(Rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
