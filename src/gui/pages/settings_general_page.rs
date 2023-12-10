@@ -3,7 +3,10 @@ use std::sync::Arc;
 use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
-use iced::widget::{button, vertical_space, Column, Container, Row, Slider, TextInput, Tooltip};
+use iced::widget::{
+    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider,
+    TextInput, Tooltip,
+};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
@@ -16,20 +19,18 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    advanced_settings_translation, info_mmdb_paths_translation, mmdb_paths_translation,
-    params_not_editable_translation, scale_factor_translation,
+    mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
-pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let font = get_font(sniffer.style);
     let font_headers = get_font_headers(sniffer.style);
 
-    let is_editable = sniffer.running_page.eq(&RunningPage::Init);
-
-    let mut content = Column::new()
+    let content = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
@@ -39,22 +40,37 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             sniffer.language,
         ))
         .push(get_settings_tabs(
-            SettingsPage::Advanced,
+            SettingsPage::General,
             font,
             sniffer.language,
         ))
-        .push(vertical_space(Fixed(15.0)))
-        .push(title_row(sniffer.language, font))
         .push(vertical_space(Fixed(10.0)))
-        .push(scale_factor_slider(
+        .push(column_all_general_setting(sniffer, font));
+
+    Container::new(content)
+        .height(Fixed(400.0))
+        .width(Fixed(800.0))
+        .style(ContainerType::Modal)
+}
+
+fn column_all_general_setting(
+    sniffer: &Sniffer,
+    font: Font,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let is_editable = sniffer.running_page.eq(&RunningPage::Init);
+
+    let mut column = Column::new()
+        .align_items(Alignment::Center)
+        .padding([5, 10])
+        .push(row_language_scale_factor(
             sniffer.language,
             font,
             sniffer.advanced_settings.scale_factor,
         ))
-        .push(vertical_space(Fixed(10.0)));
+        .push(Rule::horizontal(25));
 
     if !is_editable {
-        content = content
+        column = column
             .push(
                 Container::new(
                     Text::new(params_not_editable_translation(sniffer.language)).font(font),
@@ -65,37 +81,87 @@ pub fn settings_advanced_page(sniffer: &Sniffer) -> Container<Message, Renderer<
             .push(vertical_space(Fixed(10.0)));
     }
 
-    content = content
-        // .push(report_path_setting(
-        //     is_editable,
-        //     sniffer.language,
-        //     font,
-        //     &sniffer.advanced_settings.output_path,
-        // ))
-        // .push(vertical_space(Fixed(10.0)));
-        .push(mmdb_settings(
-            is_editable,
-            sniffer.language,
-            font,
-            &sniffer.advanced_settings.mmdb_country,
-            &sniffer.advanced_settings.mmdb_asn,
-            &sniffer.country_mmdb_reader,
-            &sniffer.asn_mmdb_reader,
-        ));
+    column = column.push(mmdb_settings(
+        is_editable,
+        sniffer.language,
+        font,
+        &sniffer.advanced_settings.mmdb_country,
+        &sniffer.advanced_settings.mmdb_asn,
+        &sniffer.country_mmdb_reader,
+        &sniffer.asn_mmdb_reader,
+    ));
 
-    Container::new(content)
-        .height(Fixed(400.0))
-        .width(Fixed(800.0))
-        .style(ContainerType::Modal)
+    column
 }
 
-fn title_row(language: Language, font: Font) -> Row<'static, Message, Renderer<StyleType>> {
-    Row::new().spacing(10).align_items(Alignment::Center).push(
-        Text::new(advanced_settings_translation(language))
-            .style(TextType::Title)
+fn row_language_scale_factor(
+    language: Language,
+    font: Font,
+    scale_factor: f64,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    Row::new()
+        .align_items(Alignment::Center)
+        .height(Length::Fixed(80.0))
+        .push(language_picklist(language, font))
+        .push(Rule::vertical(25))
+        .push(scale_factor_slider(language, font, scale_factor))
+        .push(Rule::vertical(25))
+        .push(horizontal_space(Length::FillPortion(1)))
+}
+
+fn language_picklist(
+    language: Language,
+    font: Font,
+) -> Container<'static, Message, Renderer<StyleType>> {
+    let mut flag_row = Row::new()
+        .align_items(Alignment::Center)
+        .spacing(10)
+        .push(language.get_flag());
+    if ![Language::EN, Language::IT].contains(&language) {
+        flag_row = flag_row.push(
+            Tooltip::new(
+                button(
+                    Text::new("!")
+                        .font(font)
+                        .vertical_alignment(Vertical::Center)
+                        .horizontal_alignment(Horizontal::Center)
+                        .size(15),
+                )
+                .padding(2)
+                .height(Fixed(20.0))
+                .width(Fixed(20.0)),
+                "       The selected language       \nis not fully updated to version 1.3",
+                Position::Right,
+            )
             .font(font)
-            .size(FONT_SIZE_SUBTITLE),
-    )
+            .style(ContainerType::Tooltip),
+        );
+    }
+
+    let content = Column::new()
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(
+            Text::new(language_translation(language))
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE)
+                .font(font),
+        )
+        .push(flag_row)
+        .push(
+            PickList::new(
+                &Language::ALL[..],
+                Some(language),
+                Message::LanguageSelection,
+            )
+            .padding([3, 7])
+            .font(font),
+        );
+
+    Container::new(content)
+        .width(Length::FillPortion(1))
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
 }
 
 fn scale_factor_slider(
@@ -110,8 +176,9 @@ fn scale_factor_slider(
             .spacing(5)
             .align_items(Alignment::Center)
             .push(
-                Text::new(scale_factor_translation(language))
+                Text::new(zoom_translation(language))
                     .style(TextType::Subtitle)
+                    .size(FONT_SIZE_SUBTITLE)
                     .font(font),
             )
             .push(Text::new(format!("x{scale_factor:.2}")).font(font))
@@ -121,6 +188,7 @@ fn scale_factor_slider(
                     .width(Fixed(slider_width)),
             ),
     )
+    .width(Length::FillPortion(1))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
@@ -160,31 +228,9 @@ fn mmdb_settings(
         .spacing(5)
         .align_items(Alignment::Center)
         .push(
-            Row::new()
-                .spacing(10)
-                .push(
-                    Text::new(mmdb_paths_translation(language))
-                        .font(font)
-                        .style(TextType::Subtitle),
-                )
-                .push(
-                    Tooltip::new(
-                        button(
-                            Text::new("i")
-                                .font(font)
-                                .vertical_alignment(Vertical::Center)
-                                .horizontal_alignment(Horizontal::Center)
-                                .size(15),
-                        )
-                        .padding(2)
-                        .height(Fixed(20.0))
-                        .width(Fixed(20.0)),
-                        info_mmdb_paths_translation(language),
-                        Position::Top,
-                    )
-                    .font(font)
-                    .style(ContainerType::Tooltip),
-                ),
+            Text::new(mmdb_files_translation(language))
+                .font(font)
+                .style(TextType::Subtitle),
         )
         .push(
             Row::new()

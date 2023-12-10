@@ -1143,30 +1143,6 @@ pub fn appearance_title_translation(language: Language) -> Text<'static, Rendere
     })
 }
 
-pub fn languages_title_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
-    Text::new(match language {
-        Language::EN => "Select your language",
-        Language::IT => "Seleziona la lingua",
-        Language::FR => "Sélectionnez votre langue",
-        Language::ES => "Selecciona tu idioma",
-        Language::PL => "Wybierz język",
-        Language::DE => "Stell deine Sprache ein",
-        Language::UK => "Вибери мову",
-        Language::ZH => "选择显示语言",
-        Language::RO => "Selectați limba",
-        Language::KO => "언어를 선택하세요",
-        Language::TR => "Dilinizi seçin",
-        Language::RU => "Выберите язык",
-        Language::PT => "Selecione o seu idioma",
-        Language::EL => "Επίλεξε τη γλώσσα σου",
-        // Language::FA => "زبان خود را انتخاب کنید",
-        Language::SV => "Välj ditt språk",
-        Language::FI => "Valitse kielesi",
-        Language::JA => "表示言語を選択してください",
-        Language::UZ => "Tilingizni tanlang",
-    })
-}
-
 pub fn active_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Active filters",

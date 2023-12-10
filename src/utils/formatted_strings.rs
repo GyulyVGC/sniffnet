@@ -1,5 +1,4 @@
 use std::net::IpAddr;
-use std::path::PathBuf;
 
 use iced::widget::{Column, Text};
 use iced::{Font, Renderer};
@@ -13,7 +12,7 @@ use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub const PCAP_FILE_NAME: &str = "sniffnet.pcap";
+// pub const PCAP_FILE_NAME: &str = "sniffnet.pcap";
 
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
@@ -102,18 +101,18 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
     bytes_string
 }
 
-/// Returns the default report path
-pub fn get_default_report_file_path() -> String {
-    return if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
-        config_path.pop();
-        config_path.push(PCAP_FILE_NAME);
-        config_path.to_string_lossy().to_string()
-    } else {
-        let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
-        path.push(PCAP_FILE_NAME);
-        path.to_string_lossy().to_string()
-    };
-}
+// /// Returns the default report path
+// pub fn get_default_report_file_path() -> String {
+//     return if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
+//         config_path.pop();
+//         config_path.push(PCAP_FILE_NAME);
+//         config_path.to_string_lossy().to_string()
+//     } else {
+//         let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
+//         path.push(PCAP_FILE_NAME);
+//         path.to_string_lossy().to_string()
+//     };
+// }
 
 // /// Returns the file to use for the output PCAP report
 // /// It tries and fallbacks in the order: custom path, configs path, home directory path

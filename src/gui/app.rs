@@ -20,8 +20,7 @@ use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
-use crate::gui::pages::settings_advanced_page::settings_advanced_page;
-use crate::gui::pages::settings_language_page::settings_language_page;
+use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
@@ -96,8 +95,7 @@ impl Application for Sniffer {
                     let overlay = match settings_page {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
-                        SettingsPage::Language => settings_language_page(self),
-                        SettingsPage::Advanced => settings_advanced_page(self),
+                        SettingsPage::General => settings_general_page(self),
                     };
 
                     Modal::new(content, overlay)

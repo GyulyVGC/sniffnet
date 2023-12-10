@@ -1,9 +1,8 @@
 use iced::Renderer;
 
 use crate::gui::types::message::Message;
-use crate::translations::translations::{
-    language_translation, notifications_translation, style_translation,
-};
+use crate::translations::translations::{notifications_translation, style_translation};
+use crate::translations::translations_3::general_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
@@ -14,44 +13,38 @@ pub enum SettingsPage {
     Notifications,
     /// Settings Appearance page.
     Appearance,
-    /// Settings Language page.
-    Language,
-    /// Advanced settings.
-    Advanced,
+    /// General settings.
+    General,
 }
 
 impl SettingsPage {
-    pub const ALL: [SettingsPage; 4] = [
+    pub const ALL: [SettingsPage; 3] = [
         SettingsPage::Notifications,
         SettingsPage::Appearance,
-        SettingsPage::Language,
-        SettingsPage::Advanced,
+        SettingsPage::General,
     ];
 
     pub fn get_tab_label(&self, language: Language) -> &str {
         match self {
             SettingsPage::Notifications => notifications_translation(language),
             SettingsPage::Appearance => style_translation(language),
-            SettingsPage::Language => language_translation(language),
-            SettingsPage::Advanced => "",
+            SettingsPage::General => general_translation(language),
         }
     }
 
     pub fn next(self) -> Self {
         match self {
             SettingsPage::Notifications => SettingsPage::Appearance,
-            SettingsPage::Appearance => SettingsPage::Language,
-            SettingsPage::Language => SettingsPage::Advanced,
-            SettingsPage::Advanced => SettingsPage::Notifications,
+            SettingsPage::Appearance => SettingsPage::General,
+            SettingsPage::General => SettingsPage::Notifications,
         }
     }
 
     pub fn previous(self) -> Self {
         match self {
-            SettingsPage::Notifications => SettingsPage::Advanced,
+            SettingsPage::Notifications => SettingsPage::General,
             SettingsPage::Appearance => SettingsPage::Notifications,
-            SettingsPage::Language => SettingsPage::Appearance,
-            SettingsPage::Advanced => SettingsPage::Language,
+            SettingsPage::General => SettingsPage::Appearance,
         }
     }
 
@@ -59,8 +52,7 @@ impl SettingsPage {
         match self {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,
-            SettingsPage::Language => Icon::Globe,
-            SettingsPage::Advanced => Icon::Dots,
+            SettingsPage::General => Icon::Dots,
         }
         .to_text()
     }
@@ -78,21 +70,21 @@ mod tests {
     fn test_previous_settings_page() {
         assert_eq!(
             SettingsPage::Notifications.previous(),
-            SettingsPage::Advanced
+            SettingsPage::General
         );
         assert_eq!(
             SettingsPage::Appearance.previous(),
             SettingsPage::Notifications
         );
         assert_eq!(SettingsPage::Language.previous(), SettingsPage::Appearance);
-        assert_eq!(SettingsPage::Advanced.previous(), SettingsPage::Language);
+        assert_eq!(SettingsPage::General.previous(), SettingsPage::Language);
     }
 
     #[test]
     fn test_next_settings_page() {
         assert_eq!(SettingsPage::Notifications.next(), SettingsPage::Appearance);
         assert_eq!(SettingsPage::Appearance.next(), SettingsPage::Language);
-        assert_eq!(SettingsPage::Language.next(), SettingsPage::Advanced);
-        assert_eq!(SettingsPage::Advanced.next(), SettingsPage::Notifications);
+        assert_eq!(SettingsPage::Language.next(), SettingsPage::General);
+        assert_eq!(SettingsPage::General.next(), SettingsPage::Notifications);
     }
 }

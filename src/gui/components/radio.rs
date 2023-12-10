@@ -1,6 +1,5 @@
-use iced::widget::horizontal_space;
 use iced::widget::{Column, Radio, Row, Text};
-use iced::{Alignment, Font, Length, Renderer};
+use iced::{Alignment, Font, Renderer};
 
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
@@ -63,37 +62,6 @@ pub fn transport_protocol_radios(
             .spacing(7)
             .font(font)
             .size(15),
-        );
-    }
-    ret_val
-}
-
-pub fn language_radios(
-    active: Language,
-    collection: &[Language],
-    font: Font,
-) -> Row<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Row::new().spacing(10).align_items(Alignment::Center);
-    for option in collection {
-        ret_val = ret_val.push(
-            Row::new().align_items(Alignment::Center).push(
-                Row::new()
-                    .align_items(Alignment::Center)
-                    .width(Length::Fixed(200.0))
-                    .push(
-                        Radio::new(
-                            format!("{} ({:?})", option.get_radio_label(), option),
-                            *option,
-                            Some(active),
-                            Message::LanguageSelection,
-                        )
-                        .spacing(7)
-                        .font(font)
-                        .size(15),
-                    )
-                    .push(horizontal_space(Length::Fixed(15.0)))
-                    .push(option.get_flag()),
-            ),
         );
     }
     ret_val

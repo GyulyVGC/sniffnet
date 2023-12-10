@@ -1160,7 +1160,7 @@ mod tests {
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(false));
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Advanced));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(true));
