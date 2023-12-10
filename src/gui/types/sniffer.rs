@@ -870,24 +870,24 @@ mod tests {
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
-        sniffer.update(Message::OpenSettings(SettingsPage::Language));
+        sniffer.update(Message::OpenSettings(SettingsPage::General));
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
         // try opening modal with settings opened
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
         assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
         // close settings
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Language);
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
         // reopen settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.settings_page, Some(SettingsPage::Language));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Language);
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
+        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
         // switch settings page
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);

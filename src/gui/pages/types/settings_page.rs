@@ -76,15 +76,13 @@ mod tests {
             SettingsPage::Appearance.previous(),
             SettingsPage::Notifications
         );
-        assert_eq!(SettingsPage::Language.previous(), SettingsPage::Appearance);
-        assert_eq!(SettingsPage::General.previous(), SettingsPage::Language);
+        assert_eq!(SettingsPage::General.previous(), SettingsPage::Appearance);
     }
 
     #[test]
     fn test_next_settings_page() {
         assert_eq!(SettingsPage::Notifications.next(), SettingsPage::Appearance);
-        assert_eq!(SettingsPage::Appearance.next(), SettingsPage::Language);
-        assert_eq!(SettingsPage::Language.next(), SettingsPage::General);
+        assert_eq!(SettingsPage::Appearance.next(), SettingsPage::General);
         assert_eq!(SettingsPage::General.next(), SettingsPage::Notifications);
     }
 }
