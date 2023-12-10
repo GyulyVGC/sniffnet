@@ -11,7 +11,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Users can now provide custom paths for MMDB files to allow using the commercial versions of the country and ASN databases (fixes [#243](https://github.com/GyulyVGC/sniffnet/issues/243))
 - The app's configurations are now stored only on application close, instead of needlessly store them each time the settings popup is closed
 - The textual output report is not generated anymore
-- Settings "Language" tab has been removed. Language selection and other options are now included in a new settings tab "General".
+- Settings "Language" tab has been removed. Language selection and other options are now included in a new settings tab "General" ([#365](https://github.com/GyulyVGC/sniffnet/pull/365))
 - Updated Portuguese translation to v1.2 ([#398](https://github.com/GyulyVGC/sniffnet/pull/398))
 - Cleaned code implementing the concept of first class theming ([#339](https://github.com/GyulyVGC/sniffnet/pull/339))
 - Added documentation about Sniffnet installation on Nix and Tiny Core Linux (respectively [#394](https://github.com/GyulyVGC/sniffnet/pull/394) and [#341](https://github.com/GyulyVGC/sniffnet/pull/341))
