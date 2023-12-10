@@ -29,8 +29,10 @@ use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut body = Column::new()
         .width(Length::Fill)
@@ -44,16 +46,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         RunningPage::Inspect,
         font,
         font_headers,
-        sniffer.language,
+        language,
         sniffer.unread_notifications,
     );
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let sort_active_str = sniffer
-        .report_sort_type
-        .get_picklist_label(sniffer.language);
-    let sort_list_str: Vec<&str> = ReportSortType::all_strings(sniffer.language);
+    let sort_active_str = sniffer.report_sort_type.get_picklist_label(language);
+    let sort_list_str: Vec<&str> = ReportSortType::all_strings(language);
     let picklist_sort = PickList::new(
         sort_list_str.clone(),
         Some(sort_active_str),
@@ -73,8 +73,8 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let report = lazy(
         (
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
-            sniffer.style,
-            sniffer.language,
+            style,
+            language,
             sniffer.report_sort_type,
             sniffer.search.clone(),
             sniffer.page_number,
@@ -86,13 +86,13 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         .push(
             Container::new(
                 Row::new()
-                    .push(filters_col(&sniffer.search, font, sniffer.language))
+                    .push(filters_col(&sniffer.search, font, language))
                     .push(Rule::vertical(25))
                     .push(
                         Column::new()
                             .spacing(10)
                             .push(
-                                Text::new(sort_by_translation(sniffer.language))
+                                Text::new(sort_by_translation(language))
                                     .font(font)
                                     .style(TextType::Title)
                                     .size(FONT_SIZE_TITLE),
@@ -110,7 +110,9 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 }
 
 fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 
@@ -165,7 +167,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
             )
             .push(get_change_page_row(
                 font,
-                sniffer.language,
+                language,
                 sniffer.page_number,
                 start_entry_num,
                 end_entry_num,
@@ -181,7 +183,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
                 .push(vertical_space(Length::FillPortion(1)))
                 .push(Icon::Funnel.to_text().size(60))
                 .push(vertical_space(Length::Fixed(15.0)))
-                .push(Text::new(no_search_results_translation(sniffer.language)).font(font))
+                .push(Text::new(no_search_results_translation(language)).font(font))
                 .push(vertical_space(Length::FillPortion(2))),
         );
     }

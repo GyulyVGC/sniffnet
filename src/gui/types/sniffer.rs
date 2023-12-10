@@ -15,7 +15,6 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
-use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
@@ -26,16 +25,14 @@ use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
-use crate::notifications::types::notifications::{Notification, Notifications};
+use crate::notifications::types::notifications::Notification;
 use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
-use crate::translations::types::language::Language;
 use crate::utils::types::web_page::WebPage;
 use crate::{
-    ConfigAdvancedSettings, ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData,
-    StyleType, TrafficChart,
+    ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart,
 };
 
 /// Struct on which the gui is based
@@ -58,10 +55,6 @@ pub struct Sniffer {
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
-    /// Application style
-    pub style: StyleType,
-    /// Wether gradients are enabled by the user
-    pub color_gradient: GradientType,
     /// Waiting string
     pub waiting: String,
     /// Chart displayed
@@ -74,12 +67,8 @@ pub struct Sniffer {
     pub settings_page: Option<SettingsPage>,
     /// Remembers the last opened setting page
     pub last_opened_setting: SettingsPage,
-    /// Contains the notifications configuration set by the user
-    pub notifications: Notifications,
     /// Defines the current running page
     pub running_page: RunningPage,
-    /// Language used in the GUI
-    pub language: Language,
     /// Number of unread notifications
     pub unread_notifications: usize,
     /// Search parameters of inspect page
@@ -88,8 +77,8 @@ pub struct Sniffer {
     pub page_number: usize,
     /// Record the timestamp of last window focus
     pub last_focus_time: std::time::Instant,
-    /// Advanced settings
-    pub advanced_settings: ConfigAdvancedSettings,
+    /// Application settings
+    pub settings: ConfigSettings,
     /// Position and size of the app window
     pub window: ConfigWindow,
     /// MMDB reader for countries
@@ -109,46 +98,33 @@ impl Sniffer {
             last_device_name_sniffed: configs.device.device_name.clone(),
             filters: Filters::default(),
             pcap_error: None,
-            style: configs.settings.style,
-            color_gradient: configs.settings.color_gradient,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(configs.settings.style, configs.settings.language),
             report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
-            notifications: configs.settings.notifications,
             running_page: RunningPage::Init,
-            language: configs.settings.language,
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
             last_focus_time: std::time::Instant::now(),
-            advanced_settings: configs.advanced_settings.clone(),
+            settings: configs.settings.clone(),
             window: configs.window,
             country_mmdb_reader: Arc::new(MmdbReader::from(
-                &configs.advanced_settings.mmdb_country,
+                &configs.settings.mmdb_country,
                 COUNTRY_MMDB,
             )),
-            asn_mmdb_reader: Arc::new(MmdbReader::from(
-                &configs.advanced_settings.mmdb_asn,
-                ASN_MMDB,
-            )),
+            asn_mmdb_reader: Arc::new(MmdbReader::from(&configs.settings.mmdb_asn, ASN_MMDB)),
         }
     }
 
     pub fn get_configs(&self) -> Configs {
         Configs {
-            settings: ConfigSettings {
-                style: self.style,
-                notifications: self.notifications,
-                language: self.language,
-                color_gradient: self.color_gradient,
-            },
+            settings: self.settings.clone(),
             device: ConfigDevice {
                 device_name: self.last_device_name_sniffed.clone(),
             },
-            advanced_settings: self.advanced_settings.clone(),
             window: self.window,
         }
     }
@@ -166,14 +142,14 @@ impl Sniffer {
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
-                self.style = style;
-                self.traffic_chart.change_style(self.style);
+                self.settings.style = style;
+                self.traffic_chart.change_style(style);
             }
             Message::LoadStyle(path) => {
-                self.advanced_settings.style_path = path.clone();
+                self.settings.style_path = path.clone();
                 if let Ok(palette) = CustomPalette::from_file(path) {
-                    self.style = StyleType::Custom(ExtraStyles::CustomToml(palette));
-                    self.traffic_chart.change_style(self.style);
+                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(palette));
+                    self.traffic_chart.change_style(self.settings.style);
                 }
             }
             Message::Waiting => self.update_waiting_dots(),
@@ -202,7 +178,7 @@ impl Sniffer {
                 }
             }
             Message::LanguageSelection(language) => {
-                self.language = language;
+                self.settings.language = language;
                 self.traffic_chart.change_language(language);
             }
             Message::UpdateNotificationSettings(value, emit_sound) => {
@@ -210,7 +186,7 @@ impl Sniffer {
             }
             Message::ChangeVolume(volume) => {
                 play(Sound::Pop, volume);
-                self.notifications.volume = volume;
+                self.settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
                 self.runtime_data.logged_notifications = VecDeque::new();
@@ -257,30 +233,31 @@ impl Sniffer {
                 }
             }
             Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
-            Message::GradientsSelection(gradient_type) => self.color_gradient = gradient_type,
+            Message::GradientsSelection(gradient_type) => {
+                self.settings.color_gradient = gradient_type;
+            }
             Message::ChangeScaleFactor(multiplier) => {
-                self.advanced_settings.scale_factor = multiplier;
+                self.settings.scale_factor = multiplier;
             }
             Message::WindowMoved(x, y) => {
                 self.window.position = (x, y);
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
-                let scaled_width = (f64::from(width) * self.advanced_settings.scale_factor) as u32;
-                let scaled_height =
-                    (f64::from(height) * self.advanced_settings.scale_factor) as u32;
+                let scaled_width = (f64::from(width) * self.settings.scale_factor) as u32;
+                let scaled_height = (f64::from(height) * self.settings.scale_factor) as u32;
                 self.window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => {
-                self.advanced_settings.mmdb_country = db.clone();
+                self.settings.mmdb_country = db.clone();
                 self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
-                self.advanced_settings.mmdb_asn = db.clone();
+                self.settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             // Message::CustomReport(path) => {
-            //     self.advanced_settings.output_path = path;
+            //     self.settings.output_path = path;
             // }
             Message::CloseRequested => {
                 self.get_configs().store();
@@ -307,7 +284,7 @@ impl Sniffer {
         drop(info_traffic_lock);
         let emitted_notifications = notify_and_log(
             &mut self.runtime_data,
-            self.notifications,
+            self.settings.notifications,
             &self.info_traffic.clone(),
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
@@ -356,7 +333,7 @@ impl Sniffer {
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
-        self.traffic_chart = TrafficChart::new(self.style, self.language);
+        self.traffic_chart = TrafficChart::new(self.settings.style, self.settings.language);
         self.running_page = RunningPage::Overview;
 
         if pcap_error.is_none() {
@@ -439,20 +416,20 @@ impl Sniffer {
     fn update_notification_settings(&mut self, value: Notification, emit_sound: bool) {
         let sound = match value {
             Notification::Packets(packets_notification) => {
-                self.notifications.packets_notification = packets_notification;
+                self.settings.notifications.packets_notification = packets_notification;
                 packets_notification.sound
             }
             Notification::Bytes(bytes_notification) => {
-                self.notifications.bytes_notification = bytes_notification;
+                self.settings.notifications.bytes_notification = bytes_notification;
                 bytes_notification.sound
             }
             Notification::Favorite(favorite_notification) => {
-                self.notifications.favorite_notification = favorite_notification;
+                self.settings.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
             }
         };
         if emit_sound {
-            play(sound, self.notifications.volume);
+            play(sound, self.settings.notifications.volume);
         }
     }
 

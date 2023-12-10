@@ -30,26 +30,29 @@ use crate::{AppProtocol, Language, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let color_gradient = sniffer.settings.color_gradient;
+    let font = get_font(style);
 
     let col_adapter = get_col_adapter(sniffer, font);
 
     let ip_active = sniffer.filters.ip;
-    let col_ip_radio = ip_version_radios(ip_active, font, sniffer.language);
+    let col_ip_radio = ip_version_radios(ip_active, font, language);
     let col_ip = Column::new()
         .spacing(10)
         .width(FillPortion(5))
         .push(col_ip_radio);
 
     let transport_active = sniffer.filters.transport;
-    let col_transport_radio = transport_protocol_radios(transport_active, font, sniffer.language);
+    let col_transport_radio = transport_protocol_radios(transport_active, font, language);
     let col_transport = Column::new()
         .align_items(Alignment::Center)
         .spacing(10)
         .width(FillPortion(9))
         .push(col_transport_radio)
         .push(vertical_space(FillPortion(2)))
-        .push(button_start(font, sniffer.language, sniffer.color_gradient))
+        .push(button_start(font, language, color_gradient))
         .push(vertical_space(FillPortion(1)));
 
     let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
@@ -67,13 +70,13 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         Message::AppProtocolSelection,
     )
     .padding([3, 7])
-    .placeholder(all_translation(sniffer.language))
+    .placeholder(all_translation(language))
     .font(font);
     let col_app = Column::new()
         .width(FillPortion(8))
         .spacing(10)
         .push(
-            Text::new(application_protocol_translation(sniffer.language))
+            Text::new(application_protocol_translation(language))
                 .font(font)
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
@@ -86,7 +89,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         .spacing(15)
         .push(
             Row::new().push(
-                select_filters_translation(sniffer.language)
+                select_filters_translation(language)
                     .font(font)
                     .style(TextType::Title)
                     .size(FONT_SIZE_TITLE),
@@ -138,6 +141,8 @@ fn button_start(
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<StyleType>> {
+    let language = sniffer.settings.language;
+
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
         let mut dev_str = String::new();
@@ -156,10 +161,10 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<St
         match num_addresses {
             0 => {}
             1 => {
-                dev_str.push_str(&format!("\n{}:", address_translation(sniffer.language)));
+                dev_str.push_str(&format!("\n{}:", address_translation(language)));
             }
             _ => {
-                dev_str.push_str(&format!("\n{}:", addresses_translation(sniffer.language)));
+                dev_str.push_str(&format!("\n{}:", addresses_translation(language)));
             }
         }
 
@@ -176,7 +181,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<St
         .height(Length::Fill)
         .width(FillPortion(4))
         .push(
-            choose_adapters_translation(sniffer.language)
+            choose_adapters_translation(language)
                 .font(font)
                 .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),

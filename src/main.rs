@@ -29,7 +29,6 @@ use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
-use crate::configs::types::config_advanced_settings::ConfigAdvancedSettings;
 use crate::configs::types::config_window::{ConfigWindow, ToPosition};
 use crate::configs::types::configs::Configs;
 use crate::secondary_threads::check_updates::set_newer_release_status;

@@ -27,8 +27,11 @@ use crate::translations::translations_3::{
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let color_gradient = sniffer.settings.color_gradient;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -36,14 +39,10 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<S
         .push(settings_header(
             font,
             font_headers,
-            sniffer.color_gradient,
-            sniffer.language,
+            color_gradient,
+            language,
         ))
-        .push(get_settings_tabs(
-            SettingsPage::General,
-            font,
-            sniffer.language,
-        ))
+        .push(get_settings_tabs(SettingsPage::General, font, language))
         .push(vertical_space(Fixed(10.0)))
         .push(column_all_general_setting(sniffer, font));
 
@@ -57,36 +56,36 @@ fn column_all_general_setting(
     sniffer: &Sniffer,
     font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let language = sniffer.settings.language;
+
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
     let mut column = Column::new()
         .align_items(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(
-            sniffer.language,
+            language,
             font,
-            sniffer.advanced_settings.scale_factor,
+            sniffer.settings.scale_factor,
         ))
         .push(Rule::horizontal(25));
 
     if !is_editable {
         column = column
             .push(
-                Container::new(
-                    Text::new(params_not_editable_translation(sniffer.language)).font(font),
-                )
-                .padding(10.0)
-                .style(ContainerType::Badge),
+                Container::new(Text::new(params_not_editable_translation(language)).font(font))
+                    .padding(10.0)
+                    .style(ContainerType::Badge),
             )
             .push(vertical_space(Fixed(10.0)));
     }
 
     column = column.push(mmdb_settings(
         is_editable,
-        sniffer.language,
+        language,
         font,
-        &sniffer.advanced_settings.mmdb_country,
-        &sniffer.advanced_settings.mmdb_asn,
+        &sniffer.settings.mmdb_country,
+        &sniffer.settings.mmdb_asn,
         &sniffer.country_mmdb_reader,
         &sniffer.asn_mmdb_reader,
     ));

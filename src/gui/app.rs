@@ -61,14 +61,17 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let font = get_font(self.style);
-        let font_headers = get_font_headers(self.style);
+        let style = self.settings.style;
+        let language = self.settings.language;
+        let color_gradient = self.settings.color_gradient;
+        let font = get_font(style);
+        let font_headers = get_font_headers(style);
 
         let header = header(
             font,
-            self.color_gradient,
+            color_gradient,
             self.running_page.ne(&RunningPage::Init),
-            self.language,
+            language,
             self.last_opened_setting,
         );
 
@@ -80,8 +83,8 @@ impl Application for Sniffer {
         };
 
         let footer = footer(
-            self.language,
-            self.color_gradient,
+            language,
+            color_gradient,
             font,
             font_headers,
             &self.newer_release_available.clone(),
@@ -107,15 +110,10 @@ impl Application for Sniffer {
             }
             Some(modal) => {
                 let overlay = match modal {
-                    MyModal::Quit => {
-                        get_exit_overlay(self.color_gradient, font, font_headers, self.language)
+                    MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(color_gradient, font, font_headers, language)
                     }
-                    MyModal::ClearAll => get_clear_all_overlay(
-                        self.color_gradient,
-                        font,
-                        font_headers,
-                        self.language,
-                    ),
                     MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 };
 
@@ -179,10 +177,10 @@ impl Application for Sniffer {
     }
 
     fn theme(&self) -> Self::Theme {
-        self.style
+        self.settings.style
     }
 
     fn scale_factor(&self) -> f64 {
-        self.advanced_settings.scale_factor
+        self.settings.scale_factor
     }
 }

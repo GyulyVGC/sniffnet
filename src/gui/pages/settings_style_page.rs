@@ -31,8 +31,12 @@ use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let style_path = &sniffer.settings.style_path;
+    let color_gradient = sniffer.settings.color_gradient;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -40,27 +44,19 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         .push(settings_header(
             font,
             font_headers,
-            sniffer.color_gradient,
-            sniffer.language,
+            color_gradient,
+            language,
         ))
-        .push(get_settings_tabs(
-            SettingsPage::Appearance,
-            font,
-            sniffer.language,
-        ))
+        .push(get_settings_tabs(SettingsPage::Appearance, font, language))
         .push(vertical_space(Length::Fixed(15.0)))
         .push(
-            appearance_title_translation(sniffer.language)
+            appearance_title_translation(language)
                 .style(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(vertical_space(Length::Fixed(15.0)))
-        .push(gradients_row(
-            font,
-            sniffer.color_gradient,
-            sniffer.language,
-        ))
+        .push(gradients_row(font, color_gradient, language))
         .push(vertical_space(Length::Fixed(15.0)));
 
     let mut styles_col = Column::new()
@@ -69,16 +65,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         .push(
             Row::new()
                 .push(get_palette_container(
-                    sniffer.style,
+                    style,
                     "Yeti Night".to_string(),
-                    yeti_night_translation(sniffer.language).to_string(),
+                    yeti_night_translation(language).to_string(),
                     Night,
                 ))
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
-                    sniffer.style,
+                    style,
                     "Yeti Day".to_string(),
-                    yeti_day_translation(sniffer.language).to_string(),
+                    yeti_day_translation(language).to_string(),
                     Day,
                 )),
         )
@@ -86,35 +82,27 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         .push(
             Row::new()
                 .push(get_palette_container(
-                    sniffer.style,
+                    style,
                     "Deep Sea".to_string(),
-                    deep_sea_translation(sniffer.language).to_string(),
+                    deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
                 .push(horizontal_space(Length::Fixed(15.0)))
                 .push(get_palette_container(
-                    sniffer.style,
+                    style,
                     "Mon Amour".to_string(),
-                    mon_amour_translation(sniffer.language).to_string(),
+                    mon_amour_translation(language).to_string(),
                     MonAmour,
                 )),
         )
         .push(vertical_space(Length::Fixed(10.0)));
-    for children in get_extra_palettes(ExtraStyles::all_styles(), sniffer.style) {
+    for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
     styles_col = styles_col
-        .push(lazy(
-            (&sniffer.advanced_settings.style_path, sniffer.style),
-            move |_| {
-                lazy_custom_style_input(
-                    sniffer.language,
-                    font,
-                    &sniffer.advanced_settings.style_path,
-                    sniffer.style,
-                )
-            },
-        ))
+        .push(lazy((style_path, style), move |_| {
+            lazy_custom_style_input(language, font, style_path, style)
+        }))
         .push(vertical_space(10));
 
     let styles_scroll =
