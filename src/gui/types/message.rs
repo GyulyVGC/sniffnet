@@ -33,8 +33,6 @@ pub enum Message {
     ReportSortSelection(ReportSortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
-    /// Open Sniffnet's complete textual report
-    OpenReport,
     /// Open the supplied web page
     OpenWebPage(WebPage),
     /// Start sniffing packets
@@ -43,6 +41,8 @@ pub enum Message {
     Reset,
     /// Change application style
     Style(StyleType),
+    /// Deserialize a style from a path
+    LoadStyle(String),
     /// Manage waiting time
     Waiting,
     /// Displays a modal
@@ -89,4 +89,18 @@ pub enum Message {
     FontLoaded(Result<(), font::Error>),
     /// Enable or disable gradients
     GradientsSelection(GradientType),
+    /// Set UI scale factor
+    ChangeScaleFactor(f64),
+    /// The app window position has been changed
+    WindowMoved(i32, i32),
+    /// The app window size has been changed
+    WindowResized(u32, u32),
+    /// The country MMDB custom path has been updated
+    CustomCountryDb(String),
+    /// The ASN MMDB custom path has been updated
+    CustomAsnDb(String),
+    // /// The path for the output report has been updated
+    // CustomReport(String),
+    /// Save the configurations of the app and quit
+    CloseRequested,
 }

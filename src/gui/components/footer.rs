@@ -26,7 +26,7 @@ pub fn footer(
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Result<bool, String>>>,
+    newer_release_available: &Arc<Mutex<Option<bool>>>,
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let release_details_row =
         get_release_details(language, font, font_footer, newer_release_available);
@@ -112,7 +112,7 @@ fn get_release_details(
     language: Language,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Result<bool, String>>>,
+    newer_release_available: &Arc<Mutex<Option<bool>>>,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
@@ -123,7 +123,7 @@ fn get_release_details(
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );
-    if let Ok(boolean_response) = *newer_release_available.lock().unwrap() {
+    if let Some(boolean_response) = *newer_release_available.lock().unwrap() {
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(

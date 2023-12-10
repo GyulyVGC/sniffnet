@@ -1,9 +1,8 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, vertical_space, Rule};
 use iced::widget::{
-    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput, Tooltip,
+    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput,
 };
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
@@ -25,14 +24,15 @@ use crate::translations::translations_2::{
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
     showing_results_translation, sort_by_translation,
 };
-use crate::utils::formatted_strings::get_open_report_tooltip;
 use crate::utils::types::icon::Icon;
 use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut body = Column::new()
         .width(Length::Fill)
@@ -46,16 +46,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         RunningPage::Inspect,
         font,
         font_headers,
-        sniffer.language,
+        language,
         sniffer.unread_notifications,
     );
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let sort_active_str = sniffer
-        .report_sort_type
-        .get_picklist_label(sniffer.language);
-    let sort_list_str: Vec<&str> = ReportSortType::all_strings(sniffer.language);
+    let sort_active_str = sniffer.report_sort_type.get_picklist_label(language);
+    let sort_list_str: Vec<&str> = ReportSortType::all_strings(language);
     let picklist_sort = PickList::new(
         sort_list_str.clone(),
         Some(sort_active_str),
@@ -75,8 +73,8 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let report = lazy(
         (
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
-            sniffer.style,
-            sniffer.language,
+            style,
+            language,
             sniffer.report_sort_type,
             sniffer.search.clone(),
             sniffer.page_number,
@@ -88,13 +86,13 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         .push(
             Container::new(
                 Row::new()
-                    .push(filters_col(&sniffer.search, font, sniffer.language))
+                    .push(filters_col(&sniffer.search, font, language))
                     .push(Rule::vertical(25))
                     .push(
                         Column::new()
                             .spacing(10)
                             .push(
-                                Text::new(sort_by_translation(sniffer.language))
+                                Text::new(sort_by_translation(language))
                                     .font(font)
                                     .style(TextType::Title)
                                     .size(FONT_SIZE_TITLE),
@@ -111,8 +109,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 
@@ -133,13 +133,9 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
         let entry_row = Row::new()
             .align_items(Alignment::Center)
             .push(
-                Text::new(format!(
-                    "  {}{}  ",
-                    report_entry.key.print_gui(),
-                    report_entry.val.print_gui()
-                ))
-                .style(entry_text_type)
-                .font(font),
+                Text::new(format!("  {}{}  ", report_entry.key, report_entry.val))
+                    .style(entry_text_type)
+                    .font(font),
             )
             .push(report_entry.tooltip)
             .push(Text::new("  "));
@@ -148,7 +144,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
             button(entry_row)
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    report_entry.val.index,
+                    report_entry.key,
                 )))
                 .style(ButtonType::Neutral),
         );
@@ -171,7 +167,7 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
             )
             .push(get_change_page_row(
                 font,
-                sniffer.language,
+                language,
                 sniffer.page_number,
                 start_entry_num,
                 end_entry_num,
@@ -187,26 +183,17 @@ fn lazy_report(sniffer: &Sniffer) -> Row<'static, Message, Renderer<StyleType>> 
                 .push(vertical_space(Length::FillPortion(1)))
                 .push(Icon::Funnel.to_text().size(60))
                 .push(vertical_space(Length::Fixed(15.0)))
-                .push(Text::new(no_search_results_translation(sniffer.language)).font(font))
+                .push(Text::new(no_search_results_translation(language)).font(font))
                 .push(vertical_space(Length::FillPortion(2))),
         );
     }
 
-    Row::new()
-        .spacing(15)
-        .align_items(Alignment::Center)
-        .width(Length::Fill)
-        .push(horizontal_space(Length::FillPortion(1)))
-        .push(
-            Container::new(col_report)
-                .padding([10, 7, 7, 7])
-                .width(Length::Fixed(1042.0))
-                .style(ContainerType::BorderedRound),
-        )
-        .push(
-            Container::new(get_button_open_report(sniffer.language, font))
-                .width(Length::FillPortion(1)),
-        )
+    Container::new(col_report)
+        .align_y(Vertical::Center)
+        .align_x(Horizontal::Center)
+        .padding([10, 7, 7, 7])
+        .width(Length::Fixed(1042.0))
+        .style(ContainerType::BorderedRound)
 }
 
 fn filters_col(
@@ -426,28 +413,6 @@ fn get_change_page_row(
         } else {
             Container::new(horizontal_space(25.0))
         })
-}
-
-fn get_button_open_report(
-    language: Language,
-    font: Font,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let content = button(
-        Icon::File
-            .to_text()
-            .size(21)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
-    )
-    .padding(10)
-    .height(Length::Fixed(50.0))
-    .width(Length::Fixed(75.0))
-    .on_press(Message::OpenReport);
-
-    Tooltip::new(content, get_open_report_tooltip(language), Position::Top)
-        .gap(5)
-        .font(font)
-        .style(ContainerType::Tooltip)
 }
 
 fn button_clear_filter(

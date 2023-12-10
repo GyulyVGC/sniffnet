@@ -24,6 +24,7 @@ pub(in crate::gui::styles) fn gruvbox_dark() -> CustomPalette {
             chart_badge_alpha: 0.15,
             round_borders_alpha: 0.12,
             round_containers_alpha: 0.05,
+            nightly: true,
         },
     }
 }
@@ -44,6 +45,7 @@ pub(in crate::gui::styles) fn gruvbox_light() -> CustomPalette {
             chart_badge_alpha: 0.75,
             round_borders_alpha: 0.45,
             round_containers_alpha: 0.2,
+            nightly: false,
         },
     }
 }

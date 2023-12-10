@@ -22,6 +22,19 @@ impl Default for ConfigDevice {
 }
 
 impl ConfigDevice {
+    pub fn load() -> Self {
+        if let Ok(device) = confy::load::<ConfigDevice>("sniffnet", "device") {
+            device
+        } else {
+            confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
+            ConfigDevice::default()
+        }
+    }
+
+    pub fn store(self) {
+        confy::store("sniffnet", "device", self).unwrap_or(());
+    }
+
     pub fn to_my_device(&self) -> MyDevice {
         for device in Device::list().unwrap() {
             if device.name.eq(&self.device_name) {

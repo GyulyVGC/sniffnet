@@ -13,16 +13,13 @@ struct AppVersion {
 
 /// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
-pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Result<bool, String>>>) {
+pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Option<bool>>>) {
     let result = is_newer_release_available(6, 30);
     *newer_release_available.lock().unwrap() = result;
 }
 
 /// Checks if a newer release of Sniffnet is available on GitHub
-fn is_newer_release_available(
-    max_retries: u8,
-    seconds_between_retries: u8,
-) -> Result<bool, String> {
+fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
     let client = reqwest::blocking::Client::new();
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
@@ -65,25 +62,23 @@ fn is_newer_release_available(
         {
             latest_version.remove(0);
             return if latest_version.gt(&APP_VERSION.to_string()) {
-                Ok(true)
+                Some(true)
             } else {
-                Ok(false)
+                Some(false)
             };
         }
-        Err(format!("Cannot parse latest version name {latest_version}"))
+    }
+    let retries_left = max_retries - 1;
+    if retries_left > 0 {
+        // sleep seconds_between_retries and retries the request
+        thread::sleep(Duration::from_secs(u64::from(seconds_between_retries)));
+        is_newer_release_available(retries_left, seconds_between_retries)
     } else {
-        let retries_left = max_retries - 1;
-        if retries_left > 0 {
-            // sleep seconds_between_retries and retries the request
-            thread::sleep(Duration::from_secs(u64::from(seconds_between_retries)));
-            is_newer_release_available(retries_left, seconds_between_retries)
-        } else {
-            Err(response.err().unwrap().to_string())
-        }
+        None
     }
 }
 
-#[cfg(all(test, not(target_os = "macos")))]
+#[cfg(test)]
 mod tests {
     use super::*;
 

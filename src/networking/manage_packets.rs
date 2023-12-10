@@ -4,10 +4,11 @@ use std::sync::{Arc, Mutex};
 use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{Ethernet2Header, IpHeader, PacketHeaders, TransportHeader};
-use maxminddb::Reader;
 use pcap::{Active, Address, Capture, Device};
 
-use crate::countries::country_utils::get_country;
+use crate::mmdb::asn::get_asn;
+use crate::mmdb::country::get_country;
+use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -17,7 +18,6 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::utils::asn::asn;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
@@ -169,19 +169,8 @@ pub fn modify_or_insert_in_map(
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
-    let source_ip = &key.address1;
-    let destination_ip = &key.address2;
-    let very_long_address = source_ip.len() > 25 || destination_ip.len() > 25;
 
-    let len = info_traffic_mutex.lock().unwrap().map.len();
-    let index = info_traffic_mutex
-        .lock()
-        .unwrap()
-        .map
-        .get_index_of(key)
-        .unwrap_or(len);
-
-    if index == len {
+    if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key
 
         // update device addresses
@@ -196,6 +185,8 @@ pub fn modify_or_insert_in_map(
             }
         }
         // determine traffic direction
+        let source_ip = &key.address1;
+        let destination_ip = &key.address2;
         traffic_direction =
             get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
     };
@@ -220,13 +211,9 @@ pub fn modify_or_insert_in_map(
             initial_timestamp: now,
             final_timestamp: now,
             app_protocol: application_protocol,
-            very_long_address,
             traffic_direction,
-            index,
         })
         .clone();
-
-    info_traffic.addresses_last_interval.insert(index);
 
     if let Some(host_info) = info_traffic
         .addresses_resolved
@@ -246,8 +233,8 @@ pub fn reverse_dns_lookup(
     key: &AddressPortPair,
     traffic_direction: TrafficDirection,
     my_device: &MyDevice,
-    country_db_reader: &Reader<&[u8]>,
-    asn_db_reader: &Reader<&[u8]>,
+    country_db_reader: &Arc<MmdbReader>,
+    asn_db_reader: &Arc<MmdbReader>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
@@ -263,7 +250,7 @@ pub fn reverse_dns_lookup(
     );
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
     let country = get_country(&address_to_lookup, country_db_reader);
-    let asn = asn(&address_to_lookup, asn_db_reader);
+    let asn = get_asn(&address_to_lookup, asn_db_reader);
     let r_dns = if let Ok(result) = lookup_result {
         if result.is_empty() {
             address_to_lookup.clone()

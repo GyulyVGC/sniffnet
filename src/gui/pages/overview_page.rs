@@ -48,8 +48,10 @@ use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -65,17 +67,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.device, font, sniffer.language, &sniffer.waiting);
+                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body = body_no_observed(
-                    sniffer.filters,
-                    observed,
-                    font,
-                    sniffer.language,
-                    &sniffer.waiting,
-                );
+                body =
+                    body_no_observed(sniffer.filters, observed, font, language, &sniffer.waiting);
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -83,7 +80,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                     RunningPage::Overview,
                     font,
                     font_headers,
-                    sniffer.language,
+                    language,
                     sniffer.unread_notifications,
                 );
                 tab_and_body = tab_and_body.push(tabs);
@@ -91,12 +88,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                 let container_chart = container_chart(sniffer, font);
 
                 let container_info = lazy(
-                    (
-                        total,
-                        sniffer.style,
-                        sniffer.language,
-                        sniffer.traffic_chart.chart_type,
-                    ),
+                    (total, style, language, sniffer.traffic_chart.chart_type),
                     move |_| lazy_col_info(total, filtered, dropped, sniffer),
                 );
 
@@ -105,8 +97,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                     (
                         filtered,
                         num_favorites,
-                        sniffer.style,
-                        sniffer.language,
+                        style,
+                        language,
                         sniffer.traffic_chart.chart_type,
                     ),
                     move |_| lazy_row_report(sniffer),
@@ -132,7 +124,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
         body = body_pcap_error(
             sniffer.pcap_error.as_ref().unwrap(),
             &sniffer.waiting,
-            sniffer.language,
+            language,
             font,
         );
     }
@@ -247,7 +239,8 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let language = sniffer.settings.language;
+    let font = get_font(sniffer.settings.style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut scroll_host = Column::new()
@@ -289,23 +282,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                         .font(font),
                     ),
             )
-            .push(
-                Row::new()
-                    .push(if incoming_bar_len > 0.0 {
-                        Row::new()
-                            .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(RuleType::Incoming))
-                    } else {
-                        Row::new()
-                    })
-                    .push(if outgoing_bar_len > 0.0 {
-                        Row::new()
-                            .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(RuleType::Outgoing))
-                    } else {
-                        Row::new()
-                    }),
-            );
+            .push(get_bars(incoming_bar_len, outgoing_bar_len));
 
         let content = Row::new()
             .align_items(Alignment::Center)
@@ -316,7 +293,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                 FLAGS_WIDTH_BIG,
                 data_info_host.is_local,
                 data_info_host.traffic_type,
-                sniffer.language,
+                language,
                 font,
             ))
             .push(host_bar);
@@ -336,7 +313,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 
     if entries.len() >= 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
-            Text::new(only_top_30_hosts_translation(sniffer.language))
+            Text::new(only_top_30_hosts_translation(language))
                 .font(font)
                 .horizontal_alignment(Horizontal::Center),
         );
@@ -345,7 +322,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(host_translation(sniffer.language))
+            Text::new(host_translation(language))
                 .font(font)
                 .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),
@@ -358,13 +335,15 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 }
 
 fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_app = Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(application_protocol_translation(sniffer.language))
+            Text::new(application_protocol_translation(language))
                 .font(font)
                 .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),
@@ -405,23 +384,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
                         .font(font),
                     ),
             )
-            .push(
-                Row::new()
-                    .push(if incoming_bar_len > 0.0 {
-                        Row::new()
-                            .width(Length::Fixed(incoming_bar_len))
-                            .push(Rule::horizontal(1).style(RuleType::Incoming))
-                    } else {
-                        Row::new()
-                    })
-                    .push(if outgoing_bar_len > 0.0 {
-                        Row::new()
-                            .width(Length::Fixed(outgoing_bar_len))
-                            .push(Rule::horizontal(1).style(RuleType::Outgoing))
-                    } else {
-                        Row::new()
-                    }),
-            );
+            .push(get_bars(incoming_bar_len, outgoing_bar_len));
 
         scroll_app = scroll_app.push(
             button(content)
@@ -447,19 +410,20 @@ fn lazy_col_info(
     dropped: u32,
     sniffer: &Sniffer,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters =
-        col_device_filters(sniffer.language, font, sniffer.filters, &sniffer.device);
+    let col_device_filters = col_device_filters(language, font, sniffer.filters, &sniffer.device);
 
     let col_data_representation =
-        col_data_representation(sniffer.language, font, sniffer.traffic_chart.chart_type);
+        col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
     let col_bytes_packets = col_bytes_packets(
-        sniffer.language,
+        language,
         dropped,
         total,
         filtered,
@@ -499,7 +463,7 @@ fn lazy_col_info(
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer<StyleType>> {
     let traffic_chart = &sniffer.traffic_chart;
-    let language = sniffer.language;
+    let language = sniffer.settings.language;
 
     let mut chart_info_string = String::from("(");
     chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {
@@ -654,6 +618,24 @@ fn get_bars_length(
     }
 
     (incoming_bar_len, outgoing_bar_len)
+}
+
+fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, Renderer<StyleType>> {
+    Row::new()
+        .push(if in_len > 0.0 {
+            Row::new()
+                .width(Length::Fixed(in_len))
+                .push(Rule::horizontal(1).style(RuleType::Incoming))
+        } else {
+            Row::new()
+        })
+        .push(if out_len > 0.0 {
+            Row::new()
+                .width(Length::Fixed(out_len))
+                .push(Rule::horizontal(1).style(RuleType::Outgoing))
+        } else {
+            Row::new()
+        })
 }
 
 fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Renderer<StyleType>> {

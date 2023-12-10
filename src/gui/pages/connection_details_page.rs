@@ -34,30 +34,30 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
-    connection_index: usize,
+    key: AddressPortPair,
 ) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
         sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
-        move |_| page_content(sniffer, connection_index),
+        move |_| page_content(sniffer, &key),
     ))
 }
 
 fn page_content(
     sniffer: &Sniffer,
-    connection_index: usize,
+    key: &AddressPortPair,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let color_gradient = sniffer.settings.color_gradient;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let info_traffic_lock = sniffer
         .info_traffic
         .lock()
         .expect("Error acquiring mutex\n\r");
-    let key_val: (&AddressPortPair, &InfoAddressPortPair) =
-        info_traffic_lock.map.get_index(connection_index).unwrap();
-    let key = key_val.0.clone();
-    let val = key_val.1.clone();
-    let address_to_lookup = get_address_to_lookup(&key, val.traffic_direction);
+    let val = info_traffic_lock.map.get(key).unwrap().clone();
+    let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = info_traffic_lock
         .addresses_resolved
         .get(&address_to_lookup)
@@ -71,35 +71,35 @@ fn page_content(
     let header_and_content = Column::new().width(Length::Fill).push(page_header(
         font,
         font_headers,
-        sniffer.color_gradient,
-        sniffer.language,
+        color_gradient,
+        language,
     ));
 
     let mut source_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
-        Text::new(source_translation(sniffer.language))
+        Text::new(source_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
             .style(TextType::Title),
     );
     let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
-        Text::new(destination_translation(sniffer.language))
+        Text::new(destination_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
             .style(TextType::Title),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
-        host_info_col = get_host_info_col(&r_dns, &host, font, sniffer.language);
+        host_info_col = get_host_info_col(&r_dns, &host, font, language);
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(
             host.country,
             FLAGS_WIDTH_BIG,
             host_info.is_local,
             host_info.traffic_type,
-            sniffer.language,
+            language,
             font,
         );
-        let computer = get_local_tooltip(sniffer, &address_to_lookup, &key);
+        let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
             dest_caption = dest_caption.push(computer);
@@ -115,7 +115,7 @@ fn page_content(
         key.port1,
         &val.mac_address1,
         font,
-        sniffer.language,
+        language,
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
@@ -123,7 +123,7 @@ fn page_content(
         key.port2,
         &val.mac_address2,
         font,
-        sniffer.language,
+        language,
     );
 
     if address_to_lookup.eq(&key.address1) {
@@ -132,7 +132,7 @@ fn page_content(
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(&key, &val, font, sniffer.language);
+    let col_info = col_info(key, &val, font, language);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 
@@ -274,6 +274,9 @@ fn get_local_tooltip(
     address_to_lookup: &str,
     key: &AddressPortPair,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+
     let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
     get_computer_tooltip(
         is_my_address(
@@ -293,8 +296,8 @@ fn get_local_tooltip(
             my_interface_addresses,
             TrafficDirection::Outgoing,
         ),
-        sniffer.language,
-        get_font(sniffer.style),
+        language,
+        get_font(style),
     )
 }
 

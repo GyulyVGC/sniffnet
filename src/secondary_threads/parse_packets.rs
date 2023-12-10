@@ -7,7 +7,7 @@ use std::thread;
 use etherparse::PacketHeaders;
 use pcap::{Active, Capture};
 
-use crate::countries::country_utils::COUNTRY_MMDB;
+use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
@@ -15,22 +15,20 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
-use crate::utils::asn::ASN_MMDB;
 use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
-    current_capture_id: &Arc<Mutex<u16>>,
+    current_capture_id: &Arc<Mutex<usize>>,
     device: &MyDevice,
     mut cap: Capture<Active>,
     filters: Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
+    country_mmdb_reader: &Arc<MmdbReader>,
+    asn_mmdb_reader: &Arc<MmdbReader>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
-
-    let country_db_reader = Arc::new(maxminddb::Reader::from_source(COUNTRY_MMDB).unwrap());
-    let asn_db_reader = Arc::new(maxminddb::Reader::from_source(ASN_MMDB).unwrap());
 
     loop {
         match cap.next_packet() {
@@ -123,8 +121,8 @@ pub fn parse_packets(
                                     let key2 = key.clone();
                                     let info_traffic2 = info_traffic_mutex.clone();
                                     let device2 = device.clone();
-                                    let country_db_reader2 = country_db_reader.clone();
-                                    let asn_db_reader2 = asn_db_reader.clone();
+                                    let country_db_reader_2 = country_mmdb_reader.clone();
+                                    let asn_db_reader_2 = asn_mmdb_reader.clone();
                                     thread::Builder::new()
                                         .name("thread_reverse_dns_lookup".to_string())
                                         .spawn(move || {
@@ -133,8 +131,8 @@ pub fn parse_packets(
                                                 &key2,
                                                 new_info.traffic_direction,
                                                 &device2,
-                                                &country_db_reader2,
-                                                &asn_db_reader2,
+                                                &country_db_reader_2,
+                                                &asn_db_reader_2,
                                             );
                                         })
                                         .unwrap();

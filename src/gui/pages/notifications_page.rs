@@ -33,9 +33,11 @@ use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let notifications = sniffer.notifications;
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let notifications = sniffer.settings.notifications;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
@@ -45,7 +47,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
         RunningPage::Notifications,
         font,
         font_headers,
-        sniffer.language,
+        language,
         sniffer.unread_notifications,
     );
 
@@ -58,18 +60,18 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
         && !notifications.favorite_notification.notify_on_favorite
         && sniffer.runtime_data.logged_notifications.is_empty()
     {
-        let body = body_no_notifications_set(font, sniffer.language);
+        let body = body_no_notifications_set(font, language);
         tab_and_body = tab_and_body.push(body);
     } else if sniffer.runtime_data.logged_notifications.is_empty() {
-        let body = body_no_notifications_received(font, sniffer.language, &sniffer.waiting);
+        let body = body_no_notifications_received(font, language, &sniffer.waiting);
         tab_and_body = tab_and_body.push(body);
     } else {
         let logged_notifications = lazy(
             (
                 sniffer.runtime_data.tot_emitted_notifications,
                 sniffer.runtime_data.logged_notifications.len(),
-                sniffer.language,
-                sniffer.style,
+                language,
+                style,
             ),
             move |_| lazy_logged_notifications(sniffer),
         );
@@ -79,7 +81,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
                 Container::new(if sniffer.runtime_data.logged_notifications.len() < 30 {
                     Text::new("")
                 } else {
-                    Text::new(only_last_30_translation(sniffer.language)).font(font)
+                    Text::new(only_last_30_translation(language)).font(font)
                 })
                 .padding(10)
                 .width(Length::FillPortion(1))
@@ -92,7 +94,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
                     .direction(Direction::Vertical(ScrollbarType::properties())),
             )
             .push(
-                Container::new(get_button_clear_all(font, sniffer.language))
+                Container::new(get_button_clear_all(font, language))
                     .width(Length::FillPortion(1))
                     .height(Length::Fill)
                     .align_x(Horizontal::Center)
@@ -394,7 +396,9 @@ fn get_button_clear_all(
 }
 
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let font = get_font(style);
     let mut ret_val = Column::new()
         .width(Length::Fixed(830.0))
         .padding(5)
@@ -404,13 +408,13 @@ fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Rend
     for logged_notification in &sniffer.runtime_data.logged_notifications {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
-                packets_notification_log(packet_threshold_exceeded.clone(), sniffer.language, font)
+                packets_notification_log(packet_threshold_exceeded.clone(), language, font)
             }
             LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
-                bytes_notification_log(byte_threshold_exceeded.clone(), sniffer.language, font)
+                bytes_notification_log(byte_threshold_exceeded.clone(), language, font)
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
-                favorite_notification_log(favorite_transmitted.clone(), sniffer.language, font)
+                favorite_notification_log(favorite_transmitted.clone(), language, font)
             }
         });
     }

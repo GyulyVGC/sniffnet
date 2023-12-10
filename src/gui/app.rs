@@ -20,7 +20,7 @@ use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
-use crate::gui::pages::settings_language_page::settings_language_page;
+use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
@@ -30,7 +30,6 @@ use crate::gui::styles::style_constants::{
 };
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::gui::types::status::Status;
 use crate::StyleType;
 
 /// Update period (milliseconds)
@@ -49,7 +48,6 @@ impl Application for Sniffer {
                 font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
                 font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
                 font::load(ICONS_BYTES).map(Message::FontLoaded),
-                iced::window::maximize(true),
             ]),
         )
     }
@@ -63,39 +61,30 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let status = *self.status_pair.0.lock().unwrap();
-        let font = get_font(self.style);
-        let font_headers = get_font_headers(self.style);
+        let style = self.settings.style;
+        let language = self.settings.language;
+        let color_gradient = self.settings.color_gradient;
+        let font = get_font(style);
+        let font_headers = get_font_headers(style);
 
-        let header = match status {
-            Status::Init => header(
-                font,
-                self.color_gradient,
-                false,
-                self.language,
-                self.last_opened_setting,
-            ),
-            Status::Running => header(
-                font,
-                self.color_gradient,
-                true,
-                self.language,
-                self.last_opened_setting,
-            ),
-        };
+        let header = header(
+            font,
+            color_gradient,
+            self.running_page.ne(&RunningPage::Init),
+            language,
+            self.last_opened_setting,
+        );
 
-        let body = match status {
-            Status::Init => initial_page(self),
-            Status::Running => match self.running_page {
-                RunningPage::Overview => overview_page(self),
-                RunningPage::Inspect => inspect_page(self),
-                RunningPage::Notifications => notifications_page(self),
-            },
+        let body = match self.running_page {
+            RunningPage::Init => initial_page(self),
+            RunningPage::Overview => overview_page(self),
+            RunningPage::Inspect => inspect_page(self),
+            RunningPage::Notifications => notifications_page(self),
         };
 
         let footer = footer(
-            self.language,
-            self.color_gradient,
+            language,
+            color_gradient,
             font,
             font_headers,
             &self.newer_release_available.clone(),
@@ -103,13 +92,13 @@ impl Application for Sniffer {
 
         let content = Column::new().push(header).push(body).push(footer);
 
-        match self.modal {
+        match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay = match settings_page {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
-                        SettingsPage::Language => settings_language_page(self),
+                        SettingsPage::General => settings_general_page(self),
                     };
 
                     Modal::new(content, overlay)
@@ -121,18 +110,11 @@ impl Application for Sniffer {
             }
             Some(modal) => {
                 let overlay = match modal {
-                    MyModal::Quit => {
-                        get_exit_overlay(self.color_gradient, font, font_headers, self.language)
+                    MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(color_gradient, font, font_headers, language)
                     }
-                    MyModal::ClearAll => get_clear_all_overlay(
-                        self.color_gradient,
-                        font,
-                        font_headers,
-                        self.language,
-                    ),
-                    MyModal::ConnectionDetails(connection_index) => {
-                        connection_details_page(self, connection_index)
-                    }
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 };
 
                 Modal::new(content, overlay)
@@ -144,15 +126,22 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
-        let hot_keys_subscription = subscription::events_with(|event, _| match event {
+        let window_events_subscription = subscription::events_with(|event, _| match event {
             Window(window::Event::Focused) => Some(Message::WindowFocused),
+            Window(window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
+            Window(window::Event::Resized { width, height }) => {
+                Some(Message::WindowResized(width, height))
+            }
+            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
+            _ => None,
+        });
+        let hot_keys_subscription = subscription::events_with(|event, _| match event {
             Keyboard(Event::KeyPressed {
                 key_code,
                 modifiers,
             }) => match modifiers {
                 Modifiers::COMMAND => match key_code {
                     KeyCode::Q => Some(Message::Quit),
-                    KeyCode::O => Some(Message::OpenReport),
                     KeyCode::Comma => Some(Message::OpenLastSettings),
                     KeyCode::Backspace => Some(Message::ResetButtonPressed),
                     KeyCode::D => Some(Message::CtrlDPressed),
@@ -174,18 +163,24 @@ impl Application for Sniffer {
             },
             _ => None,
         });
-        let time_subscription = match *self.status_pair.0.lock().unwrap() {
-            Status::Running => {
-                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
-            }
-            Status::Init => {
-                iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
-            }
+        let time_subscription = if self.running_page.eq(&RunningPage::Init) {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
+        } else {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
         };
-        Subscription::batch([hot_keys_subscription, time_subscription])
+
+        Subscription::batch([
+            window_events_subscription,
+            hot_keys_subscription,
+            time_subscription,
+        ])
     }
 
     fn theme(&self) -> Self::Theme {
-        self.style
+        self.settings.style
+    }
+
+    fn scale_factor(&self) -> f64 {
+        self.settings.scale_factor
     }
 }

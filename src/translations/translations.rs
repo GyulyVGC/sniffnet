@@ -1143,30 +1143,6 @@ pub fn appearance_title_translation(language: Language) -> Text<'static, Rendere
     })
 }
 
-pub fn languages_title_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
-    Text::new(match language {
-        Language::EN => "Select your language",
-        Language::IT => "Seleziona la lingua",
-        Language::FR => "Sélectionnez votre langue",
-        Language::ES => "Selecciona tu idioma",
-        Language::PL => "Wybierz język",
-        Language::DE => "Stell deine Sprache ein",
-        Language::UK => "Вибери мову",
-        Language::ZH => "选择显示语言",
-        Language::RO => "Selectați limba",
-        Language::KO => "언어를 선택하세요",
-        Language::TR => "Dilinizi seçin",
-        Language::RU => "Выберите язык",
-        Language::PT => "Selecione o seu idioma",
-        Language::EL => "Επίλεξε τη γλώσσα σου",
-        // Language::FA => "زبان خود را انتخاب کنید",
-        Language::SV => "Välj ditt språk",
-        Language::FI => "Valitse kielesi",
-        Language::JA => "表示言語を選択してください",
-        Language::UZ => "Tilingizni tanlang",
-    })
-}
-
 pub fn active_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Active filters",
@@ -1630,30 +1606,6 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::SV => "Ljud",
         Language::FI => "Ääni",
         Language::UZ => "Ovoz",
-    }
-}
-
-pub fn open_report_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Open full report",
-        Language::IT => "Apri report completo",
-        Language::FR => "Ouvrir le rapport complet",
-        Language::ES => "Abrir el informe completo",
-        Language::PL => "Otwórz pełny raport",
-        Language::DE => "Kompletten Bericht öffnen",
-        Language::UK => "Відкрий повний рапорт",
-        Language::ZH => "打开完整报告",
-        Language::RO => "Deschideți raport complet",
-        Language::KO => "전체 보고서 열기",
-        Language::TR => "Tam raporu aç",
-        Language::RU => "Открыть полный отчёт",
-        Language::PT => "Abrir relatório completo",
-        Language::EL => "Άνοιγμα της πλήρους αναφοράς",
-        // Language::FA => "گزارش کامل را باز کن",
-        Language::SV => "Öppna fullständig rapport",
-        Language::FI => "Avaa koko raportti",
-        Language::JA => "詳細なレポートを開く",
-        Language::UZ => "To'liq hisobotni ochish",
     }
 }
 

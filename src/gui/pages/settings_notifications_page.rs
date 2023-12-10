@@ -34,25 +34,29 @@ use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let font = get_font(sniffer.style);
-    let font_headers = get_font_headers(sniffer.style);
+    let style = sniffer.settings.style;
+    let language = sniffer.settings.language;
+    let color_gradient = sniffer.settings.color_gradient;
+    let notifications = sniffer.settings.notifications;
+    let font = get_font(style);
+    let font_headers = get_font_headers(style);
 
     let mut content = Column::new()
         .width(Length::Fill)
         .push(settings_header(
             font,
             font_headers,
-            sniffer.color_gradient,
-            sniffer.language,
+            color_gradient,
+            language,
         ))
         .push(get_settings_tabs(
             SettingsPage::Notifications,
             font,
-            sniffer.language,
+            language,
         ))
         .push(vertical_space(Fixed(15.0)))
         .push(
-            notifications_title_translation(sniffer.language)
+            notifications_title_translation(language)
                 .font(font)
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
@@ -64,28 +68,24 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
     let volume_notification_col = Column::new()
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(volume_slider(
-            sniffer.language,
-            font,
-            sniffer.notifications.volume,
-        ))
+        .push(volume_slider(language, font, notifications.volume))
         .push(
             Scrollable::new(
                 Column::new()
                     .width(Fixed(720.0))
                     .push(get_packets_notify(
-                        sniffer.notifications.packets_notification,
-                        sniffer.language,
+                        notifications.packets_notification,
+                        language,
                         font,
                     ))
                     .push(get_bytes_notify(
-                        sniffer.notifications.bytes_notification,
-                        sniffer.language,
+                        notifications.bytes_notification,
+                        language,
                         font,
                     ))
                     .push(get_favorite_notify(
-                        sniffer.notifications.favorite_notification,
-                        sniffer.language,
+                        notifications.favorite_notification,
+                        language,
                         font,
                     )),
             )
