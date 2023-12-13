@@ -30,6 +30,7 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             let searched_domain = &*sniffer.search.domain.to_lowercase();
             let searched_country = &*sniffer.search.country.to_lowercase();
             let searched_as_name = &*sniffer.search.as_name.to_lowercase();
+            let searched_address = &*sniffer.search.address.to_lowercase();
             let searched_only_fav = sniffer.search.only_favorites;
             // if a host-related filter is active and this address has not been resolved yet => false
             if r_dns_host.is_none()
@@ -64,6 +65,14 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             if !searched_as_name.is_empty() {
                 let asn_name = r_dns_host.unwrap().1.asn.name.to_lowercase();
                 if !asn_name.contains(searched_as_name) {
+                    return false;
+                }
+            }
+            // check IP address filter
+            if !searched_address.is_empty() {
+                let source = key.address1.to_lowercase();
+                let dest = key.address2.to_lowercase();
+                if !source.contains(searched_address) && !dest.contains(searched_address) {
                     return false;
                 }
             }

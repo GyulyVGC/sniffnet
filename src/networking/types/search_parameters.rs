@@ -3,6 +3,8 @@
 pub struct SearchParameters {
     /// Application protocol
     pub app: String,
+    /// IP address
+    pub address: String,
     /// Domain
     pub domain: String,
     /// Country
@@ -20,6 +22,7 @@ impl SearchParameters {
             || !self.domain.is_empty()
             || !self.country.is_empty()
             || !self.as_name.is_empty()
+            || !self.address.is_empty()
     }
 }
 
@@ -28,4 +31,5 @@ pub enum FilterInputType {
     Domain,
     Country,
     AS,
+    Address,
 }
