@@ -103,4 +103,6 @@ pub enum Message {
     // CustomReport(String),
     /// Save the configurations of the app and quit
     CloseRequested,
+    /// Copies the given string to clipboard
+    CopyIp(String),
 }

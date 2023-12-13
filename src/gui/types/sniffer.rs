@@ -4,7 +4,6 @@
 use std::collections::{HashSet, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
 
 use iced::{window, Command};
 use pcap::Device;
@@ -16,6 +15,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::types::message::Message;
+use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
@@ -75,8 +75,6 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// Record the timestamp of last window focus
-    pub last_focus_time: std::time::Instant,
     /// Application settings
     pub settings: ConfigSettings,
     /// Position and size of the app window
@@ -85,6 +83,8 @@ pub struct Sniffer {
     pub country_mmdb_reader: Arc<MmdbReader>,
     /// MMDB reader for ASN
     pub asn_mmdb_reader: Arc<MmdbReader>,
+    /// Time-related events
+    pub timing_events: TimingEvents,
 }
 
 impl Sniffer {
@@ -108,7 +108,6 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            last_focus_time: std::time::Instant::now(),
             settings: configs.settings.clone(),
             window: configs.window,
             country_mmdb_reader: Arc::new(MmdbReader::from(
@@ -116,6 +115,7 @@ impl Sniffer {
                 COUNTRY_MMDB,
             )),
             asn_mmdb_reader: Arc::new(MmdbReader::from(&configs.settings.mmdb_asn, ASN_MMDB)),
+            timing_events: TimingEvents::default(),
         }
     }
 
@@ -196,7 +196,7 @@ impl Sniffer {
             Message::SwitchPage(next) => {
                 // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
                 // first check if user switch back just now, and ignore the request for a short time.
-                if self.last_focus_time.elapsed() > Duration::from_millis(200) {
+                if !self.timing_events.was_just_focus() {
                     self.switch_page(next);
                 }
             }
@@ -232,7 +232,7 @@ impl Sniffer {
                     }
                 }
             }
-            Message::WindowFocused => self.last_focus_time = std::time::Instant::now(),
+            Message::WindowFocused => self.timing_events.focus_now(),
             Message::GradientsSelection(gradient_type) => {
                 self.settings.color_gradient = gradient_type;
             }
@@ -262,6 +262,10 @@ impl Sniffer {
             Message::CloseRequested => {
                 self.get_configs().store();
                 return iced::window::close();
+            }
+            Message::CopyIp(string) => {
+                self.timing_events.copy_ip_now(string.clone());
+                return iced::clipboard::write(string);
             }
             _ => {}
         }
@@ -1119,9 +1123,9 @@ mod tests {
     }
 
     #[test]
-    fn test_correctly_switch_running_and_notification_pages() {
+    fn test_correctly_switch_running_and_settings_pages() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
-        sniffer.last_focus_time = std::time::Instant::now().sub(Duration::from_millis(400));
+        sniffer.timing_events.focus = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
         assert_eq!(sniffer.settings_page, None);

@@ -14,6 +14,7 @@ pub enum Icon {
     Bin,
     BytesThreshold,
     Clock,
+    Copy,
     Dots,
     Error,
     // File,
@@ -74,6 +75,7 @@ impl Icon {
             Icon::Star => "g",
             Icon::Warning => "T",
             Icon::Waves => "y",
+            Icon::Copy => "u",
         })
         .font(ICONS)
     }
