@@ -18,7 +18,7 @@ use crate::gui::types::message::Message;
 use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
-use crate::translations::translations::application_protocol_translation;
+use crate::translations::translations::{address_translation, application_protocol_translation};
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
@@ -245,6 +245,14 @@ fn filters_col(
                 .align_items(Alignment::Center)
                 .spacing(10)
                 .push(filter_input(
+                    FilterInputType::Address,
+                    &search_params.address,
+                    address_translation(language),
+                    120.0,
+                    search_params.clone(),
+                    font,
+                ))
+                .push(filter_input(
                     FilterInputType::App,
                     &search_params.app,
                     application_protocol_translation(language),
@@ -312,6 +320,10 @@ fn filter_input(
                 as_name: String::new(),
                 ..search_params.clone()
             },
+            FilterInputType::Address => SearchParameters {
+                address: String::new(),
+                ..search_params.clone()
+            },
         },
         font,
     );
@@ -333,6 +345,10 @@ fn filter_input(
                 },
                 FilterInputType::AS => SearchParameters {
                     as_name: new_value.trim().to_string(),
+                    ..search_params.clone()
+                },
+                FilterInputType::Address => SearchParameters {
+                    address: new_value.trim().to_string(),
                     ..search_params.clone()
                 },
             })

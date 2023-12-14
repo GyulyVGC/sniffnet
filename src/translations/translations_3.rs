@@ -49,3 +49,11 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         _ => "Custom style",
     }
 }
+
+pub fn copy_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Copy",
+        Language::IT => "Copia",
+        _ => "Copy",
+    }
+}

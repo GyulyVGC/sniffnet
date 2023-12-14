@@ -5,6 +5,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 ## [UNRELEASED]
 - The size of text and widgets can now be customised by setting a proper zoom value (fixes [#202](https://github.com/GyulyVGC/sniffnet/issues/202) and [#344](https://github.com/GyulyVGC/sniffnet/issues/344))
 - Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286))
+- IP addresses can now be copied to clipboard from the popup related to a given entry of the connections table, and a new search parameter has been introduced in Inspect page to allow users filter their connections based on IP address values ([#409](https://github.com/GyulyVGC/sniffnet/pull/409))
 - Added Japanese translation 🇯🇵 ([#343](https://github.com/GyulyVGC/sniffnet/pull/343))
 - Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))
 - Window size and position are now remembered, so that Sniffnet can reopen with the same window properties

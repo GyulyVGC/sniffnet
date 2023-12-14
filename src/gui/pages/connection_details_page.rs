@@ -14,6 +14,7 @@ use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::timing_events::TimingEvents;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
@@ -28,6 +29,7 @@ use crate::translations::translations_2::{
     fqdn_translation, mac_address_translation, socket_address_translation, source_translation,
     transmitted_data_translation,
 };
+use crate::translations::translations_3::copy_translation;
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
@@ -37,7 +39,11 @@ pub fn connection_details_page(
     key: AddressPortPair,
 ) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
-        sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+        (
+            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+            sniffer.timing_events.was_just_copy_ip(&key.address1),
+            sniffer.timing_events.was_just_copy_ip(&key.address2),
+        ),
         move |_| page_content(sniffer, &key),
     ))
 }
@@ -116,6 +122,7 @@ fn page_content(
         &val.mac_address1,
         font,
         language,
+        &sniffer.timing_events,
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
@@ -124,6 +131,7 @@ fn page_content(
         &val.mac_address2,
         font,
         language,
+        &sniffer.timing_events,
     );
 
     if address_to_lookup.eq(&key.address1) {
@@ -308,6 +316,7 @@ fn get_src_or_dest_col(
     mac: &str,
     font: Font,
     language: Language,
+    timing_events: &TimingEvents,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     Column::new()
         .spacing(4)
@@ -317,11 +326,17 @@ fn get_src_or_dest_col(
                 .align_x(Horizontal::Center),
         )
         .push(Rule::horizontal(10.0))
-        .push(TextType::highlighted_subtitle_with_desc(
-            socket_address_translation(language),
-            &get_socket_address(ip, port),
-            font,
-        ))
+        .push(
+            Row::new()
+                .spacing(10)
+                .align_items(Alignment::End)
+                .push(TextType::highlighted_subtitle_with_desc(
+                    socket_address_translation(language),
+                    &get_socket_address(ip, port),
+                    font,
+                ))
+                .push(get_button_copy(language, font, ip, timing_events)),
+        )
         .push(TextType::highlighted_subtitle_with_desc(
             mac_address_translation(language),
             mac,
@@ -358,4 +373,34 @@ fn assemble_widgets(
                 .push(dest_container)
                 .push(vertical_space(Length::FillPortion(1))),
         )
+}
+
+fn get_button_copy(
+    language: Language,
+    font: Font,
+    string: &String,
+    timing_events: &TimingEvents,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
+    let icon = if timing_events.was_just_copy_ip(string) {
+        Text::new("✔").font(font).size(14)
+    } else {
+        Icon::Copy.to_text().size(12)
+    };
+
+    let content = button(
+        icon.horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
+    )
+    .padding(0)
+    .height(Length::Fixed(25.0))
+    .width(Length::Fixed(25.0))
+    .on_press(Message::CopyIp(string.clone()));
+
+    Tooltip::new(
+        content,
+        format!("{} (IP)", copy_translation(language)),
+        Position::Right,
+    )
+    .font(font)
+    .style(ContainerType::Tooltip)
 }

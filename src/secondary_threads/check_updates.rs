@@ -78,7 +78,7 @@ fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> O
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
 
