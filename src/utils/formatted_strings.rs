@@ -7,7 +7,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
 use crate::translations::translations::{active_filters_translation, none_translation};
-use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
+use crate::{AppProtocol, Language, StyleType};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -29,27 +29,29 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
 
 /// Computes the String representing the active filters
 pub fn get_active_filters_col(
-    filters: Filters,
+    filters: &Filters,
     language: Language,
     font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    // THIS FUNCTION NEEDS TO BE FIXED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
             .style(TextType::Subtitle),
     );
-    if filters.ip.eq(&IpVersion::Other)
+    if filters.ip.len() == 2
         && filters.application.eq(&AppProtocol::Other)
-        && filters.transport.eq(&TransProtocol::Other)
+        && filters.transport.len() == 2
+    // TO FIX!!!
     {
         ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
     } else {
         let mut filters_string = String::new();
-        if filters.ip.ne(&IpVersion::Other) {
-            filters_string.push_str(&format!("{} ", filters.ip));
+        if filters.ip.len() != 2 {
+            filters_string.push_str(&format!("{:?} ", filters.ip));
         }
-        if filters.transport.ne(&TransProtocol::Other) {
-            filters_string.push_str(&format!("{} ", filters.transport));
+        if filters.transport.len() != 2 {
+            filters_string.push_str(&format!("{:?} ", filters.transport));
         }
         if filters.application.ne(&AppProtocol::Other) {
             filters_string.push_str(&format!("{} ", filters.application));

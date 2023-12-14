@@ -1,71 +1,13 @@
 use iced::widget::{Column, Radio, Row, Text};
 use iced::{Alignment, Font, Renderer};
 
-use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
-use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
 };
 use crate::notifications::types::sound::Sound;
-use crate::translations::translations::{
-    ip_version_translation, sound_translation, transport_protocol_translation,
-};
-use crate::{ChartType, IpVersion, Language, StyleType, TransProtocol};
-
-pub fn ip_version_radios(
-    active: IpVersion,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().spacing(10).push(
-        ip_version_translation(language)
-            .font(font)
-            .style(TextType::Subtitle)
-            .size(FONT_SIZE_SUBTITLE),
-    );
-    for option in IpVersion::ALL {
-        ret_val = ret_val.push(
-            Radio::new(
-                option.get_radio_label(language),
-                option,
-                Some(active),
-                Message::IpVersionSelection,
-            )
-            .spacing(7)
-            .font(font)
-            .size(15),
-        );
-    }
-    ret_val
-}
-
-pub fn transport_protocol_radios(
-    active: TransProtocol,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().spacing(10).push(
-        Text::new(transport_protocol_translation(language))
-            .font(font)
-            .style(TextType::Subtitle)
-            .size(FONT_SIZE_SUBTITLE),
-    );
-    for option in TransProtocol::ALL {
-        ret_val = ret_val.push(
-            Radio::new(
-                option.get_radio_label(language),
-                option,
-                Some(active),
-                Message::TransportProtocolSelection,
-            )
-            .spacing(7)
-            .font(font)
-            .size(15),
-        );
-    }
-    ret_val
-}
+use crate::translations::translations::sound_translation;
+use crate::{ChartType, Language, StyleType};
 
 pub fn sound_packets_threshold_radios(
     packets_notification: PacketsNotification,

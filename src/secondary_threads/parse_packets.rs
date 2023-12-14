@@ -15,6 +15,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::InfoTraffic;
 
 /// The calling thread enters in a loop in which it waits for network packets, parses them according
@@ -23,7 +24,7 @@ pub fn parse_packets(
     current_capture_id: &Arc<Mutex<usize>>,
     device: &MyDevice,
     mut cap: Capture<Active>,
-    filters: Filters,
+    filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
@@ -49,13 +50,13 @@ pub fn parse_packets(
                     Ok(headers) => {
                         let mut exchanged_bytes = 0;
                         let mut mac_addresses = (String::new(), String::new());
-                        let mut protocols = Filters::default();
+                        let mut packet_filters_fields = PacketFiltersFields::default();
 
                         let key_option = analyze_headers(
                             headers,
                             &mut mac_addresses,
                             &mut exchanged_bytes,
-                            &mut protocols,
+                            &mut packet_filters_fields,
                         );
                         if key_option.is_none() {
                             continue;
@@ -64,7 +65,7 @@ pub fn parse_packets(
                         let key = key_option.unwrap();
                         let mut new_info = InfoAddressPortPair::default();
 
-                        let passed_filters = filters.matches(protocols);
+                        let passed_filters = filters.matches(&packet_filters_fields);
                         if passed_filters {
                             new_info = modify_or_insert_in_map(
                                 info_traffic_mutex,
@@ -72,7 +73,7 @@ pub fn parse_packets(
                                 device,
                                 mac_addresses,
                                 exchanged_bytes,
-                                protocols.application,
+                                packet_filters_fields.application,
                             );
                         }
 
@@ -171,7 +172,7 @@ pub fn parse_packets(
                             //increment the packet count for the sniffed app protocol
                             info_traffic
                                 .app_protocols
-                                .entry(protocols.application)
+                                .entry(packet_filters_fields.application)
                                 .and_modify(|data_info| {
                                     data_info
                                         .add_packet(exchanged_bytes, new_info.traffic_direction);

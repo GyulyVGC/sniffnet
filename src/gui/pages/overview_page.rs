@@ -72,7 +72,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
                 body =
-                    body_no_observed(sniffer.filters, observed, font, language, &sniffer.waiting);
+                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -169,7 +169,7 @@ fn body_no_packets(
 }
 
 fn body_no_observed(
-    filters: Filters,
+    filters: &Filters,
     observed: u128,
     font: Font,
     language: Language,
@@ -417,7 +417,7 @@ fn lazy_col_info(
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters = col_device_filters(language, font, sniffer.filters, &sniffer.device);
+    let col_device_filters = col_device_filters(language, font, &sniffer.filters, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -504,7 +504,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer
 fn col_device_filters(
     language: Language,
     font: Font,
-    filters: Filters,
+    filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]

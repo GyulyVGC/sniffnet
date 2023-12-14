@@ -133,9 +133,20 @@ impl Sniffer {
         match message {
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
-            Message::IpVersionSelection(version) => self.filters.ip = version,
-            Message::TransportProtocolSelection(protocol) => self.filters.transport = protocol,
-            Message::AppProtocolSelection(protocol) => self.filters.application = protocol,
+            Message::IpVersionSelection(version, insert) => {
+                if insert {
+                    self.filters.ip.insert(version);
+                } else {
+                    self.filters.ip.remove(&version);
+                }
+            }
+            Message::TransportProtocolSelection(protocol, insert) => {
+                if insert {
+                    self.filters.transport.insert(protocol);
+                } else {
+                    self.filters.transport.remove(&protocol);
+                }
+            }
             Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => self.report_sort_type = sort,
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
@@ -343,7 +354,7 @@ impl Sniffer {
         if pcap_error.is_none() {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
-            let filters = self.filters;
+            let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
             thread::Builder::new()
@@ -353,7 +364,7 @@ impl Sniffer {
                         &current_capture_id,
                         &device,
                         cap.unwrap(),
-                        filters,
+                        &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
                         &asn_mmdb_reader,

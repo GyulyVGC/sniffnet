@@ -12,10 +12,10 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
@@ -28,7 +28,7 @@ pub fn analyze_headers(
     headers: PacketHeaders,
     mac_addresses: &mut (String, String),
     exchanged_bytes: &mut u128,
-    protocols: &mut Filters,
+    packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
     let mut address1 = String::new();
     let mut address2 = String::new();
@@ -42,7 +42,7 @@ pub fn analyze_headers(
     if !analyze_network_header(
         headers.ip,
         exchanged_bytes,
-        &mut protocols.ip,
+        &mut packet_filters_fields.ip,
         &mut address1,
         &mut address2,
     ) {
@@ -53,8 +53,8 @@ pub fn analyze_headers(
         headers.transport,
         &mut port1,
         &mut port2,
-        &mut protocols.application,
-        &mut protocols.transport,
+        &mut packet_filters_fields.application,
+        &mut packet_filters_fields.transport,
     ) {
         return None;
     }
@@ -64,7 +64,7 @@ pub fn analyze_headers(
         port1,
         address2.clone(),
         port2,
-        protocols.transport,
+        packet_filters_fields.transport,
     ))
 }
 

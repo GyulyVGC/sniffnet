@@ -119,34 +119,33 @@ impl fmt::Display for AppProtocol {
 }
 
 impl AppProtocol {
-    /// Defines a constant to be used in the picklist in gui initial page
-    pub(crate) const ALL: [AppProtocol; 25] = [
-        AppProtocol::Other,
-        AppProtocol::BGP,
-        AppProtocol::DHCP,
-        AppProtocol::DNS,
-        AppProtocol::FTP,
-        AppProtocol::FTPS,
-        AppProtocol::HTTP,
-        AppProtocol::HTTPS,
-        AppProtocol::IMAP,
-        AppProtocol::IMAPS,
-        AppProtocol::LDAP,
-        AppProtocol::LDAPS,
-        AppProtocol::mDNS,
-        AppProtocol::NetBIOS,
-        AppProtocol::NTP,
-        AppProtocol::POP,
-        AppProtocol::POP3S,
-        AppProtocol::SMTP,
-        AppProtocol::SNMP,
-        AppProtocol::SSDP,
-        AppProtocol::SSH,
-        AppProtocol::TACACS,
-        AppProtocol::Telnet,
-        AppProtocol::TFTP,
-        AppProtocol::XMPP,
-    ];
+    // pub(crate) const ALL: [AppProtocol; 25] = [
+    //     AppProtocol::Other,
+    //     AppProtocol::BGP,
+    //     AppProtocol::DHCP,
+    //     AppProtocol::DNS,
+    //     AppProtocol::FTP,
+    //     AppProtocol::FTPS,
+    //     AppProtocol::HTTP,
+    //     AppProtocol::HTTPS,
+    //     AppProtocol::IMAP,
+    //     AppProtocol::IMAPS,
+    //     AppProtocol::LDAP,
+    //     AppProtocol::LDAPS,
+    //     AppProtocol::mDNS,
+    //     AppProtocol::NetBIOS,
+    //     AppProtocol::NTP,
+    //     AppProtocol::POP,
+    //     AppProtocol::POP3S,
+    //     AppProtocol::SMTP,
+    //     AppProtocol::SNMP,
+    //     AppProtocol::SSDP,
+    //     AppProtocol::SSH,
+    //     AppProtocol::TACACS,
+    //     AppProtocol::Telnet,
+    //     AppProtocol::TFTP,
+    //     AppProtocol::XMPP,
+    // ];
 }
 
 #[cfg(test)]
