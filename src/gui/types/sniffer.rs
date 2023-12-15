@@ -499,7 +499,9 @@ impl Sniffer {
             && self.settings_page.is_none()
             && self.modal.is_none()
         {
-            return self.update(Message::Start);
+            if self.filters.are_valid() {
+                return self.update(Message::Start);
+            }
         } else if self.modal.eq(&Some(MyModal::Quit)) {
             return self.update(Message::Reset);
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {

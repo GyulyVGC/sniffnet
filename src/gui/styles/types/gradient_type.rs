@@ -51,6 +51,7 @@ pub fn get_gradient_buttons(
     colors: &Palette,
     gradient_type: GradientType,
     is_nightly: bool,
+    alpha: f32,
 ) -> Gradient {
     let mix = if is_nightly {
         Color::BLACK
@@ -61,13 +62,22 @@ pub fn get_gradient_buttons(
         iced::gradient::Linear::new(Degrees(225.0))
             .add_stop(
                 0.0,
-                match gradient_type {
-                    GradientType::Mild => mix_colors(mix, colors.secondary),
-                    GradientType::Wild => colors.outgoing,
-                    GradientType::None => colors.secondary,
+                Color {
+                    a: alpha,
+                    ..match gradient_type {
+                        GradientType::Mild => mix_colors(mix, colors.secondary),
+                        GradientType::Wild => colors.outgoing,
+                        GradientType::None => colors.secondary,
+                    }
                 },
             )
-            .add_stop(1.0, colors.secondary),
+            .add_stop(
+                1.0,
+                Color {
+                    a: alpha,
+                    ..colors.secondary
+                },
+            ),
     )
 }
 

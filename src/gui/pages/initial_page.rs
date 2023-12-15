@@ -7,8 +7,8 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::Shaping;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Button, Column, Container, Row, Scrollable, Text,
-    TextInput, Tooltip,
+    button, horizontal_space, vertical_space, Button, Column, Container, Row, Rule, Scrollable,
+    Text, TextInput, Tooltip,
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Font, Length, Renderer};
@@ -24,6 +24,7 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::filters::Filters;
 use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
@@ -78,7 +79,19 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
                 .push(col_address_filter)
                 .push(col_port_filter),
         )
-        .push(button_start(font, language, color_gradient));
+        .push(Rule::horizontal(40))
+        .push(
+            Container::new(button_start(
+                font,
+                language,
+                color_gradient,
+                &sniffer.filters,
+            ))
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .align_y(Vertical::Center)
+            .align_x(Horizontal::Center),
+        );
 
     let body = Column::new().push(vertical_space(Length::Fixed(5.0))).push(
         Row::new()
@@ -98,10 +111,10 @@ fn col_ip_buttons(
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
-        let check_simbol = if is_active { "✔" } else { "✘" };
+        let check_symbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
-                Text::new(format!("{check_simbol} {option}"))
+                Text::new(format!("{option} {check_symbol}"))
                     .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
@@ -138,10 +151,10 @@ fn col_transport_buttons(
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in TransProtocol::ALL {
         let is_active = active_transport_filters.contains(&option);
-        let check_simbol = if is_active { "✔" } else { "✘" };
+        let check_symbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
-                Text::new(format!("{check_simbol} {option}"))
+                Text::new(format!("{option} {check_symbol}"))
                     .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
@@ -182,7 +195,7 @@ fn col_address_input(
     };
     let input_row = Row::new().padding([0, 0, 0, 5]).push(
         TextInput::new(IpCollection::PLACEHOLDER_STR, value)
-            .padding([0, 5])
+            .padding([2, 5])
             .on_input(Message::AddressFilter)
             .font(font)
             .width(Length::Fixed(310.0))
@@ -217,7 +230,7 @@ fn col_port_input(
     };
     let input_row = Row::new().padding([0, 0, 0, 5]).push(
         TextInput::new(PortCollection::PLACEHOLDER_STR, value)
-            .padding([0, 5])
+            .padding([2, 5])
             .on_input(Message::PortFilter)
             .font(font)
             .width(Length::Fixed(180.0))
@@ -244,8 +257,9 @@ fn button_start(
     font: Font,
     language: Language,
     color_gradient: GradientType,
+    filters: &Filters,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let content = button(
+    let mut content = button(
         Icon::Rocket
             .to_text()
             .size(25)
@@ -255,8 +269,11 @@ fn button_start(
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(ButtonType::Gradient(color_gradient))
-    .on_press(Message::Start);
+    .style(ButtonType::Gradient(color_gradient));
+
+    if filters.are_valid() {
+        content = content.on_press(Message::Start);
+    }
 
     let tooltip = start_translation(language).to_string();
     //tooltip.push_str(" [⏎]");

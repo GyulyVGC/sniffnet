@@ -50,4 +50,11 @@ impl Filters {
             && (self.port_collection.contains(packet_filters_fields.sport)
                 || self.port_collection.contains(packet_filters_fields.dport))
     }
+
+    pub fn are_valid(&self) -> bool {
+        !self.ip.is_empty()
+            && !self.transport.is_empty()
+            && IpCollection::new(&self.address_str).is_some()
+            && PortCollection::new(&self.port_str).is_some()
+    }
 }
