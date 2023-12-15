@@ -7,7 +7,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
 use crate::translations::translations::{active_filters_translation, none_translation};
-use crate::{AppProtocol, Language, StyleType};
+use crate::{Language, StyleType};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -39,9 +39,7 @@ pub fn get_active_filters_col(
             .font(font)
             .style(TextType::Subtitle),
     );
-    if filters.ip.len() == 2
-        && filters.application.eq(&AppProtocol::Other)
-        && filters.transport.len() == 2
+    if filters.ip.len() == 2 && filters.transport.len() == 2
     // TO FIX!!!
     {
         ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
@@ -52,9 +50,6 @@ pub fn get_active_filters_col(
         }
         if filters.transport.len() != 2 {
             filters_string.push_str(&format!("{:?} ", filters.transport));
-        }
-        if filters.application.ne(&AppProtocol::Other) {
-            filters_string.push_str(&format!("{} ", filters.application));
         }
         ret_val = ret_val.push(Text::new(format!("   {filters_string}")).font(font));
     }

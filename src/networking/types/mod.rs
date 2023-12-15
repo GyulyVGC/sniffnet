@@ -8,6 +8,7 @@ pub mod filters;
 pub mod host;
 pub mod info_address_port_pair;
 pub mod info_traffic;
+pub mod ip_collection;
 pub mod ip_version;
 pub mod my_device;
 pub mod packet_filters_fields;

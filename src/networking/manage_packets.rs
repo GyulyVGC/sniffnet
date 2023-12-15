@@ -1,4 +1,5 @@
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
@@ -48,12 +49,13 @@ pub fn analyze_headers(
     ) {
         return None;
     }
+    packet_filters_fields.source = IpAddr::from_str(&address1).unwrap();
+    packet_filters_fields.dest = IpAddr::from_str(&address2).unwrap();
 
     if !analyze_transport_header(
         headers.transport,
         &mut port1,
         &mut port2,
-        &mut packet_filters_fields.application,
         &mut packet_filters_fields.transport,
     ) {
         return None;
@@ -130,7 +132,6 @@ fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
     port1: &mut u16,
     port2: &mut u16,
-    application_protocol: &mut AppProtocol,
     transport_protocol: &mut TransProtocol,
 ) -> bool {
     match transport_header {
@@ -138,24 +139,24 @@ fn analyze_transport_header(
             *port1 = udp_header.source_port;
             *port2 = udp_header.destination_port;
             *transport_protocol = TransProtocol::UDP;
-            *application_protocol = from_port_to_application_protocol(*port1);
-            if (*application_protocol).eq(&AppProtocol::Other) {
-                *application_protocol = from_port_to_application_protocol(*port2);
-            }
             true
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
             *port1 = tcp_header.source_port;
             *port2 = tcp_header.destination_port;
             *transport_protocol = TransProtocol::TCP;
-            *application_protocol = from_port_to_application_protocol(*port1);
-            if (*application_protocol).eq(&AppProtocol::Other) {
-                *application_protocol = from_port_to_application_protocol(*port2);
-            }
             true
         }
         _ => false,
     }
+}
+
+pub fn get_app_protocol(src_port: u16, dst_port: u16) -> AppProtocol {
+    let mut application_protocol = from_port_to_application_protocol(src_port);
+    if (application_protocol).eq(&AppProtocol::Other) {
+        application_protocol = from_port_to_application_protocol(dst_port);
+    }
+    application_protocol
 }
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.

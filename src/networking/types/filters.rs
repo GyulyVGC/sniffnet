@@ -1,18 +1,21 @@
 //! Module defining the `Filters` struct, which represents the possible filters applicable on network traffic.
 
+use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::{AppProtocol, IpVersion, TransProtocol};
+use crate::{IpVersion, TransProtocol};
 use std::collections::HashSet;
 
 /// Possible filters applicable to network traffic
 #[derive(Clone)]
 pub struct Filters {
-    /// Internet Protocol version
+    /// Internet Protocol versions
     pub ip: HashSet<IpVersion>,
-    /// Transport layer protocol
+    /// Transport layer protocols
     pub transport: HashSet<TransProtocol>,
-    /// Application layer protocol
-    pub application: AppProtocol,
+    /// IP addresses string in Initial page text input
+    pub address_str: String,
+    /// IP address collection to match against traffic
+    pub address_collection: IpCollection,
 }
 
 impl Default for Filters {
@@ -20,7 +23,8 @@ impl Default for Filters {
         Self {
             ip: HashSet::from(IpVersion::ALL),
             transport: HashSet::from(TransProtocol::ALL),
-            application: AppProtocol::Other,
+            address_str: String::new(),
+            address_collection: IpCollection::default(),
         }
     }
 }
@@ -30,5 +34,11 @@ impl Filters {
     pub fn matches(&self, packet_filters_fields: &PacketFiltersFields) -> bool {
         self.ip.contains(&packet_filters_fields.ip)
             && self.transport.contains(&packet_filters_fields.transport)
+            && (self
+                .address_collection
+                .contains(&packet_filters_fields.source)
+                || self
+                    .address_collection
+                    .contains(&packet_filters_fields.dest))
     }
 }

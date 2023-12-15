@@ -1,4 +1,6 @@
-use crate::{AppProtocol, IpVersion, TransProtocol};
+use crate::{IpVersion, TransProtocol};
+use std::net::IpAddr;
+use std::str::FromStr;
 
 /// Fields extracted from a packet to determine if this packet matches the defined filters
 #[derive(Clone)]
@@ -7,8 +9,10 @@ pub struct PacketFiltersFields {
     pub ip: IpVersion,
     /// Transport layer protocol
     pub transport: TransProtocol,
-    /// Application layer protocol
-    pub application: AppProtocol,
+    /// Source IP address
+    pub source: IpAddr,
+    /// Destination IP address
+    pub dest: IpAddr,
 }
 
 impl Default for PacketFiltersFields {
@@ -16,7 +20,8 @@ impl Default for PacketFiltersFields {
         Self {
             ip: IpVersion::IPv4,
             transport: TransProtocol::TCP,
-            application: AppProtocol::Other,
+            source: IpAddr::from_str("::").unwrap(),
+            dest: IpAddr::from_str("::").unwrap(),
         }
     }
 }

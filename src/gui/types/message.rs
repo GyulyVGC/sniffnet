@@ -23,6 +23,8 @@ pub enum Message {
     IpVersionSelection(IpVersion, bool),
     /// Select transport filter
     TransportProtocolSelection(TransProtocol, bool),
+    /// Changed address filter
+    AddressFilter(String),
     /// Select chart type to be displayed
     ChartSelection(ChartType),
     /// Select report type to be displayed

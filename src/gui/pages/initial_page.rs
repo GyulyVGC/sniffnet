@@ -4,10 +4,11 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::Shaping;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, Row, Scrollable, Text,
-    Tooltip,
+    TextInput, Tooltip,
 };
 use iced::Length::FillPortion;
 use iced::{alignment, Font, Length, Renderer};
@@ -19,9 +20,11 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
+use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::ip_collection::IpCollection;
 use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
     ip_version_translation, select_filters_translation, start_translation,
@@ -45,6 +48,12 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let transport_active = &sniffer.filters.transport;
     let col_transport_buttons = col_transport_buttons(transport_active, font, language);
 
+    let address_active = &sniffer.filters.address_str;
+    let col_address_filter = col_address_input(address_active, font, language);
+
+    let port_active = &sniffer.filters.address_str;
+    let col_port_filter = col_address_input(port_active, font, language);
+
     let filters_pane = Column::new()
         .width(FillPortion(6))
         .padding(10)
@@ -57,9 +66,15 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         )
         .push(
             Row::new()
-                .spacing(10)
+                .spacing(20)
                 .push(col_ip_buttons)
                 .push(col_transport_buttons),
+        )
+        .push(
+            Row::new()
+                .spacing(20)
+                .push(col_address_filter)
+                .push(col_port_filter),
         )
         .push(button_start(font, language, color_gradient));
 
@@ -81,14 +96,16 @@ fn col_ip_buttons(
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
+        let check_simbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
-                Text::new(option.to_string())
+                Text::new(format!("{check_simbol} {option}"))
+                    .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(80.0))
+            .width(Length::Fixed(90.0))
             .height(Length::Fixed(35.0))
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
@@ -119,14 +136,16 @@ fn col_transport_buttons(
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in TransProtocol::ALL {
         let is_active = active_transport_filters.contains(&option);
+        let check_simbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
-                Text::new(option.to_string())
+                Text::new(format!("{check_simbol} {option}"))
+                    .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(80.0))
+            .width(Length::Fixed(90.0))
             .height(Length::Fixed(35.0))
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
@@ -147,6 +166,41 @@ fn col_transport_buttons(
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(buttons_row)
+}
+
+fn col_address_input(
+    value: &String,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let is_error = if value.is_empty() {
+        false
+    } else {
+        IpCollection::new(value).is_none()
+    };
+    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+        TextInput::new(IpCollection::PLACEHOLDER_STR, value)
+            .padding([0, 5])
+            .on_input(Message::AddressFilter)
+            .font(font)
+            .width(Length::Fixed(310.0))
+            .style(if is_error {
+                TextInputType::Error
+            } else {
+                TextInputType::Standard
+            }),
+    );
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(address_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(input_row)
 }
 
 fn button_start(
