@@ -12,6 +12,7 @@ pub mod ip_collection;
 pub mod ip_version;
 pub mod my_device;
 pub mod packet_filters_fields;
+pub mod port_collection;
 pub mod search_parameters;
 pub mod traffic_direction;
 pub mod traffic_type;

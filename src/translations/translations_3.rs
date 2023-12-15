@@ -57,3 +57,11 @@ pub fn copy_translation(language: Language) -> &'static str {
         _ => "Copy",
     }
 }
+
+pub fn port_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Port",
+        Language::IT => "Porta",
+        _ => "Port",
+    }
+}

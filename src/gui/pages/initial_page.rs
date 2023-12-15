@@ -25,11 +25,13 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::ip_collection::IpCollection;
+use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
     ip_version_translation, select_filters_translation, start_translation,
     transport_protocol_translation,
 };
+use crate::translations::translations_3::port_translation;
 use crate::utils::types::icon::Icon;
 use crate::{IpVersion, Language, StyleType, TransProtocol};
 
@@ -51,8 +53,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let address_active = &sniffer.filters.address_str;
     let col_address_filter = col_address_input(address_active, font, language);
 
-    let port_active = &sniffer.filters.address_str;
-    let col_port_filter = col_address_input(port_active, font, language);
+    let port_active = &sniffer.filters.port_str;
+    let col_port_filter = col_port_input(port_active, font, language);
 
     let filters_pane = Column::new()
         .width(FillPortion(6))
@@ -196,6 +198,41 @@ fn col_address_input(
         .spacing(7)
         .push(
             Text::new(address_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(input_row)
+}
+
+fn col_port_input(
+    value: &String,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let is_error = if value.is_empty() {
+        false
+    } else {
+        PortCollection::new(value).is_none()
+    };
+    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+        TextInput::new(PortCollection::PLACEHOLDER_STR, value)
+            .padding([0, 5])
+            .on_input(Message::PortFilter)
+            .font(font)
+            .width(Length::Fixed(180.0))
+            .style(if is_error {
+                TextInputType::Error
+            } else {
+                TextInputType::Standard
+            }),
+    );
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(port_translation(language))
                 .font(font)
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),

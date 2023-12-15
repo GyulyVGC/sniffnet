@@ -2,6 +2,7 @@
 
 use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
+use crate::networking::types::port_collection::PortCollection;
 use crate::{IpVersion, TransProtocol};
 use std::collections::HashSet;
 
@@ -16,6 +17,10 @@ pub struct Filters {
     pub address_str: String,
     /// IP address collection to match against traffic
     pub address_collection: IpCollection,
+    /// Ports string in Initial page text input
+    pub port_str: String,
+    /// Port collection to match against traffic
+    pub port_collection: PortCollection,
 }
 
 impl Default for Filters {
@@ -25,6 +30,8 @@ impl Default for Filters {
             transport: HashSet::from(TransProtocol::ALL),
             address_str: String::new(),
             address_collection: IpCollection::default(),
+            port_str: String::new(),
+            port_collection: PortCollection::default(),
         }
     }
 }
@@ -40,5 +47,7 @@ impl Filters {
                 || self
                     .address_collection
                     .contains(&packet_filters_fields.dest))
+            && (self.port_collection.contains(packet_filters_fields.sport)
+                || self.port_collection.contains(packet_filters_fields.dport))
     }
 }

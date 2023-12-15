@@ -24,6 +24,7 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::port_collection::PortCollection;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::Notification;
@@ -153,6 +154,12 @@ impl Sniffer {
                     self.filters.address_collection = collection;
                 }
                 self.filters.address_str = value;
+            }
+            Message::PortFilter(value) => {
+                if let Some(collection) = PortCollection::new(&value) {
+                    self.filters.port_collection = collection;
+                }
+                self.filters.port_str = value;
             }
             Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => self.report_sort_type = sort,

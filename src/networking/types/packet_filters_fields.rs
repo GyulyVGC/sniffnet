@@ -13,6 +13,10 @@ pub struct PacketFiltersFields {
     pub source: IpAddr,
     /// Destination IP address
     pub dest: IpAddr,
+    /// Source port
+    pub sport: u16,
+    /// Destination port
+    pub dport: u16,
 }
 
 impl Default for PacketFiltersFields {
@@ -22,6 +26,8 @@ impl Default for PacketFiltersFields {
             transport: TransProtocol::TCP,
             source: IpAddr::from_str("::").unwrap(),
             dest: IpAddr::from_str("::").unwrap(),
+            sport: 0,
+            dport: 0,
         }
     }
 }

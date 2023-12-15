@@ -25,6 +25,8 @@ pub enum Message {
     TransportProtocolSelection(TransProtocol, bool),
     /// Changed address filter
     AddressFilter(String),
+    /// Changed port filter
+    PortFilter(String),
     /// Select chart type to be displayed
     ChartSelection(ChartType),
     /// Select report type to be displayed

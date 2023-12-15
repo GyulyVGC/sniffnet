@@ -33,8 +33,6 @@ pub fn analyze_headers(
 ) -> Option<AddressPortPair> {
     let mut address1 = String::new();
     let mut address2 = String::new();
-    let mut port1 = 0;
-    let mut port2 = 0;
 
     if !analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1) {
         return None;
@@ -54,8 +52,8 @@ pub fn analyze_headers(
 
     if !analyze_transport_header(
         headers.transport,
-        &mut port1,
-        &mut port2,
+        &mut packet_filters_fields.sport,
+        &mut packet_filters_fields.dport,
         &mut packet_filters_fields.transport,
     ) {
         return None;
@@ -63,9 +61,9 @@ pub fn analyze_headers(
 
     Some(AddressPortPair::new(
         address1.clone(),
-        port1,
+        packet_filters_fields.sport,
         address2.clone(),
-        port2,
+        packet_filters_fields.dport,
         packet_filters_fields.transport,
     ))
 }
