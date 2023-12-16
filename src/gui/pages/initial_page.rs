@@ -2,6 +2,8 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
+use std::collections::HashSet;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::Shaping;
@@ -13,7 +15,6 @@ use iced::widget::{
 use iced::Length::FillPortion;
 use iced::{alignment, Font, Length, Renderer};
 use pcap::Device;
-use std::collections::HashSet;
 
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -34,7 +35,7 @@ use crate::translations::translations::{
 use crate::translations::translations_3::port_translation;
 use crate::utils::formatted_strings::get_invalid_filters_string;
 use crate::utils::types::icon::Icon;
-use crate::{IpVersion, Language, StyleType, TransProtocol};
+use crate::{IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -48,8 +49,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let ip_active = &sniffer.filters.ip;
     let col_ip_buttons = col_ip_buttons(ip_active, font, language);
 
-    let transport_active = &sniffer.filters.transport;
-    let col_transport_buttons = col_transport_buttons(transport_active, font, language);
+    let protocol_active = &sniffer.filters.protocol;
+    let col_protocol_buttons = col_protocol_buttons(protocol_active, font, language);
 
     let address_active = &sniffer.filters.address_str;
     let col_address_filter = col_address_input(address_active, font, language);
@@ -71,7 +72,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             Row::new()
                 .spacing(20)
                 .push(col_ip_buttons)
-                .push(col_transport_buttons),
+                .push(col_protocol_buttons),
         )
         .push(
             Row::new()
@@ -143,14 +144,14 @@ fn col_ip_buttons(
         .push(buttons_row)
 }
 
-fn col_transport_buttons(
-    active_transport_filters: &HashSet<TransProtocol>,
+fn col_protocol_buttons(
+    active_protocol_filters: &HashSet<Protocol>,
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
-    for option in TransProtocol::ALL {
-        let is_active = active_transport_filters.contains(&option);
+    for option in Protocol::ALL {
+        let is_active = active_protocol_filters.contains(&option);
         let check_symbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
@@ -167,7 +168,7 @@ fn col_transport_buttons(
             } else {
                 ButtonType::BorderedRound
             })
-            .on_press(Message::TransportProtocolSelection(option, !is_active)),
+            .on_press(Message::ProtocolSelection(option, !is_active)),
         );
     }
 

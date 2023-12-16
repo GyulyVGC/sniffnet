@@ -221,7 +221,7 @@ fn col_info(
         )
         .push(TextType::highlighted_subtitle_with_desc(
             transport_protocol_translation(language),
-            &key.trans_protocol.to_string(),
+            &key.protocol.to_string(),
             font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(

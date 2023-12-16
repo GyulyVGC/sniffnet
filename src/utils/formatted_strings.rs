@@ -32,7 +32,7 @@ pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> Stri
     if filters.ip.is_empty() {
         ret_val.push_str(&format!("\n • {}", ip_version_translation(language)));
     }
-    if filters.transport.is_empty() {
+    if filters.protocol.is_empty() {
         ret_val.push_str(&format!("\n • {}", protocol_translation(language)));
     }
     if IpCollection::new(&filters.address_str).is_none() {
@@ -54,7 +54,7 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
             filters.pretty_print_ip()
         ));
     }
-    if filters.transport_active() {
+    if filters.protocol_active() {
         filters_string.push_str(&format!(
             "• {}: {}\n",
             protocol_translation(language),

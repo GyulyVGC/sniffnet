@@ -8,7 +8,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
 use crate::utils::types::web_page::WebPage;
-use crate::{ChartType, IpVersion, Language, ReportSortType, StyleType, TransProtocol};
+use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -21,8 +21,8 @@ pub enum Message {
     AdapterSelection(String),
     /// Select IP filter
     IpVersionSelection(IpVersion, bool),
-    /// Select transport filter
-    TransportProtocolSelection(TransProtocol, bool),
+    /// Select protocol filter
+    ProtocolSelection(Protocol, bool),
     /// Changed address filter
     AddressFilter(String),
     /// Changed port filter

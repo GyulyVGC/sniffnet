@@ -21,7 +21,7 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
-use crate::{AppProtocol, InfoTraffic, IpVersion, TransProtocol};
+use crate::{AppProtocol, InfoTraffic, IpVersion, Protocol};
 
 /// Calls methods to analyze link, network, and transport headers.
 /// Returns the relevant collected information.
@@ -54,7 +54,7 @@ pub fn analyze_headers(
         headers.transport,
         &mut packet_filters_fields.sport,
         &mut packet_filters_fields.dport,
-        &mut packet_filters_fields.transport,
+        &mut packet_filters_fields.protocol,
     ) {
         return None;
     }
@@ -64,7 +64,7 @@ pub fn analyze_headers(
         packet_filters_fields.sport,
         address2.clone(),
         packet_filters_fields.dport,
-        packet_filters_fields.transport,
+        packet_filters_fields.protocol,
     ))
 }
 
@@ -130,19 +130,19 @@ fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
     port1: &mut u16,
     port2: &mut u16,
-    transport_protocol: &mut TransProtocol,
+    protocol: &mut Protocol,
 ) -> bool {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
             *port1 = udp_header.source_port;
             *port2 = udp_header.destination_port;
-            *transport_protocol = TransProtocol::UDP;
+            *protocol = Protocol::UDP;
             true
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
             *port1 = tcp_header.source_port;
             *port2 = tcp_header.destination_port;
-            *transport_protocol = TransProtocol::TCP;
+            *protocol = Protocol::TCP;
             true
         }
         _ => false,

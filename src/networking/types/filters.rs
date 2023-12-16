@@ -1,18 +1,19 @@
 //! Module defining the `Filters` struct, which represents the possible filters applicable on network traffic.
 
+use std::collections::HashSet;
+
 use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::port_collection::PortCollection;
-use crate::{IpVersion, TransProtocol};
-use std::collections::HashSet;
+use crate::{IpVersion, Protocol};
 
 /// Possible filters applicable to network traffic
 #[derive(Clone)]
 pub struct Filters {
     /// Internet Protocol versions
     pub ip: HashSet<IpVersion>,
-    /// Transport layer protocols
-    pub transport: HashSet<TransProtocol>,
+    /// Protocols
+    pub protocol: HashSet<Protocol>,
     /// IP addresses string in Initial page text input
     pub address_str: String,
     /// IP address collection to match against traffic
@@ -27,7 +28,7 @@ impl Default for Filters {
     fn default() -> Self {
         Self {
             ip: HashSet::from(IpVersion::ALL),
-            transport: HashSet::from(TransProtocol::ALL),
+            protocol: HashSet::from(Protocol::ALL),
             address_str: String::new(),
             address_collection: IpCollection::default(),
             port_str: String::new(),
@@ -40,7 +41,7 @@ impl Filters {
     /// Checks whether the filters match the current packet's protocols
     pub fn matches(&self, packet_filters_fields: &PacketFiltersFields) -> bool {
         self.ip.contains(&packet_filters_fields.ip)
-            && self.transport.contains(&packet_filters_fields.transport)
+            && self.protocol.contains(&packet_filters_fields.protocol)
             && (self
                 .address_collection
                 .contains(&packet_filters_fields.source)
@@ -53,14 +54,14 @@ impl Filters {
 
     pub fn are_valid(&self) -> bool {
         !self.ip.is_empty()
-            && !self.transport.is_empty()
+            && !self.protocol.is_empty()
             && IpCollection::new(&self.address_str).is_some()
             && PortCollection::new(&self.port_str).is_some()
     }
 
     pub fn none_active(&self) -> bool {
         !self.ip_version_active()
-            && !self.transport_active()
+            && !self.protocol_active()
             && !self.address_active()
             && !self.port_active()
     }
@@ -69,8 +70,8 @@ impl Filters {
         self.ip.len() != IpVersion::ALL.len()
     }
 
-    pub fn transport_active(&self) -> bool {
-        self.transport.len() != TransProtocol::ALL.len()
+    pub fn protocol_active(&self) -> bool {
+        self.protocol.len() != Protocol::ALL.len()
     }
 
     pub fn address_active(&self) -> bool {
@@ -86,7 +87,7 @@ impl Filters {
     }
 
     pub fn pretty_print_protocol(&self) -> String {
-        format!("{:?}", self.transport)
+        format!("{:?}", self.protocol)
             .replace('{', "")
             .replace('}', "")
     }

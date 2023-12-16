@@ -142,11 +142,11 @@ impl Sniffer {
                     self.filters.ip.remove(&version);
                 }
             }
-            Message::TransportProtocolSelection(protocol, insert) => {
+            Message::ProtocolSelection(protocol, insert) => {
                 if insert {
-                    self.filters.transport.insert(protocol);
+                    self.filters.protocol.insert(protocol);
                 } else {
-                    self.filters.transport.remove(&protocol);
+                    self.filters.protocol.remove(&protocol);
                 }
             }
             Message::AddressFilter(value) => {
@@ -565,8 +565,8 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        ByteMultiple, ChartType, Configs, IpVersion, Language, ReportSortType, RunningPage,
-        Sniffer, StyleType, TransProtocol,
+        ByteMultiple, ChartType, Configs, IpVersion, Language, Protocol, ReportSortType,
+        RunningPage, Sniffer, StyleType,
     };
 
     #[test]
@@ -583,28 +583,16 @@ mod tests {
     }
 
     #[test]
-    fn test_correctly_update_transport_protocol() {
+    fn test_correctly_update_protocol() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
-        assert_eq!(sniffer.filters.transport, HashSet::from(TransProtocol::ALL));
-        sniffer.update(Message::TransportProtocolSelection(
-            TransProtocol::UDP,
-            true,
-        ));
-        assert_eq!(sniffer.filters.transport, HashSet::from(TransProtocol::ALL));
-        sniffer.update(Message::TransportProtocolSelection(
-            TransProtocol::UDP,
-            false,
-        ));
-        assert_eq!(
-            sniffer.filters.transport,
-            HashSet::from([TransProtocol::TCP])
-        );
-        sniffer.update(Message::TransportProtocolSelection(
-            TransProtocol::TCP,
-            false,
-        ));
-        assert_eq!(sniffer.filters.transport, HashSet::new());
+        assert_eq!(sniffer.filters.protocol, HashSet::from(Protocol::ALL));
+        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
+        assert_eq!(sniffer.filters.protocol, HashSet::from(Protocol::ALL));
+        sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
+        assert_eq!(sniffer.filters.protocol, HashSet::from([Protocol::TCP]));
+        sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
+        assert_eq!(sniffer.filters.protocol, HashSet::new());
     }
 
     #[test]
