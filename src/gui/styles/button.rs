@@ -147,29 +147,36 @@ impl button::StyleSheet for StyleType {
     }
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
-        let colors = get_colors(*self);
-        button::Appearance {
-            background: Some(match style {
-                ButtonType::Gradient(GradientType::None) => Background::Color(Color {
-                    a: get_alpha_round_containers(*self),
-                    ..colors.secondary
-                }),
-                ButtonType::Gradient(gradient_type) => Background::Gradient(get_gradient_buttons(
-                    &colors,
-                    *gradient_type,
-                    self.is_nightly(),
-                    get_alpha_round_containers(*self),
-                )),
-                _ => Background::Color(colors.buttons),
-            }),
-            border_radius: BORDER_BUTTON_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            shadow_offset: Vector::new(0.0, 0.0),
-            text_color: colors.text_headers,
-            border_color: Color {
-                a: get_alpha_round_containers(*self),
-                ..colors.secondary
-            },
+        match style {
+            ButtonType::Gradient(_) => {
+                let colors = get_colors(*self);
+                button::Appearance {
+                    background: Some(match style {
+                        ButtonType::Gradient(GradientType::None) => Background::Color(Color {
+                            a: get_alpha_round_containers(*self),
+                            ..colors.secondary
+                        }),
+                        ButtonType::Gradient(gradient_type) => {
+                            Background::Gradient(get_gradient_buttons(
+                                &colors,
+                                *gradient_type,
+                                self.is_nightly(),
+                                get_alpha_round_containers(*self),
+                            ))
+                        }
+                        _ => Background::Color(colors.buttons),
+                    }),
+                    border_radius: BORDER_BUTTON_RADIUS.into(),
+                    border_width: BORDER_WIDTH,
+                    shadow_offset: Vector::new(0.0, 0.0),
+                    text_color: colors.text_headers,
+                    border_color: Color {
+                        a: get_alpha_round_containers(*self),
+                        ..colors.secondary
+                    },
+                }
+            }
+            _ => button::StyleSheet::active(self, style),
         }
     }
 }

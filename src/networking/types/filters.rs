@@ -57,4 +57,37 @@ impl Filters {
             && IpCollection::new(&self.address_str).is_some()
             && PortCollection::new(&self.port_str).is_some()
     }
+
+    pub fn none_active(&self) -> bool {
+        !self.ip_version_active()
+            && !self.transport_active()
+            && !self.address_active()
+            && !self.port_active()
+    }
+
+    pub fn ip_version_active(&self) -> bool {
+        self.ip.len() != IpVersion::ALL.len()
+    }
+
+    pub fn transport_active(&self) -> bool {
+        self.transport.len() != TransProtocol::ALL.len()
+    }
+
+    pub fn address_active(&self) -> bool {
+        self.address_collection != IpCollection::default()
+    }
+
+    pub fn port_active(&self) -> bool {
+        self.port_collection != PortCollection::default()
+    }
+
+    pub fn pretty_print_ip(&self) -> String {
+        format!("{:?}", self.ip).replace('{', "").replace('}', "")
+    }
+
+    pub fn pretty_print_protocol(&self) -> String {
+        format!("{:?}", self.transport)
+            .replace('{', "")
+            .replace('}', "")
+    }
 }
