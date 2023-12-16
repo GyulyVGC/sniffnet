@@ -29,10 +29,10 @@ use crate::networking::types::ip_collection::IpCollection;
 use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
-    ip_version_translation, select_filters_translation, start_translation,
-    transport_protocol_translation,
+    ip_version_translation, protocol_translation, select_filters_translation, start_translation,
 };
 use crate::translations::translations_3::port_translation;
+use crate::utils::formatted_strings::get_invalid_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{IpVersion, Language, StyleType, TransProtocol};
 
@@ -135,7 +135,7 @@ fn col_ip_buttons(
         .width(Length::Fill)
         .spacing(7)
         .push(
-            ip_version_translation(language)
+            Text::new(ip_version_translation(language))
                 .font(font)
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
@@ -175,7 +175,7 @@ fn col_transport_buttons(
         .width(Length::Fill)
         .spacing(7)
         .push(
-            Text::new(transport_protocol_translation(language))
+            Text::new(protocol_translation(language))
                 .font(font)
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
@@ -271,12 +271,15 @@ fn button_start(
     .width(Length::Fixed(160.0))
     .style(ButtonType::Gradient(color_gradient));
 
+    let mut tooltip = start_translation(language).to_string();
+    //tooltip.push_str(" [⏎]");
+
     if filters.are_valid() {
         content = content.on_press(Message::Start);
+    } else {
+        tooltip = get_invalid_filters_string(filters, language);
     }
 
-    let tooltip = start_translation(language).to_string();
-    //tooltip.push_str(" [⏎]");
     Tooltip::new(content, tooltip, Position::Top)
         .gap(5)
         .font(font)

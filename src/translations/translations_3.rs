@@ -65,3 +65,11 @@ pub fn port_translation(language: Language) -> &'static str {
         _ => "Port",
     }
 }
+
+pub fn invalid_filters_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Invalid filters",
+        Language::IT => "Filtri non validi",
+        _ => "Invalid filters",
+    }
+}

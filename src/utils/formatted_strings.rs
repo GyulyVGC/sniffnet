@@ -6,7 +6,13 @@ use iced::{Font, Renderer};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
-use crate::translations::translations::{active_filters_translation, none_translation};
+use crate::networking::types::ip_collection::IpCollection;
+use crate::networking::types::port_collection::PortCollection;
+use crate::translations::translations::{
+    active_filters_translation, address_translation, ip_version_translation, none_translation,
+    protocol_translation,
+};
+use crate::translations::translations_3::{invalid_filters_translation, port_translation};
 use crate::{Language, StyleType};
 
 /// Application version number (to be displayed in gui footer)
@@ -25,6 +31,23 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
     } else {
         format!("{:.1}%", 100.0 * filtered_float / observed_float)
     }
+}
+
+pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
+    let mut ret_val = format!("{}:", invalid_filters_translation(language));
+    if filters.ip.is_empty() {
+        ret_val.push_str(&format!("\n  - {}", ip_version_translation(language)));
+    }
+    if filters.transport.is_empty() {
+        ret_val.push_str(&format!("\n  - {}", protocol_translation(language)));
+    }
+    if IpCollection::new(&filters.address_str).is_none() {
+        ret_val.push_str(&format!("\n  - {}", address_translation(language)));
+    }
+    if PortCollection::new(&filters.port_str).is_none() {
+        ret_val.push_str(&format!("\n  - {}", port_translation(language)));
+    }
+    ret_val
 }
 
 /// Computes the String representing the active filters

@@ -143,8 +143,8 @@ pub fn addresses_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn ip_version_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
-    Text::new(match language {
+pub fn ip_version_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => "IP version",
         Language::IT => "Versione IP",
         Language::FR => "Version IP",
@@ -164,7 +164,7 @@ pub fn ip_version_translation(language: Language) -> Text<'static, Renderer<Styl
         Language::FI => "IP-versio",
         Language::JA => "IP バージョン",
         Language::UZ => "IP versiyasi",
-    })
+    }
 }
 
 pub fn transport_protocol_translation(language: Language) -> &'static str {
@@ -187,6 +187,26 @@ pub fn transport_protocol_translation(language: Language) -> &'static str {
         Language::FI => "Kuljetusprotokolla",
         Language::JA => "トランスポート プロトコル",
         Language::UZ => "Transport protokoli",
+    }
+}
+
+pub fn protocol_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN | Language::RO => "Protocol",
+        Language::IT => "Protocollo",
+        Language::FR => "Protocole",
+        Language::ES | Language::PT => "Protocolo",
+        Language::PL => "Protokół",
+        Language::DE | Language::SV => "Protokoll",
+        Language::UK | Language::RU => "Протокол",
+        Language::ZH => "协议",
+        Language::KO => "프로토콜",
+        Language::TR => "Protokolü",
+        Language::EL => "Πρωτόκολλο",
+        // Language::FA => "پیوندنامهٔ",
+        Language::FI => "Protokolla",
+        Language::JA => "プロトコル",
+        Language::UZ => "Protokoli",
     }
 }
 
