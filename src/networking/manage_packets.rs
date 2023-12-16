@@ -41,7 +41,7 @@ pub fn analyze_headers(
     if !analyze_network_header(
         headers.ip,
         exchanged_bytes,
-        &mut packet_filters_fields.ip,
+        &mut packet_filters_fields.ip_version,
         &mut address1,
         &mut address2,
     ) {

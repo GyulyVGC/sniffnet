@@ -7,7 +7,7 @@ use crate::{IpVersion, Protocol};
 #[derive(Clone)]
 pub struct PacketFiltersFields {
     /// Internet Protocol version
-    pub ip: IpVersion,
+    pub ip_version: IpVersion,
     /// Protocol
     pub protocol: Protocol,
     /// Source IP address
@@ -23,7 +23,7 @@ pub struct PacketFiltersFields {
 impl Default for PacketFiltersFields {
     fn default() -> Self {
         Self {
-            ip: IpVersion::IPv4,
+            ip_version: IpVersion::IPv4,
             protocol: Protocol::TCP,
             source: IpAddr::from_str("::").unwrap(),
             dest: IpAddr::from_str("::").unwrap(),

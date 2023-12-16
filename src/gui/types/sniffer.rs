@@ -22,7 +22,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
-use crate::networking::types::ip_collection::IpCollection;
+use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::port_collection::PortCollection;
 use crate::networking::types::search_parameters::SearchParameters;
@@ -137,20 +137,20 @@ impl Sniffer {
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
-                    self.filters.ip.insert(version);
+                    self.filters.ip_versions.insert(version);
                 } else {
-                    self.filters.ip.remove(&version);
+                    self.filters.ip_versions.remove(&version);
                 }
             }
             Message::ProtocolSelection(protocol, insert) => {
                 if insert {
-                    self.filters.protocol.insert(protocol);
+                    self.filters.protocols.insert(protocol);
                 } else {
-                    self.filters.protocol.remove(&protocol);
+                    self.filters.protocols.remove(&protocol);
                 }
             }
             Message::AddressFilter(value) => {
-                if let Some(collection) = IpCollection::new(&value) {
+                if let Some(collection) = AddressCollection::new(&value) {
                     self.filters.address_collection = collection;
                 }
                 self.filters.address_str = value;
@@ -573,26 +573,29 @@ mod tests {
     fn test_correctly_update_ip_version() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
-        assert_eq!(sniffer.filters.ip, HashSet::from(IpVersion::ALL));
+        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
         sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
-        assert_eq!(sniffer.filters.ip, HashSet::from(IpVersion::ALL));
+        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
         sniffer.update(Message::IpVersionSelection(IpVersion::IPv4, false));
-        assert_eq!(sniffer.filters.ip, HashSet::from([IpVersion::IPv6]));
+        assert_eq!(
+            sniffer.filters.ip_versions,
+            HashSet::from([IpVersion::IPv6])
+        );
         sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, false));
-        assert_eq!(sniffer.filters.ip, HashSet::new());
+        assert_eq!(sniffer.filters.ip_versions, HashSet::new());
     }
 
     #[test]
     fn test_correctly_update_protocol() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
-        assert_eq!(sniffer.filters.protocol, HashSet::from(Protocol::ALL));
+        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocol, HashSet::from(Protocol::ALL));
+        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
-        assert_eq!(sniffer.filters.protocol, HashSet::from([Protocol::TCP]));
+        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::TCP]));
         sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(sniffer.filters.protocol, HashSet::new());
+        assert_eq!(sniffer.filters.protocols, HashSet::new());
     }
 
     #[test]

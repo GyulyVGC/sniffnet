@@ -26,7 +26,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::filters::Filters;
-use crate::networking::types::ip_collection::IpCollection;
+use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
@@ -46,10 +46,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     let col_adapter = get_col_adapter(sniffer, font);
 
-    let ip_active = &sniffer.filters.ip;
+    let ip_active = &sniffer.filters.ip_versions;
     let col_ip_buttons = col_ip_buttons(ip_active, font, language);
 
-    let protocol_active = &sniffer.filters.protocol;
+    let protocol_active = &sniffer.filters.protocols;
     let col_protocol_buttons = col_protocol_buttons(protocol_active, font, language);
 
     let address_active = &sniffer.filters.address_str;
@@ -192,10 +192,10 @@ fn col_address_input(
     let is_error = if value.is_empty() {
         false
     } else {
-        IpCollection::new(value).is_none()
+        AddressCollection::new(value).is_none()
     };
     let input_row = Row::new().padding([0, 0, 0, 5]).push(
-        TextInput::new(IpCollection::PLACEHOLDER_STR, value)
+        TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
             .padding([2, 5])
             .on_input(Message::AddressFilter)
             .font(font)

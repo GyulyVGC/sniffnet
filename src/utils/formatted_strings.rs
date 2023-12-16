@@ -1,7 +1,7 @@
 use std::net::IpAddr;
 
 use crate::networking::types::filters::Filters;
-use crate::networking::types::ip_collection::IpCollection;
+use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
@@ -29,13 +29,13 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
 
 pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
     let mut ret_val = format!("{}:", invalid_filters_translation(language));
-    if filters.ip.is_empty() {
+    if filters.ip_versions.is_empty() {
         ret_val.push_str(&format!("\n • {}", ip_version_translation(language)));
     }
-    if filters.protocol.is_empty() {
+    if filters.protocols.is_empty() {
         ret_val.push_str(&format!("\n • {}", protocol_translation(language)));
     }
-    if IpCollection::new(&filters.address_str).is_none() {
+    if AddressCollection::new(&filters.address_str).is_none() {
         ret_val.push_str(&format!("\n • {}", address_translation(language)));
     }
     if PortCollection::new(&filters.port_str).is_none() {
