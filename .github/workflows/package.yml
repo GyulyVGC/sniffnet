@@ -100,7 +100,7 @@ jobs:
           args: --release --target ${{ matrix.target }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
           path: |
@@ -155,7 +155,7 @@ jobs:
           mv artifacts/sniffnet*armhf.deb artifacts/Sniffnet_LinuxDEB_armhf.deb
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deb
           path: artifacts/
@@ -204,7 +204,7 @@ jobs:
           mv artifacts/sniffnet*aarch64.rpm artifacts/Sniffnet_LinuxRPM_aarch64.rpm
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rpm
           path: artifacts/
@@ -270,7 +270,7 @@ jobs:
           mv artifacts/sniffnet*aarch64.dmg artifacts/Sniffnet_macOS_AppleSilicon.dmg
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dmg
           path: artifacts/
@@ -324,7 +324,7 @@ jobs:
           }
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: msi
           path: artifacts/
