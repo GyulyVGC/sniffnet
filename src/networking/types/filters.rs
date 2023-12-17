@@ -53,10 +53,26 @@ impl Filters {
     }
 
     pub fn are_valid(&self) -> bool {
+        self.ip_version_valid()
+            && self.protocol_valid()
+            && self.address_valid()
+            && self.port_valid()
+    }
+
+    pub fn ip_version_valid(&self) -> bool {
         !self.ip_versions.is_empty()
-            && !self.protocols.is_empty()
-            && AddressCollection::new(&self.address_str).is_some()
-            && PortCollection::new(&self.port_str).is_some()
+    }
+
+    pub fn protocol_valid(&self) -> bool {
+        !self.protocols.is_empty()
+    }
+
+    pub fn address_valid(&self) -> bool {
+        AddressCollection::new(&self.address_str).is_some()
+    }
+
+    pub fn port_valid(&self) -> bool {
+        PortCollection::new(&self.port_str).is_some()
     }
 
     pub fn none_active(&self) -> bool {

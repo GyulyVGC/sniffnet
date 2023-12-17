@@ -871,28 +871,28 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Rende
     })
 }
 
-pub fn both_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "both",
-        Language::IT => "entrambi",
-        Language::FR => "les deux",
-        Language::ES | Language::PT => "ambos",
-        Language::PL => "oba",
-        Language::DE => "beide",
-        Language::UK => "обидва",
-        Language::ZH => "皆需",
-        Language::RO => "ambele",
-        Language::KO => "둘다",
-        Language::TR => "ikiside",
-        Language::RU => "оба",
-        Language::EL => "αμφότερα",
-        // Language::FA => "هر دو",
-        Language::SV => "båda",
-        Language::FI => "molemmat",
-        Language::JA => "両方",
-        Language::UZ => "ikkalasi ham",
-    }
-}
+// pub fn both_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "both",
+//         Language::IT => "entrambi",
+//         Language::FR => "les deux",
+//         Language::ES | Language::PT => "ambos",
+//         Language::PL => "oba",
+//         Language::DE => "beide",
+//         Language::UK => "обидва",
+//         Language::ZH => "皆需",
+//         Language::RO => "ambele",
+//         Language::KO => "둘다",
+//         Language::TR => "ikiside",
+//         Language::RU => "оба",
+//         Language::EL => "αμφότερα",
+//         // Language::FA => "هر دو",
+//         Language::SV => "båda",
+//         Language::FI => "molemmat",
+//         Language::JA => "両方",
+//         Language::UZ => "ikkalasi ham",
+//     }
+// }
 
 // pub fn all_protocols_translation(language: Language) -> &'static str {
 //     match language {
@@ -909,28 +909,28 @@ pub fn both_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn all_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "All",
-        Language::IT => "Tutti",
-        Language::FR => "Tous",
-        Language::ES | Language::PT => "Todos",
-        Language::PL => "Wszystkie",
-        Language::DE => "Alle",
-        Language::UK => "Усі",
-        Language::ZH => "所有",
-        Language::RO => "Toate",
-        Language::KO => "모두",
-        Language::TR => "Hepsi",
-        Language::RU => "Всё",
-        Language::EL => "Όλα",
-        // Language::FA => "همه",
-        Language::SV => "Alla",
-        Language::FI => "Kaikki",
-        Language::JA => "すべて",
-        Language::UZ => "Barchasi",
-    }
-}
+// pub fn all_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "All",
+//         Language::IT => "Tutti",
+//         Language::FR => "Tous",
+//         Language::ES | Language::PT => "Todos",
+//         Language::PL => "Wszystkie",
+//         Language::DE => "Alle",
+//         Language::UK => "Усі",
+//         Language::ZH => "所有",
+//         Language::RO => "Toate",
+//         Language::KO => "모두",
+//         Language::TR => "Hepsi",
+//         Language::RU => "Всё",
+//         Language::EL => "Όλα",
+//         // Language::FA => "همه",
+//         Language::SV => "Alla",
+//         Language::FI => "Kaikki",
+//         Language::JA => "すべて",
+//         Language::UZ => "Barchasi",
+//     }
+// }
 
 pub fn packets_translation(language: Language) -> &'static str {
     match language {
