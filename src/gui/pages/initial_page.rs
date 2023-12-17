@@ -2,31 +2,40 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
+use std::collections::HashSet;
+
+use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::Shaping;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Button, Column, Container, PickList, Row, Scrollable,
-    Text, Tooltip,
+    button, horizontal_space, vertical_space, Button, Column, Container, Row, Rule, Scrollable,
+    Text, TextInput, Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Font, Length, Renderer};
+use iced::{alignment, Font, Length, Renderer};
 use pcap::Device;
 
-use crate::gui::components::radio::{ip_version_radios, transport_protocol_radios};
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
+use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
+use crate::networking::types::filters::Filters;
+use crate::networking::types::ip_collection::AddressCollection;
+use crate::networking::types::port_collection::PortCollection;
 use crate::translations::translations::{
-    address_translation, addresses_translation, all_translation, application_protocol_translation,
-    choose_adapters_translation, select_filters_translation, start_translation,
+    address_translation, addresses_translation, choose_adapters_translation,
+    ip_version_translation, protocol_translation, select_filters_translation, start_translation,
 };
+use crate::translations::translations_3::port_translation;
+use crate::utils::formatted_strings::get_invalid_filters_string;
 use crate::utils::types::icon::Icon;
-use crate::{AppProtocol, Language, StyleType};
+use crate::{IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -37,89 +46,221 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     let col_adapter = get_col_adapter(sniffer, font);
 
-    let ip_active = sniffer.filters.ip;
-    let col_ip_radio = ip_version_radios(ip_active, font, language);
-    let col_ip = Column::new()
-        .spacing(10)
-        .width(FillPortion(5))
-        .push(col_ip_radio);
+    let ip_active = &sniffer.filters.ip_versions;
+    let col_ip_buttons = col_ip_buttons(ip_active, font, language);
 
-    let transport_active = sniffer.filters.transport;
-    let col_transport_radio = transport_protocol_radios(transport_active, font, language);
-    let col_transport = Column::new()
-        .align_items(Alignment::Center)
-        .spacing(10)
-        .width(FillPortion(9))
-        .push(col_transport_radio)
-        .push(vertical_space(FillPortion(2)))
-        .push(button_start(font, language, color_gradient))
-        .push(vertical_space(FillPortion(1)));
+    let protocol_active = &sniffer.filters.protocols;
+    let col_protocol_buttons = col_protocol_buttons(protocol_active, font, language);
 
-    let app_active = if sniffer.filters.application.ne(&AppProtocol::Other) {
-        Some(sniffer.filters.application)
-    } else {
-        None
-    };
-    let picklist_app = PickList::new(
-        if app_active.is_some() {
-            &AppProtocol::ALL[..]
-        } else {
-            &AppProtocol::ALL[1..]
-        },
-        app_active,
-        Message::AppProtocolSelection,
-    )
-    .padding([3, 7])
-    .placeholder(all_translation(language))
-    .font(font);
-    let col_app = Column::new()
-        .width(FillPortion(8))
-        .spacing(10)
-        .push(
-            Text::new(application_protocol_translation(language))
-                .font(font)
-                .style(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(picklist_app);
+    let address_active = &sniffer.filters.address_str;
+    let col_address_filter = col_address_input(address_active, font, language);
 
-    let filters = Column::new()
+    let port_active = &sniffer.filters.port_str;
+    let col_port_filter = col_port_input(port_active, font, language);
+
+    let filters_pane = Column::new()
         .width(FillPortion(6))
         .padding(10)
         .spacing(15)
         .push(
-            Row::new().push(
-                select_filters_translation(language)
-                    .font(font)
-                    .style(TextType::Title)
-                    .size(FONT_SIZE_TITLE),
-            ),
+            select_filters_translation(language)
+                .font(font)
+                .style(TextType::Title)
+                .size(FONT_SIZE_TITLE),
         )
         .push(
             Row::new()
-                .spacing(10)
-                .height(FillPortion(3))
-                .push(col_ip)
-                .push(col_transport)
-                .push(col_app),
+                .spacing(20)
+                .push(col_ip_buttons)
+                .push(col_protocol_buttons),
+        )
+        .push(
+            Row::new()
+                .spacing(20)
+                .push(col_address_filter)
+                .push(col_port_filter),
+        )
+        .push(Rule::horizontal(40))
+        .push(
+            Container::new(button_start(
+                font,
+                language,
+                color_gradient,
+                &sniffer.filters,
+            ))
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .align_y(Vertical::Center)
+            .align_x(Horizontal::Center),
         );
 
     let body = Column::new().push(vertical_space(Length::Fixed(5.0))).push(
         Row::new()
             .push(col_adapter)
             .push(horizontal_space(Length::Fixed(30.0)))
-            .push(filters),
+            .push(filters_pane),
     );
 
     Container::new(body).height(Length::Fill)
+}
+
+fn col_ip_buttons(
+    active_ip_filters: &HashSet<IpVersion>,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+    for option in IpVersion::ALL {
+        let is_active = active_ip_filters.contains(&option);
+        let check_symbol = if is_active { "✔" } else { "✘" };
+        buttons_row = buttons_row.push(
+            Button::new(
+                Text::new(format!("{option} {check_symbol}"))
+                    .shaping(Shaping::Advanced)
+                    .horizontal_alignment(Horizontal::Center)
+                    .vertical_alignment(Vertical::Center)
+                    .font(font),
+            )
+            .width(Length::Fixed(90.0))
+            .height(Length::Fixed(35.0))
+            .style(if is_active {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::IpVersionSelection(option, !is_active)),
+        );
+    }
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(ip_version_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(buttons_row)
+}
+
+fn col_protocol_buttons(
+    active_protocol_filters: &HashSet<Protocol>,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+    for option in Protocol::ALL {
+        let is_active = active_protocol_filters.contains(&option);
+        let check_symbol = if is_active { "✔" } else { "✘" };
+        buttons_row = buttons_row.push(
+            Button::new(
+                Text::new(format!("{option} {check_symbol}"))
+                    .shaping(Shaping::Advanced)
+                    .horizontal_alignment(Horizontal::Center)
+                    .vertical_alignment(Vertical::Center)
+                    .font(font),
+            )
+            .width(Length::Fixed(90.0))
+            .height(Length::Fixed(35.0))
+            .style(if is_active {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::ProtocolSelection(option, !is_active)),
+        );
+    }
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(protocol_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(buttons_row)
+}
+
+fn col_address_input(
+    value: &String,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let is_error = if value.is_empty() {
+        false
+    } else {
+        AddressCollection::new(value).is_none()
+    };
+    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+        TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
+            .padding([2, 5])
+            .on_input(Message::AddressFilter)
+            .font(font)
+            .width(Length::Fixed(310.0))
+            .style(if is_error {
+                TextInputType::Error
+            } else {
+                TextInputType::Standard
+            }),
+    );
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(address_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(input_row)
+}
+
+fn col_port_input(
+    value: &String,
+    font: Font,
+    language: Language,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let is_error = if value.is_empty() {
+        false
+    } else {
+        PortCollection::new(value).is_none()
+    };
+    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+        TextInput::new(PortCollection::PLACEHOLDER_STR, value)
+            .padding([2, 5])
+            .on_input(Message::PortFilter)
+            .font(font)
+            .width(Length::Fixed(180.0))
+            .style(if is_error {
+                TextInputType::Error
+            } else {
+                TextInputType::Standard
+            }),
+    );
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(7)
+        .push(
+            Text::new(port_translation(language))
+                .font(font)
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(input_row)
 }
 
 fn button_start(
     font: Font,
     language: Language,
     color_gradient: GradientType,
+    filters: &Filters,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let content = button(
+    let mut content = button(
         Icon::Rocket
             .to_text()
             .size(25)
@@ -129,12 +270,20 @@ fn button_start(
     .padding(10)
     .height(Length::Fixed(80.0))
     .width(Length::Fixed(160.0))
-    .style(ButtonType::Gradient(color_gradient))
-    .on_press(Message::Start);
+    .style(ButtonType::Gradient(color_gradient));
 
-    let tooltip = start_translation(language).to_string();
+    let mut tooltip = start_translation(language).to_string();
     //tooltip.push_str(" [⏎]");
-    Tooltip::new(content, tooltip, Position::Top)
+    let mut position = Position::Top;
+
+    if filters.are_valid() {
+        content = content.on_press(Message::Start);
+    } else {
+        tooltip = get_invalid_filters_string(filters, language);
+        position = Position::FollowCursor;
+    }
+
+    Tooltip::new(content, tooltip, position)
         .gap(5)
         .font(font)
         .style(ContainerType::Tooltip)

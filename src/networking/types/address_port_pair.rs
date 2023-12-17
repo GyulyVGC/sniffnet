@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use crate::TransProtocol;
+use crate::Protocol;
 
 /// Struct representing a network address:port pair.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
@@ -16,7 +16,7 @@ pub struct AddressPortPair {
     /// Transport layer destination port number (in the range 0..=65535).
     pub port2: u16,
     ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
-    pub trans_protocol: TransProtocol,
+    pub protocol: Protocol,
 }
 
 impl AddressPortPair {
@@ -32,14 +32,14 @@ impl AddressPortPair {
         port1: u16,
         address2: String,
         port2: u16,
-        trans_protocol: TransProtocol,
+        trans_protocol: Protocol,
     ) -> Self {
         AddressPortPair {
             address1,
             port1,
             address2,
             port2,
-            trans_protocol,
+            protocol: trans_protocol,
         }
     }
 }
@@ -50,13 +50,13 @@ impl fmt::Display for AddressPortPair {
             write!(
                 f,
                 "{:^45}{:>8}  {:^45}{:>8}     {}   ",
-                self.address1, self.port1, self.address2, self.port2, self.trans_protocol
+                self.address1, self.port1, self.address2, self.port2, self.protocol
             )
         } else {
             write!(
                 f,
                 "{:^25}{:>8}  {:^25}{:>8}     {}   ",
-                self.address1, self.port1, self.address2, self.port2, self.trans_protocol
+                self.address1, self.port1, self.address2, self.port2, self.protocol
             )
         }
     }

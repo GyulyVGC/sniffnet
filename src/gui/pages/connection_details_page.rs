@@ -9,6 +9,7 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
+use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
@@ -21,7 +22,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
-    application_protocol_translation, hide_translation, incoming_translation, outgoing_translation,
+    application_protocol_translation, incoming_translation, outgoing_translation,
     packets_translation, transport_protocol_translation,
 };
 use crate::translations::translations_2::{
@@ -156,7 +157,6 @@ fn page_header(
     color_gradient: GradientType,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let tooltip = hide_translation(language).to_string();
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -168,27 +168,9 @@ fn page_header(
                     .horizontal_alignment(Horizontal::Center),
             )
             .push(
-                Container::new(
-                    Tooltip::new(
-                        button(
-                            Text::new("×")
-                                .font(font)
-                                .vertical_alignment(Vertical::Center)
-                                .horizontal_alignment(Horizontal::Center)
-                                .size(15),
-                        )
-                        .padding(2)
-                        .height(Fixed(20.0))
-                        .width(Fixed(20.0))
-                        .on_press(Message::HideModal),
-                        tooltip,
-                        Position::Right,
-                    )
-                    .font(font)
-                    .style(ContainerType::Tooltip),
-                )
-                .width(Length::FillPortion(1))
-                .align_x(Horizontal::Center),
+                Container::new(button_hide(Message::HideModal, language, font))
+                    .width(Length::FillPortion(1))
+                    .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)
@@ -221,7 +203,7 @@ fn col_info(
         )
         .push(TextType::highlighted_subtitle_with_desc(
             transport_protocol_translation(language),
-            &key.trans_protocol.to_string(),
+            &key.protocol.to_string(),
             font,
         ))
         .push(TextType::highlighted_subtitle_with_desc(
@@ -401,6 +383,7 @@ fn get_button_copy(
         format!("{} (IP)", copy_translation(language)),
         Position::Right,
     )
+    .gap(5)
     .font(font)
     .style(ContainerType::Tooltip)
 }

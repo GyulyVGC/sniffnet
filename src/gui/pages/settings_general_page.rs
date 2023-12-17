@@ -130,7 +130,7 @@ fn language_picklist(
                 .height(Fixed(20.0))
                 .width(Fixed(20.0)),
                 "       The selected language       \nis not fully updated to version 1.3",
-                Position::Right,
+                Position::FollowCursor,
             )
             .font(font)
             .style(ContainerType::Tooltip),

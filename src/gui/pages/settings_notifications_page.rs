@@ -1,14 +1,13 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
 use iced::widget::Slider;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text,
-    TextInput, Tooltip,
+    horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text, TextInput,
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
+use crate::gui::components::button::button_hide;
 use crate::gui::components::radio::{
     sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
 };
@@ -26,7 +25,7 @@ use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
 };
 use crate::translations::translations::{
-    bytes_threshold_translation, favorite_notification_translation, hide_translation,
+    bytes_threshold_translation, favorite_notification_translation,
     notifications_title_translation, packets_threshold_translation, per_second_translation,
     settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
 };
@@ -404,8 +403,6 @@ pub fn settings_header(
     color_gradient: GradientType,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let tooltip = hide_translation(language).to_string();
-    //tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -417,27 +414,9 @@ pub fn settings_header(
                     .horizontal_alignment(Horizontal::Center),
             )
             .push(
-                Container::new(
-                    Tooltip::new(
-                        button(
-                            Text::new("×")
-                                .font(font)
-                                .vertical_alignment(Vertical::Center)
-                                .horizontal_alignment(Horizontal::Center)
-                                .size(15),
-                        )
-                        .padding(2)
-                        .height(Fixed(20.0))
-                        .width(Fixed(20.0))
-                        .on_press(Message::CloseSettings),
-                        tooltip,
-                        Position::Right,
-                    )
-                    .font(font)
-                    .style(ContainerType::Tooltip),
-                )
-                .width(Length::FillPortion(1))
-                .align_x(Horizontal::Center),
+                Container::new(button_hide(Message::CloseSettings, language, font))
+                    .width(Length::FillPortion(1))
+                    .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)

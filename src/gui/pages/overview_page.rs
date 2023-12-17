@@ -5,11 +5,12 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, lazy, vertical_space, Button, Column, Container, Row, Scrollable, Text,
+    button, lazy, vertical_space, Button, Column, Container, Row, Scrollable, Text, Tooltip,
 };
 use iced::widget::{horizontal_space, Rule};
-use iced::Length::{Fill, FillPortion};
+use iced::Length::{Fill, FillPortion, Fixed};
 use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
@@ -31,17 +32,18 @@ use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
 use crate::translations::translations::{
-    application_protocol_translation, bytes_chart_translation, error_translation,
-    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
-    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, application_protocol_translation, bytes_chart_translation,
+    error_translation, filtered_bytes_translation, filtered_packets_translation,
+    network_adapter_translation, no_addresses_translation, none_translation, of_total_translation,
+    packets_chart_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     only_top_30_hosts_translation,
 };
 use crate::utils::formatted_strings::{
-    get_active_filters_col, get_formatted_bytes_string_with_b, get_percentage_string,
+    get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
 use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
@@ -72,7 +74,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
                 body =
-                    body_no_observed(sniffer.filters, observed, font, language, &sniffer.waiting);
+                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -169,7 +171,7 @@ fn body_no_packets(
 }
 
 fn body_no_observed(
-    filters: Filters,
+    filters: &Filters,
     observed: u128,
     font: Font,
     language: Language,
@@ -186,9 +188,9 @@ fn body_no_observed(
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
         .push(Icon::Funnel.to_text().size(60))
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(get_active_filters_col(filters, language, font, true))
+        .push(Rule::horizontal(20))
         .push(tot_packets_text)
-        .push(get_active_filters_col(filters, language, font))
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(vertical_space(FillPortion(2)))
 }
@@ -417,7 +419,7 @@ fn lazy_col_info(
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters = col_device_filters(language, font, sniffer.filters, &sniffer.device);
+    let col_device_filters = col_device_filters(language, font, &sniffer.filters, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -504,7 +506,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer
 fn col_device_filters(
     language: Language,
     font: Font,
-    filters: Filters,
+    filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]
@@ -522,7 +524,7 @@ fn col_device_filters(
             font,
         ))
         .push(vertical_space(15))
-        .push(get_active_filters_col(filters, language, font))
+        .push(get_active_filters_col(filters, language, font, false))
 }
 
 fn col_data_representation(
@@ -655,4 +657,46 @@ fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Re
         ButtonType::NotStarred
     })
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
+}
+
+fn get_active_filters_col(
+    filters: &Filters,
+    language: Language,
+    font: Font,
+    show: bool,
+) -> Column<'static, Message, Renderer<StyleType>> {
+    let mut ret_val = Column::new().push(
+        Text::new(format!("{}:", active_filters_translation(language),))
+            .font(font)
+            .style(TextType::Subtitle),
+    );
+
+    if filters.none_active() {
+        ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
+    } else {
+        let filters_string = get_active_filters_string(filters, language);
+        ret_val = ret_val.push(if show {
+            Row::new().push(Text::new(filters_string).font(font))
+        } else {
+            Row::new().padding([0, 0, 0, 20]).push(
+                Tooltip::new(
+                    button(
+                        Text::new("i")
+                            .font(font)
+                            .vertical_alignment(Vertical::Center)
+                            .horizontal_alignment(Horizontal::Center)
+                            .size(15),
+                    )
+                    .padding(2)
+                    .height(Fixed(20.0))
+                    .width(Fixed(20.0)),
+                    filters_string,
+                    Position::FollowCursor,
+                )
+                .font(font)
+                .style(ContainerType::Tooltip),
+            )
+        });
+    }
+    ret_val
 }

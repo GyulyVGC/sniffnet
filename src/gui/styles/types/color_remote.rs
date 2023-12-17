@@ -153,7 +153,7 @@ mod tests {
     const CATPPUCCIN_PINK_NO_OCTO: &str = "%f5c2e7";
     const CATPPUCCIN_PINK_TRUNCATED: &str = "#c2e7";
     const CATPPUCCIN_PINK_TOO_LONG: &str = "#f5c2e7f5c2e7f5";
-    const INVALID_COLOR: &str = "#ca🐈";
+    const INVALID_COLOR: &str = "#cal✘";
 
     // Test if deserializing and serializing a color works.
     #[test]
@@ -205,7 +205,7 @@ mod tests {
     fn test_invalid_hex_color_de() {
         assert_de_tokens_error::<DelegateTest>(
             &[Token::Str(INVALID_COLOR)],
-            "invalid value: string \"#ca🐈\", expected valid hexadecimal",
+            "invalid value: string \"#cal✘\", expected valid hexadecimal",
         );
     }
 }

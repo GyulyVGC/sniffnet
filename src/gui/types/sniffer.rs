@@ -22,7 +22,9 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::get_capture_result;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
+use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::port_collection::PortCollection;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::Notification;
@@ -133,9 +135,32 @@ impl Sniffer {
         match message {
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
-            Message::IpVersionSelection(version) => self.filters.ip = version,
-            Message::TransportProtocolSelection(protocol) => self.filters.transport = protocol,
-            Message::AppProtocolSelection(protocol) => self.filters.application = protocol,
+            Message::IpVersionSelection(version, insert) => {
+                if insert {
+                    self.filters.ip_versions.insert(version);
+                } else {
+                    self.filters.ip_versions.remove(&version);
+                }
+            }
+            Message::ProtocolSelection(protocol, insert) => {
+                if insert {
+                    self.filters.protocols.insert(protocol);
+                } else {
+                    self.filters.protocols.remove(&protocol);
+                }
+            }
+            Message::AddressFilter(value) => {
+                if let Some(collection) = AddressCollection::new(&value) {
+                    self.filters.address_collection = collection;
+                }
+                self.filters.address_str = value;
+            }
+            Message::PortFilter(value) => {
+                if let Some(collection) = PortCollection::new(&value) {
+                    self.filters.port_collection = collection;
+                }
+                self.filters.port_str = value;
+            }
             Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => self.report_sort_type = sort,
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
@@ -343,7 +368,7 @@ impl Sniffer {
         if pcap_error.is_none() {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
-            let filters = self.filters;
+            let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
             thread::Builder::new()
@@ -353,7 +378,7 @@ impl Sniffer {
                         &current_capture_id,
                         &device,
                         cap.unwrap(),
-                        filters,
+                        &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
                         &asn_mmdb_reader,
@@ -474,7 +499,9 @@ impl Sniffer {
             && self.settings_page.is_none()
             && self.modal.is_none()
         {
-            return self.update(Message::Start);
+            if self.filters.are_valid() {
+                return self.update(Message::Start);
+            }
         } else if self.modal.eq(&Some(MyModal::Quit)) {
             return self.update(Message::Reset);
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
@@ -538,53 +565,37 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        AppProtocol, ByteMultiple, ChartType, Configs, IpVersion, Language, ReportSortType,
-        RunningPage, Sniffer, StyleType, TransProtocol,
+        ByteMultiple, ChartType, Configs, IpVersion, Language, Protocol, ReportSortType,
+        RunningPage, Sniffer, StyleType,
     };
 
     #[test]
     fn test_correctly_update_ip_version() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
-        assert_eq!(sniffer.filters.ip, IpVersion::Other);
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6));
-        assert_eq!(sniffer.filters.ip, IpVersion::IPv6);
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4));
-        assert_eq!(sniffer.filters.ip, IpVersion::IPv4);
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4));
-        assert_eq!(sniffer.filters.ip, IpVersion::IPv4);
-        sniffer.update(Message::IpVersionSelection(IpVersion::Other));
-        assert_eq!(sniffer.filters.ip, IpVersion::Other);
+        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
+        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4, false));
+        assert_eq!(
+            sniffer.filters.ip_versions,
+            HashSet::from([IpVersion::IPv6])
+        );
+        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, false));
+        assert_eq!(sniffer.filters.ip_versions, HashSet::new());
     }
 
     #[test]
-    fn test_correctly_update_transport_protocol() {
+    fn test_correctly_update_protocol() {
         let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
 
-        assert_eq!(sniffer.filters.transport, TransProtocol::Other);
-        sniffer.update(Message::TransportProtocolSelection(TransProtocol::UDP));
-        assert_eq!(sniffer.filters.transport, TransProtocol::UDP);
-        sniffer.update(Message::TransportProtocolSelection(TransProtocol::UDP));
-        assert_eq!(sniffer.filters.transport, TransProtocol::UDP);
-        sniffer.update(Message::TransportProtocolSelection(TransProtocol::TCP));
-        assert_eq!(sniffer.filters.transport, TransProtocol::TCP);
-        sniffer.update(Message::TransportProtocolSelection(TransProtocol::Other));
-        assert_eq!(sniffer.filters.transport, TransProtocol::Other);
-    }
-
-    #[test]
-    fn test_correctly_update_application_protocol() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
-
-        assert_eq!(sniffer.filters.application, AppProtocol::Other);
-        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTPS));
-        assert_eq!(sniffer.filters.application, AppProtocol::HTTPS);
-        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTP));
-        assert_eq!(sniffer.filters.application, AppProtocol::HTTP);
-        sniffer.update(Message::AppProtocolSelection(AppProtocol::HTTP));
-        assert_eq!(sniffer.filters.application, AppProtocol::HTTP);
-        sniffer.update(Message::AppProtocolSelection(AppProtocol::XMPP));
-        assert_eq!(sniffer.filters.application, AppProtocol::XMPP);
+        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
+        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
+        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
+        sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
+        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::TCP]));
+        sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
+        assert_eq!(sniffer.filters.protocols, HashSet::new());
     }
 
     #[test]

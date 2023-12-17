@@ -4,22 +4,20 @@ use iced::advanced::renderer;
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{self, Clipboard, Shell};
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, Row, Text, Tooltip,
-};
+use iced::widget::{button, horizontal_space, vertical_space, Column, Container, Row, Text};
 use iced::{
     event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Renderer,
     Size,
 };
 
+use crate::gui::components::button::button_hide;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
-    ask_clear_all_translation, ask_quit_translation, clear_all_translation, hide_translation,
+    ask_clear_all_translation, ask_quit_translation, clear_all_translation,
     quit_analysis_translation, yes_translation,
 };
 use crate::{Language, StyleType};
@@ -95,8 +93,6 @@ fn get_modal_header(
     language: Language,
     title: String,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let tooltip = hide_translation(language).to_string();
-    //tooltip.push_str(" [esc]");
     Container::new(
         Row::new()
             .push(horizontal_space(Length::FillPortion(1)))
@@ -108,27 +104,9 @@ fn get_modal_header(
                     .horizontal_alignment(Horizontal::Center),
             )
             .push(
-                Container::new(
-                    Tooltip::new(
-                        button(
-                            Text::new("×")
-                                .font(font)
-                                .vertical_alignment(Vertical::Center)
-                                .horizontal_alignment(Horizontal::Center)
-                                .size(15),
-                        )
-                        .padding(2)
-                        .height(Length::Fixed(20.0))
-                        .width(Length::Fixed(20.0))
-                        .on_press(Message::HideModal),
-                        tooltip,
-                        Position::Right,
-                    )
-                    .font(font)
-                    .style(ContainerType::Tooltip),
-                )
-                .width(Length::FillPortion(1))
-                .align_x(Horizontal::Center),
+                Container::new(button_hide(Message::HideModal, language, font))
+                    .width(Length::FillPortion(1))
+                    .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)

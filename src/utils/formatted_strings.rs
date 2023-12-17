@@ -1,13 +1,11 @@
 use std::net::IpAddr;
 
-use iced::widget::{Column, Text};
-use iced::{Font, Renderer};
-
-use crate::gui::styles::text::TextType;
-use crate::gui::types::message::Message;
 use crate::networking::types::filters::Filters;
-use crate::translations::translations::{active_filters_translation, none_translation};
-use crate::{AppProtocol, IpVersion, Language, StyleType, TransProtocol};
+use crate::translations::translations::{
+    address_translation, ip_version_translation, protocol_translation,
+};
+use crate::translations::translations_3::{invalid_filters_translation, port_translation};
+use crate::Language;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -27,36 +25,55 @@ pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
     }
 }
 
-/// Computes the String representing the active filters
-pub fn get_active_filters_col(
-    filters: Filters,
-    language: Language,
-    font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().push(
-        Text::new(format!("{}:", active_filters_translation(language),))
-            .font(font)
-            .style(TextType::Subtitle),
-    );
-    if filters.ip.eq(&IpVersion::Other)
-        && filters.application.eq(&AppProtocol::Other)
-        && filters.transport.eq(&TransProtocol::Other)
-    {
-        ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
-    } else {
-        let mut filters_string = String::new();
-        if filters.ip.ne(&IpVersion::Other) {
-            filters_string.push_str(&format!("{} ", filters.ip));
-        }
-        if filters.transport.ne(&TransProtocol::Other) {
-            filters_string.push_str(&format!("{} ", filters.transport));
-        }
-        if filters.application.ne(&AppProtocol::Other) {
-            filters_string.push_str(&format!("{} ", filters.application));
-        }
-        ret_val = ret_val.push(Text::new(format!("   {filters_string}")).font(font));
+pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
+    let mut ret_val = format!("{}:", invalid_filters_translation(language));
+    if !filters.ip_version_valid() {
+        ret_val.push_str(&format!("\n • {}", ip_version_translation(language)));
+    }
+    if !filters.protocol_valid() {
+        ret_val.push_str(&format!("\n • {}", protocol_translation(language)));
+    }
+    if !filters.address_valid() {
+        ret_val.push_str(&format!("\n • {}", address_translation(language)));
+    }
+    if !filters.port_valid() {
+        ret_val.push_str(&format!("\n • {}", port_translation(language)));
     }
     ret_val
+}
+
+/// Computes the string representing the active filters
+pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
+    let mut filters_string = String::new();
+    if filters.ip_version_active() {
+        filters_string.push_str(&format!(
+            "• {}: {}\n",
+            ip_version_translation(language),
+            filters.pretty_print_ip()
+        ));
+    }
+    if filters.protocol_active() {
+        filters_string.push_str(&format!(
+            "• {}: {}\n",
+            protocol_translation(language),
+            filters.pretty_print_protocol()
+        ));
+    }
+    if filters.address_active() {
+        filters_string.push_str(&format!(
+            "• {}: {}\n",
+            address_translation(language),
+            filters.address_str
+        ));
+    }
+    if filters.port_active() {
+        filters_string.push_str(&format!(
+            "• {}: {}\n",
+            port_translation(language),
+            filters.port_str
+        ));
+    }
+    filters_string
 }
 
 /// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
