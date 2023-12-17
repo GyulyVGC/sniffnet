@@ -691,7 +691,7 @@ fn get_active_filters_col(
                     .height(Fixed(20.0))
                     .width(Fixed(20.0)),
                     filters_string,
-                    Position::Right,
+                    Position::FollowCursor,
                 )
                 .font(font)
                 .style(ContainerType::Tooltip),

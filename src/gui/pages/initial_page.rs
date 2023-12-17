@@ -274,14 +274,16 @@ fn button_start(
 
     let mut tooltip = start_translation(language).to_string();
     //tooltip.push_str(" [⏎]");
+    let mut position = Position::Top;
 
     if filters.are_valid() {
         content = content.on_press(Message::Start);
     } else {
         tooltip = get_invalid_filters_string(filters, language);
+        position = Position::FollowCursor;
     }
 
-    Tooltip::new(content, tooltip, Position::Top)
+    Tooltip::new(content, tooltip, position)
         .gap(5)
         .font(font)
         .style(ContainerType::Tooltip)

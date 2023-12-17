@@ -79,6 +79,7 @@ fn get_button_reset(
         quit_analysis_translation(language),
         Position::Right,
     )
+    .gap(5)
     .font(font)
     .style(ContainerType::Tooltip)
 }
@@ -101,6 +102,7 @@ pub fn get_button_settings(
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(content, settings_translation(language), Position::Left)
+        .gap(5)
         .font(font)
         .style(ContainerType::Tooltip)
 }
