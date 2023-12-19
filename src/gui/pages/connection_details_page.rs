@@ -294,7 +294,7 @@ fn get_local_tooltip(
 fn get_src_or_dest_col(
     caption: Row<'static, Message, Renderer<StyleType>>,
     ip: &String,
-    port: u16,
+    port: Option<u16>,
     mac: &str,
     font: Font,
     language: Language,

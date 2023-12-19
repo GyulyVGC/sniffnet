@@ -56,13 +56,18 @@ impl PortCollection {
         Some(Self { ports, ranges })
     }
 
-    pub(crate) fn contains(&self, port: u16) -> bool {
+    pub(crate) fn contains(&self, port: Option<u16>) -> bool {
+        // ignore port filter in case of ICMP
+        if port.is_none() {
+            return true;
+        }
+
         for range in &self.ranges {
-            if range.contains(&port) {
+            if range.contains(&port.unwrap()) {
                 return true;
             }
         }
-        self.ports.contains(&port)
+        self.ports.contains(&port.unwrap())
     }
 }
 

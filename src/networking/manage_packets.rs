@@ -114,33 +114,49 @@ fn analyze_network_header(
 /// Returns false if packet has to be skipped.
 fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
-    port1: &mut u16,
-    port2: &mut u16,
+    port1: &mut Option<u16>,
+    port2: &mut Option<u16>,
     protocol: &mut Protocol,
 ) -> bool {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
-            *port1 = udp_header.source_port;
-            *port2 = udp_header.destination_port;
+            *port1 = Some(udp_header.source_port);
+            *port2 = Some(udp_header.destination_port);
             *protocol = Protocol::UDP;
             true
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
-            *port1 = tcp_header.source_port;
-            *port2 = tcp_header.destination_port;
+            *port1 = Some(tcp_header.source_port);
+            *port2 = Some(tcp_header.destination_port);
             *protocol = Protocol::TCP;
+            true
+        }
+        Some(TransportHeader::Icmpv4(icmpv4_header)) => {
+            *port1 = None;
+            *port2 = None;
+            *protocol = Protocol::ICMP;
+            true
+        }
+        Some(TransportHeader::Icmpv6(icmpv6_header)) => {
+            *port1 = None;
+            *port2 = None;
+            *protocol = Protocol::ICMP;
             true
         }
         _ => false,
     }
 }
 
-pub fn get_app_protocol(src_port: u16, dst_port: u16) -> AppProtocol {
-    let mut application_protocol = from_port_to_application_protocol(src_port);
-    if (application_protocol).eq(&AppProtocol::Other) {
-        application_protocol = from_port_to_application_protocol(dst_port);
-    }
-    application_protocol
+pub fn get_app_protocol(src_port: Option<u16>, dst_port: Option<u16>) -> AppProtocol {
+    return if src_port.is_some() && dst_port.is_some() {
+        let mut application_protocol = from_port_to_application_protocol(src_port.unwrap());
+        if (application_protocol).eq(&AppProtocol::Other) {
+            application_protocol = from_port_to_application_protocol(dst_port.unwrap());
+        }
+        application_protocol
+    } else {
+        AppProtocol::Other
+    };
 }
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
