@@ -1,10 +1,11 @@
 [package]
 name        = "sniffnet"
 version     = "1.2.2"
-authors     = [ "Giuliano Bellini" ]
+authors     = [ "Giuliano Bellini <gyulyvgc99@gmail.com>" ]
 edition     = "2021"
 description = "Application to comfortably monitor your network traffic"
 readme      = "README.md"
+homepage    = "https://sniffnet.net"
 repository  = "https://github.com/GyulyVGC/sniffnet"
 license     = "MIT OR Apache-2.0"
 keywords    = [ "filter", "network", "packet", "sniffer", "gui" ]
@@ -62,6 +63,11 @@ rstest = "0.18.2"
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"
+
+#═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 

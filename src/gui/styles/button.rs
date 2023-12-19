@@ -171,7 +171,7 @@ impl button::StyleSheet for StyleType {
                     shadow_offset: Vector::new(0.0, 0.0),
                     text_color: colors.text_headers,
                     border_color: Color {
-                        a: get_alpha_round_containers(*self),
+                        a: get_alpha_round_borders(*self),
                         ..colors.secondary
                     },
                 }
