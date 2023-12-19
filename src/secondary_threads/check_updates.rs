@@ -22,8 +22,8 @@ pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Option<bool>
 fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
     let client = reqwest::blocking::Client::new();
     let response = client
-        .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
-        .header("User-agent", "GyulyVGC")
+        .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
+        .header("User-agent", format!("sniffnet-{}", APP_VERSION))
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send();
@@ -34,8 +34,8 @@ fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> O
         #[cfg(test)]
         if result_json.is_err() {
             let response2 = client
-                .get("https://api.github.com/repos/GyulyVGC/Sniffnet/releases/latest")
-                .header("User-agent", "GyulyVGC")
+                .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
+                .header("User-agent", format!("sniffnet-{}", APP_VERSION))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
                 .send();
