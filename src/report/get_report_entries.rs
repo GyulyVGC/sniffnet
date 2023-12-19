@@ -43,7 +43,7 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             }
             // check application protocol filter
             let searched_app = &*sniffer.search.app.to_lowercase();
-            let app = format!("{:?}", value.app_protocol).to_lowercase();
+            let app = value.app_protocol.to_string().to_lowercase();
             if !searched_app.is_empty() && app.ne(searched_app) {
                 return false;
             }

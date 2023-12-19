@@ -22,8 +22,9 @@ use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
-    application_protocol_translation, incoming_translation, outgoing_translation,
-    packets_translation, transport_protocol_translation,
+    address_translation, application_protocol_translation, incoming_translation,
+    outgoing_translation, packets_translation, protocol_translation,
+    transport_protocol_translation,
 };
 use crate::translations::translations_2::{
     administrative_entity_translation, connection_details_translation, destination_translation,
@@ -186,7 +187,14 @@ fn col_info(
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    Column::new()
+    let is_icmp = key.port1.is_none() || key.port2.is_none();
+    let protocol_caption = if is_icmp {
+        protocol_translation(language)
+    } else {
+        transport_protocol_translation(language)
+    };
+
+    let mut ret_val = Column::new()
         .spacing(10)
         .padding([0, 0, 0, 40])
         .width(Length::FillPortion(2))
@@ -202,15 +210,20 @@ fn col_info(
             ),
         )
         .push(TextType::highlighted_subtitle_with_desc(
-            transport_protocol_translation(language),
+            protocol_caption,
             &key.protocol.to_string(),
             font,
-        ))
-        .push(TextType::highlighted_subtitle_with_desc(
+        ));
+
+    if !is_icmp {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             application_protocol_translation(language),
             &val.app_protocol.to_string(),
             font,
-        ))
+        ));
+    }
+
+    ret_val = ret_val
         .push(TextType::highlighted_subtitle_with_desc(
             &format!(
                 "{} ({})",
@@ -229,7 +242,9 @@ fn col_info(
             ),
             font,
         ))
-        .push(vertical_space(Length::FillPortion(1)))
+        .push(vertical_space(Length::FillPortion(1)));
+
+    ret_val
 }
 
 fn get_host_info_col(
@@ -300,6 +315,11 @@ fn get_src_or_dest_col(
     language: Language,
     timing_events: &TimingEvents,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let address_caption = if port.is_some() {
+        socket_address_translation(language)
+    } else {
+        address_translation(language)
+    };
     Column::new()
         .spacing(4)
         .push(
@@ -313,7 +333,7 @@ fn get_src_or_dest_col(
                 .spacing(10)
                 .align_items(Alignment::End)
                 .push(TextType::highlighted_subtitle_with_desc(
-                    socket_address_translation(language),
+                    address_caption,
                     &get_socket_address(ip, port),
                     font,
                 ))

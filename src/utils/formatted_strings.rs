@@ -209,6 +209,6 @@ pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
             format!("{address}:{res}")
         }
     } else {
-        format!("{address}")
+        address.to_owned()
     }
 }

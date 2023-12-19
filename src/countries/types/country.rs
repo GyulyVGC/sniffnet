@@ -264,7 +264,7 @@ impl Default for Country {
 impl fmt::Display for Country {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.eq(&Country::ZZ) {
-            write!(f, "")
+            write!(f, "?")
         } else {
             write!(f, "{self:?}")
         }

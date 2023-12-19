@@ -375,7 +375,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             .width(Length::Fixed(width))
             .push(
                 Row::new()
-                    .push(Text::new(format!("{app:?}")).font(font))
+                    .push(Text::new(app.to_string()).font(font))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
@@ -392,7 +392,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app: format!("{app:?}"),
+                    app: app.to_string(),
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),

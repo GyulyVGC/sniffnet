@@ -111,7 +111,7 @@ pub fn from_port_to_application_protocol(port: u16) -> AppProtocol {
 impl fmt::Display for AppProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.eq(&AppProtocol::Other) {
-            write!(f, "-")
+            write!(f, "?")
         } else {
             write!(f, "{self:?}")
         }

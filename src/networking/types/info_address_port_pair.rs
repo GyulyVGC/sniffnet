@@ -51,15 +51,12 @@ impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bytes_string = get_formatted_bytes_string(self.transmitted_bytes);
 
-        let app_string = match self.app_protocol {
-            AppProtocol::Other => "Other".to_string(),
-            _ => self.app_protocol.to_string(),
-        };
-
         write!(
             f,
             "{:^9}{:>10}  {:>9}   ",
-            app_string, self.transmitted_packets, bytes_string,
+            self.app_protocol.to_string(),
+            self.transmitted_packets,
+            bytes_string,
         )
     }
 }
