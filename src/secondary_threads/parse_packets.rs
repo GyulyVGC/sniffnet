@@ -14,6 +14,7 @@ use crate::networking::manage_packets::{
 };
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
@@ -51,12 +52,14 @@ pub fn parse_packets(
                     Ok(headers) => {
                         let mut exchanged_bytes = 0;
                         let mut mac_addresses = (String::new(), String::new());
+                        let mut icmp_type = IcmpType::default();
                         let mut packet_filters_fields = PacketFiltersFields::default();
 
                         let key_option = analyze_headers(
                             headers,
                             &mut mac_addresses,
                             &mut exchanged_bytes,
+                            &mut icmp_type,
                             &mut packet_filters_fields,
                         );
                         if key_option.is_none() {
@@ -74,6 +77,7 @@ pub fn parse_packets(
                                 &key,
                                 device,
                                 mac_addresses,
+                                icmp_type,
                                 exchanged_bytes,
                                 application_protocol,
                             );

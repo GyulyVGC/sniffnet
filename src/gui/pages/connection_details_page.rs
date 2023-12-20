@@ -1,8 +1,9 @@
 use std::net::IpAddr;
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
+use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
@@ -11,6 +12,7 @@ use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -19,6 +21,7 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
+use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
@@ -31,7 +34,7 @@ use crate::translations::translations_2::{
     fqdn_translation, mac_address_translation, socket_address_translation, source_translation,
     transmitted_data_translation,
 };
-use crate::translations::translations_3::copy_translation;
+use crate::translations::translations_3::{copy_translation, messages_translation};
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
@@ -196,7 +199,7 @@ fn col_info(
 
     let mut ret_val = Column::new()
         .spacing(10)
-        .padding([0, 0, 0, 40])
+        .padding([20, 10, 20, 40])
         .width(Length::FillPortion(2))
         .push(vertical_space(Length::FillPortion(1)))
         .push(
@@ -223,26 +226,47 @@ fn col_info(
         ));
     }
 
-    ret_val = ret_val
-        .push(TextType::highlighted_subtitle_with_desc(
-            &format!(
-                "{} ({})",
-                transmitted_data_translation(language),
-                if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
-                    outgoing_translation(language).to_lowercase()
-                } else {
-                    incoming_translation(language).to_lowercase()
-                }
-            ),
-            &format!(
-                "{}\n   {} {}",
-                get_formatted_bytes_string_with_b(val.transmitted_bytes),
-                val.transmitted_packets,
-                packets_translation(language)
-            ),
-            font,
-        ))
-        .push(vertical_space(Length::FillPortion(1)));
+    ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+        &format!(
+            "{} ({})",
+            transmitted_data_translation(language),
+            if val.traffic_direction.eq(&TrafficDirection::Outgoing) {
+                outgoing_translation(language).to_lowercase()
+            } else {
+                incoming_translation(language).to_lowercase()
+            }
+        ),
+        &format!(
+            "{}\n   {} {}",
+            get_formatted_bytes_string_with_b(val.transmitted_bytes),
+            val.transmitted_packets,
+            packets_translation(language)
+        ),
+        font,
+    ));
+
+    if is_icmp {
+        ret_val =
+            ret_val.push(
+                Column::new()
+                    .push(
+                        Text::new(format!("{}:", messages_translation(language)))
+                            .style(TextType::Subtitle)
+                            .font(font),
+                    )
+                    .push(
+                        Scrollable::new(Column::new().padding([0, 10, 10, 0]).push(
+                            Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font),
+                        ))
+                        .direction(Direction::Both {
+                            vertical: ScrollbarType::properties(),
+                            horizontal: ScrollbarType::properties(),
+                        }),
+                    ),
+            );
+    }
+
+    ret_val = ret_val.push(vertical_space(Length::FillPortion(1)));
 
     ret_val
 }
