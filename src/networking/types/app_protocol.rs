@@ -181,6 +181,6 @@ mod tests {
     #[test]
     fn app_protocol_display_other() {
         let test_str = AppProtocol::Other.to_string();
-        assert_eq!(test_str, "-");
+        assert_eq!(test_str, "?");
     }
 }
