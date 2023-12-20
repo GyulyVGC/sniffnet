@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{copy_translation, messages_translation};
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::utils::types::icon::Icon;
-use crate::{Language, Sniffer, StyleType};
+use crate::{Language, Protocol, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -190,7 +190,7 @@ fn col_info(
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let is_icmp = key.port1.is_none() || key.port2.is_none();
+    let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let protocol_caption = if is_icmp {
         protocol_translation(language)
     } else {
