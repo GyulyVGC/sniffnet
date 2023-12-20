@@ -73,3 +73,11 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         _ => "Invalid filters",
     }
 }
+
+pub fn messages_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Messages",
+        Language::IT => "Messaggi",
+        _ => "Messages",
+    }
+}

@@ -56,13 +56,18 @@ impl PortCollection {
         Some(Self { ports, ranges })
     }
 
-    pub(crate) fn contains(&self, port: u16) -> bool {
+    pub(crate) fn contains(&self, port: Option<u16>) -> bool {
+        // ignore port filter in case of ICMP
+        if port.is_none() {
+            return true;
+        }
+
         for range in &self.ranges {
-            if range.contains(&port) {
+            if range.contains(&port.unwrap()) {
                 return true;
             }
         }
-        self.ports.contains(&port)
+        self.ports.contains(&port.unwrap())
     }
 }
 
@@ -82,13 +87,13 @@ mod tests {
     #[test]
     fn test_default_collection_contains_everything() {
         let collection = PortCollection::default();
-        assert!(collection.contains(0));
-        assert!(collection.contains(1));
-        assert!(collection.contains(2));
-        assert!(collection.contains(80));
-        assert!(collection.contains(8080));
-        assert!(collection.contains(55333));
-        assert!(collection.contains(65535));
+        assert!(collection.contains(Some(0)));
+        assert!(collection.contains(Some(1)));
+        assert!(collection.contains(Some(2)));
+        assert!(collection.contains(Some(80)));
+        assert!(collection.contains(Some(8080)));
+        assert!(collection.contains(Some(55333)));
+        assert!(collection.contains(Some(65535)));
     }
 
     #[test]
@@ -158,20 +163,20 @@ mod tests {
     #[test]
     fn test_port_collection_contains() {
         let collection = PortCollection::new("1,2,25-30,55,101-117").unwrap();
-        assert!(collection.contains(1));
-        assert!(collection.contains(2));
-        assert!(collection.contains(25));
-        assert!(collection.contains(27));
-        assert!(collection.contains(30));
-        assert!(collection.contains(55));
-        assert!(collection.contains(101));
-        assert!(collection.contains(109));
-        assert!(collection.contains(117));
-        assert!(!collection.contains(4));
-        assert!(!collection.contains(24));
-        assert!(!collection.contains(31));
-        assert!(!collection.contains(100));
-        assert!(!collection.contains(118));
-        assert!(!collection.contains(8080));
+        assert!(collection.contains(Some(1)));
+        assert!(collection.contains(Some(2)));
+        assert!(collection.contains(Some(25)));
+        assert!(collection.contains(Some(27)));
+        assert!(collection.contains(Some(30)));
+        assert!(collection.contains(Some(55)));
+        assert!(collection.contains(Some(101)));
+        assert!(collection.contains(Some(109)));
+        assert!(collection.contains(Some(117)));
+        assert!(!collection.contains(Some(4)));
+        assert!(!collection.contains(Some(24)));
+        assert!(!collection.contains(Some(31)));
+        assert!(!collection.contains(Some(100)));
+        assert!(!collection.contains(Some(118)));
+        assert!(!collection.contains(Some(8080)));
     }
 }

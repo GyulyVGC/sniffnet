@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
 
@@ -13,6 +14,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
+use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
@@ -28,6 +30,7 @@ pub fn analyze_headers(
     headers: PacketHeaders,
     mac_addresses: &mut (String, String),
     exchanged_bytes: &mut u128,
+    icmp_type: &mut IcmpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
     if !analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1) {
@@ -49,6 +52,7 @@ pub fn analyze_headers(
         &mut packet_filters_fields.sport,
         &mut packet_filters_fields.dport,
         &mut packet_filters_fields.protocol,
+        icmp_type,
     ) {
         return None;
     }
@@ -114,30 +118,45 @@ fn analyze_network_header(
 /// Returns false if packet has to be skipped.
 fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
-    port1: &mut u16,
-    port2: &mut u16,
+    port1: &mut Option<u16>,
+    port2: &mut Option<u16>,
     protocol: &mut Protocol,
+    icmp_type: &mut IcmpType,
 ) -> bool {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
-            *port1 = udp_header.source_port;
-            *port2 = udp_header.destination_port;
+            *port1 = Some(udp_header.source_port);
+            *port2 = Some(udp_header.destination_port);
             *protocol = Protocol::UDP;
             true
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
-            *port1 = tcp_header.source_port;
-            *port2 = tcp_header.destination_port;
+            *port1 = Some(tcp_header.source_port);
+            *port2 = Some(tcp_header.destination_port);
             *protocol = Protocol::TCP;
+            true
+        }
+        Some(TransportHeader::Icmpv4(icmpv4_header)) => {
+            *port1 = None;
+            *port2 = None;
+            *protocol = Protocol::ICMP;
+            *icmp_type = IcmpTypeV4::from_etherparse(&icmpv4_header.icmp_type);
+            true
+        }
+        Some(TransportHeader::Icmpv6(icmpv6_header)) => {
+            *port1 = None;
+            *port2 = None;
+            *protocol = Protocol::ICMP;
+            *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
         _ => false,
     }
 }
 
-pub fn get_app_protocol(src_port: u16, dst_port: u16) -> AppProtocol {
+pub fn get_app_protocol(src_port: Option<u16>, dst_port: Option<u16>) -> AppProtocol {
     let mut application_protocol = from_port_to_application_protocol(src_port);
-    if (application_protocol).eq(&AppProtocol::Other) {
+    if (application_protocol).eq(&AppProtocol::Unknown) {
         application_protocol = from_port_to_application_protocol(dst_port);
     }
     application_protocol
@@ -149,6 +168,7 @@ pub fn modify_or_insert_in_map(
     key: &AddressPortPair,
     my_device: &MyDevice,
     mac_addresses: (String, String),
+    icmp_type: IcmpType,
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
 ) -> InfoAddressPortPair {
@@ -187,6 +207,12 @@ pub fn modify_or_insert_in_map(
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = now;
+            if key.protocol.eq(&Protocol::ICMP) {
+                info.icmp_types
+                    .entry(icmp_type)
+                    .and_modify(|n| *n += 1)
+                    .or_insert(1);
+            }
         })
         .or_insert(InfoAddressPortPair {
             mac_address1: mac_addresses.0,
@@ -197,6 +223,11 @@ pub fn modify_or_insert_in_map(
             final_timestamp: now,
             app_protocol: application_protocol,
             traffic_direction,
+            icmp_types: if key.protocol.eq(&Protocol::ICMP) {
+                HashMap::from([(icmp_type, 1)])
+            } else {
+                HashMap::new()
+            },
         })
         .clone();
 

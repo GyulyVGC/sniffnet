@@ -593,9 +593,16 @@ mod tests {
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
         assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::TCP]));
+        assert_eq!(
+            sniffer.filters.protocols,
+            HashSet::from([Protocol::TCP, Protocol::ICMP])
+        );
         sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
+        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ICMP]));
+        sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
         assert_eq!(sniffer.filters.protocols, HashSet::new());
+        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
+        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::UDP]));
     }
 
     #[test]

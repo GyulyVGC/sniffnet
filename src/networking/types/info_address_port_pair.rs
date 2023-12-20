@@ -1,10 +1,12 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
+use std::collections::HashMap;
 use std::fmt;
 
 use chrono::{DateTime, Local};
 
+use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
@@ -12,7 +14,7 @@ use crate::AppProtocol;
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
     pub mac_address1: String,
@@ -30,36 +32,20 @@ pub struct InfoAddressPortPair {
     pub app_protocol: AppProtocol,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
-}
-
-impl Default for InfoAddressPortPair {
-    fn default() -> Self {
-        Self {
-            mac_address1: String::new(),
-            mac_address2: String::new(),
-            transmitted_bytes: 0,
-            transmitted_packets: 0,
-            initial_timestamp: DateTime::default(),
-            final_timestamp: DateTime::default(),
-            app_protocol: AppProtocol::Other,
-            traffic_direction: TrafficDirection::default(),
-        }
-    }
+    /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
+    pub icmp_types: HashMap<IcmpType, usize>,
 }
 
 impl fmt::Display for InfoAddressPortPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let bytes_string = get_formatted_bytes_string(self.transmitted_bytes);
 
-        let app_string = match self.app_protocol {
-            AppProtocol::Other => "Other".to_string(),
-            _ => self.app_protocol.to_string(),
-        };
-
         write!(
             f,
             "{:^9}{:>10}  {:>9}   ",
-            app_string, self.transmitted_packets, bytes_string,
+            self.app_protocol.to_string(),
+            self.transmitted_packets,
+            bytes_string,
         )
     }
 }

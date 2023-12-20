@@ -8,6 +8,8 @@ pub enum Protocol {
     TCP,
     /// User Datagram Protocol
     UDP,
+    /// Internet Control Message Protocol
+    ICMP,
 }
 
 impl fmt::Display for Protocol {
@@ -17,5 +19,5 @@ impl fmt::Display for Protocol {
 }
 
 impl Protocol {
-    pub(crate) const ALL: [Protocol; 2] = [Protocol::TCP, Protocol::UDP];
+    pub(crate) const ALL: [Protocol; 3] = [Protocol::TCP, Protocol::UDP, Protocol::ICMP];
 }

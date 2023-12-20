@@ -43,7 +43,7 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             }
             // check application protocol filter
             let searched_app = &*sniffer.search.app.to_lowercase();
-            let app = format!("{:?}", value.app_protocol).to_lowercase();
+            let app = value.app_protocol.to_string().to_lowercase();
             if !searched_app.is_empty() && app.ne(searched_app) {
                 return false;
             }
@@ -160,13 +160,16 @@ pub fn get_app_entries(
     chart_type: ChartType,
 ) -> Vec<(AppProtocol, DataInfo)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&AppProtocol, &DataInfo)> =
-        info_traffic_lock.app_protocols.iter().collect();
+    let mut sorted_vec: Vec<(&AppProtocol, &DataInfo)> = info_traffic_lock
+        .app_protocols
+        .iter()
+        .filter(|(app_protocol, _)| app_protocol.ne(&&AppProtocol::NotApplicable))
+        .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if p1.eq(&AppProtocol::Other) {
+        if p1.eq(&AppProtocol::Unknown) {
             Ordering::Greater
-        } else if p2.eq(&AppProtocol::Other) {
+        } else if p2.eq(&AppProtocol::Unknown) {
             Ordering::Less
         } else {
             match chart_type {

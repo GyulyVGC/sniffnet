@@ -1,11 +1,12 @@
-use crate::gui::styles::container::ContainerType;
-use crate::gui::types::message::Message;
-use crate::translations::translations::hide_translation;
-use crate::{Language, StyleType};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Text, Tooltip};
 use iced::{Font, Length, Renderer};
+
+use crate::gui::styles::container::ContainerType;
+use crate::gui::types::message::Message;
+use crate::translations::translations::hide_translation;
+use crate::{Language, StyleType};
 
 #[allow(clippy::module_name_repetitions)]
 pub fn button_hide(
