@@ -155,15 +155,11 @@ fn analyze_transport_header(
 }
 
 pub fn get_app_protocol(src_port: Option<u16>, dst_port: Option<u16>) -> AppProtocol {
-    if src_port.is_some() && dst_port.is_some() {
-        let mut application_protocol = from_port_to_application_protocol(src_port.unwrap());
-        if (application_protocol).eq(&AppProtocol::Other) {
-            application_protocol = from_port_to_application_protocol(dst_port.unwrap());
-        }
-        application_protocol
-    } else {
-        AppProtocol::Other
+    let mut application_protocol = from_port_to_application_protocol(src_port);
+    if (application_protocol).eq(&AppProtocol::Unknown) {
+        application_protocol = from_port_to_application_protocol(dst_port);
     }
+    application_protocol
 }
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.

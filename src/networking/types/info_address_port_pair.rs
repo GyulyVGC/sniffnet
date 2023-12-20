@@ -14,7 +14,7 @@ use crate::AppProtocol;
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
     pub mac_address1: String,
@@ -34,22 +34,6 @@ pub struct InfoAddressPortPair {
     pub traffic_direction: TrafficDirection,
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
     pub icmp_types: HashMap<IcmpType, usize>,
-}
-
-impl Default for InfoAddressPortPair {
-    fn default() -> Self {
-        Self {
-            mac_address1: String::new(),
-            mac_address2: String::new(),
-            transmitted_bytes: 0,
-            transmitted_packets: 0,
-            initial_timestamp: DateTime::default(),
-            final_timestamp: DateTime::default(),
-            app_protocol: AppProtocol::Other,
-            traffic_direction: TrafficDirection::default(),
-            icmp_types: HashMap::new(),
-        }
-    }
 }
 
 impl fmt::Display for InfoAddressPortPair {

@@ -363,8 +363,8 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             data_info,
         );
 
-        // check if Other is longer than the first entry
-        if app.eq(&AppProtocol::Other) && incoming_bar_len + outgoing_bar_len > width * 0.88 {
+        // check if Unknown is longer than the first entry
+        if app.eq(&AppProtocol::Unknown) && incoming_bar_len + outgoing_bar_len > width * 0.88 {
             let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
             incoming_bar_len = width * 0.88 * incoming_proportion;
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
