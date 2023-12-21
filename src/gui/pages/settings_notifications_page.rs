@@ -1,18 +1,16 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::Slider;
 use iced::widget::{
     horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text, TextInput,
 };
+use iced::widget::{Button, Slider};
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
 use crate::gui::components::button::button_hide;
-use crate::gui::components::radio::{
-    sound_bytes_threshold_radios, sound_favorite_radios, sound_packets_threshold_radios,
-};
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{
@@ -24,10 +22,12 @@ use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
     BytesNotification, FavoriteNotification, Notification, PacketsNotification,
 };
+use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
     bytes_threshold_translation, favorite_notification_translation,
     notifications_title_translation, packets_threshold_translation, per_second_translation,
-    settings_translation, specify_multiples_translation, threshold_translation, volume_translation,
+    settings_translation, sound_translation, specify_multiples_translation, threshold_translation,
+    volume_translation,
 };
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
@@ -144,14 +144,13 @@ fn get_packets_notify(
             .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
             .push(input_group_packets(packets_notification, font, language));
-        let sound_row =
-            Row::new()
-                .push(horizontal_space(Fixed(50.0)))
-                .push(sound_packets_threshold_radios(
-                    packets_notification,
-                    font,
-                    language,
-                ));
+        let sound_row = Row::new()
+            .push(horizontal_space(Fixed(50.0)))
+            .push(sound_buttons(
+                Notification::Packets(packets_notification),
+                font,
+                language,
+            ));
         ret_val = ret_val
             .push(vertical_space(Fixed(5.0)))
             .push(input_row)
@@ -210,14 +209,13 @@ fn get_bytes_notify(
             .push(horizontal_space(Fixed(50.0)))
             .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
             .push(input_group_bytes(bytes_notification, font, language));
-        let sound_row =
-            Row::new()
-                .push(horizontal_space(Fixed(50.0)))
-                .push(sound_bytes_threshold_radios(
-                    bytes_notification,
-                    font,
-                    language,
-                ));
+        let sound_row = Row::new()
+            .push(horizontal_space(Fixed(50.0)))
+            .push(sound_buttons(
+                Notification::Bytes(bytes_notification),
+                font,
+                language,
+            ));
         ret_val = ret_val
             .push(vertical_space(Fixed(5.0)))
             .push(input_row)
@@ -258,7 +256,11 @@ fn get_favorite_notify(
     if favorite_notification.notify_on_favorite {
         let sound_row = Row::new()
             .push(horizontal_space(Fixed(50.0)))
-            .push(sound_favorite_radios(favorite_notification, font, language));
+            .push(sound_buttons(
+                Notification::Favorite(favorite_notification),
+                font,
+                language,
+            ));
         ret_val = ret_val.push(vertical_space(Fixed(5.0))).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
@@ -395,6 +397,51 @@ fn volume_slider(
     .height(Length::Fixed(60.0))
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
+}
+
+pub fn sound_buttons(
+    notification: Notification,
+    font: Font,
+    language: Language,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    let current_sound = match notification {
+        Notification::Packets(n) => n.sound,
+        Notification::Bytes(n) => n.sound,
+        Notification::Favorite(n) => n.sound,
+    };
+
+    let mut ret_val = Row::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(format!("{}:", sound_translation(language))).font(font));
+
+    for option in Sound::ALL {
+        let is_active = current_sound.eq(&option);
+        let message_value = match notification {
+            Notification::Packets(n) => {
+                Notification::Packets(PacketsNotification { sound: option, ..n })
+            }
+            Notification::Bytes(n) => Notification::Bytes(BytesNotification { sound: option, ..n }),
+            Notification::Favorite(n) => {
+                Notification::Favorite(FavoriteNotification { sound: option, ..n })
+            }
+        };
+        ret_val = ret_val.push(
+            Button::new(option.get_text(font))
+                .width(Length::Fixed(90.0))
+                .height(Length::Fixed(30.0))
+                .style(if is_active {
+                    ButtonType::BorderedRoundSelected
+                } else {
+                    ButtonType::BorderedRound
+                })
+                .on_press(Message::UpdateNotificationSettings(
+                    message_value,
+                    option.ne(&Sound::None),
+                )),
+        );
+    }
+    ret_val
 }
 
 pub fn settings_header(

@@ -15,7 +15,6 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
-use crate::gui::components::radio::chart_radios;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -532,14 +531,33 @@ fn col_data_representation(
     font: Font,
     chart_type: ChartType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    Column::new()
-        .width(Length::FillPortion(1))
-        .push(
-            Text::new(format!("{}:", data_representation_translation(language)))
-                .style(TextType::Subtitle)
-                .font(font),
-        )
-        .push(chart_radios(chart_type, font, language))
+    let mut ret_val = Column::new().spacing(5).width(Length::FillPortion(1)).push(
+        Text::new(format!("{}:", data_representation_translation(language)))
+            .style(TextType::Subtitle)
+            .font(font),
+    );
+
+    for option in ChartType::ALL {
+        let is_active = chart_type.eq(&option);
+        ret_val = ret_val.push(
+            Button::new(
+                Text::new(option.get_label(language).to_owned())
+                    .width(Length::Fill)
+                    .horizontal_alignment(Horizontal::Center)
+                    .vertical_alignment(Vertical::Center)
+                    .font(font),
+            )
+            .width(Length::Fill)
+            .height(Length::Fixed(33.0))
+            .style(if is_active {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::ChartSelection(option)),
+        );
+    }
+    ret_val
 }
 
 fn col_bytes_packets(

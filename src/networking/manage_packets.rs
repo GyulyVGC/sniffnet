@@ -233,7 +233,7 @@ pub fn modify_or_insert_in_map(
 
     if let Some(host_info) = info_traffic
         .addresses_resolved
-        .get(&get_address_to_lookup(key, traffic_direction))
+        .get(&get_address_to_lookup(key, new_info.traffic_direction))
         .cloned()
     {
         if info_traffic.favorite_hosts.contains(&host_info.1) {

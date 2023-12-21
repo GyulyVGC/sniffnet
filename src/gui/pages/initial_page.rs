@@ -156,6 +156,7 @@ fn col_protocol_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
+                    .width(Length::Fill)
                     .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
