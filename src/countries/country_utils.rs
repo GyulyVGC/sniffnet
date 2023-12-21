@@ -19,6 +19,7 @@ use crate::countries::flags_pictures::{
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::svg::SvgType;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
@@ -35,6 +36,7 @@ fn get_flag_from_country(
 ) -> (Svg<Renderer<StyleType>>, String) {
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
+    let mut svg_style = SvgType::Standard;
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
         Country::AD => AD,
         Country::AE => AE,
@@ -284,19 +286,24 @@ fn get_flag_from_country(
         Country::ZZ => {
             if is_local {
                 tooltip = local_translation(language);
+                svg_style = SvgType::AdaptColor;
                 HOME
             } else if traffic_type.eq(&TrafficType::Multicast) {
                 tooltip = "Multicast".to_string();
+                svg_style = SvgType::AdaptColor;
                 MULTICAST
             } else if traffic_type.eq(&TrafficType::Broadcast) {
                 tooltip = "Broadcast".to_string();
+                svg_style = SvgType::AdaptColor;
                 BROADCAST
             } else {
                 tooltip = unknown_translation(language);
+                svg_style = SvgType::AdaptColor;
                 UNKNOWN
             }
         }
     })))
+    .style(svg_style)
     .width(Length::Fixed(width))
     .height(Length::Fixed(width * 0.75));
 
@@ -340,6 +347,7 @@ pub fn get_computer_tooltip(
             (false, TrafficType::Unicast) => UNKNOWN,
         },
     )))
+    .style(SvgType::AdaptColor)
     .width(Length::Fixed(FLAGS_WIDTH_BIG))
     .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75));
 
