@@ -8,10 +8,10 @@
 
 ## 👋 Welcome
 
-Sniffnet is an application to make Internet traffic analysis easily understandable to the vast majority of people, even if they are not networking expert.
+Sniffnet is an application to empower everyone with a tool to comfortably monitor their Internet traffic.
 
-Although, at the same time, Sniffnet tries to convey information that can be useful to effectively monitor the network traffic,
-with many additional functionalities planned for the future releases.
+The main pillar of Sniffnet is to represent in a straightforward way concepts that are usually considered advanced:
+for this reason implementing an optimal UI for the application is crucially important.
 
 ## 📖 Table of contents
 
@@ -29,28 +29,27 @@ with many additional functionalities planned for the future releases.
 
 ## 🚢 How to contribute design
 
-1. Check out open [issues](https://github.com/gyulyvgc/sniffnet/issues) here on GitHub (we label them with `design: 💅required`)
-2. Feel free to open an issue on your own if you find something you would like to contribute to the project and use the `design: 💡idea` label for it.
-3. Clone the public Figma files if available or create new ones and share them publicly
-4. Add your contributions to an issue, and I promise I will review your contribution carefully and foster discussions
+1. Check out [open design issues](https://github.com/GyulyVGC/sniffnet/labels/design) here on GitHub (we label them with the `design` label).
+2. Feel free to open an issue on your own if you find something you would like to contribute to the project and use the `design` label for it.
+3. Add your ideas to an issue, and I promise I will review your contribution carefully and foster discussions.
 
-**We encourage you to:**
+**I encourage you to:**
 
 - Get in touch with me by starting a discussion on [GitHub](https://github.com/gyulyvgc/sniffnet/discussions).
-- Check out our [Contributor Guide](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) and
-  [Code of Conduct](https://github.com/GyulyVGC/sniffnet/blob/main/CODE_OF_CONDUCT.md)
+- Check out the [Contributor Guide](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md) and
+  [Code of Conduct](https://github.com/GyulyVGC/sniffnet/blob/main/CODE_OF_CONDUCT.md).
 
-## 🚀 Our Main Product
+## 🚀 The Main Product
 
-Sniffnet can be downloaded from [here](https://github.com/GyulyVGC/sniffnet/releases)
+Sniffnet can be downloaded from [here](https://sniffnet.net/download/).
 
 ### Target audience
 
-All users with a decent amount of technological knowledge. Typical users' age ranges from 16 to 60.
+All users with a decent amount of technological knowledge.
 
 ### Design files
 
-> Since I do not have a design team at hand – most of my product does not have any Design files, and you'll be forced to browse through the product itself and propose improvements.
+> Since I do not have a design team at hand most of the product does not have any Design files, and you'll be forced to browse through the product itself and propose improvements.
 
 ## 💅 Design relevant materials
 
@@ -58,15 +57,15 @@ Here is a list of design relevant information and materials:
 
 ### Fonts
 
-I'm using `Inconsolata`. The fonts I used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
+Sniffnet uses `Sarasa Gothic mono`. The fonts used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
 
-### Colors
+### Colors and components
 
-For info on the used RGB colors, I suggest you to give a look at the file [style.rs](https://github.com/GyulyVGC/sniffnet/blob/main/src/utility/style_constants.rs)
+For info on the used RGB colors as well as the UI components, I suggest you to give a look at the files in the [styles folder](https://github.com/GyulyVGC/sniffnet/blob/main/src/gui/styles).
 
 ### Logos
 
-You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/logos)
+You can find a set of logos [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/logos/raw).
 
 ## 🎓 License
 
