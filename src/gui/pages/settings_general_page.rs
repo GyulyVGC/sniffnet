@@ -24,6 +24,7 @@ use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
+use crate::utils::types::web_page::WebPage;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -126,10 +127,11 @@ fn language_picklist(
                         .horizontal_alignment(Horizontal::Center)
                         .size(15),
                 )
+                .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
                 .padding(2)
                 .height(Fixed(20.0))
                 .width(Fixed(20.0)),
-                "       The selected language       \nis not fully updated to version 1.3",
+                "The selected language is not\nfully updated to version 1.3 ↗",
                 Position::FollowCursor,
             )
             .font(font)

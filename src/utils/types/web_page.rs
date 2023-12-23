@@ -9,6 +9,8 @@ pub enum WebPage {
     WebsiteDownload,
     /// My sponsor page
     Sponsor,
+    /// Sniffnet issue #60 on GitHub
+    IssueLanguages,
 }
 
 impl WebPage {
@@ -18,6 +20,7 @@ impl WebPage {
             WebPage::Website => "https://www.sniffnet.net",
             WebPage::Sponsor => "https://github.com/sponsors/GyulyVGC",
             WebPage::WebsiteDownload => "https://www.sniffnet.net/download/",
+            WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",
         }
     }
 }
