@@ -5,7 +5,7 @@
 use iced::widget::checkbox::Appearance;
 use iced::Background;
 
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum CheckboxType {
@@ -18,8 +18,9 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
 
     fn active(&self, _: &Self::Style, is_checked: bool) -> Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
-            background: Background::Color(colors.buttons),
+            background: Background::Color(color_buttons),
             icon_color: colors.text_body,
             border_radius: 0.0.into(),
             border_width: if is_checked { 1.0 } else { 0.0 },
@@ -30,8 +31,9 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style, _is_checked: bool) -> Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
-            background: Background::Color(colors.buttons),
+            background: Background::Color(color_buttons),
             icon_color: colors.text_body,
             border_radius: 0.0.into(),
             border_width: 1.0,

@@ -11,7 +11,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -31,8 +31,8 @@ use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_font();
+    let font_headers = style.get_font_headers();
 
     let mut body = Column::new()
         .width(Length::Fill)
@@ -112,7 +112,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = get_font(style);
+    let font = style.get_font();
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 

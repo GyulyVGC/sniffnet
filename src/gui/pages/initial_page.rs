@@ -19,7 +19,7 @@ use pcap::Device;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -42,7 +42,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
-    let font = get_font(style);
+    let font = style.get_font();
 
     let col_adapter = get_col_adapter(sniffer, font);
 

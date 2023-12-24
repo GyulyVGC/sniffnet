@@ -5,8 +5,7 @@
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::{get_alpha_round_borders, get_alpha_round_containers};
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum TextInputType {
@@ -21,19 +20,17 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn active(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                _ => Color{a: get_alpha_round_borders(*self), ..color_buttons},
             }),
             border_radius: 0.0.into(),
             border_width: 1.5,
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => Color {
-                    a: get_alpha_round_borders(*self),
-                    ..colors.buttons
-                },
+                TextInputType::Standard => color_buttons,
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
             },
             icon_color: colors.text_body,
@@ -57,7 +54,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     fn placeholder_color(&self, _: &Self::Style) -> Color {
         let color = get_colors(*self).text_body;
         Color {
-            a: if self.is_nightly() { 0.2 } else { 0.7 },
+            a: if self.is_text_body_dark() { 0.7 } else { 0.2 },
             ..color
         }
     }
@@ -69,7 +66,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     fn disabled_color(&self, _style: &Self::Style) -> Color {
         let color = get_colors(*self).text_body;
         Color {
-            a: if self.is_nightly() { 0.2 } else { 0.7 },
+            a: if self.is_text_body_dark() { 0.7 } else { 0.2 },
             ..color
         }
     }
@@ -77,17 +74,18 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     fn selection_color(&self, _: &Self::Style) -> Color {
         let color = get_colors(*self).text_body;
         Color {
-            a: if self.is_nightly() { 0.05 } else { 0.4 },
+            a: if self.is_text_body_dark() { 0.4 } else { 0.05 },
             ..color
         }
     }
 
     fn hovered(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                _ => color_buttons,
             }),
             border_radius: 0.0.into(),
             border_width: 1.5,
@@ -101,12 +99,13 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => Color {
                     a: get_alpha_round_containers(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
             }),
             border_radius: 0.0.into(),
@@ -115,7 +114,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Badge => Color::TRANSPARENT,
                 TextInputType::Standard => Color {
                     a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, get_alpha_round_borders(*self)),
             },

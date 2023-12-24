@@ -5,12 +5,9 @@
 use iced::widget::container::Appearance;
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::{
-    get_alpha_chart_badge, get_alpha_round_borders, get_alpha_round_containers,
-    BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
-};
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum ContainerType {
@@ -30,6 +27,7 @@ impl iced::widget::container::StyleSheet for StyleType {
 
     fn appearance(&self, style: &Self::Style) -> Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Appearance {
             text_color: Some(match style {
                 ContainerType::Gradient(_) => colors.text_headers,
@@ -37,10 +35,10 @@ impl iced::widget::container::StyleSheet for StyleType {
             }),
             background: Some(match style {
                 ContainerType::Gradient(GradientType::None) => Background::Color(colors.secondary),
-                ContainerType::Tooltip => Background::Color(colors.buttons),
+                ContainerType::Tooltip => Background::Color(color_buttons),
                 ContainerType::BorderedRound => Background::Color(Color {
                     a: get_alpha_round_containers(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 }),
                 ContainerType::Neutral | ContainerType::Palette => {
                     Background::Color(Color::TRANSPARENT)
@@ -77,7 +75,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                 ContainerType::Palette => Color::BLACK,
                 _ => Color {
                     a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
             },
         }

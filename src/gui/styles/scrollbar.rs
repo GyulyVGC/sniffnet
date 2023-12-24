@@ -6,9 +6,9 @@ use iced::widget::scrollable::Properties;
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::{get_alpha_round_borders, BORDER_ROUNDED_RADIUS};
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS};
 use crate::gui::styles::types::palette::mix_colors;
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum ScrollbarType {
@@ -26,19 +26,19 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
     type Style = ScrollbarType;
 
     fn active(&self, _: &Self::Style) -> Scrollbar {
-        let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Scrollbar {
             background: Some(Background::Color(Color::TRANSPARENT)),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: Color {
                 a: get_alpha_round_borders(*self),
-                ..colors.buttons
+                ..color_buttons
             },
             scroller: Scroller {
                 color: Color {
                     a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
                 border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: 0.0,
@@ -49,22 +49,23 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         Scrollbar {
             background: Some(Background::Color(Color {
                 a: get_alpha_round_borders(*self),
-                ..colors.buttons
+                ..color_buttons
             })),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
             border_color: Color {
                 a: get_alpha_round_borders(*self),
-                ..colors.buttons
+                ..color_buttons
             },
             scroller: Scroller {
                 color: if is_mouse_over_scrollbar {
                     colors.secondary
                 } else {
-                    mix_colors(colors.secondary, colors.buttons)
+                    mix_colors(colors.secondary, color_buttons)
                 },
                 border_radius: BORDER_ROUNDED_RADIUS.into(),
                 border_width: 0.0,

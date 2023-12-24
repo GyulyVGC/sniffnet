@@ -4,51 +4,14 @@ use std::hash::{Hash, Hasher};
 use std::io::{BufReader, Read};
 use std::path::Path;
 
-use iced::Color;
 use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
 
 use crate::gui::styles::custom_themes::{dracula, gruvbox, nord, solarized};
 use crate::gui::styles::types::palette::Palette;
 
-use super::color_remote::{color_hash, deserialize_color, serialize_color};
+use super::color_remote::{color_hash};
 
-const FLOAT_PRECISION: f32 = 10000.0;
-
-/// Custom style with any relevant metadata
-// NOTE: This is flattened for ergonomics. With flatten, both [Palette] and [PaletteExtension] can be
-// defined in the TOML as a single entity rather than two separate tables. This is intentional because
-// the separation between palette and its extension is an implementation detail that shouldn't be exposed
-// to custom theme designers.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
-pub struct CustomPalette {
-    /// Base colors for the theme
-    #[serde(flatten)]
-    pub(crate) palette: Palette,
-    /// Extra colors such as the favorites star
-    #[serde(flatten)]
-    pub(crate) extension: PaletteExtension,
-}
-
-/// Extension color for themes.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
-pub struct PaletteExtension {
-    /// Color of favorites star
-    #[serde(
-        deserialize_with = "deserialize_color",
-        serialize_with = "serialize_color"
-    )]
-    pub starred: Color,
-    /// Badge/logo alpha
-    pub chart_badge_alpha: f32,
-    /// Round borders alpha
-    pub round_borders_alpha: f32,
-    /// Round containers alpha
-    pub round_containers_alpha: f32,
-    /// Nightly (dark) style
-    pub nightly: bool,
-}
-
-impl CustomPalette {
+impl Palette {
     /// Deserialize [`CustomPalette`] from `path`.
     ///
     /// # Arguments
@@ -72,47 +35,23 @@ impl CustomPalette {
     }
 }
 
-impl Hash for CustomPalette {
+impl Hash for Palette {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let Self { palette, extension } = self;
-
         let Palette {
             primary,
             secondary,
             outgoing,
-            buttons,
+            starred,
             text_headers,
             text_body,
-        } = palette;
+        } = self;
 
         color_hash(*primary, state);
         color_hash(*secondary, state);
         color_hash(*outgoing, state);
-        color_hash(*buttons, state);
+        color_hash(*starred, state);
         color_hash(*text_headers, state);
         color_hash(*text_body, state);
-
-        extension.hash(state);
-    }
-}
-
-impl Hash for PaletteExtension {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let Self {
-            starred,
-            chart_badge_alpha,
-            round_borders_alpha,
-            round_containers_alpha,
-            ..
-        } = self;
-
-        color_hash(*starred, state);
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        ((*chart_badge_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        ((*round_borders_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        ((*round_containers_alpha * FLOAT_PRECISION).trunc() as u32).hash(state);
     }
 }
 
@@ -128,43 +67,23 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
-    CustomToml(CustomPalette),
+    CustomToml(Palette),
 }
 
 impl ExtraStyles {
     /// [`Palette`] of the [`ExtraStyles`] variant
     pub fn to_palette(self) -> Palette {
         match self {
-            ExtraStyles::DraculaLight => dracula::dracula_light().palette,
-            ExtraStyles::DraculaDark => dracula::dracula_dark().palette,
-            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark().palette,
-            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light().palette,
-            ExtraStyles::NordLight => nord::nord_light().palette,
-            ExtraStyles::NordDark => nord::nord_dark().palette,
-            ExtraStyles::SolarizedDark => solarized::solarized_dark().palette,
-            ExtraStyles::SolarizedLight => solarized::solarized_light().palette,
-            ExtraStyles::CustomToml(user) => user.palette,
+            ExtraStyles::DraculaLight => dracula::dracula_light(),
+            ExtraStyles::DraculaDark => dracula::dracula_dark(),
+            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark(),
+            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light(),
+            ExtraStyles::NordLight => nord::nord_light(),
+            ExtraStyles::NordDark => nord::nord_dark(),
+            ExtraStyles::SolarizedDark => solarized::solarized_dark(),
+            ExtraStyles::SolarizedLight => solarized::solarized_light(),
+            ExtraStyles::CustomToml(user) => user,
         }
-    }
-
-    /// Extension colors for the current [`ExtraStyles`] variant
-    pub fn to_ext(self) -> PaletteExtension {
-        match self {
-            ExtraStyles::DraculaLight => dracula::dracula_light().extension,
-            ExtraStyles::DraculaDark => dracula::dracula_dark().extension,
-            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark().extension,
-            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light().extension,
-            ExtraStyles::NordLight => nord::nord_light().extension,
-            ExtraStyles::NordDark => nord::nord_dark().extension,
-            ExtraStyles::SolarizedDark => solarized::solarized_dark().extension,
-            ExtraStyles::SolarizedLight => solarized::solarized_light().extension,
-            ExtraStyles::CustomToml(user) => user.extension,
-        }
-    }
-
-    /// Theme is a night/dark style
-    pub fn is_nightly(self) -> bool {
-        self.to_ext().nightly
     }
 
     /// Slice of all implemented custom styles
@@ -229,7 +148,6 @@ mod tests {
                 round_borders_alpha: 0.4,
                 round_containers_alpha: 0.25,
                 chart_badge_alpha: 0.2,
-                nightly: true,
             },
         }
     }

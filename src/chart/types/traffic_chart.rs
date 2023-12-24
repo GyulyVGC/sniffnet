@@ -8,14 +8,12 @@ use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::style_constants::{
-    get_alpha_chart_badge, get_font_weight, CHARTS_LINE_BORDER,
-};
+use crate::gui::styles::style_constants::{CHARTS_LINE_BORDER};
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
-use crate::{get_colors, ChartType, Language, StyleType};
+use crate::{ChartType, Language, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -91,7 +89,7 @@ impl Chart<Message> for TrafficChart {
         _state: &Self::State,
         mut chart_builder: ChartBuilder<DB>,
     ) {
-        let font_weight = get_font_weight(self.style);
+        let font_weight = self.style.get_font_weight();
 
         if self.ticks == 0 {
             return;
@@ -103,7 +101,7 @@ impl Chart<Message> for TrafficChart {
         let color_incoming = to_rgb_color(colors.secondary);
         let color_outgoing = to_rgb_color(colors.outgoing);
         let color_font = to_rgb_color(colors.text_body);
-        let color_mix = get_alpha_chart_badge(self.style);
+        let color_mix = self.style.get_alpha_chart_badge();
 
         chart_builder
             .margin_right(30)

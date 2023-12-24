@@ -4,7 +4,7 @@
 
 use iced::widget::svg::Appearance;
 
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum SvgType {

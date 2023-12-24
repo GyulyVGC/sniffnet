@@ -13,11 +13,11 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, BORDER_WIDTH, FONT_SIZE_SUBTITLE,
+    BORDER_WIDTH, FONT_SIZE_SUBTITLE,
 };
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
-use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
+use crate::gui::styles::types::custom_palette::{ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
@@ -29,14 +29,15 @@ use crate::translations::translations_3::custom_style_translation;
 use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
+use crate::gui::styles::types::palette::Palette;
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let style_path = &sniffer.settings.style_path;
     let color_gradient = sniffer.settings.color_gradient;
     let language = sniffer.settings.language;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_font();
+    let font_headers = style.get_font_headers();
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -187,7 +188,7 @@ fn get_palette_container(
     description: String,
     on_press: StyleType,
 ) -> Button<'static, Message, Renderer<StyleType>> {
-    let font = get_font(style);
+    let font = style.get_font();
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
 
@@ -303,7 +304,7 @@ fn lazy_custom_style_input(
 ) -> Button<'static, Message, Renderer<StyleType>> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
-    let custom_palette = CustomPalette::from_file(custom_path);
+    let custom_palette = Palette::from_file(custom_path);
     let is_error = if custom_path.is_empty() {
         false
     } else {

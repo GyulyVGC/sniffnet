@@ -15,7 +15,6 @@ use super::color_remote::{deserialize_color, serialize_color};
 ///
 /// Best practices:
 /// - `primary` should be a kind of neutral color
-/// - `primary` and `buttons` should be similar colors
 /// - `secondary` and `outgoing` should be complementary colors if possible
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
@@ -39,12 +38,12 @@ pub struct Palette {
         serialize_with = "serialize_color"
     )]
     pub outgoing: Color,
-    /// Color of active buttons (when not hovered) and inactive tabs
+    /// Color of favorites' star symbol
     #[serde(
         deserialize_with = "deserialize_color",
         serialize_with = "serialize_color"
     )]
-    pub buttons: Color,
+    pub starred: Color,
     /// Color of header and footer text
     #[serde(
         deserialize_with = "deserialize_color",
@@ -57,16 +56,6 @@ pub struct Palette {
         serialize_with = "serialize_color"
     )]
     pub text_body: Color,
-}
-
-pub fn get_colors(style: StyleType) -> Palette {
-    match style {
-        StyleType::Night => NIGHT_STYLE,
-        StyleType::Day => DAY_STYLE,
-        StyleType::DeepSea => DEEP_SEA_STYLE,
-        StyleType::MonAmour => MON_AMOUR_STYLE,
-        StyleType::Custom(style) => style.to_palette(),
-    }
 }
 
 pub fn to_rgb_color(color: Color) -> RGBColor {

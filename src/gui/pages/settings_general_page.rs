@@ -14,7 +14,7 @@ use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -31,8 +31,8 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<S
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_font();
+    let font_headers = style.get_font_headers();
 
     let content = Column::new()
         .align_items(Alignment::Center)

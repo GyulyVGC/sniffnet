@@ -2,10 +2,8 @@
 
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
-use plotters::prelude::FontStyle;
 
 use crate::gui::styles::types::palette::Palette;
-use crate::StyleType;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -20,16 +18,15 @@ const SECONDARY_NIGHT: Color = Color {
     b: 0.0,
     a: 1.0,
 };
-const BUTTONS_NIGHT: Color = Color {
-    r: 0.1,
-    g: 0.1,
-    b: 0.1,
-    a: 1.0,
-};
 pub const NIGHT_STYLE: Palette = Palette {
     primary: PRIMARY_NIGHT,
     secondary: SECONDARY_NIGHT,
-    buttons: BUTTONS_NIGHT,
+    starred: Color {
+        r: 245.0 / 255.0,
+        g: 193.0 / 255.0,
+        b: 39.0 / 255.0,
+        a: 0.5,
+    },
     outgoing: SECONDARY_DAY,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
@@ -43,17 +40,16 @@ const SECONDARY_DAY: Color = Color {
     b: 0.7,
     a: 1.0,
 };
-const BUTTONS_DAY: Color = Color {
-    r: 0.8,
-    g: 0.8,
-    b: 0.8,
-    a: 1.0,
-};
 pub const DAY_STYLE: Palette = Palette {
     primary: PRIMARY_DAY,
     secondary: SECONDARY_DAY,
-    buttons: BUTTONS_DAY,
     outgoing: SECONDARY_NIGHT,
+    starred: Color {
+        r: 245.0 / 255.0,
+        g: 193.0 / 255.0,
+        b: 39.0 / 255.0,
+        a: 0.8,
+    },
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
 };
@@ -71,12 +67,6 @@ const SECONDARY_DEEP_SEA: Color = Color {
     b: 149.0 / 255.0,
     a: 1.0,
 };
-const BUTTONS_DEEP_SEA: Color = Color {
-    r: 48.0 / 255.0,
-    g: 71.0 / 255.0,
-    b: 94.0 / 255.0,
-    a: 1.0,
-};
 const OUTGOING_DEEP_SEA: Color = Color {
     r: 254.0 / 255.0,
     g: 254.0 / 255.0,
@@ -86,7 +76,12 @@ const OUTGOING_DEEP_SEA: Color = Color {
 pub const DEEP_SEA_STYLE: Palette = Palette {
     primary: PRIMARY_DEEP_SEA,
     secondary: SECONDARY_DEEP_SEA,
-    buttons: BUTTONS_DEEP_SEA,
+    starred: Color {
+        r: 245.0 / 255.0,
+        g: 193.0 / 255.0,
+        b: 39.0 / 255.0,
+        a: 0.5,
+    },
     outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
@@ -105,12 +100,6 @@ const PRIMARY_MON_AMOUR: Color = Color {
     b: 220.0 / 255.0,
     a: 1.0,
 };
-const BUTTONS_MON_AMOUR: Color = Color {
-    r: 242.0 / 255.0,
-    g: 190.0 / 255.0,
-    b: 209.0 / 255.0,
-    a: 1.0,
-};
 const OUTGOING_MON_AMOUR: Color = Color {
     r: 58.0 / 255.0,
     g: 166.0 / 255.0,
@@ -120,7 +109,12 @@ const OUTGOING_MON_AMOUR: Color = Color {
 pub const MON_AMOUR_STYLE: Palette = Palette {
     primary: PRIMARY_MON_AMOUR,
     secondary: SECONDARY_MON_AMOUR,
-    buttons: BUTTONS_MON_AMOUR,
+    starred: Color {
+        r: 245.0 / 255.0,
+        g: 193.0 / 255.0,
+        b: 39.0 / 255.0,
+        a: 0.8,
+    },
     outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
@@ -144,30 +138,6 @@ pub const SARASA_MONO: Font = Font {
     monospaced: true,
 };
 
-pub fn get_font(style: StyleType) -> Font {
-    if style.is_nightly() {
-        SARASA_MONO
-    } else {
-        SARASA_MONO_BOLD
-    }
-}
-
-pub fn get_font_weight(style: StyleType) -> FontStyle {
-    if style.is_nightly() {
-        FontStyle::Normal
-    } else {
-        FontStyle::Bold
-    }
-}
-
-pub fn get_font_headers(style: StyleType) -> Font {
-    if style.is_nightly() {
-        SARASA_MONO_BOLD
-    } else {
-        SARASA_MONO
-    }
-}
-
 //font to display icons
 pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
 pub const ICONS: Font = Font::with_name("Glyphter");
@@ -183,48 +153,3 @@ pub const BORDER_WIDTH: f32 = 2.0;
 pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
-
-/// Yellow color used in favorites star
-pub fn get_starred_color(style: StyleType) -> Color {
-    match style {
-        StyleType::Night | StyleType::DeepSea => Color {
-            r: 245.0 / 255.0,
-            g: 193.0 / 255.0,
-            b: 39.0 / 255.0,
-            a: 0.5,
-        },
-        StyleType::Day | StyleType::MonAmour => Color {
-            r: 245.0 / 255.0,
-            g: 193.0 / 255.0,
-            b: 39.0 / 255.0,
-            a: 0.8,
-        },
-        StyleType::Custom(style) => style.to_ext().starred,
-    }
-}
-
-pub fn get_alpha_chart_badge(style: StyleType) -> f32 {
-    match style {
-        StyleType::Night | StyleType::DeepSea => 0.2,
-        StyleType::Day | StyleType::MonAmour => 0.8,
-        StyleType::Custom(style) => style.to_ext().chart_badge_alpha,
-    }
-}
-
-pub fn get_alpha_round_borders(style: StyleType) -> f32 {
-    match style {
-        StyleType::Night | StyleType::DeepSea => 0.35,
-        StyleType::Day => 0.45,
-        StyleType::MonAmour => 0.5,
-        StyleType::Custom(style) => style.to_ext().round_borders_alpha,
-    }
-}
-
-pub fn get_alpha_round_containers(style: StyleType) -> f32 {
-    match style {
-        StyleType::Night | StyleType::MonAmour => 0.25,
-        StyleType::Day => 0.2,
-        StyleType::DeepSea => 0.15,
-        StyleType::Custom(style) => style.to_ext().round_containers_alpha,
-    }
-}

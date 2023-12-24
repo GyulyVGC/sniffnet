@@ -7,7 +7,7 @@ use iced::widget::{Column, Text};
 use iced::{Color, Font, Renderer};
 
 use crate::gui::types::message::Message;
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default, PartialEq)]
 pub enum TextType {
@@ -52,7 +52,6 @@ impl iced::widget::text::StyleSheet for StyleType {
     }
 }
 
-/// Returns the weighted average of two colors; color intensity is fixed to 100%
 pub fn highlight(style: StyleType, element: TextType) -> Color {
     let colors = get_colors(style);
     let color = colors.secondary;

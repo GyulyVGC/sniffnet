@@ -25,9 +25,7 @@ use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES,
-};
+use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES, };
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::StyleType;
@@ -64,8 +62,8 @@ impl Application for Sniffer {
         let style = self.settings.style;
         let language = self.settings.language;
         let color_gradient = self.settings.color_gradient;
-        let font = get_font(style);
-        let font_headers = get_font_headers(style);
+        let font = style.get_font();
+        let font_headers = style.get_font_headers();
 
         let header = header(
             font,

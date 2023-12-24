@@ -6,15 +6,12 @@ use iced::widget::button;
 use iced::widget::button::Appearance;
 use iced::{Background, Color, Vector};
 
-use crate::gui::styles::style_constants::{
-    get_alpha_round_borders, get_alpha_round_containers, get_starred_color, BORDER_BUTTON_RADIUS,
-    BORDER_WIDTH,
-};
+use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{
     get_gradient_buttons, get_gradient_hovered_buttons, GradientType,
 };
 use crate::gui::styles::types::palette::mix_colors;
-use crate::{get_colors, StyleType};
+use crate::{StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum ButtonType {
@@ -37,15 +34,16 @@ impl button::StyleSheet for StyleType {
 
     fn active(&self, style: &Self::Style) -> button::Appearance {
         let colors = get_colors(*self);
+        let color_buttons = self.get_buttons_color();
         button::Appearance {
             background: Some(match style {
                 ButtonType::TabActive | ButtonType::BorderedRoundSelected => {
-                    Background::Color(mix_colors(colors.primary, colors.buttons))
+                    Background::Color(mix_colors(colors.primary, color_buttons))
                 }
-                ButtonType::Starred => Background::Color(get_starred_color(*self)),
+                ButtonType::Starred => Background::Color(colors.starred),
                 ButtonType::BorderedRound => Background::Color(Color {
-                    a: get_alpha_round_containers(*self),
-                    ..colors.buttons
+                    a: self.get_alpha_round_containers(),
+                    ..color_buttons
                 }),
                 ButtonType::Neutral | ButtonType::NotStarred => {
                     Background::Color(Color::TRANSPARENT)
@@ -59,7 +57,7 @@ impl button::StyleSheet for StyleType {
                     self.is_nightly(),
                     1.0,
                 )),
-                _ => Background::Color(colors.buttons),
+                _ => Background::Color(color_buttons),
             }),
             border_radius: match style {
                 ButtonType::Neutral => 0.0.into(),
@@ -90,8 +88,8 @@ impl button::StyleSheet for StyleType {
             border_color: match style {
                 ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
                 ButtonType::BorderedRound => Color {
-                    a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    a: self.get_alpha_round_borders(),
+                    ..color_buttons
                 },
                 _ => colors.secondary,
             },
@@ -100,6 +98,7 @@ impl button::StyleSheet for StyleType {
 
     fn hovered(&self, style: &Self::Style) -> button::Appearance {
         let colors = get_colors(*self);
+        let color_buttons = self.get_buttons_color();
         button::Appearance {
             shadow_offset: match style {
                 ButtonType::Neutral => Vector::default(),
@@ -107,14 +106,15 @@ impl button::StyleSheet for StyleType {
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(match style {
-                ButtonType::Starred => Background::Color(get_starred_color(*self)),
+                ButtonType::Starred => Background::Color(colors.starred),
+                ButtonType::Neutral => Background::Color(Color{a: get_alpha_round_borders(*self), ..color_buttons}),
                 ButtonType::Gradient(GradientType::None) => {
                     Background::Color(mix_colors(colors.primary, colors.secondary))
                 }
                 ButtonType::Gradient(gradient_type) => Background::Gradient(
                     get_gradient_hovered_buttons(&colors, *gradient_type, self.is_nightly()),
                 ),
-                _ => Background::Color(mix_colors(colors.primary, colors.buttons)),
+                _ => Background::Color(mix_colors(colors.primary, color_buttons)),
             }),
             border_radius: match style {
                 ButtonType::Neutral => 0.0.into(),
@@ -132,10 +132,11 @@ impl button::StyleSheet for StyleType {
             },
             border_color: match style {
                 ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
-                ButtonType::BorderedRound | ButtonType::Neutral | ButtonType::NotStarred => Color {
+                ButtonType::BorderedRound | ButtonType::NotStarred => Color {
                     a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
+                ButtonType::Neutral => color_buttons,
                 _ => colors.secondary,
             },
             text_color: match style {
@@ -150,6 +151,7 @@ impl button::StyleSheet for StyleType {
         match style {
             ButtonType::Gradient(_) => {
                 let colors = get_colors(*self);
+                let color_buttons = get_buttons_color(*self);
                 button::Appearance {
                     background: Some(match style {
                         ButtonType::Gradient(GradientType::None) => Background::Color(Color {
@@ -164,7 +166,7 @@ impl button::StyleSheet for StyleType {
                                 get_alpha_round_containers(*self),
                             ))
                         }
-                        _ => Background::Color(colors.buttons),
+                        _ => Background::Color(color_buttons),
                     }),
                     border_radius: BORDER_BUTTON_RADIUS.into(),
                     border_width: BORDER_WIDTH,

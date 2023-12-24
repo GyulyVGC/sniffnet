@@ -6,8 +6,7 @@ use iced::widget::rule;
 use iced::widget::rule::FillMode;
 use iced::Color;
 
-use crate::gui::styles::style_constants::get_alpha_round_borders;
-use crate::{get_colors, StyleType};
+use crate::{ StyleType};
 
 #[derive(Clone, Copy, Default)]
 pub enum RuleType {
@@ -26,6 +25,7 @@ impl rule::StyleSheet for StyleType {
 
     fn appearance(&self, style: &Self::Style) -> iced::widget::rule::Appearance {
         let colors = get_colors(*self);
+        let color_buttons = get_buttons_color(*self);
         iced::widget::rule::Appearance {
             color: match style {
                 RuleType::Incoming => colors.secondary,
@@ -33,10 +33,10 @@ impl rule::StyleSheet for StyleType {
                 RuleType::PalettePrimary(style) => get_colors(*style).primary,
                 RuleType::PaletteSecondary(style) => get_colors(*style).secondary,
                 RuleType::PaletteOutgoing(style) => get_colors(*style).outgoing,
-                RuleType::PaletteButtons(style) => get_colors(*style).buttons,
+                RuleType::PaletteButtons(style) => get_buttons_color(*style),
                 RuleType::Standard => Color {
                     a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    ..color_buttons
                 },
             },
             width: match style {

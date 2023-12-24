@@ -13,7 +13,7 @@ use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -60,8 +60,8 @@ fn page_content(
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_font();
+    let font_headers = style.get_font_headers();
 
     let info_traffic_lock = sniffer
         .info_traffic
@@ -326,7 +326,7 @@ fn get_local_tooltip(
             TrafficDirection::Outgoing,
         ),
         language,
-        get_font(style),
+        style.get_font(),
     )
 }
 
