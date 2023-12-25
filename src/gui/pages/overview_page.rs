@@ -20,7 +20,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
@@ -51,8 +51,8 @@ use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = style.get_font();
-    let font_headers = style.get_font_headers();
+    let font = style.get_palette_extension().font;
+    let font_headers = style.get_palette_extension().font_headers;
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -241,7 +241,8 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let language = sniffer.settings.language;
-    let font = sniffer.settings.style.get_font();
+    let style = sniffer.settings.style;
+    let font = style.get_palette_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut scroll_host = Column::new()
@@ -338,7 +339,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = style.get_font();
+    let font = style.get_palette_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut col_app = Column::new()
@@ -413,7 +414,7 @@ fn lazy_col_info(
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = style.get_font();
+    let font = style.get_palette_extension().font;
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;

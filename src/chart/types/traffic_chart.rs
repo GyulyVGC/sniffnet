@@ -8,7 +8,7 @@ use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::gui::styles::style_constants::{CHARTS_LINE_BORDER};
+use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -97,11 +97,11 @@ impl Chart<Message> for TrafficChart {
         let tot_seconds = self.ticks - 1;
         let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
 
-        let colors = get_colors(self.style);
+        let colors = self.style.get_palette();
         let color_incoming = to_rgb_color(colors.secondary);
         let color_outgoing = to_rgb_color(colors.outgoing);
         let color_font = to_rgb_color(colors.text_body);
-        let color_mix = self.style.get_alpha_chart_badge();
+        let color_mix = self.style.get_palette_extension().alpha_chart_badge;
 
         chart_builder
             .margin_right(30)

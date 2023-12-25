@@ -12,13 +12,12 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{
-    BORDER_WIDTH, FONT_SIZE_SUBTITLE,
-};
+use crate::gui::styles::style_constants::{BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
-use crate::gui::styles::types::custom_palette::{ExtraStyles};
+use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{
     appearance_title_translation, deep_sea_translation, mon_amour_translation,
@@ -29,15 +28,14 @@ use crate::translations::translations_3::custom_style_translation;
 use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
-use crate::gui::styles::types::palette::Palette;
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let style_path = &sniffer.settings.style_path;
     let color_gradient = sniffer.settings.color_gradient;
     let language = sniffer.settings.language;
-    let font = style.get_font();
-    let font_headers = style.get_font_headers();
+    let font = style.get_palette_extension().font;
+    let font_headers = style.get_palette_extension().font_headers;
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -188,7 +186,7 @@ fn get_palette_container(
     description: String,
     on_press: StyleType,
 ) -> Button<'static, Message, Renderer<StyleType>> {
-    let font = style.get_font();
+    let font = style.get_palette_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
 
@@ -302,7 +300,8 @@ fn lazy_custom_style_input(
     custom_path: &str,
     style: StyleType,
 ) -> Button<'static, Message, Renderer<StyleType>> {
-    let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
+    let is_custom_toml_style_set =
+        matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_, _)));
 
     let custom_palette = Palette::from_file(custom_path);
     let is_error = if custom_path.is_empty() {
@@ -333,7 +332,7 @@ fn lazy_custom_style_input(
         content = content.push(get_palette(style, true));
     } else if let Ok(palette) = custom_palette {
         content = content.push(get_palette(
-            StyleType::Custom(ExtraStyles::CustomToml(palette)),
+            StyleType::Custom(ExtraStyles::CustomToml(palette, palette.generate_palette_extension())),
             true,
         ));
     }

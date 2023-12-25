@@ -6,10 +6,24 @@ use std::path::Path;
 
 use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
 
-use crate::gui::styles::custom_themes::{dracula, gruvbox, nord, solarized};
+use crate::gui::styles::custom_themes::dracula::{
+    DRACULA_DARK_PALETTE, DRACULA_DARK_PALETTE_EXTENSION, DRACULA_LIGHT_PALETTE,
+    DRACULA_LIGHT_PALETTE_EXTENSION,
+};
+use crate::gui::styles::custom_themes::gruvbox::{
+    GRUVBOX_DARK_PALETTE, GRUVBOX_DARK_PALETTE_EXTENSION, GRUVBOX_LIGHT_PALETTE,
+    GRUVBOX_LIGHT_PALETTE_EXTENSION,
+};
+use crate::gui::styles::custom_themes::nord::{
+    NORD_DARK_PALETTE, NORD_DARK_PALETTE_EXTENSION, NORD_LIGHT_PALETTE,
+    NORD_LIGHT_PALETTE_EXTENSION,
+};
+use crate::gui::styles::custom_themes::solarized::{
+    SOLARIZED_DARK_PALETTE, SOLARIZED_DARK_PALETTE_EXTENSION, SOLARIZED_LIGHT_PALETTE,
+    SOLARIZED_LIGHT_PALETTE_EXTENSION,
+};
 use crate::gui::styles::types::palette::Palette;
-
-use super::color_remote::{color_hash};
+use crate::gui::styles::types::palette_extension::PaletteExtension;
 
 impl Palette {
     /// Deserialize [`CustomPalette`] from `path`.
@@ -35,29 +49,9 @@ impl Palette {
     }
 }
 
-impl Hash for Palette {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let Palette {
-            primary,
-            secondary,
-            outgoing,
-            starred,
-            text_headers,
-            text_body,
-        } = self;
-
-        color_hash(*primary, state);
-        color_hash(*secondary, state);
-        color_hash(*outgoing, state);
-        color_hash(*starred, state);
-        color_hash(*text_headers, state);
-        color_hash(*text_body, state);
-    }
-}
-
 /// Built in extra styles
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "custom")]
+// #[serde(tag = "custom")]
 pub enum ExtraStyles {
     DraculaDark,
     DraculaLight,
@@ -67,22 +61,37 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
-    CustomToml(Palette),
+    CustomToml(Palette, PaletteExtension),
 }
 
 impl ExtraStyles {
     /// [`Palette`] of the [`ExtraStyles`] variant
     pub fn to_palette(self) -> Palette {
         match self {
-            ExtraStyles::DraculaLight => dracula::dracula_light(),
-            ExtraStyles::DraculaDark => dracula::dracula_dark(),
-            ExtraStyles::GruvboxDark => gruvbox::gruvbox_dark(),
-            ExtraStyles::GruvboxLight => gruvbox::gruvbox_light(),
-            ExtraStyles::NordLight => nord::nord_light(),
-            ExtraStyles::NordDark => nord::nord_dark(),
-            ExtraStyles::SolarizedDark => solarized::solarized_dark(),
-            ExtraStyles::SolarizedLight => solarized::solarized_light(),
-            ExtraStyles::CustomToml(user) => user,
+            ExtraStyles::DraculaDark => *DRACULA_DARK_PALETTE,
+            ExtraStyles::DraculaLight => DRACULA_LIGHT_PALETTE,
+            ExtraStyles::GruvboxDark => GRUVBOX_DARK_PALETTE,
+            ExtraStyles::GruvboxLight => GRUVBOX_LIGHT_PALETTE,
+            ExtraStyles::NordDark => NORD_DARK_PALETTE,
+            ExtraStyles::NordLight => NORD_LIGHT_PALETTE,
+            ExtraStyles::SolarizedDark => SOLARIZED_DARK_PALETTE,
+            ExtraStyles::SolarizedLight => SOLARIZED_LIGHT_PALETTE,
+            ExtraStyles::CustomToml(palette, _) => palette,
+        }
+    }
+
+    /// [`PaletteExtension`] of the [`ExtraStyles`] variant
+    pub fn to_palette_extension(self) -> PaletteExtension {
+        match self {
+            ExtraStyles::DraculaDark => *DRACULA_DARK_PALETTE_EXTENSION,
+            ExtraStyles::DraculaLight => *DRACULA_LIGHT_PALETTE_EXTENSION,
+            ExtraStyles::GruvboxDark => *GRUVBOX_DARK_PALETTE_EXTENSION,
+            ExtraStyles::GruvboxLight => *GRUVBOX_LIGHT_PALETTE_EXTENSION,
+            ExtraStyles::NordDark => *NORD_DARK_PALETTE_EXTENSION,
+            ExtraStyles::NordLight => *NORD_LIGHT_PALETTE_EXTENSION,
+            ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE_EXTENSION,
+            ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE_EXTENSION,
+            ExtraStyles::CustomToml(_, palette_extension) => palette_extension,
         }
     }
 
@@ -113,7 +122,7 @@ impl fmt::Display for ExtraStyles {
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
             // Custom style names aren't used anywhere so this shouldn't be reached
-            ExtraStyles::CustomToml(_) => unreachable!(),
+            ExtraStyles::CustomToml(_, _) => unreachable!(),
         }
     }
 }
@@ -138,16 +147,10 @@ mod tests {
             palette: Palette {
                 primary: color!(0x30, 0x34, 0x46),
                 secondary: color!(0xa6, 0xd1, 0x89),
-                buttons: color!(0x41, 0x45, 0x59),
                 outgoing: color!(0xf4, 0xb8, 0xe4),
+                starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
                 text_headers: color!(0x23, 0x26, 0x34),
                 text_body: color!(0xc6, 0xd0, 0xf5),
-            },
-            extension: PaletteExtension {
-                starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
-                round_borders_alpha: 0.4,
-                round_containers_alpha: 0.25,
-                chart_badge_alpha: 0.2,
             },
         }
     }

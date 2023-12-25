@@ -4,6 +4,7 @@ use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
 
 use crate::gui::styles::types::palette::Palette;
+use crate::gui::styles::types::palette_extension::PaletteExtension;
 
 // night theme
 const PRIMARY_NIGHT: Color = Color {
@@ -18,7 +19,7 @@ const SECONDARY_NIGHT: Color = Color {
     b: 0.0,
     a: 1.0,
 };
-pub const NIGHT_STYLE: Palette = Palette {
+pub const NIGHT_PALETTE: Palette = Palette {
     primary: PRIMARY_NIGHT,
     secondary: SECONDARY_NIGHT,
     starred: Color {
@@ -32,6 +33,23 @@ pub const NIGHT_STYLE: Palette = Palette {
     text_body: Color::WHITE,
 };
 
+const BUTTONS_NIGHT: Color = Color {
+    r: 0.1,
+    g: 0.1,
+    b: 0.1,
+    a: 1.0,
+};
+
+pub const NIGHT_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
+    is_nightly: true,
+    font: SARASA_MONO,
+    font_headers: SARASA_MONO_BOLD,
+    alpha_chart_badge: 0.15,
+    alpha_round_borders: 0.35,
+    alpha_round_containers: 0.25,
+    buttons_color: BUTTONS_NIGHT,
+};
+
 // day theme
 const PRIMARY_DAY: Color = Color::WHITE;
 const SECONDARY_DAY: Color = Color {
@@ -40,7 +58,7 @@ const SECONDARY_DAY: Color = Color {
     b: 0.7,
     a: 1.0,
 };
-pub const DAY_STYLE: Palette = Palette {
+pub const DAY_PALETTE: Palette = Palette {
     primary: PRIMARY_DAY,
     secondary: SECONDARY_DAY,
     outgoing: SECONDARY_NIGHT,
@@ -52,6 +70,23 @@ pub const DAY_STYLE: Palette = Palette {
     },
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
+};
+
+const BUTTONS_DAY: Color = Color {
+    r: 0.8,
+    g: 0.8,
+    b: 0.8,
+    a: 1.0,
+};
+
+pub const DAY_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
+    is_nightly: false,
+    font: SARASA_MONO_BOLD,
+    font_headers: SARASA_MONO,
+    alpha_chart_badge: 0.75,
+    alpha_round_borders: 0.45,
+    alpha_round_containers: 0.2,
+    buttons_color: BUTTONS_DAY,
 };
 
 // deep sea theme
@@ -73,7 +108,7 @@ const OUTGOING_DEEP_SEA: Color = Color {
     b: 134.0 / 255.0,
     a: 1.0,
 };
-pub const DEEP_SEA_STYLE: Palette = Palette {
+pub const DEEP_SEA_PALETTE: Palette = Palette {
     primary: PRIMARY_DEEP_SEA,
     secondary: SECONDARY_DEEP_SEA,
     starred: Color {
@@ -85,6 +120,23 @@ pub const DEEP_SEA_STYLE: Palette = Palette {
     outgoing: OUTGOING_DEEP_SEA,
     text_headers: Color::BLACK,
     text_body: Color::WHITE,
+};
+
+const BUTTONS_DEEP_SEA: Color = Color {
+    r: 48.0 / 255.0,
+    g: 71.0 / 255.0,
+    b: 94.0 / 255.0,
+    a: 1.0,
+};
+
+pub const DEEP_SEA_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
+    is_nightly: true,
+    font: SARASA_MONO,
+    font_headers: SARASA_MONO_BOLD,
+    alpha_chart_badge: 0.15,
+    alpha_round_borders: 0.35,
+    alpha_round_containers: 0.15,
+    buttons_color: BUTTONS_DEEP_SEA,
 };
 
 // mon amour theme
@@ -106,7 +158,7 @@ const OUTGOING_MON_AMOUR: Color = Color {
     b: 185.0 / 255.0,
     a: 1.0,
 };
-pub const MON_AMOUR_STYLE: Palette = Palette {
+pub const MON_AMOUR_PALETTE: Palette = Palette {
     primary: PRIMARY_MON_AMOUR,
     secondary: SECONDARY_MON_AMOUR,
     starred: Color {
@@ -118,6 +170,23 @@ pub const MON_AMOUR_STYLE: Palette = Palette {
     outgoing: OUTGOING_MON_AMOUR,
     text_headers: Color::WHITE,
     text_body: Color::BLACK,
+};
+
+const BUTTONS_MON_AMOUR: Color = Color {
+    r: 242.0 / 255.0,
+    g: 190.0 / 255.0,
+    b: 209.0 / 255.0,
+    a: 1.0,
+};
+
+pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
+    is_nightly: false,
+    font: SARASA_MONO_BOLD,
+    font_headers: SARASA_MONO,
+    alpha_chart_badge: 0.75,
+    alpha_round_borders: 0.5,
+    alpha_round_containers: 0.25,
+    buttons_color: BUTTONS_MON_AMOUR,
 };
 
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =

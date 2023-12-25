@@ -3158,6 +3158,7 @@ dependencies = [
  "etherparse",
  "iced",
  "maxminddb",
+ "once_cell",
  "pcap",
  "plotters",
  "plotters-iced",
