@@ -25,9 +25,9 @@ use crate::gui::styles::types::palette_extension::PaletteExtension;
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
 pub struct CustomPalette {
     #[serde(flatten)]
-    palette: Palette,
+    pub(crate) palette: Palette,
     #[serde(flatten)]
-    extension: PaletteExtension,
+    pub(crate) extension: PaletteExtension,
 }
 
 impl CustomPalette {
