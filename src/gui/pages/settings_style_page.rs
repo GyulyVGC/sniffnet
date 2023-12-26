@@ -15,7 +15,7 @@ use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
-use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
+use crate::gui::styles::types::custom_palette::{ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::message::Message;
@@ -195,7 +195,7 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(get_palette(on_press, is_custom));
+        .push(get_palette_rule(on_press.get_palette(), is_custom));
 
     if !is_custom {
         content = content.push(Text::new(description).font(font));
@@ -213,8 +213,8 @@ fn get_palette_container(
         .on_press(Message::Style(on_press))
 }
 
-fn get_palette(
-    style: StyleType,
+fn get_palette_rule(
+    palette: Palette,
     is_custom: bool,
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let height = if is_custom { 25.0 } else { 40.0 };
@@ -224,22 +224,22 @@ fn get_palette(
             .push(
                 Row::new()
                     .width(Length::Fixed(120.0))
-                    .push(Rule::horizontal(height).style(RuleType::PalettePrimary(style))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, is_custom))),
             )
             .push(
                 Row::new()
                     .width(Length::Fixed(80.0))
-                    .push(Rule::horizontal(height).style(RuleType::PaletteSecondary(style))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteColor(palette.secondary, is_custom))),
             )
             .push(
                 Row::new()
                     .width(Length::Fixed(60.0))
-                    .push(Rule::horizontal(height).style(RuleType::PaletteOutgoing(style))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, is_custom))),
             )
             .push(
                 Row::new()
                     .width(Length::Fixed(40.0))
-                    .push(Rule::horizontal(height).style(RuleType::PaletteButtons(style))),
+                    .push(Rule::horizontal(height).style(RuleType::PaletteColor(palette.generate_buttons_color(), is_custom))),
             ),
     )
     .align_x(Horizontal::Center)
@@ -329,12 +329,10 @@ fn lazy_custom_style_input(
         .push(input);
 
     if is_custom_toml_style_set {
-        content = content.push(get_palette(style, true));
+        content = content.push(get_palette_rule(style.get_palette(), true));
     } else if let Ok(palette) = custom_palette {
-        content = content.push(get_palette(
-            StyleType::Custom(ExtraStyles::CustomToml(
-                CustomPalette::from_palette(palette)
-            )),
+        content = content.push(get_palette_rule(
+            palette,
             true,
         ));
     }

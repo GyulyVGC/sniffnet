@@ -79,3 +79,51 @@ where
         _ => Err(serde::ser::Error::custom("invalid font")),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use iced::Color;
+    use serde_test::{assert_tokens, Token};
+    use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+    use crate::gui::styles::types::palette_extension::PaletteExtension;
+
+    // Test if deserializing and serializing a PaletteExtension works.
+    #[test]
+    fn test_working_palette_extension_round_trip() {
+        let ext = PaletteExtension {
+            is_nightly: false,
+            font: SARASA_MONO_BOLD,
+            font_headers: SARASA_MONO,
+            alpha_chart_badge: 0.5,
+            alpha_round_borders: 0.25,
+            alpha_round_containers: 0.1778,
+            buttons_color: Color {
+                r: 0.6,
+                g: 0.4,
+                b: 0.2,
+                a: 1.0
+            }
+        };
+        assert_tokens(
+            &ext,
+            &[
+                Token::Struct { name: "PaletteExtension", len: 7 },
+                Token::Str("is_nightly"),
+                Token::Bool(false),
+                Token::Str("font"),
+                Token::Str("SARASA_MONO_BOLD"),
+                Token::Str("font_headers"),
+                Token::Str("SARASA_MONO"),
+                Token::Str("alpha_chart_badge"),
+                Token::F32(0.5),
+                Token::Str("alpha_round_borders"),
+                Token::F32(0.25),
+                Token::Str("alpha_round_containers"),
+                Token::F32(0.1778),
+                Token::Str("buttons_color"),
+                Token::Str("#996633"),
+                Token::StructEnd,
+            ],
+        );
+    }
+}

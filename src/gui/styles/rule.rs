@@ -12,10 +12,7 @@ use crate::StyleType;
 pub enum RuleType {
     #[default]
     Standard,
-    PalettePrimary(StyleType),
-    PaletteSecondary(StyleType),
-    PaletteOutgoing(StyleType),
-    PaletteButtons(StyleType),
+    PaletteColor(Color, bool),
     Incoming,
     Outgoing,
 }
@@ -30,10 +27,7 @@ impl rule::StyleSheet for StyleType {
             color: match style {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
-                RuleType::PalettePrimary(style) => style.get_palette().primary,
-                RuleType::PaletteSecondary(style) => style.get_palette().secondary,
-                RuleType::PaletteOutgoing(style) => style.get_palette().outgoing,
-                RuleType::PaletteButtons(style) => style.get_palette_extension().buttons_color,
+                RuleType::PaletteColor(color, _) => *color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
@@ -41,13 +35,7 @@ impl rule::StyleSheet for StyleType {
             },
             width: match style {
                 RuleType::Incoming | RuleType::Outgoing => 5,
-                RuleType::PalettePrimary(style)
-                | RuleType::PaletteSecondary(style)
-                | RuleType::PaletteOutgoing(style)
-                | RuleType::PaletteButtons(style) => match style {
-                    StyleType::Custom(_) => 25,
-                    _ => 40,
-                },
+                RuleType::PaletteColor(_, is_custom) => if *is_custom {25} else { 40 },
                 RuleType::Standard => 3,
             },
             radius: 0.0.into(),

@@ -58,6 +58,26 @@ pub struct Palette {
 }
 
 impl Palette {
+    pub fn generate_buttons_color(self) -> Color {
+        let primary = self.primary;
+        let is_nightly = primary.r + primary.g + primary.b <= 1.5;
+        if is_nightly {
+            Color {
+                r: f32::min(primary.r + 0.15, 1.0),
+                g: f32::min(primary.g + 0.15, 1.0),
+                b: f32::min(primary.b + 0.15, 1.0),
+                a: 1.0,
+            }
+        } else {
+            Color {
+                r: f32::max(primary.r - 0.15, 0.0),
+                g: f32::max(primary.g - 0.15, 0.0),
+                b: f32::max(primary.b - 0.15, 0.0),
+                a: 1.0,
+            }
+        }
+    }
+
     pub fn generate_palette_extension(self) -> PaletteExtension {
         let primary = self.primary;
         let text_body = self.text_body;
@@ -79,22 +99,8 @@ impl Palette {
         let alpha_chart_badge = if is_nightly { 0.15 } else { 0.75 };
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
         let alpha_round_containers = if is_nightly { 0.12 } else { 0.24 };
-        let buttons_color = if is_nightly {
-            Color {
-                r: f32::min(primary.r + 0.15, 1.0),
-                g: f32::min(primary.g + 0.15, 1.0),
-                b: f32::min(primary.b + 0.15, 1.0),
-                a: 1.0,
-            }
-        } else {
-            Color {
-                r: f32::max(primary.r - 0.15, 0.0),
-                g: f32::max(primary.g - 0.15, 0.0),
-                b: f32::max(primary.b - 0.15, 0.0),
-                a: 1.0,
-            }
-        };
-
+        let buttons_color = self.generate_buttons_color();
+        println!("ciao");
         PaletteExtension {
             is_nightly,
             font,
@@ -159,5 +165,131 @@ pub fn mix_colors(color_1: Color, color_2: Color) -> Color {
 impl Default for Palette {
     fn default() -> Self {
         NIGHT_PALETTE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use iced::Color;
+    use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+    use crate::gui::styles::types::palette::Palette;
+    use crate::gui::styles::types::palette_extension::PaletteExtension;
+
+    #[test]
+    fn test_generate_palette_extension_dark() {
+        let palette = Palette {
+            primary: Color {
+                r: 1.0,
+                g: 0.4,
+                b: 0.05,
+                a: 1.0
+            },
+            secondary: Color {
+                r: 0.7,
+                g: 0.9,
+                b: 0.5,
+                a: 1.0
+            },
+            outgoing: Color {
+                r: 0.9,
+                g: 0.5,
+                b: 0.7,
+                a: 1.0
+            },
+            starred: Color {
+                r: 0.5,
+                g: 0.5,
+                b: 0.5,
+                a: 0.5
+            },
+            text_headers: Color {
+                r: 0.0,
+                g: 0.2,
+                b: 0.2,
+                a: 1.0
+            },
+            text_body: Color {
+                r: 0.5,
+                g: 0.5,
+                b: 0.51,
+                a: 1.0
+            }
+        };
+
+        assert_eq!(palette.generate_palette_extension(),
+                   PaletteExtension{
+                       is_nightly: true,
+                       font: SARASA_MONO,
+                       font_headers: SARASA_MONO_BOLD,
+                       alpha_chart_badge: 0.15,
+                       alpha_round_borders: 0.3,
+                       alpha_round_containers: 0.12,
+                       buttons_color: Color {
+                           r: 1.0,
+                           g: 0.55,
+                           b: 0.2,
+                           a: 1.0
+                       }
+                   }
+        )
+    }
+
+    #[test]
+    fn test_generate_palette_extension_light() {
+        let palette = Palette {
+            primary: Color {
+                r: 1.0,
+                g: 0.9,
+                b: 0.05,
+                a: 1.0
+            },
+            secondary: Color {
+                r: 0.7,
+                g: 0.9,
+                b: 0.5,
+                a: 1.0
+            },
+            outgoing: Color {
+                r: 0.9,
+                g: 0.5,
+                b: 0.7,
+                a: 1.0
+            },
+            starred: Color {
+                r: 0.5,
+                g: 0.5,
+                b: 0.5,
+                a: 0.5
+            },
+            text_headers: Color {
+                r: 0.7,
+                g: 0.2,
+                b: 0.2,
+                a: 1.0
+            },
+            text_body: Color {
+                r: 1.0,
+                g: 0.9,
+                b: 0.4,
+                a: 1.0
+            }
+        };
+
+        assert_eq!(palette.generate_palette_extension(),
+            PaletteExtension{
+                is_nightly: false,
+                font: SARASA_MONO,
+                font_headers: SARASA_MONO_BOLD,
+                alpha_chart_badge: 0.75,
+                alpha_round_borders: 0.6,
+                alpha_round_containers: 0.24,
+                buttons_color: Color {
+                    r: 0.85,
+                    g: 0.75,
+                    b: 0.0,
+                    a: 1.0
+                }
+            }
+        )
     }
 }
