@@ -13,7 +13,7 @@ use crate::configs::types::config_window::ConfigWindow;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::types::custom_palette::ExtraStyles;
+use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
@@ -174,10 +174,7 @@ impl Sniffer {
             Message::LoadStyle(path) => {
                 self.settings.style_path = path.clone();
                 if let Ok(palette) = Palette::from_file(path) {
-                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(
-                        palette,
-                        palette.generate_palette_extension(),
-                    ));
+                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(CustomPalette::from_palette(palette)));
                     self.traffic_chart.change_style(self.settings.style);
                 }
             }

@@ -25,8 +25,25 @@ use crate::gui::styles::custom_themes::solarized::{
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
+pub struct CustomPalette {
+    #[serde(flatten)]
+    palette: Palette,
+    #[serde(flatten)]
+    extension: PaletteExtension
+}
+
+impl CustomPalette {
+    pub fn from_palette(palette: Palette) -> Self {
+        Self {
+            palette,
+            extension: palette.generate_palette_extension()
+        }
+    }
+}
+
 impl Palette {
-    /// Deserialize [`CustomPalette`] from `path`.
+    /// Deserialize [`Palette`] from `path`.
     ///
     /// # Arguments
     /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
@@ -51,7 +68,7 @@ impl Palette {
 
 /// Built in extra styles
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
-// #[serde(tag = "custom")]
+#[serde(tag = "custom", content = "attributes")]
 pub enum ExtraStyles {
     DraculaDark,
     DraculaLight,
@@ -61,7 +78,7 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
-    CustomToml(Palette, PaletteExtension),
+    CustomToml(CustomPalette),
 }
 
 impl ExtraStyles {
@@ -76,7 +93,7 @@ impl ExtraStyles {
             ExtraStyles::NordLight => *NORD_LIGHT_PALETTE,
             ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE,
             ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE,
-            ExtraStyles::CustomToml(palette, _) => palette,
+            ExtraStyles::CustomToml(custom_palette) => custom_palette.palette,
         }
     }
 
@@ -91,7 +108,7 @@ impl ExtraStyles {
             ExtraStyles::NordLight => *NORD_LIGHT_PALETTE_EXTENSION,
             ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE_EXTENSION,
             ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE_EXTENSION,
-            ExtraStyles::CustomToml(_, palette_extension) => palette_extension,
+            ExtraStyles::CustomToml(custom_palette) => custom_palette.extension,
         }
     }
 
@@ -122,7 +139,7 @@ impl fmt::Display for ExtraStyles {
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
             // Custom style names aren't used anywhere so this shouldn't be reached
-            ExtraStyles::CustomToml(_, _) => unreachable!(),
+            ExtraStyles::CustomToml(_) => unreachable!(),
         }
     }
 }
@@ -131,7 +148,7 @@ impl fmt::Display for ExtraStyles {
 mod tests {
     use iced::color;
 
-    use super::{CustomPalette, Palette, PaletteExtension};
+    use super::{Palette};
 
     fn style_path(name: &str) -> String {
         format!(
@@ -142,23 +159,21 @@ mod tests {
     }
 
     // NOTE: This has to be updated if `resources/themes/catppuccin.toml` changes
-    fn catppuccin_style() -> CustomPalette {
-        CustomPalette {
-            palette: Palette {
+    fn catppuccin_style() -> Palette {
+        Palette {
                 primary: color!(0x30, 0x34, 0x46),
                 secondary: color!(0xa6, 0xd1, 0x89),
                 outgoing: color!(0xf4, 0xb8, 0xe4),
                 starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
                 text_headers: color!(0x23, 0x26, 0x34),
                 text_body: color!(0xc6, 0xd0, 0xf5),
-            },
-        }
+            }
     }
 
     #[test]
     fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
         let style = catppuccin_style();
-        let style_de = CustomPalette::from_file(style_path("catppuccin"))?;
+        let style_de = Palette::from_file(style_path("catppuccin"))?;
 
         assert_eq!(style, style_de);
         Ok(())

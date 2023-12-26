@@ -15,7 +15,7 @@ use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
-use crate::gui::styles::types::custom_palette::ExtraStyles;
+use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::message::Message;
@@ -301,7 +301,7 @@ fn lazy_custom_style_input(
     style: StyleType,
 ) -> Button<'static, Message, Renderer<StyleType>> {
     let is_custom_toml_style_set =
-        matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_, _)));
+        matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
     let custom_palette = Palette::from_file(custom_path);
     let is_error = if custom_path.is_empty() {
@@ -333,8 +333,7 @@ fn lazy_custom_style_input(
     } else if let Ok(palette) = custom_palette {
         content = content.push(get_palette(
             StyleType::Custom(ExtraStyles::CustomToml(
-                palette,
-                palette.generate_palette_extension(),
+                CustomPalette::from_palette(palette)
             )),
             true,
         ));
