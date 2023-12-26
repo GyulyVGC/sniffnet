@@ -1,9 +1,11 @@
-use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
-use crate::gui::styles::types::color_remote::color_hash;
+use std::hash::{Hash, Hasher};
+
 use iced::{Color, Font};
 use serde::de::Unexpected;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::hash::{Hash, Hasher};
+
+use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+use crate::gui::styles::types::color_remote::color_hash;
 
 use super::color_remote::{deserialize_color, serialize_color};
 
@@ -45,7 +47,8 @@ impl Hash for PaletteExtension {
         is_nightly.hash(state);
         font.hash(state);
         font_headers.hash(state);
-        (997 * (alpha_chart_badge + alpha_round_borders + alpha_round_containers) as u32)
+        #[allow(clippy::cast_possible_truncation)]
+        (997 * (alpha_chart_badge + alpha_round_borders + alpha_round_containers) as i32)
             .hash(state);
         color_hash(*buttons_color, state);
     }
@@ -73,9 +76,9 @@ pub(super) fn serialize_font<S>(font: &Font, serializer: S) -> Result<S::Ok, S::
 where
     S: Serializer,
 {
-    match font {
-        &SARASA_MONO => serializer.serialize_str("SARASA_MONO"),
-        &SARASA_MONO_BOLD => serializer.serialize_str("SARASA_MONO_BOLD"),
+    match *font {
+        SARASA_MONO => serializer.serialize_str("SARASA_MONO"),
+        SARASA_MONO_BOLD => serializer.serialize_str("SARASA_MONO_BOLD"),
         _ => Err(serde::ser::Error::custom("invalid font")),
     }
 }
@@ -84,6 +87,7 @@ where
 mod tests {
     use iced::Color;
     use serde_test::{assert_tokens, Token};
+
     use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -101,13 +105,16 @@ mod tests {
                 r: 0.6,
                 g: 0.4,
                 b: 0.2,
-                a: 1.0
-            }
+                a: 1.0,
+            },
         };
         assert_tokens(
             &ext,
             &[
-                Token::Struct { name: "PaletteExtension", len: 7 },
+                Token::Struct {
+                    name: "PaletteExtension",
+                    len: 7,
+                },
                 Token::Str("is_nightly"),
                 Token::Bool(false),
                 Token::Str("font"),

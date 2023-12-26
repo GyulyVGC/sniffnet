@@ -6,7 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added support for ICMP connections and messages ([#417](https://github.com/GyulyVGC/sniffnet/pull/417) — fixes [#288](https://github.com/GyulyVGC/sniffnet/issues/288))
 - Introduced new filtering capabilities to allow users specify custom values of ports and IP addresses ([#414](https://github.com/GyulyVGC/sniffnet/pull/414))
 - The size of text and widgets can now be customised by setting a proper zoom value (fixes [#202](https://github.com/GyulyVGC/sniffnet/issues/202) and [#344](https://github.com/GyulyVGC/sniffnet/issues/344))
-- Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286))
+- Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286) and [#419](https://github.com/GyulyVGC/sniffnet/pull/419))
 - IP addresses can now be copied to clipboard from the popup related to a given entry of the connections table, and a new search parameter has been introduced in Inspect page to allow users filter their connections based on IP address values ([#409](https://github.com/GyulyVGC/sniffnet/pull/409))
 - Added Japanese translation 🇯🇵 ([#343](https://github.com/GyulyVGC/sniffnet/pull/343))
 - Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))

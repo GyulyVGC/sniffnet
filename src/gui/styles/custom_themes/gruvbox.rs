@@ -10,7 +10,7 @@ use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
 /// Gruvbox (night style)
-pub const GRUVBOX_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static GRUVBOX_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0x282828),   // bg
     secondary: color!(0xfe8019), // orange
     outgoing: color!(0x8ec07c),  // aqua
@@ -23,7 +23,7 @@ pub static GRUVBOX_DARK_PALETTE_EXTENSION: Lazy<PaletteExtension> =
     Lazy::new(|| GRUVBOX_DARK_PALETTE.generate_palette_extension());
 
 /// Gruvbox (day style)
-pub const GRUVBOX_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static GRUVBOX_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xfbf1c7),      // bg
     secondary: color!(0xd65d0e),    // orange
     outgoing: color!(0x689d6a),     // aqua

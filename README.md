@@ -409,22 +409,13 @@ The currently usable hotkeys are reported in the following.
 
   The TOML must follow this format:
   ```toml
-  # Colors are in RGB/RGBA hexadecimal.
-  primary = "#303446"           # Background
-  secondary = "#a6d189"         # Headers / incoming connections
-  buttons = "#414559"           # Buttons
-  outgoing = "#f4b8e4"          # Outgoing connections
-  text_headers = "#232634"      # Text headers
-  text_body = "#c6d0f5"         # Text body
-  starred = "#e5c890aa"         # Favorites
-
-  # The following parameters are in the range [0.0, 1.0].
-  round_borders_alpha = 0.4     # Borders opacity
-  round_containers_alpha = 0.25 # Containers opacity
-  chart_badge_alpha = 0.2       # Chart opacity
-
-  # Set to true if the theme is dark, false if it's light.
-  nightly = true
+  # all colors are in RGB/RGBA hexadecimal.
+  primary = "#303446"           # background color
+  secondary = "#a6d189"         # header, footer, and incoming connections color
+  outgoing = "#f4b8e4"          # outgoing connections color
+  text_body = "#c6d0f5"         # body text color 
+  text_headers = "#232634"      # header and footer text color
+  starred = "#e5c890aa"         # favorites' star color
   ```
 
   The example theme above uses colors from [Catppuccin](https://github.com/catppuccin/catppuccin).

@@ -9,7 +9,7 @@ use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
 /// Solarized light (Day style)
-pub const SOLARIZED_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static SOLARIZED_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xfdf6e3),      // base3
     secondary: color!(0x859900),    // green
     outgoing: color!(0x268bd2),     // blue
@@ -22,7 +22,7 @@ pub static SOLARIZED_LIGHT_PALETTE_EXTENSION: Lazy<PaletteExtension> =
     Lazy::new(|| SOLARIZED_LIGHT_PALETTE.generate_palette_extension());
 
 /// Solarized dark (Night style)
-pub const SOLARIZED_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static SOLARIZED_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0x002b36),      // base03
     secondary: color!(0x859900),    // green
     outgoing: color!(0x268bd2),     // blue

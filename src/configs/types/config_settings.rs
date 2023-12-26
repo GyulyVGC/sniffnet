@@ -25,7 +25,12 @@ impl ConfigSettings {
         if let Ok(settings) = confy::load::<ConfigSettings>("sniffnet", "settings") {
             settings
         } else {
-            println!("{:?}",confy::load::<ConfigSettings>("sniffnet", "settings").err().unwrap());
+            println!(
+                "{:?}",
+                confy::load::<ConfigSettings>("sniffnet", "settings")
+                    .err()
+                    .unwrap()
+            );
             confy::store("sniffnet", "settings", ConfigSettings::default()).unwrap_or(());
             ConfigSettings::default()
         }

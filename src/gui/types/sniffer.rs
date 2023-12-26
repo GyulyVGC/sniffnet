@@ -174,7 +174,9 @@ impl Sniffer {
             Message::LoadStyle(path) => {
                 self.settings.style_path = path.clone();
                 if let Ok(palette) = Palette::from_file(path) {
-                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(CustomPalette::from_palette(palette)));
+                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(
+                        CustomPalette::from_palette(palette),
+                    ));
                     self.traffic_chart.change_style(self.settings.style);
                 }
             }

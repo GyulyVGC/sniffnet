@@ -22,7 +22,7 @@ pub static DRACULA_DARK_PALETTE_EXTENSION: Lazy<PaletteExtension> =
     Lazy::new(|| DRACULA_DARK_PALETTE.generate_palette_extension());
 
 // Light Darker variant
-pub const DRACULA_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static DRACULA_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xf8f8f2),
     secondary: color!(0x9f1670),
     outgoing: color!(0x005d6f),

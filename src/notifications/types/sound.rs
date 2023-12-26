@@ -1,9 +1,9 @@
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::Text;
-use iced::{Font, Length, Renderer};
 use std::fmt;
 use std::thread;
 
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::Text;
+use iced::{Font, Length, Renderer};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 

@@ -35,7 +35,13 @@ impl rule::StyleSheet for StyleType {
             },
             width: match style {
                 RuleType::Incoming | RuleType::Outgoing => 5,
-                RuleType::PaletteColor(_, is_custom) => if *is_custom {25} else { 40 },
+                RuleType::PaletteColor(_, is_custom) => {
+                    if *is_custom {
+                        25
+                    } else {
+                        40
+                    }
+                }
                 RuleType::Standard => 3,
             },
             radius: 0.0.into(),

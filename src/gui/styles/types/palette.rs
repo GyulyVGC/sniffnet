@@ -1,12 +1,14 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
-use crate::gui::styles::style_constants::{NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD};
-use crate::gui::styles::types::color_remote::color_hash;
-use crate::gui::styles::types::palette_extension::PaletteExtension;
+use std::hash::{Hash, Hasher};
+
 use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
+
+use crate::gui::styles::style_constants::{NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD};
+use crate::gui::styles::types::color_remote::color_hash;
+use crate::gui::styles::types::palette_extension::PaletteExtension;
 
 use super::color_remote::{deserialize_color, serialize_color};
 
@@ -171,6 +173,7 @@ impl Default for Palette {
 #[cfg(test)]
 mod tests {
     use iced::Color;
+
     use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
     use crate::gui::styles::types::palette::Palette;
     use crate::gui::styles::types::palette_extension::PaletteExtension;
@@ -182,55 +185,56 @@ mod tests {
                 r: 1.0,
                 g: 0.4,
                 b: 0.05,
-                a: 1.0
+                a: 1.0,
             },
             secondary: Color {
                 r: 0.7,
                 g: 0.9,
                 b: 0.5,
-                a: 1.0
+                a: 1.0,
             },
             outgoing: Color {
                 r: 0.9,
                 g: 0.5,
                 b: 0.7,
-                a: 1.0
+                a: 1.0,
             },
             starred: Color {
                 r: 0.5,
                 g: 0.5,
                 b: 0.5,
-                a: 0.5
+                a: 0.5,
             },
             text_headers: Color {
                 r: 0.0,
                 g: 0.2,
                 b: 0.2,
-                a: 1.0
+                a: 1.0,
             },
             text_body: Color {
                 r: 0.5,
                 g: 0.5,
                 b: 0.51,
-                a: 1.0
-            }
+                a: 1.0,
+            },
         };
 
-        assert_eq!(palette.generate_palette_extension(),
-                   PaletteExtension{
-                       is_nightly: true,
-                       font: SARASA_MONO,
-                       font_headers: SARASA_MONO_BOLD,
-                       alpha_chart_badge: 0.15,
-                       alpha_round_borders: 0.3,
-                       alpha_round_containers: 0.12,
-                       buttons_color: Color {
-                           r: 1.0,
-                           g: 0.55,
-                           b: 0.2,
-                           a: 1.0
-                       }
-                   }
+        assert_eq!(
+            palette.generate_palette_extension(),
+            PaletteExtension {
+                is_nightly: true,
+                font: SARASA_MONO,
+                font_headers: SARASA_MONO_BOLD,
+                alpha_chart_badge: 0.15,
+                alpha_round_borders: 0.3,
+                alpha_round_containers: 0.12,
+                buttons_color: Color {
+                    r: 1.0,
+                    g: 0.55,
+                    b: 0.2,
+                    a: 1.0
+                }
+            }
         )
     }
 
@@ -241,42 +245,43 @@ mod tests {
                 r: 1.0,
                 g: 0.9,
                 b: 0.05,
-                a: 1.0
+                a: 1.0,
             },
             secondary: Color {
                 r: 0.7,
                 g: 0.9,
                 b: 0.5,
-                a: 1.0
+                a: 1.0,
             },
             outgoing: Color {
                 r: 0.9,
                 g: 0.5,
                 b: 0.7,
-                a: 1.0
+                a: 1.0,
             },
             starred: Color {
                 r: 0.5,
                 g: 0.5,
                 b: 0.5,
-                a: 0.5
+                a: 0.5,
             },
             text_headers: Color {
                 r: 0.7,
                 g: 0.2,
                 b: 0.2,
-                a: 1.0
+                a: 1.0,
             },
             text_body: Color {
                 r: 1.0,
                 g: 0.9,
                 b: 0.4,
-                a: 1.0
-            }
+                a: 1.0,
+            },
         };
 
-        assert_eq!(palette.generate_palette_extension(),
-            PaletteExtension{
+        assert_eq!(
+            palette.generate_palette_extension(),
+            PaletteExtension {
                 is_nightly: false,
                 font: SARASA_MONO,
                 font_headers: SARASA_MONO_BOLD,
