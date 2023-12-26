@@ -20,7 +20,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn active(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
@@ -56,7 +56,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn placeholder_color(&self, _: &Self::Style) -> Color {
         let color = self.get_palette().text_body;
-        let is_nightly = self.get_palette_extension().is_nightly;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.2 } else { 0.7 },
             ..color
@@ -69,7 +69,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn disabled_color(&self, _style: &Self::Style) -> Color {
         let color = self.get_palette().text_body;
-        let is_nightly = self.get_palette_extension().is_nightly;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.2 } else { 0.7 },
             ..color
@@ -78,7 +78,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn selection_color(&self, _: &Self::Style) -> Color {
         let color = self.get_palette().text_body;
-        let is_nightly = self.get_palette_extension().is_nightly;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.05 } else { 0.4 },
             ..color
@@ -87,7 +87,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn hovered(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
@@ -105,7 +105,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,

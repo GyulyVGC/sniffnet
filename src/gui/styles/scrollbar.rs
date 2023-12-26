@@ -26,7 +26,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
     type Style = ScrollbarType;
 
     fn active(&self, _: &Self::Style) -> Scrollbar {
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Scrollbar {
             background: Some(Background::Color(Color::TRANSPARENT)),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
@@ -49,7 +49,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style, is_mouse_over_scrollbar: bool) -> Scrollbar {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Scrollbar {
             background: Some(Background::Color(Color {
                 a: ext.alpha_round_borders,

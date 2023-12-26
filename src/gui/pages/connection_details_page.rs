@@ -60,8 +60,8 @@ fn page_content(
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
-    let font = style.get_palette_extension().font;
-    let font_headers = style.get_palette_extension().font_headers;
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let info_traffic_lock = sniffer
         .info_traffic
@@ -326,7 +326,7 @@ fn get_local_tooltip(
             TrafficDirection::Outgoing,
         ),
         language,
-        style.get_palette_extension().font,
+        style.get_extension().font,
     )
 }
 

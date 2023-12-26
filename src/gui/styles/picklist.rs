@@ -19,7 +19,7 @@ impl iced::overlay::menu::StyleSheet for StyleType {
 
     fn appearance(&self, _: &Self::Style) -> iced::overlay::menu::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
@@ -37,7 +37,7 @@ impl pick_list::StyleSheet for StyleType {
 
     fn active(&self, _: &Self::Style) -> pick_list::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
@@ -54,7 +54,7 @@ impl pick_list::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style) -> pick_list::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         pick_list::Appearance {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,

@@ -122,7 +122,7 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
                     host_info.is_local,
                     host_info.traffic_type,
                     language,
-                    style.get_palette_extension().font,
+                    style.get_extension().font,
                 );
                 ReportEntry {
                     key: key_val.0.clone(),

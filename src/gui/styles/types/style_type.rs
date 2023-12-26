@@ -52,7 +52,7 @@ impl StyleType {
         }
     }
 
-    pub fn get_palette_extension(self) -> PaletteExtension {
+    pub fn get_extension(self) -> PaletteExtension {
         match self {
             StyleType::Night => NIGHT_PALETTE_EXTENSION,
             StyleType::Day => DAY_PALETTE_EXTENSION,
@@ -63,7 +63,7 @@ impl StyleType {
     }
 
     pub fn get_font_weight(self) -> FontStyle {
-        if self.get_palette_extension().font.eq(&SARASA_MONO_BOLD) {
+        if self.get_extension().font.eq(&SARASA_MONO_BOLD) {
             FontStyle::Bold
         } else {
             FontStyle::Normal

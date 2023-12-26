@@ -18,7 +18,7 @@ impl iced::widget::radio::StyleSheet for StyleType {
 
     fn active(&self, _: &Self::Style, is_selected: bool) -> iced::widget::radio::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         iced::widget::radio::Appearance {
             background: Background::Color(ext.buttons_color),
             dot_color: colors.secondary,
@@ -30,7 +30,7 @@ impl iced::widget::radio::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style, _is_selected: bool) -> iced::widget::radio::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         iced::widget::radio::Appearance {
             background: Background::Color(ext.buttons_color),
             dot_color: colors.secondary,

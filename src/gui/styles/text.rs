@@ -55,7 +55,7 @@ impl iced::widget::text::StyleSheet for StyleType {
 pub fn highlight(style: StyleType, element: TextType) -> Color {
     let colors = style.get_palette();
     let color = colors.secondary;
-    let is_nightly = style.get_palette_extension().is_nightly;
+    let is_nightly = style.get_extension().is_nightly;
     match element {
         TextType::Title => {
             let (p1, c) = if is_nightly { (0.6, 1.0) } else { (0.9, 0.7) };

@@ -18,7 +18,7 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
 
     fn active(&self, _: &Self::Style, is_checked: bool) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(ext.buttons_color),
             icon_color: colors.text_body,
@@ -31,7 +31,7 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style, _is_checked: bool) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(ext.buttons_color),
             icon_color: colors.text_body,

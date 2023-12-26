@@ -22,7 +22,7 @@ impl rule::StyleSheet for StyleType {
 
     fn appearance(&self, style: &Self::Style) -> iced::widget::rule::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         iced::widget::rule::Appearance {
             color: match style {
                 RuleType::Incoming => colors.secondary,

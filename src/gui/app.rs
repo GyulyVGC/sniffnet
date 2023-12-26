@@ -62,8 +62,8 @@ impl Application for Sniffer {
         let style = self.settings.style;
         let language = self.settings.language;
         let color_gradient = self.settings.color_gradient;
-        let font = style.get_palette_extension().font;
-        let font_headers = style.get_palette_extension().font_headers;
+        let font = style.get_extension().font;
+        let font_headers = style.get_extension().font_headers;
 
         let header = header(
             font,

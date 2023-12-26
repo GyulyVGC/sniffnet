@@ -31,8 +31,8 @@ use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = style.get_palette_extension().font;
-    let font_headers = style.get_palette_extension().font_headers;
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let mut body = Column::new()
         .width(Length::Fill)
@@ -112,7 +112,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = style.get_palette_extension().font;
+    let font = style.get_extension().font;
 
     let (search_results, results_number) = get_searched_entries(sniffer);
 

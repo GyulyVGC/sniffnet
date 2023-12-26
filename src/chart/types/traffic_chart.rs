@@ -101,7 +101,7 @@ impl Chart<Message> for TrafficChart {
         let color_incoming = to_rgb_color(colors.secondary);
         let color_outgoing = to_rgb_color(colors.outgoing);
         let color_font = to_rgb_color(colors.text_body);
-        let color_mix = self.style.get_palette_extension().alpha_chart_badge;
+        let color_mix = self.style.get_extension().alpha_chart_badge;
 
         chart_builder
             .margin_right(30)

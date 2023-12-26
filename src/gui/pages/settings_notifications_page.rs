@@ -35,8 +35,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
     let notifications = sniffer.settings.notifications;
-    let font = style.get_palette_extension().font;
-    let font_headers = style.get_palette_extension().font_headers;
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let mut content = Column::new()
         .width(Length::Fill)

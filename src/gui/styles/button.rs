@@ -34,7 +34,7 @@ impl button::StyleSheet for StyleType {
 
     fn active(&self, style: &Self::Style) -> button::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         button::Appearance {
             background: Some(match style {
                 ButtonType::TabActive | ButtonType::BorderedRoundSelected => {
@@ -98,7 +98,7 @@ impl button::StyleSheet for StyleType {
 
     fn hovered(&self, style: &Self::Style) -> button::Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         button::Appearance {
             shadow_offset: match style {
                 ButtonType::Neutral => Vector::default(),
@@ -154,7 +154,7 @@ impl button::StyleSheet for StyleType {
         match style {
             ButtonType::Gradient(_) => {
                 let colors = self.get_palette();
-                let ext = self.get_palette_extension();
+                let ext = self.get_extension();
                 button::Appearance {
                     background: Some(match style {
                         ButtonType::Gradient(GradientType::None) => Background::Color(Color {

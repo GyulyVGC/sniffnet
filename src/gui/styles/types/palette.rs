@@ -1,6 +1,9 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
+use std::fs::File;
 use std::hash::{Hash, Hasher};
+use std::io::{BufReader, Read};
+use std::path::Path;
 
 use iced::Color;
 use plotters::style::RGBColor;
@@ -102,7 +105,7 @@ impl Palette {
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
         let alpha_round_containers = if is_nightly { 0.12 } else { 0.24 };
         let buttons_color = self.generate_buttons_color();
-        println!("ciao");
+
         PaletteExtension {
             is_nightly,
             font,
@@ -112,6 +115,28 @@ impl Palette {
             alpha_round_containers,
             buttons_color,
         }
+    }
+
+    /// Deserialize [`Palette`] from `path`.
+    ///
+    /// # Arguments
+    /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
+    pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
+    where
+        P: AsRef<Path>,
+    {
+        // Try to open the file at `path`
+        let mut toml_reader = File::open(path)
+            .map_err(serde::de::Error::custom)
+            .map(BufReader::new)?;
+
+        // Read the ostensible TOML
+        let mut style_toml = String::new();
+        toml_reader
+            .read_to_string(&mut style_toml)
+            .map_err(serde::de::Error::custom)?;
+
+        toml::de::from_str(&style_toml)
     }
 }
 

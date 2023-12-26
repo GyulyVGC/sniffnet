@@ -20,7 +20,7 @@ impl iced::widget::slider::StyleSheet for StyleType {
 
     fn active(&self, _: &Self::Style) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             rail: Rail {
                 colors: (
@@ -41,7 +41,7 @@ impl iced::widget::slider::StyleSheet for StyleType {
 
     fn hovered(&self, _: &Self::Style) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, ext.buttons_color),
@@ -59,7 +59,7 @@ impl iced::widget::slider::StyleSheet for StyleType {
 
     fn dragging(&self, _: &Self::Style) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             rail: Rail {
                 colors: (colors.secondary, ext.buttons_color),

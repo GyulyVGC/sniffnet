@@ -1,10 +1,7 @@
 use std::fmt;
-use std::fs::File;
 use std::hash::Hash;
-use std::io::{BufReader, Read};
-use std::path::Path;
 
-use serde::{de::Error as DeErrorTrait, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::custom_themes::dracula::{
     DRACULA_DARK_PALETTE, DRACULA_DARK_PALETTE_EXTENSION, DRACULA_LIGHT_PALETTE,
@@ -39,30 +36,6 @@ impl CustomPalette {
             palette,
             extension: palette.generate_palette_extension(),
         }
-    }
-}
-
-impl Palette {
-    /// Deserialize [`Palette`] from `path`.
-    ///
-    /// # Arguments
-    /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
-    pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
-    where
-        P: AsRef<Path>,
-    {
-        // Try to open the file at `path`
-        let mut toml_reader = File::open(path)
-            .map_err(DeErrorTrait::custom)
-            .map(BufReader::new)?;
-
-        // Read the ostensible TOML
-        let mut style_toml = String::new();
-        toml_reader
-            .read_to_string(&mut style_toml)
-            .map_err(DeErrorTrait::custom)?;
-
-        toml::de::from_str(&style_toml)
     }
 }
 

@@ -42,7 +42,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
-    let font = style.get_palette_extension().font;
+    let font = style.get_extension().font;
 
     let col_adapter = get_col_adapter(sniffer, font);
 

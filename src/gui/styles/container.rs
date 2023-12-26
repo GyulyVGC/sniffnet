@@ -27,7 +27,7 @@ impl iced::widget::container::StyleSheet for StyleType {
 
     fn appearance(&self, style: &Self::Style) -> Appearance {
         let colors = self.get_palette();
-        let ext = self.get_palette_extension();
+        let ext = self.get_extension();
         Appearance {
             text_color: Some(match style {
                 ContainerType::Gradient(_) => colors.text_headers,

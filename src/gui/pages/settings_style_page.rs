@@ -34,8 +34,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
     let style_path = &sniffer.settings.style_path;
     let color_gradient = sniffer.settings.color_gradient;
     let language = sniffer.settings.language;
-    let font = style.get_palette_extension().font;
-    let font_headers = style.get_palette_extension().font_headers;
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
@@ -186,7 +186,7 @@ fn get_palette_container(
     description: String,
     on_press: StyleType,
 ) -> Button<'static, Message, Renderer<StyleType>> {
-    let font = style.get_palette_extension().font;
+    let font = style.get_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
 
