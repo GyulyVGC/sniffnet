@@ -9,10 +9,7 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::style_constants::{
-    BUTTONS_DAY, BUTTONS_DEEP_SEA, BUTTONS_MON_AMOUR, BUTTONS_NIGHT, DAY_PALETTE, DEEP_SEA_PALETTE,
-    MON_AMOUR_PALETTE, NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD,
-};
+use crate::gui::styles::style_constants::{NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -67,17 +64,6 @@ pub struct Palette {
 
 impl Palette {
     pub fn generate_buttons_color(self) -> Color {
-        // first check if this is one of the standard palettes...
-        if self.eq(&NIGHT_PALETTE) {
-            return BUTTONS_NIGHT;
-        } else if self.eq(&DAY_PALETTE) {
-            return BUTTONS_DAY;
-        } else if self.eq(&DEEP_SEA_PALETTE) {
-            return BUTTONS_DEEP_SEA;
-        } else if self.eq(&MON_AMOUR_PALETTE) {
-            return BUTTONS_MON_AMOUR;
-        };
-
         let primary = self.primary;
         let is_nightly = primary.r + primary.g + primary.b <= 1.5;
         if is_nightly {

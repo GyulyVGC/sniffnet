@@ -12,7 +12,7 @@ use crate::StyleType;
 pub enum RuleType {
     #[default]
     Standard,
-    PaletteColor(Color, bool),
+    PaletteColor(Color, u16),
     Incoming,
     Outgoing,
 }
@@ -35,13 +35,7 @@ impl rule::StyleSheet for StyleType {
             },
             width: match style {
                 RuleType::Incoming | RuleType::Outgoing => 5,
-                RuleType::PaletteColor(_, is_custom) => {
-                    if *is_custom {
-                        25
-                    } else {
-                        40
-                    }
-                }
+                RuleType::PaletteColor(_, width) => *width,
                 RuleType::Standard => 3,
             },
             radius: 0.0.into(),

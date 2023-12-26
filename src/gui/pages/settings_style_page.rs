@@ -3,7 +3,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, TextInput};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Element, Font, Length, Renderer};
+use iced::{Alignment, Color, Element, Font, Length, Renderer};
 
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -195,7 +195,11 @@ fn get_palette_container(
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
-        .push(get_palette_rule(on_press.get_palette(), is_custom));
+        .push(get_palette_rule(
+            on_press.get_palette(),
+            on_press.get_extension().buttons_color,
+            is_custom,
+        ));
 
     if !is_custom {
         content = content.push(Text::new(description).font(font));
@@ -215,37 +219,30 @@ fn get_palette_container(
 
 fn get_palette_rule(
     palette: Palette,
+    buttons_color: Color,
     is_custom: bool,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let height = if is_custom { 25.0 } else { 40.0 };
+    let height = if is_custom { 25 } else { 40 };
 
     Container::new(
         Row::new()
             .push(Row::new().width(Length::Fixed(120.0)).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, is_custom)),
+                Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, height)),
             ))
-            .push(
-                Row::new().width(Length::Fixed(80.0)).push(
-                    Rule::horizontal(height)
-                        .style(RuleType::PaletteColor(palette.secondary, is_custom)),
-                ),
-            )
+            .push(Row::new().width(Length::Fixed(80.0)).push(
+                Rule::horizontal(height).style(RuleType::PaletteColor(palette.secondary, height)),
+            ))
             .push(Row::new().width(Length::Fixed(60.0)).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, is_custom)),
+                Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, height)),
             ))
-            .push(
-                Row::new()
-                    .width(Length::Fixed(40.0))
-                    .push(Rule::horizontal(height).style(RuleType::PaletteColor(
-                        palette.generate_buttons_color(),
-                        is_custom,
-                    ))),
-            ),
+            .push(Row::new().width(Length::Fixed(40.0)).push(
+                Rule::horizontal(height).style(RuleType::PaletteColor(buttons_color, height)),
+            )),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(height + 1.7 * BORDER_WIDTH)
+    .height(f32::from(height) + 1.7 * BORDER_WIDTH)
     .style(ContainerType::Palette)
 }
 
@@ -328,9 +325,17 @@ fn lazy_custom_style_input(
         .push(input);
 
     if is_custom_toml_style_set {
-        content = content.push(get_palette_rule(style.get_palette(), true));
+        content = content.push(get_palette_rule(
+            style.get_palette(),
+            style.get_extension().buttons_color,
+            true,
+        ));
     } else if let Ok(palette) = custom_palette {
-        content = content.push(get_palette_rule(palette, true));
+        content = content.push(get_palette_rule(
+            palette,
+            palette.generate_buttons_color(),
+            true,
+        ));
     }
 
     Button::new(content)
