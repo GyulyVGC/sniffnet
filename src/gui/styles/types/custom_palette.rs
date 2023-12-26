@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fs::File;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use std::io::{BufReader, Read};
 use std::path::Path;
 
@@ -69,13 +69,13 @@ impl ExtraStyles {
     pub fn to_palette(self) -> Palette {
         match self {
             ExtraStyles::DraculaDark => *DRACULA_DARK_PALETTE,
-            ExtraStyles::DraculaLight => DRACULA_LIGHT_PALETTE,
-            ExtraStyles::GruvboxDark => GRUVBOX_DARK_PALETTE,
-            ExtraStyles::GruvboxLight => GRUVBOX_LIGHT_PALETTE,
-            ExtraStyles::NordDark => NORD_DARK_PALETTE,
-            ExtraStyles::NordLight => NORD_LIGHT_PALETTE,
-            ExtraStyles::SolarizedDark => SOLARIZED_DARK_PALETTE,
-            ExtraStyles::SolarizedLight => SOLARIZED_LIGHT_PALETTE,
+            ExtraStyles::DraculaLight => *DRACULA_LIGHT_PALETTE,
+            ExtraStyles::GruvboxDark => *GRUVBOX_DARK_PALETTE,
+            ExtraStyles::GruvboxLight => *GRUVBOX_LIGHT_PALETTE,
+            ExtraStyles::NordDark => *NORD_DARK_PALETTE,
+            ExtraStyles::NordLight => *NORD_LIGHT_PALETTE,
+            ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE,
+            ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE,
             ExtraStyles::CustomToml(palette, _) => palette,
         }
     }

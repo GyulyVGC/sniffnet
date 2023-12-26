@@ -58,7 +58,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let color = self.get_palette().text_body;
         let is_nightly = self.get_palette_extension().is_nightly;
         Color {
-            a: if is_nightly { 0.7 } else { 0.2 },
+            a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
@@ -71,7 +71,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let color = self.get_palette().text_body;
         let is_nightly = self.get_palette_extension().is_nightly;
         Color {
-            a: if is_nightly { 0.7 } else { 0.2 },
+            a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
@@ -80,7 +80,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let color = self.get_palette().text_body;
         let is_nightly = self.get_palette_extension().is_nightly;
         Color {
-            a: if is_nightly { 0.4 } else { 0.05 },
+            a: if is_nightly { 0.05 } else { 0.4 },
             ..color
         }
     }

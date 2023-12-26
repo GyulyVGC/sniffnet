@@ -332,7 +332,10 @@ fn lazy_custom_style_input(
         content = content.push(get_palette(style, true));
     } else if let Ok(palette) = custom_palette {
         content = content.push(get_palette(
-            StyleType::Custom(ExtraStyles::CustomToml(palette, palette.generate_palette_extension())),
+            StyleType::Custom(ExtraStyles::CustomToml(
+                palette,
+                palette.generate_palette_extension(),
+            )),
             true,
         ));
     }
