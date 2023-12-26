@@ -48,7 +48,7 @@ impl StyleType {
             StyleType::Day => DAY_PALETTE,
             StyleType::DeepSea => DEEP_SEA_PALETTE,
             StyleType::MonAmour => MON_AMOUR_PALETTE,
-            StyleType::Custom(style) => style.to_palette(),
+            StyleType::Custom(style) => style.get_palette(),
         }
     }
 
@@ -58,7 +58,7 @@ impl StyleType {
             StyleType::Day => DAY_PALETTE_EXTENSION,
             StyleType::DeepSea => DEEP_SEA_PALETTE_EXTENSION,
             StyleType::MonAmour => MON_AMOUR_PALETTE_EXTENSION,
-            StyleType::Custom(style) => style.to_palette_extension(),
+            StyleType::Custom(style) => style.get_extension(),
         }
     }
 

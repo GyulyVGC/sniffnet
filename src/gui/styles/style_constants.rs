@@ -33,7 +33,7 @@ pub const NIGHT_PALETTE: Palette = Palette {
     text_body: Color::WHITE,
 };
 
-const BUTTONS_NIGHT: Color = Color {
+pub const BUTTONS_NIGHT: Color = Color {
     r: 0.1,
     g: 0.1,
     b: 0.1,
@@ -72,7 +72,7 @@ pub const DAY_PALETTE: Palette = Palette {
     text_body: Color::BLACK,
 };
 
-const BUTTONS_DAY: Color = Color {
+pub const BUTTONS_DAY: Color = Color {
     r: 0.8,
     g: 0.8,
     b: 0.8,
@@ -122,7 +122,7 @@ pub const DEEP_SEA_PALETTE: Palette = Palette {
     text_body: Color::WHITE,
 };
 
-const BUTTONS_DEEP_SEA: Color = Color {
+pub const BUTTONS_DEEP_SEA: Color = Color {
     r: 48.0 / 255.0,
     g: 71.0 / 255.0,
     b: 94.0 / 255.0,
@@ -172,7 +172,7 @@ pub const MON_AMOUR_PALETTE: Palette = Palette {
     text_body: Color::BLACK,
 };
 
-const BUTTONS_MON_AMOUR: Color = Color {
+pub const BUTTONS_MON_AMOUR: Color = Color {
     r: 242.0 / 255.0,
     g: 190.0 / 255.0,
     b: 209.0 / 255.0,

@@ -56,7 +56,7 @@ pub enum ExtraStyles {
 
 impl ExtraStyles {
     /// [`Palette`] of the [`ExtraStyles`] variant
-    pub fn to_palette(self) -> Palette {
+    pub fn get_palette(self) -> Palette {
         match self {
             ExtraStyles::DraculaDark => *DRACULA_DARK_PALETTE,
             ExtraStyles::DraculaLight => *DRACULA_LIGHT_PALETTE,
@@ -71,7 +71,7 @@ impl ExtraStyles {
     }
 
     /// [`PaletteExtension`] of the [`ExtraStyles`] variant
-    pub fn to_palette_extension(self) -> PaletteExtension {
+    pub fn get_extension(self) -> PaletteExtension {
         match self {
             ExtraStyles::DraculaDark => *DRACULA_DARK_PALETTE_EXTENSION,
             ExtraStyles::DraculaLight => *DRACULA_LIGHT_PALETTE_EXTENSION,
@@ -114,41 +114,5 @@ impl fmt::Display for ExtraStyles {
             // Custom style names aren't used anywhere so this shouldn't be reached
             ExtraStyles::CustomToml(_) => unreachable!(),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use iced::color;
-
-    use super::Palette;
-
-    fn style_path(name: &str) -> String {
-        format!(
-            "{}/resources/themes/{}.toml",
-            env!("CARGO_MANIFEST_DIR"),
-            name
-        )
-    }
-
-    // NOTE: This has to be updated if `resources/themes/catppuccin.toml` changes
-    fn catppuccin_style() -> Palette {
-        Palette {
-            primary: color!(0x30, 0x34, 0x46),
-            secondary: color!(0xa6, 0xd1, 0x89),
-            outgoing: color!(0xf4, 0xb8, 0xe4),
-            starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
-            text_headers: color!(0x23, 0x26, 0x34),
-            text_body: color!(0xc6, 0xd0, 0xf5),
-        }
-    }
-
-    #[test]
-    fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
-        let style = catppuccin_style();
-        let style_de = Palette::from_file(style_path("catppuccin"))?;
-
-        assert_eq!(style, style_de);
-        Ok(())
     }
 }

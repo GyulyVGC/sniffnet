@@ -9,7 +9,10 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::style_constants::{NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD};
+use crate::gui::styles::style_constants::{
+    BUTTONS_DAY, BUTTONS_DEEP_SEA, BUTTONS_MON_AMOUR, BUTTONS_NIGHT, DAY_PALETTE, DEEP_SEA_PALETTE,
+    MON_AMOUR_PALETTE, NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD,
+};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -64,6 +67,17 @@ pub struct Palette {
 
 impl Palette {
     pub fn generate_buttons_color(self) -> Color {
+        // first check if this is one of the standard palettes...
+        if self.eq(&NIGHT_PALETTE) {
+            return BUTTONS_NIGHT;
+        } else if self.eq(&DAY_PALETTE) {
+            return BUTTONS_DAY;
+        } else if self.eq(&DEEP_SEA_PALETTE) {
+            return BUTTONS_DEEP_SEA;
+        } else if self.eq(&MON_AMOUR_PALETTE) {
+            return BUTTONS_MON_AMOUR;
+        };
+
         let primary = self.primary;
         let is_nightly = primary.r + primary.g + primary.b <= 1.5;
         if is_nightly {
@@ -197,11 +211,42 @@ impl Default for Palette {
 
 #[cfg(test)]
 mod tests {
+    use iced::color;
     use iced::Color;
 
     use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
-    use crate::gui::styles::types::palette::Palette;
     use crate::gui::styles::types::palette_extension::PaletteExtension;
+
+    use super::Palette;
+
+    fn style_path(name: &str) -> String {
+        format!(
+            "{}/resources/themes/{}.toml",
+            env!("CARGO_MANIFEST_DIR"),
+            name
+        )
+    }
+
+    // NOTE: This has to be updated if `resources/themes/catppuccin.toml` changes
+    fn catppuccin_style() -> Palette {
+        Palette {
+            primary: color!(0x30, 0x34, 0x46),
+            secondary: color!(0xa6, 0xd1, 0x89),
+            outgoing: color!(0xf4, 0xb8, 0xe4),
+            starred: color!(0xe5, 0xc8, 0x90, 0.6666667),
+            text_headers: color!(0x23, 0x26, 0x34),
+            text_body: color!(0xc6, 0xd0, 0xf5),
+        }
+    }
+
+    #[test]
+    fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
+        let style = catppuccin_style();
+        let style_de = Palette::from_file(style_path("catppuccin"))?;
+
+        assert_eq!(style, style_de);
+        Ok(())
+    }
 
     #[test]
     fn test_generate_palette_extension_dark() {
