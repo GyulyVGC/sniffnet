@@ -19,6 +19,7 @@ pub enum TextType {
     Subtitle,
     Danger,
     Sponsor,
+    Starred,
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -54,24 +55,24 @@ impl iced::widget::text::StyleSheet for StyleType {
 
 pub fn highlight(style: StyleType, element: TextType) -> Color {
     let colors = style.get_palette();
-    let color = colors.secondary;
+    let secondary = colors.secondary;
     let is_nightly = style.get_extension().is_nightly;
     match element {
         TextType::Title => {
             let (p1, c) = if is_nightly { (0.6, 1.0) } else { (0.9, 0.7) };
             Color {
-                r: c * (1.0 - p1) + color.r * p1,
-                g: c * (1.0 - p1) + color.g * p1,
-                b: c * (1.0 - p1) + color.b * p1,
+                r: c * (1.0 - p1) + secondary.r * p1,
+                g: c * (1.0 - p1) + secondary.g * p1,
+                b: c * (1.0 - p1) + secondary.b * p1,
                 a: 1.0,
             }
         }
         TextType::Subtitle => {
             let (p1, c) = if is_nightly { (0.4, 1.0) } else { (0.6, 0.7) };
             Color {
-                r: c * (1.0 - p1) + color.r * p1,
-                g: c * (1.0 - p1) + color.g * p1,
-                b: c * (1.0 - p1) + color.b * p1,
+                r: c * (1.0 - p1) + secondary.r * p1,
+                g: c * (1.0 - p1) + secondary.g * p1,
+                b: c * (1.0 - p1) + secondary.b * p1,
                 a: 1.0,
             }
         }
@@ -80,5 +81,6 @@ pub fn highlight(style: StyleType, element: TextType) -> Color {
         TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
         TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
         TextType::Standard => colors.text_body,
+        TextType::Starred => colors.starred,
     }
 }

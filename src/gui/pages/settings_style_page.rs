@@ -38,6 +38,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
     let font_headers = style.get_extension().font_headers;
 
     let mut content = Column::new()
+        .padding([0, 0, 5, 0])
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(

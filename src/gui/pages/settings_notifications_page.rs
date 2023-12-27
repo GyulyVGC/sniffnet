@@ -63,6 +63,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
         .push(vertical_space(Fixed(5.0)));
 
     let volume_notification_col = Column::new()
+        .padding([0, 0, 5, 0])
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))

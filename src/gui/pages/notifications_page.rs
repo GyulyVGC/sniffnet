@@ -337,7 +337,7 @@ fn favorite_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::Star.to_text().size(80),
+                Icon::Star.to_text().size(80).style(TextType::Starred),
                 favorite_transmitted_translation(language),
                 Position::FollowCursor,
             )
