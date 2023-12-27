@@ -585,9 +585,16 @@ mod tests {
         RunningPage, Sniffer, StyleType,
     };
 
+    fn new_sniffer() -> Sniffer {
+        Sniffer::new(
+            &Arc::new(Mutex::new(Configs::default())),
+            Arc::new(Mutex::new(None)),
+        )
+    }
+
     #[test]
     fn test_correctly_update_ip_version() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
         sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
@@ -603,7 +610,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_protocol() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
@@ -623,7 +630,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_chart_kind() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
         sniffer.update(Message::ChartSelection(ChartType::Packets));
@@ -636,7 +643,7 @@ mod tests {
 
     #[test]
     fn test_correctly_update_report_kind() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
         sniffer.update(Message::ReportSortSelection(ReportSortType::MostBytes));
@@ -651,23 +658,38 @@ mod tests {
 
     #[test]
     fn test_correctly_update_style() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         sniffer.update(Message::Style(StyleType::MonAmour));
-        assert_eq!(sniffer.settings.style, StyleType::MonAmour);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.style,
+            StyleType::MonAmour
+        );
         sniffer.update(Message::Style(StyleType::Day));
-        assert_eq!(sniffer.settings.style, StyleType::Day);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.style,
+            StyleType::Day
+        );
         sniffer.update(Message::Style(StyleType::Night));
-        assert_eq!(sniffer.settings.style, StyleType::Night);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.style,
+            StyleType::Night
+        );
         sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.settings.style, StyleType::DeepSea);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.style,
+            StyleType::DeepSea
+        );
         sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.settings.style, StyleType::DeepSea);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.style,
+            StyleType::DeepSea
+        );
     }
 
     #[test]
     fn test_waiting_dots_update() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.waiting, ".".to_string());
         sniffer.update(Message::Waiting);
@@ -682,7 +704,7 @@ mod tests {
 
     #[test]
     fn test_modify_favorite_connections() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
         // remove 1
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -871,7 +893,7 @@ mod tests {
 
     #[test]
     fn test_show_and_hide_modal_and_settings() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
@@ -958,29 +980,56 @@ mod tests {
 
     #[test]
     fn test_correctly_update_language() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
-        assert_eq!(sniffer.settings.language, Language::EN);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.language,
+            Language::EN
+        );
         assert_eq!(sniffer.traffic_chart.language, Language::EN);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.settings.language, Language::IT);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.language,
+            Language::IT
+        );
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.settings.language, Language::IT);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.language,
+            Language::IT
+        );
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        assert_eq!(sniffer.settings.language, Language::ZH);
+        assert_eq!(
+            sniffer.configs.lock().unwrap().settings.language,
+            Language::ZH
+        );
         assert_eq!(sniffer.traffic_chart.language, Language::ZH);
     }
 
     #[test]
     fn test_correctly_update_notification_settings() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
 
         // initial default state
-        assert_eq!(sniffer.settings.notifications.volume, 60);
         assert_eq!(
-            sniffer.settings.notifications.packets_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .volume,
+            60
+        );
+        assert_eq!(
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification,
             PacketsNotification {
                 threshold: None,
                 sound: Sound::Gulp,
@@ -988,7 +1037,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.bytes_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification,
             BytesNotification {
                 threshold: None,
                 byte_multiple: ByteMultiple::KB,
@@ -997,7 +1052,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.favorite_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .favorite_notification,
             FavoriteNotification {
                 notify_on_favorite: false,
                 sound: Sound::Swhoosh,
@@ -1005,9 +1066,24 @@ mod tests {
         );
         // change volume
         sniffer.update(Message::ChangeVolume(95));
-        assert_eq!(sniffer.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.settings.notifications.packets_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .volume,
+            95
+        );
+        assert_eq!(
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification,
             PacketsNotification {
                 threshold: None,
                 sound: Sound::Gulp,
@@ -1015,7 +1091,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.bytes_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification,
             BytesNotification {
                 threshold: None,
                 byte_multiple: ByteMultiple::KB,
@@ -1024,7 +1106,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.favorite_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .favorite_notification,
             FavoriteNotification {
                 notify_on_favorite: false,
                 sound: Sound::Swhoosh,
@@ -1039,9 +1127,24 @@ mod tests {
             }),
             false,
         ));
-        assert_eq!(sniffer.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.settings.notifications.packets_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .volume,
+            95
+        );
+        assert_eq!(
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification,
             PacketsNotification {
                 threshold: Some(1122),
                 sound: Sound::None,
@@ -1049,7 +1152,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.bytes_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification,
             BytesNotification {
                 threshold: None,
                 byte_multiple: ByteMultiple::KB,
@@ -1058,7 +1167,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.favorite_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .favorite_notification,
             FavoriteNotification {
                 notify_on_favorite: false,
                 sound: Sound::Swhoosh,
@@ -1074,9 +1189,24 @@ mod tests {
             }),
             true,
         ));
-        assert_eq!(sniffer.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.settings.notifications.packets_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .volume,
+            95
+        );
+        assert_eq!(
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification,
             PacketsNotification {
                 threshold: Some(1122),
                 sound: Sound::None,
@@ -1084,7 +1214,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.bytes_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification,
             BytesNotification {
                 threshold: Some(3),
                 byte_multiple: ByteMultiple::GB,
@@ -1093,7 +1229,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.favorite_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .favorite_notification,
             FavoriteNotification {
                 notify_on_favorite: false,
                 sound: Sound::Swhoosh,
@@ -1107,9 +1249,24 @@ mod tests {
             }),
             true,
         ));
-        assert_eq!(sniffer.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.settings.notifications.packets_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .volume,
+            95
+        );
+        assert_eq!(
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification,
             PacketsNotification {
                 threshold: Some(1122),
                 sound: Sound::None,
@@ -1117,7 +1274,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.bytes_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification,
             BytesNotification {
                 threshold: Some(3),
                 byte_multiple: ByteMultiple::GB,
@@ -1126,7 +1289,13 @@ mod tests {
             }
         );
         assert_eq!(
-            sniffer.settings.notifications.favorite_notification,
+            sniffer
+                .configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .favorite_notification,
             FavoriteNotification {
                 notify_on_favorite: true,
                 sound: Sound::Pop
@@ -1136,7 +1305,7 @@ mod tests {
 
     #[test]
     fn test_clear_all_notifications() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
         sniffer.runtime_data.logged_notifications =
             VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
                 PacketsThresholdExceeded {
@@ -1158,7 +1327,7 @@ mod tests {
 
     #[test]
     fn test_correctly_switch_running_and_settings_pages() {
-        let mut sniffer = Sniffer::new(&Configs::default(), Arc::new(Mutex::new(None)));
+        let mut sniffer = new_sniffer();
         sniffer.timing_events.focus = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
