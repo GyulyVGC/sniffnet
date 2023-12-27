@@ -59,9 +59,10 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let style = self.settings.style;
-        let language = self.settings.language;
-        let color_gradient = self.settings.color_gradient;
+        let settings = &self.configs.lock().unwrap().settings;
+        let style = settings.style;
+        let language = settings.language;
+        let color_gradient = settings.color_gradient;
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
@@ -175,10 +176,10 @@ impl Application for Sniffer {
     }
 
     fn theme(&self) -> Self::Theme {
-        self.settings.style
+        self.configs.lock().unwrap().settings.style
     }
 
     fn scale_factor(&self) -> f64 {
-        self.settings.scale_factor
+        self.configs.lock().unwrap().settings.scale_factor
     }
 }

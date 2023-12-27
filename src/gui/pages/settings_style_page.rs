@@ -30,10 +30,11 @@ use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let style_path = &sniffer.settings.style_path;
-    let color_gradient = sniffer.settings.color_gradient;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let style_path = settings.style_path.clone();
+    let color_gradient = settings.color_gradient;
+    let language = settings.language;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -100,8 +101,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         styles_col = styles_col.push(children);
     }
     styles_col = styles_col
-        .push(lazy((style_path, style), move |_| {
-            lazy_custom_style_input(language, font, style_path, style)
+        .push(lazy((style_path.clone(), style), move |_| {
+            lazy_custom_style_input(language, font, &style_path, style)
         }))
         .push(vertical_space(10));
 

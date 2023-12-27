@@ -33,9 +33,10 @@ use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let notifications = sniffer.settings.notifications;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
+    let notifications = settings.notifications;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -396,8 +397,9 @@ fn get_button_clear_all(
 }
 
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(Length::Fixed(830.0))

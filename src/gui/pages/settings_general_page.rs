@@ -28,9 +28,10 @@ use crate::utils::types::web_page::WebPage;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
+    let color_gradient = settings.color_gradient;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -57,7 +58,8 @@ fn column_all_general_setting(
     sniffer: &Sniffer,
     font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let language = settings.language;
 
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
@@ -67,7 +69,7 @@ fn column_all_general_setting(
         .push(row_language_scale_factor(
             language,
             font,
-            sniffer.settings.scale_factor,
+            settings.scale_factor,
         ))
         .push(Rule::horizontal(25));
 
@@ -85,8 +87,8 @@ fn column_all_general_setting(
         is_editable,
         language,
         font,
-        &sniffer.settings.mmdb_country,
-        &sniffer.settings.mmdb_asn,
+        &settings.mmdb_country,
+        &settings.mmdb_asn,
         &sniffer.country_mmdb_reader,
         &sniffer.asn_mmdb_reader,
     ));

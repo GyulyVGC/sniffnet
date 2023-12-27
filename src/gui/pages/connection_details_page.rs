@@ -57,9 +57,10 @@ fn page_content(
     sniffer: &Sniffer,
     key: &AddressPortPair,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
+    let color_gradient = settings.color_gradient;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -303,8 +304,9 @@ fn get_local_tooltip(
     address_to_lookup: &str,
     key: &AddressPortPair,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
 
     let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
     get_computer_tooltip(

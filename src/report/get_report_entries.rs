@@ -15,8 +15,9 @@ use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 /// Returns the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
 pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
 
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock

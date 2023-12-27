@@ -31,10 +31,11 @@ use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
-    let notifications = sniffer.settings.notifications;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
+    let color_gradient = settings.color_gradient;
+    let notifications = settings.notifications;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

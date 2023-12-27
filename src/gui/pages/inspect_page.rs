@@ -29,8 +29,9 @@ use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -110,8 +111,9 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 }
 
 fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
     let font = style.get_extension().font;
 
     let (search_results, results_number) = get_searched_entries(sniffer);

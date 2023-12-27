@@ -51,10 +51,13 @@ mod utils;
 pub fn main() -> iced::Result {
     parse_cli_args();
 
+    let configs1 = Arc::new(Mutex::new(Configs::load()));
+    let configs2 = configs1.clone();
+
     let newer_release_available1 = Arc::new(Mutex::new(None));
     let newer_release_available2 = newer_release_available1.clone();
 
-    // to kill the main thread as soon as a secondary thread panics
+    // kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
         // invoke the default handler and exit the process
@@ -62,7 +65,12 @@ pub fn main() -> iced::Result {
         process::exit(1);
     }));
 
-    let configs = Configs::load();
+    // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
+    ctrlc::set_handler(move || {
+        configs2.lock().unwrap().clone().store();
+        process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
 
     thread::Builder::new()
         .name("thread_check_updates".to_string())
@@ -73,12 +81,14 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
+    let window_properties = configs1.lock().unwrap().window;
+
     Sniffer::run(Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some("sniffnet".to_string()),
         window: window::Settings {
-            size: configs.window.size, // start size
-            position: configs.window.position.to_position(),
+            size: window_properties.size, // start size
+            position: window_properties.position.to_position(),
             min_size: Some((800, 500)), // min size allowed
             max_size: None,
             visible: true,
@@ -92,7 +102,7 @@ pub fn main() -> iced::Result {
             },
             ..Default::default()
         },
-        flags: Sniffer::new(&configs, newer_release_available1),
+        flags: Sniffer::new(&configs1, newer_release_available1),
         default_font: Font::with_name("Sarasa Mono SC"),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,

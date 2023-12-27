@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::networking::types::my_device::MyDevice;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ConfigDevice {
     pub device_name: String,
 }

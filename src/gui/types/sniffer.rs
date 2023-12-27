@@ -9,7 +9,6 @@ use iced::{window, Command};
 use pcap::Device;
 
 use crate::chart::manage_chart_data::update_charts_data;
-use crate::configs::types::config_window::ConfigWindow;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -34,14 +33,14 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::utils::types::web_page::WebPage;
-use crate::{
-    ConfigDevice, ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart,
-};
+use crate::{Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///
 /// It contains gui statuses and network traffic statistics to be shared among the different threads
 pub struct Sniffer {
+    /// Application's configurations: settings, window properties, name of last device sniffed
+    pub configs: Arc<Mutex<Configs>>,
     /// Capture number, incremented at every new run
     pub current_capture_id: Arc<Mutex<usize>>,
     /// Capture data updated by thread parsing packets
@@ -52,8 +51,6 @@ pub struct Sniffer {
     pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed
     pub device: MyDevice,
-    /// Last network adapter name for which packets were observed; saved into config file
-    pub last_device_name_sniffed: String,
     /// Active filters on the observed traffic
     pub filters: Filters,
     /// Signals if a pcap error occurred
@@ -78,10 +75,6 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// Application settings
-    pub settings: ConfigSettings,
-    /// Position and size of the app window
-    pub window: ConfigWindow,
     /// MMDB reader for countries
     pub country_mmdb_reader: Arc<MmdbReader>,
     /// MMDB reader for ASN
@@ -91,18 +84,23 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub fn new(configs: &Configs, newer_release_available: Arc<Mutex<Option<bool>>>) -> Self {
+    pub fn new(
+        configs: &Arc<Mutex<Configs>>,
+        newer_release_available: Arc<Mutex<Option<bool>>>,
+    ) -> Self {
+        let settings = &configs.lock().unwrap().settings;
+        let device = configs.lock().unwrap().device.to_my_device();
         Self {
+            configs: configs.clone(),
             current_capture_id: Arc::new(Mutex::new(0)),
             info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
             newer_release_available,
             runtime_data: RunTimeData::new(),
-            device: configs.device.to_my_device(),
-            last_device_name_sniffed: configs.device.device_name.clone(),
+            device,
             filters: Filters::default(),
             pcap_error: None,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(configs.settings.style, configs.settings.language),
+            traffic_chart: TrafficChart::new(settings.style, settings.language),
             report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
@@ -111,24 +109,9 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            settings: configs.settings.clone(),
-            window: configs.window,
-            country_mmdb_reader: Arc::new(MmdbReader::from(
-                &configs.settings.mmdb_country,
-                COUNTRY_MMDB,
-            )),
-            asn_mmdb_reader: Arc::new(MmdbReader::from(&configs.settings.mmdb_asn, ASN_MMDB)),
+            country_mmdb_reader: Arc::new(MmdbReader::from(&settings.mmdb_country, COUNTRY_MMDB)),
+            asn_mmdb_reader: Arc::new(MmdbReader::from(&settings.mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
-        }
-    }
-
-    pub fn get_configs(&self) -> Configs {
-        Configs {
-            settings: self.settings.clone(),
-            device: ConfigDevice {
-                device_name: self.last_device_name_sniffed.clone(),
-            },
-            window: self.window,
         }
     }
 
@@ -168,16 +151,17 @@ impl Sniffer {
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
-                self.settings.style = style;
+                self.configs.lock().unwrap().settings.style = style;
                 self.traffic_chart.change_style(style);
             }
             Message::LoadStyle(path) => {
-                self.settings.style_path = path.clone();
+                self.configs.lock().unwrap().settings.style_path = path.clone();
                 if let Ok(palette) = Palette::from_file(path) {
-                    self.settings.style = StyleType::Custom(ExtraStyles::CustomToml(
+                    let style = StyleType::Custom(ExtraStyles::CustomToml(
                         CustomPalette::from_palette(palette),
                     ));
-                    self.traffic_chart.change_style(self.settings.style);
+                    self.configs.lock().unwrap().settings.style = style;
+                    self.traffic_chart.change_style(style);
                 }
             }
             Message::Waiting => self.update_waiting_dots(),
@@ -206,7 +190,7 @@ impl Sniffer {
                 }
             }
             Message::LanguageSelection(language) => {
-                self.settings.language = language;
+                self.configs.lock().unwrap().settings.language = language;
                 self.traffic_chart.change_language(language);
             }
             Message::UpdateNotificationSettings(value, emit_sound) => {
@@ -214,7 +198,7 @@ impl Sniffer {
             }
             Message::ChangeVolume(volume) => {
                 play(Sound::Pop, volume);
-                self.settings.notifications.volume = volume;
+                self.configs.lock().unwrap().settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
                 self.runtime_data.logged_notifications = VecDeque::new();
@@ -262,33 +246,34 @@ impl Sniffer {
             }
             Message::WindowFocused => self.timing_events.focus_now(),
             Message::GradientsSelection(gradient_type) => {
-                self.settings.color_gradient = gradient_type;
+                self.configs.lock().unwrap().settings.color_gradient = gradient_type;
             }
             Message::ChangeScaleFactor(multiplier) => {
-                self.settings.scale_factor = multiplier;
+                self.configs.lock().unwrap().settings.scale_factor = multiplier;
             }
             Message::WindowMoved(x, y) => {
-                self.window.position = (x, y);
+                self.configs.lock().unwrap().window.position = (x, y);
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
-                let scaled_width = (f64::from(width) * self.settings.scale_factor) as u32;
-                let scaled_height = (f64::from(height) * self.settings.scale_factor) as u32;
-                self.window.size = (scaled_width, scaled_height);
+                let settings = &self.configs.lock().unwrap().settings;
+                let scaled_width = (f64::from(width) * settings.scale_factor) as u32;
+                let scaled_height = (f64::from(height) * settings.scale_factor) as u32;
+                self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => {
-                self.settings.mmdb_country = db.clone();
+                self.configs.lock().unwrap().settings.mmdb_country = db.clone();
                 self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
-                self.settings.mmdb_asn = db.clone();
+                self.configs.lock().unwrap().settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             // Message::CustomReport(path) => {
             //     self.settings.output_path = path;
             // }
             Message::CloseRequested => {
-                self.get_configs().store();
+                self.configs.lock().unwrap().clone().store();
                 return iced::window::close();
             }
             Message::CopyIp(string) => {
@@ -316,7 +301,7 @@ impl Sniffer {
         drop(info_traffic_lock);
         let emitted_notifications = notify_and_log(
             &mut self.runtime_data,
-            self.settings.notifications,
+            self.configs.lock().unwrap().settings.notifications,
             &self.info_traffic.clone(),
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
@@ -328,8 +313,8 @@ impl Sniffer {
 
         let current_device_name = self.device.name.clone();
         // update ConfigDevice stored if different from last sniffed device
-        if current_device_name.ne(&self.last_device_name_sniffed) {
-            self.last_device_name_sniffed = current_device_name.clone();
+        if current_device_name.ne(&self.configs.lock().unwrap().device.device_name) {
+            self.configs.lock().unwrap().device.device_name = current_device_name.clone();
         }
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications)
@@ -365,7 +350,8 @@ impl Sniffer {
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
-        self.traffic_chart = TrafficChart::new(self.settings.style, self.settings.language);
+        let settings = &self.configs.lock().unwrap().settings;
+        self.traffic_chart = TrafficChart::new(settings.style, settings.language);
         self.running_page = RunningPage::Overview;
 
         if pcap_error.is_none() {
@@ -448,20 +434,38 @@ impl Sniffer {
     fn update_notification_settings(&mut self, value: Notification, emit_sound: bool) {
         let sound = match value {
             Notification::Packets(packets_notification) => {
-                self.settings.notifications.packets_notification = packets_notification;
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .packets_notification = packets_notification;
                 packets_notification.sound
             }
             Notification::Bytes(bytes_notification) => {
-                self.settings.notifications.bytes_notification = bytes_notification;
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .bytes_notification = bytes_notification;
                 bytes_notification.sound
             }
             Notification::Favorite(favorite_notification) => {
-                self.settings.notifications.favorite_notification = favorite_notification;
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .favorite_notification = favorite_notification;
                 favorite_notification.sound
             }
         };
         if emit_sound {
-            play(sound, self.settings.notifications.volume);
+            play(
+                sound,
+                self.configs.lock().unwrap().settings.notifications.volume,
+            );
         }
     }
 

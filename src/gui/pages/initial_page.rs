@@ -39,9 +39,10 @@ use crate::{IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let style = settings.style;
+    let language = settings.language;
+    let color_gradient = settings.color_gradient;
     let font = style.get_extension().font;
 
     let col_adapter = get_col_adapter(sniffer, font);
@@ -291,7 +292,8 @@ fn button_start(
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<StyleType>> {
-    let language = sniffer.settings.language;
+    let settings = &sniffer.configs.lock().unwrap().settings;
+    let language = settings.language;
 
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {
