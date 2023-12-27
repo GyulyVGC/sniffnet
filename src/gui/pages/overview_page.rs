@@ -45,13 +45,13 @@ use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
-use crate::{AppProtocol, ChartType, Language, RunningPage, StyleType};
+use crate::{AppProtocol, ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -241,9 +241,9 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let language = settings.language;
-    let style = settings.style;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -339,9 +339,9 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 }
 
 fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -415,9 +415,9 @@ fn lazy_col_info(
     dropped: u32,
     sniffer: &Sniffer,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
@@ -468,9 +468,8 @@ fn lazy_col_info(
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
     let traffic_chart = &sniffer.traffic_chart;
-    let language = settings.language;
 
     let mut chart_info_string = String::from("(");
     chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {

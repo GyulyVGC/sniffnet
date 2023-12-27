@@ -33,7 +33,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::utils::types::web_page::WebPage;
-use crate::{Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Struct on which the gui is based
 ///
@@ -88,7 +88,13 @@ impl Sniffer {
         configs: &Arc<Mutex<Configs>>,
         newer_release_available: Arc<Mutex<Option<bool>>>,
     ) -> Self {
-        let settings = &configs.lock().unwrap().settings;
+        let ConfigSettings {
+            style,
+            language,
+            mmdb_country,
+            mmdb_asn,
+            ..
+        } = configs.lock().unwrap().settings.clone();
         let device = configs.lock().unwrap().device.to_my_device();
         Self {
             configs: configs.clone(),
@@ -100,7 +106,7 @@ impl Sniffer {
             filters: Filters::default(),
             pcap_error: None,
             waiting: ".".to_string(),
-            traffic_chart: TrafficChart::new(settings.style, settings.language),
+            traffic_chart: TrafficChart::new(style, language),
             report_sort_type: ReportSortType::MostRecent,
             modal: None,
             settings_page: None,
@@ -109,8 +115,8 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            country_mmdb_reader: Arc::new(MmdbReader::from(&settings.mmdb_country, COUNTRY_MMDB)),
-            asn_mmdb_reader: Arc::new(MmdbReader::from(&settings.mmdb_asn, ASN_MMDB)),
+            country_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
+            asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
         }
     }
@@ -256,9 +262,9 @@ impl Sniffer {
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
-                let settings = &self.configs.lock().unwrap().settings;
-                let scaled_width = (f64::from(width) * settings.scale_factor) as u32;
-                let scaled_height = (f64::from(height) * settings.scale_factor) as u32;
+                let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                let scaled_width = (f64::from(width) * scale_factor) as u32;
+                let scaled_height = (f64::from(height) * scale_factor) as u32;
                 self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => {
@@ -313,8 +319,9 @@ impl Sniffer {
 
         let current_device_name = self.device.name.clone();
         // update ConfigDevice stored if different from last sniffed device
-        if current_device_name.ne(&self.configs.lock().unwrap().device.device_name) {
-            self.configs.lock().unwrap().device.device_name = current_device_name.clone();
+        let last_device_name_sniffed = self.configs.lock().unwrap().device.device_name.clone();
+        if current_device_name.ne(&last_device_name_sniffed) {
+            self.configs.lock().unwrap().device.device_name = current_device_name;
         }
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications)
@@ -350,8 +357,10 @@ impl Sniffer {
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
-        let settings = &self.configs.lock().unwrap().settings;
-        self.traffic_chart = TrafficChart::new(settings.style, settings.language);
+        let ConfigSettings {
+            style, language, ..
+        } = self.configs.lock().unwrap().settings;
+        self.traffic_chart = TrafficChart::new(style, language);
         self.running_page = RunningPage::Overview;
 
         if pcap_error.is_none() {

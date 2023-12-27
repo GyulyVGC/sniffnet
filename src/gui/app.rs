@@ -28,7 +28,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::StyleType;
+use crate::{ConfigSettings, StyleType};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -59,10 +59,12 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let settings = &self.configs.lock().unwrap().settings;
-        let style = settings.style;
-        let language = settings.language;
-        let color_gradient = settings.color_gradient;
+        let ConfigSettings {
+            style,
+            language,
+            color_gradient,
+            ..
+        } = self.configs.lock().unwrap().settings;
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 

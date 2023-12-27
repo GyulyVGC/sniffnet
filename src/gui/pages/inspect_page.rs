@@ -25,13 +25,13 @@ use crate::translations::translations_2::{
     showing_results_translation, sort_by_translation,
 };
 use crate::utils::types::icon::Icon;
-use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -111,9 +111,9 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 }
 
 fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
     let (search_results, results_number) = get_searched_entries(sniffer);

@@ -25,13 +25,15 @@ use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::utils::types::web_page::WebPage;
-use crate::{Language, RunningPage, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let style = settings.style;
-    let language = settings.language;
-    let color_gradient = settings.color_gradient;
+    let ConfigSettings {
+        style,
+        language,
+        color_gradient,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -58,19 +60,20 @@ fn column_all_general_setting(
     sniffer: &Sniffer,
     font: Font,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let settings = &sniffer.configs.lock().unwrap().settings;
-    let language = settings.language;
+    let ConfigSettings {
+        language,
+        scale_factor,
+        mmdb_country,
+        mmdb_asn,
+        ..
+    } = sniffer.configs.lock().unwrap().settings.clone();
 
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
     let mut column = Column::new()
         .align_items(Alignment::Center)
         .padding([5, 10])
-        .push(row_language_scale_factor(
-            language,
-            font,
-            settings.scale_factor,
-        ))
+        .push(row_language_scale_factor(language, font, scale_factor))
         .push(Rule::horizontal(25));
 
     if !is_editable {
@@ -87,8 +90,8 @@ fn column_all_general_setting(
         is_editable,
         language,
         font,
-        &settings.mmdb_country,
-        &settings.mmdb_asn,
+        &mmdb_country,
+        &mmdb_asn,
         &sniffer.country_mmdb_reader,
         &sniffer.asn_mmdb_reader,
     ));

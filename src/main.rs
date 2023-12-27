@@ -81,14 +81,14 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let window_properties = configs1.lock().unwrap().window;
+    let ConfigWindow { size, position } = configs1.lock().unwrap().window;
 
     Sniffer::run(Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some("sniffnet".to_string()),
         window: window::Settings {
-            size: window_properties.size, // start size
-            position: window_properties.position.to_position(),
+            size, // start size
+            position: position.to_position(),
             min_size: Some((800, 500)), // min size allowed
             max_size: None,
             visible: true,
