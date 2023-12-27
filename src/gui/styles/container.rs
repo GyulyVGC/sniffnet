@@ -5,12 +5,9 @@
 use iced::widget::container::Appearance;
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::{
-    get_alpha_chart_badge, get_alpha_round_borders, get_alpha_round_containers,
-    BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
-};
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
-use crate::{get_colors, StyleType};
+use crate::StyleType;
 
 #[derive(Clone, Copy, Default)]
 pub enum ContainerType {
@@ -29,7 +26,8 @@ impl iced::widget::container::StyleSheet for StyleType {
     type Style = ContainerType;
 
     fn appearance(&self, style: &Self::Style) -> Appearance {
-        let colors = get_colors(*self);
+        let colors = self.get_palette();
+        let ext = self.get_extension();
         Appearance {
             text_color: Some(match style {
                 ContainerType::Gradient(_) => colors.text_headers,
@@ -37,20 +35,20 @@ impl iced::widget::container::StyleSheet for StyleType {
             }),
             background: Some(match style {
                 ContainerType::Gradient(GradientType::None) => Background::Color(colors.secondary),
-                ContainerType::Tooltip => Background::Color(colors.buttons),
+                ContainerType::Tooltip => Background::Color(ext.buttons_color),
                 ContainerType::BorderedRound => Background::Color(Color {
-                    a: get_alpha_round_containers(*self),
-                    ..colors.buttons
+                    a: ext.alpha_round_containers,
+                    ..ext.buttons_color
                 }),
                 ContainerType::Neutral | ContainerType::Palette => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::Badge => Background::Color(Color {
-                    a: get_alpha_chart_badge(*self),
+                    a: ext.alpha_chart_badge,
                     ..colors.secondary
                 }),
                 ContainerType::Gradient(gradient_type) => Background::Gradient(
-                    get_gradient_headers(&colors, *gradient_type, self.is_nightly()),
+                    get_gradient_headers(&colors, *gradient_type, ext.is_nightly),
                 ),
                 ContainerType::Modal => Background::Color(colors.primary),
                 ContainerType::Standard => Background::Color(Color::TRANSPARENT),
@@ -76,8 +74,8 @@ impl iced::widget::container::StyleSheet for StyleType {
             border_color: match style {
                 ContainerType::Palette => Color::BLACK,
                 _ => Color {
-                    a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    a: ext.alpha_round_borders,
+                    ..ext.buttons_color
                 },
             },
         }

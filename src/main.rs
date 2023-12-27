@@ -16,7 +16,6 @@ use configs::types::config_device::ConfigDevice;
 use configs::types::config_settings::ConfigSettings;
 use gui::pages::types::running_page::RunningPage;
 use gui::styles::style_constants::FONT_SIZE_BODY;
-use gui::styles::types::palette::get_colors;
 use gui::styles::types::style_type::StyleType;
 use gui::types::runtime_data::RunTimeData;
 use gui::types::sniffer::Sniffer;

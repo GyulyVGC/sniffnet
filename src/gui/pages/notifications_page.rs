@@ -14,7 +14,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{get_font, get_font_headers, FONT_SIZE_FOOTER};
+use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::logged_notification::{
@@ -36,8 +36,8 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
     let notifications = sniffer.settings.notifications;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let mut tab_and_body = Column::new()
         .align_items(Alignment::Center)
@@ -337,7 +337,7 @@ fn favorite_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::Star.to_text().size(80),
+                Icon::Star.to_text().size(80).style(TextType::Starred),
                 favorite_transmitted_translation(language),
                 Position::FollowCursor,
             )
@@ -398,7 +398,7 @@ fn get_button_clear_all(
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let style = sniffer.settings.style;
     let language = sniffer.settings.language;
-    let font = get_font(style);
+    let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(Length::Fixed(830.0))
         .padding(5)

@@ -5,8 +5,7 @@
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
-use crate::gui::styles::style_constants::{get_alpha_round_borders, get_alpha_round_containers};
-use crate::{get_colors, StyleType};
+use crate::StyleType;
 
 #[derive(Clone, Copy, Default)]
 pub enum TextInputType {
@@ -20,20 +19,21 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     type Style = TextInputType;
 
     fn active(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(*self);
+        let colors = self.get_palette();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                _ => Color {
+                    a: ext.alpha_round_borders,
+                    ..ext.buttons_color
+                },
             }),
             border_radius: 0.0.into(),
             border_width: 1.5,
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => Color {
-                    a: get_alpha_round_borders(*self),
-                    ..colors.buttons
-                },
+                TextInputType::Standard => ext.buttons_color,
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
             },
             icon_color: colors.text_body,
@@ -41,7 +41,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     }
 
     fn focused(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(*self);
+        let colors = self.get_palette();
         Appearance {
             background: Background::Color(colors.primary),
             border_radius: 0.0.into(),
@@ -55,39 +55,43 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     }
 
     fn placeholder_color(&self, _: &Self::Style) -> Color {
-        let color = get_colors(*self).text_body;
+        let color = self.get_palette().text_body;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
-            a: if self.is_nightly() { 0.2 } else { 0.7 },
+            a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
 
     fn value_color(&self, _: &Self::Style) -> Color {
-        get_colors(*self).text_body
+        self.get_palette().text_body
     }
 
     fn disabled_color(&self, _style: &Self::Style) -> Color {
-        let color = get_colors(*self).text_body;
+        let color = self.get_palette().text_body;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
-            a: if self.is_nightly() { 0.2 } else { 0.7 },
+            a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
 
     fn selection_color(&self, _: &Self::Style) -> Color {
-        let color = get_colors(*self).text_body;
+        let color = self.get_palette().text_body;
+        let is_nightly = self.get_extension().is_nightly;
         Color {
-            a: if self.is_nightly() { 0.05 } else { 0.4 },
+            a: if is_nightly { 0.05 } else { 0.4 },
             ..color
         }
     }
 
     fn hovered(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = get_colors(*self);
+        let colors = self.get_palette();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => colors.buttons,
+                _ => ext.buttons_color,
             }),
             border_radius: 0.0.into(),
             border_width: 1.5,
@@ -100,13 +104,14 @@ impl iced::widget::text_input::StyleSheet for StyleType {
     }
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
-        let colors = get_colors(*self);
+        let colors = self.get_palette();
+        let ext = self.get_extension();
         Appearance {
             background: Background::Color(match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => Color {
-                    a: get_alpha_round_containers(*self),
-                    ..colors.buttons
+                    a: ext.alpha_round_containers,
+                    ..ext.buttons_color
                 },
             }),
             border_radius: 0.0.into(),
@@ -114,10 +119,10 @@ impl iced::widget::text_input::StyleSheet for StyleType {
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 TextInputType::Standard => Color {
-                    a: get_alpha_round_borders(*self),
-                    ..colors.buttons
+                    a: ext.alpha_round_borders,
+                    ..ext.buttons_color
                 },
-                TextInputType::Error => Color::new(0.8, 0.15, 0.15, get_alpha_round_borders(*self)),
+                TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
             },
             icon_color: colors.text_body,
         }

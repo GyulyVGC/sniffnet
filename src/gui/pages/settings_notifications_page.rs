@@ -13,9 +13,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{
-    get_font, get_font_headers, FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE,
-};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -37,8 +35,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
     let language = sniffer.settings.language;
     let color_gradient = sniffer.settings.color_gradient;
     let notifications = sniffer.settings.notifications;
-    let font = get_font(style);
-    let font_headers = get_font_headers(style);
+    let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
     let mut content = Column::new()
         .width(Length::Fill)
@@ -65,6 +63,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
         .push(vertical_space(Fixed(5.0)));
 
     let volume_notification_col = Column::new()
+        .padding([0, 0, 5, 0])
         .align_items(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
