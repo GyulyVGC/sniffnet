@@ -7,7 +7,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::notifications::types::notifications::Notifications;
 use crate::{Language, StyleType};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigSettings {
     pub color_gradient: GradientType,
     pub language: Language,
@@ -21,6 +21,7 @@ pub struct ConfigSettings {
 }
 
 impl ConfigSettings {
+    #[cfg(not(test))]
     pub fn load() -> Self {
         if let Ok(settings) = confy::load::<ConfigSettings>("sniffnet", "settings") {
             settings
@@ -30,6 +31,7 @@ impl ConfigSettings {
         }
     }
 
+    #[cfg(not(test))]
     pub fn store(self) {
         confy::store("sniffnet", "settings", self).unwrap_or(());
     }
@@ -46,6 +48,26 @@ impl Default for ConfigSettings {
             style_path: String::new(),
             notifications: Notifications::default(),
             style: StyleType::default(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ConfigSettings;
+
+    impl ConfigSettings {
+        pub fn test_path() -> String {
+            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), "settings")
+        }
+
+        pub fn load() -> Self {
+            confy::load_path::<ConfigSettings>(ConfigSettings::test_path())
+                .unwrap_or(ConfigSettings::default())
+        }
+
+        pub fn store(self) {
+            confy::store_path(ConfigSettings::test_path(), self).unwrap_or(());
         }
     }
 }

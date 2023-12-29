@@ -210,7 +210,6 @@ impl Sniffer {
                 self.runtime_data.logged_notifications = VecDeque::new();
                 return self.update(Message::HideModal);
             }
-            Message::Quit => return window::close(),
             Message::SwitchPage(next) => {
                 // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
                 // first check if user switch back just now, and ignore the request for a short time.
@@ -280,7 +279,7 @@ impl Sniffer {
             // }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return iced::window::close();
+                return window::close();
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());
@@ -563,28 +562,34 @@ impl Sniffer {
 mod tests {
     #![allow(unused_must_use)]
 
+    use serial_test::{parallel, serial};
     use std::collections::{HashSet, VecDeque};
+    use std::fs::remove_file;
     use std::ops::Sub;
+    use std::path::Path;
     use std::sync::{Arc, Mutex};
     use std::time::Duration;
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
+    use crate::gui::styles::types::custom_palette::ExtraStyles;
+    use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::message::Message;
     use crate::networking::types::host::Host;
     use crate::notifications::types::logged_notification::{
         LoggedNotification, PacketsThresholdExceeded,
     };
     use crate::notifications::types::notifications::{
-        BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+        BytesNotification, FavoriteNotification, Notification, Notifications, PacketsNotification,
     };
     use crate::notifications::types::sound::Sound;
     use crate::{
-        ByteMultiple, ChartType, Configs, IpVersion, Language, Protocol, ReportSortType,
-        RunningPage, Sniffer, StyleType,
+        ByteMultiple, ChartType, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion,
+        Language, Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
     };
 
+    // tests using this will require the #[parallel] annotation
     fn new_sniffer() -> Sniffer {
         Sniffer::new(
             &Arc::new(Mutex::new(Configs::default())),
@@ -592,7 +597,36 @@ mod tests {
         )
     }
 
+    // tests using this will require the #[serial] annotation
+    fn new_sniffer_with_configs(configs: Configs) -> Sniffer {
+        Sniffer::new(&Arc::new(Mutex::new(configs)), Arc::new(Mutex::new(None)))
+    }
+
+    // helpful to clean up files generated from tests
+    impl Drop for Sniffer {
+        fn drop(&mut self) {
+            let settings_path_str = ConfigSettings::test_path();
+            let settings_path = Path::new(&settings_path_str);
+            if settings_path.exists() {
+                remove_file(ConfigSettings::test_path()).unwrap();
+            }
+
+            let device_path_str = ConfigDevice::test_path();
+            let device_path = Path::new(&device_path_str);
+            if device_path.exists() {
+                remove_file(ConfigDevice::test_path()).unwrap();
+            }
+
+            let window_path_str = ConfigWindow::test_path();
+            let window_path = Path::new(&window_path_str);
+            if window_path.exists() {
+                remove_file(ConfigWindow::test_path()).unwrap();
+            }
+        }
+    }
+
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_ip_version() {
         let mut sniffer = new_sniffer();
 
@@ -609,6 +643,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_protocol() {
         let mut sniffer = new_sniffer();
 
@@ -629,6 +664,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_chart_kind() {
         let mut sniffer = new_sniffer();
 
@@ -642,6 +678,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_report_kind() {
         let mut sniffer = new_sniffer();
 
@@ -657,6 +694,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_style() {
         let mut sniffer = new_sniffer();
 
@@ -688,6 +726,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_waiting_dots_update() {
         let mut sniffer = new_sniffer();
 
@@ -703,6 +742,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_modify_favorite_connections() {
         let mut sniffer = new_sniffer();
         // remove 1
@@ -892,6 +932,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_show_and_hide_modal_and_settings() {
         let mut sniffer = new_sniffer();
 
@@ -979,6 +1020,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_language() {
         let mut sniffer = new_sniffer();
 
@@ -1008,6 +1050,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_notification_settings() {
         let mut sniffer = new_sniffer();
 
@@ -1304,6 +1347,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = new_sniffer();
         sniffer.runtime_data.logged_notifications =
@@ -1326,6 +1370,7 @@ mod tests {
     }
 
     #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_switch_running_and_settings_pages() {
         let mut sniffer = new_sniffer();
         sniffer.timing_events.focus = std::time::Instant::now().sub(Duration::from_millis(400));
@@ -1381,5 +1426,133 @@ mod tests {
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+    }
+
+    #[test]
+    #[serial] // needed to not collide with other tests generating configs files
+    fn test_config_settings() {
+        let path_string = ConfigSettings::test_path();
+        let path = Path::new(&path_string);
+
+        assert!(!path.exists());
+
+        let mut sniffer = new_sniffer_with_configs(Configs::load());
+
+        assert!(path.exists());
+
+        // check that the current settings are the default ones
+        let settings_start = sniffer.configs.lock().unwrap().settings.clone();
+        assert_eq!(
+            settings_start,
+            ConfigSettings {
+                color_gradient: GradientType::None,
+                language: Language::EN,
+                scale_factor: 1.0,
+                mmdb_country: "".to_string(),
+                mmdb_asn: "".to_string(),
+                style_path: "".to_string(),
+                notifications: Notifications {
+                    volume: 60,
+                    packets_notification: Default::default(),
+                    bytes_notification: Default::default(),
+                    favorite_notification: Default::default()
+                },
+                style: StyleType::Night
+            }
+        );
+
+        // change some configs by sending messages
+        sniffer.update(Message::GradientsSelection(GradientType::Wild));
+        sniffer.update(Message::LanguageSelection(Language::ZH));
+        sniffer.update(Message::ChangeScaleFactor(0.65));
+        sniffer.update(Message::CustomCountryDb("countrymmdb".to_string()));
+        sniffer.update(Message::CustomAsnDb("asnmmdb".to_string()));
+        sniffer.update(Message::LoadStyle(format!(
+            "{}/resources/themes/catppuccin.toml",
+            env!("CARGO_MANIFEST_DIR")
+        )));
+        sniffer.update(Message::Style(StyleType::Custom(ExtraStyles::DraculaDark)));
+        sniffer.update(Message::ChangeVolume(100));
+
+        // quit the app by sending a CloseRequested message
+        sniffer.update(Message::CloseRequested);
+
+        assert!(path.exists());
+
+        // check that updated configs are inherited by a new sniffer instance
+        let settings_end = new_sniffer_with_configs(Configs::load())
+            .configs
+            .lock()
+            .unwrap()
+            .settings
+            .clone();
+        assert_eq!(
+            settings_end,
+            ConfigSettings {
+                color_gradient: GradientType::Wild,
+                language: Language::ZH,
+                scale_factor: 0.65,
+                mmdb_country: "countrymmdb".to_string(),
+                mmdb_asn: "asnmmdb".to_string(),
+                style_path: format!(
+                    "{}/resources/themes/catppuccin.toml",
+                    env!("CARGO_MANIFEST_DIR")
+                ),
+                notifications: Notifications {
+                    volume: 100,
+                    packets_notification: Default::default(),
+                    bytes_notification: Default::default(),
+                    favorite_notification: Default::default()
+                },
+                style: StyleType::Custom(ExtraStyles::DraculaDark)
+            }
+        );
+    }
+
+    #[test]
+    #[serial] // needed to not collide with other tests generating configs files
+    fn test_config_window() {
+        let path_string = ConfigWindow::test_path();
+        let path = Path::new(&path_string);
+
+        assert!(!path.exists());
+
+        let mut sniffer = new_sniffer_with_configs(Configs::load());
+
+        assert!(path.exists());
+
+        // check that the current window properties are the default ones
+        let window_start = sniffer.configs.lock().unwrap().window;
+        assert_eq!(
+            window_start,
+            ConfigWindow {
+                position: (0, 0),
+                size: (1190, 670),
+            }
+        );
+
+        // change window properties by sending messages
+        sniffer.update(Message::WindowMoved(-10, 555));
+        sniffer.update(Message::WindowResized(1000, 999));
+
+        // quit the app by sending a CloseRequested message
+        sniffer.update(Message::CloseRequested);
+
+        assert!(path.exists());
+
+        // check that updated configs are inherited by a new sniffer instance
+        let window_end = new_sniffer_with_configs(Configs::load())
+            .configs
+            .lock()
+            .unwrap()
+            .window
+            .clone();
+        assert_eq!(
+            window_end,
+            ConfigWindow {
+                position: (-10, 555),
+                size: (1000, 999),
+            }
+        );
     }
 }

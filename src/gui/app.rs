@@ -142,7 +142,7 @@ impl Application for Sniffer {
                 modifiers,
             }) => match modifiers {
                 Modifiers::COMMAND => match key_code {
-                    KeyCode::Q => Some(Message::Quit),
+                    KeyCode::Q => Some(Message::CloseRequested),
                     KeyCode::Comma => Some(Message::OpenLastSettings),
                     KeyCode::Backspace => Some(Message::ResetButtonPressed),
                     KeyCode::D => Some(Message::CtrlDPressed),

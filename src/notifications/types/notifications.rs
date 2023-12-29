@@ -5,7 +5,7 @@ use crate::notifications::types::sound::Sound;
 use crate::ByteMultiple;
 
 /// Used to contain the notifications configuration set by the user
-#[derive(Clone, Serialize, Deserialize, Copy)]
+#[derive(Clone, Serialize, Deserialize, Copy, PartialEq, Debug)]
 pub struct Notifications {
     pub volume: u8,
     pub packets_notification: PacketsNotification,
