@@ -256,7 +256,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
-            &entries.get(0).unwrap().1.data_info.clone(),
+            &entries.first().unwrap().1.data_info.clone(),
             &data_info_host.data_info,
         );
 
@@ -362,7 +362,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width * 0.88,
             chart_type,
-            &entries.get(0).unwrap().1.clone(),
+            &entries.first().unwrap().1.clone(),
             data_info,
         );
 

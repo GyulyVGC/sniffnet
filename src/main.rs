@@ -45,6 +45,8 @@ mod secondary_threads;
 mod translations;
 mod utils;
 
+pub const SNIFFNET_LOWERCASE: &str = "sniffnet";
+
 /// Entry point of application execution
 ///
 /// It initializes shared variables and loads configuration parameters
@@ -85,7 +87,7 @@ pub fn main() -> iced::Result {
 
     Sniffer::run(Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
-        id: Some("sniffnet".to_string()),
+        id: Some(String::from(SNIFFNET_LOWERCASE)),
         window: window::Settings {
             size, // start size
             position: position.to_position(),
@@ -98,7 +100,7 @@ pub fn main() -> iced::Result {
             icon: None,
             #[cfg(target_os = "linux")]
             platform_specific: PlatformSpecific {
-                application_id: "sniffnet".to_string(),
+                application_id: String::from(SNIFFNET_LOWERCASE),
             },
             ..Default::default()
         },

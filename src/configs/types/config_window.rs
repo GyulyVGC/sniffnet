@@ -1,6 +1,9 @@
 use iced::window::Position;
 use serde::{Deserialize, Serialize};
 
+#[cfg(not(test))]
+use crate::SNIFFNET_LOWERCASE;
+
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
 pub struct ConfigWindow {
     pub position: (i32, i32),
@@ -8,19 +11,21 @@ pub struct ConfigWindow {
 }
 
 impl ConfigWindow {
+    const FILE_NAME: &'static str = "window";
     #[cfg(not(test))]
     pub fn load() -> Self {
-        if let Ok(window) = confy::load::<ConfigWindow>("sniffnet", "window") {
+        if let Ok(window) = confy::load::<ConfigWindow>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             window
         } else {
-            confy::store("sniffnet", "window", ConfigWindow::default()).unwrap_or(());
+            confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigWindow::default())
+                .unwrap_or(());
             ConfigWindow::default()
         }
     }
 
     #[cfg(not(test))]
     pub fn store(self) {
-        confy::store("sniffnet", "window", self).unwrap_or(());
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
     }
 }
 
@@ -49,7 +54,7 @@ mod tests {
 
     impl ConfigWindow {
         pub fn test_path() -> String {
-            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), "window")
+            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), Self::FILE_NAME)
         }
 
         pub fn load() -> Self {

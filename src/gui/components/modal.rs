@@ -142,6 +142,7 @@ fn confirm_button_row(
 /// A widget that centers a modal element over some base element
 pub struct Modal<'a, Message, Renderer> {
     base: Element<'a, Message, Renderer>,
+    #[allow(clippy::struct_field_names)]
     modal: Element<'a, Message, Renderer>,
     on_blur: Option<Message>,
 }

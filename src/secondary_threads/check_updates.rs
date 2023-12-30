@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+use crate::SNIFFNET_LOWERCASE;
 use serde::Deserialize;
 
 use crate::utils::formatted_strings::APP_VERSION;
@@ -23,7 +24,7 @@ fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> O
     let client = reqwest::blocking::Client::new();
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-        .header("User-agent", format!("sniffnet-{APP_VERSION}"))
+        .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send();
@@ -35,7 +36,7 @@ fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> O
         if result_json.is_err() {
             let response2 = client
                 .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-                .header("User-agent", format!("sniffnet-{APP_VERSION}"))
+                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
                 .send();

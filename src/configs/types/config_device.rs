@@ -8,7 +8,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::networking::types::my_device::MyDevice;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[cfg(not(test))]
+use crate::SNIFFNET_LOWERCASE;
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigDevice {
     pub device_name: String,
 }
@@ -30,19 +33,22 @@ impl Default for ConfigDevice {
 }
 
 impl ConfigDevice {
+    const FILE_NAME: &'static str = "device";
+
     #[cfg(not(test))]
     pub fn load() -> Self {
-        if let Ok(device) = confy::load::<ConfigDevice>("sniffnet", "device") {
+        if let Ok(device) = confy::load::<ConfigDevice>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             device
         } else {
-            confy::store("sniffnet", "device", ConfigDevice::default()).unwrap_or(());
+            confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigDevice::default())
+                .unwrap_or(());
             ConfigDevice::default()
         }
     }
 
     #[cfg(not(test))]
     pub fn store(self) {
-        confy::store("sniffnet", "device", self).unwrap_or(());
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
     }
 
     pub fn to_my_device(&self) -> MyDevice {
@@ -75,7 +81,7 @@ mod tests {
 
     impl ConfigDevice {
         pub fn test_path() -> String {
-            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), "device")
+            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), Self::FILE_NAME)
         }
 
         pub fn load() -> Self {
