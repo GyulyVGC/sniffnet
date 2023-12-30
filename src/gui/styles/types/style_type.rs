@@ -32,7 +32,7 @@ impl Default for StyleType {
 impl application::StyleSheet for StyleType {
     type Style = ();
 
-    fn appearance(&self, _: &Self::Style) -> Appearance {
+    fn appearance(&self, (): &Self::Style) -> Appearance {
         let colors = self.get_palette();
         Appearance {
             background_color: colors.primary,

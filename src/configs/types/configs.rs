@@ -1,6 +1,6 @@
 use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
 
-#[derive(Default)]
+#[derive(Default, Clone, PartialEq, Debug)]
 pub struct Configs {
     pub settings: ConfigSettings,
     pub device: ConfigDevice,

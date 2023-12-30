@@ -65,8 +65,6 @@ pub enum Message {
     ClearAllNotifications,
     /// Set notifications volume
     ChangeVolume(u8),
-    /// Quits the app. Used when Ctrl+Q keys are pressed.
-    Quit,
     /// Switch from a page to the next (previous) one if true (false), when the tab (shift+tab) key is pressed.
     SwitchPage(bool),
     /// The enter (return) key has been pressed

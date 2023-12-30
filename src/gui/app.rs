@@ -28,7 +28,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::StyleType;
+use crate::{ConfigSettings, StyleType};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -59,9 +59,12 @@ impl Application for Sniffer {
     }
 
     fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        let style = self.settings.style;
-        let language = self.settings.language;
-        let color_gradient = self.settings.color_gradient;
+        let ConfigSettings {
+            style,
+            language,
+            color_gradient,
+            ..
+        } = self.configs.lock().unwrap().settings;
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
@@ -139,7 +142,7 @@ impl Application for Sniffer {
                 modifiers,
             }) => match modifiers {
                 Modifiers::COMMAND => match key_code {
-                    KeyCode::Q => Some(Message::Quit),
+                    KeyCode::Q => Some(Message::CloseRequested),
                     KeyCode::Comma => Some(Message::OpenLastSettings),
                     KeyCode::Backspace => Some(Message::ResetButtonPressed),
                     KeyCode::D => Some(Message::CtrlDPressed),
@@ -175,10 +178,10 @@ impl Application for Sniffer {
     }
 
     fn theme(&self) -> Self::Theme {
-        self.settings.style
+        self.configs.lock().unwrap().settings.style
     }
 
     fn scale_factor(&self) -> f64 {
-        self.settings.scale_factor
+        self.configs.lock().unwrap().settings.scale_factor
     }
 }

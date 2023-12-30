@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{copy_translation, messages_translation};
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::utils::types::icon::Icon;
-use crate::{Language, Protocol, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -57,9 +57,12 @@ fn page_content(
     sniffer: &Sniffer,
     key: &AddressPortPair,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
+    let ConfigSettings {
+        style,
+        language,
+        color_gradient,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -303,8 +306,9 @@ fn get_local_tooltip(
     address_to_lookup: &str,
     key: &AddressPortPair,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
 
     let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
     get_computer_tooltip(

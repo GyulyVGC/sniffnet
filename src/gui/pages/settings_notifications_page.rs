@@ -28,13 +28,16 @@ use crate::translations::translations::{
     volume_translation,
 };
 use crate::utils::types::icon::Icon;
-use crate::{Language, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
-    let notifications = sniffer.settings.notifications;
+    let ConfigSettings {
+        style,
+        language,
+        color_gradient,
+        notifications,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

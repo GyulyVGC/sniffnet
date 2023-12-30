@@ -120,7 +120,7 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
 
 // /// Returns the default report path
 // pub fn get_default_report_file_path() -> String {
-//     return if let Ok(mut config_path) = confy::get_configuration_file_path("sniffnet", "file") {
+//     return if let Ok(mut config_path) = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "file") {
 //         config_path.pop();
 //         config_path.push(PCAP_FILE_NAME);
 //         config_path.to_string_lossy().to_string()
@@ -138,7 +138,7 @@ pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
 //     if let Ok(custom_file) = File::create(custom_path) {
 //         return custom_file;
 //     } else if let Ok(mut config_path) =
-//         confy::get_configuration_file_path("sniffnet", "file")
+//         confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "file")
 //     {
 //         config_path.pop();
 //         config_path.push(PCAP_FILE_NAME);

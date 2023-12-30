@@ -35,13 +35,16 @@ use crate::translations::translations::{
 use crate::translations::translations_3::port_translation;
 use crate::utils::formatted_strings::get_invalid_filters_string;
 use crate::utils::types::icon::Icon;
-use crate::{IpVersion, Language, Protocol, StyleType};
+use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let color_gradient = sniffer.settings.color_gradient;
+    let ConfigSettings {
+        style,
+        language,
+        color_gradient,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
     let col_adapter = get_col_adapter(sniffer, font);
@@ -291,7 +294,7 @@ fn button_start(
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<StyleType>> {
-    let language = sniffer.settings.language;
+    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
 
     let mut dev_str_list = vec![];
     for dev in Device::list().expect("Error retrieving device list\r\n") {

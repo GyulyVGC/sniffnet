@@ -29,13 +29,16 @@ use crate::translations::translations::{
 };
 use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::utils::types::icon::Icon;
-use crate::{Language, RunningPage, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
-    let notifications = sniffer.settings.notifications;
+    let ConfigSettings {
+        style,
+        language,
+        notifications,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -396,8 +399,9 @@ fn get_button_clear_all(
 }
 
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
-    let style = sniffer.settings.style;
-    let language = sniffer.settings.language;
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(Length::Fixed(830.0))
