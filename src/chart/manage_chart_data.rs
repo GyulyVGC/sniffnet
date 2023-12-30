@@ -81,6 +81,7 @@ fn get_max(deque: &VecDeque<(u32, i64)>) -> i64 {
 
 #[cfg(test)]
 mod tests {
+    use pcap::Linktype;
     use std::collections::VecDeque;
 
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
@@ -167,6 +168,7 @@ mod tests {
             style: StyleType::default(),
         };
         let mut runtime_data = RunTimeData {
+            link_type: Linktype::ETHERNET,
             all_bytes: 0,
             all_packets: 0,
             tot_sent_bytes: tot_sent + 1111,

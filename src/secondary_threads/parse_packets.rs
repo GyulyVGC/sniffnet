@@ -206,8 +206,6 @@ fn get_sniffable_headers<'a>(
 ) -> Result<PacketHeaders<'a>, ReadError> {
     match is_link_type_confirmed {
         false => {
-            *is_link_type_confirmed = true;
-
             let ethernet_result = PacketHeaders::from_ethernet_slice(packet);
             let ip_result = PacketHeaders::from_ip_slice(packet);
             let null_result = PacketHeaders::from_ip_slice(&packet[4..]);
@@ -218,17 +216,20 @@ fn get_sniffable_headers<'a>(
 
             match (is_ethernet_sniffable, is_ip_sniffable, is_null_sniffable) {
                 (true, _, _) => {
+                    *is_link_type_confirmed = true;
                     *link_type = Linktype::ETHERNET;
                     info_traffic_mutex.lock().unwrap().link_type = Linktype::ETHERNET;
                     ethernet_result
                 }
                 (_, true, _) => {
+                    *is_link_type_confirmed = true;
                     // it could be IPV4 as well as IPV6 but it should be the same
                     *link_type = Linktype::IPV4;
                     info_traffic_mutex.lock().unwrap().link_type = Linktype::IPV4;
                     ip_result
                 }
                 (_, _, true) => {
+                    *is_link_type_confirmed = true;
                     // it could be NULL as well as LOOP but it should be the same
                     *link_type = Linktype::NULL;
                     info_traffic_mutex.lock().unwrap().link_type = Linktype::NULL;
