@@ -70,7 +70,7 @@ pub fn main() -> iced::Result {
     // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
     ctrlc::set_handler(move || {
         configs2.lock().unwrap().clone().store();
-        process::exit(0);
+        process::exit(130);
     })
     .expect("Error setting Ctrl-C handler");
 

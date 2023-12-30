@@ -12,7 +12,8 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))
 - Window size and position are now remembered, so that Sniffnet can reopen with the same window properties
 - Users can now provide custom paths for MMDB files to allow using the commercial versions of the country and ASN databases (fixes [#243](https://github.com/GyulyVGC/sniffnet/issues/243))
-- The app's configurations are now stored only on application close, instead of needlessly store them each time the settings popup is closed
+- Added new command line option `--restore-default` to restore the default configurations of the app (settings, window properties, and device selected at startup)
+- The app's configurations are now stored only on application close, instead of needlessly store them each time the settings popup is closed ([#420](https://github.com/GyulyVGC/sniffnet/pull/420))
 - The textual output report is not generated anymore
 - Settings "Language" tab has been removed. Language selection and other options are now included in a new settings tab "General" ([#365](https://github.com/GyulyVGC/sniffnet/pull/365))
 - Updated Portuguese translation to v1.2 ([#398](https://github.com/GyulyVGC/sniffnet/pull/398))
