@@ -349,11 +349,7 @@ fn get_src_or_dest_col(
         address_translation(language)
     };
 
-    let mac_str = if let Some(val) = mac {
-        &val
-    } else {
-        "-"
-    };
+    let mac_str = if let Some(val) = mac { val } else { "-" };
 
     Column::new()
         .spacing(4)

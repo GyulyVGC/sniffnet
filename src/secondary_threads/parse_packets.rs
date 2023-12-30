@@ -32,8 +32,11 @@ pub fn parse_packets(
     asn_mmdb_reader: &Arc<MmdbReader>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
-    let mut is_first_packet = true;
+
+    // pcap seems to assign ethernet to all interfaces (at least on macOS)...
     let mut link_type = cap.get_datalink();
+    // ...it'll be confirmed after having parsed the first packet!
+    let mut is_link_type_confirmed = false;
 
     loop {
         match cap.next_packet() {
@@ -47,19 +50,12 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                if let Ok(headers) = match is_first_packet {
-                    true => {
-                        is_first_packet = false;
-                        get_sniffable_headers(&packet, &mut link_type, info_traffic_mutex)
-                    }
-                    false => match link_type {
-                        Linktype::IPV4 | Linktype::IPV6 => PacketHeaders::from_ip_slice(&packet),
-                        Linktype::NULL | Linktype::LOOP => {
-                            PacketHeaders::from_ip_slice(&packet[4..])
-                        }
-                        _ => PacketHeaders::from_ethernet_slice(&packet),
-                    },
-                } {
+                if let Ok(headers) = get_sniffable_headers(
+                    &packet,
+                    &mut link_type,
+                    info_traffic_mutex,
+                    &mut is_link_type_confirmed,
+                ) {
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
@@ -206,39 +202,53 @@ fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     link_type: &mut Linktype,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
+    is_link_type_confirmed: &mut bool,
 ) -> Result<PacketHeaders<'a>, ReadError> {
-    let ethernet_result = PacketHeaders::from_ethernet_slice(&packet);
-    let ip_result = PacketHeaders::from_ip_slice(&packet);
-    let null_result = PacketHeaders::from_ip_slice(&packet[4..]);
+    match is_link_type_confirmed {
+        false => {
+            *is_link_type_confirmed = true;
 
-    let is_ethernet_sniffable = are_headers_sniffable(&ethernet_result);
-    let is_ip_sniffable = are_headers_sniffable(&ip_result);
-    let is_null_sniffable = are_headers_sniffable(&null_result);
+            let ethernet_result = PacketHeaders::from_ethernet_slice(packet);
+            let ip_result = PacketHeaders::from_ip_slice(packet);
+            let null_result = PacketHeaders::from_ip_slice(&packet[4..]);
 
-    match (is_ethernet_sniffable, is_ip_sniffable, is_null_sniffable) {
-        (true, _, _) => {
-            *link_type = Linktype::ETHERNET;
-            info_traffic_mutex.lock().unwrap().link_type = Linktype::ETHERNET;
-            ethernet_result
+            let is_ethernet_sniffable = are_headers_sniffable(&ethernet_result);
+            let is_ip_sniffable = are_headers_sniffable(&ip_result);
+            let is_null_sniffable = are_headers_sniffable(&null_result);
+
+            match (is_ethernet_sniffable, is_ip_sniffable, is_null_sniffable) {
+                (true, _, _) => {
+                    *link_type = Linktype::ETHERNET;
+                    info_traffic_mutex.lock().unwrap().link_type = Linktype::ETHERNET;
+                    ethernet_result
+                }
+                (_, true, _) => {
+                    // it could be IPV4 as well as IPV6 but it should be the same
+                    *link_type = Linktype::IPV4;
+                    info_traffic_mutex.lock().unwrap().link_type = Linktype::IPV4;
+                    ip_result
+                }
+                (_, _, true) => {
+                    // it could be NULL as well as LOOP but it should be the same
+                    *link_type = Linktype::NULL;
+                    info_traffic_mutex.lock().unwrap().link_type = Linktype::NULL;
+                    null_result
+                }
+                (false, false, false) => ethernet_result,
+            }
         }
-        (_, true, _) => {
-            *link_type = Linktype::IPV4;
-            info_traffic_mutex.lock().unwrap().link_type = Linktype::IPV4;
-            ip_result
-        }
-        (_, _, true) => {
-            *link_type = Linktype::NULL;
-            info_traffic_mutex.lock().unwrap().link_type = Linktype::NULL;
-            null_result
-        }
-        (false, false, false) => ethernet_result,
+        true => match *link_type {
+            Linktype::IPV4 | Linktype::IPV6 => PacketHeaders::from_ip_slice(packet),
+            Linktype::NULL | Linktype::LOOP => PacketHeaders::from_ip_slice(&packet[4..]),
+            _ => PacketHeaders::from_ethernet_slice(packet),
+        },
     }
 }
 
 fn are_headers_sniffable(headers_result: &Result<PacketHeaders, ReadError>) -> bool {
-    return if let Ok(headers) = headers_result {
+    if let Ok(headers) = headers_result {
         headers.ip.is_some() && headers.transport.is_some()
     } else {
         false
-    };
+    }
 }

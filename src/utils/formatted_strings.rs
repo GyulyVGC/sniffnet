@@ -1,3 +1,4 @@
+use pcap::Linktype;
 use std::net::IpAddr;
 
 use crate::networking::types::filters::Filters;
@@ -74,6 +75,16 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
         ));
     }
     filters_string
+}
+
+pub fn get_adapter_link_type_str(adapter: &str, link_type: Linktype) -> String {
+    let link_type_str = match link_type {
+        Linktype::ETHERNET => "(Ethernet)",
+        Linktype::NULL | Linktype::LOOP => "(null/loopback)",
+        Linktype::IPV4 | Linktype::IPV6 => "(raw IP)",
+        _ => "",
+    };
+    format!("{adapter} {link_type_str}")
 }
 
 /// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)

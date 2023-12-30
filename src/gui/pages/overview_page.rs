@@ -43,7 +43,8 @@ use crate::translations::translations_2::{
     only_top_30_hosts_translation,
 };
 use crate::utils::formatted_strings::{
-    get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
+    get_active_filters_string, get_adapter_link_type_str, get_formatted_bytes_string_with_b,
+    get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
 use crate::{AppProtocol, ChartType, ConfigSettings, Language, RunningPage, StyleType};
@@ -522,19 +523,19 @@ fn col_device_filters(
     link_type: Linktype,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]
-    let mut adapter_info = device.name.to_owned();
+    let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
     let adapter_name = &device.name;
     #[cfg(target_os = "windows")]
-    let mut adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+    let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
 
-    adapter_info.push_str(&format!(" ({})", link_type.0,));
+    let adapter_link_type = get_adapter_link_type_str(adapter_info, link_type);
 
     Column::new()
         .width(Length::FillPortion(1))
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
-            &adapter_info,
+            &adapter_link_type,
             font,
         ))
         .push(vertical_space(15))

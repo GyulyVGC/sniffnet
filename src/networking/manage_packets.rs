@@ -71,16 +71,13 @@ fn analyze_link_header(
     link_header: Option<Ethernet2Header>,
     mac_address1: &mut Option<String>,
     mac_address2: &mut Option<String>,
-)  {
-    match link_header {
-        Some(header) => {
-            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
-            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
-        }
-        _ => {
-            *mac_address1 = None;
-            *mac_address2 = None;
-        },
+) {
+    if let Some(header) = link_header {
+        *mac_address1 = Some(mac_from_dec_to_hex(header.source));
+        *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
+    } else {
+        *mac_address1 = None;
+        *mac_address2 = None;
     }
 }
 
