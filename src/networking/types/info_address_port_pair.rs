@@ -17,9 +17,9 @@ use crate::AppProtocol;
 #[derive(Clone, Default)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
-    pub mac_address1: String,
+    pub mac_address1: Option<String>,
     /// Destination MAC address
-    pub mac_address2: String,
+    pub mac_address2: Option<String>,
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.

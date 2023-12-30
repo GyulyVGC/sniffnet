@@ -338,7 +338,7 @@ fn get_src_or_dest_col(
     caption: Row<'static, Message, Renderer<StyleType>>,
     ip: &String,
     port: Option<u16>,
-    mac: &str,
+    mac: &Option<String>,
     font: Font,
     language: Language,
     timing_events: &TimingEvents,
@@ -348,6 +348,13 @@ fn get_src_or_dest_col(
     } else {
         address_translation(language)
     };
+
+    let mac_str = if let Some(val) = mac {
+        &val
+    } else {
+        "-"
+    };
+
     Column::new()
         .spacing(4)
         .push(
@@ -369,7 +376,7 @@ fn get_src_or_dest_col(
         )
         .push(TextType::highlighted_subtitle_with_desc(
             mac_address_translation(language),
-            mac,
+            mac_str,
             font,
         ))
 }

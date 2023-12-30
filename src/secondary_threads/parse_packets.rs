@@ -61,7 +61,7 @@ pub fn parse_packets(
                     },
                 } {
                     let mut exchanged_bytes = 0;
-                    let mut mac_addresses = (String::new(), String::new());
+                    let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
 

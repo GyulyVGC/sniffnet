@@ -28,14 +28,12 @@ use crate::{AppProtocol, InfoTraffic, IpVersion, Protocol};
 /// Returns the relevant collected information.
 pub fn analyze_headers(
     headers: PacketHeaders,
-    mac_addresses: &mut (String, String),
+    mac_addresses: &mut (Option<String>, Option<String>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
-    if !analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1) {
-        return None;
-    }
+    analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1);
 
     if !analyze_network_header(
         headers.ip,
@@ -71,16 +69,18 @@ pub fn analyze_headers(
 /// Returns false if packet has to be skipped.
 fn analyze_link_header(
     link_header: Option<Ethernet2Header>,
-    mac_address1: &mut String,
-    mac_address2: &mut String,
-) -> bool {
+    mac_address1: &mut Option<String>,
+    mac_address2: &mut Option<String>,
+)  {
     match link_header {
         Some(header) => {
-            *mac_address1 = mac_from_dec_to_hex(header.source);
-            *mac_address2 = mac_from_dec_to_hex(header.destination);
-            true
+            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
+            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
         }
-        _ => true,
+        _ => {
+            *mac_address1 = None;
+            *mac_address2 = None;
+        },
     }
 }
 
@@ -167,7 +167,7 @@ pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     key: &AddressPortPair,
     my_device: &MyDevice,
-    mac_addresses: (String, String),
+    mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     exchanged_bytes: u128,
     application_protocol: AppProtocol,
