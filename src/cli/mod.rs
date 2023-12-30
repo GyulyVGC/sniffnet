@@ -49,13 +49,16 @@ fn unknown_argument(arg: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::sync::{Arc, Mutex};
+
+    use serial_test::serial;
+
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::notifications::types::notifications::Notifications;
     use crate::{ConfigDevice, ConfigSettings, ConfigWindow, Language, Sniffer, StyleType};
-    use serial_test::serial;
-    use std::sync::{Arc, Mutex};
+
+    use super::*;
 
     #[test]
     #[serial]

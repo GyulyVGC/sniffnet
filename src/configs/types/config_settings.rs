@@ -5,10 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::notifications::types::notifications::Notifications;
-use crate::{Language, StyleType};
-
 #[cfg(not(test))]
 use crate::SNIFFNET_LOWERCASE;
+use crate::{Language, StyleType};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigSettings {

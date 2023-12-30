@@ -7,7 +7,6 @@ use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
 
 use crate::networking::types::my_device::MyDevice;
-
 #[cfg(not(test))]
 use crate::SNIFFNET_LOWERCASE;
 

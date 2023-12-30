@@ -2,10 +2,10 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use crate::SNIFFNET_LOWERCASE;
 use serde::Deserialize;
 
 use crate::utils::formatted_strings::APP_VERSION;
+use crate::SNIFFNET_LOWERCASE;
 
 #[derive(Deserialize, Debug)]
 struct AppVersion {

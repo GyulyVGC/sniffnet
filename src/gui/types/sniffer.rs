@@ -562,13 +562,14 @@ impl Sniffer {
 mod tests {
     #![allow(unused_must_use)]
 
-    use serial_test::{parallel, serial};
     use std::collections::{HashSet, VecDeque};
     use std::fs::remove_file;
     use std::ops::Sub;
     use std::path::Path;
     use std::sync::{Arc, Mutex};
     use std::time::Duration;
+
+    use serial_test::{parallel, serial};
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
