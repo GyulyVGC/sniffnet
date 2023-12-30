@@ -80,7 +80,7 @@ fn analyze_link_header(
             *mac_address2 = mac_from_dec_to_hex(header.destination);
             true
         }
-        _ => false,
+        _ => true,
     }
 }
 

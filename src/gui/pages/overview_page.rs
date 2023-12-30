@@ -12,6 +12,7 @@ use iced::widget::{
 use iced::widget::{horizontal_space, Rule};
 use iced::Length::{Fill, FillPortion, Fixed};
 use iced::{Alignment, Font, Length, Renderer};
+use pcap::Linktype;
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -65,11 +66,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
         let total = observed + u128::from(dropped);
+        let link_type = sniffer.runtime_data.link_type;
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
+                body =
+                    body_no_packets(&sniffer.device, font, language, &sniffer.waiting, link_type);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
@@ -139,8 +142,10 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
+    link_type: Linktype,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let adapter_name = device.name.clone();
+    let mut adapter_name = device.name.clone();
+    adapter_name.push_str(&format!(" ({})", link_type.0,));
     let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
             Icon::Warning.to_text().size(60),
@@ -422,8 +427,10 @@ fn lazy_col_info(
     let filtered_bytes =
         sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
+    let link_type = sniffer.runtime_data.link_type;
 
-    let col_device_filters = col_device_filters(language, font, &sniffer.filters, &sniffer.device);
+    let col_device_filters =
+        col_device_filters(language, font, &sniffer.filters, &sniffer.device, link_type);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -512,19 +519,22 @@ fn col_device_filters(
     font: Font,
     filters: &Filters,
     device: &MyDevice,
+    link_type: Linktype,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     #[cfg(not(target_os = "windows"))]
-    let adapter_info = &device.name;
+    let mut adapter_info = device.name.to_owned();
     #[cfg(target_os = "windows")]
     let adapter_name = &device.name;
     #[cfg(target_os = "windows")]
-    let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+    let mut adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+
+    adapter_info.push_str(&format!(" ({})", link_type.0,));
 
     Column::new()
         .width(Length::FillPortion(1))
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
-            adapter_info,
+            &adapter_info,
             font,
         ))
         .push(vertical_space(15))

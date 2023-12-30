@@ -303,6 +303,7 @@ impl Sniffer {
         self.runtime_data.tot_received_bytes = info_traffic_lock.tot_received_bytes;
         self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
         self.runtime_data.dropped_packets = info_traffic_lock.dropped_packets;
+        self.runtime_data.link_type = info_traffic_lock.link_type;
         drop(info_traffic_lock);
         let emitted_notifications = notify_and_log(
             &mut self.runtime_data,
