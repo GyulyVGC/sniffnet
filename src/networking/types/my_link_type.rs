@@ -6,36 +6,47 @@ use iced::widget::Column;
 use iced::{Font, Renderer};
 use pcap::Linktype;
 
+/// Currently supported link types
 #[derive(Copy, Clone)]
 pub enum MyLinkType {
-    Supported(Linktype),
+    Null(Linktype),
+    Ethernet(Linktype),
+    RawIp(Linktype),
+    Loop(Linktype),
+    IPv4(Linktype),
+    IPv6(Linktype),
     Unsupported(Linktype),
     NotYetAssigned,
 }
 
 impl MyLinkType {
-    pub fn is_supported(&self) -> bool {
-        match self {
-            MyLinkType::Supported(_) => true,
-            MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => false,
-        }
+    pub fn is_supported(self) -> bool {
+        !matches!(
+            self,
+            MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned
+        )
     }
 
     pub fn from_pcap_link_type(link_type: Linktype) -> Self {
         match link_type {
-            Linktype::NULL
-            | Linktype::ETHERNET
-            | Linktype(12)
-            | Linktype::LOOP
-            | Linktype::IPV4
-            | Linktype::IPV6 => Self::Supported(link_type),
+            Linktype::NULL => Self::Null(link_type),
+            Linktype::ETHERNET => Self::Ethernet(link_type),
+            Linktype(12) => Self::RawIp(link_type),
+            Linktype::LOOP => Self::Loop(link_type),
+            Linktype::IPV4 => Self::IPv4(link_type),
+            Linktype::IPV6 => Self::IPv6(link_type),
             _ => Self::Unsupported(link_type),
         }
     }
 
-    pub fn full_print_on_one_line(&self, language: Language) -> String {
+    pub fn full_print_on_one_line(self, language: Language) -> String {
         match self {
-            MyLinkType::Supported(l) => {
+            Self::Null(l)
+            | Self::Ethernet(l)
+            | Self::RawIp(l)
+            | Self::Loop(l)
+            | Self::IPv4(l)
+            | Self::IPv6(l) => {
                 format!(
                     "{}: {} ({})",
                     link_type_translation(language),
@@ -55,12 +66,17 @@ impl MyLinkType {
     }
 
     pub fn link_type_col(
-        &self,
+        self,
         language: Language,
         font: Font,
     ) -> Column<'static, Message, Renderer<StyleType>> {
         match self {
-            MyLinkType::Supported(l) => {
+            Self::Null(l)
+            | Self::Ethernet(l)
+            | Self::RawIp(l)
+            | Self::Loop(l)
+            | Self::IPv4(l)
+            | Self::IPv6(l) => {
                 let link_info = format!(
                     "{} ({})",
                     l.get_name().unwrap_or(l.0.to_string()),

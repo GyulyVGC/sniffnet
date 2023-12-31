@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use etherparse::{PacketHeaders, ReadError};
-use pcap::{Active, Capture, Linktype, Packet};
+use pcap::{Active, Capture, Packet};
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::{
@@ -35,8 +35,7 @@ pub fn parse_packets(
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
-    let link_type = cap.get_datalink();
-    info_traffic_mutex.lock().unwrap().link_type = MyLinkType::from_pcap_link_type(link_type);
+    let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
 
     loop {
         match cap.next_packet() {
@@ -50,7 +49,7 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                if let Ok(headers) = get_sniffable_headers(&packet, link_type) {
+                if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
@@ -195,11 +194,13 @@ pub fn parse_packets(
 
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
-    link_type: Linktype,
+    my_link_type: MyLinkType,
 ) -> Result<PacketHeaders<'a>, ReadError> {
-    match link_type {
-        Linktype(12) | Linktype::IPV4 | Linktype::IPV6 => PacketHeaders::from_ip_slice(packet),
-        Linktype::NULL | Linktype::LOOP => from_null_slice(packet),
+    match my_link_type {
+        MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
+            PacketHeaders::from_ip_slice(packet)
+        }
+        MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null_slice(packet),
         _ => PacketHeaders::from_ethernet_slice(packet),
     }
 }

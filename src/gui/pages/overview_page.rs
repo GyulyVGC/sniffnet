@@ -457,7 +457,7 @@ fn lazy_col_info(
                         .direction(Direction::Horizontal(ScrollbarType::properties())),
                 )
                 .push(Rule::vertical(25))
-                .push(col_data_representation),
+                .push(col_data_representation.width(Length::FillPortion(1))),
         )
         .push(Rule::horizontal(15))
         .push(
@@ -523,16 +523,13 @@ fn col_device(
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
-    let adapter_name = &device.name;
-    #[cfg(target_os = "windows")]
-    let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+    let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
 
     Column::new()
-        .spacing(15)
-        .width(Length::FillPortion(1))
+        .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
-            &adapter_info,
+            adapter_info,
             font,
         ))
         .push(link_type.link_type_col(language, font))
@@ -543,7 +540,7 @@ fn col_data_representation(
     font: Font,
     chart_type: ChartType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().spacing(5).width(Length::FillPortion(1)).push(
+    let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
             .style(TextType::Subtitle)
             .font(font),
@@ -602,7 +599,7 @@ fn col_bytes_packets(
     };
 
     Column::new()
-        .spacing(15)
+        .spacing(10)
         .push(get_active_filters_col(filters, language, font, false))
         .push(TextType::highlighted_subtitle_with_desc(
             filtered_bytes_translation(language),
