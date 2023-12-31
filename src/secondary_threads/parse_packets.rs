@@ -18,6 +18,7 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::InfoTraffic;
 
@@ -35,7 +36,7 @@ pub fn parse_packets(
     let capture_id = *current_capture_id.lock().unwrap();
 
     let link_type = cap.get_datalink();
-    info_traffic_mutex.lock().unwrap().link_type = link_type;
+    info_traffic_mutex.lock().unwrap().link_type = MyLinkType::from_pcap_link_type(link_type);
 
     loop {
         match cap.next_packet() {

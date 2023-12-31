@@ -81,3 +81,11 @@ pub fn messages_translation(language: Language) -> &'static str {
         _ => "Messages",
     }
 }
+
+pub fn link_type_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Link type",
+        Language::IT => "Tipo di collegamento",
+        _ => "Link type",
+    }
+}

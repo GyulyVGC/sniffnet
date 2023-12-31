@@ -1,6 +1,6 @@
 //! Module defining the `RunTimeData` struct, useful to to generate chart and to display statistics about network traffic
-//!
-use pcap::Linktype;
+
+use crate::networking::types::my_link_type::MyLinkType;
 use std::collections::VecDeque;
 
 use crate::notifications::types::logged_notification::LoggedNotification;
@@ -8,7 +8,7 @@ use crate::notifications::types::logged_notification::LoggedNotification;
 /// Struct containing useful data to display statistics about network traffic and the relative notifications
 pub struct RunTimeData {
     /// Link type of the current capture (e.g., ethernet)
-    pub link_type: Linktype,
+    pub link_type: MyLinkType,
     /// Total number of bytes (filtered and not filtered)
     pub all_bytes: u128,
     /// Total number of packets (filtered and not filtered)
@@ -41,7 +41,7 @@ impl RunTimeData {
     /// Constructs a new `ChartsData` element.
     pub fn new() -> Self {
         RunTimeData {
-            link_type: Linktype::ETHERNET,
+            link_type: MyLinkType::NotYetAssigned,
             all_bytes: 0,
             all_packets: 0,
             tot_sent_bytes: 0,

@@ -1,7 +1,6 @@
 //! Module defining the `ReportInfo` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use pcap::Linktype;
 use std::collections::{HashMap, HashSet};
 
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -9,13 +8,14 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::AppProtocol;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {
     /// Link type of the current capture (e.g., ethernet)
-    pub link_type: Linktype,
+    pub link_type: MyLinkType,
     /// Total amount of filtered bytes received.
     pub tot_received_bytes: u128,
     /// Total amount of filtered bytes sent.
@@ -50,7 +50,7 @@ impl InfoTraffic {
     /// Constructs a new `InfoTraffic` element.
     pub fn new() -> Self {
         InfoTraffic {
-            link_type: Linktype::ETHERNET,
+            link_type: MyLinkType::NotYetAssigned,
             tot_received_bytes: 0,
             tot_sent_bytes: 0,
             tot_received_packets: 0,
