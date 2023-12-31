@@ -490,7 +490,7 @@ pub fn is_my_address(address_to_lookup: &String, my_interface_addresses: &Vec<Ad
 
 /// Determines if the capture opening resolves into an Error
 pub fn get_capture_result(device: &MyDevice) -> (Option<String>, Option<Capture<Active>>) {
-    let cap_result = Capture::from_device(&*device.name)
+    let cap_result = Capture::from_device(device.to_pcap_device())
         .expect("Capture initialization error\n\r")
         .promisc(true)
         .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)

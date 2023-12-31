@@ -35,6 +35,7 @@ pub fn parse_packets(
 
     // pcap seems to assign ethernet to all interfaces (at least on macOS)...
     let mut link_type = cap.get_datalink();
+    info_traffic_mutex.lock().unwrap().link_type = link_type;
     // ...it'll be confirmed after having parsed the first packet!
     let mut is_link_type_confirmed = false;
 
