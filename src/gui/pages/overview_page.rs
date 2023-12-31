@@ -67,11 +67,13 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
         let total = observed + u128::from(dropped);
+        let link_type = sniffer.runtime_data.link_type;
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
+                body =
+                    body_no_packets(&sniffer.device, font, language, &sniffer.waiting, link_type);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
@@ -141,8 +143,10 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
+    link_type: Linktype,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let adapter_name = device.name.clone();
+    let mut adapter_name = device.name.clone();
+    adapter_name.push_str(&format!(" ({})", link_type.0,));
     let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
         (
             Icon::Warning.to_text().size(60),
