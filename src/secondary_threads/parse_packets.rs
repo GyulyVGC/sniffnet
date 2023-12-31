@@ -1,6 +1,7 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets and
 //! inserting them in the shared map.
 
+use std::io::ErrorKind;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -33,11 +34,8 @@ pub fn parse_packets(
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
-    // pcap seems to assign ethernet to all interfaces (at least on macOS)...
-    let mut link_type = cap.get_datalink();
+    let link_type = cap.get_datalink();
     info_traffic_mutex.lock().unwrap().link_type = link_type;
-    // ...it'll be confirmed after having parsed the first packet!
-    let mut is_link_type_confirmed = false;
 
     loop {
         match cap.next_packet() {
@@ -51,12 +49,7 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                if let Ok(headers) = get_sniffable_headers(
-                    &packet,
-                    &mut link_type,
-                    info_traffic_mutex,
-                    &mut is_link_type_confirmed,
-                ) {
+                if let Ok(headers) = get_sniffable_headers(&packet, link_type) {
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
@@ -201,56 +194,43 @@ pub fn parse_packets(
 
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
-    link_type: &mut Linktype,
-    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
-    is_link_type_confirmed: &mut bool,
+    link_type: Linktype,
 ) -> Result<PacketHeaders<'a>, ReadError> {
-    match is_link_type_confirmed {
-        false => {
-            let ethernet_result = PacketHeaders::from_ethernet_slice(packet);
-            let ip_result = PacketHeaders::from_ip_slice(packet);
-            let null_result = PacketHeaders::from_ip_slice(&packet[4..]);
-
-            let is_ethernet_sniffable = are_headers_sniffable(&ethernet_result);
-            let is_ip_sniffable = are_headers_sniffable(&ip_result);
-            let is_null_sniffable = are_headers_sniffable(&null_result);
-
-            match (is_ethernet_sniffable, is_ip_sniffable, is_null_sniffable) {
-                (true, _, _) => {
-                    *is_link_type_confirmed = true;
-                    *link_type = Linktype::ETHERNET;
-                    info_traffic_mutex.lock().unwrap().link_type = Linktype::ETHERNET;
-                    ethernet_result
-                }
-                (_, true, _) => {
-                    *is_link_type_confirmed = true;
-                    // it could be IPV4 as well as IPV6 but it should be the same
-                    *link_type = Linktype::IPV4;
-                    info_traffic_mutex.lock().unwrap().link_type = Linktype::IPV4;
-                    ip_result
-                }
-                (_, _, true) => {
-                    *is_link_type_confirmed = true;
-                    // it could be NULL as well as LOOP but it should be the same
-                    *link_type = Linktype::NULL;
-                    info_traffic_mutex.lock().unwrap().link_type = Linktype::NULL;
-                    null_result
-                }
-                (false, false, false) => ethernet_result,
-            }
-        }
-        true => match *link_type {
-            Linktype::IPV4 | Linktype::IPV6 => PacketHeaders::from_ip_slice(packet),
-            Linktype::NULL | Linktype::LOOP => PacketHeaders::from_ip_slice(&packet[4..]),
-            _ => PacketHeaders::from_ethernet_slice(packet),
-        },
+    match link_type {
+        Linktype(12) | Linktype::IPV4 | Linktype::IPV6 => PacketHeaders::from_ip_slice(packet),
+        Linktype::NULL | Linktype::LOOP => from_null_slice(packet),
+        _ => PacketHeaders::from_ethernet_slice(packet),
     }
 }
 
-fn are_headers_sniffable(headers_result: &Result<PacketHeaders, ReadError>) -> bool {
-    if let Ok(headers) = headers_result {
-        headers.ip.is_some() && headers.transport.is_some()
+fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, ReadError> {
+    if packet.len() < 4 {
+        return Err(ReadError::UnexpectedEndOfSlice(packet.len()));
+    }
+
+    let is_valid_af_inet = {
+        // based on https://wiki.wireshark.org/NullLoopback.md (2023-12-31)
+        fn matches(value: u32) -> bool {
+            match value {
+                // 2 = IPv4 on all platforms
+                // 24, 28, or 30 = IPv6 depending on platform
+                2 | 24 | 28 | 30 => true,
+                _ => false,
+            }
+        }
+        let h = &packet[..4];
+        let b = [h[0], h[1], h[2], h[3]];
+        // check both big endian and little endian representations
+        // as some OS'es use native endianess and others use big endian
+        matches(u32::from_le_bytes(b)) || matches(u32::from_be_bytes(b))
+    };
+
+    if is_valid_af_inet {
+        PacketHeaders::from_ip_slice(&packet[4..])
     } else {
-        false
+        Err(ReadError::IoError(std::io::Error::new(
+            ErrorKind::InvalidData,
+            "Invalid AF_INET / AF_INET6 value",
+        )))
     }
 }
