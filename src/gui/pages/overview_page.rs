@@ -41,6 +41,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     only_top_30_hosts_translation,
 };
+use crate::translations::translations_3::unsupported_link_type_translation;
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
@@ -140,18 +141,27 @@ fn body_no_packets(
     language: Language,
     waiting: &str,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let adapter_name = device.name.clone();
-    let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
+    let link_type = device.link_type;
+    let mut adapter_info = device.name.clone();
+    adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
+    let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &adapter_name)
+            unsupported_link_type_translation(language, &adapter_info)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    } else if device.addresses.lock().unwrap().is_empty() {
+        (
+            Icon::Warning.to_text().size(60),
+            no_addresses_translation(language, &adapter_info)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
     } else {
         (
             Icon::get_hourglass(waiting.len()).size(60),
-            waiting_translation(language, &adapter_name)
+            waiting_translation(language, &adapter_info)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
@@ -295,8 +305,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
             .push(get_flag_tooltip(
                 host.country,
                 FLAGS_WIDTH_BIG,
-                data_info_host.is_local,
-                data_info_host.traffic_type,
+                data_info_host,
                 language,
                 font,
             ))
@@ -419,24 +428,13 @@ fn lazy_col_info(
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
-    let filtered_bytes =
-        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-    let all_bytes = sniffer.runtime_data.all_bytes;
 
-    let col_device_filters = col_device_filters(language, font, &sniffer.filters, &sniffer.device);
+    let col_device = col_device(language, font, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let col_bytes_packets = col_bytes_packets(
-        language,
-        dropped,
-        total,
-        filtered,
-        all_bytes,
-        filtered_bytes,
-        font,
-    );
+    let col_bytes_packets = col_bytes_packets(language, dropped, total, filtered, font, sniffer);
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -445,14 +443,14 @@ fn lazy_col_info(
             Row::new()
                 .height(Length::Fixed(120.0))
                 .push(
-                    Scrollable::new(col_device_filters)
-                        .width(Length::Fill)
-                        .direction(Direction::Vertical(ScrollbarType::properties())),
+                    Scrollable::new(col_device)
+                        .width(Length::FillPortion(1))
+                        .direction(Direction::Horizontal(ScrollbarType::properties())),
                 )
                 .push(Rule::vertical(25))
-                .push(col_data_representation),
+                .push(col_data_representation.width(Length::FillPortion(1))),
         )
-        .push(Rule::horizontal(25))
+        .push(Rule::horizontal(15))
         .push(
             Scrollable::new(col_bytes_packets)
                 .width(Length::Fill)
@@ -507,28 +505,25 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer
     .style(ContainerType::BorderedRound)
 }
 
-fn col_device_filters(
+fn col_device(
     language: Language,
     font: Font,
-    filters: &Filters,
     device: &MyDevice,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let link_type = device.link_type;
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]
-    let adapter_name = &device.name;
-    #[cfg(target_os = "windows")]
-    let adapter_info = device.desc.as_ref().unwrap_or(adapter_name);
+    let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
 
     Column::new()
-        .width(Length::FillPortion(1))
+        .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
             adapter_info,
             font,
         ))
-        .push(vertical_space(15))
-        .push(get_active_filters_col(filters, language, font, false))
+        .push(link_type.link_type_col(language, font))
 }
 
 fn col_data_representation(
@@ -536,7 +531,7 @@ fn col_data_representation(
     font: Font,
     chart_type: ChartType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Column::new().spacing(5).width(Length::FillPortion(1)).push(
+    let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
             .style(TextType::Subtitle)
             .font(font),
@@ -570,10 +565,14 @@ fn col_bytes_packets(
     dropped: u32,
     total: u128,
     filtered: u128,
-    all_bytes: u128,
-    filtered_bytes: u128,
     font: Font,
+    sniffer: &Sniffer,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let filtered_bytes =
+        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let all_bytes = sniffer.runtime_data.all_bytes;
+    let filters = &sniffer.filters;
+
     let dropped_val = if dropped > 0 {
         format!(
             "{} {}",
@@ -594,7 +593,8 @@ fn col_bytes_packets(
     };
 
     Column::new()
-        .spacing(15)
+        .spacing(10)
+        .push(get_active_filters_col(filters, language, font, false))
         .push(TextType::highlighted_subtitle_with_desc(
             filtered_bytes_translation(language),
             &bytes_value,

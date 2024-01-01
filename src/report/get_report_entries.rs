@@ -120,8 +120,7 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
                 let flag = get_flag_tooltip(
                     host.country,
                     FLAGS_WIDTH_SMALL,
-                    host_info.is_local,
-                    host_info.traffic_type,
+                    host_info,
                     language,
                     style.get_extension().font,
                 );

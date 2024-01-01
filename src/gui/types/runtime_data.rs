@@ -1,5 +1,5 @@
 //! Module defining the `RunTimeData` struct, useful to to generate chart and to display statistics about network traffic
-//!
+
 use std::collections::VecDeque;
 
 use crate::notifications::types::logged_notification::LoggedNotification;

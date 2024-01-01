@@ -24,6 +24,7 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::port_collection::PortCollection;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::notify_and_log::notify_and_log;
@@ -351,7 +352,7 @@ impl Sniffer {
         let current_device_name = &*self.device.name.clone();
         self.set_adapter(current_device_name);
         let device = self.device.clone();
-        let (pcap_error, cap) = get_capture_result(&device);
+        let (pcap_error, cap_result) = get_capture_result(&device);
         self.pcap_error = pcap_error.clone();
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
@@ -364,17 +365,19 @@ impl Sniffer {
 
         if pcap_error.is_none() {
             // no pcap error
+            let cap = cap_result.unwrap();
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
+            self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
                         &device,
-                        cap.unwrap(),
+                        cap,
                         &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
@@ -406,6 +409,7 @@ impl Sniffer {
                     name: dev.name,
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
+                    link_type: MyLinkType::NotYetAssigned,
                 };
                 break;
             }

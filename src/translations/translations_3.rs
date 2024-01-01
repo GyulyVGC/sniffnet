@@ -1,6 +1,10 @@
 #![allow(clippy::match_same_arms)]
 
-use crate::Language;
+use iced::widget::Text;
+use iced::Renderer;
+
+use crate::translations::translations::network_adapter_translation;
+use crate::{Language, StyleType};
 
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {
@@ -80,4 +84,27 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::IT => "Messaggi",
         _ => "Messages",
     }
+}
+
+pub fn link_type_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Link type",
+        Language::IT => "Tipo di collegamento",
+        _ => "Link type",
+    }
+}
+
+pub fn unsupported_link_type_translation(
+    language: Language,
+    adapter: &str,
+) -> Text<'static, Renderer<StyleType>> {
+    let mut string = match language {
+        Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
+        Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
+        _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
+    }.to_string();
+
+    let network_adapter_translation = network_adapter_translation(language);
+    string.push_str(&format!("\n\n{network_adapter_translation}: {adapter}"));
+    Text::new(string)
 }

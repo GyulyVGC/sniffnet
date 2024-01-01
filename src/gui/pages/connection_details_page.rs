@@ -18,7 +18,9 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
-use crate::networking::manage_packets::{get_address_to_lookup, get_traffic_type, is_my_address};
+use crate::networking::manage_packets::{
+    get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
+};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
@@ -105,14 +107,7 @@ fn page_content(
     if let Some((r_dns, host)) = host_option {
         host_info_col = get_host_info_col(&r_dns, &host, font, language);
         let host_info = host_info_option.unwrap_or_default();
-        let flag = get_flag_tooltip(
-            host.country,
-            FLAGS_WIDTH_BIG,
-            host_info.is_local,
-            host_info.traffic_type,
-            language,
-            font,
-        );
+        let flag = get_flag_tooltip(host.country, FLAGS_WIDTH_BIG, &host_info, language, font);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
@@ -310,16 +305,15 @@ fn get_local_tooltip(
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
 
+    let local_address = if address_to_lookup.eq(&key.address1) {
+        &key.address2
+    } else {
+        &key.address1
+    };
     let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
     get_computer_tooltip(
-        is_my_address(
-            if address_to_lookup.eq(&key.address1) {
-                &key.address2
-            } else {
-                &key.address1
-            },
-            my_interface_addresses,
-        ),
+        is_my_address(local_address, my_interface_addresses),
+        is_local_connection(local_address, my_interface_addresses),
         get_traffic_type(
             if address_to_lookup.eq(&key.address1) {
                 &key.address2
@@ -338,7 +332,7 @@ fn get_src_or_dest_col(
     caption: Row<'static, Message, Renderer<StyleType>>,
     ip: &String,
     port: Option<u16>,
-    mac: &str,
+    mac: &Option<String>,
     font: Font,
     language: Language,
     timing_events: &TimingEvents,
@@ -348,6 +342,9 @@ fn get_src_or_dest_col(
     } else {
         address_translation(language)
     };
+
+    let mac_str = if let Some(val) = mac { val } else { "-" };
+
     Column::new()
         .spacing(4)
         .push(
@@ -369,7 +366,7 @@ fn get_src_or_dest_col(
         )
         .push(TextType::highlighted_subtitle_with_desc(
             mac_address_translation(language),
-            mac,
+            mac_str,
             font,
         ))
 }
