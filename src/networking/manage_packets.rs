@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
 use chrono::Local;
@@ -189,8 +190,13 @@ pub fn modify_or_insert_in_map(
         // determine traffic direction
         let source_ip = &key.address1;
         let destination_ip = &key.address2;
-        traffic_direction =
-            get_traffic_direction(source_ip, destination_ip, &my_interface_addresses);
+        traffic_direction = get_traffic_direction(
+            source_ip,
+            destination_ip,
+            key.port1,
+            key.port2,
+            &my_interface_addresses,
+        );
     };
 
     let mut info_traffic = info_traffic_mutex
@@ -261,6 +267,7 @@ pub fn reverse_dns_lookup(
         &my_interface_addresses,
         traffic_direction,
     );
+    let is_loopback = is_loopback(&address_to_lookup);
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
     let country = get_country(&address_to_lookup, country_db_reader);
     let asn = get_asn(&address_to_lookup, asn_db_reader);
@@ -298,6 +305,7 @@ pub fn reverse_dns_lookup(
         .or_insert(DataInfoHost {
             data_info: other_data,
             is_favorite: false,
+            is_loopback,
             is_local,
             traffic_type,
         });
@@ -313,12 +321,25 @@ pub fn reverse_dns_lookup(
 fn get_traffic_direction(
     source_ip: &String,
     destination_ip: &String,
+    source_port: Option<u16>,
+    dest_port: Option<u16>,
     my_interface_addresses: &[Address],
 ) -> TrafficDirection {
     let my_interface_addresses_string: Vec<String> = my_interface_addresses
         .iter()
         .map(|address| address.addr.to_string())
         .collect();
+
+    // first let's handle TCP and UDP loopback
+    if is_loopback(source_ip) && is_loopback(destination_ip) {
+        if let (Some(sport), Some(dport)) = (source_port, dest_port) {
+            return if sport > dport {
+                TrafficDirection::Outgoing
+            } else {
+                TrafficDirection::Incoming
+            };
+        }
+    }
 
     if my_interface_addresses_string.contains(source_ip) {
         // source is local
@@ -407,8 +428,14 @@ fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bo
     false
 }
 
+fn is_loopback(address_to_lookup: &str) -> bool {
+    IpAddr::from_str(address_to_lookup)
+        .unwrap_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED))
+        .is_loopback()
+}
+
 /// Determines if the connection is local
-fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec<Address>) -> bool {
+pub fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec<Address>) -> bool {
     let mut ret_val = false;
 
     let address_to_lookup_type = if address_to_lookup.contains(':') {
@@ -475,17 +502,13 @@ fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec<Add
 }
 
 /// Determines if the address passed as parameter belong to the chosen adapter
-pub fn is_my_address(address_to_lookup: &String, my_interface_addresses: &Vec<Address>) -> bool {
-    let mut ret_val = false;
-
+pub fn is_my_address(local_address: &String, my_interface_addresses: &Vec<Address>) -> bool {
     for address in my_interface_addresses {
-        if address.addr.to_string().eq(address_to_lookup) {
-            ret_val = true;
-            break;
+        if address.addr.to_string().eq(local_address) {
+            return true;
         }
     }
-
-    ret_val
+    is_loopback(local_address)
 }
 
 /// Determines if the capture opening resolves into an Error
@@ -659,30 +682,40 @@ mod tests {
         let result1 = get_traffic_direction(
             &"172.20.10.9".to_string(),
             &"99.88.77.00".to_string(),
+            Some(99),
+            Some(99),
             &address_vec,
         );
         assert_eq!(result1, TrafficDirection::Outgoing);
         let result2 = get_traffic_direction(
             &"172.20.10.10".to_string(),
             &"172.20.10.9".to_string(),
+            Some(99),
+            Some(99),
             &address_vec,
         );
         assert_eq!(result2, TrafficDirection::Incoming);
         let result3 = get_traffic_direction(
             &"172.20.10.9".to_string(),
             &"0.0.0.0".to_string(),
+            Some(99),
+            Some(99),
             &address_vec,
         );
         assert_eq!(result3, TrafficDirection::Outgoing);
         let result4 = get_traffic_direction(
             &"0.0.0.0".to_string(),
             &"172.20.10.9".to_string(),
+            Some(99),
+            Some(99),
             &address_vec,
         );
         assert_eq!(result4, TrafficDirection::Incoming);
         let result4 = get_traffic_direction(
             &"0.0.0.0".to_string(),
             &"172.20.10.10".to_string(),
+            Some(99),
+            Some(99),
             &address_vec,
         );
         assert_eq!(result4, TrafficDirection::Outgoing);

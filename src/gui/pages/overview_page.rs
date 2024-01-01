@@ -308,8 +308,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
             .push(get_flag_tooltip(
                 host.country,
                 FLAGS_WIDTH_BIG,
-                data_info_host.is_local,
-                data_info_host.traffic_type,
+                data_info_host,
                 language,
                 font,
             ))

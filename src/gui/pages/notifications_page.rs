@@ -312,11 +312,10 @@ fn favorite_notification_log(
     language: Language,
     font: Font,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let domain = logged_notification.host.domain;
     let country = logged_notification.host.country;
-    let asn = logged_notification.host.asn;
+    let asn = &logged_notification.host.asn;
 
-    let mut domain_asn_str = domain;
+    let mut domain_asn_str = logged_notification.host.domain.clone();
     if !asn.name.is_empty() {
         domain_asn_str.push_str(&format!(" - {}", asn.name));
     }
@@ -327,8 +326,7 @@ fn favorite_notification_log(
         .push(get_flag_tooltip(
             country,
             FLAGS_WIDTH_BIG,
-            logged_notification.data_info_host.is_local,
-            logged_notification.data_info_host.traffic_type,
+            &logged_notification.data_info_host,
             language,
             font,
         ))

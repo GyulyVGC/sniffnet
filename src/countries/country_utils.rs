@@ -21,6 +21,7 @@ use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::svg::SvgType;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
     local_translation, unknown_translation, your_network_adapter_translation,
@@ -31,6 +32,7 @@ fn get_flag_from_country(
     country: Country,
     width: f32,
     is_local: bool,
+    is_loopback: bool,
     traffic_type: TrafficType,
     language: Language,
 ) -> (Svg<Renderer<StyleType>>, String) {
@@ -284,7 +286,11 @@ fn get_flag_from_country(
         Country::ZM => ZM,
         Country::ZW => ZW,
         Country::ZZ => {
-            if is_local {
+            if is_loopback {
+                tooltip = your_network_adapter_translation(language);
+                svg_style = SvgType::AdaptColor;
+                COMPUTER
+            } else if is_local {
                 tooltip = local_translation(language);
                 svg_style = SvgType::AdaptColor;
                 HOME
@@ -313,13 +319,21 @@ fn get_flag_from_country(
 pub fn get_flag_tooltip(
     country: Country,
     width: f32,
-    is_local: bool,
-    traffic_type: TrafficType,
+    host_info: &DataInfoHost,
     language: Language,
     font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let (content, tooltip) =
-        get_flag_from_country(country, width, is_local, traffic_type, language);
+    let is_local = host_info.is_local;
+    let is_loopback = host_info.is_loopback;
+    let traffic_type = host_info.traffic_type;
+    let (content, tooltip) = get_flag_from_country(
+        country,
+        width,
+        is_local,
+        is_loopback,
+        traffic_type,
+        language,
+    );
 
     let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
         .font(font)
@@ -335,27 +349,30 @@ pub fn get_flag_tooltip(
 
 pub fn get_computer_tooltip(
     is_my_address: bool,
+    is_local: bool,
     traffic_type: TrafficType,
     language: Language,
     font: Font,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = Svg::new(Handle::from_memory(Vec::from(
-        match (is_my_address, traffic_type) {
-            (true, _) => COMPUTER,
-            (false, TrafficType::Multicast) => MULTICAST,
-            (false, TrafficType::Broadcast) => BROADCAST,
-            (false, TrafficType::Unicast) => UNKNOWN,
+        match (is_my_address, is_local, traffic_type) {
+            (true, _, _) => COMPUTER,
+            (false, true, _) => HOME,
+            (false, false, TrafficType::Multicast) => MULTICAST,
+            (false, false, TrafficType::Broadcast) => BROADCAST,
+            (false, false, TrafficType::Unicast) => UNKNOWN,
         },
     )))
     .style(SvgType::AdaptColor)
     .width(Length::Fixed(FLAGS_WIDTH_BIG))
     .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75));
 
-    let tooltip = match (is_my_address, traffic_type) {
-        (true, _) => your_network_adapter_translation(language),
-        (false, TrafficType::Multicast) => "Multicast".to_string(),
-        (false, TrafficType::Broadcast) => "Broadcast".to_string(),
-        (false, TrafficType::Unicast) => unknown_translation(language),
+    let tooltip = match (is_my_address, is_local, traffic_type) {
+        (true, _, _) => your_network_adapter_translation(language),
+        (false, true, _) => local_translation(language),
+        (false, false, TrafficType::Multicast) => "Multicast".to_string(),
+        (false, false, TrafficType::Broadcast) => "Broadcast".to_string(),
+        (false, false, TrafficType::Unicast) => unknown_translation(language),
     };
 
     Tooltip::new(content, tooltip, Position::FollowCursor)
