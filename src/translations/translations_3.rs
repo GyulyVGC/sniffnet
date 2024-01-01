@@ -1,9 +1,10 @@
 #![allow(clippy::match_same_arms)]
 
-use crate::translations::translations::network_adapter_translation;
-use crate::{Language, StyleType};
 use iced::widget::Text;
 use iced::Renderer;
+
+use crate::translations::translations::network_adapter_translation;
+use crate::{Language, StyleType};
 
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {

@@ -1,7 +1,8 @@
 use std::sync::{Arc, Mutex};
 
-use crate::networking::types::my_link_type::MyLinkType;
 use pcap::{Address, Device, DeviceFlags};
+
+use crate::networking::types::my_link_type::MyLinkType;
 
 /// Represents the current inspected device.
 /// Used to keep in sync the device addresses in case of changes

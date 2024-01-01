@@ -1,10 +1,11 @@
+use iced::widget::Column;
+use iced::{Font, Renderer};
+use pcap::Linktype;
+
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_3::link_type_translation;
 use crate::{Language, StyleType};
-use iced::widget::Column;
-use iced::{Font, Renderer};
-use pcap::Linktype;
 
 /// Currently supported link types
 #[derive(Copy, Clone)]
