@@ -370,7 +370,7 @@ impl Sniffer {
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.runtime_data.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+            self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -409,6 +409,7 @@ impl Sniffer {
                     name: dev.name,
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
+                    link_type: MyLinkType::NotYetAssigned,
                 };
                 break;
             }

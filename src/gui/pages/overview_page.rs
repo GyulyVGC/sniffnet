@@ -28,7 +28,6 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_app_entries, get_host_entries};
 use crate::translations::translations::{
@@ -67,13 +66,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
         let total = observed + u128::from(dropped);
-        let link_type = sniffer.runtime_data.link_type;
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body =
-                    body_no_packets(&sniffer.device, font, language, &sniffer.waiting, link_type);
+                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
@@ -143,8 +140,8 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
-    link_type: MyLinkType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let link_type = device.link_type;
     let mut adapter_info = device.name.clone();
     adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
@@ -431,9 +428,8 @@ fn lazy_col_info(
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
-    let link_type = sniffer.runtime_data.link_type;
 
-    let col_device = col_device(language, font, &sniffer.device, link_type);
+    let col_device = col_device(language, font, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -513,8 +509,8 @@ fn col_device(
     language: Language,
     font: Font,
     device: &MyDevice,
-    link_type: MyLinkType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let link_type = device.link_type;
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
     #[cfg(target_os = "windows")]

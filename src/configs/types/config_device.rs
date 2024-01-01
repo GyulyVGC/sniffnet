@@ -7,6 +7,7 @@ use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
 
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::my_link_type::MyLinkType;
 #[cfg(not(test))]
 use crate::SNIFFNET_LOWERCASE;
 
@@ -57,6 +58,7 @@ impl ConfigDevice {
                     name: device.name,
                     desc: device.desc,
                     addresses: Arc::new(Mutex::new(device.addresses)),
+                    link_type: MyLinkType::NotYetAssigned,
                 };
             }
         }
@@ -70,6 +72,7 @@ impl ConfigDevice {
             name: standard_device.name,
             desc: standard_device.desc,
             addresses: Arc::new(Mutex::new(standard_device.addresses)),
+            link_type: MyLinkType::NotYetAssigned,
         }
     }
 }

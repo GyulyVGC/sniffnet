@@ -84,7 +84,6 @@ mod tests {
     use std::collections::VecDeque;
 
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
-    use crate::networking::types::my_link_type::MyLinkType;
     use crate::{ChartType, Language, RunTimeData, StyleType, TrafficChart};
 
     #[test]
@@ -168,7 +167,6 @@ mod tests {
             style: StyleType::default(),
         };
         let mut runtime_data = RunTimeData {
-            link_type: MyLinkType::NotYetAssigned,
             all_bytes: 0,
             all_packets: 0,
             tot_sent_bytes: tot_sent + 1111,

@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 
+use crate::networking::types::my_link_type::MyLinkType;
 use pcap::{Address, Device, DeviceFlags};
 
 /// Represents the current inspected device.
@@ -10,6 +11,7 @@ pub struct MyDevice {
     pub name: String,
     pub desc: Option<String>,
     pub addresses: Arc<Mutex<Vec<Address>>>,
+    pub link_type: MyLinkType,
 }
 
 impl MyDevice {
