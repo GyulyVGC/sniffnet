@@ -98,9 +98,9 @@ pub fn unsupported_link_type_translation(
     adapter: &str,
 ) -> Text<'static, Renderer<StyleType>> {
     let mut string = match language {
-        Language::EN => "The link type associated to this adapter is not supported by Sniffnet yet...",
+        Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
-        _ => "The link type associated to this adapter is not supported by Sniffnet yet...",
+        _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
 
     let network_adapter_translation = network_adapter_translation(language);

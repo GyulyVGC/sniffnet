@@ -315,7 +315,7 @@ fn favorite_notification_log(
     let country = logged_notification.host.country;
     let asn = &logged_notification.host.asn;
 
-    let mut domain_asn_str = logged_notification.host.domain.clone();
+    let mut domain_asn_str = logged_notification.host.domain;
     if !asn.name.is_empty() {
         domain_asn_str.push_str(&format!(" - {}", asn.name));
     }
