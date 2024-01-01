@@ -42,6 +42,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     only_top_30_hosts_translation,
 };
+use crate::translations::translations_3::unsupported_link_type_translation;
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
@@ -144,19 +145,26 @@ fn body_no_packets(
     waiting: &str,
     link_type: MyLinkType,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let mut adapter_name = device.name.clone();
-    adapter_name.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
-    let (icon_text, nothing_to_see_text) = if device.addresses.lock().unwrap().is_empty() {
+    let mut adapter_info = device.name.clone();
+    adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
+    let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &adapter_name)
+            unsupported_link_type_translation(language, &adapter_info)
+                .horizontal_alignment(Horizontal::Center)
+                .font(font),
+        )
+    } else if device.addresses.lock().unwrap().is_empty() {
+        (
+            Icon::Warning.to_text().size(60),
+            no_addresses_translation(language, &adapter_info)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
     } else {
         (
             Icon::get_hourglass(waiting.len()).size(60),
-            waiting_translation(language, &adapter_name)
+            waiting_translation(language, &adapter_info)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
@@ -424,9 +432,6 @@ fn lazy_col_info(
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
-    let filtered_bytes =
-        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
-    let all_bytes = sniffer.runtime_data.all_bytes;
     let link_type = sniffer.runtime_data.link_type;
 
     let col_device = col_device(language, font, &sniffer.device, link_type);
@@ -434,16 +439,7 @@ fn lazy_col_info(
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let col_bytes_packets = col_bytes_packets(
-        language,
-        dropped,
-        total,
-        filtered,
-        all_bytes,
-        filtered_bytes,
-        font,
-        &sniffer.filters,
-    );
+    let col_bytes_packets = col_bytes_packets(language, dropped, total, filtered, font, sniffer);
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -574,11 +570,14 @@ fn col_bytes_packets(
     dropped: u32,
     total: u128,
     filtered: u128,
-    all_bytes: u128,
-    filtered_bytes: u128,
     font: Font,
-    filters: &Filters,
+    sniffer: &Sniffer,
 ) -> Column<'static, Message, Renderer<StyleType>> {
+    let filtered_bytes =
+        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let all_bytes = sniffer.runtime_data.all_bytes;
+    let filters = &sniffer.filters;
+
     let dropped_val = if dropped > 0 {
         format!(
             "{} {}",

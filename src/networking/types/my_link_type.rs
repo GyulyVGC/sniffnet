@@ -21,10 +21,7 @@ pub enum MyLinkType {
 
 impl MyLinkType {
     pub fn is_supported(self) -> bool {
-        !matches!(
-            self,
-            MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned
-        )
+        !matches!(self, Self::Unsupported(_) | Self::NotYetAssigned)
     }
 
     pub fn from_pcap_link_type(link_type: Linktype) -> Self {
@@ -46,7 +43,8 @@ impl MyLinkType {
             | Self::RawIp(l)
             | Self::Loop(l)
             | Self::IPv4(l)
-            | Self::IPv6(l) => {
+            | Self::IPv6(l)
+            | Self::Unsupported(l) => {
                 format!(
                     "{}: {} ({})",
                     link_type_translation(language),
@@ -54,14 +52,7 @@ impl MyLinkType {
                     l.get_description().unwrap_or(String::new())
                 )
             }
-            MyLinkType::Unsupported(l) => {
-                format!(
-                    "{}: {} (NOT SUPPORTED)",
-                    link_type_translation(language),
-                    l.get_name().unwrap_or(l.0.to_string()),
-                )
-            }
-            MyLinkType::NotYetAssigned => String::new(),
+            Self::NotYetAssigned => String::new(),
         }
     }
 
@@ -76,7 +67,8 @@ impl MyLinkType {
             | Self::RawIp(l)
             | Self::Loop(l)
             | Self::IPv4(l)
-            | Self::IPv6(l) => {
+            | Self::IPv6(l)
+            | Self::Unsupported(l) => {
                 let link_info = format!(
                     "{} ({})",
                     l.get_name().unwrap_or(l.0.to_string()),
@@ -88,18 +80,7 @@ impl MyLinkType {
                     font,
                 )
             }
-            MyLinkType::Unsupported(l) => {
-                let link_info = format!(
-                    "{} (NOT SUPPORTED)",
-                    l.get_name().unwrap_or(l.0.to_string()),
-                );
-                TextType::highlighted_subtitle_with_desc(
-                    link_type_translation(language),
-                    &link_info,
-                    font,
-                )
-            }
-            MyLinkType::NotYetAssigned => Column::new().height(0),
+            Self::NotYetAssigned => Column::new().height(0),
         }
     }
 }
