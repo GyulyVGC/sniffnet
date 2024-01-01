@@ -5,6 +5,7 @@ use iced::{Font, Length, Renderer};
 
 use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
+use crate::gui::types::message::Message::LoadStyle;
 use crate::translations::translations::hide_translation;
 use crate::{Language, StyleType};
 
@@ -26,6 +27,31 @@ pub fn button_hide(
         .height(Length::Fixed(20.0))
         .width(Length::Fixed(20.0))
         .on_press(message),
+        hide_translation(language),
+        Position::Right,
+    )
+    .gap(5)
+    .font(font)
+    .style(ContainerType::Tooltip)
+}
+
+pub fn button_open_file(
+    old_file: String,
+    language: Language,
+    font: Font,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
+    Tooltip::new(
+        button(
+            Text::new("Y")
+                .font(font)
+                .vertical_alignment(Vertical::Center)
+                .horizontal_alignment(Horizontal::Center)
+                .size(15),
+        )
+        .padding(2)
+        .height(Length::Fixed(20.0))
+        .width(Length::Fixed(20.0))
+        .on_press(Message::OpenFile(old_file, LoadStyle)),
         hide_translation(language),
         Position::Right,
     )

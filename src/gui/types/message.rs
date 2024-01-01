@@ -103,4 +103,6 @@ pub enum Message {
     CloseRequested,
     /// Copies the given string to clipboard
     CopyIp(String),
+    /// Launch a new file dialog
+    OpenFile(String, fn(String) -> Message),
 }

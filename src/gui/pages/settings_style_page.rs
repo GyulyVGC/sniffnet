@@ -5,6 +5,7 @@ use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Color, Element, Font, Length, Renderer};
 
+use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -325,6 +326,7 @@ fn lazy_custom_style_input(
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .spacing(5)
+        .push(button_open_file(custom_path.to_owned(), language, font))
         .push(Text::new(custom_style_translation(language)).font(font))
         .push(input);
 

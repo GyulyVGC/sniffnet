@@ -2,11 +2,13 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use iced::{window, Command};
 use pcap::Device;
+use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;
@@ -286,7 +288,10 @@ impl Sniffer {
                 self.timing_events.copy_ip_now(string.clone());
                 return iced::clipboard::write(string);
             }
-            _ => {}
+            Message::OpenFile(old_file, consumer_message) => {
+                return Command::perform(Self::open_file(old_file), consumer_message);
+            }
+            Message::TickInit | Message::FontLoaded(_) => {}
         }
         Command::none()
     }
@@ -559,6 +564,23 @@ impl Sniffer {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }
         Command::none()
+    }
+
+    async fn open_file(old_file: String) -> String {
+        let starting_directory = if old_file.is_empty() {
+            env!("HOME")
+        } else {
+            &old_file
+        };
+        let picked_file = rfd::AsyncFileDialog::new()
+            .set_title("Open a text file...")
+            .add_filter("blablabla", &["toml"])
+            .set_directory(starting_directory)
+            .pick_file()
+            .await
+            .unwrap_or(FileHandle::from(PathBuf::from(&old_file)));
+
+        picked_file.path().to_string_lossy().to_string()
     }
 }
 
