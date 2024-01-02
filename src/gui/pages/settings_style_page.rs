@@ -1,6 +1,6 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, TextInput};
+use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Color, Element, Font, Length, Renderer};
@@ -15,7 +15,6 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
@@ -26,6 +25,7 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::color_gradients_translation;
 use crate::translations::translations_3::custom_style_translation;
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
@@ -311,24 +311,29 @@ fn lazy_custom_style_input(
         custom_palette.is_err()
     };
 
-    let input = TextInput::new("-", custom_path)
-        .on_input(Message::LoadStyle)
-        .on_submit(Message::LoadStyle(custom_path.to_string()))
-        .padding([0, 5])
-        .font(font)
-        .width(Length::Fixed(300.0))
-        .style(if is_error {
-            TextInputType::Error
-        } else {
-            TextInputType::Standard
-        });
+    // let input = TextInput::new("-", custom_path)
+    //     .on_input(Message::LoadStyle)
+    //     .on_submit(Message::LoadStyle(custom_path.to_string()))
+    //     .padding([0, 5])
+    //     .font(font)
+    //     .width(Length::Fixed(300.0))
+    //     .style(if is_error {
+    //         TextInputType::Error
+    //     } else {
+    //         TextInputType::Standard
+    //     });
 
     let mut content = Column::new()
         .align_items(Alignment::Center)
         .spacing(5)
-        .push(button_open_file(custom_path.to_owned(), language, font))
         .push(Text::new(custom_style_translation(language)).font(font))
-        .push(input);
+        .push(button_open_file(
+            custom_path.to_owned(),
+            FileInfo::Style,
+            language,
+            font,
+        ));
+    // .push(input);
 
     if is_custom_toml_style_set {
         content = content.push(get_palette_rule(
@@ -347,7 +352,7 @@ fn lazy_custom_style_input(
     Button::new(content)
         .height(Length::Fixed(
             if custom_palette.is_ok() || is_custom_toml_style_set {
-                110.0
+                125.0
             } else {
                 75.0
             },

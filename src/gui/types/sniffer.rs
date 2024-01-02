@@ -35,6 +35,8 @@ use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
+use crate::translations::types::language::Language;
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
@@ -288,8 +290,15 @@ impl Sniffer {
                 self.timing_events.copy_ip_now(string.clone());
                 return iced::clipboard::write(string);
             }
-            Message::OpenFile(old_file, consumer_message) => {
-                return Command::perform(Self::open_file(old_file), consumer_message);
+            Message::OpenFile(old_file, file_info, consumer_message) => {
+                return Command::perform(
+                    Self::open_file(
+                        old_file,
+                        file_info,
+                        self.configs.lock().unwrap().settings.language,
+                    ),
+                    consumer_message,
+                );
             }
             Message::TickInit | Message::FontLoaded(_) => {}
         }
@@ -566,15 +575,15 @@ impl Sniffer {
         Command::none()
     }
 
-    async fn open_file(old_file: String) -> String {
+    async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
         let starting_directory = if old_file.is_empty() {
-            env!("HOME")
+            std::env::var("HOME").unwrap_or_default()
         } else {
-            &old_file
+            old_file.clone()
         };
         let picked_file = rfd::AsyncFileDialog::new()
-            .set_title("Open a text file...")
-            .add_filter("blablabla", &["toml"])
+            .set_title(file_info.action_info(language))
+            .add_filter("File type", &[file_info.get_extension()])
             .set_directory(starting_directory)
             .pick_file()
             .await

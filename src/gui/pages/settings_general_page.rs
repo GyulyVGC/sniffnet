@@ -236,7 +236,8 @@ fn mmdb_settings(
         .push(
             Text::new(mmdb_files_translation(language))
                 .font(font)
-                .style(TextType::Subtitle),
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
         )
         .push(
             Row::new()
