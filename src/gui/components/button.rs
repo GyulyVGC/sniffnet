@@ -55,7 +55,7 @@ pub fn button_open_file(
         )
         .padding(0)
         .height(Length::Fixed(40.0))
-        .width(Length::Fixed(60.0))
+        .width(Length::Fixed(40.0))
         .on_press(Message::OpenFile(old_file, file_info, LoadStyle)),
         tooltip_str,
         Position::Right,

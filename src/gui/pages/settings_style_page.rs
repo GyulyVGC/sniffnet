@@ -4,6 +4,7 @@ use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Color, Element, Font, Length, Renderer};
+use std::cmp::min;
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -323,16 +324,37 @@ fn lazy_custom_style_input(
     //         TextInputType::Standard
     //     });
 
-    let mut content = Column::new()
+    let row_path_info = if custom_path.is_empty() {
+        Row::new().width(0)
+    } else {
+        let tot_len = custom_path.len();
+        let slice_len = min(20, tot_len);
+        let suspensions = if tot_len > 20 { "..." } else { "" };
+        let slice = [suspensions, &custom_path[tot_len - slice_len..]].concat();
+        Row::new()
+            .push(Text::new(slice).font(font).style(if is_error {
+                TextType::Danger
+            } else {
+                TextType::Standard
+            }))
+            .push(horizontal_space(15))
+    };
+
+    let button_row = Row::new()
         .align_items(Alignment::Center)
-        .spacing(5)
-        .push(Text::new(custom_style_translation(language)).font(font))
+        .push(row_path_info)
         .push(button_open_file(
             custom_path.to_owned(),
             FileInfo::Style,
             language,
             font,
         ));
+
+    let mut content = Column::new()
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(custom_style_translation(language)).font(font))
+        .push(button_row);
     // .push(input);
 
     if is_custom_toml_style_set {
@@ -354,7 +376,7 @@ fn lazy_custom_style_input(
             if custom_palette.is_ok() || is_custom_toml_style_set {
                 125.0
             } else {
-                75.0
+                90.0
             },
         ))
         .width(Length::Fixed(380.0))
