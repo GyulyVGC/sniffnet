@@ -61,6 +61,8 @@ jobs:
         run: sudo apt-get install libpcap-dev
       - name: Install dependency for alsa-sys
         run: sudo apt-get install libasound2-dev
+      - name: Install dependency for rfd
+        run: sudo apt-get install libgtk-3-dev
       - name: install fmt
         run: rustup component add rustfmt
       - name: install clippy

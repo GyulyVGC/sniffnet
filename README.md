@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇬🇧&nbsp;&nbsp;🇩🇪&nbsp;&nbsp;🇬🇷&nbsp;&nbsp;🇪🇦&nbsp;&nbsp;🇫🇮&nbsp;&nbsp;🇫🇷&nbsp;&nbsp;🇮🇹&nbsp;&nbsp;🇰🇷&nbsp;&nbsp;🇵🇱&nbsp;&nbsp;🇵🇹&nbsp;&nbsp;🇷🇴&nbsp;&nbsp;🇷🇺&nbsp;&nbsp;🇸🇪&nbsp;&nbsp;🇹🇷&nbsp;&nbsp;🇺🇦&nbsp;&nbsp;🇨🇳<br>
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 <nobr>[+ 11 more languages](https://github.com/GyulyVGC/sniffnet/issues/60)<nobr><br>
 
 </div>
 
@@ -227,10 +227,12 @@ Depending on your operating system, you may need to install some dependencies to
   - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
+    - `libgtk-3-dev`
     - `libfontconfig1-dev`
   - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
     - `libpcap-devel`
     - `alsa-lib-devel`
+    - `gtk3-devel`
     - `fontconfig-devel`
 
 > **Note**
@@ -331,32 +333,32 @@ sudo sniffnet
 
 <div align="center">
 
-|Port number(s)|Application protocol  |  Description |
-|--|--|--|
-| 20, 21 | FTP |File Transfer Protocol |
-|22|SSH |Secure Shell |
-|23|Telnet |Telnet |
-|25|SMTP |Simple Mail Transfer Protocol |
-|49|TACACS |Terminal Access Controller Access-Control System |
-|53|DNS |Domain Name System |
-|67, 68|DHCP |Dynamic Host Configuration Protocol |
-|69|TFTP |Trivial File Transfer Protocol |
-|80, 8080|HTTP |Hypertext Transfer Protocol |
-|109, 110|POP |Post Office Protocol |
-|123|NTP |Network Time Protocol |
-|137, 138, 139|NetBIOS |NetBIOS |
-|143, 220|IMAP |Internet Message Access Protocol |
-|161, 162, 199|SNMP |Simple Network Management Protocol |
-|179|BGP |Border Gateway Protocol |
-|389|LDAP |Lightweight Directory Access Protocol |
-|443|HTTPS |Hypertext Transfer Protocol over SSL/TLS |
-|636|LDAPS |Lightweight Directory Access Protocol over TLS/SSL |
-|989, 990|FTPS |File Transfer Protocol over TLS/SSL |
-|993|IMAPS |Internet Message Access Protocol over TLS/SSL |
-|995|POP3S |Post Office Protocol 3 over TLS/SSL |
-|1900|SSDP |Simple Service Discovery Protocol |
-|5222|XMPP |Extensible Messaging and Presence Protocol |
-|5353|mDNS |Multicast DNS |
+| Port number(s) | Application protocol | Description                                        |
+|----------------|----------------------|----------------------------------------------------|
+| 20, 21         | FTP                  | File Transfer Protocol                             |
+| 22             | SSH                  | Secure Shell                                       |
+| 23             | Telnet               | Telnet                                             |
+| 25             | SMTP                 | Simple Mail Transfer Protocol                      |
+| 49             | TACACS               | Terminal Access Controller Access-Control System   |
+| 53             | DNS                  | Domain Name System                                 |
+| 67, 68         | DHCP                 | Dynamic Host Configuration Protocol                |
+| 69             | TFTP                 | Trivial File Transfer Protocol                     |
+| 80, 8080       | HTTP                 | Hypertext Transfer Protocol                        |
+| 109, 110       | POP                  | Post Office Protocol                               |
+| 123            | NTP                  | Network Time Protocol                              |
+| 137, 138, 139  | NetBIOS              | NetBIOS                                            |
+| 143, 220       | IMAP                 | Internet Message Access Protocol                   |
+| 161, 162, 199  | SNMP                 | Simple Network Management Protocol                 |
+| 179            | BGP                  | Border Gateway Protocol                            |
+| 389            | LDAP                 | Lightweight Directory Access Protocol              |
+| 443            | HTTPS                | Hypertext Transfer Protocol over SSL/TLS           |
+| 636            | LDAPS                | Lightweight Directory Access Protocol over TLS/SSL |
+| 989, 990       | FTPS                 | File Transfer Protocol over TLS/SSL                |
+| 993            | IMAPS                | Internet Message Access Protocol over TLS/SSL      |
+| 995            | POP3S                | Post Office Protocol 3 over TLS/SSL                |
+| 1900           | SSDP                 | Simple Service Discovery Protocol                  |
+| 5222           | XMPP                 | Extensible Messaging and Presence Protocol         |
+| 5353           | mDNS                 | Multicast DNS                                      |
 
 </div>
 
@@ -380,21 +382,21 @@ The currently usable hotkeys are reported in the following.
 
 > **Note**
 >
-> On macOS, use the `cmd` key instead of `ctrl`
+> On macOS, use the <kbd>cmd</kbd> key instead of <kbd>ctrl</kbd>
 
 <div align="center">
 
-| Event | Shortcut keys |
-|--|--|
-| Quit the application | `ctrl+Q` |
-| Open full report | `ctrl+O` |
-| Open settings | `ctrl+,` |
-| Clear all notifications | `ctrl+D` |
-| Interrupt the ongoing analysis | `ctrl+backspace` |
-| Start the analysis and confirm modal actions | `enter` |
-| Close settings and modal popups | `esc` |
-| Switch from a tab to the next (or previous) one | `tab` (or `shift+tab`) |
-| Change inspect connections page to the next (or previous) one | `ctrl+rightArrow` (or `ctrl+leftArrow`) |
+| Event                                                         | Shortcut keys                                                                   |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Quit the application                                          | <kbd>ctrl</kbd>+<kbd>Q</kbd>                                                    |
+| Open full report                                              | <kbd>ctrl</kbd>+<kbd>O</kbd>                                                    |
+| Open settings                                                 | <kbd>ctrl</kbd>+<kbd>,</kbd>                                                    |
+| Clear all notifications                                       | <kbd>ctrl</kbd>+<kbd>D</kbd>                                                    |
+| Interrupt the ongoing analysis                                | <kbd>ctrl</kbd>+<kbd>backspace</kbd>                                            |
+| Start the analysis and confirm modal actions                  | <kbd>enter</kbd>                                                                |
+| Close settings and modal popups                               | <kbd>esc</kbd>                                                                  |
+| Switch from a tab to the next (or previous) one               | <kbd>tab</kbd> (or <kbd>shift</kbd>+<kbd>tab</kbd>)                             |
+| Change inspect connections page to the next (or previous) one | <kbd>ctrl</kbd>+<kbd>rightArrow</kbd> (or <kbd>ctrl</kbd>+<kbd>leftArrow</kbd>) |
 
 </div>
 
