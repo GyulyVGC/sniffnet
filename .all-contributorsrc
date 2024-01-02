@@ -428,6 +428,16 @@
         "doc",
         "translation"
       ]
+    },
+    {
+      "login": "JulianSchmid",
+      "name": "Julian Schmid",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1327472?v=4",
+      "profile": "https://github.com/JulianSchmid",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
