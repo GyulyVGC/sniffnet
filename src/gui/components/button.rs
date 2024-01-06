@@ -7,7 +7,6 @@ use iced::{Font, Length, Renderer};
 
 use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
-use crate::gui::types::message::Message::LoadStyle;
 use crate::translations::translations::hide_translation;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -43,24 +42,27 @@ pub fn button_open_file(
     file_info: FileInfo,
     language: Language,
     font: Font,
+    is_editable: bool,
+    action: fn(String) -> Message,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let tooltip_str = file_info.action_info(language);
-    Tooltip::new(
-        button(
-            Icon::File
-                .to_text()
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center)
-                .size(21.0),
-        )
-        .padding(0)
-        .height(Length::Fixed(40.0))
-        .width(Length::Fixed(40.0))
-        .on_press(Message::OpenFile(old_file, file_info, LoadStyle)),
-        tooltip_str,
-        Position::Right,
+    let mut button = button(
+        Icon::File
+            .to_text()
+            .vertical_alignment(Vertical::Center)
+            .horizontal_alignment(Horizontal::Center)
+            .size(16.0),
     )
-    .gap(5)
-    .font(font)
-    .style(ContainerType::Tooltip)
+    .padding(0)
+    .height(Length::Fixed(25.0))
+    .width(Length::Fixed(40.0));
+
+    if is_editable {
+        button = button.on_press(Message::OpenFile(old_file, file_info, action));
+    }
+
+    Tooltip::new(button, tooltip_str, Position::Right)
+        .gap(5)
+        .font(font)
+        .style(ContainerType::Tooltip)
 }

@@ -15,7 +15,7 @@ Multithreaded, cross-platform, reliable <br>
 <div align="center">
 
 Graphical interface translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 <nobr>[+ 11 more languages](https://github.com/GyulyVGC/sniffnet/issues/60)<nobr><br>
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [<nobr>+ 11 more languages</nobr>](https://github.com/GyulyVGC/sniffnet/issues/60)<br>
 
 </div>
 

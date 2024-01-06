@@ -4,7 +4,6 @@ use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
 use iced::Length::Fixed;
 use iced::{Alignment, Color, Element, Font, Length, Renderer};
-use std::cmp::min;
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -26,6 +25,7 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::color_gradients_translation;
 use crate::translations::translations_3::custom_style_translation;
+use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
@@ -324,30 +324,24 @@ fn lazy_custom_style_input(
     //         TextInputType::Standard
     //     });
 
-    let row_path_info = if custom_path.is_empty() {
-        Row::new().width(0)
-    } else {
-        let tot_len = custom_path.len();
-        let slice_len = min(20, tot_len);
-        let suspensions = if tot_len > 20 { "..." } else { "" };
-        let slice = [suspensions, &custom_path[tot_len - slice_len..]].concat();
-        Row::new()
-            .push(Text::new(slice).font(font).style(if is_error {
-                TextType::Danger
-            } else {
-                TextType::Standard
-            }))
-            .push(horizontal_space(15))
-    };
-
     let button_row = Row::new()
         .align_items(Alignment::Center)
-        .push(row_path_info)
+        .push(
+            Text::new(get_path_termination_string(custom_path, 20))
+                .font(font)
+                .style(if is_error {
+                    TextType::Danger
+                } else {
+                    TextType::Standard
+                }),
+        )
         .push(button_open_file(
             custom_path.to_owned(),
             FileInfo::Style,
             language,
             font,
+            true,
+            Message::LoadStyle,
         ));
 
     let mut content = Column::new()

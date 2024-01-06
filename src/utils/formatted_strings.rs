@@ -1,3 +1,4 @@
+use std::cmp::min;
 use std::net::IpAddr;
 
 use crate::networking::types::filters::Filters;
@@ -211,4 +212,14 @@ pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
     } else {
         address.to_owned()
     }
+}
+
+pub fn get_path_termination_string(full_path: &str, i: usize) -> String {
+    if full_path.is_empty() {
+        return String::new();
+    }
+    let tot_len = full_path.len();
+    let slice_len = min(i, tot_len);
+    let suspensions = if tot_len > i { "..." } else { "" };
+    [suspensions, &full_path[tot_len - slice_len..], " "].concat()
 }
