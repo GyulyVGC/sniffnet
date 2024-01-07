@@ -151,36 +151,51 @@ impl button::StyleSheet for StyleType {
     }
 
     fn disabled(&self, style: &Self::Style) -> Appearance {
+        let colors = self.get_palette();
+        let ext = self.get_extension();
         match style {
-            ButtonType::Gradient(_) => {
-                let colors = self.get_palette();
-                let ext = self.get_extension();
-                button::Appearance {
-                    background: Some(match style {
-                        ButtonType::Gradient(GradientType::None) => Background::Color(Color {
-                            a: ext.alpha_round_containers,
-                            ..colors.secondary
-                        }),
-                        ButtonType::Gradient(gradient_type) => {
-                            Background::Gradient(get_gradient_buttons(
-                                &colors,
-                                *gradient_type,
-                                ext.is_nightly,
-                                ext.alpha_round_containers,
-                            ))
-                        }
-                        _ => Background::Color(ext.buttons_color),
-                    }),
-                    border_radius: BORDER_BUTTON_RADIUS.into(),
-                    border_width: BORDER_WIDTH,
-                    shadow_offset: Vector::new(0.0, 0.0),
-                    text_color: colors.text_headers,
-                    border_color: Color {
-                        a: ext.alpha_round_borders,
+            ButtonType::Gradient(_) => button::Appearance {
+                background: Some(match style {
+                    ButtonType::Gradient(GradientType::None) => Background::Color(Color {
+                        a: ext.alpha_round_containers,
                         ..colors.secondary
-                    },
-                }
-            }
+                    }),
+                    ButtonType::Gradient(gradient_type) => {
+                        Background::Gradient(get_gradient_buttons(
+                            &colors,
+                            *gradient_type,
+                            ext.is_nightly,
+                            ext.alpha_round_containers,
+                        ))
+                    }
+                    _ => Background::Color(ext.buttons_color),
+                }),
+                border_radius: BORDER_BUTTON_RADIUS.into(),
+                border_width: BORDER_WIDTH,
+                shadow_offset: Vector::new(0.0, 0.0),
+                text_color: colors.text_headers,
+                border_color: Color {
+                    a: ext.alpha_round_borders,
+                    ..colors.secondary
+                },
+            },
+            ButtonType::Standard => Appearance {
+                shadow_offset: Vector::new(0.0, 0.0),
+                background: Some(Background::Color(Color {
+                    a: ext.alpha_round_containers,
+                    ..ext.buttons_color
+                })),
+                border_radius: BORDER_BUTTON_RADIUS.into(),
+                border_width: BORDER_WIDTH,
+                border_color: Color {
+                    a: ext.alpha_round_borders,
+                    ..colors.secondary
+                },
+                text_color: Color {
+                    a: ext.alpha_round_containers,
+                    ..colors.text_body
+                },
+            },
             _ => button::StyleSheet::active(self, style),
         }
     }

@@ -45,7 +45,9 @@ pub fn button_open_file(
     is_editable: bool,
     action: fn(String) -> Message,
 ) -> Tooltip<'static, Message, Renderer<StyleType>> {
-    let tooltip_str = file_info.action_info(language);
+    let mut tooltip_str = "";
+    let mut tooltip_style = ContainerType::Neutral;
+
     let mut button = button(
         Icon::File
             .to_text()
@@ -58,11 +60,13 @@ pub fn button_open_file(
     .width(Length::Fixed(40.0));
 
     if is_editable {
+        tooltip_str = file_info.action_info(language);
+        tooltip_style = ContainerType::Tooltip;
         button = button.on_press(Message::OpenFile(old_file, file_info, action));
     }
 
     Tooltip::new(button, tooltip_str, Position::Right)
         .gap(5)
         .font(font)
-        .style(ContainerType::Tooltip)
+        .style(tooltip_style)
 }

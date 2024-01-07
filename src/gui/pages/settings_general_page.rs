@@ -201,28 +201,6 @@ fn scale_factor_slider(
     .align_y(Vertical::Center)
 }
 
-// fn report_path_setting(
-//     is_editable: bool,
-//     language: Language,
-//     font: Font,
-//     custom_path: &str,
-// ) -> Row<'static, Message, Renderer<StyleType>> {
-//     let mut input = TextInput::new(&get_default_report_file_path(), custom_path)
-//         .padding([0, 5])
-//         .font(font)
-//         .width(Length::Fixed(500.0))
-//         .style(TextInputType::Standard);
-//
-//     if is_editable {
-//         input = input.on_input(Message::CustomReport);
-//     }
-//
-//     Row::new()
-//         .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
-//         .push(horizontal_space(5))
-//         .push(input)
-// }
-
 fn mmdb_settings(
     is_editable: bool,
     language: Language,
@@ -296,7 +274,7 @@ fn mmdb_selection_row(
         .align_items(Alignment::Center)
         .push(Text::new(format!("{caption}: ")).font(font))
         .push(
-            Text::new(get_path_termination_string(custom_path, 20))
+            Text::new(get_path_termination_string(custom_path, 30))
                 .font(font)
                 .style(if is_error {
                     TextType::Danger
