@@ -349,7 +349,6 @@ fn lazy_custom_style_input(
         .spacing(5)
         .push(Text::new(custom_style_translation(language)).font(font))
         .push(button_row);
-    // .push(input);
 
     if is_custom_toml_style_set {
         content = content.push(get_palette_rule(
@@ -368,9 +367,9 @@ fn lazy_custom_style_input(
     Button::new(content)
         .height(Length::Fixed(
             if custom_palette.is_ok() || is_custom_toml_style_set {
-                125.0
+                110.0
             } else {
-                90.0
+                75.0
             },
         ))
         .width(Length::Fixed(380.0))

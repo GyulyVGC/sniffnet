@@ -2,8 +2,8 @@
 
 This file provides an overview of the direction this project is heading.
 
-As described in [#329](https://github.com/GyulyVGC/sniffnet/discussions/329), I no longer have the possibility of working on Sniffnet full-time, so expect updates to come at a slower pace with respect to the past. <br>
-I'll keep maintaining Sniffnet in my spare time and I'll try my best to target all the following points.
+Even if I no longer have the luck of working on Sniffnet full-time (as described in [#329](https://github.com/GyulyVGC/sniffnet/discussions/329)),
+I'll try all my best to make the application grow even further by targeting the following features, improvements, and fixes. <br>
 
 Sections are sorted by relevance. <br>
 Elements inside a section are sorted by expected release date. <br>

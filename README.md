@@ -1,5 +1,12 @@
 <p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
+<h4 align="center">
+  <!-- <a href="https://github.com/GyulyVGC/sniffnet/wiki">User manual</a> | -->
+  <a href="https://sniffnet.net">Website</a> |
+  <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md">Roadmap</a> |
+  <a href="https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md">Contribute</a>
+</h4>
+
 <p align="center">
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
 &nbsp;
@@ -9,13 +16,12 @@
 <p align="center">
 Application to comfortably monitor your Internet traffic <br>
 Multithreaded, cross-platform, reliable <br>
-🌐 <a href="https://www.sniffnet.net">www.sniffnet.net</a>
 </p>
 
 <div align="center">
 
 Graphical interface translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [<nobr>+ 11 more languages</nobr>](https://github.com/GyulyVGC/sniffnet/issues/60)<br>
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;11&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)<br>
 
 </div>
 
@@ -39,7 +45,7 @@ Graphical interface translated in:<br>
 </p>
 
 
-## _Help fund Sniffnet's development_ 💖
+## _Support Sniffnet's development_ 💖
 
 Sniffnet is **completely free, open-source software** which needs lots of effort and time to develop and maintain.
 
