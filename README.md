@@ -233,13 +233,13 @@ Depending on your operating system, you may need to install some dependencies to
   - On [Debian-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#Debian-based) distributions:
     - `libpcap-dev`
     - `libasound2-dev`
-    - `libgtk-3-dev`
     - `libfontconfig1-dev`
+    - `libgtk-3-dev`
   - On [RPM-based](https://en.wikipedia.org/wiki/List_of_Linux_distributions#RPM-based) distributions:
     - `libpcap-devel`
     - `alsa-lib-devel`
-    - `gtk3-devel`
     - `fontconfig-devel`
+    - `gtk3-devel`
 
 > **Note**
 >
