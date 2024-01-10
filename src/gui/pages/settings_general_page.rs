@@ -257,19 +257,6 @@ fn mmdb_selection_row(
         }
     };
 
-    // let mut input = TextInput::new("-", custom_path)
-    //     .padding([0, 5])
-    //     .font(font)
-    //     .width(Length::Fixed(200.0))
-    //     .style(if is_error {
-    //         TextInputType::Error
-    //     } else {
-    //         TextInputType::Standard
-    //     });
-    // if is_editable {
-    //     input = input.on_input(message);
-    // }
-
     Row::new()
         .align_items(Alignment::Center)
         .push(Text::new(format!("{caption}: ")).font(font))

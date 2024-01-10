@@ -181,10 +181,12 @@ pub fn parse_packets(
                             .and_modify(|data_info| {
                                 data_info.add_packet(exchanged_bytes, new_info.traffic_direction);
                             })
-                            .or_insert(DataInfo::new_with_first_packet(
-                                exchanged_bytes,
-                                new_info.traffic_direction,
-                            ));
+                            .or_insert_with(|| {
+                                DataInfo::new_with_first_packet(
+                                    exchanged_bytes,
+                                    new_info.traffic_direction,
+                                )
+                            });
                     }
                 }
             }

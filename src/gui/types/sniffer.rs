@@ -583,11 +583,11 @@ impl Sniffer {
         };
         let picked_file = rfd::AsyncFileDialog::new()
             .set_title(file_info.action_info(language))
-            .add_filter("File type", &[file_info.get_extension()])
+            .add_filter(file_info.get_extension(), &[file_info.get_extension()])
             .set_directory(starting_directory)
             .pick_file()
             .await
-            .unwrap_or(FileHandle::from(PathBuf::from(&old_file)));
+            .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
         picked_file.path().to_string_lossy().to_string()
     }

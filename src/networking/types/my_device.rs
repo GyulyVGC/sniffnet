@@ -22,7 +22,7 @@ impl MyDevice {
                 return device;
             }
         }
-        Device::lookup().unwrap_or(None).unwrap_or(Device {
+        Device::lookup().unwrap_or(None).unwrap_or_else(|| Device {
             name: String::new(),
             desc: None,
             addresses: vec![],

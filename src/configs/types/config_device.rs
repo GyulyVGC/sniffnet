@@ -21,7 +21,7 @@ impl Default for ConfigDevice {
         Self {
             device_name: Device::lookup()
                 .unwrap_or(None)
-                .unwrap_or(Device {
+                .unwrap_or_else(|| Device {
                     name: String::new(),
                     desc: None,
                     addresses: vec![],
@@ -62,7 +62,7 @@ impl ConfigDevice {
                 };
             }
         }
-        let standard_device = Device::lookup().unwrap_or(None).unwrap_or(Device {
+        let standard_device = Device::lookup().unwrap_or(None).unwrap_or_else(|| Device {
             name: String::new(),
             desc: None,
             addresses: vec![],
@@ -88,7 +88,7 @@ mod tests {
 
         pub fn load() -> Self {
             confy::load_path::<ConfigDevice>(ConfigDevice::test_path())
-                .unwrap_or(ConfigDevice::default())
+                .unwrap_or_else(|_| ConfigDevice::default())
         }
 
         pub fn store(self) {

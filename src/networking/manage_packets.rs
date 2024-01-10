@@ -217,7 +217,7 @@ pub fn modify_or_insert_in_map(
                     .or_insert(1);
             }
         })
-        .or_insert(InfoAddressPortPair {
+        .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
@@ -302,7 +302,7 @@ pub fn reverse_dns_lookup(
         .and_modify(|data_info_host| {
             data_info_host.data_info += other_data;
         })
-        .or_insert(DataInfoHost {
+        .or_insert_with(|| DataInfoHost {
             data_info: other_data,
             is_favorite: false,
             is_loopback,
@@ -418,7 +418,7 @@ fn is_broadcast_address(address: &str, my_interface_addresses: &[Address]) -> bo
         .map(|address| {
             address
                 .broadcast_addr
-                .unwrap_or("255.255.255.255".parse().unwrap())
+                .unwrap_or_else(|| "255.255.255.255".parse().unwrap())
                 .to_string()
         })
         .collect();
@@ -448,8 +448,9 @@ pub fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec
         match address.addr {
             IpAddr::V4(local_addr) if address_to_lookup_type.eq(&IPv4) => {
                 // check if the two IPv4 addresses are in the same subnet
-                let address_to_lookup_parsed: Ipv4Addr =
-                    address_to_lookup.parse().unwrap_or(Ipv4Addr::from(0));
+                let address_to_lookup_parsed: Ipv4Addr = address_to_lookup
+                    .parse()
+                    .unwrap_or_else(|_| Ipv4Addr::from(0));
                 // remote is link local?
                 if address_to_lookup_parsed.is_link_local() {
                     ret_val = true;
@@ -472,8 +473,9 @@ pub fn is_local_connection(address_to_lookup: &str, my_interface_addresses: &Vec
             }
             IpAddr::V6(local_addr) if address_to_lookup_type.eq(&IPv6) => {
                 // check if the two IPv6 addresses are in the same subnet
-                let address_to_lookup_parsed: Ipv6Addr =
-                    address_to_lookup.parse().unwrap_or(Ipv6Addr::from(0));
+                let address_to_lookup_parsed: Ipv6Addr = address_to_lookup
+                    .parse()
+                    .unwrap_or_else(|_| Ipv6Addr::from(0));
                 // remote is link local?
                 if address_to_lookup.starts_with("fe80") {
                     ret_val = true;

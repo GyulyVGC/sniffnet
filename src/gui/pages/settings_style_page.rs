@@ -312,18 +312,6 @@ fn lazy_custom_style_input(
         custom_palette.is_err()
     };
 
-    // let input = TextInput::new("-", custom_path)
-    //     .on_input(Message::LoadStyle)
-    //     .on_submit(Message::LoadStyle(custom_path.to_string()))
-    //     .padding([0, 5])
-    //     .font(font)
-    //     .width(Length::Fixed(300.0))
-    //     .style(if is_error {
-    //         TextInputType::Error
-    //     } else {
-    //         TextInputType::Standard
-    //     });
-
     let button_row = Row::new()
         .align_items(Alignment::Center)
         .push(
