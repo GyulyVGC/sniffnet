@@ -45,7 +45,7 @@ fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> O
         }
 
         let mut latest_version = result_json
-            .unwrap_or(AppVersion {
+            .unwrap_or_else(|_| AppVersion {
                 name: String::from(":-("),
             })
             .name;

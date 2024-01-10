@@ -49,7 +49,7 @@ impl MyLinkType {
                 format!(
                     "{}: {} ({})",
                     link_type_translation(language),
-                    l.get_name().unwrap_or(l.0.to_string()),
+                    l.get_name().unwrap_or_else(|_| l.0.to_string()),
                     l.get_description().unwrap_or(String::new())
                 )
             }
@@ -72,7 +72,7 @@ impl MyLinkType {
             | Self::Unsupported(l) => {
                 let link_info = format!(
                     "{} ({})",
-                    l.get_name().unwrap_or(l.0.to_string()),
+                    l.get_name().unwrap_or_else(|_| l.0.to_string()),
                     l.get_description().unwrap_or(String::new())
                 );
                 TextType::highlighted_subtitle_with_desc(

@@ -72,7 +72,7 @@ mod tests {
 
         pub fn load() -> Self {
             confy::load_path::<ConfigSettings>(ConfigSettings::test_path())
-                .unwrap_or(ConfigSettings::default())
+                .unwrap_or_else(|_| ConfigSettings::default())
         }
 
         pub fn store(self) {

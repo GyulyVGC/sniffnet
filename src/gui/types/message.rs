@@ -7,6 +7,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::Host;
 use crate::networking::types::search_parameters::SearchParameters;
 use crate::notifications::types::notifications::Notification;
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
 
@@ -103,4 +104,6 @@ pub enum Message {
     CloseRequested,
     /// Copies the given string to clipboard
     CopyIp(String),
+    /// Launch a new file dialog
+    OpenFile(String, FileInfo, fn(String) -> Message),
 }

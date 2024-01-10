@@ -59,7 +59,7 @@ mod tests {
 
         pub fn load() -> Self {
             confy::load_path::<ConfigWindow>(ConfigWindow::test_path())
-                .unwrap_or(ConfigWindow::default())
+                .unwrap_or_else(|_| ConfigWindow::default())
         }
 
         pub fn store(self) {

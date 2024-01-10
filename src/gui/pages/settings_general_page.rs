@@ -5,18 +5,18 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider,
-    TextInput, Tooltip,
+    Tooltip,
 };
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length, Renderer};
 
+use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::translations::translations::language_translation;
@@ -24,6 +24,8 @@ use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
+use crate::utils::formatted_strings::get_path_termination_string;
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
@@ -199,28 +201,6 @@ fn scale_factor_slider(
     .align_y(Vertical::Center)
 }
 
-// fn report_path_setting(
-//     is_editable: bool,
-//     language: Language,
-//     font: Font,
-//     custom_path: &str,
-// ) -> Row<'static, Message, Renderer<StyleType>> {
-//     let mut input = TextInput::new(&get_default_report_file_path(), custom_path)
-//         .padding([0, 5])
-//         .font(font)
-//         .width(Length::Fixed(500.0))
-//         .style(TextInputType::Standard);
-//
-//     if is_editable {
-//         input = input.on_input(Message::CustomReport);
-//     }
-//
-//     Row::new()
-//         .push(Text::new(format!("{}:", file_path_translation(language))).font(font))
-//         .push(horizontal_space(5))
-//         .push(input)
-// }
-
 fn mmdb_settings(
     is_editable: bool,
     language: Language,
@@ -236,37 +216,37 @@ fn mmdb_settings(
         .push(
             Text::new(mmdb_files_translation(language))
                 .font(font)
-                .style(TextType::Subtitle),
+                .style(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
         )
-        .push(
-            Row::new()
-                .spacing(20)
-                .push(mmdb_input(
-                    is_editable,
-                    font,
-                    Message::CustomCountryDb,
-                    country_path,
-                    country_reader,
-                    country_translation(language),
-                ))
-                .push(mmdb_input(
-                    is_editable,
-                    font,
-                    Message::CustomAsnDb,
-                    asn_path,
-                    asn_reader,
-                    "ASN",
-                )),
-        )
+        .push(mmdb_selection_row(
+            is_editable,
+            font,
+            Message::CustomCountryDb,
+            country_path,
+            country_reader,
+            country_translation(language),
+            language,
+        ))
+        .push(mmdb_selection_row(
+            is_editable,
+            font,
+            Message::CustomAsnDb,
+            asn_path,
+            asn_reader,
+            "ASN",
+            language,
+        ))
 }
 
-fn mmdb_input(
+fn mmdb_selection_row(
     is_editable: bool,
     font: Font,
     message: fn(String) -> Message,
     custom_path: &str,
     mmdb_reader: &Arc<MmdbReader>,
     caption: &str,
+    language: Language,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let is_error = if custom_path.is_empty() {
         false
@@ -277,22 +257,51 @@ fn mmdb_input(
         }
     };
 
-    let mut input = TextInput::new("-", custom_path)
-        .padding([0, 5])
-        .font(font)
-        .width(Length::Fixed(200.0))
-        .style(if is_error {
-            TextInputType::Error
+    Row::new()
+        .align_items(Alignment::Center)
+        .push(Text::new(format!("{caption}: ")).font(font))
+        .push(
+            Text::new(get_path_termination_string(custom_path, 30))
+                .font(font)
+                .style(if is_error {
+                    TextType::Danger
+                } else {
+                    TextType::Standard
+                }),
+        )
+        .push(if custom_path.is_empty() {
+            button_open_file(
+                custom_path.to_owned(),
+                FileInfo::Database,
+                language,
+                font,
+                is_editable,
+                message,
+            )
         } else {
-            TextInputType::Standard
-        });
+            button_clear_mmdb(message, font, is_editable)
+        })
+}
+
+fn button_clear_mmdb(
+    message: fn(String) -> Message,
+    font: Font,
+    is_editable: bool,
+) -> Tooltip<'static, Message, Renderer<StyleType>> {
+    let mut button = button(
+        Text::new("×")
+            .font(font)
+            .vertical_alignment(Vertical::Center)
+            .horizontal_alignment(Horizontal::Center)
+            .size(15),
+    )
+    .padding(2)
+    .height(Fixed(20.0))
+    .width(Fixed(20.0));
 
     if is_editable {
-        input = input.on_input(message);
+        button = button.on_press(message(String::new()));
     }
 
-    Row::new()
-        .spacing(5)
-        .push(Text::new(format!("{caption}:")).font(font))
-        .push(input)
+    Tooltip::new(button, "", Position::Right).style(ContainerType::Neutral)
 }

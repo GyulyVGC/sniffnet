@@ -2,11 +2,13 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use iced::{window, Command};
 use pcap::Device;
+use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::gui::components::types::my_modal::MyModal;
@@ -33,6 +35,8 @@ use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
+use crate::translations::types::language::Language;
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
@@ -286,7 +290,17 @@ impl Sniffer {
                 self.timing_events.copy_ip_now(string.clone());
                 return iced::clipboard::write(string);
             }
-            _ => {}
+            Message::OpenFile(old_file, file_info, consumer_message) => {
+                return Command::perform(
+                    Self::open_file(
+                        old_file,
+                        file_info,
+                        self.configs.lock().unwrap().settings.language,
+                    ),
+                    consumer_message,
+                );
+            }
+            Message::TickInit | Message::FontLoaded(_) => {}
         }
         Command::none()
     }
@@ -559,6 +573,25 @@ impl Sniffer {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }
         Command::none()
+    }
+
+    async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
+        let starting_directory = if old_file.is_empty() {
+            std::env::var("HOME").unwrap_or_default()
+        } else {
+            let mut folder_path = PathBuf::from(&old_file);
+            folder_path.pop();
+            folder_path.to_string_lossy().to_string()
+        };
+        let picked_file = rfd::AsyncFileDialog::new()
+            .set_title(file_info.action_info(language))
+            .add_filter(file_info.get_extension(), &[file_info.get_extension()])
+            .set_directory(starting_directory)
+            .pick_file()
+            .await
+            .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
+
+        picked_file.path().to_string_lossy().to_string()
     }
 }
 

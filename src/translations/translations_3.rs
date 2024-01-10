@@ -108,3 +108,19 @@ pub fn unsupported_link_type_translation(
     string.push_str(&format!("\n\n{network_adapter_translation}: {adapter}"));
     Text::new(string)
 }
+
+pub fn style_from_file_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Select style from a file",
+        Language::IT => "Seleziona lo stile da un file",
+        _ => "Select style from a file",
+    }
+}
+
+pub fn database_from_file_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Select database file",
+        Language::IT => "Seleziona file di database",
+        _ => "Select database file",
+    }
+}
