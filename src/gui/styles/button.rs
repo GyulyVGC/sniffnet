@@ -157,7 +157,7 @@ impl button::StyleSheet for StyleType {
             ButtonType::Gradient(_) => button::Appearance {
                 background: Some(match style {
                     ButtonType::Gradient(GradientType::None) => Background::Color(Color {
-                        a: ext.alpha_round_containers,
+                        a: ext.alpha_chart_badge,
                         ..colors.secondary
                     }),
                     ButtonType::Gradient(gradient_type) => {
@@ -165,7 +165,7 @@ impl button::StyleSheet for StyleType {
                             &colors,
                             *gradient_type,
                             ext.is_nightly,
-                            ext.alpha_round_containers,
+                            ext.alpha_chart_badge,
                         ))
                     }
                     _ => Background::Color(ext.buttons_color),
@@ -173,26 +173,29 @@ impl button::StyleSheet for StyleType {
                 border_radius: BORDER_BUTTON_RADIUS.into(),
                 border_width: BORDER_WIDTH,
                 shadow_offset: Vector::new(0.0, 0.0),
-                text_color: colors.text_headers,
+                text_color: Color {
+                    a: ext.alpha_chart_badge,
+                    ..colors.text_headers
+                },
                 border_color: Color {
-                    a: ext.alpha_round_borders,
+                    a: ext.alpha_chart_badge,
                     ..colors.secondary
                 },
             },
             ButtonType::Standard => Appearance {
                 shadow_offset: Vector::new(0.0, 0.0),
                 background: Some(Background::Color(Color {
-                    a: ext.alpha_round_containers,
+                    a: ext.alpha_chart_badge,
                     ..ext.buttons_color
                 })),
                 border_radius: BORDER_BUTTON_RADIUS.into(),
                 border_width: BORDER_WIDTH,
                 border_color: Color {
-                    a: ext.alpha_round_borders,
+                    a: ext.alpha_chart_badge,
                     ..colors.secondary
                 },
                 text_color: Color {
-                    a: ext.alpha_round_containers,
+                    a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
             },
