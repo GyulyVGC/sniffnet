@@ -579,7 +579,9 @@ impl Sniffer {
         let starting_directory = if old_file.is_empty() {
             std::env::var("HOME").unwrap_or_default()
         } else {
-            old_file.clone()
+            let mut folder_path = PathBuf::from(&old_file);
+            folder_path.pop();
+            folder_path.to_string_lossy().to_string()
         };
         let picked_file = rfd::AsyncFileDialog::new()
             .set_title(file_info.action_info(language))
