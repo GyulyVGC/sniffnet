@@ -126,7 +126,6 @@ jobs:
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
-          if-no-files-found: error
 
       - name: Package for Debian-based Linux distros
         shell: bash
@@ -175,7 +174,6 @@ jobs:
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
-          if-no-files-found: error
 
       - name: Package for RPM-based Linux distros
         shell: bash
@@ -220,7 +218,6 @@ jobs:
         with:
           name: build-macos-${{ matrix.target }}
           path: target/
-          if-no-files-found: error
 
       - name: Package for macOS
         shell: bash
@@ -296,7 +293,6 @@ jobs:
         with:
           name: build-windows-${{ matrix.target }}
           path: target/
-          if-no-files-found: error
 
       - name: Package for Microsoft Windows
         shell: powershell
