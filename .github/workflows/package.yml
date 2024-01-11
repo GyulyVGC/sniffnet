@@ -102,7 +102,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
+          name: build-${{ matrix.os }}-${{ matrix.target }}
           path: |
             target/*/release/sniffnet
             target/*/release/sniffnet.exe
@@ -113,6 +113,19 @@ jobs:
     container:
       image: debian:latest
     needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: i686-unknown-linux-gnu
+            arch: i386
+          - target: armv7-unknown-linux-gnueabihf
+            arch: armhf
+          - target: x86_64-unknown-linux-gnu
+            arch: amd64
+          - target: aarch64-unknown-linux-gnu
+            arch: arm64
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -130,34 +143,23 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-deb
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: build-ubuntu
+          name: build-ubuntu-${{ matrix.target }}
           path: target/
 
       - name: Package for Debian-based Linux distros
         shell: bash
         run: |
-          targets=(
-            i686-unknown-linux-gnu
-            armv7-unknown-linux-gnueabihf
-            x86_64-unknown-linux-gnu
-            aarch64-unknown-linux-gnu
-          )
           mkdir artifacts
-          for target in "${targets[@]}"; do
-            cargo deb --no-build --no-strip --target $target
-            mv target/${target}/debian/*.deb artifacts/
-          done
-          mv artifacts/sniffnet*amd64.deb artifacts/Sniffnet_LinuxDEB_amd64.deb
-          mv artifacts/sniffnet*arm64.deb artifacts/Sniffnet_LinuxDEB_arm64.deb
-          mv artifacts/sniffnet*i386.deb artifacts/Sniffnet_LinuxDEB_i386.deb
-          mv artifacts/sniffnet*armhf.deb artifacts/Sniffnet_LinuxDEB_armhf.deb
+          cargo deb --no-build --no-strip --target ${{ matrix.target }}
+          mv target/${{ matrix.target }}/debian/*.deb artifacts/
+          mv artifacts/sniffnet*.deb artifacts/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: deb
+          name: deb-${{ matrix.arch }}
           path: artifacts/
 
   rpm:
@@ -165,6 +167,15 @@ jobs:
     container:
       image: fedora:latest
     needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - arch: aarch64
+            target: aarch64-unknown-linux-gnu
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -182,36 +193,38 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-generate-rpm
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: build-ubuntu
+          name: build-ubuntu-${{ matrix.target }}
           path: target/
 
       - name: Package for RPM-based Linux distros
         shell: bash
         run: |
-          targets=(
-            x86_64-unknown-linux-gnu
-            aarch64-unknown-linux-gnu
-          )
           mkdir artifacts
-          for target in "${targets[@]}"; do
-            patchelf --replace-needed libpcap.so.0.8 libpcap.so.1 target/${target}/release/sniffnet
-            cargo generate-rpm --target $target
-            mv target/${target}/generate-rpm/*.rpm artifacts/
-          done
-          mv artifacts/sniffnet*x86_64.rpm artifacts/Sniffnet_LinuxRPM_x86_64.rpm
-          mv artifacts/sniffnet*aarch64.rpm artifacts/Sniffnet_LinuxRPM_aarch64.rpm
+          patchelf --replace-needed libpcap.so.0.8 libpcap.so.1 target/${{ matrix.target }}/release/sniffnet
+          cargo generate-rpm --target ${{ matrix.target }}
+          mv target/${{ matrix.target }}/generate-rpm/*.rpm artifacts/
+          mv artifacts/sniffnet*.rpm artifacts/Sniffnet_LinuxRPM_${{ matrix.arch }}.rpm
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rpm
+          name: rpm-${{ matrix.arch }}
           path: artifacts/
 
   dmg:
     runs-on: macos-latest
     needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: Intel
+            target: x86_64-apple-darwin
+          - arch: AppleSilicon
+            target: aarch64-apple-darwin
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -228,9 +241,9 @@ jobs:
           cargo install toml-cli
           brew install create-dmg
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: build-macos
+          name: build-macos-${{ matrix.target }}
           path: target/
 
       - name: Package for macOS
@@ -238,46 +251,48 @@ jobs:
         run: |
           VERSION=$(toml get Cargo.toml package.version --raw)
           sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GITHUB_SHA:0:7}/g" resources/packaging/macos/Info.plist
-          targets=(
-            x86_64-apple-darwin
-            aarch64-apple-darwin
-          )
           mkdir artifacts
-          for target in "${targets[@]}"; do
-            mkdir -p target/${target}/release/bundle/osx/Sniffnet.app/Contents/{MacOS,Resources}
-            cp resources/packaging/macos/Info.plist \
-              target/${target}/release/bundle/osx/Sniffnet.app/Contents/
-            cp resources/packaging/macos/graphics/sniffnet.icns \
-              target/${target}/release/bundle/osx/Sniffnet.app/Contents/Resources/
-            chmod +x target/${target}/release/sniffnet
-            cp target/${target}/release/sniffnet \
-              target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
-            cp resources/packaging/macos/wrapper.sh \
-              target/${target}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
-            create-dmg \
-              --volname "Sniffnet Installer" \
-              --background "resources/packaging/macos/graphics/dmg_bg.png" \
-              --window-pos 200 120 \
-              --window-size 900 450 \
-              --icon-size 100 \
-              --app-drop-link 620 240 \
-              --icon "Sniffnet.app" 300 240 \
-              --hide-extension "Sniffnet.app" \
-              "artifacts/sniffnet-${target%%-*}.dmg" \
-              "target/${target}/release/bundle/osx/"
-          done
-          mv artifacts/sniffnet*x86_64.dmg artifacts/Sniffnet_macOS_Intel.dmg
-          mv artifacts/sniffnet*aarch64.dmg artifacts/Sniffnet_macOS_AppleSilicon.dmg
+          mkdir -p target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/{MacOS,Resources}
+          cp resources/packaging/macos/Info.plist \
+            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/
+          cp resources/packaging/macos/graphics/sniffnet.icns \
+            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/Resources/
+          chmod +x target/${{ matrix.target }}/release/sniffnet
+          cp target/${{ matrix.target }}/release/sniffnet \
+            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+          cp resources/packaging/macos/wrapper.sh \
+            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+          create-dmg \
+            --volname "Sniffnet Installer" \
+            --background "resources/packaging/macos/graphics/dmg_bg.png" \
+            --window-pos 200 120 \
+            --window-size 900 450 \
+            --icon-size 100 \
+            --app-drop-link 620 240 \
+            --icon "Sniffnet.app" 300 240 \
+            --hide-extension "Sniffnet.app" \
+            "artifacts/sniffnet-${{ matrix.target%%-* }}.dmg" \
+            "target/${{ matrix.target }}/release/bundle/osx/"
+          mv artifacts/sniffnet*.dmg artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dmg
+          name: dmg-${{ matrix.arch }}
           path: artifacts/
 
   msi:
     runs-on: windows-latest
     needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: 32-bit
+            target: i686-pc-windows-msvc
+          - arch: 64-bit
+            target: x86_64-pc-windows-msvc
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -303,28 +318,20 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-wix
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: build-windows
+          name: build-windows-${{ matrix.target }}
           path: target/
 
       - name: Package for Microsoft Windows
         shell: powershell
         run: |
-          $targets=@(
-            "i686-pc-windows-msvc",
-            "x86_64-pc-windows-msvc"
-          )
           New-Item -ItemType Directory -Path artifacts
-          foreach ($target in $targets)
-          {
-            cargo wix --no-build --nocapture --target $target
-            Move-Item -Path target\wix\sniffnet*x86.msi -Destination .\artifacts\Sniffnet_Windows_32-bit.msi
-            Move-Item -Path target\wix\sniffnet*x86_64.msi -Destination .\artifacts\Sniffnet_Windows_64-bit.msi
-          }
+          cargo wix --no-build --nocapture --target ${{ matrix.target }}
+          Move-Item -Path target\wix\sniffnet*.msi -Destination .\artifacts\Sniffnet_Windows_${{ matrix.arch }}.msi
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: msi
+          name: msi-${{ matrix.arch }}
           path: artifacts/
