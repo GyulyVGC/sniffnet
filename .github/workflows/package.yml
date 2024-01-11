@@ -153,8 +153,7 @@ jobs:
         run: |
           mkdir artifacts
           cargo deb --no-build --no-strip --target ${{ matrix.target }}
-          mv target/${{ matrix.target }}/debian/*.deb artifacts/
-          mv artifacts/sniffnet*.deb artifacts/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb
+          mv target/${{ matrix.target }}/debian/*.deb artifacts/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
@@ -204,8 +203,7 @@ jobs:
           mkdir artifacts
           patchelf --replace-needed libpcap.so.0.8 libpcap.so.1 target/${{ matrix.target }}/release/sniffnet
           cargo generate-rpm --target ${{ matrix.target }}
-          mv target/${{ matrix.target }}/generate-rpm/*.rpm artifacts/
-          mv artifacts/sniffnet*.rpm artifacts/Sniffnet_LinuxRPM_${{ matrix.arch }}.rpm
+          mv target/${{ matrix.target }}/generate-rpm/*.rpm artifacts/Sniffnet_LinuxRPM_${{ matrix.arch }}.rpm
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
@@ -252,16 +250,16 @@ jobs:
           VERSION=$(toml get Cargo.toml package.version --raw)
           sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GITHUB_SHA:0:7}/g" resources/packaging/macos/Info.plist
           mkdir artifacts
-          mkdir -p target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/{MacOS,Resources}
+          mkdir -p target/release/bundle/osx/Sniffnet.app/Contents/{MacOS,Resources}
           cp resources/packaging/macos/Info.plist \
-            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/
+            target/release/bundle/osx/Sniffnet.app/Contents/
           cp resources/packaging/macos/graphics/sniffnet.icns \
-            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/Resources/
+            target/release/bundle/osx/Sniffnet.app/Contents/Resources/
           chmod +x target/${{ matrix.target }}/release/sniffnet
           cp target/${{ matrix.target }}/release/sniffnet \
-            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+            target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
           cp resources/packaging/macos/wrapper.sh \
-            target/${{ matrix.target }}/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+            target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
           create-dmg \
             --volname "Sniffnet Installer" \
             --background "resources/packaging/macos/graphics/dmg_bg.png" \
@@ -271,9 +269,8 @@ jobs:
             --app-drop-link 620 240 \
             --icon "Sniffnet.app" 300 240 \
             --hide-extension "Sniffnet.app" \
-            "artifacts/sniffnet-${{ matrix.target }}.dmg" \
-            "target/${{ matrix.target }}/release/bundle/osx/"
-          mv artifacts/sniffnet*.dmg artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg
+            "artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg" \
+            "target/release/bundle/osx/"
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
