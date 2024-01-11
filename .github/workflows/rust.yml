@@ -50,11 +50,11 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install Linux dependencies
-        if: ${{ matrix.os == 'ubuntu' }}
+        if: matrix.os == 'ubuntu'
         run: sudo apt-get install libpcap-dev libasound2-dev libgtk-3-dev
 
       - name: Install Windows dependencies
-        if: ${{ matrix.os == 'windows' }} && github.event_name != 'pull_request'
+        if: matrix.os == 'windows' && github.event_name != 'pull_request'
         run: |
           Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
           Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
@@ -65,11 +65,11 @@ jobs:
       - name: fmt
         run: cargo fmt --all -- --check
       - name: build
-        if: ${{ matrix.os != 'windows' }} || github.event_name != 'pull_request'
+        if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo build --verbose --target ${{ matrix.target }}
       - name: clippy
-        if: ${{ matrix.os != 'windows' }} || github.event_name != 'pull_request'
+        if:  matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo clippy -- -D warnings --target ${{ matrix.target }}
       - name: test
-        if: ${{ matrix.os != 'windows' }} || github.event_name != 'pull_request'
+        if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo test --verbose --target ${{ matrix.target }}
