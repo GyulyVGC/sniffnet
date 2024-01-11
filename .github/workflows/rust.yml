@@ -23,27 +23,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: install fmt
-        run: rustup component add rustfmt
-      - name: install clippy
-        run: rustup component add clippy
+          components: rustfmt, clippy
       - name: fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
       - name: test
         run: cargo test --verbose
 
@@ -52,33 +40,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          components: rustfmt, clippy
       - name: Install libpcap
         run: sudo apt-get install libpcap-dev
       - name: Install dependency for alsa-sys
         run: sudo apt-get install libasound2-dev
       - name: Install dependency for rfd
         run: sudo apt-get install libgtk-3-dev
-      - name: install fmt
-        run: rustup component add rustfmt
-      - name: install clippy
-        run: rustup component add clippy
       - name: fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
       - name: build
         run: cargo build --verbose
       - name: clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
       - name: test
         run: cargo test --verbose
 
@@ -87,11 +63,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions-rs/toolchain@v1
+    - uses: dtolnay/rust-toolchain@stable
       with:
-        profile: minimal
-        toolchain: stable
-        override: true
+        components: rustfmt, clippy
     - name: Install npcap sdk
       run: |
             Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
@@ -104,25 +78,14 @@ jobs:
       run: |
             Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
             C:/npcap-oem.exe /S
-    - name: install fmt
-      run: rustup component add rustfmt
-    - name: install clippy
-      run: rustup component add clippy
     - name: fmt
-      if: github.event_name != 'pull_request'
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
+      run: cargo fmt --all -- --check
     - name: build
       if: github.event_name != 'pull_request'
       run: cargo build --verbose
     - name: clippy
       if: github.event_name != 'pull_request'
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: -- -D warnings
+      run: cargo clippy -- -D warnings
     - name: test
       if: github.event_name != 'pull_request'
       run: cargo test --verbose
