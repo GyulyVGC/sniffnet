@@ -271,7 +271,7 @@ jobs:
             --app-drop-link 620 240 \
             --icon "Sniffnet.app" 300 240 \
             --hide-extension "Sniffnet.app" \
-            "artifacts/sniffnet-${{ matrix.target%%-* }}.dmg" \
+            "artifacts/sniffnet-${{ matrix.target }}.dmg" \
             "target/${{ matrix.target }}/release/bundle/osx/"
           mv artifacts/sniffnet*.dmg artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg
 
