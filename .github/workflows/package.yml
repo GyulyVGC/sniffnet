@@ -112,7 +112,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: apt update -y && apt install -y curl build-essential
+        run: apt-get update -y && apt-get install -y curl build-essential
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
