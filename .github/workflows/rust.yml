@@ -18,111 +18,44 @@ env:
 # Linters inspired from here: https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
 jobs:
 
-  macOS:
-    name: MacOS (fmt, build, clippy, test)
-    runs-on: macos-latest
+  rust:
+    name: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu
+          - os: macos
+          - os: windows
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: install fmt
-        run: rustup component add rustfmt
-      - name: install clippy
-        run: rustup component add clippy
+          components: rustfmt, clippy
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu'
+        run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev libgtk-3-dev
+
+      - name: Install Windows dependencies
+        if: matrix.os == 'windows' && github.event_name != 'pull_request'
+        run: |
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
+          Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
+          echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
+          Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
+          C:/npcap-oem.exe /S
+
       - name: fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
       - name: build
+        if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo build --verbose
       - name: clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        if:  matrix.os != 'windows' || github.event_name != 'pull_request'
+        run: cargo clippy -- -D warnings
       - name: test
+        if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo test --verbose
-
-  Linux:
-    name: Linux (fmt, build, clippy, test)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Install libpcap
-        run: sudo apt-get install libpcap-dev
-      - name: Install dependency for alsa-sys
-        run: sudo apt-get install libasound2-dev
-      - name: Install dependency for rfd
-        run: sudo apt-get install libgtk-3-dev
-      - name: install fmt
-        run: rustup component add rustfmt
-      - name: install clippy
-        run: rustup component add clippy
-      - name: fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-      - name: build
-        run: cargo build --verbose
-      - name: clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-      - name: test
-        run: cargo test --verbose
-
-  Windows:
-    name: Windows (fmt, build, clippy, test)
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-    - name: Install npcap sdk
-      run: |
-            Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
-            Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
-            echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
-    - name: Install npcap dll
-      # Secrets are not passed to workflows that are triggered by a pull request from a fork.
-      # https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets
-      if: github.event_name != 'pull_request'
-      run: |
-            Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
-            C:/npcap-oem.exe /S
-    - name: install fmt
-      run: rustup component add rustfmt
-    - name: install clippy
-      run: rustup component add clippy
-    - name: fmt
-      if: github.event_name != 'pull_request'
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
-    - name: build
-      if: github.event_name != 'pull_request'
-      run: cargo build --verbose
-    - name: clippy
-      if: github.event_name != 'pull_request'
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: -- -D warnings
-    - name: test
-      if: github.event_name != 'pull_request'
-      run: cargo test --verbose
