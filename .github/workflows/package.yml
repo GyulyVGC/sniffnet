@@ -40,7 +40,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install Windows dependencies
         if: matrix.os == 'windows'
         env:
           NPCAP_OEM_URL: ${{ secrets.NPCAP_OEM_URL }}

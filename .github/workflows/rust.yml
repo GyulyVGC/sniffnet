@@ -19,49 +19,25 @@ env:
 jobs:
 
   rust:
-    name: ${{ matrix.target }}
+    name: ${{ matrix.os }}-latest
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: true
       matrix:
         include:
           - os: ubuntu
-            arch: i386
-            target: i686-unknown-linux-gnu
-          - os: ubuntu
-            arch: armhf
-            target: armv7-unknown-linux-gnueabihf
-          - os: ubuntu
-            arch: amd64
-            target: x86_64-unknown-linux-gnu
-          - os: ubuntu
-            arch: arm64
-            target: aarch64-unknown-linux-gnu
           - os: macos
-            arch: amd64
-            target: x86_64-apple-darwin
-          - os: macos
-            arch: arm64
-            target: aarch64-apple-darwin
           - os: windows
-            arch: i386
-            target: i686-pc-windows-msvc
-          - os: windows
-            arch: amd64
-            target: x86_64-pc-windows-msvc
 
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-          targets: ${{ matrix.target }}
 
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu'
-        run: |
-          sudo dpkg --add-architecture ${{ matrix.arch }}
-          apt update -y && apt install -y libpcap-dev:${{ matrix.arch }} libasound2-dev:${{ matrix.arch }} libgtk-3-dev:${{ matrix.arch }}
+        run: apt update -y && apt install -y libpcap-dev libasound2-dev libgtk-3-dev
 
       - name: Install Windows dependencies
         if: matrix.os == 'windows' && github.event_name != 'pull_request'
@@ -76,10 +52,10 @@ jobs:
         run: cargo fmt --all -- --check
       - name: build
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo build --verbose --target ${{ matrix.target }}
+        run: cargo build --verbose
       - name: clippy
         if:  matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo clippy -- -D warnings --target ${{ matrix.target }}
+        run: cargo clippy -- -D warnings
       - name: test
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo test --verbose --target ${{ matrix.target }}
+        run: cargo test --verbose
