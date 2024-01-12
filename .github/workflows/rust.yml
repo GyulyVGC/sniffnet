@@ -60,7 +60,7 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu'
         run: |
-          dpkg --add-architecture ${{ matrix.arch }}
+          sudo dpkg --add-architecture ${{ matrix.arch }}
           apt update -y && apt install -y libpcap-dev:${{ matrix.arch }} libasound2-dev:${{ matrix.arch }} libgtk-3-dev:${{ matrix.arch }}
 
       - name: Install Windows dependencies
