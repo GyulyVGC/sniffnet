@@ -2,12 +2,14 @@
 //! to share data among the different threads.
 
 use std::collections::{HashSet, VecDeque};
+use std::ops::Deref;
 use std::path::PathBuf;
+use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use iced::{window, Command};
-use pcap::Device;
+use pcap::{Device, Packet};
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
@@ -35,6 +37,7 @@ use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::secondary_threads::parse_packets::parse_packets;
+use crate::secondary_threads::writer::writer;
 use crate::translations::types::language::Language;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
@@ -377,28 +380,36 @@ impl Sniffer {
         self.traffic_chart = TrafficChart::new(style, language);
         self.running_page = RunningPage::Overview;
 
+        let (tx, rx) = channel::<Packet>();
+
         if pcap_error.is_none() {
             // no pcap error
-            let cap = cap_result.unwrap();
+            let unwrapped_cap = cap_result.expect("Failed to get Capture<Active>");
+            let cap = Arc::new(Mutex::new(unwrapped_cap));
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+            self.device.link_type =
+                MyLinkType::from_pcap_link_type(cap.lock().unwrap().get_datalink());
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
                         &device,
-                        cap,
+                        &cap.lock().unwrap(),
                         &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
                         &asn_mmdb_reader,
+                        tx.clone(),
                     );
                 })
                 .unwrap();
+            thread::Builder::new()
+                .name("thread_write_packets".to_string())
+                .spawn(move || writer(&cap.lock().unwrap(), rx));
         }
     }
 

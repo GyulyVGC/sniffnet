@@ -2,6 +2,7 @@
 //! inserting them in the shared map.
 
 use std::io::ErrorKind;
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -27,11 +28,12 @@ use crate::InfoTraffic;
 pub fn parse_packets(
     current_capture_id: &Arc<Mutex<usize>>,
     device: &MyDevice,
-    mut cap: Capture<Active>,
+    mut cap: &Capture<Active>,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
+    tx: Sender<Packet>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
@@ -50,6 +52,7 @@ pub fn parse_packets(
                     return;
                 }
                 if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
+                    tx.send(packet);
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
