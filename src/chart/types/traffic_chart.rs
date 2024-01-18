@@ -98,10 +98,12 @@ impl Chart<Message> for TrafficChart {
         let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
 
         let colors = self.style.get_palette();
+        let ext = self.style.get_extension();
         let color_incoming = to_rgb_color(colors.secondary);
         let color_outgoing = to_rgb_color(colors.outgoing);
         let color_font = to_rgb_color(colors.text_body);
-        let color_mix = self.style.get_extension().alpha_chart_badge;
+        let color_mix = ext.alpha_chart_badge;
+        let buttons_color = to_rgb_color(ext.buttons_color);
 
         chart_builder
             .margin_right(30)
@@ -109,27 +111,36 @@ impl Chart<Message> for TrafficChart {
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
+        let y_axis_range = if self.chart_type.eq(&ChartType::Packets) {
+            let fs = self.max_received_packets - self.min_sent_packets;
+            #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
+            let gap = (fs as f64 * 0.1) as i64;
+            self.min_sent_packets - gap..self.max_received_packets + gap
+        } else {
+            let fs = self.max_received_bytes - self.min_sent_bytes;
+            #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
+            let gap = (fs as f64 * 0.1) as i64;
+            self.min_sent_bytes - gap..self.max_received_bytes + gap
+        };
+
         let mut chart = chart_builder
-            .build_cartesian_2d(
-                first_time_displayed..tot_seconds,
-                if self.chart_type.eq(&ChartType::Packets) {
-                    self.min_sent_packets..self.max_received_packets
-                } else {
-                    self.min_sent_bytes..self.max_received_bytes
-                },
-            )
-            .expect("Error drawing packets chart");
+            .build_cartesian_2d(first_time_displayed..tot_seconds, y_axis_range)
+            .expect("Error drawing chart");
 
         // Mesh
         chart
             .configure_mesh()
+            .axis_style(buttons_color)
+            .bold_line_style(buttons_color.mix(0.67))
+            .light_line_style(buttons_color.mix(0.33))
+            .y_max_light_lines(1)
+            .y_labels(7)
             .label_style(
                 ("Sarasa Mono SC", 12)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),
             )
-            .y_labels(7)
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {

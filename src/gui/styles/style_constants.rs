@@ -34,9 +34,9 @@ pub const NIGHT_PALETTE: Palette = Palette {
 };
 
 pub const BUTTONS_NIGHT: Color = Color {
-    r: 0.1,
-    g: 0.1,
-    b: 0.1,
+    r: 0.12,
+    g: 0.12,
+    b: 0.12,
     a: 1.0,
 };
 
@@ -45,8 +45,8 @@ pub const NIGHT_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     font: SARASA_MONO,
     font_headers: SARASA_MONO_BOLD,
     alpha_chart_badge: 0.15,
-    alpha_round_borders: 0.35,
-    alpha_round_containers: 0.25,
+    alpha_round_borders: 0.4,
+    alpha_round_containers: 0.3,
     buttons_color: BUTTONS_NIGHT,
 };
 
