@@ -46,6 +46,7 @@ mod translations;
 mod utils;
 
 pub const SNIFFNET_LOWERCASE: &str = "sniffnet";
+pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 
 /// Entry point of application execution
 ///

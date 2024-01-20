@@ -19,7 +19,7 @@ use crate::translations::translations_2::new_version_available_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
-use crate::Language;
+use crate::{Language, SNIFFNET_TITLECASE};
 
 pub fn footer(
     language: Language,
@@ -119,7 +119,7 @@ fn get_release_details(
         .height(Length::Fill)
         .width(Length::FillPortion(1))
         .push(
-            Text::new(format!("Version {APP_VERSION}"))
+            Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );

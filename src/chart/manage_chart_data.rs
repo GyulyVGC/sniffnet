@@ -24,7 +24,7 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
         tot_seconds,
         -<u128 as TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
     ));
-    traffic_chart.min_sent_bytes = get_min(&traffic_chart.sent_bytes);
+    traffic_chart.min_bytes = get_min(&traffic_chart.sent_bytes);
     runtime_data.tot_sent_bytes_prev = runtime_data.tot_sent_bytes;
     // update received bytes traffic data
     if traffic_chart.received_bytes.len() >= 30 {
@@ -33,7 +33,7 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     traffic_chart
         .received_bytes
         .push_back((tot_seconds, received_bytes_entry.try_into().unwrap()));
-    traffic_chart.max_received_bytes = get_max(&traffic_chart.received_bytes);
+    traffic_chart.max_bytes = get_max(&traffic_chart.received_bytes);
     runtime_data.tot_received_bytes_prev = runtime_data.tot_received_bytes;
 
     // update sent packets traffic data
@@ -44,7 +44,7 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
         tot_seconds,
         -<u128 as TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
     ));
-    traffic_chart.min_sent_packets = get_min(&traffic_chart.sent_packets);
+    traffic_chart.min_packets = get_min(&traffic_chart.sent_packets);
     runtime_data.tot_sent_packets_prev = runtime_data.tot_sent_packets;
     // update received packets traffic data
     if traffic_chart.received_packets.len() >= 30 {
@@ -53,7 +53,7 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     traffic_chart
         .received_packets
         .push_back((tot_seconds, received_packets_entry.try_into().unwrap()));
-    traffic_chart.max_received_packets = get_max(&traffic_chart.received_packets);
+    traffic_chart.max_packets = get_max(&traffic_chart.received_packets);
     runtime_data.tot_received_packets_prev = runtime_data.tot_received_packets;
 }
 
@@ -158,10 +158,10 @@ mod tests {
             received_bytes: received.clone(),
             sent_packets: sent.clone(),
             received_packets: received.clone(),
-            min_sent_bytes: -1000,
-            max_received_bytes: 21000,
-            min_sent_packets: -1000,
-            max_received_packets: 21000,
+            min_bytes: -1000,
+            max_bytes: 21000,
+            min_packets: -1000,
+            max_packets: 21000,
             language: Language::default(),
             chart_type: ChartType::Packets,
             style: StyleType::default(),
@@ -207,10 +207,10 @@ mod tests {
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 30);
-        assert_eq!(traffic_chart.min_sent_bytes, -1111);
-        assert_eq!(traffic_chart.min_sent_packets, -3333);
-        assert_eq!(traffic_chart.max_received_bytes, 21000);
-        assert_eq!(traffic_chart.max_received_packets, 21000);
+        assert_eq!(traffic_chart.min_bytes, -1111);
+        assert_eq!(traffic_chart.min_packets, -3333);
+        assert_eq!(traffic_chart.max_bytes, 21000);
+        assert_eq!(traffic_chart.max_packets, 21000);
         assert_eq!(traffic_chart.sent_bytes, sent_bytes);
         assert_eq!(traffic_chart.received_packets, received_packets);
         assert_eq!(traffic_chart.sent_packets, sent_packets);
@@ -244,10 +244,10 @@ mod tests {
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 32);
-        assert_eq!(traffic_chart.min_sent_bytes, -1111);
-        assert_eq!(traffic_chart.min_sent_packets, -3333);
-        assert_eq!(traffic_chart.max_received_bytes, 21000);
-        assert_eq!(traffic_chart.max_received_packets, 21000);
+        assert_eq!(traffic_chart.min_bytes, -1111);
+        assert_eq!(traffic_chart.min_packets, -3333);
+        assert_eq!(traffic_chart.max_bytes, 21000);
+        assert_eq!(traffic_chart.max_packets, 21000);
         assert_eq!(traffic_chart.sent_bytes, sent_bytes);
         assert_eq!(traffic_chart.received_packets, received_packets);
         assert_eq!(traffic_chart.sent_packets, sent_packets);

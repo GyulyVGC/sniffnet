@@ -24,9 +24,9 @@ pub fn zoom_translation(language: Language) -> &'static str {
 
 pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Database files (MMDB format)",
-        Language::IT => "File di database (formato MMDB)",
-        _ => "Database files (MMDB format)",
+        Language::EN => "Database files",
+        Language::IT => "File di database",
+        _ => "Database files",
     }
 }
 

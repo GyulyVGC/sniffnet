@@ -28,7 +28,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::{ConfigSettings, StyleType};
+use crate::{ConfigSettings, StyleType, SNIFFNET_TITLECASE};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -51,7 +51,7 @@ impl Application for Sniffer {
     }
 
     fn title(&self) -> String {
-        String::from("Sniffnet")
+        String::from(SNIFFNET_TITLECASE)
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {

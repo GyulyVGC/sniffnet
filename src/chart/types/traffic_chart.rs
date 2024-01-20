@@ -27,14 +27,14 @@ pub struct TrafficChart {
     pub sent_packets: VecDeque<(u32, i64)>,
     /// Received packets filtered and their time occurrence
     pub received_packets: VecDeque<(u32, i64)>,
-    /// Minimum number of sent bytes per time interval (computed on last 30 intervals)
-    pub min_sent_bytes: i64,
-    /// Minimum number of received bytes per time interval (computed on last 30 intervals)
-    pub max_received_bytes: i64,
-    /// Minimum number of sent packets per time interval (computed on last 30 intervals)
-    pub min_sent_packets: i64,
-    /// Minimum number of received packets per time interval (computed on last 30 intervals)
-    pub max_received_packets: i64,
+    /// Minimum number of bytes per time interval (computed on last 30 intervals)
+    pub min_bytes: i64,
+    /// Maximum number of bytes per time interval (computed on last 30 intervals)
+    pub max_bytes: i64,
+    /// Minimum number of packets per time interval (computed on last 30 intervals)
+    pub min_packets: i64,
+    /// Maximum number of packets per time interval (computed on last 30 intervals)
+    pub max_packets: i64,
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
@@ -51,10 +51,10 @@ impl TrafficChart {
             received_bytes: VecDeque::default(),
             sent_packets: VecDeque::default(),
             received_packets: VecDeque::default(),
-            min_sent_bytes: 0,
-            max_received_bytes: 0,
-            min_sent_packets: 0,
-            max_received_packets: 0,
+            min_bytes: 0,
+            max_bytes: 0,
+            min_packets: 0,
+            max_packets: 0,
             language,
             chart_type: ChartType::Bytes,
             style,
@@ -111,16 +111,16 @@ impl Chart<Message> for TrafficChart {
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
-        let y_axis_range = if self.chart_type.eq(&ChartType::Packets) {
-            let fs = self.max_received_packets - self.min_sent_packets;
+        let get_y_axis_range = |min: i64, max: i64| {
+            let fs = max - min;
             #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
             let gap = (fs as f64 * 0.1) as i64;
-            self.min_sent_packets - gap..self.max_received_packets + gap
-        } else {
-            let fs = self.max_received_bytes - self.min_sent_bytes;
-            #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-            let gap = (fs as f64 * 0.1) as i64;
-            self.min_sent_bytes - gap..self.max_received_bytes + gap
+            min - gap..max + gap
+        };
+
+        let y_axis_range = match self.chart_type {
+            ChartType::Packets => get_y_axis_range(self.min_packets, self.max_packets),
+            ChartType::Bytes => get_y_axis_range(self.min_bytes, self.max_bytes),
         };
 
         let mut chart = chart_builder
@@ -131,8 +131,8 @@ impl Chart<Message> for TrafficChart {
         chart
             .configure_mesh()
             .axis_style(buttons_color)
-            .bold_line_style(buttons_color.mix(0.67))
-            .light_line_style(buttons_color.mix(0.33))
+            .bold_line_style(buttons_color.mix(0.4))
+            .light_line_style(buttons_color.mix(0.2))
             .y_max_light_lines(1)
             .y_labels(7)
             .label_style(
