@@ -20,6 +20,7 @@ pub enum ContainerType {
     Neutral,
     Gradient(GradientType),
     Modal,
+    Highlighted,
 }
 
 impl iced::widget::container::StyleSheet for StyleType {
@@ -30,11 +31,13 @@ impl iced::widget::container::StyleSheet for StyleType {
         let ext = self.get_extension();
         Appearance {
             text_color: Some(match style {
-                ContainerType::Gradient(_) => colors.text_headers,
+                ContainerType::Gradient(_) | ContainerType::Highlighted => colors.text_headers,
                 _ => colors.text_body,
             }),
             background: Some(match style {
-                ContainerType::Gradient(GradientType::None) => Background::Color(colors.secondary),
+                ContainerType::Gradient(GradientType::None) | ContainerType::Highlighted => {
+                    Background::Color(colors.secondary)
+                }
                 ContainerType::Tooltip => Background::Color(ext.buttons_color),
                 ContainerType::BorderedRound => Background::Color(Color {
                     a: ext.alpha_round_containers,
@@ -59,14 +62,15 @@ impl iced::widget::container::StyleSheet for StyleType {
                     [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
                 }
                 ContainerType::Tooltip => 7.0.into(),
-                ContainerType::Badge => 100.0.into(),
+                ContainerType::Badge | ContainerType::Highlighted => 100.0.into(),
                 _ => 0.0.into(),
             },
             border_width: match style {
                 ContainerType::Standard
                 | ContainerType::Modal
                 | ContainerType::Neutral
-                | ContainerType::Gradient(_) => 0.0,
+                | ContainerType::Gradient(_)
+                | ContainerType::Highlighted => 0.0,
                 ContainerType::Tooltip => BORDER_WIDTH / 2.0,
                 ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,

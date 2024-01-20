@@ -22,6 +22,7 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
+use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
@@ -74,8 +75,14 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body =
-                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
+                body = body_no_observed(
+                    &sniffer.filters,
+                    observed,
+                    font,
+                    font_headers,
+                    language,
+                    &sniffer.waiting,
+                );
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -184,6 +191,7 @@ fn body_no_observed(
     filters: &Filters,
     observed: u128,
     font: Font,
+    font_headers: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'static, Message, Renderer<StyleType>> {
@@ -198,7 +206,13 @@ fn body_no_observed(
         .align_items(Alignment::Center)
         .push(vertical_space(FillPortion(1)))
         .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(filters, language, font, true))
+        .push(get_active_filters_col(
+            filters,
+            language,
+            font,
+            font_headers,
+            true,
+        ))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
@@ -427,14 +441,24 @@ fn lazy_col_info(
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
-    let font = style.get_extension().font;
+    let PaletteExtension {
+        font, font_headers, ..
+    } = style.get_extension();
 
     let col_device = col_device(language, font, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let col_bytes_packets = col_bytes_packets(language, dropped, total, filtered, font, sniffer);
+    let col_bytes_packets = col_bytes_packets(
+        language,
+        dropped,
+        total,
+        filtered,
+        font,
+        font_headers,
+        sniffer,
+    );
 
     let content = Column::new()
         .align_items(Alignment::Center)
@@ -566,6 +590,7 @@ fn col_bytes_packets(
     total: u128,
     filtered: u128,
     font: Font,
+    font_headers: Font,
     sniffer: &Sniffer,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let filtered_bytes =
@@ -594,7 +619,13 @@ fn col_bytes_packets(
 
     Column::new()
         .spacing(10)
-        .push(get_active_filters_col(filters, language, font, false))
+        .push(get_active_filters_col(
+            filters,
+            language,
+            font,
+            font_headers,
+            false,
+        ))
         .push(TextType::highlighted_subtitle_with_desc(
             filtered_bytes_translation(language),
             &bytes_value,
@@ -686,6 +717,7 @@ fn get_active_filters_col(
     filters: &Filters,
     language: Language,
     font: Font,
+    font_headers: Font,
     show: bool,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Column::new().push(
@@ -703,16 +735,12 @@ fn get_active_filters_col(
         } else {
             Row::new().padding([0, 0, 0, 20]).push(
                 Tooltip::new(
-                    button(
-                        Text::new("i")
-                            .font(font)
-                            .vertical_alignment(Vertical::Center)
-                            .horizontal_alignment(Horizontal::Center)
-                            .size(15),
-                    )
-                    .padding(2)
-                    .height(Fixed(20.0))
-                    .width(Fixed(20.0)),
+                    Container::new(Text::new("i").font(font_headers).size(15))
+                        .align_x(Horizontal::Center)
+                        .padding(2)
+                        .height(Fixed(20.0))
+                        .width(Fixed(20.0))
+                        .style(ContainerType::Highlighted),
                     filters_string,
                     Position::FollowCursor,
                 )

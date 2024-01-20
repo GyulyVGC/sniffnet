@@ -25,7 +25,6 @@ pub enum ButtonType {
     NotStarred,
     Neutral,
     Alert,
-    Badge,
     Gradient(GradientType),
 }
 
@@ -48,9 +47,7 @@ impl button::StyleSheet for StyleType {
                 ButtonType::Neutral | ButtonType::NotStarred => {
                     Background::Color(Color::TRANSPARENT)
                 }
-                ButtonType::Gradient(GradientType::None) | ButtonType::Badge => {
-                    Background::Color(colors.secondary)
-                }
+                ButtonType::Gradient(GradientType::None) => Background::Color(colors.secondary),
                 ButtonType::Gradient(gradient_type) => Background::Gradient(get_gradient_buttons(
                     &colors,
                     *gradient_type,
@@ -71,8 +68,7 @@ impl button::StyleSheet for StyleType {
                 | ButtonType::TabInactive
                 | ButtonType::Starred
                 | ButtonType::NotStarred
-                | ButtonType::Neutral
-                | ButtonType::Badge => 0.0,
+                | ButtonType::Neutral => 0.0,
                 ButtonType::BorderedRound => BORDER_WIDTH * 2.0,
                 _ => BORDER_WIDTH,
             },
@@ -82,7 +78,7 @@ impl button::StyleSheet for StyleType {
             },
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
-                ButtonType::Badge | ButtonType::Gradient(_) => colors.text_headers,
+                ButtonType::Gradient(_) => colors.text_headers,
                 _ => colors.text_body,
             },
             border_color: match style {

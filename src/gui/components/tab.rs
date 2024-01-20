@@ -1,10 +1,12 @@
 //! Tab buttons to be used in the various pages just under the header
 
-use iced::widget::{button, horizontal_space, Button, Row, Text};
+use iced::alignment::Vertical;
+use iced::widget::{button, horizontal_space, Button, Container, Row, Text};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
@@ -98,16 +100,12 @@ fn new_page_tab(
 
     if let Some(num) = unread {
         if num > 0 {
-            let notifications_badge = button(
-                Text::new(num.to_string())
-                    .font(font_headers)
-                    .size(14)
-                    .horizontal_alignment(alignment::Horizontal::Center)
-                    .vertical_alignment(alignment::Vertical::Center),
-            )
-            .padding([2, 4, 0, 4])
-            .height(Length::Fixed(20.0))
-            .style(ButtonType::Badge);
+            let notifications_badge =
+                Container::new(Text::new(num.to_string()).font(font_headers).size(14))
+                    .align_y(Vertical::Center)
+                    .padding([2, 4])
+                    .height(Length::Fixed(20.0))
+                    .style(ContainerType::Highlighted);
             content = content
                 .push(horizontal_space(Length::Fixed(7.0)))
                 .push(notifications_badge);
