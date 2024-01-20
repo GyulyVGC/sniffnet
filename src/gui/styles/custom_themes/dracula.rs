@@ -26,7 +26,7 @@ pub static DRACULA_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xf8f8f2),
     secondary: color!(0x9f1670),
     outgoing: color!(0x005d6f),
-    starred: color!(0xffb86c, 0.8),
+    starred: color!(0xffb86c),
     text_headers: color!(0xf8f8f2),
     text_body: color!(0x282a36),
 });

@@ -27,7 +27,7 @@ pub static GRUVBOX_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xfbf1c7),      // bg
     secondary: color!(0xd65d0e),    // orange
     outgoing: color!(0x689d6a),     // aqua
-    starred: color!(0xd79921, 0.8), // yellow
+    starred: color!(0xd79921, 0.9), // yellow
     text_headers: color!(0xf9f5d7), // bg0_h
     text_body: color!(0x282828),    // fg
 });

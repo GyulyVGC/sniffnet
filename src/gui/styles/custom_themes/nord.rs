@@ -24,7 +24,7 @@ pub static NORD_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xeceff4),      // nord6
     secondary: color!(0x05e81ac),   // nord10
     outgoing: color!(0xb48ead),     // nord15
-    starred: color!(0xebcb8b),      // nord13
+    starred: color!(0xD08770, 0.8), // nord12
     text_headers: color!(0xeceff4), // nord6
     text_body: color!(0x2e3440),    // nord0
 });
