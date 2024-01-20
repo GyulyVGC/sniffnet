@@ -162,7 +162,7 @@ fn language_picklist(
                 Some(language),
                 Message::LanguageSelection,
             )
-            .padding([3, 7])
+            .padding([2, 7])
             .font(font),
         );
 

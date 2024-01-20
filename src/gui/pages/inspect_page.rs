@@ -68,7 +68,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             }
         },
     )
-    .padding([3, 7])
+    .padding([2, 7])
     .font(font);
 
     let report = lazy(

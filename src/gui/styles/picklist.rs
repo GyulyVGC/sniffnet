@@ -47,11 +47,8 @@ impl pick_list::StyleSheet for StyleType {
             handle_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
             border_radius: PICKLIST_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: Color {
-                a: ext.alpha_round_borders,
-                ..ext.buttons_color
-            },
+            border_width: 0.0,
+            border_color: Color::TRANSPARENT,
         }
     }
 
