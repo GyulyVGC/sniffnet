@@ -193,8 +193,8 @@ impl Chart<Message> for TrafficChart {
         chart
             .configure_series_labels()
             .position(SeriesLabelPosition::UpperRight)
-            .background_style(BLACK.mix(0.3))
-            .border_style(BLACK.mix(0.6))
+            .background_style(buttons_color.mix(0.6))
+            .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
             .label_font(
                 ("Sarasa Mono SC", 13.5)
                     .into_font()
