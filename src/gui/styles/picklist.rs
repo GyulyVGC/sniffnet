@@ -2,6 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::pick_list;
 use iced::{Background, Color};
 
@@ -14,6 +15,8 @@ pub enum PicklistType {
     Standard,
 }
 
+const PICKLIST_BORDER_RADIUS: f32 = 8.0;
+
 impl iced::overlay::menu::StyleSheet for StyleType {
     type Style = PicklistType;
 
@@ -23,8 +26,8 @@ impl iced::overlay::menu::StyleSheet for StyleType {
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border_width: 1.0,
-            border_radius: 0.0.into(),
+            border_width: BORDER_WIDTH,
+            border_radius: PICKLIST_BORDER_RADIUS.into(),
             border_color: colors.secondary,
             selected_text_color: colors.text_body,
             selected_background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
@@ -43,8 +46,8 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border_radius: 0.0.into(),
-            border_width: 1.0,
+            border_radius: PICKLIST_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: Color {
                 a: ext.alpha_round_borders,
                 ..ext.buttons_color
@@ -60,8 +63,8 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
-            border_radius: 0.0.into(),
-            border_width: 1.0,
+            border_radius: PICKLIST_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: colors.secondary,
         }
     }

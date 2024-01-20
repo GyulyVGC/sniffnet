@@ -2,6 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
@@ -14,6 +15,8 @@ pub enum TextInputType {
     Badge,
     Error,
 }
+
+const TEXT_INPUT_BORDER_RADIUS: f32 = 5.0;
 
 impl iced::widget::text_input::StyleSheet for StyleType {
     type Style = TextInputType;
@@ -29,8 +32,8 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border_radius: 0.0.into(),
-            border_width: 1.5,
+            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 TextInputType::Standard => ext.buttons_color,
@@ -44,8 +47,8 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let colors = self.get_palette();
         Appearance {
             background: Background::Color(colors.primary),
-            border_radius: 0.0.into(),
-            border_width: 1.5,
+            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: match style {
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                 _ => colors.secondary,
@@ -93,8 +96,8 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => ext.buttons_color,
             }),
-            border_radius: 0.0.into(),
-            border_width: 1.5,
+            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: match style {
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                 _ => colors.secondary,
@@ -114,8 +117,8 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border_radius: 0.0.into(),
-            border_width: 1.5,
+            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
+            border_width: BORDER_WIDTH,
             border_color: match style {
                 TextInputType::Badge => Color::TRANSPARENT,
                 TextInputType::Standard => Color {

@@ -31,10 +31,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
             background: Some(Background::Color(Color::TRANSPARENT)),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
-            border_color: Color {
-                a: ext.alpha_round_borders,
-                ..ext.buttons_color
-            },
+            border_color: Color::TRANSPARENT,
             scroller: Scroller {
                 color: Color {
                     a: ext.alpha_round_borders,
@@ -57,10 +54,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
             })),
             border_radius: BORDER_ROUNDED_RADIUS.into(),
             border_width: 0.0,
-            border_color: Color {
-                a: ext.alpha_round_borders,
-                ..ext.buttons_color
-            },
+            border_color: Color::TRANSPARENT,
             scroller: Scroller {
                 color: if is_mouse_over_scrollbar {
                     colors.secondary
