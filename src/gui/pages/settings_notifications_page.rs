@@ -132,7 +132,7 @@ fn get_packets_notify(
     .size(18)
     .font(font);
 
-    let mut ret_val = Column::new().spacing(5).push(checkbox);
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
 
     if packets_notification.threshold.is_none() {
         Column::new().padding(5).push(
@@ -153,10 +153,7 @@ fn get_packets_notify(
                 font,
                 language,
             ));
-        ret_val = ret_val
-            .push(vertical_space(Fixed(5.0)))
-            .push(input_row)
-            .push(sound_row);
+        ret_val = ret_val.push(input_row).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
@@ -197,7 +194,7 @@ fn get_bytes_notify(
     .size(18)
     .font(font);
 
-    let mut ret_val = Column::new().spacing(5).push(checkbox);
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
 
     if bytes_notification.threshold.is_none() {
         Column::new().padding(5).push(
@@ -218,10 +215,7 @@ fn get_bytes_notify(
                 font,
                 language,
             ));
-        ret_val = ret_val
-            .push(vertical_space(Fixed(5.0)))
-            .push(input_row)
-            .push(sound_row);
+        ret_val = ret_val.push(input_row).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
@@ -253,7 +247,7 @@ fn get_favorite_notify(
     .size(18)
     .font(font);
 
-    let mut ret_val = Column::new().spacing(5).push(checkbox);
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
         let sound_row = Row::new()
@@ -263,7 +257,7 @@ fn get_favorite_notify(
                 font,
                 language,
             ));
-        ret_val = ret_val.push(vertical_space(Fixed(5.0))).push(sound_row);
+        ret_val = ret_val.push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
@@ -401,7 +395,7 @@ fn volume_slider(
     .align_y(Vertical::Center)
 }
 
-pub fn sound_buttons(
+fn sound_buttons(
     notification: Notification,
     font: Font,
     language: Language,
@@ -430,8 +424,9 @@ pub fn sound_buttons(
         };
         ret_val = ret_val.push(
             Button::new(option.get_text(font))
-                .width(Length::Fixed(90.0))
-                .height(Length::Fixed(30.0))
+                .padding(0)
+                .width(Length::Fixed(80.0))
+                .height(Length::Fixed(25.0))
                 .style(if is_active {
                     ButtonType::BorderedRoundSelected
                 } else {

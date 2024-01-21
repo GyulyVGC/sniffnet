@@ -1,6 +1,7 @@
 use std::fmt;
 use std::thread;
 
+use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
 use iced::{Font, Length, Renderer};
@@ -52,6 +53,7 @@ impl Sound {
             Sound::Swhoosh => Text::new("Swhoosh").font(font),
             Sound::None => Icon::Forbidden.to_text(),
         }
+        .size(FONT_SIZE_FOOTER)
         .width(Length::Fill)
         .horizontal_alignment(Horizontal::Center)
         .vertical_alignment(Vertical::Center)
