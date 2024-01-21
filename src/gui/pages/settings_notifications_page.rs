@@ -142,17 +142,8 @@ fn get_packets_notify(
                 .style(ContainerType::BorderedRound),
         )
     } else {
-        let input_row = Row::new()
-            .push(horizontal_space(Fixed(50.0)))
-            .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
-            .push(input_group_packets(packets_notification, font, language));
-        let sound_row = Row::new()
-            .push(horizontal_space(Fixed(50.0)))
-            .push(sound_buttons(
-                Notification::Packets(packets_notification),
-                font,
-                language,
-            ));
+        let input_row = input_group_packets(packets_notification, font, language);
+        let sound_row = sound_buttons(Notification::Packets(packets_notification), font, language);
         ret_val = ret_val.push(input_row).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
@@ -204,17 +195,8 @@ fn get_bytes_notify(
                 .style(ContainerType::BorderedRound),
         )
     } else {
-        let input_row = Row::new()
-            .push(horizontal_space(Fixed(50.0)))
-            .push(Text::new(format!("{}: ", threshold_translation(language))).font(font))
-            .push(input_group_bytes(bytes_notification, font, language));
-        let sound_row = Row::new()
-            .push(horizontal_space(Fixed(50.0)))
-            .push(sound_buttons(
-                Notification::Bytes(bytes_notification),
-                font,
-                language,
-            ));
+        let input_row = input_group_bytes(bytes_notification, font, language);
+        let sound_row = sound_buttons(Notification::Bytes(bytes_notification), font, language);
         ret_val = ret_val.push(input_row).push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
@@ -250,13 +232,11 @@ fn get_favorite_notify(
     let mut ret_val = Column::new().spacing(10).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
-        let sound_row = Row::new()
-            .push(horizontal_space(Fixed(50.0)))
-            .push(sound_buttons(
-                Notification::Favorite(favorite_notification),
-                font,
-                language,
-            ));
+        let sound_row = sound_buttons(
+            Notification::Favorite(favorite_notification),
+            font,
+            language,
+        );
         ret_val = ret_val.push(sound_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
@@ -281,7 +261,10 @@ fn input_group_packets(
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
-        .spacing(10)
+        .align_items(Alignment::Center)
+        .spacing(5)
+        .push(horizontal_space(Fixed(45.0)))
+        .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
                 "0",
@@ -299,7 +282,7 @@ fn input_group_packets(
                     false,
                 )
             })
-            .padding([0, 0, 0, 10])
+            .padding([3, 5])
             .font(font)
             .width(Length::Fixed(100.0)),
         )
@@ -319,14 +302,20 @@ fn input_group_bytes(
     font: Font,
     language: Language,
 ) -> Container<'static, Message, Renderer<StyleType>> {
-    let mut info_str = per_second_translation(language).to_string();
-    info_str.push_str(specify_multiples_translation(language));
+    let info_str = format!(
+        "{}; {}",
+        per_second_translation(language),
+        specify_multiples_translation(language)
+    );
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
         / bytes_notification.byte_multiple.get_multiplier())
     .to_string();
     curr_threshold_str.push_str(bytes_notification.byte_multiple.get_char());
     let input_row = Row::new()
-        .spacing(10)
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(horizontal_space(Fixed(45.0)))
+        .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
                 "0",
@@ -340,7 +329,7 @@ fn input_group_bytes(
                 let bytes_notification = BytesNotification::from(&value, Some(bytes_notification));
                 Message::UpdateNotificationSettings(Notification::Bytes(bytes_notification), false)
             })
-            .padding([0, 0, 0, 10])
+            .padding([3, 5])
             .font(font)
             .width(Length::Fixed(100.0)),
         )
@@ -409,6 +398,7 @@ fn sound_buttons(
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
         .spacing(5)
+        .push(horizontal_space(Fixed(45.0)))
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
 
     for option in Sound::ALL {

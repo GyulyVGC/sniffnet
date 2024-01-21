@@ -200,7 +200,7 @@ fn col_address_input(
     };
     let input_row = Row::new().padding([0, 0, 0, 5]).push(
         TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
-            .padding([2, 5])
+            .padding([3, 5])
             .on_input(Message::AddressFilter)
             .font(font)
             .width(Length::Fixed(310.0))
@@ -235,7 +235,7 @@ fn col_port_input(
     };
     let input_row = Row::new().padding([0, 0, 0, 5]).push(
         TextInput::new(PortCollection::PLACEHOLDER_STR, value)
-            .padding([2, 5])
+            .padding([3, 5])
             .on_input(Message::PortFilter)
             .font(font)
             .width(Length::Fixed(180.0))

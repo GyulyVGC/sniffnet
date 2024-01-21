@@ -216,7 +216,6 @@ fn filters_col(
     }
 
     Column::new()
-        .spacing(3)
         .push(title_row)
         .push(vertical_space(Length::Fixed(10.0)))
         .push(
@@ -355,7 +354,7 @@ fn filter_input(
                 },
             })
         })
-        .padding([0, 5])
+        .padding([3, 5])
         .font(font)
         .width(Length::Fixed(width))
         .style(if is_filter_active {
@@ -366,6 +365,7 @@ fn filter_input(
 
     let mut content = Row::new()
         .spacing(5)
+        .align_items(Alignment::Center)
         .push(Text::new(format!("{caption}:")).font(font))
         .push(input);
 
