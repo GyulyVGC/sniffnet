@@ -1,6 +1,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, vertical_space, Rule};
+use iced::widget::tooltip::Position;
+use iced::widget::{button, horizontal_space, vertical_space, Rule, Tooltip};
 use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput,
 };
@@ -15,9 +16,12 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
+use crate::report::types::report_col::ReportCol;
 use crate::translations::translations::{address_translation, application_protocol_translation};
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
@@ -121,27 +125,18 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     let mut col_report = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Center);
+        .align_items(Alignment::Start);
 
-    let mut scroll_report = Column::new();
+    let mut scroll_report = Column::new().align_items(Alignment::Start);
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
-        let entry_text_type = if report_entry.val.traffic_direction == TrafficDirection::Outgoing {
-            TextType::Outgoing
-        } else {
-            TextType::Incoming
-        };
-        let entry_row = Row::new()
-            .align_items(Alignment::Center)
-            .push(
-                Text::new(format!("  {}{}  ", report_entry.key, report_entry.val))
-                    .style(entry_text_type)
-                    .font(font),
-            )
-            .push(report_entry.tooltip)
-            .push(Text::new("  "));
-
+        let mut entry_row = row_report_entry(&report_entry.key, &report_entry.val, font);
+        entry_row = entry_row.push(
+            Container::new(report_entry.tooltip)
+                .width(Length::Fixed(ReportCol::Country.get_width()))
+                .align_x(Horizontal::Center),
+        );
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)
@@ -153,7 +148,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     }
     if results_number > 0 {
         col_report = col_report
-            .push(Text::new("      Src IP address       Src port      Dst IP address       Dst port  Layer4   Layer7     Packets     Bytes   Country").vertical_alignment(Vertical::Center).height(Length::FillPortion(2)).font(font))
+            .push(report_header_row(language, font))
             .push(Rule::horizontal(5))
             .push(
                 Scrollable::new(scroll_report)
@@ -162,11 +157,9 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
                     .direction(Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
-                    })
+                    }),
             )
-            .push(
-                Rule::horizontal(5)
-            )
+            .push(Rule::horizontal(5))
             .push(get_change_page_row(
                 font,
                 language,
@@ -196,6 +189,100 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         .padding([10, 7, 7, 7])
         .width(Length::Fixed(1042.0))
         .style(ContainerType::BorderedRound)
+}
+
+fn report_header_row(language: Language, font: Font) -> Row<'static, Message, Renderer<StyleType>> {
+    let mut ret_val = Row::new().align_items(Alignment::Center);
+    for report_col in ReportCol::ALL {
+        let max_chars = report_col.get_max_chars() as usize;
+        let full_title = report_col.get_title(language);
+        let chars = full_title.chars().collect::<Vec<char>>();
+        let title_tooltip = if chars.len() <= max_chars {
+            Tooltip::new(
+                Text::new(full_title)
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .font(font),
+                "",
+                Position::FollowCursor,
+            )
+            .style(ContainerType::Neutral)
+        } else {
+            let reduced_title = &chars[..max_chars - 3].iter().collect::<String>();
+            Tooltip::new(
+                Text::new([reduced_title.trim(), "..."].concat())
+                    .vertical_alignment(Vertical::Center)
+                    .horizontal_alignment(Horizontal::Center)
+                    .font(font),
+                full_title,
+                Position::FollowCursor,
+            )
+            .style(ContainerType::Tooltip)
+        };
+        ret_val = ret_val.push(
+            Column::new()
+                .align_items(Alignment::Center)
+                .width(Length::Fixed(report_col.get_width()))
+                .height(Length::Fixed(40.0))
+                .push(title_tooltip),
+        );
+    }
+    ret_val
+}
+
+fn row_report_entry(
+    key: &AddressPortPair,
+    val: &InfoAddressPortPair,
+    font: Font,
+) -> Row<'static, Message, Renderer<StyleType>> {
+    let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
+        TextType::Outgoing
+    } else {
+        TextType::Incoming
+    };
+
+    let mut ret_val = Row::new().align_items(Alignment::Center);
+
+    for report_col in ReportCol::ALL.iter().filter(|e| e.ne(&&ReportCol::Country)) {
+        let max_chars = report_col.get_max_chars() as usize;
+        let col_value = match report_col {
+            ReportCol::SrcIp => key.address1.clone(),
+            ReportCol::SrcPort => {
+                if let Some(port) = key.port1 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            ReportCol::DstIp => key.address2.clone(),
+            ReportCol::DstPort => {
+                if let Some(port) = key.port2 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            ReportCol::Proto => key.protocol.to_string(),
+            ReportCol::AppProto => val.app_protocol.to_string(),
+            ReportCol::Bytes => val.transmitted_bytes.to_string(),
+            ReportCol::Packets => val.transmitted_packets.to_string(),
+            ReportCol::Country => String::new(),
+        };
+        ret_val = ret_val.push(
+            Container::new(
+                Text::new(if col_value.len() <= max_chars {
+                    col_value
+                } else {
+                    [&col_value[..max_chars - 3], "..."].concat()
+                })
+                .font(font)
+                .style(text_type),
+            )
+            .align_x(Horizontal::Center)
+            .width(Length::Fixed(report_col.get_width())),
+        );
+    }
+    ret_val
 }
 
 fn filters_col(
