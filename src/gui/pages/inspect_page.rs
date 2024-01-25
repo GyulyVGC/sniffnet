@@ -3,11 +3,10 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Tooltip};
-use iced::widget::{
-    lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput,
-};
+use iced::widget::{lazy, Button, Checkbox, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
+use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
@@ -25,7 +24,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::translations::translations_2::{
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
-    showing_results_translation, sort_by_translation,
+    showing_results_translation,
 };
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
@@ -56,24 +55,6 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let sort_active_str = sniffer.report_sort_type.get_picklist_label(language);
-    let sort_list_str: Vec<&str> = ReportSortType::all_strings(language);
-    let picklist_sort = PickList::new(
-        sort_list_str.clone(),
-        Some(sort_active_str),
-        move |selected_str| {
-            if selected_str == *sort_list_str.first().unwrap_or(&"") {
-                Message::ReportSortSelection(ReportSortType::MostRecent)
-            } else if selected_str == *sort_list_str.get(1).unwrap_or(&"") {
-                Message::ReportSortSelection(ReportSortType::MostBytes)
-            } else {
-                Message::ReportSortSelection(ReportSortType::MostPackets)
-            }
-        },
-    )
-    .padding([2, 7])
-    .font(font);
-
     let report = lazy(
         (
             sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
@@ -88,25 +69,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     body = body
         .push(
-            Container::new(
-                Row::new()
-                    .push(filters_col(&sniffer.search, font, language))
-                    .push(Rule::vertical(25))
-                    .push(
-                        Column::new()
-                            .spacing(10)
-                            .push(
-                                Text::new(sort_by_translation(language))
-                                    .font(font)
-                                    .style(TextType::Title)
-                                    .size(FONT_SIZE_TITLE),
-                            )
-                            .push(picklist_sort),
-                    ),
-            )
-            .height(Length::Fixed(165.0))
-            .padding(10)
-            .style(ContainerType::BorderedRound),
+            Container::new(Row::new().push(filters_col(&sniffer.search, font, language)))
+                .height(Length::Fixed(165.0))
+                .padding(10)
+                .style(ContainerType::BorderedRound),
         )
         .push(report);
 
@@ -125,7 +91,12 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         .height(Length::Fill)
         .width(Length::Fill)
         .align_items(Alignment::Start)
-        .push(report_header_row(language, sniffer.search.clone(), font))
+        .push(report_header_row(
+            language,
+            sniffer.search.clone(),
+            font,
+            sniffer.report_sort_type,
+        ))
         .push(Rule::horizontal(5));
 
     let mut scroll_report = Column::new().align_items(Alignment::Start);
@@ -194,6 +165,7 @@ fn report_header_row(
     language: Language,
     search_params: SearchParameters,
     font: Font,
+    sort_type: ReportSortType,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
@@ -209,6 +181,7 @@ fn report_header_row(
                 "",
                 Position::FollowCursor,
             )
+            .font(font)
             .style(ContainerType::Neutral)
         } else {
             let reduced_title = &chars[..max_chars - 3].iter().collect::<String>();
@@ -220,6 +193,7 @@ fn report_header_row(
                 full_title,
                 Position::FollowCursor,
             )
+            .font(font)
             .style(ContainerType::Tooltip)
         };
         let mut col_header = Column::new()
@@ -234,10 +208,35 @@ fn report_header_row(
                 search_params.clone(),
                 font,
             ));
+        } else {
+            col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
         ret_val = ret_val.push(col_header);
     }
     ret_val
+}
+
+fn sort_arrows(
+    active_sort_type: ReportSortType,
+    report_col: &ReportCol,
+) -> Container<'static, Message, Renderer<StyleType>> {
+    Container::new(
+        button(
+            active_sort_type
+                .icon(report_col)
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        )
+        .padding(0)
+        .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
+        .width(Length::Fixed(FLAGS_WIDTH_BIG))
+        .style(active_sort_type.button_type(report_col))
+        .on_press(Message::ReportSortSelection(
+            active_sort_type.next_sort(report_col),
+        )),
+    )
+    .align_y(Vertical::Center)
+    .height(Length::Fill)
 }
 
 fn row_report_entry(
@@ -397,9 +396,9 @@ fn filter_input(
     }
 
     let mut content = Row::new()
+        .height(Length::Fill)
         .spacing(5)
         .align_items(Alignment::Center)
-        // .push(Text::new(format!("{caption}:")).font(font))
         .push(input);
 
     if is_filter_active {

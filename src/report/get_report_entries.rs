@@ -10,6 +10,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::report_entry::ReportEntry;
+use crate::report::types::report_sort_type::{ByteSort, PacketSort};
 use crate::{AppProtocol, ChartType, ConfigSettings, InfoTraffic, ReportSortType, Sniffer};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
@@ -129,9 +130,23 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
         })
         .collect();
     all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
-        ReportSortType::MostRecent => b.final_timestamp.cmp(&a.final_timestamp),
-        ReportSortType::MostBytes => b.transmitted_bytes.cmp(&a.transmitted_bytes),
-        ReportSortType::MostPackets => b.transmitted_packets.cmp(&a.transmitted_packets),
+        ReportSortType {
+            byte_sort,
+            packet_sort: PacketSort::Neutral,
+        } => match byte_sort {
+            ByteSort::Ascending => a.transmitted_bytes.cmp(&b.transmitted_bytes),
+            ByteSort::Descending => b.transmitted_bytes.cmp(&a.transmitted_bytes),
+            ByteSort::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+        },
+        ReportSortType {
+            byte_sort: ByteSort::Neutral,
+            packet_sort,
+        } => match packet_sort {
+            PacketSort::Ascending => a.transmitted_packets.cmp(&b.transmitted_packets),
+            PacketSort::Descending => b.transmitted_packets.cmp(&a.transmitted_packets),
+            PacketSort::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+        },
+        _ => b.final_timestamp.cmp(&a.final_timestamp),
     });
 
     let upper_bound = min(sniffer.page_number * 20, all_results.len());

@@ -112,7 +112,7 @@ impl Sniffer {
             pcap_error: None,
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(style, language),
-            report_sort_type: ReportSortType::MostRecent,
+            report_sort_type: ReportSortType::default(),
             modal: None,
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
@@ -406,7 +406,7 @@ impl Sniffer {
         self.running_page = RunningPage::Init;
         *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous captures
         self.pcap_error = None;
-        self.report_sort_type = ReportSortType::MostRecent;
+        self.report_sort_type = ReportSortType::default();
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;

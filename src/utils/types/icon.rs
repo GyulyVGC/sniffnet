@@ -35,6 +35,9 @@ pub enum Icon {
     Rocket,
     Settings,
     Sniffnet,
+    SortAscending,
+    SortDescending,
+    SortNeutral,
     Star,
     Warning,
     Waves,
@@ -76,6 +79,9 @@ impl Icon {
             Icon::Warning => 'T',
             Icon::Waves => 'y',
             Icon::Copy => 'u',
+            Icon::SortAscending => 'm',
+            Icon::SortDescending => 'l',
+            Icon::SortNeutral => 'n',
         }
     }
 

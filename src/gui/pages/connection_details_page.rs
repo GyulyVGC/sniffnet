@@ -29,7 +29,6 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
     address_translation, application_protocol_translation, incoming_translation,
     outgoing_translation, packets_translation, protocol_translation,
-    transport_protocol_translation,
 };
 use crate::translations::translations_2::{
     administrative_entity_translation, connection_details_translation, destination_translation,
@@ -189,11 +188,6 @@ fn col_info(
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
-    let protocol_caption = if is_icmp {
-        protocol_translation(language)
-    } else {
-        transport_protocol_translation(language)
-    };
 
     let mut ret_val = Column::new()
         .spacing(10)
@@ -211,7 +205,7 @@ fn col_info(
             ),
         )
         .push(TextType::highlighted_subtitle_with_desc(
-            protocol_caption,
+            protocol_translation(language),
             &key.protocol.to_string(),
             font,
         ));
