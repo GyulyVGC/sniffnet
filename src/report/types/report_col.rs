@@ -1,3 +1,4 @@
+use crate::networking::types::search_parameters::FilterInputType;
 use crate::translations::translations::{
     address_translation, application_protocol_translation, bytes_translation, packets_translation,
     protocol_translation,
@@ -111,6 +112,19 @@ impl ReportCol {
             ReportCol::Bytes => BYTE_REPORT_MAX_CHARS,
             ReportCol::Packets => PACKET_REPORT_MAX_CHARS,
             ReportCol::Country => COUNTRY_REPORT_MAX_CHARS,
+        }
+    }
+
+    pub(crate) fn get_filter_input_type(&self) -> FilterInputType {
+        match self {
+            ReportCol::SrcIp => FilterInputType::AddressSrc,
+            ReportCol::DstIp => FilterInputType::AddressDst,
+            ReportCol::SrcPort => FilterInputType::PortSrc,
+            ReportCol::DstPort => FilterInputType::PortDst,
+            ReportCol::Proto => FilterInputType::Proto,
+            ReportCol::AppProto => FilterInputType::AppProto,
+            ReportCol::Country => FilterInputType::Country,
+            ReportCol::Bytes | ReportCol::Packets => panic!(),
         }
     }
 }

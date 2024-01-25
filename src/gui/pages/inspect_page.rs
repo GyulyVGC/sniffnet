@@ -1,7 +1,8 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, vertical_space, Rule, Tooltip};
+use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Tooltip};
 use iced::widget::{
     lazy, Button, Checkbox, Column, Container, PickList, Row, Scrollable, Text, TextInput,
 };
@@ -12,7 +13,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, ICONS};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -22,9 +23,7 @@ use crate::networking::types::search_parameters::{FilterInputType, SearchParamet
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
-use crate::translations::translations::{address_translation, application_protocol_translation};
 use crate::translations::translations_2::{
-    administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
     showing_results_translation, sort_by_translation,
 };
@@ -125,7 +124,9 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     let mut col_report = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Start);
+        .align_items(Alignment::Start)
+        .push(report_header_row(language, sniffer.search.clone(), font))
+        .push(Rule::horizontal(5));
 
     let mut scroll_report = Column::new().align_items(Alignment::Start);
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
@@ -148,8 +149,6 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     }
     if results_number > 0 {
         col_report = col_report
-            .push(report_header_row(language, font))
-            .push(Rule::horizontal(5))
             .push(
                 Scrollable::new(scroll_report)
                     .height(Length::FillPortion(15))
@@ -191,7 +190,11 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         .style(ContainerType::BorderedRound)
 }
 
-fn report_header_row(language: Language, font: Font) -> Row<'static, Message, Renderer<StyleType>> {
+fn report_header_row(
+    language: Language,
+    search_params: SearchParameters,
+    font: Font,
+) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars() as usize;
@@ -219,13 +222,20 @@ fn report_header_row(language: Language, font: Font) -> Row<'static, Message, Re
             )
             .style(ContainerType::Tooltip)
         };
-        ret_val = ret_val.push(
-            Column::new()
-                .align_items(Alignment::Center)
-                .width(Length::Fixed(report_col.get_width()))
-                .height(Length::Fixed(40.0))
-                .push(title_tooltip),
-        );
+        let mut col_header = Column::new()
+            .align_items(Alignment::Center)
+            .width(Length::Fixed(report_col.get_width()))
+            .height(Length::Fixed(60.0))
+            .push(title_tooltip);
+        if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
+            col_header = col_header.push(filter_input(
+                report_col.get_filter_input_type(),
+                report_col.get_width(),
+                search_params.clone(),
+                font,
+            ));
+        }
+        ret_val = ret_val.push(col_header);
     }
     ret_val
 }
@@ -333,46 +343,13 @@ fn filters_col(
                 .align_items(Alignment::Center)
                 .spacing(10)
                 .push(filter_input(
-                    FilterInputType::Address,
-                    &search_params.address,
-                    address_translation(language),
-                    120.0,
-                    search_params.clone(),
-                    font,
-                ))
-                .push(filter_input(
-                    FilterInputType::App,
-                    &search_params.app,
-                    application_protocol_translation(language),
-                    60.0,
-                    search_params.clone(),
-                    font,
-                ))
-                .push(filter_input(
-                    FilterInputType::Country,
-                    &search_params.country,
-                    country_translation(language),
-                    30.0,
-                    search_params.clone(),
-                    font,
-                )),
-        )
-        .push(
-            Row::new()
-                .align_items(Alignment::Center)
-                .spacing(10)
-                .push(filter_input(
                     FilterInputType::Domain,
-                    &search_params.domain,
-                    domain_name_translation(language),
                     120.0,
                     search_params.clone(),
                     font,
                 ))
                 .push(filter_input(
-                    FilterInputType::AS,
-                    &search_params.as_name.clone(),
-                    administrative_entity_translation(language),
+                    FilterInputType::AsName,
                     120.0,
                     search_params.clone(),
                     font,
@@ -382,78 +359,47 @@ fn filters_col(
 
 fn filter_input(
     filter_input_type: FilterInputType,
-    filter_value: &str,
-    caption: &str,
     width: f32,
     search_params: SearchParameters,
     font: Font,
 ) -> Container<'static, Message, Renderer<StyleType>> {
+    let filter_value = filter_input_type.current_value(&search_params);
     let is_filter_active = !filter_value.is_empty();
 
-    let button_clear = button_clear_filter(
-        match filter_input_type {
-            FilterInputType::App => SearchParameters {
-                app: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Domain => SearchParameters {
-                domain: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Country => SearchParameters {
-                country: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::AS => SearchParameters {
-                as_name: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Address => SearchParameters {
-                address: String::new(),
-                ..search_params.clone()
-            },
-        },
-        font,
-    );
+    let button_clear = button_clear_filter(filter_input_type.clear_search(&search_params), font);
 
-    let input = TextInput::new("-", filter_value)
+    let mut input = TextInput::new("", filter_value)
         .on_input(move |new_value| {
-            Message::Search(match filter_input_type {
-                FilterInputType::App => SearchParameters {
-                    app: new_value.trim().to_string(),
-                    ..search_params.clone()
-                },
-                FilterInputType::Domain => SearchParameters {
-                    domain: new_value.trim().to_string(),
-                    ..search_params.clone()
-                },
-                FilterInputType::Country => SearchParameters {
-                    country: new_value.trim().to_string(),
-                    ..search_params.clone()
-                },
-                FilterInputType::AS => SearchParameters {
-                    as_name: new_value.trim().to_string(),
-                    ..search_params.clone()
-                },
-                FilterInputType::Address => SearchParameters {
-                    address: new_value.trim().to_string(),
-                    ..search_params.clone()
-                },
-            })
+            Message::Search(filter_input_type.new_search(&search_params, new_value))
         })
         .padding([3, 5])
+        .size(FONT_SIZE_FOOTER)
         .font(font)
-        .width(Length::Fixed(width))
+        .width(Length::Fixed(if is_filter_active {
+            width - 45.0
+        } else {
+            width
+        }))
         .style(if is_filter_active {
             TextInputType::Badge
         } else {
             TextInputType::Standard
         });
 
+    if !is_filter_active {
+        input = input.icon(text_input::Icon {
+            font: ICONS,
+            code_point: Icon::Funnel.codepoint(),
+            size: Some(12.0),
+            spacing: 2.0,
+            side: Side::Left,
+        });
+    }
+
     let mut content = Row::new()
         .spacing(5)
         .align_items(Alignment::Center)
-        .push(Text::new(format!("{caption}:")).font(font))
+        // .push(Text::new(format!("{caption}:")).font(font))
         .push(input);
 
     if is_filter_active {
@@ -461,7 +407,11 @@ fn filter_input(
     }
 
     Container::new(content)
-        .padding(5)
+        .padding(if is_filter_active {
+            [5, 5, 5, 10]
+        } else {
+            [5, 3, 5, 3]
+        })
         .style(if is_filter_active {
             ContainerType::Badge
         } else {

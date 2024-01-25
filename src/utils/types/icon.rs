@@ -41,43 +41,46 @@ pub enum Icon {
 }
 
 impl Icon {
+    pub fn codepoint(&self) -> char {
+        match self {
+            Icon::ArrowBack => 'C',
+            Icon::ArrowLeft => 'i',
+            Icon::ArrowRight => 'j',
+            Icon::ArrowsDown => ':',
+            Icon::AudioHigh => 'Z',
+            Icon::AudioMute => 'Y',
+            Icon::Bin => 'h',
+            Icon::BytesThreshold => 'f',
+            Icon::Clock => '9',
+            Icon::Dots => 'R',
+            Icon::Error => 'U',
+            Icon::File => '8',
+            Icon::Forbidden => 'x',
+            Icon::Funnel => 'V',
+            Icon::GitHub => 'H',
+            Icon::Globe => 'c',
+            Icon::HalfSun => 'K',
+            Icon::Hourglass1 => '1',
+            Icon::Hourglass2 => '2',
+            Icon::Hourglass3 => '3',
+            Icon::Inspect => '5',
+            Icon::Lightning => 'z',
+            Icon::Notification => '7',
+            Icon::Overview => 'd',
+            Icon::PacketsThreshold => 'e',
+            // Icon::Restore => 'k',
+            Icon::Rocket => 'S',
+            Icon::Settings => 'a',
+            Icon::Sniffnet => 'A',
+            Icon::Star => 'g',
+            Icon::Warning => 'T',
+            Icon::Waves => 'y',
+            Icon::Copy => 'u',
+        }
+    }
+
     pub fn to_text(&self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
-        Text::new(match self {
-            Icon::ArrowBack => "C",
-            Icon::ArrowLeft => "i",
-            Icon::ArrowRight => "j",
-            Icon::ArrowsDown => ":",
-            Icon::AudioHigh => "Z",
-            Icon::AudioMute => "Y",
-            Icon::Bin => "h",
-            Icon::BytesThreshold => "f",
-            Icon::Clock => "9",
-            Icon::Dots => "R",
-            Icon::Error => "U",
-            Icon::File => "8",
-            Icon::Forbidden => "x",
-            Icon::Funnel => "V",
-            Icon::GitHub => "H",
-            Icon::Globe => "c",
-            Icon::HalfSun => "K",
-            Icon::Hourglass1 => "1",
-            Icon::Hourglass2 => "2",
-            Icon::Hourglass3 => "3",
-            Icon::Inspect => "5",
-            Icon::Lightning => "z",
-            Icon::Notification => "7",
-            Icon::Overview => "d",
-            Icon::PacketsThreshold => "e",
-            // Icon::Restore => "k",
-            Icon::Rocket => "S",
-            Icon::Settings => "a",
-            Icon::Sniffnet => "A",
-            Icon::Star => "g",
-            Icon::Warning => "T",
-            Icon::Waves => "y",
-            Icon::Copy => "u",
-        })
-        .font(ICONS)
+        Text::new(self.codepoint().to_string()).font(ICONS)
     }
 
     pub fn get_hourglass(num: usize) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {

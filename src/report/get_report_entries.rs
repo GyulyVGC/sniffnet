@@ -30,7 +30,6 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             let searched_domain = &*sniffer.search.domain.to_lowercase();
             let searched_country = &*sniffer.search.country.to_lowercase();
             let searched_as_name = &*sniffer.search.as_name.to_lowercase();
-            let searched_address = &*sniffer.search.address.to_lowercase();
             let searched_only_fav = sniffer.search.only_favorites;
             // if a host-related filter is active and this address has not been resolved yet => false
             if r_dns_host.is_none()
@@ -41,10 +40,57 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             {
                 return false;
             }
+            let searched_src_address = &*sniffer.search.address_src.to_lowercase();
+            let searched_dst_address = &*sniffer.search.address_dst.to_lowercase();
+            let searched_src_port = &*sniffer.search.port_src.to_lowercase();
+            let searched_dst_port = &*sniffer.search.port_dst.to_lowercase();
+            let searched_proto = &*sniffer.search.proto.to_lowercase();
+            let searched_app = &*sniffer.search.app_proto.to_lowercase();
+
+            // check src IP filter
+            if !searched_src_address.is_empty() {
+                let source = key.address1.to_lowercase();
+                if !source.contains(searched_src_address) {
+                    return false;
+                }
+            }
+            // check dst IP filter
+            if !searched_dst_address.is_empty() {
+                let dest = key.address2.to_lowercase();
+                if !dest.contains(searched_dst_address) {
+                    return false;
+                }
+            }
+            // check src port filter
+            if !searched_src_port.is_empty() {
+                let src_port = if let Some(port) = key.port1 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                };
+                if !src_port.contains(searched_src_port) {
+                    return false;
+                }
+            }
+            // check dst port filter
+            if !searched_dst_port.is_empty() {
+                let dst_port = if let Some(port) = key.port2 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                };
+                if !dst_port.contains(searched_dst_port) {
+                    return false;
+                }
+            }
+            // check protocol filter
+            let proto = key.protocol.to_string().to_lowercase();
+            if !searched_proto.is_empty() && !proto.contains(searched_proto) {
+                return false;
+            }
             // check application protocol filter
-            let searched_app = &*sniffer.search.app.to_lowercase();
             let app = value.app_protocol.to_string().to_lowercase();
-            if !searched_app.is_empty() && app.ne(searched_app) {
+            if !searched_app.is_empty() && !app.contains(searched_app) {
                 return false;
             }
             // check domain filter
@@ -65,14 +111,6 @@ pub fn get_searched_entries(sniffer: &Sniffer) -> (Vec<ReportEntry>, usize) {
             if !searched_as_name.is_empty() {
                 let asn_name = r_dns_host.unwrap().1.asn.name.to_lowercase();
                 if !asn_name.contains(searched_as_name) {
-                    return false;
-                }
-            }
-            // check IP address filter
-            if !searched_address.is_empty() {
-                let source = key.address1.to_lowercase();
-                let dest = key.address2.to_lowercase();
-                if !source.contains(searched_address) && !dest.contains(searched_address) {
                     return false;
                 }
             }

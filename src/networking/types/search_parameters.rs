@@ -1,14 +1,22 @@
 /// Used to express the search filters applied to GUI inspect page
 #[derive(Clone, Debug, Default, Hash)]
 pub struct SearchParameters {
+    /// IP address (source)
+    pub address_src: String,
+    /// Transport port (source)
+    pub port_src: String,
+    /// IP address (destination)
+    pub address_dst: String,
+    /// Transport port (destination)
+    pub port_dst: String,
+    /// Protocol
+    pub proto: String,
     /// Application protocol
-    pub app: String,
-    /// IP address
-    pub address: String,
-    /// Domain
-    pub domain: String,
+    pub app_proto: String,
     /// Country
     pub country: String,
+    /// Domain
+    pub domain: String,
     /// Autonomous System name
     pub as_name: String,
     /// Whether to display only favorites
@@ -18,18 +26,129 @@ pub struct SearchParameters {
 impl SearchParameters {
     pub fn is_some_filter_active(&self) -> bool {
         self.only_favorites
-            || !self.app.is_empty()
-            || !self.domain.is_empty()
+            || !self.address_src.is_empty()
+            || !self.port_src.is_empty()
+            || !self.address_dst.is_empty()
+            || !self.port_dst.is_empty()
+            || !self.proto.is_empty()
+            || !self.app_proto.is_empty()
             || !self.country.is_empty()
             || !self.as_name.is_empty()
-            || !self.address.is_empty()
+            || !self.domain.is_empty()
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum FilterInputType {
-    App,
-    Domain,
+    AddressSrc,
+    PortSrc,
+    AddressDst,
+    PortDst,
+    Proto,
+    AppProto,
     Country,
-    AS,
-    Address,
+    Domain,
+    AsName,
+}
+
+impl FilterInputType {
+    pub fn current_value(self, search_params: &SearchParameters) -> &str {
+        match self {
+            FilterInputType::AddressSrc => &search_params.address_src,
+            FilterInputType::PortSrc => &search_params.port_src,
+            FilterInputType::AddressDst => &search_params.address_dst,
+            FilterInputType::PortDst => &search_params.port_dst,
+            FilterInputType::Proto => &search_params.proto,
+            FilterInputType::AppProto => &search_params.app_proto,
+            FilterInputType::Country => &search_params.country,
+            FilterInputType::Domain => &search_params.domain,
+            FilterInputType::AsName => &search_params.as_name,
+        }
+    }
+
+    pub fn clear_search(&self, search_params: &SearchParameters) -> SearchParameters {
+        match self {
+            FilterInputType::AddressSrc => SearchParameters {
+                address_src: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::PortSrc => SearchParameters {
+                port_src: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::AddressDst => SearchParameters {
+                address_dst: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::PortDst => SearchParameters {
+                port_dst: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Proto => SearchParameters {
+                proto: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::AppProto => SearchParameters {
+                app_proto: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Domain => SearchParameters {
+                domain: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Country => SearchParameters {
+                country: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::AsName => SearchParameters {
+                as_name: String::new(),
+                ..search_params.clone()
+            },
+        }
+    }
+
+    pub fn new_search(
+        &self,
+        search_params: &SearchParameters,
+        new_value: String,
+    ) -> SearchParameters {
+        match self {
+            FilterInputType::AddressSrc => SearchParameters {
+                address_src: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::PortSrc => SearchParameters {
+                port_src: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::AddressDst => SearchParameters {
+                address_dst: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::PortDst => SearchParameters {
+                port_dst: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::Proto => SearchParameters {
+                proto: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::AppProto => SearchParameters {
+                app_proto: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::Domain => SearchParameters {
+                domain: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::Country => SearchParameters {
+                country: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::AsName => SearchParameters {
+                as_name: new_value,
+                ..search_params.clone()
+            },
+        }
+    }
 }

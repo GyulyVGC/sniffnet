@@ -418,7 +418,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app: app.to_string(),
+                    app_proto: app.to_string(),
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),

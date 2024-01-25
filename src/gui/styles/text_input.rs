@@ -39,12 +39,16 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Standard => ext.buttons_color,
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
             },
-            icon_color: colors.text_body,
+            icon_color: Color {
+                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                ..colors.text_body
+            },
         }
     }
 
     fn focused(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
         let colors = self.get_palette();
+        let is_nightly = self.get_extension().is_nightly;
         Appearance {
             background: Background::Color(colors.primary),
             border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
@@ -53,7 +57,10 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                 _ => colors.secondary,
             },
-            icon_color: colors.text_body,
+            icon_color: Color {
+                a: if is_nightly { 0.2 } else { 0.7 },
+                ..colors.text_body
+            },
         }
     }
 
@@ -102,7 +109,10 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                 _ => colors.secondary,
             },
-            icon_color: colors.text_body,
+            icon_color: Color {
+                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                ..colors.text_body
+            },
         }
     }
 
@@ -127,7 +137,10 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 },
                 TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
             },
-            icon_color: colors.text_body,
+            icon_color: Color {
+                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                ..colors.text_body
+            },
         }
     }
 }
