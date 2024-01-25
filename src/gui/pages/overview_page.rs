@@ -15,6 +15,7 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
+use crate::countries::types::country::Country;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -333,8 +334,12 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                 .padding([5, 15, 5, 10])
                 .on_press(Message::Search(SearchParameters {
                     domain: host.domain.clone(),
-                    country: host.country.to_string().clone(),
                     as_name: host.asn.name.clone(),
+                    country: if host.country != Country::ZZ {
+                        host.country.to_string()
+                    } else {
+                        String::new()
+                    },
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),

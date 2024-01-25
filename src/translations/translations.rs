@@ -378,7 +378,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, Renderer<S
 pub fn clear_all_translation(language: Language) -> String {
     match language {
         Language::EN => "Clear all".to_string(),
-        Language::IT => "Elimina tutte".to_string(),
+        Language::IT => "Elimina tutto".to_string(),
         Language::FR => "Tout effacer".to_string(),
         Language::ES => "Borrar todo".to_string(),
         Language::PL => "Wyczyść wszystko".to_string(),

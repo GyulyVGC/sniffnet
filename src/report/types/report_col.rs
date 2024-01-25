@@ -47,6 +47,7 @@ pub enum ReportCol {
 
 impl ReportCol {
     pub(crate) const ALL: [ReportCol; 9] = [
+        ReportCol::Country,
         ReportCol::SrcIp,
         ReportCol::SrcPort,
         ReportCol::DstIp,
@@ -55,7 +56,6 @@ impl ReportCol {
         ReportCol::AppProto,
         ReportCol::Bytes,
         ReportCol::Packets,
-        ReportCol::Country,
     ];
 
     pub(crate) fn get_title(&self, language: Language) -> String {

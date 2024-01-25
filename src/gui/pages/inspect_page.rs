@@ -102,12 +102,14 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
-        let mut entry_row = row_report_entry(&report_entry.key, &report_entry.val, font);
-        entry_row = entry_row.push(
-            Container::new(report_entry.tooltip)
-                .width(Length::Fixed(ReportCol::Country.get_width()))
-                .align_x(Horizontal::Center),
-        );
+        let entry_row = Row::new()
+            .align_items(Alignment::Center)
+            .push(
+                Container::new(report_entry.tooltip)
+                    .width(Length::Fixed(ReportCol::Country.get_width()))
+                    .align_x(Horizontal::Center),
+            )
+            .push(row_report_entry(&report_entry.key, &report_entry.val, font));
         scroll_report = scroll_report.push(
             button(entry_row)
                 .padding(2)
@@ -123,10 +125,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
                 Scrollable::new(scroll_report)
                     .height(Length::Fill)
                     .width(Length::Fill)
-                    .direction(Direction::Both {
-                        vertical: ScrollbarType::properties(),
-                        horizontal: ScrollbarType::properties(),
-                    }),
+                    .direction(Direction::Vertical(ScrollbarType::properties())),
             )
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
