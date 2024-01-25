@@ -254,29 +254,7 @@ fn row_report_entry(
 
     for report_col in ReportCol::ALL.iter().filter(|e| e.ne(&&ReportCol::Country)) {
         let max_chars = report_col.get_max_chars() as usize;
-        let col_value = match report_col {
-            ReportCol::SrcIp => key.address1.clone(),
-            ReportCol::SrcPort => {
-                if let Some(port) = key.port1 {
-                    port.to_string()
-                } else {
-                    "-".to_string()
-                }
-            }
-            ReportCol::DstIp => key.address2.clone(),
-            ReportCol::DstPort => {
-                if let Some(port) = key.port2 {
-                    port.to_string()
-                } else {
-                    "-".to_string()
-                }
-            }
-            ReportCol::Proto => key.protocol.to_string(),
-            ReportCol::AppProto => val.app_protocol.to_string(),
-            ReportCol::Bytes => val.transmitted_bytes.to_string(),
-            ReportCol::Packets => val.transmitted_packets.to_string(),
-            ReportCol::Country => String::new(),
-        };
+        let col_value = report_col.get_value(key, val);
         ret_val = ret_val.push(
             Container::new(
                 Text::new(if col_value.len() <= max_chars {

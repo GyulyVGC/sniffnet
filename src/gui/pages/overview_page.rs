@@ -305,7 +305,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info_host.data_info.tot_packets().to_string()
                         } else {
-                            get_formatted_bytes_string_with_b(data_info_host.data_info.tot_bytes())
+                            get_formatted_bytes_string_with_b(
+                                data_info_host.data_info.tot_bytes(),
+                                1,
+                            )
                         })
                         .font(font),
                     ),
@@ -407,7 +410,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info.tot_packets().to_string()
                         } else {
-                            get_formatted_bytes_string_with_b(data_info.tot_bytes())
+                            get_formatted_bytes_string_with_b(data_info.tot_bytes(), 1)
                         })
                         .font(font),
                     ),
@@ -608,11 +611,11 @@ fn col_bytes_packets(
         none_translation(language).to_string()
     };
     let bytes_value = if dropped > 0 {
-        get_formatted_bytes_string_with_b(filtered_bytes)
+        get_formatted_bytes_string_with_b(filtered_bytes, 1)
     } else {
         format!(
             "{} {}",
-            &get_formatted_bytes_string_with_b(filtered_bytes),
+            &get_formatted_bytes_string_with_b(filtered_bytes, 1),
             of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
         )
     };

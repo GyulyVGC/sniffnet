@@ -1,3 +1,5 @@
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::search_parameters::FilterInputType;
 use crate::translations::translations::{
     address_translation, application_protocol_translation, bytes_translation, packets_translation,
@@ -8,6 +10,7 @@ use crate::translations::translations_2::{
 };
 use crate::translations::translations_3::port_translation;
 use crate::translations::types::language::Language;
+use crate::utils::formatted_strings::get_formatted_bytes_string;
 
 // total width: 1012.0
 
@@ -88,6 +91,32 @@ impl ReportCol {
                 str.remove(0).to_ascii_uppercase().to_string() + &str
             }
             ReportCol::Country => country_translation(language).to_string(),
+        }
+    }
+
+    pub(crate) fn get_value(&self, key: &AddressPortPair, val: &InfoAddressPortPair) -> String {
+        match self {
+            ReportCol::SrcIp => key.address1.clone(),
+            ReportCol::SrcPort => {
+                if let Some(port) = key.port1 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            ReportCol::DstIp => key.address2.clone(),
+            ReportCol::DstPort => {
+                if let Some(port) = key.port2 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            ReportCol::Proto => key.protocol.to_string(),
+            ReportCol::AppProto => val.app_protocol.to_string(),
+            ReportCol::Bytes => get_formatted_bytes_string(val.transmitted_bytes, 1),
+            ReportCol::Packets => val.transmitted_packets.to_string(),
+            ReportCol::Country => String::new(),
         }
     }
 

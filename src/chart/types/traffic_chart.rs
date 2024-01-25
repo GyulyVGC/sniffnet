@@ -144,7 +144,7 @@ impl Chart<Message> for TrafficChart {
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
-                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
+                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()), 0)
             })
             .draw()
             .unwrap();

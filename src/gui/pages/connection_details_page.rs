@@ -230,7 +230,7 @@ fn col_info(
         ),
         &format!(
             "{}\n   {} {}",
-            get_formatted_bytes_string_with_b(val.transmitted_bytes),
+            get_formatted_bytes_string_with_b(val.transmitted_bytes, 1),
             val.transmitted_packets,
             packets_translation(language)
         ),

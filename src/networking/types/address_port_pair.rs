@@ -1,7 +1,5 @@
 //! Module defining the `AddressPortPair` struct, which represents a network address:port pair.
 
-use std::fmt;
-
 use crate::Protocol;
 
 /// Struct representing a network address:port pair.
@@ -40,40 +38,6 @@ impl AddressPortPair {
             address2,
             port2,
             protocol,
-        }
-    }
-}
-
-impl fmt::Display for AddressPortPair {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let (port_1_str, port_2_str) = if self.port1.is_some() && self.port2.is_some() {
-            (
-                self.port1.unwrap().to_string(),
-                self.port2.unwrap().to_string(),
-            )
-        } else {
-            ("-".to_string(), "-".to_string())
-        };
-        if self.address1.len() > 25 || self.address2.len() > 25 {
-            write!(
-                f,
-                "{:^45}{:>8}  {:^45}{:>8}    {:>4}   ",
-                self.address1,
-                port_1_str,
-                self.address2,
-                port_2_str,
-                self.protocol.to_string()
-            )
-        } else {
-            write!(
-                f,
-                "{:^25}{:>8}  {:^25}{:>8}    {:>4}   ",
-                self.address1,
-                port_1_str,
-                self.address2,
-                port_2_str,
-                self.protocol.to_string()
-            )
         }
     }
 }

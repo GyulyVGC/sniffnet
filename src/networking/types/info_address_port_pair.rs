@@ -2,13 +2,11 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use std::collections::HashMap;
-use std::fmt;
 
 use chrono::{DateTime, Local};
 
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::utils::formatted_strings::get_formatted_bytes_string;
 use crate::AppProtocol;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
@@ -34,18 +32,4 @@ pub struct InfoAddressPortPair {
     pub traffic_direction: TrafficDirection,
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
     pub icmp_types: HashMap<IcmpType, usize>,
-}
-
-impl fmt::Display for InfoAddressPortPair {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let bytes_string = get_formatted_bytes_string(self.transmitted_bytes);
-
-        write!(
-            f,
-            "{:^9}{:>10}  {:>9}   ",
-            self.app_protocol.to_string(),
-            self.transmitted_packets,
-            bytes_string,
-        )
-    }
 }

@@ -235,21 +235,24 @@ fn bytes_notification_log(
     threshold_str.push_str(": ");
     threshold_str.push_str(&get_formatted_bytes_string_with_b(
         (logged_notification.threshold).into(),
+        1,
     ));
 
     threshold_str.push_str(&format!(" {}", per_second_translation(language)));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
-    incoming_str.push_str(&get_formatted_bytes_string_with_b(u128::from(
-        logged_notification.incoming,
-    )));
+    incoming_str.push_str(&get_formatted_bytes_string_with_b(
+        u128::from(logged_notification.incoming),
+        1,
+    ));
     let mut outgoing_str = " - ".to_string();
     outgoing_str.push_str(outgoing_translation(language));
     outgoing_str.push_str(": ");
-    outgoing_str.push_str(&get_formatted_bytes_string_with_b(u128::from(
-        logged_notification.outgoing,
-    )));
+    outgoing_str.push_str(&get_formatted_bytes_string_with_b(
+        u128::from(logged_notification.outgoing),
+        1,
+    ));
     let content = Row::new()
         .spacing(30)
         .align_items(Alignment::Center)
@@ -291,9 +294,10 @@ fn bytes_notification_log(
                 .push(
                     Text::new(bytes_exceeded_value_translation(
                         language,
-                        &get_formatted_bytes_string_with_b(u128::from(
-                            logged_notification.incoming + logged_notification.outgoing,
-                        )),
+                        &get_formatted_bytes_string_with_b(
+                            u128::from(logged_notification.incoming + logged_notification.outgoing),
+                            1,
+                        ),
                     ))
                     .font(font),
                 )
