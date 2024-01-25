@@ -6,7 +6,6 @@ use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, T
 use iced::widget::{lazy, Button, Checkbox, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
-use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
@@ -122,7 +121,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         col_report = col_report
             .push(
                 Scrollable::new(scroll_report)
-                    .height(Length::FillPortion(15))
+                    .height(Length::Fill)
                     .width(Length::Fill)
                     .direction(Direction::Both {
                         vertical: ScrollbarType::properties(),
@@ -228,8 +227,6 @@ fn sort_arrows(
                 .vertical_alignment(Vertical::Center),
         )
         .padding(0)
-        .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
-        .width(Length::Fixed(FLAGS_WIDTH_BIG))
         .style(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
             active_sort_type.next_sort(report_col),
@@ -423,9 +420,10 @@ fn get_change_page_row(
     results_number: usize,
 ) -> Row<'static, Message, Renderer<StyleType>> {
     Row::new()
-        .height(Length::FillPortion(2))
+        .height(Length::Fixed(40.0))
         .align_items(Alignment::Center)
         .spacing(10)
+        .push(horizontal_space(Length::Fill))
         .push(if page_number > 1 {
             Container::new(get_button_change_page(false).width(25.0))
         } else {
@@ -445,6 +443,7 @@ fn get_change_page_row(
         } else {
             Container::new(horizontal_space(25.0))
         })
+        .push(horizontal_space(Length::Fill))
 }
 
 fn button_clear_filter(
