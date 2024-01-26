@@ -11,7 +11,9 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, ICONS};
+use crate::gui::styles::style_constants::{
+    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
+};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -22,9 +24,11 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::translations::translations_2::{
+    administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, search_filters_translation,
     showing_results_translation,
 };
+use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
@@ -68,8 +72,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     body = body
         .push(
-            Container::new(Row::new().push(filters_col(&sniffer.search, font, language)))
-                .height(Length::Fixed(165.0))
+            Container::new(host_filters_col(&sniffer.search, font, language))
                 .padding(10)
                 .style(ContainerType::BorderedRound),
         )
@@ -102,16 +105,8 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
-        let entry_row = Row::new()
-            .align_items(Alignment::Center)
-            .push(
-                Container::new(report_entry.tooltip)
-                    .width(Length::Fixed(ReportCol::Country.get_width()))
-                    .align_x(Horizontal::Center),
-            )
-            .push(row_report_entry(&report_entry.key, &report_entry.val, font));
         scroll_report = scroll_report.push(
-            button(entry_row)
+            button(row_report_entry(&report_entry.key, &report_entry.val, font))
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
                     report_entry.key,
@@ -167,6 +162,7 @@ fn report_header_row(
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
+        let width = report_col.get_width();
         let max_chars = report_col.get_max_chars() as usize;
         let full_title = report_col.get_title(language);
         let chars = full_title.chars().collect::<Vec<char>>();
@@ -196,13 +192,13 @@ fn report_header_row(
         };
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
-            .width(Length::Fixed(report_col.get_width()))
+            .width(Length::Fixed(width))
             .height(Length::Fixed(60.0))
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
             col_header = col_header.push(filter_input(
                 report_col.get_filter_input_type(),
-                report_col.get_width(),
+                width,
                 search_params.clone(),
                 font,
             ));
@@ -248,7 +244,7 @@ fn row_report_entry(
 
     let mut ret_val = Row::new().align_items(Alignment::Center);
 
-    for report_col in ReportCol::ALL.iter().filter(|e| e.ne(&&ReportCol::Country)) {
+    for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars() as usize;
         let col_value = report_col.get_value(key, val);
         ret_val = ret_val.push(
@@ -268,7 +264,7 @@ fn row_report_entry(
     ret_val
 }
 
-fn filters_col(
+fn host_filters_col(
     search_params: &SearchParameters,
     font: Font,
     language: Language,
@@ -276,18 +272,43 @@ fn filters_col(
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
-        Text::new(search_filters_translation(language))
+        Text::new(filter_by_host_translation(language))
             .font(font)
-            .style(TextType::Title)
-            .size(FONT_SIZE_TITLE),
+            .style(TextType::Subtitle)
+            .size(FONT_SIZE_SUBTITLE),
     );
-    if search_params.is_some_filter_active() {
-        title_row = title_row.push(button_clear_filter(SearchParameters::default(), font));
+    if search_params.is_some_host_filter_active() {
+        title_row = title_row.push(button_clear_filter(
+            search_params.reset_host_filters(),
+            font,
+        ));
     }
 
-    Column::new()
-        .push(title_row)
-        .push(vertical_space(Length::Fixed(10.0)))
+    let input_country = filter_input(FilterInputType::Country, 80.0, search_params.clone(), font);
+    let input_domain = filter_input(FilterInputType::Domain, 180.0, search_params.clone(), font);
+    let input_as_name = filter_input(FilterInputType::AsName, 180.0, search_params.clone(), font);
+
+    let container_country = Row::new()
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(Text::new(format!("{}:", country_translation(language))).font(font))
+        .push(input_country);
+
+    let container_domain = Row::new()
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(Text::new(format!("{}:", domain_name_translation(language))).font(font))
+        .push(input_domain);
+
+    let container_as_name = Row::new()
+        .spacing(5)
+        .align_items(Alignment::Center)
+        .push(Text::new(format!("{}:", administrative_entity_translation(language))).font(font))
+        .push(input_as_name);
+
+    let col1 = Column::new()
+        .align_items(Alignment::Start)
+        .spacing(5)
         .push(
             Container::new(
                 Checkbox::new(
@@ -304,29 +325,26 @@ fn filters_col(
                 .size(18)
                 .font(font),
             )
-            .padding([5, 8])
-            .style(if search_params.only_favorites {
-                ContainerType::Badge
-            } else {
-                ContainerType::Neutral
-            }),
+            .padding([5, 0]),
         )
+        .push(container_country);
+
+    let col2 = Column::new()
+        .align_items(Alignment::Start)
+        .spacing(5)
+        .push(container_domain)
+        .push(container_as_name);
+
+    Column::new()
+        .align_items(Alignment::Start)
+        .push(title_row)
+        .push(vertical_space(10))
         .push(
             Row::new()
                 .align_items(Alignment::Center)
-                .spacing(10)
-                .push(filter_input(
-                    FilterInputType::Domain,
-                    120.0,
-                    search_params.clone(),
-                    font,
-                ))
-                .push(filter_input(
-                    FilterInputType::AsName,
-                    120.0,
-                    search_params.clone(),
-                    font,
-                )),
+                .spacing(30)
+                .push(col1)
+                .push(col2),
         )
 }
 
@@ -345,7 +363,7 @@ fn filter_input(
         .on_input(move |new_value| {
             Message::Search(filter_input_type.new_search(&search_params, new_value))
         })
-        .padding([3, 5])
+        .padding([2, 5])
         .size(FONT_SIZE_FOOTER)
         .font(font)
         .width(Length::Fixed(if is_filter_active {

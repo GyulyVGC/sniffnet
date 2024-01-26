@@ -51,13 +51,13 @@ impl ReportSortType {
     }
 
     pub fn icon(self, report_col: &ReportCol) -> Text<'static, Renderer<StyleType>> {
-        let mut size = 15;
+        let mut size = 14;
         match report_col {
             ReportCol::Bytes => match self.byte_sort {
                 ByteSort::Ascending => Icon::SortAscending,
                 ByteSort::Descending => Icon::SortDescending,
                 ByteSort::Neutral => {
-                    size = 20;
+                    size = 18;
                     Icon::SortNeutral
                 }
             },
@@ -65,7 +65,7 @@ impl ReportSortType {
                 PacketSort::Ascending => Icon::SortAscending,
                 PacketSort::Descending => Icon::SortDescending,
                 PacketSort::Neutral => {
-                    size = 20;
+                    size = 18;
                     Icon::SortNeutral
                 }
             },

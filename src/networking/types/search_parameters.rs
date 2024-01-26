@@ -24,17 +24,21 @@ pub struct SearchParameters {
 }
 
 impl SearchParameters {
-    pub fn is_some_filter_active(&self) -> bool {
+    pub fn is_some_host_filter_active(&self) -> bool {
         self.only_favorites
-            || !self.address_src.is_empty()
-            || !self.port_src.is_empty()
-            || !self.address_dst.is_empty()
-            || !self.port_dst.is_empty()
-            || !self.proto.is_empty()
-            || !self.app_proto.is_empty()
             || !self.country.is_empty()
             || !self.as_name.is_empty()
             || !self.domain.is_empty()
+    }
+
+    pub fn reset_host_filters(&self) -> Self {
+        Self {
+            country: String::new(),
+            domain: String::new(),
+            as_name: String::new(),
+            only_favorites: false,
+            ..self.clone()
+        }
     }
 }
 

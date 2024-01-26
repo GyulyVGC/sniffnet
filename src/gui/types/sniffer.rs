@@ -157,7 +157,10 @@ impl Sniffer {
                 self.filters.port_str = value;
             }
             Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
-            Message::ReportSortSelection(sort) => self.report_sort_type = sort,
+            Message::ReportSortSelection(sort) => {
+                self.page_number = 1;
+                self.report_sort_type = sort;
+            }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => self.start(),
             Message::Reset => return self.reset(),
