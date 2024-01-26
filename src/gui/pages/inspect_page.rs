@@ -218,7 +218,6 @@ fn sort_arrows(
                 .horizontal_alignment(Horizontal::Center)
                 .vertical_alignment(Vertical::Center),
         )
-        .padding(0)
         .style(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
             active_sort_type.next_sort(report_col),

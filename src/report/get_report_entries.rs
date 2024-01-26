@@ -7,7 +7,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::report::types::report_sort_type::{ByteSort, PacketSort};
+use crate::report::types::sort_type::SortType;
 use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
@@ -35,19 +35,19 @@ pub fn get_searched_entries(
     all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
         ReportSortType {
             byte_sort,
-            packet_sort: PacketSort::Neutral,
+            packet_sort: SortType::Neutral,
         } => match byte_sort {
-            ByteSort::Ascending => a.transmitted_bytes.cmp(&b.transmitted_bytes),
-            ByteSort::Descending => b.transmitted_bytes.cmp(&a.transmitted_bytes),
-            ByteSort::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+            SortType::Ascending => a.transmitted_bytes.cmp(&b.transmitted_bytes),
+            SortType::Descending => b.transmitted_bytes.cmp(&a.transmitted_bytes),
+            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
         },
         ReportSortType {
-            byte_sort: ByteSort::Neutral,
+            byte_sort: SortType::Neutral,
             packet_sort,
         } => match packet_sort {
-            PacketSort::Ascending => a.transmitted_packets.cmp(&b.transmitted_packets),
-            PacketSort::Descending => b.transmitted_packets.cmp(&a.transmitted_packets),
-            PacketSort::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+            SortType::Ascending => a.transmitted_packets.cmp(&b.transmitted_packets),
+            SortType::Descending => b.transmitted_packets.cmp(&a.transmitted_packets),
+            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
         },
         _ => b.final_timestamp.cmp(&a.final_timestamp),
     });
