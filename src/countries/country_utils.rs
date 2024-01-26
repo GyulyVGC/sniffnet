@@ -357,9 +357,9 @@ pub fn get_computer_tooltip(
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, is_local, traffic_type) {
             (true, _, _) => COMPUTER,
+            (false, _, TrafficType::Multicast) => MULTICAST,
+            (false, _, TrafficType::Broadcast) => BROADCAST,
             (false, true, _) => HOME,
-            (false, false, TrafficType::Multicast) => MULTICAST,
-            (false, false, TrafficType::Broadcast) => BROADCAST,
             (false, false, TrafficType::Unicast) => UNKNOWN,
         },
     )))

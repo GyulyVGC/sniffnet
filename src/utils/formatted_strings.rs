@@ -108,7 +108,7 @@ pub fn get_formatted_bytes_string(bytes: u128, precision: usize) -> String {
         n.to_string()
     } else {
         // with multiple
-        format!("{n:.p$} {multiple_transmitted}", p = precision)
+        format!("{n:.precision$} {multiple_transmitted}")
     }
 }
 

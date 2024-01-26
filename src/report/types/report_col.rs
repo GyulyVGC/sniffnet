@@ -5,9 +5,7 @@ use crate::translations::translations::{
     address_translation, application_protocol_translation, bytes_translation, packets_translation,
     protocol_translation,
 };
-use crate::translations::translations_2::{
-    country_translation, destination_translation, source_translation,
-};
+use crate::translations::translations_2::{destination_translation, source_translation};
 use crate::translations::translations_3::port_translation;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_formatted_bytes_string;

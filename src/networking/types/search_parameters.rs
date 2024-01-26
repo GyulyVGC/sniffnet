@@ -1,3 +1,7 @@
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::host::Host;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+
 /// Used to express the search filters applied to GUI inspect page
 #[derive(Clone, Debug, Default, Hash)]
 pub struct SearchParameters {
@@ -24,6 +28,107 @@ pub struct SearchParameters {
 }
 
 impl SearchParameters {
+    pub fn match_entry(
+        &self,
+        key: &AddressPortPair,
+        value: &InfoAddressPortPair,
+        r_dns_host: Option<&(String, Host)>,
+        is_favorite: bool,
+    ) -> bool {
+        // if a host-related filter is active and this address has not been resolved yet => false
+        if r_dns_host.is_none() && self.is_some_host_filter_active() {
+            return false;
+        }
+
+        // check src IP filter
+        if !self.address_src.is_empty() {
+            let source = key.address1.to_lowercase();
+            if !source.contains(&*self.address_src.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check dst IP filter
+        if !self.address_dst.is_empty() {
+            let dest = key.address2.to_lowercase();
+            if !dest.contains(&*self.address_dst.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check src port filter
+        if !self.port_src.is_empty() {
+            let src_port = if let Some(port) = key.port1 {
+                port.to_string()
+            } else {
+                "-".to_string()
+            };
+            if !src_port.starts_with(&*self.port_src) {
+                return false;
+            }
+        }
+
+        // check dst port filter
+        if !self.port_dst.is_empty() {
+            let dst_port = if let Some(port) = key.port2 {
+                port.to_string()
+            } else {
+                "-".to_string()
+            };
+            if !dst_port.starts_with(&*self.port_dst) {
+                return false;
+            }
+        }
+
+        // check protocol filter
+        if !self.proto.is_empty() {
+            let proto = key.protocol.to_string().to_lowercase();
+            if !proto.starts_with(&*self.proto.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check application protocol filter
+        if !self.app_proto.is_empty() {
+            let app = value.app_protocol.to_string().to_lowercase();
+            if !app.starts_with(&*self.app_proto.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check domain filter
+        if !self.domain.is_empty() {
+            let domain = r_dns_host.unwrap().0.to_lowercase();
+            if !domain.contains(&*self.domain.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check country filter
+        if !self.country.is_empty() {
+            let country = r_dns_host.unwrap().1.country.to_string().to_lowercase();
+            if !country.starts_with(&*self.country.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check Autonomous System name filter
+        if !self.as_name.is_empty() {
+            let asn_name = r_dns_host.unwrap().1.asn.name.to_lowercase();
+            if !asn_name.contains(&*self.as_name.to_lowercase()) {
+                return false;
+            }
+        }
+
+        // check favorites filter
+        if self.only_favorites && !is_favorite {
+            return false;
+        }
+
+        // if arrived at this point all filters are satisfied
+        true
+    }
+
     pub fn is_some_host_filter_active(&self) -> bool {
         self.only_favorites
             || !self.country.is_empty()
@@ -70,7 +175,7 @@ impl FilterInputType {
         }
     }
 
-    pub fn clear_search(&self, search_params: &SearchParameters) -> SearchParameters {
+    pub fn clear_search(self, search_params: &SearchParameters) -> SearchParameters {
         match self {
             FilterInputType::AddressSrc => SearchParameters {
                 address_src: String::new(),
@@ -112,7 +217,7 @@ impl FilterInputType {
     }
 
     pub fn new_search(
-        &self,
+        self,
         search_params: &SearchParameters,
         new_value: String,
     ) -> SearchParameters {

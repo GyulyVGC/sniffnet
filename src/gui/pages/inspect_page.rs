@@ -11,9 +11,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{
-    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, ICONS,
-};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -25,8 +23,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
-    no_search_results_translation, only_show_favorites_translation, search_filters_translation,
-    showing_results_translation,
+    no_search_results_translation, only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
@@ -95,7 +92,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         .align_items(Alignment::Start)
         .push(report_header_row(
             language,
-            sniffer.search.clone(),
+            &sniffer.search,
             font,
             sniffer.report_sort_type,
         ))
@@ -106,10 +103,10 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(&report_entry.key, &report_entry.val, font))
+            button(row_report_entry(&report_entry.0, &report_entry.1, font))
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    report_entry.key,
+                    report_entry.0,
                 )))
                 .style(ButtonType::Neutral),
         );
@@ -156,7 +153,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
 
 fn report_header_row(
     language: Language,
-    search_params: SearchParameters,
+    search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
 ) -> Row<'static, Message, Renderer<StyleType>> {

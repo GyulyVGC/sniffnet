@@ -335,10 +335,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                 .on_press(Message::Search(SearchParameters {
                     domain: host.domain.clone(),
                     as_name: host.asn.name.clone(),
-                    country: if host.country != Country::ZZ {
-                        host.country.to_string()
-                    } else {
+                    country: if host.country == Country::ZZ {
                         String::new()
+                    } else {
+                        host.country.to_string()
                     },
                     ..SearchParameters::default()
                 }))
