@@ -2,7 +2,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Tooltip};
+use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Toggler, Tooltip};
 use iced::widget::{lazy, Button, Checkbox, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
@@ -307,8 +307,8 @@ fn host_filters_col(
         .spacing(5)
         .push(
             Container::new(
-                Checkbox::new(
-                    only_show_favorites_translation(language),
+                Toggler::new(
+                    only_show_favorites_translation(language).to_owned(),
                     search_params.only_favorites,
                     move |toggled| {
                         Message::Search(SearchParameters {
@@ -317,8 +317,9 @@ fn host_filters_col(
                         })
                     },
                 )
+                .width(Length::Shrink)
                 .spacing(5)
-                .size(18)
+                .size(23)
                 .font(font),
             )
             .padding([5, 0]),
