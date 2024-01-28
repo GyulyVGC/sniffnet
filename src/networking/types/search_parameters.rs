@@ -40,82 +40,8 @@ impl SearchParameters {
             return false;
         }
 
-        // check src IP filter
-        if !self.address_src.is_empty() {
-            let source = key.address1.to_lowercase();
-            if !source.contains(&*self.address_src.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check dst IP filter
-        if !self.address_dst.is_empty() {
-            let dest = key.address2.to_lowercase();
-            if !dest.contains(&*self.address_dst.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check src port filter
-        if !self.port_src.is_empty() {
-            let src_port = if let Some(port) = key.port1 {
-                port.to_string()
-            } else {
-                "-".to_string()
-            };
-            if !src_port.starts_with(&*self.port_src) {
-                return false;
-            }
-        }
-
-        // check dst port filter
-        if !self.port_dst.is_empty() {
-            let dst_port = if let Some(port) = key.port2 {
-                port.to_string()
-            } else {
-                "-".to_string()
-            };
-            if !dst_port.starts_with(&*self.port_dst) {
-                return false;
-            }
-        }
-
-        // check protocol filter
-        if !self.proto.is_empty() {
-            let proto = key.protocol.to_string().to_lowercase();
-            if !proto.starts_with(&*self.proto.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check application protocol filter
-        if !self.app_proto.is_empty() {
-            let app = value.app_protocol.to_string().to_lowercase();
-            if !app.starts_with(&*self.app_proto.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check domain filter
-        if !self.domain.is_empty() {
-            let domain = r_dns_host.unwrap().0.to_lowercase();
-            if !domain.contains(&*self.domain.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check country filter
-        if !self.country.is_empty() {
-            let country = r_dns_host.unwrap().1.country.to_string().to_lowercase();
-            if !country.starts_with(&*self.country.to_lowercase()) {
-                return false;
-            }
-        }
-
-        // check Autonomous System name filter
-        if !self.as_name.is_empty() {
-            let asn_name = r_dns_host.unwrap().1.asn.name.to_lowercase();
-            if !asn_name.contains(&*self.as_name.to_lowercase()) {
+        for filter_input_type in FilterInputType::ALL {
+            if !filter_input_type.matches_entry(self, key, value, r_dns_host) {
                 return false;
             }
         }
@@ -161,6 +87,50 @@ pub enum FilterInputType {
 }
 
 impl FilterInputType {
+    pub const ALL: [FilterInputType; 9] = [
+        Self::AddressSrc,
+        Self::PortSrc,
+        Self::AddressDst,
+        Self::PortDst,
+        Self::Proto,
+        Self::AppProto,
+        Self::Country,
+        Self::Domain,
+        Self::AsName,
+    ];
+
+    pub fn matches_entry(
+        self,
+        search_params: &SearchParameters,
+        key: &AddressPortPair,
+        value: &InfoAddressPortPair,
+        r_dns_host: Option<&(String, Host)>,
+    ) -> bool {
+        let filter_value = self.current_value(search_params).to_lowercase();
+
+        if filter_value.is_empty() {
+            return true;
+        }
+
+        let entry_value = self.entry_value(key, value, r_dns_host).to_lowercase();
+
+        if let Some(stripped_filter) = filter_value.strip_prefix('=') {
+            return entry_value.eq(stripped_filter);
+        }
+
+        match self {
+            FilterInputType::AddressSrc
+            | FilterInputType::AddressDst
+            | FilterInputType::Domain
+            | FilterInputType::AsName => entry_value.contains(&filter_value),
+            FilterInputType::PortSrc
+            | FilterInputType::PortDst
+            | FilterInputType::Proto
+            | FilterInputType::AppProto
+            | FilterInputType::Country => entry_value.starts_with(&filter_value),
+        }
+    }
+
     pub fn current_value(self, search_params: &SearchParameters) -> &str {
         match self {
             FilterInputType::AddressSrc => &search_params.address_src,
@@ -172,6 +142,37 @@ impl FilterInputType {
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
+        }
+    }
+
+    pub fn entry_value(
+        self,
+        key: &AddressPortPair,
+        value: &InfoAddressPortPair,
+        r_dns_host: Option<&(String, Host)>,
+    ) -> String {
+        match self {
+            FilterInputType::AddressSrc => key.address1.to_string(),
+            FilterInputType::PortSrc => {
+                if let Some(port) = key.port1 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            FilterInputType::AddressDst => key.address2.to_string(),
+            FilterInputType::PortDst => {
+                if let Some(port) = key.port2 {
+                    port.to_string()
+                } else {
+                    "-".to_string()
+                }
+            }
+            FilterInputType::Proto => key.protocol.to_string(),
+            FilterInputType::AppProto => value.app_protocol.to_string(),
+            FilterInputType::Country => r_dns_host.unwrap().1.country.to_string(),
+            FilterInputType::Domain => r_dns_host.unwrap().0.to_string(),
+            FilterInputType::AsName => r_dns_host.unwrap().1.asn.name.to_string(),
         }
     }
 

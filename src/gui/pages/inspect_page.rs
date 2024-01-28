@@ -67,26 +67,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
         move |_| lazy_report(sniffer),
     );
 
-    body = body
-        .push(
-            Container::new(host_filters_col(&sniffer.search, font, language))
-                .padding(10)
-                .style(ContainerType::BorderedRound),
-        )
-        .push(report);
-
-    Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
-}
-
-fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
-    let ConfigSettings {
-        style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
-    let font = style.get_extension().font;
-
-    let (search_results, results_number) = get_searched_entries(sniffer);
-
-    let mut col_report = Column::new()
+    let col_report = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
         .align_items(Alignment::Start)
@@ -96,7 +77,39 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
             font,
             sniffer.report_sort_type,
         ))
-        .push(Rule::horizontal(5));
+        .push(Rule::horizontal(5))
+        .push(report);
+
+    body = body
+        .push(
+            Container::new(host_filters_col(&sniffer.search, font, language))
+                .padding(10)
+                .style(ContainerType::BorderedRound),
+        )
+        .push(
+            Container::new(col_report)
+                .align_y(Vertical::Center)
+                .align_x(Horizontal::Center)
+                .padding([10, 7, 7, 7])
+                .width(Length::Fixed(1042.0))
+                .style(ContainerType::BorderedRound),
+        );
+
+    Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
+}
+
+fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+    let ConfigSettings {
+        style, language, ..
+    } = sniffer.configs.lock().unwrap().settings;
+    let font = style.get_extension().font;
+
+    let (search_results, results_number) = get_searched_entries(sniffer);
+
+    let mut ret_val = Column::new()
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .align_items(Alignment::Start);
 
     let mut scroll_report = Column::new().align_items(Alignment::Start);
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
@@ -112,7 +125,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         );
     }
     if results_number > 0 {
-        col_report = col_report
+        ret_val = ret_val
             .push(
                 Scrollable::new(scroll_report)
                     .height(Length::Fill)
@@ -129,7 +142,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
                 results_number,
             ));
     } else {
-        col_report = col_report.push(
+        ret_val = ret_val.push(
             Column::new()
                 .width(Length::Fill)
                 .height(Length::Fill)
@@ -143,12 +156,7 @@ fn lazy_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleT
         );
     }
 
-    Container::new(col_report)
-        .align_y(Vertical::Center)
-        .align_x(Horizontal::Center)
-        .padding([10, 7, 7, 7])
-        .width(Length::Fixed(1042.0))
-        .style(ContainerType::BorderedRound)
+    ret_val
 }
 
 fn report_header_row(
