@@ -3,7 +3,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Toggler, Tooltip};
-use iced::widget::{lazy, Button, Checkbox, Column, Container, Row, Scrollable, Text, TextInput};
+use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Renderer};
 
 use crate::gui::components::tab::get_pages_tabs;
@@ -160,7 +160,7 @@ fn report_header_row(
     let mut ret_val = Row::new().align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
         let width = report_col.get_width();
-        let max_chars = report_col.get_max_chars() as usize;
+        let max_chars = report_col.get_max_chars(Some(language)) as usize;
         let full_title = report_col.get_title(language);
         let chars = full_title.chars().collect::<Vec<char>>();
         let title_tooltip = if chars.len() <= max_chars {
@@ -241,7 +241,7 @@ fn row_report_entry(
     let mut ret_val = Row::new().align_items(Alignment::Center);
 
     for report_col in ReportCol::ALL {
-        let max_chars = report_col.get_max_chars() as usize;
+        let max_chars = report_col.get_max_chars(None) as usize;
         let col_value = report_col.get_value(key, val);
         ret_val = ret_val.push(
             Container::new(

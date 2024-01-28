@@ -109,10 +109,17 @@ impl ReportCol {
         }
     }
 
-    pub(crate) fn get_max_chars(&self) -> u8 {
+    pub(crate) fn get_max_chars(&self, language_opt: Option<Language>) -> u8 {
+        let reduction_factor = if [Language::JA, Language::KO, Language::ZH]
+            .contains(&language_opt.unwrap_or(Language::EN))
+        {
+            2
+        } else {
+            1
+        };
         match self {
-            ReportCol::SrcIp | ReportCol::DstIp => LARGE_COL_MAX_CHARS,
-            _ => SMALL_COL_MAX_CHARS,
+            ReportCol::SrcIp | ReportCol::DstIp => LARGE_COL_MAX_CHARS / reduction_factor,
+            _ => SMALL_COL_MAX_CHARS / reduction_factor,
         }
     }
 

@@ -28,9 +28,13 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             } else {
                 ext.buttons_color
             },
-            background_border: None,
+            background_border: Some(ext.buttons_color),
             foreground: colors.primary,
-            foreground_border: Some(ext.buttons_color),
+            foreground_border: Some(if is_active {
+                colors.secondary
+            } else {
+                ext.buttons_color
+            }),
         }
     }
 
@@ -48,7 +52,11 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             },
             background_border: Some(colors.secondary),
             foreground: colors.primary,
-            foreground_border: Some(ext.buttons_color),
+            foreground_border: Some(if is_active {
+                colors.secondary
+            } else {
+                ext.buttons_color
+            }),
         }
     }
 }
