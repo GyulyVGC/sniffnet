@@ -43,10 +43,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(
-        self,
-        font: Font,
-    ) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, Renderer<StyleType>> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),

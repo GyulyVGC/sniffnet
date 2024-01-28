@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
-use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider,
+    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider, Text,
     Tooltip,
 };
 use iced::Length::Fixed;

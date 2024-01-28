@@ -15,7 +15,7 @@ pub enum Icon {
     BytesThreshold,
     Clock,
     Copy,
-    Dots,
+    Generals,
     Error,
     File,
     Forbidden,
@@ -55,7 +55,7 @@ impl Icon {
             Icon::Bin => 'h',
             Icon::BytesThreshold => 'f',
             Icon::Clock => '9',
-            Icon::Dots => 'R',
+            Icon::Generals => 'Q',
             Icon::Error => 'U',
             Icon::File => '8',
             Icon::Forbidden => 'x',
@@ -85,11 +85,11 @@ impl Icon {
         }
     }
 
-    pub fn to_text(&self) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn to_text(&self) -> iced::widget::Text<'static, Renderer<StyleType>> {
         Text::new(self.codepoint().to_string()).font(ICONS)
     }
 
-    pub fn get_hourglass(num: usize) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn get_hourglass(num: usize) -> iced::widget::Text<'static, Renderer<StyleType>> {
         match num {
             1 => Icon::Hourglass1.to_text(),
             2 => Icon::Hourglass2.to_text(),

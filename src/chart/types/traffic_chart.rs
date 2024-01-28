@@ -136,7 +136,7 @@ impl Chart<Message> for TrafficChart {
             .y_max_light_lines(1)
             .y_labels(7)
             .label_style(
-                ("Sarasa Mono SC", 12)
+                ("Sarasa Mono SC for Sniffnet", 12.5)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),
@@ -196,7 +196,7 @@ impl Chart<Message> for TrafficChart {
             .background_style(buttons_color.mix(0.6))
             .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
             .label_font(
-                ("Sarasa Mono SC", 13.5)
+                ("Sarasa Mono SC for Sniffnet", 13.5)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),

@@ -3,7 +3,7 @@ use crate::gui::styles::types::style_type::StyleType;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::icon::Icon;
-use iced::advanced::widget::Text;
+use iced::widget::Text;
 use iced::Renderer;
 use std::fmt::Debug;
 

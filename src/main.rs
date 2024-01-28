@@ -106,7 +106,7 @@ pub fn main() -> iced::Result {
             ..Default::default()
         },
         flags: Sniffer::new(&configs1, newer_release_available1),
-        default_font: Font::with_name("Sarasa Mono SC"),
+        default_font: Font::with_name("Sarasa Mono SC for Sniffnet"),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,
         exit_on_close_request: false,
