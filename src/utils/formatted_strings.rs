@@ -219,11 +219,17 @@ pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
 }
 
 pub fn get_path_termination_string(full_path: &str, i: usize) -> String {
-    if full_path.is_empty() {
+    let chars = full_path.chars().collect::<Vec<char>>();
+    if chars.is_empty() {
         return String::new();
     }
-    let tot_len = full_path.len();
+    let tot_len = chars.len();
     let slice_len = min(i, tot_len);
     let suspensions = if tot_len > i { "..." } else { "" };
-    [suspensions, &full_path[tot_len - slice_len..], " "].concat()
+    [
+        suspensions,
+        &chars[tot_len - slice_len..].iter().collect::<String>(),
+        " ",
+    ]
+    .concat()
 }
