@@ -315,7 +315,7 @@ fn lazy_custom_style_input(
     let button_row = Row::new()
         .align_items(Alignment::Center)
         .push(
-            Text::new(get_path_termination_string(custom_path, 16))
+            Text::new(get_path_termination_string(custom_path, 17))
                 .font(font)
                 .style(if is_error {
                     TextType::Danger

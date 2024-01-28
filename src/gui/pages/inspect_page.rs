@@ -183,9 +183,9 @@ fn report_header_row(
             .font(font)
             .style(ContainerType::Neutral)
         } else {
-            let reduced_title = &chars[..max_chars - 3].iter().collect::<String>();
+            let reduced_title = &chars[..max_chars - 2].iter().collect::<String>();
             Tooltip::new(
-                Text::new([reduced_title.trim(), "..."].concat())
+                Text::new([reduced_title.trim(), "…"].concat())
                     .vertical_alignment(Vertical::Center)
                     .horizontal_alignment(Horizontal::Center)
                     .font(font),
@@ -256,7 +256,7 @@ fn row_report_entry(
                 Text::new(if col_value.len() <= max_chars {
                     col_value
                 } else {
-                    [&col_value[..max_chars - 3], "..."].concat()
+                    [&col_value[..max_chars - 2], "…"].concat()
                 })
                 .font(font)
                 .style(text_type),

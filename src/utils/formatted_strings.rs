@@ -225,7 +225,7 @@ pub fn get_path_termination_string(full_path: &str, i: usize) -> String {
     }
     let tot_len = chars.len();
     let slice_len = min(i, tot_len);
-    let suspensions = if tot_len > i { "..." } else { "" };
+    let suspensions = if tot_len > i { "…" } else { "" };
     [
         suspensions,
         &chars[tot_len - slice_len..].iter().collect::<String>(),

@@ -260,7 +260,7 @@ fn mmdb_selection_row(
         .align_items(Alignment::Center)
         .push(Text::new(format!("{caption}: ")).font(font))
         .push(
-            Text::new(get_path_termination_string(custom_path, 30))
+            Text::new(get_path_termination_string(custom_path, 25))
                 .font(font)
                 .style(if is_error {
                     TextType::Danger
