@@ -93,6 +93,7 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, Renderer<StyleType
 fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
     let content = button(
         Text::new('❤'.to_string())
+            .font(font)
             .size(23)
             .style(TextType::Sponsor)
             .horizontal_alignment(Horizontal::Center)

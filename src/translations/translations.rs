@@ -1,3 +1,5 @@
+// EXTRA NEEDED CHARACTERS: … Б
+
 use iced::widget::Text;
 use iced::Renderer;
 

@@ -47,32 +47,32 @@ impl ReportCol {
             ReportCol::SrcIp => format!(
                 "{} ({})",
                 address_translation(language),
-                source_translation(language).to_ascii_lowercase()
+                source_translation(language).to_lowercase()
             ),
             ReportCol::SrcPort => format!(
                 "{} ({})",
                 port_translation(language),
-                source_translation(language).to_ascii_lowercase()
+                source_translation(language).to_lowercase()
             ),
             ReportCol::DstIp => format!(
                 "{} ({})",
                 address_translation(language),
-                destination_translation(language).to_ascii_lowercase()
+                destination_translation(language).to_lowercase()
             ),
             ReportCol::DstPort => format!(
                 "{} ({})",
                 port_translation(language),
-                destination_translation(language).to_ascii_lowercase()
+                destination_translation(language).to_lowercase()
             ),
             ReportCol::Proto => protocol_translation(language).to_string(),
             ReportCol::AppProto => application_protocol_translation(language).to_string(),
             ReportCol::Bytes => {
                 let mut str = bytes_translation(language).to_string();
-                str.remove(0).to_ascii_uppercase().to_string() + &str
+                str.remove(0).to_uppercase().to_string() + &str
             }
             ReportCol::Packets => {
                 let mut str = packets_translation(language).to_string();
-                str.remove(0).to_ascii_uppercase().to_string() + &str
+                str.remove(0).to_uppercase().to_string() + &str
             }
         }
     }

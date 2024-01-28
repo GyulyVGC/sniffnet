@@ -192,7 +192,7 @@ pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =
     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
 pub const SARASA_MONO_BOLD: Font = Font {
-    family: Family::Name("Sarasa Mono SC"),
+    family: Family::Name("Sarasa Mono SC for Sniffnet"),
     weight: Weight::Bold,
     stretch: Stretch::Normal,
     monospaced: true,
@@ -201,7 +201,7 @@ pub const SARASA_MONO_BOLD: Font = Font {
 pub const SARASA_MONO_BYTES: &[u8] =
     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
 pub const SARASA_MONO: Font = Font {
-    family: Family::Name("Sarasa Mono SC"),
+    family: Family::Name("Sarasa Mono SC for Sniffnet"),
     weight: Weight::Normal,
     stretch: Stretch::Normal,
     monospaced: true,
@@ -209,7 +209,7 @@ pub const SARASA_MONO: Font = Font {
 
 //font to display icons
 pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
-pub const ICONS: Font = Font::with_name("Glyphter");
+pub const ICONS: Font = Font::with_name("Icons for Sniffnet");
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 14.3;
