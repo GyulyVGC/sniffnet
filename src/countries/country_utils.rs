@@ -290,10 +290,6 @@ fn get_flag_from_country(
                 tooltip = your_network_adapter_translation(language);
                 svg_style = SvgType::AdaptColor;
                 COMPUTER
-            } else if is_local {
-                tooltip = local_translation(language);
-                svg_style = SvgType::AdaptColor;
-                HOME
             } else if traffic_type.eq(&TrafficType::Multicast) {
                 tooltip = "Multicast".to_string();
                 svg_style = SvgType::AdaptColor;
@@ -302,6 +298,10 @@ fn get_flag_from_country(
                 tooltip = "Broadcast".to_string();
                 svg_style = SvgType::AdaptColor;
                 BROADCAST
+            } else if is_local {
+                tooltip = local_translation(language);
+                svg_style = SvgType::AdaptColor;
+                HOME
             } else {
                 tooltip = unknown_translation(language);
                 svg_style = SvgType::AdaptColor;
@@ -369,9 +369,9 @@ pub fn get_computer_tooltip(
 
     let tooltip = match (is_my_address, is_local, traffic_type) {
         (true, _, _) => your_network_adapter_translation(language),
+        (false, _, TrafficType::Multicast) => "Multicast".to_string(),
+        (false, _, TrafficType::Broadcast) => "Broadcast".to_string(),
         (false, true, _) => local_translation(language),
-        (false, false, TrafficType::Multicast) => "Multicast".to_string(),
-        (false, false, TrafficType::Broadcast) => "Broadcast".to_string(),
         (false, false, TrafficType::Unicast) => unknown_translation(language),
     };
 
