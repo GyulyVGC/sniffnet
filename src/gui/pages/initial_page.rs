@@ -6,7 +6,6 @@ use std::collections::HashSet;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::text::Shaping;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, Row, Rule, Scrollable,

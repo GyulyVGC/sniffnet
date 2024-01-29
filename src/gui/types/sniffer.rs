@@ -625,6 +625,8 @@ mod tests {
         BytesNotification, FavoriteNotification, Notification, Notifications, PacketsNotification,
     };
     use crate::notifications::types::sound::Sound;
+    use crate::report::types::report_col::ReportCol;
+    use crate::report::types::sort_type::SortType;
     use crate::{
         ByteMultiple, ChartType, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion,
         Language, Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
@@ -720,18 +722,59 @@ mod tests {
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_report_kind() {
+    fn test_correctly_update_report_sort_kind() {
         let mut sniffer = new_sniffer();
 
-        assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
-        sniffer.update(Message::ReportSortSelection(ReportSortType::MostBytes));
-        assert_eq!(sniffer.report_sort_type, ReportSortType::MostBytes);
-        sniffer.update(Message::ReportSortSelection(ReportSortType::MostPackets));
-        assert_eq!(sniffer.report_sort_type, ReportSortType::MostPackets);
-        sniffer.update(Message::ReportSortSelection(ReportSortType::MostPackets));
-        assert_eq!(sniffer.report_sort_type, ReportSortType::MostPackets);
-        sniffer.update(Message::ReportSortSelection(ReportSortType::MostRecent));
-        assert_eq!(sniffer.report_sort_type, ReportSortType::MostRecent);
+        let sort = ReportSortType {
+            byte_sort: SortType::Neutral,
+            packet_sort: SortType::Neutral,
+        };
+
+        assert_eq!(sniffer.report_sort_type, sort);
+        sniffer.update(Message::ReportSortSelection(
+            sort.next_sort(&ReportCol::Bytes),
+        ));
+        assert_eq!(
+            sniffer.report_sort_type,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+        sniffer.update(Message::ReportSortSelection(
+            sort.next_sort(&ReportCol::Bytes)
+                .next_sort(&ReportCol::Bytes),
+        ));
+        assert_eq!(
+            sniffer.report_sort_type,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+        sniffer.update(Message::ReportSortSelection(
+            sort.next_sort(&ReportCol::Bytes)
+                .next_sort(&ReportCol::Packets),
+        ));
+        assert_eq!(
+            sniffer.report_sort_type,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+        sniffer.update(Message::ReportSortSelection(
+            sort.next_sort(&ReportCol::Bytes)
+                .next_sort(&ReportCol::Bytes)
+                .next_sort(&ReportCol::Bytes),
+        ));
+        assert_eq!(
+            sniffer.report_sort_type,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
     }
 
     #[test]
