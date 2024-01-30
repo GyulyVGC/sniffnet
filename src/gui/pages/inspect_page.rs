@@ -165,10 +165,10 @@ fn report_header_row(
     font: Font,
     sort_type: ReportSortType,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Row::new().align_items(Alignment::Center);
+    let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
         let width = report_col.get_width();
-        let max_chars = report_col.get_max_chars(Some(language)) as usize;
+        let max_chars = report_col.get_max_chars(Some(language));
         let full_title = report_col.get_title(language);
         let chars = full_title.chars().collect::<Vec<char>>();
         let title_tooltip = if chars.len() <= max_chars {
@@ -249,7 +249,7 @@ fn row_report_entry(
     let mut ret_val = Row::new().align_items(Alignment::Center);
 
     for report_col in ReportCol::ALL {
-        let max_chars = report_col.get_max_chars(None) as usize;
+        let max_chars = report_col.get_max_chars(None);
         let col_value = report_col.get_value(key, val);
         ret_val = ret_val.push(
             Container::new(

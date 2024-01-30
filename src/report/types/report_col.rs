@@ -15,8 +15,8 @@ use crate::utils::formatted_strings::get_formatted_bytes_string;
 const LARGE_COL_WIDTH: f32 = 221.0;
 const SMALL_COL_WIDTH: f32 = 95.0;
 
-const LARGE_COL_MAX_CHARS: u8 = 25;
-const SMALL_COL_MAX_CHARS: u8 = 10;
+const LARGE_COL_MAX_CHARS: usize = 25;
+const SMALL_COL_MAX_CHARS: usize = 10;
 
 #[derive(Eq, PartialEq)]
 pub enum ReportCol {
@@ -109,7 +109,7 @@ impl ReportCol {
         }
     }
 
-    pub(crate) fn get_max_chars(&self, language_opt: Option<Language>) -> u8 {
+    pub(crate) fn get_max_chars(&self, language_opt: Option<Language>) -> usize {
         let reduction_factor = if [Language::JA, Language::KO, Language::ZH]
             .contains(&language_opt.unwrap_or(Language::EN))
         {
@@ -131,7 +131,7 @@ impl ReportCol {
             ReportCol::DstPort => FilterInputType::PortDst,
             ReportCol::Proto => FilterInputType::Proto,
             ReportCol::AppProto => FilterInputType::AppProto,
-            ReportCol::Bytes | ReportCol::Packets => panic!(),
+            ReportCol::Bytes | ReportCol::Packets => FilterInputType::Country, // just to not panic...
         }
     }
 }
