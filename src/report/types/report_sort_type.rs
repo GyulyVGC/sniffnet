@@ -85,3 +85,130 @@ impl Default for ReportSortType {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::report::types::report_col::ReportCol;
+    use crate::report::types::report_sort_type::ReportSortType;
+    use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_next_report_sort() {
+        let mut sort = ReportSortType::default();
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Ascending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+    }
+}
