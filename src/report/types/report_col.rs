@@ -44,26 +44,8 @@ impl ReportCol {
 
     pub(crate) fn get_title(&self, language: Language) -> String {
         match self {
-            ReportCol::SrcIp => format!(
-                "{} ({})",
-                address_translation(language),
-                source_translation(language).to_lowercase()
-            ),
-            ReportCol::SrcPort => format!(
-                "{} ({})",
-                port_translation(language),
-                source_translation(language).to_lowercase()
-            ),
-            ReportCol::DstIp => format!(
-                "{} ({})",
-                address_translation(language),
-                destination_translation(language).to_lowercase()
-            ),
-            ReportCol::DstPort => format!(
-                "{} ({})",
-                port_translation(language),
-                destination_translation(language).to_lowercase()
-            ),
+            ReportCol::SrcIp | ReportCol::DstIp => address_translation(language).to_string(),
+            ReportCol::SrcPort | ReportCol::DstPort => port_translation(language).to_string(),
             ReportCol::Proto => protocol_translation(language).to_string(),
             ReportCol::AppProto => application_protocol_translation(language).to_string(),
             ReportCol::Bytes => {
@@ -74,6 +56,18 @@ impl ReportCol {
                 let mut str = packets_translation(language).to_string();
                 str.remove(0).to_uppercase().to_string() + &str
             }
+        }
+    }
+
+    pub(crate) fn get_title_direction_info(&self, language: Language) -> String {
+        match self {
+            ReportCol::SrcIp | ReportCol::SrcPort => {
+                format!(" ({})", source_translation(language).to_lowercase())
+            }
+            ReportCol::DstIp | ReportCol::DstPort => {
+                format!(" ({})", destination_translation(language).to_lowercase())
+            }
+            _ => String::new(),
         }
     }
 

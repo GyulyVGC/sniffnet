@@ -169,32 +169,62 @@ fn report_header_row(
     for report_col in ReportCol::ALL {
         let width = report_col.get_width();
         let max_chars = report_col.get_max_chars(Some(language));
-        let full_title = report_col.get_title(language);
-        let chars = full_title.chars().collect::<Vec<char>>();
-        let title_tooltip = if chars.len() <= max_chars {
-            Tooltip::new(
-                Text::new(full_title)
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font),
-                "",
-                Position::FollowCursor,
-            )
-            .font(font)
-            .style(ContainerType::Neutral)
+        let title = report_col.get_title(language);
+        let title_direction_info = report_col.get_title_direction_info(language);
+        let chars_title = title.chars().collect::<Vec<char>>();
+        let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();
+        let title_tooltip = if chars_title.len() + chars_title_direction_info.len() <= max_chars {
+            let title_row = Row::new()
+                .align_items(Alignment::End)
+                .push(Text::new(title).font(font))
+                .push(
+                    Text::new(title_direction_info)
+                        .font(font)
+                        .size(FONT_SIZE_FOOTER),
+                );
+            Tooltip::new(title_row, "", Position::FollowCursor)
+                .font(font)
+                .style(ContainerType::Neutral)
         } else {
-            let reduced_title = &chars[..max_chars - 2].iter().collect::<String>();
-            Tooltip::new(
-                Text::new([reduced_title.trim(), "…"].concat())
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
+            let mut title_row = Row::new().align_items(Alignment::End);
+            if chars_title.len() > max_chars {
+                title_row = title_row.push(
+                    Text::new(
+                        [
+                            &chars_title[..max_chars - 2].iter().collect::<String>(),
+                            "…",
+                        ]
+                        .concat(),
+                    )
                     .font(font),
-                full_title,
+                );
+            } else {
+                // title length is <= max_chars, but with direction info the whole thing is too long
+                title_row = title_row.push(Text::new(title.clone()).font(font)).push(
+                    Text::new(if max_chars - chars_title.len() > 4 {
+                        [
+                            &chars_title_direction_info[..max_chars - chars_title.len() - 2]
+                                .iter()
+                                .collect::<String>(),
+                            "…",
+                        ]
+                        .concat()
+                    } else {
+                        "…".to_string()
+                    })
+                    .font(font)
+                    .size(FONT_SIZE_FOOTER),
+                );
+            };
+            Tooltip::new(
+                title_row,
+                [title, title_direction_info].concat(),
                 Position::FollowCursor,
             )
             .font(font)
             .style(ContainerType::Tooltip)
         };
+
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
             .width(Length::Fixed(width))
@@ -288,7 +318,7 @@ fn host_filters_col(
         ));
     }
 
-    let input_country = filter_input(FilterInputType::Country, 80.0, search_params.clone(), font);
+    let input_country = filter_input(FilterInputType::Country, 95.0, search_params.clone(), font);
     let input_domain = filter_input(FilterInputType::Domain, 180.0, search_params.clone(), font);
     let input_as_name = filter_input(FilterInputType::AsName, 180.0, search_params.clone(), font);
 
