@@ -193,11 +193,15 @@ fn report_header_row(
             .height(Length::Fixed(60.0))
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
-            col_header = col_header.push(filter_input(
-                report_col.get_filter_input_type(),
-                search_params.clone(),
-                font,
-            ));
+            col_header = col_header.push(
+                Container::new(filter_input(
+                    report_col.get_filter_input_type(),
+                    search_params.clone(),
+                    font,
+                ))
+                .height(Length::Fill)
+                .align_y(Vertical::Center),
+            );
         } else {
             col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
@@ -361,12 +365,12 @@ fn host_filters_col(
             )
             .padding([5, 0]),
         )
-        .push(container_country);
+        .push(container_domain);
 
     let col2 = Column::new()
         .align_items(Alignment::Start)
         .spacing(5)
-        .push(container_domain)
+        .push(container_country)
         .push(container_as_name);
 
     Column::new()
