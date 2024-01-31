@@ -168,7 +168,6 @@ fn report_header_row(
 ) -> Row<'static, Message, Renderer<StyleType>> {
     let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
-        let width = report_col.get_width();
         let (title_display, title_small_display, tooltip_val) =
             title_report_col_display(&report_col, language);
         let title_row = Row::new()
@@ -190,13 +189,12 @@ fn report_header_row(
 
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
-            .width(Length::Fixed(width))
+            .width(Length::Fixed(report_col.get_width()))
             .height(Length::Fixed(60.0))
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
             col_header = col_header.push(filter_input(
                 report_col.get_filter_input_type(),
-                width,
                 search_params.clone(),
                 font,
             ));
@@ -316,9 +314,12 @@ fn host_filters_col(
         ));
     }
 
-    let input_country = filter_input(FilterInputType::Country, 95.0, search_params.clone(), font);
-    let input_domain = filter_input(FilterInputType::Domain, 180.0, search_params.clone(), font);
-    let input_as_name = filter_input(FilterInputType::AsName, 180.0, search_params.clone(), font);
+    let input_country = filter_input(FilterInputType::Country, search_params.clone(), font)
+        .width(Length::Fixed(95.0));
+    let input_domain = filter_input(FilterInputType::Domain, search_params.clone(), font)
+        .width(Length::Fixed(190.0));
+    let input_as_name = filter_input(FilterInputType::AsName, search_params.clone(), font)
+        .width(Length::Fixed(190.0));
 
     let container_country = Row::new()
         .spacing(5)
@@ -383,7 +384,6 @@ fn host_filters_col(
 
 fn filter_input(
     filter_input_type: FilterInputType,
-    width: f32,
     search_params: SearchParameters,
     font: Font,
 ) -> Container<'static, Message, Renderer<StyleType>> {
@@ -399,11 +399,7 @@ fn filter_input(
         .padding([2, 5])
         .size(FONT_SIZE_FOOTER)
         .font(font)
-        .width(Length::Fixed(if is_filter_active {
-            width - 45.0
-        } else {
-            width
-        }))
+        .width(Length::Fill)
         .style(if is_filter_active {
             TextInputType::Badge
         } else {
@@ -421,7 +417,6 @@ fn filter_input(
     }
 
     let mut content = Row::new()
-        .height(Length::Fill)
         .spacing(5)
         .align_items(Alignment::Center)
         .push(input);
@@ -546,10 +541,7 @@ mod tests {
                         .concat()
                     );
                     // displayed values have max len -1 (they include "…" that counts for 2 units)
-                    assert_eq!(
-                        title_chars.len() + title_small_chars.len(),
-                        report_col.get_max_chars(Some(language)) - 1
-                    );
+                    assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
                     if title != report_col.get_title(language) {
                         // first title part is not full, so second one is suspensions
                         assert_eq!(title_small, "…");
