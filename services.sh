@@ -16,11 +16,11 @@ OUT=./src/networking/services.rs
 
 curl https://raw.githubusercontent.com/nmap/nmap/master/nmap-services \
  | grep -E '/tcp|/udp' \
- | grep -E -v '^unknown|^#' \
+ | grep -E -v '^unknown\t|^#|^\?\t|^\-\t' \
  | cut -d$'\t' -f 1,2 \
  | tr '/' '\t' \
  | awk -F $'\t' '{printf("%s\t(%s, Protocol::%s)\n", $1, $2, toupper($3))}' \
- | datamash -s --collapse-delimiter '|' groupby 1 collapse 2 \
+ | datamash -s -c '|' groupby 1 collapse 2 \
  | awk -F $'\t' '{printf("\t\t%s => \"%s\",\n", $2, $1)}' >> $OUT
 
 {
