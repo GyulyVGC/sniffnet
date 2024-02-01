@@ -1,13 +1,13 @@
 use std::fmt;
 use std::thread;
 
-use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
 use iced::{Font, Length, Renderer};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
+use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::notifications::types::sound::Sound::{Gulp, Pop, Swhoosh};
 use crate::utils::types::icon::Icon;
 use crate::StyleType;
@@ -43,10 +43,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(
-        self,
-        font: Font,
-    ) -> iced::advanced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, Renderer<StyleType>> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),

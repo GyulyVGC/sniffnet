@@ -6,7 +6,6 @@ use std::collections::HashSet;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::text::Shaping;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     button, horizontal_space, vertical_space, Button, Column, Container, Row, Rule, Scrollable,
@@ -119,7 +118,6 @@ fn col_ip_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),
@@ -160,7 +158,6 @@ fn col_protocol_buttons(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
                     .width(Length::Fill)
-                    .shaping(Shaping::Advanced)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),

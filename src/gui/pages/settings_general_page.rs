@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
-use iced::advanced::widget::Text;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider,
+    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider, Text,
     Tooltip,
 };
 use iced::Length::Fixed;
@@ -261,7 +260,7 @@ fn mmdb_selection_row(
         .align_items(Alignment::Center)
         .push(Text::new(format!("{caption}: ")).font(font))
         .push(
-            Text::new(get_path_termination_string(custom_path, 30))
+            Text::new(get_path_termination_string(custom_path, 25))
                 .font(font)
                 .style(if is_error {
                     TextType::Danger

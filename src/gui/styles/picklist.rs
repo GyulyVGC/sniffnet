@@ -2,10 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::pick_list;
 use iced::{Background, Color};
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::gui::styles::types::palette::mix_colors;
 use crate::StyleType;
 

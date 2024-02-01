@@ -170,28 +170,28 @@ pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn sort_by_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Sort by",
-        Language::IT => "Ordina per",
-        Language::RU => "Сортировка",
-        Language::SV => "Sortera efter",
-        Language::FI => "Järjestä",
-        Language::DE => "Sortieren nach",
-        Language::TR => "Şuna göre sırala",
-        // Language::FA => "مرتب سازی بر اساس",
-        Language::ES | Language::PT => "Ordenar por",
-        Language::KO => "정렬",
-        Language::ZH => "排序",
-        Language::UK => "Сортувати за",
-        Language::RO => "Filtrează după",
-        Language::PL => "Sortuj według",
-        Language::FR => "Trier par",
-        Language::JA => "ソート",
-        Language::UZ => "Saralash turi",
-        _ => "Sort by",
-    }
-}
+// pub fn sort_by_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Sort by",
+//         Language::IT => "Ordina per",
+//         Language::RU => "Сортировка",
+//         Language::SV => "Sortera efter",
+//         Language::FI => "Järjestä",
+//         Language::DE => "Sortieren nach",
+//         Language::TR => "Şuna göre sırala",
+//         // Language::FA => "مرتب سازی بر اساس",
+//         Language::ES | Language::PT => "Ordenar por",
+//         Language::KO => "정렬",
+//         Language::ZH => "排序",
+//         Language::UK => "Сортувати за",
+//         Language::RO => "Filtrează după",
+//         Language::PL => "Sortuj według",
+//         Language::FR => "Trier par",
+//         Language::JA => "ソート",
+//         Language::UZ => "Saralash turi",
+//         _ => "Sort by",
+//     }
+// }
 
 pub fn local_translation(language: Language) -> String {
     match language {
@@ -504,29 +504,29 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn search_filters_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Search filters",
-        Language::IT => "Filtri di ricerca",
-        Language::RU => "Фильтры для поиска",
-        Language::SV => "Sökfilter",
-        Language::FI => "Hakusuodattimet",
-        Language::DE => "Filter suchen",
-        Language::TR => "Arama filtresi",
-        // Language::FA => "صافی های جستجو",
-        Language::ES => "Filtros de búsqueda",
-        Language::KO => "검색 필터",
-        Language::ZH => "搜索条件",
-        Language::UK => "Фільтри пошуку",
-        Language::RO => "Filtre de căutare",
-        Language::PL => "Filtry wyszukiwania",
-        Language::FR => "Filtres de recherche",
-        Language::JA => "検索フィルター",
-        Language::UZ => "Qidiruv filtrlari",
-        Language::PT => "Filtros de busca",
-        _ => "Search filters",
-    }
-}
+// pub fn search_filters_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Search filters",
+//         Language::IT => "Filtri di ricerca",
+//         Language::RU => "Фильтры для поиска",
+//         Language::SV => "Sökfilter",
+//         Language::FI => "Hakusuodattimet",
+//         Language::DE => "Filter suchen",
+//         Language::TR => "Arama filtresi",
+//         // Language::FA => "صافی های جستجو",
+//         Language::ES => "Filtros de búsqueda",
+//         Language::KO => "검색 필터",
+//         Language::ZH => "搜索条件",
+//         Language::UK => "Фільтри пошуку",
+//         Language::RO => "Filtre de căutare",
+//         Language::PL => "Filtry wyszukiwania",
+//         Language::FR => "Filtres de recherche",
+//         Language::JA => "検索フィルター",
+//         Language::UZ => "Qidiruv filtrlari",
+//         Language::PT => "Filtros de busca",
+//         _ => "Search filters",
+//     }
+// }
 
 pub fn no_search_results_translation(language: Language) -> &'static str {
     match language {

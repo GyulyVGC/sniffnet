@@ -1,31 +1,216 @@
-use crate::translations::translations::{
-    bytes_report_translation, packets_report_translation, recent_report_translation,
-};
-use crate::Language;
+use std::fmt::Debug;
 
-/// Enum representing the possible kinds of displayed relevant connections.
+use iced::widget::Text;
+use iced::Renderer;
+
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::types::style_type::StyleType;
+use crate::report::types::report_col::ReportCol;
+use crate::report::types::sort_type::SortType;
+use crate::utils::types::icon::Icon;
+
+/// Struct representing the possible kinds of sort for displayed relevant connections.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[allow(clippy::enum_variant_names)]
-pub enum ReportSortType {
-    MostRecent,
-    MostBytes,
-    MostPackets,
+pub struct ReportSortType {
+    pub byte_sort: SortType,
+    pub packet_sort: SortType,
 }
 
 impl ReportSortType {
-    pub fn all_strings(language: Language) -> Vec<&'static str> {
-        vec![
-            recent_report_translation(language),
-            bytes_report_translation(language),
-            packets_report_translation(language),
-        ]
+    pub fn next_sort(self, report_col: &ReportCol) -> Self {
+        match report_col {
+            ReportCol::Bytes => Self {
+                byte_sort: match self.byte_sort {
+                    SortType::Ascending => SortType::Neutral,
+                    SortType::Descending => SortType::Ascending,
+                    SortType::Neutral => SortType::Descending,
+                },
+                packet_sort: SortType::Neutral,
+            },
+            ReportCol::Packets => Self {
+                byte_sort: SortType::Neutral,
+                packet_sort: match self.packet_sort {
+                    SortType::Ascending => SortType::Neutral,
+                    SortType::Descending => SortType::Ascending,
+                    SortType::Neutral => SortType::Descending,
+                },
+            },
+            _ => Self::default(),
+        }
     }
 
-    pub fn get_picklist_label(self, language: Language) -> &'static str {
-        match self {
-            ReportSortType::MostRecent => recent_report_translation(language),
-            ReportSortType::MostBytes => bytes_report_translation(language),
-            ReportSortType::MostPackets => packets_report_translation(language),
+    pub fn icon(self, report_col: &ReportCol) -> Text<'static, Renderer<StyleType>> {
+        let mut size = 14;
+        match report_col {
+            ReportCol::Bytes => match self.byte_sort {
+                SortType::Ascending => Icon::SortAscending,
+                SortType::Descending => Icon::SortDescending,
+                SortType::Neutral => {
+                    size = 18;
+                    Icon::SortNeutral
+                }
+            },
+            ReportCol::Packets => match self.packet_sort {
+                SortType::Ascending => Icon::SortAscending,
+                SortType::Descending => Icon::SortDescending,
+                SortType::Neutral => {
+                    size = 18;
+                    Icon::SortNeutral
+                }
+            },
+            _ => Icon::SortNeutral,
         }
+        .to_text()
+        .size(size)
+    }
+
+    pub fn button_type(self, report_col: &ReportCol) -> ButtonType {
+        match report_col {
+            ReportCol::Bytes => match self.byte_sort {
+                SortType::Ascending | SortType::Descending => ButtonType::SortArrowActive,
+                SortType::Neutral => ButtonType::SortArrows,
+            },
+            ReportCol::Packets => match self.packet_sort {
+                SortType::Ascending | SortType::Descending => ButtonType::SortArrowActive,
+                SortType::Neutral => ButtonType::SortArrows,
+            },
+            _ => ButtonType::SortArrows,
+        }
+    }
+}
+
+impl Default for ReportSortType {
+    fn default() -> Self {
+        Self {
+            byte_sort: SortType::Neutral,
+            packet_sort: SortType::Neutral,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::report::types::report_col::ReportCol;
+    use crate::report::types::report_sort_type::ReportSortType;
+    use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_next_report_sort() {
+        let mut sort = ReportSortType::default();
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Ascending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
     }
 }

@@ -11,4 +11,5 @@ pub mod style_constants;
 pub mod svg;
 pub mod text;
 pub mod text_input;
+mod toggler;
 pub mod types;

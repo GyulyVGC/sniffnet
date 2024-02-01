@@ -1,3 +1,5 @@
+// EXTRA NEEDED CHARACTERS: Б
+
 use iced::widget::Text;
 use iced::Renderer;
 
@@ -167,28 +169,28 @@ pub fn ip_version_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn transport_protocol_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Transport protocol",
-        Language::IT => "Protocollo di trasporto",
-        Language::FR => "Protocole de transport",
-        Language::ES | Language::PT => "Protocolo de transporte",
-        Language::PL => "Protokół transportowy",
-        Language::DE => "Netzwerkprotokoll",
-        Language::UK => "Транспортний протокол",
-        Language::ZH => "目标传输协议",
-        Language::RO => "Protocol de transport",
-        Language::KO => "전송 프로토콜",
-        Language::TR => "İletişim protokolü",
-        Language::RU => "Транспортный протокол",
-        Language::EL => "Πρωτόκολλο μεταφοράς",
-        // Language::FA => "پیوندنامهٔ ترابرد",
-        Language::SV => "Transportprotokoll",
-        Language::FI => "Kuljetusprotokolla",
-        Language::JA => "トランスポート プロトコル",
-        Language::UZ => "Transport protokoli",
-    }
-}
+// pub fn transport_protocol_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Transport protocol",
+//         Language::IT => "Protocollo di trasporto",
+//         Language::FR => "Protocole de transport",
+//         Language::ES | Language::PT => "Protocolo de transporte",
+//         Language::PL => "Protokół transportowy",
+//         Language::DE => "Netzwerkprotokoll",
+//         Language::UK => "Транспортний протокол",
+//         Language::ZH => "目标传输协议",
+//         Language::RO => "Protocol de transport",
+//         Language::KO => "전송 프로토콜",
+//         Language::TR => "İletişim protokolü",
+//         Language::RU => "Транспортный протокол",
+//         Language::EL => "Πρωτόκολλο μεταφοράς",
+//         // Language::FA => "پیوندنامهٔ ترابرد",
+//         Language::SV => "Transportprotokoll",
+//         Language::FI => "Kuljetusprotokolla",
+//         Language::JA => "トランスポート プロトコル",
+//         Language::UZ => "Transport protokoli",
+//     }
+// }
 
 pub fn protocol_translation(language: Language) -> &'static str {
     match language {
@@ -378,7 +380,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, Renderer<S
 pub fn clear_all_translation(language: Language) -> String {
     match language {
         Language::EN => "Clear all".to_string(),
-        Language::IT => "Elimina tutte".to_string(),
+        Language::IT => "Elimina tutto".to_string(),
         Language::FR => "Tout effacer".to_string(),
         Language::ES => "Borrar todo".to_string(),
         Language::PL => "Wyczyść wszystko".to_string(),
@@ -1024,77 +1026,77 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn recent_report_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "most recent",
-        Language::IT => "più recenti",
-        Language::FR => "la plus récente",
-        Language::ES => "más reciente",
-        Language::PL => "najnowsze",
-        Language::DE => "zuletzt",
-        Language::UK => "найновіші",
-        Language::ZH => "按时间",
-        Language::RO => "cea mai recentă",
-        Language::KO => "가장 최근",
-        Language::TR => "en son",
-        Language::RU => "новейшие",
-        Language::PT => "mais recente",
-        Language::EL => "πιο πρόσφατα",
-        // Language::FA => "آخرین",
-        Language::SV => "senaste",
-        Language::FI => "viimeisin",
-        Language::JA => "新しい順",
-        Language::UZ => "eng so'nggi",
-    }
-}
+// pub fn recent_report_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "most recent",
+//         Language::IT => "più recenti",
+//         Language::FR => "la plus récente",
+//         Language::ES => "más reciente",
+//         Language::PL => "najnowsze",
+//         Language::DE => "zuletzt",
+//         Language::UK => "найновіші",
+//         Language::ZH => "按时间",
+//         Language::RO => "cea mai recentă",
+//         Language::KO => "가장 최근",
+//         Language::TR => "en son",
+//         Language::RU => "новейшие",
+//         Language::PT => "mais recente",
+//         Language::EL => "πιο πρόσφατα",
+//         // Language::FA => "آخرین",
+//         Language::SV => "senaste",
+//         Language::FI => "viimeisin",
+//         Language::JA => "新しい順",
+//         Language::UZ => "eng so'nggi",
+//     }
+// }
 
-pub fn packets_report_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "most packets",
-        Language::IT => "più pacchetti",
-        Language::FR => "le plus de paquets",
-        Language::ES => "mayoría de los paquetes",
-        Language::PL => "najwięcej pakietów",
-        Language::DE => "meiste Pakete",
-        Language::UK => "найбільше пакетів",
-        Language::ZH => "按数据包",
-        Language::RO => "cele mai multe pachete",
-        Language::KO => "대부분의 패킷",
-        Language::TR => "en çok paket",
-        Language::RU => "больше всего пакетов",
-        Language::PT => "mais pacotes",
-        Language::EL => "περισσότερα πακέτα",
-        // Language::FA => "بیشترین بسته ها",
-        Language::SV => "flest paket",
-        Language::FI => "eniten paketteja",
-        Language::JA => "パケット数の多い順",
-        Language::UZ => "eng ko'p paketlar",
-    }
-}
+// pub fn packets_report_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "most packets",
+//         Language::IT => "più pacchetti",
+//         Language::FR => "le plus de paquets",
+//         Language::ES => "mayoría de los paquetes",
+//         Language::PL => "najwięcej pakietów",
+//         Language::DE => "meiste Pakete",
+//         Language::UK => "найбільше пакетів",
+//         Language::ZH => "按数据包",
+//         Language::RO => "cele mai multe pachete",
+//         Language::KO => "대부분의 패킷",
+//         Language::TR => "en çok paket",
+//         Language::RU => "больше всего пакетов",
+//         Language::PT => "mais pacotes",
+//         Language::EL => "περισσότερα πακέτα",
+//         // Language::FA => "بیشترین بسته ها",
+//         Language::SV => "flest paket",
+//         Language::FI => "eniten paketteja",
+//         Language::JA => "パケット数の多い順",
+//         Language::UZ => "eng ko'p paketlar",
+//     }
+// }
 
-pub fn bytes_report_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "most bytes",
-        Language::IT => "più byte",
-        Language::FR => "le plus de données",
-        Language::ES => "mayoría de los bytes",
-        Language::PL => "najwięcej bajtów",
-        Language::DE => "meiste Bytes",
-        Language::UK => "найбільше байтів",
-        Language::ZH => "按流量",
-        Language::RO => "cei mai mulți octeți",
-        Language::KO => "대부분의 바이트",
-        Language::TR => "en çok bayt",
-        Language::RU => "больше всего байт",
-        Language::PT => "mais bytes",
-        Language::EL => "περισσότερα bytes",
-        // Language::FA => "بیشترین بایت ها",
-        Language::SV => "flest bytes",
-        Language::FI => "eniten tavuja",
-        Language::JA => "バイト量の多い順",
-        Language::UZ => "eng ko'p bayt",
-    }
-}
+// pub fn bytes_report_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "most bytes",
+//         Language::IT => "più byte",
+//         Language::FR => "le plus de données",
+//         Language::ES => "mayoría de los bytes",
+//         Language::PL => "najwięcej bajtów",
+//         Language::DE => "meiste Bytes",
+//         Language::UK => "найбільше байтів",
+//         Language::ZH => "按流量",
+//         Language::RO => "cei mai mulți octeți",
+//         Language::KO => "대부분의 바이트",
+//         Language::TR => "en çok bayt",
+//         Language::RU => "больше всего байт",
+//         Language::PT => "mais bytes",
+//         Language::EL => "περισσότερα bytes",
+//         // Language::FA => "بیشترین بایت ها",
+//         Language::SV => "flest bytes",
+//         Language::FI => "eniten tavuja",
+//         Language::JA => "バイト量の多い順",
+//         Language::UZ => "eng ko'p bayt",
+//     }
+// }
 
 // pub fn favorite_report_translation(language: Language) -> &'static str {
 //     match language {

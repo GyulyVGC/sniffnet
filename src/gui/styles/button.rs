@@ -26,6 +26,8 @@ pub enum ButtonType {
     Neutral,
     Alert,
     Gradient(GradientType),
+    SortArrows,
+    SortArrowActive,
 }
 
 impl button::StyleSheet for StyleType {
@@ -44,9 +46,10 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 }),
-                ButtonType::Neutral | ButtonType::NotStarred => {
-                    Background::Color(Color::TRANSPARENT)
-                }
+                ButtonType::Neutral
+                | ButtonType::NotStarred
+                | ButtonType::SortArrows
+                | ButtonType::SortArrowActive => Background::Color(Color::TRANSPARENT),
                 ButtonType::Gradient(GradientType::None) => Background::Color(colors.secondary),
                 ButtonType::Gradient(gradient_type) => Background::Gradient(get_gradient_buttons(
                     &colors,
@@ -66,6 +69,8 @@ impl button::StyleSheet for StyleType {
             border_width: match style {
                 ButtonType::TabActive
                 | ButtonType::TabInactive
+                | ButtonType::SortArrows
+                | ButtonType::SortArrowActive
                 | ButtonType::Starred
                 | ButtonType::NotStarred
                 | ButtonType::Neutral => 0.0,
@@ -78,6 +83,11 @@ impl button::StyleSheet for StyleType {
             },
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
+                ButtonType::SortArrows => Color {
+                    a: if ext.is_nightly { 0.2 } else { 0.7 },
+                    ..colors.text_body
+                },
+                ButtonType::SortArrowActive => colors.secondary,
                 ButtonType::Gradient(_) => colors.text_headers,
                 _ => colors.text_body,
             },
@@ -97,12 +107,17 @@ impl button::StyleSheet for StyleType {
         let ext = self.get_extension();
         button::Appearance {
             shadow_offset: match style {
-                ButtonType::Neutral => Vector::default(),
+                ButtonType::Neutral | ButtonType::SortArrows | ButtonType::SortArrowActive => {
+                    Vector::default()
+                }
                 ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
                 _ => Vector::new(0.0, 2.0),
             },
             background: Some(match style {
                 ButtonType::Starred => Background::Color(colors.starred),
+                ButtonType::SortArrows | ButtonType::SortArrowActive => {
+                    Background::Color(Color::TRANSPARENT)
+                }
                 ButtonType::Neutral => Background::Color(Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
@@ -125,6 +140,8 @@ impl button::StyleSheet for StyleType {
             border_width: match style {
                 ButtonType::Starred
                 | ButtonType::TabActive
+                | ButtonType::SortArrows
+                | ButtonType::SortArrowActive
                 | ButtonType::TabInactive
                 | ButtonType::BorderedRound => 0.0,
                 _ => BORDER_WIDTH,
@@ -141,6 +158,7 @@ impl button::StyleSheet for StyleType {
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
                 ButtonType::Gradient(_) => colors.text_headers,
+                ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
         }

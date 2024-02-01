@@ -30,6 +30,7 @@ use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::configs::types::config_window::{ConfigWindow, ToPosition};
 use crate::configs::types::configs::Configs;
+use crate::gui::app::FONT_FAMILY_NAME;
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
@@ -106,7 +107,7 @@ pub fn main() -> iced::Result {
             ..Default::default()
         },
         flags: Sniffer::new(&configs1, newer_release_available1),
-        default_font: Font::with_name("Sarasa Mono SC"),
+        default_font: Font::with_name(FONT_FAMILY_NAME),
         default_text_size: FONT_SIZE_BODY,
         antialiasing: false,
         exit_on_close_request: false,

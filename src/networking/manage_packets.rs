@@ -344,11 +344,11 @@ fn get_traffic_direction(
     if my_interface_addresses_string.contains(source_ip) {
         // source is local
         TrafficDirection::Outgoing
-    } else if source_ip.ne("0.0.0.0") {
-        // source not local and different from 0.0.0.0
+    } else if source_ip.ne("0.0.0.0") && source_ip.ne("::") {
+        // source not local and different from 0.0.0.0 and different from ::
         TrafficDirection::Incoming
     } else if !my_interface_addresses_string.contains(destination_ip) {
-        // source is 0.0.0.0 (local not yet assigned an IP) and destination is not local
+        // source is 0.0.0.0 or :: (local not yet assigned an IP) and destination is not local
         TrafficDirection::Outgoing
     } else {
         TrafficDirection::Incoming

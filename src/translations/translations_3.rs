@@ -124,3 +124,11 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         _ => "Select database file",
     }
 }
+
+pub fn filter_by_host_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Filter by network host",
+        Language::IT => "Filtra per host di rete",
+        _ => "Filter by network host",
+    }
+}

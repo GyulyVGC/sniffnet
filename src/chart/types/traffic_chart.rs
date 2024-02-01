@@ -8,6 +8,7 @@ use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
+use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
@@ -136,7 +137,7 @@ impl Chart<Message> for TrafficChart {
             .y_max_light_lines(1)
             .y_labels(7)
             .label_style(
-                ("Sarasa Mono SC", 12)
+                (FONT_FAMILY_NAME, 12.5)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),
@@ -144,7 +145,7 @@ impl Chart<Message> for TrafficChart {
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
-                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()))
+                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()), 0)
             })
             .draw()
             .unwrap();
@@ -196,7 +197,7 @@ impl Chart<Message> for TrafficChart {
             .background_style(buttons_color.mix(0.6))
             .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
             .label_font(
-                ("Sarasa Mono SC", 13.5)
+                (FONT_FAMILY_NAME, 13.5)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),
