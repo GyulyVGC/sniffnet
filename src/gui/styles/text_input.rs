@@ -2,10 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::text_input::Appearance;
 use iced::{Background, Color};
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
 
 #[derive(Clone, Copy, Default)]

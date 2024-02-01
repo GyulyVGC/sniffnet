@@ -1,11 +1,13 @@
+use std::fmt::Debug;
+
+use iced::widget::Text;
+use iced::Renderer;
+
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::icon::Icon;
-use iced::widget::Text;
-use iced::Renderer;
-use std::fmt::Debug;
 
 /// Struct representing the possible kinds of sort for displayed relevant connections.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

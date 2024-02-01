@@ -1,9 +1,9 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
-use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
 
+use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 

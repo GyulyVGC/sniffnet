@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
@@ -5,7 +7,6 @@ use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Toggler, Tooltip};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Renderer};
-use std::cmp::min;
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -78,6 +79,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             font,
             sniffer.report_sort_type,
         ))
+        .push(vertical_space(4))
         .push(Rule::horizontal(5))
         .push(report);
 
@@ -91,7 +93,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             Container::new(col_report)
                 .align_y(Vertical::Center)
                 .align_x(Horizontal::Center)
-                .padding([10, 7, 7, 7])
+                .padding([10, 7, 3, 7])
                 .width(Length::Fixed(1042.0))
                 .style(ContainerType::BorderedRound),
         );
@@ -190,7 +192,7 @@ fn report_header_row(
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
             .width(Length::Fixed(report_col.get_width()))
-            .height(Length::Fixed(60.0))
+            .height(Length::Fixed(56.0))
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
             col_header = col_header.push(
