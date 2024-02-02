@@ -51,10 +51,10 @@ ctrlc = { version = "3.4.2", features = ["termination"] }
 rfd = "0.13.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.11.23", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+reqwest = { version = "0.11.24", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.11.23", features = ["json", "blocking"] }
+reqwest = { version = "0.11.24", features = ["json", "blocking"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
