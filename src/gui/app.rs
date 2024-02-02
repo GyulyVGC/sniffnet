@@ -33,6 +33,9 @@ use crate::{ConfigSettings, StyleType, SNIFFNET_TITLECASE};
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
 
+pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
+pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
+
 impl Application for Sniffer {
     type Executor = executor::Default;
     type Message = Message;

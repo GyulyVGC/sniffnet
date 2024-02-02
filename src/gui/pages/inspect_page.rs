@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
@@ -77,6 +79,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             font,
             sniffer.report_sort_type,
         ))
+        .push(vertical_space(4))
         .push(Rule::horizontal(5))
         .push(report);
 
@@ -90,7 +93,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             Container::new(col_report)
                 .align_y(Vertical::Center)
                 .align_x(Horizontal::Center)
-                .padding([10, 7, 7, 7])
+                .padding([10, 7, 3, 7])
                 .width(Length::Fixed(1042.0))
                 .style(ContainerType::BorderedRound),
         );
@@ -165,54 +168,83 @@ fn report_header_row(
     font: Font,
     sort_type: ReportSortType,
 ) -> Row<'static, Message, Renderer<StyleType>> {
-    let mut ret_val = Row::new().align_items(Alignment::Center);
+    let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
-        let width = report_col.get_width();
-        let max_chars = report_col.get_max_chars(Some(language)) as usize;
-        let full_title = report_col.get_title(language);
-        let chars = full_title.chars().collect::<Vec<char>>();
-        let title_tooltip = if chars.len() <= max_chars {
-            Tooltip::new(
-                Text::new(full_title)
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font),
-                "",
-                Position::FollowCursor,
-            )
-            .font(font)
-            .style(ContainerType::Neutral)
+        let (title_display, title_small_display, tooltip_val) =
+            title_report_col_display(&report_col, language);
+        let title_row = Row::new()
+            .align_items(Alignment::End)
+            .push(Text::new(title_display).font(font))
+            .push(
+                Text::new(title_small_display)
+                    .font(font)
+                    .size(FONT_SIZE_FOOTER),
+            );
+        let tooltip_style = if tooltip_val.is_empty() {
+            ContainerType::Neutral
         } else {
-            let reduced_title = &chars[..max_chars - 2].iter().collect::<String>();
-            Tooltip::new(
-                Text::new([reduced_title.trim(), "…"].concat())
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
-                    .font(font),
-                full_title,
-                Position::FollowCursor,
-            )
-            .font(font)
-            .style(ContainerType::Tooltip)
+            ContainerType::Tooltip
         };
+        let title_tooltip = Tooltip::new(title_row, tooltip_val, Position::FollowCursor)
+            .font(font)
+            .style(tooltip_style);
+
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
-            .width(Length::Fixed(width))
-            .height(Length::Fixed(60.0))
+            .width(Length::Fixed(report_col.get_width()))
+            .height(Length::Fixed(56.0))
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
-            col_header = col_header.push(filter_input(
-                report_col.get_filter_input_type(),
-                width,
-                search_params.clone(),
-                font,
-            ));
+            col_header = col_header.push(
+                Container::new(filter_input(
+                    report_col.get_filter_input_type(),
+                    search_params.clone(),
+                    font,
+                ))
+                .height(Length::Fill)
+                .align_y(Vertical::Center),
+            );
         } else {
             col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
         ret_val = ret_val.push(col_header);
     }
     ret_val
+}
+
+fn title_report_col_display(
+    report_col: &ReportCol,
+    language: Language,
+) -> (String, String, String) {
+    let max_chars = report_col.get_max_chars(Some(language));
+    let title = report_col.get_title(language);
+    let title_direction_info = report_col.get_title_direction_info(language);
+    let chars_title = title.chars().collect::<Vec<char>>();
+    let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();
+    if chars_title.len() + chars_title_direction_info.len() <= max_chars {
+        (title, title_direction_info, String::new())
+    } else if chars_title.len() >= max_chars - 4 {
+        (
+            chars_title[..min(max_chars - 2, chars_title.len())]
+                .iter()
+                .collect::<String>(),
+            String::from("…"),
+            [title, title_direction_info].concat(),
+        )
+    } else {
+        // title length is < max_chars - 4, but with direction info the whole thing is too long
+        (
+            title.clone(),
+            [
+                &chars_title_direction_info[..max_chars - chars_title.len() - 2]
+                    .iter()
+                    .collect::<String>(),
+                "…",
+            ]
+            .concat(),
+            [title, title_direction_info].concat(),
+        )
+    }
 }
 
 fn sort_arrows(
@@ -249,7 +281,7 @@ fn row_report_entry(
     let mut ret_val = Row::new().align_items(Alignment::Center);
 
     for report_col in ReportCol::ALL {
-        let max_chars = report_col.get_max_chars(None) as usize;
+        let max_chars = report_col.get_max_chars(None);
         let col_value = report_col.get_value(key, val);
         ret_val = ret_val.push(
             Container::new(
@@ -288,9 +320,12 @@ fn host_filters_col(
         ));
     }
 
-    let input_country = filter_input(FilterInputType::Country, 80.0, search_params.clone(), font);
-    let input_domain = filter_input(FilterInputType::Domain, 180.0, search_params.clone(), font);
-    let input_as_name = filter_input(FilterInputType::AsName, 180.0, search_params.clone(), font);
+    let input_country = filter_input(FilterInputType::Country, search_params.clone(), font)
+        .width(Length::Fixed(95.0));
+    let input_domain = filter_input(FilterInputType::Domain, search_params.clone(), font)
+        .width(Length::Fixed(190.0));
+    let input_as_name = filter_input(FilterInputType::AsName, search_params.clone(), font)
+        .width(Length::Fixed(190.0));
 
     let container_country = Row::new()
         .spacing(5)
@@ -332,12 +367,12 @@ fn host_filters_col(
             )
             .padding([5, 0]),
         )
-        .push(container_country);
+        .push(container_domain);
 
     let col2 = Column::new()
         .align_items(Alignment::Start)
         .spacing(5)
-        .push(container_domain)
+        .push(container_country)
         .push(container_as_name);
 
     Column::new()
@@ -355,7 +390,6 @@ fn host_filters_col(
 
 fn filter_input(
     filter_input_type: FilterInputType,
-    width: f32,
     search_params: SearchParameters,
     font: Font,
 ) -> Container<'static, Message, Renderer<StyleType>> {
@@ -371,11 +405,7 @@ fn filter_input(
         .padding([2, 5])
         .size(FONT_SIZE_FOOTER)
         .font(font)
-        .width(Length::Fixed(if is_filter_active {
-            width - 45.0
-        } else {
-            width
-        }))
+        .width(Length::Fill)
         .style(if is_filter_active {
             TextInputType::Badge
         } else {
@@ -393,7 +423,6 @@ fn filter_input(
     }
 
     let mut content = Row::new()
-        .height(Length::Fill)
         .spacing(5)
         .align_items(Alignment::Center)
         .push(input);
@@ -483,4 +512,82 @@ fn button_clear_filter(
     .height(Length::Fixed(20.0))
     .width(Length::Fixed(20.0))
     .on_press(Message::Search(new_search_parameters))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::gui::pages::inspect_page::title_report_col_display;
+    use crate::report::types::report_col::ReportCol;
+    use crate::translations::types::language::Language;
+
+    #[test]
+    fn test_table_titles_display_and_tooltip_values_for_each_language() {
+        // check glyph len when adding new language...
+        assert_eq!(Language::ALL.len(), 18);
+        for report_col in ReportCol::ALL {
+            for language in Language::ALL {
+                let (title, title_small, tooltip_val) =
+                    title_report_col_display(&report_col, language);
+                let title_chars = title.chars().collect::<Vec<char>>();
+                let title_small_chars = title_small.chars().collect::<Vec<char>>();
+                let max_chars = report_col.get_max_chars(Some(language));
+                if tooltip_val.is_empty() {
+                    // all is entirely displayed
+                    assert!(title_chars.len() + title_small_chars.len() <= max_chars);
+                    assert_eq!(title, report_col.get_title(language));
+                    assert_eq!(title_small, report_col.get_title_direction_info(language));
+                } else {
+                    // tooltip is the full concatenation
+                    assert_eq!(
+                        tooltip_val,
+                        [
+                            report_col.get_title(language),
+                            report_col.get_title_direction_info(language)
+                        ]
+                        .concat()
+                    );
+                    // displayed values have max len -1 (they include "…" that counts for 2 units)
+                    assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+                    if title != report_col.get_title(language) {
+                        // first title part is not full, so second one is suspensions
+                        assert_eq!(title_small, "…");
+                        // check len wrt max
+                        assert!(title_chars.len() >= max_chars - 4);
+                        // first title part is max - 2 chars of full self
+                        assert_eq!(
+                            title,
+                            report_col
+                                .get_title(language)
+                                .chars()
+                                .collect::<Vec<char>>()[..max_chars - 2]
+                                .iter()
+                                .collect::<String>()
+                        );
+                    } else {
+                        // first part is untouched
+                        // second part has correct len
+                        assert_eq!(title_small_chars.len(), max_chars - title_chars.len() - 1);
+                        // second title part is max - title.len - 2 chars of full self, plus suspensions
+                        assert_eq!(
+                            title_small,
+                            [
+                                &report_col
+                                    .get_title_direction_info(language)
+                                    .chars()
+                                    .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
+                                    .iter()
+                                    .collect::<String>(),
+                                "…"
+                            ]
+                            .concat()
+                        );
+                        // second part never terminates with "(…"
+                        assert!(!title_small.ends_with("(…"));
+                        // second part never terminates with " …"
+                        assert!(!title_small.ends_with(" …"));
+                    }
+                }
+            }
+        }
+    }
 }

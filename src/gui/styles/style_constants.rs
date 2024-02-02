@@ -3,6 +3,7 @@
 use iced::font::{Family, Stretch, Weight};
 use iced::{Color, Font};
 
+use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -192,7 +193,7 @@ pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =
     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
 pub const SARASA_MONO_BOLD: Font = Font {
-    family: Family::Name("Sarasa Mono SC for Sniffnet"),
+    family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Bold,
     stretch: Stretch::Normal,
     monospaced: true,
@@ -201,7 +202,7 @@ pub const SARASA_MONO_BOLD: Font = Font {
 pub const SARASA_MONO_BYTES: &[u8] =
     include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
 pub const SARASA_MONO: Font = Font {
-    family: Family::Name("Sarasa Mono SC for Sniffnet"),
+    family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Normal,
     stretch: Stretch::Normal,
     monospaced: true,
@@ -209,7 +210,7 @@ pub const SARASA_MONO: Font = Font {
 
 //font to display icons
 pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
-pub const ICONS: Font = Font::with_name("Icons for Sniffnet");
+pub const ICONS: Font = Font::with_name(ICON_FONT_FAMILY_NAME);
 
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 14.3;

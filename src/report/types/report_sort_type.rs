@@ -1,11 +1,13 @@
+use std::fmt::Debug;
+
+use iced::widget::Text;
+use iced::Renderer;
+
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::icon::Icon;
-use iced::widget::Text;
-use iced::Renderer;
-use std::fmt::Debug;
 
 /// Struct representing the possible kinds of sort for displayed relevant connections.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -83,5 +85,132 @@ impl Default for ReportSortType {
             byte_sort: SortType::Neutral,
             packet_sort: SortType::Neutral,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::report::types::report_col::ReportCol;
+    use crate::report::types::report_sort_type::ReportSortType;
+    use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_next_report_sort() {
+        let mut sort = ReportSortType::default();
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Ascending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Packets);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Descending
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Descending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Ascending,
+                packet_sort: SortType::Neutral
+            }
+        );
+
+        sort = sort.next_sort(&ReportCol::Bytes);
+        assert_eq!(
+            sort,
+            ReportSortType {
+                byte_sort: SortType::Neutral,
+                packet_sort: SortType::Neutral
+            }
+        );
     }
 }
