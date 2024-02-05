@@ -398,7 +398,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
         );
 
         // check if Unknown is longer than the first entry
-        if app.eq(&AppProtocol::Unknown) && incoming_bar_len + outgoing_bar_len > width * 0.88 {
+        if app == &"?" && incoming_bar_len + outgoing_bar_len > width * 0.88 {
             let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
             incoming_bar_len = width * 0.88 * incoming_proportion;
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
@@ -655,6 +655,8 @@ fn col_bytes_packets(
         ))
 }
 
+const MIN_BAR_LENGTH: f32 = 10.0;
+
 fn get_bars_length(
     tot_width: f32,
     chart_type: ChartType,
@@ -674,11 +676,19 @@ fn get_bars_length(
     };
 
     // normalize smaller values
-    if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-        incoming_bar_len = 3.0;
+    if incoming_bar_len > 0.0 && incoming_bar_len < MIN_BAR_LENGTH {
+        incoming_bar_len = if outgoing_bar_len > 0.0 {
+            MIN_BAR_LENGTH / 2.0
+        } else {
+            MIN_BAR_LENGTH
+        };
     }
     if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-        outgoing_bar_len = 3.0;
+        outgoing_bar_len = if incoming_bar_len > 0.0 {
+            MIN_BAR_LENGTH / 2.0
+        } else {
+            MIN_BAR_LENGTH
+        };
     }
 
     (incoming_bar_len, outgoing_bar_len)

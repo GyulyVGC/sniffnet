@@ -34,7 +34,7 @@ pub struct InfoTraffic {
     /// Collection of favorite hosts that exchanged data in the last interval
     pub favorites_last_interval: HashSet<Host>,
     /// Map of the application layer protocols with their data info
-    pub app_protocols: HashMap<AppProtocol, DataInfo>,
+    pub app_protocols: HashMap<String, DataInfo>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
     pub addresses_waiting_resolution: HashMap<String, DataInfo>,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host

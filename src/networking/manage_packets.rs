@@ -154,11 +154,17 @@ fn analyze_transport_header(
     }
 }
 
-pub fn get_app_protocol(src_port: Option<u16>, dst_port: Option<u16>) -> AppProtocol {
-    SERVICES.get("");
-    let mut application_protocol = from_port_to_application_protocol(src_port);
-    if application_protocol.eq(&AppProtocol::Unknown) {
-        application_protocol = from_port_to_application_protocol(dst_port);
+pub fn get_app_protocol(
+    src_port: Option<u16>,
+    dst_port: Option<u16>,
+    protocol: Protocol,
+) -> String {
+    if src_port.is_none() || dst_port.is_none() {
+        return "-".to_string();
+    }
+    let mut application_protocol = get_service((src_port.unwrap(), protocol));
+    if application_protocol == "?" {
+        application_protocol = get_service((dst_port.unwrap(), protocol));
     }
     application_protocol
 }
@@ -171,10 +177,10 @@ pub fn modify_or_insert_in_map(
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     exchanged_bytes: u128,
-    application_protocol: AppProtocol,
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
+    let mut application_protocol = "?".to_string();
 
     if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key
@@ -200,6 +206,8 @@ pub fn modify_or_insert_in_map(
             key.port2,
             &my_interface_addresses,
         );
+        // determine upper layer service
+        application_protocol = get_app_protocol(key.port1, key.port2, key.protocol);
     };
 
     let mut info_traffic = info_traffic_mutex

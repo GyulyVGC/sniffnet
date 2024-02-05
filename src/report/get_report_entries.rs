@@ -87,18 +87,18 @@ pub fn get_host_entries(
 pub fn get_app_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
-) -> Vec<(AppProtocol, DataInfo)> {
+) -> Vec<(String, DataInfo)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&AppProtocol, &DataInfo)> = info_traffic_lock
+    let mut sorted_vec: Vec<(&String, &DataInfo)> = info_traffic_lock
         .app_protocols
         .iter()
-        .filter(|(app_protocol, _)| app_protocol.ne(&&AppProtocol::NotApplicable))
+        .filter(|(app_protocol, _)| app_protocol != &"-")
         .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if p1.eq(&AppProtocol::Unknown) {
+        if p1 == "?" {
             Ordering::Greater
-        } else if p2.eq(&AppProtocol::Unknown) {
+        } else if p2 == &"?" {
             Ordering::Less
         } else {
             match chart_type {
@@ -108,5 +108,8 @@ pub fn get_app_entries(
         }
     });
 
-    sorted_vec.iter().map(|e| (*e.0, *e.1)).collect()
+    sorted_vec
+        .iter()
+        .map(|e| (String::from(e.0), *e.1))
+        .collect()
 }
