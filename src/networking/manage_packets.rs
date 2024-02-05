@@ -25,6 +25,8 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
 use crate::{AppProtocol, InfoTraffic, IpVersion, Protocol};
 
+include!(concat!(env!("OUT_DIR"), "/services.rs"));
+
 /// Calls methods to analyze link, network, and transport headers.
 /// Returns the relevant collected information.
 pub fn analyze_headers(
@@ -153,8 +155,9 @@ fn analyze_transport_header(
 }
 
 pub fn get_app_protocol(src_port: Option<u16>, dst_port: Option<u16>) -> AppProtocol {
+    SERVICES.get("");
     let mut application_protocol = from_port_to_application_protocol(src_port);
-    if (application_protocol).eq(&AppProtocol::Unknown) {
+    if application_protocol.eq(&AppProtocol::Unknown) {
         application_protocol = from_port_to_application_protocol(dst_port);
     }
     application_protocol
@@ -557,6 +560,8 @@ mod tests {
     };
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
+
+    include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
     #[test]
     fn mac_simple_test() {
@@ -1020,5 +1025,11 @@ mod tests {
 
         let result3 = is_local_connection("fe70::8b1:1234:5678:d065", &address_vec);
         assert_eq!(result3, false);
+    }
+
+    #[test]
+    fn is_services_ok() {
+        // TODO!
+        assert_eq!(SERVICES.get("443/TCP").unwrap(), &"https");
     }
 }

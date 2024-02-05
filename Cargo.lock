@@ -2552,6 +2552,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "phf_codegen"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8d39688d359e6b34654d328e262234662d16cc0f60ec8dcbe5e718709342a5a"
+dependencies = [
+ "phf_generator",
+ "phf_shared",
+]
+
+[[package]]
 name = "phf_generator"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3375,6 +3385,8 @@ dependencies = [
  "maxminddb",
  "once_cell",
  "pcap",
+ "phf",
+ "phf_codegen",
  "plotters",
  "plotters-iced",
  "reqwest",
