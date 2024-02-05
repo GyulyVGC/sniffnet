@@ -10,8 +10,7 @@ use pcap::{Active, Capture, Packet};
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_app_protocol, modify_or_insert_in_map,
-    reverse_dns_lookup,
+    analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;

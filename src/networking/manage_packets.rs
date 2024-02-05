@@ -12,7 +12,6 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::app_protocol::from_port_to_application_protocol;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
@@ -23,7 +22,7 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::IpVersion::{IPv4, IPv6};
-use crate::{AppProtocol, InfoTraffic, IpVersion, Protocol};
+use crate::{InfoTraffic, IpVersion, Protocol};
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -154,19 +153,51 @@ fn analyze_transport_header(
     }
 }
 
-pub fn get_app_protocol(
-    src_port: Option<u16>,
-    dst_port: Option<u16>,
-    protocol: Protocol,
-) -> String {
-    if src_port.is_none() || dst_port.is_none() {
+pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirection) -> String {
+    if key.port1.is_none() || key.port2.is_none() {
         return "-".to_string();
     }
-    let mut application_protocol = get_service((src_port.unwrap(), protocol));
-    if application_protocol == "?" {
-        application_protocol = get_service((dst_port.unwrap(), protocol));
+
+    let get_query_key = |port: u16, protocol: Protocol| format!("{}/{}", port, protocol);
+
+    // to return the service associated with the highest score:
+    // score = service_is_some * (port_is_well_known + bonus_direction)
+    // service_is_some: 1 if some, 0 if none
+    // port_is_well_known: 3 if well known, 1 if not
+    // bonus_direction: +1 assigned to remote port
+    let compute_service_score = |service: &&str, port: u16, bonus_direction: bool| {
+        let service_is_some = if service.eq(&"?") { 0 } else { 1 };
+        let port_is_well_known = if port < 1024 { 3 } else { 1 };
+        let bonus_direction = if bonus_direction { 1 } else { 0 };
+        return service_is_some * (port_is_well_known + bonus_direction);
+    };
+
+    let port1 = key.port1.unwrap();
+    let port2 = key.port2.unwrap();
+
+    let service1 = SERVICES
+        .get(&get_query_key(port1, key.protocol))
+        .unwrap_or(&"?");
+    let service2 = SERVICES
+        .get(&get_query_key(port2, key.protocol))
+        .unwrap_or(&"?");
+
+    let score1 = compute_service_score(
+        service1,
+        port1,
+        traffic_direction.ne(&TrafficDirection::Outgoing),
+    );
+    let score2 = compute_service_score(
+        service2,
+        port2,
+        traffic_direction.eq(&TrafficDirection::Outgoing),
+    );
+
+    if score1 > score2 {
+        service1.to_string()
+    } else {
+        service2.to_string()
     }
-    application_protocol
 }
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
@@ -207,7 +238,7 @@ pub fn modify_or_insert_in_map(
             &my_interface_addresses,
         );
         // determine upper layer service
-        application_protocol = get_app_protocol(key.port1, key.port2, key.protocol);
+        application_protocol = get_app_protocol(key, traffic_direction);
     };
 
     let mut info_traffic = info_traffic_mutex
