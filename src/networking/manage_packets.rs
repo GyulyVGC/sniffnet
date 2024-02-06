@@ -12,6 +12,7 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::app_protocol::Service;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
@@ -153,50 +154,56 @@ fn analyze_transport_header(
     }
 }
 
-pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirection) -> String {
+pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
     if key.port1.is_none() || key.port2.is_none() {
-        return "-".to_string();
+        return Service::NotApplicable;
     }
 
-    let get_query_key = |port: u16, protocol: Protocol| format!("{}/{}", port, protocol);
+    let get_query_key = |port: u16, protocol: Protocol| format!("{port}/{protocol}");
 
     // to return the service associated with the highest score:
     // score = service_is_some * (port_is_well_known + bonus_direction)
-    // service_is_some: 1 if some, 0 if none
+    // service_is_some: 1 if some, 0 if unknown
     // port_is_well_known: 3 if well known, 1 if not
     // bonus_direction: +1 assigned to remote port
-    let compute_service_score = |service: &&str, port: u16, bonus_direction: bool| {
-        let service_is_some = if service.eq(&"?") { 0 } else { 1 };
+    let compute_service_score = |service: &Service, port: u16, bonus_direction: bool| {
+        let service_is_some = u8::from(service != &Service::Unknown);
         let port_is_well_known = if port < 1024 { 3 } else { 1 };
-        let bonus_direction = if bonus_direction { 1 } else { 0 };
-        return service_is_some * (port_is_well_known + bonus_direction);
+        let bonus_direction = u8::from(bonus_direction);
+        service_is_some * (port_is_well_known + bonus_direction)
     };
 
     let port1 = key.port1.unwrap();
     let port2 = key.port2.unwrap();
 
-    let service1 = SERVICES
-        .get(&get_query_key(port1, key.protocol))
-        .unwrap_or(&"?");
-    let service2 = SERVICES
-        .get(&get_query_key(port2, key.protocol))
-        .unwrap_or(&"?");
+    let service1 = Service::from_str(
+        SERVICES
+            .get(&get_query_key(port1, key.protocol))
+            .unwrap_or(&"?"),
+    )
+    .unwrap_or_default();
+    let service2 = Service::from_str(
+        SERVICES
+            .get(&get_query_key(port2, key.protocol))
+            .unwrap_or(&"?"),
+    )
+    .unwrap_or_default();
 
     let score1 = compute_service_score(
-        service1,
+        &service1,
         port1,
         traffic_direction.ne(&TrafficDirection::Outgoing),
     );
     let score2 = compute_service_score(
-        service2,
+        &service2,
         port2,
         traffic_direction.eq(&TrafficDirection::Outgoing),
     );
 
     if score1 > score2 {
-        service1.to_string()
+        service1
     } else {
-        service2.to_string()
+        service2
     }
 }
 
@@ -211,7 +218,7 @@ pub fn modify_or_insert_in_map(
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
-    let mut application_protocol = "?".to_string();
+    let mut application_protocol = Service::Unknown;
 
     if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key

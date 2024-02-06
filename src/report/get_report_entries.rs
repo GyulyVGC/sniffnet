@@ -8,7 +8,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::sort_type::SortType;
-use crate::{AppProtocol, ChartType, InfoTraffic, ReportSortType, Sniffer};
+use crate::{ChartType, InfoTraffic, ReportSortType, Service, Sniffer};
 
 /// Returns the elements which satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints
@@ -87,18 +87,18 @@ pub fn get_host_entries(
 pub fn get_app_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
-) -> Vec<(String, DataInfo)> {
+) -> Vec<(Service, DataInfo)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&String, &DataInfo)> = info_traffic_lock
+    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic_lock
         .app_protocols
         .iter()
-        .filter(|(app_protocol, _)| app_protocol != &"-")
+        .filter(|(app_protocol, _)| app_protocol != &&Service::NotApplicable)
         .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if p1 == "?" {
+        if p1 == &Service::Unknown {
             Ordering::Greater
-        } else if p2 == &"?" {
+        } else if p2 == &Service::Unknown {
             Ordering::Less
         } else {
             match chart_type {
@@ -108,8 +108,5 @@ pub fn get_app_entries(
         }
     });
 
-    sorted_vec
-        .iter()
-        .map(|e| (String::from(e.0), *e.1))
-        .collect()
+    sorted_vec.iter().map(|e| (e.0.clone(), *e.1)).collect()
 }

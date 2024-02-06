@@ -48,7 +48,7 @@ use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
-use crate::{AppProtocol, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{ChartType, ConfigSettings, Language, RunningPage, Service, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -398,7 +398,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
         );
 
         // check if Unknown is longer than the first entry
-        if app == &"?" && incoming_bar_len + outgoing_bar_len > width * 0.88 {
+        if app == &Service::Unknown && incoming_bar_len + outgoing_bar_len > width * 0.88 {
             let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
             incoming_bar_len = width * 0.88 * incoming_proportion;
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);

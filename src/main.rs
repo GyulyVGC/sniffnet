@@ -19,7 +19,7 @@ use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
 use gui::types::runtime_data::RunTimeData;
 use gui::types::sniffer::Sniffer;
-use networking::types::app_protocol::AppProtocol;
+use networking::types::app_protocol::Service;
 use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;

@@ -23,16 +23,16 @@ fn set_icon() {
 
 fn build_services_phf() {
     let path = Path::new(&env::var("OUT_DIR").unwrap()).join("services.rs");
-    let mut file = BufWriter::new(File::create(&path).unwrap());
+    let mut file = BufWriter::new(File::create(path).unwrap());
 
     let mut services_map = phf_codegen::Map::new();
 
     let input = BufReader::new(File::open("./services.txt").unwrap());
     for line in input.lines().flatten() {
-        let mut parts = line.split("\t");
+        let mut parts = line.split('\t');
         let service = format!("\"{}\"", parts.next().unwrap());
         let key = parts.next().unwrap().to_uppercase();
-        services_map.entry(key, &*service);
+        services_map.entry(key, &service);
     }
 
     write!(
@@ -41,5 +41,5 @@ fn build_services_phf() {
         services_map.build()
     )
     .unwrap();
-    write!(&mut file, ";\n").unwrap();
+    writeln!(&mut file, ";").unwrap();
 }
