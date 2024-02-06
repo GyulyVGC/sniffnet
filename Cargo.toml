@@ -11,14 +11,17 @@ license     = "MIT OR Apache-2.0"
 keywords    = [ "filter", "network", "packet", "sniffer", "gui" ]
 categories  = [ "visualization", "gui", "network-programming" ]
 include     = [
-    "src/**/*",
-    "LICENSE-*",
-    "README.md",
-    "CHANGELOG.md",
-    "resources/countries_flags/**/*",
-    "resources/DB/*",
-    "resources/fonts/subset/*",
-    "resources/sounds/*"
+    "/src/**/*.rs",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/resources/countries_flags/**/*.svg",
+    "/resources/DB/*.mmdb",
+    "/resources/fonts/subset/*.ttf",
+    "/resources/sounds/*.mp3",
+    "/services.txt",
+    "/build.rs",
 ]
 
 [target."cfg(windows)"]

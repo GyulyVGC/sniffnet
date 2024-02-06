@@ -35,11 +35,11 @@ fn build_services_phf() {
         services_map.entry(key, &service);
     }
 
-    write!(
+    writeln!(
         &mut file,
-        "static SERVICES: phf::Map<&'static str, &'static str> = {}",
+        "#[allow(clippy::unreadable_literal)]\n\
+        static SERVICES: phf::Map<&'static str, &'static str> = {};",
         services_map.build()
     )
     .unwrap();
-    writeln!(&mut file, ";").unwrap();
 }
