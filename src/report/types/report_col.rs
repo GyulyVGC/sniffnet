@@ -2,11 +2,10 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::search_parameters::FilterInputType;
 use crate::translations::translations::{
-    address_translation, application_protocol_translation, bytes_translation, packets_translation,
-    protocol_translation,
+    address_translation, bytes_translation, packets_translation, protocol_translation,
 };
 use crate::translations::translations_2::{destination_translation, source_translation};
-use crate::translations::translations_3::port_translation;
+use crate::translations::translations_3::{port_translation, service_translation};
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_formatted_bytes_string;
 
@@ -25,7 +24,7 @@ pub enum ReportCol {
     DstIp,
     DstPort,
     Proto,
-    AppProto,
+    Service,
     Bytes,
     Packets,
 }
@@ -37,7 +36,7 @@ impl ReportCol {
         ReportCol::DstIp,
         ReportCol::DstPort,
         ReportCol::Proto,
-        ReportCol::AppProto,
+        ReportCol::Service,
         ReportCol::Bytes,
         ReportCol::Packets,
     ];
@@ -47,7 +46,7 @@ impl ReportCol {
             ReportCol::SrcIp | ReportCol::DstIp => address_translation(language).to_string(),
             ReportCol::SrcPort | ReportCol::DstPort => port_translation(language).to_string(),
             ReportCol::Proto => protocol_translation(language).to_string(),
-            ReportCol::AppProto => application_protocol_translation(language).to_string(),
+            ReportCol::Service => service_translation(language).to_string(),
             ReportCol::Bytes => {
                 let mut str = bytes_translation(language).to_string();
                 str.remove(0).to_uppercase().to_string() + &str
@@ -90,7 +89,7 @@ impl ReportCol {
                 }
             }
             ReportCol::Proto => key.protocol.to_string(),
-            ReportCol::AppProto => val.app_protocol.to_string(),
+            ReportCol::Service => val.service.to_string(),
             ReportCol::Bytes => get_formatted_bytes_string(val.transmitted_bytes, 1),
             ReportCol::Packets => val.transmitted_packets.to_string(),
         }
@@ -124,7 +123,7 @@ impl ReportCol {
             ReportCol::SrcPort => FilterInputType::PortSrc,
             ReportCol::DstPort => FilterInputType::PortDst,
             ReportCol::Proto => FilterInputType::Proto,
-            ReportCol::AppProto => FilterInputType::AppProto,
+            ReportCol::Service => FilterInputType::AppProto,
             ReportCol::Bytes | ReportCol::Packets => FilterInputType::Country, // just to not panic...
         }
     }

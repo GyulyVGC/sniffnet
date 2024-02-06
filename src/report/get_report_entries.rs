@@ -84,15 +84,15 @@ pub fn get_host_entries(
         .collect()
 }
 
-pub fn get_app_entries(
+pub fn get_service_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
 ) -> Vec<(Service, DataInfo)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic_lock
-        .app_protocols
+        .services
         .iter()
-        .filter(|(app_protocol, _)| app_protocol != &&Service::NotApplicable)
+        .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {

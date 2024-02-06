@@ -16,7 +16,7 @@ pub struct SearchParameters {
     /// Protocol
     pub proto: String,
     /// Application protocol
-    pub app_proto: String,
+    pub service: String,
     /// Country
     pub country: String,
     /// Domain
@@ -138,7 +138,7 @@ impl FilterInputType {
             FilterInputType::AddressDst => &search_params.address_dst,
             FilterInputType::PortDst => &search_params.port_dst,
             FilterInputType::Proto => &search_params.proto,
-            FilterInputType::AppProto => &search_params.app_proto,
+            FilterInputType::AppProto => &search_params.service,
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
@@ -169,7 +169,7 @@ impl FilterInputType {
                 }
             }
             FilterInputType::Proto => key.protocol.to_string(),
-            FilterInputType::AppProto => value.app_protocol.to_string(),
+            FilterInputType::AppProto => value.service.to_string(),
             FilterInputType::Country => r_dns_host.unwrap().1.country.to_string(),
             FilterInputType::Domain => r_dns_host.unwrap().0.to_string(),
             FilterInputType::AsName => r_dns_host.unwrap().1.asn.name.to_string(),
@@ -199,7 +199,7 @@ impl FilterInputType {
                 ..search_params.clone()
             },
             FilterInputType::AppProto => SearchParameters {
-                app_proto: String::new(),
+                service: String::new(),
                 ..search_params.clone()
             },
             FilterInputType::Domain => SearchParameters {
@@ -244,7 +244,7 @@ impl FilterInputType {
                 ..search_params.clone()
             },
             FilterInputType::AppProto => SearchParameters {
-                app_proto: new_value.trim().to_string(),
+                service: new_value.trim().to_string(),
                 ..search_params.clone()
             },
             FilterInputType::Domain => SearchParameters {

@@ -173,8 +173,8 @@ pub fn parse_packets(
 
                         //increment the packet count for the sniffed app protocol
                         info_traffic
-                            .app_protocols
-                            .entry(new_info.app_protocol)
+                            .services
+                            .entry(new_info.service)
                             .and_modify(|data_info| {
                                 data_info.add_packet(exchanged_bytes, new_info.traffic_direction);
                             })

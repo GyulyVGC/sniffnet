@@ -132,3 +132,12 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         _ => "Filter by network host",
     }
 }
+
+// referred to a network service like https, dns, and similar
+pub fn service_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Service",
+        Language::IT => "Servizio",
+        _ => "Service",
+    }
+}

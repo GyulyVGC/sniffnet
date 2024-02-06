@@ -31,19 +31,18 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::search_parameters::SearchParameters;
-use crate::report::get_report_entries::{get_app_entries, get_host_entries};
+use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::translations::translations::{
-    active_filters_translation, application_protocol_translation, bytes_chart_translation,
-    error_translation, filtered_bytes_translation, filtered_packets_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, of_total_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    active_filters_translation, bytes_chart_translation, error_translation,
+    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
+    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
     only_top_30_hosts_translation,
 };
-use crate::translations::translations_3::unsupported_link_type_translation;
+use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
@@ -251,12 +250,12 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
         .width(Length::Fill);
 
     let col_host = col_host(840.0, sniffer);
-    let col_app = col_app(250.0, sniffer);
+    let col_service = col_service(250.0, sniffer);
 
     row_report = row_report
         .push(col_host)
         .push(Rule::vertical(40))
-        .push(col_app);
+        .push(col_service);
 
     Container::new(row_report)
         .height(FillPortion(4))
@@ -369,27 +368,27 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         )
 }
 
-fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut col_app = Column::new()
+    let mut col_service = Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(application_protocol_translation(language))
+            Text::new(service_translation(language))
                 .font(font)
                 .style(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(vertical_space(Length::Fixed(10.0)));
 
-    let mut scroll_app = Column::new().width(Length::Fixed(width));
-    let entries = get_app_entries(&sniffer.info_traffic, chart_type);
+    let mut scroll_service = Column::new().width(Length::Fixed(width));
+    let entries = get_service_entries(&sniffer.info_traffic, chart_type);
 
-    for (app, data_info) in &entries {
+    for (service, data_info) in &entries {
         let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
             width * 0.88,
             chart_type,
@@ -398,7 +397,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
         );
 
         // check if Unknown is longer than the first entry
-        if app == &Service::Unknown && incoming_bar_len + outgoing_bar_len > width * 0.88 {
+        if service == &Service::Unknown && incoming_bar_len + outgoing_bar_len > width * 0.88 {
             let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
             incoming_bar_len = width * 0.88 * incoming_proportion;
             outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
@@ -409,7 +408,7 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             .width(Length::Fixed(width))
             .push(
                 Row::new()
-                    .push(Text::new(app.to_string()).font(font))
+                    .push(Text::new(service.to_string()).font(font))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
@@ -422,22 +421,22 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             )
             .push(get_bars(incoming_bar_len, outgoing_bar_len));
 
-        scroll_app = scroll_app.push(
+        scroll_service = scroll_service.push(
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app_proto: app.to_string(),
+                    service: service.to_string(),
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),
         );
     }
-    col_app = col_app.push(
-        Scrollable::new(Container::new(scroll_app).width(Length::Fill))
+    col_service = col_service.push(
+        Scrollable::new(Container::new(scroll_service).width(Length::Fill))
             .direction(Direction::Vertical(ScrollbarType::properties())),
     );
 
-    col_app
+    col_service
 }
 
 fn lazy_col_info(

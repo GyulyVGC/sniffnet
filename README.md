@@ -315,7 +315,7 @@ sudo sniffnet
 </details>
 
 
-## Supported application layer protocols
+## Supported network services
 
 <details>
 
@@ -323,7 +323,9 @@ sudo sniffnet
 
   <br>
 
-  Application layer protocols are inferred from the transport port numbers,
+  Sniffnet supports more than 6000 services, including common upper layer protocols, trojans, and worms.
+
+  Network services are inferred from the transport protocol and port number,
   following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
 
   Please, remember that this is just a convention:
@@ -333,40 +335,8 @@ sudo sniffnet
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
   > However, many unofficial uses of well-known port numbers occur in practice.
-
-  The following table reports the port-to-service mappings used by Sniffnet,
-  chosen from the most common assignments by IANA.
-
-<div align="center">
-
-| Port number(s) | Application protocol | Description                                        |
-|----------------|----------------------|----------------------------------------------------|
-| 20, 21         | FTP                  | File Transfer Protocol                             |
-| 22             | SSH                  | Secure Shell                                       |
-| 23             | Telnet               | Telnet                                             |
-| 25             | SMTP                 | Simple Mail Transfer Protocol                      |
-| 49             | TACACS               | Terminal Access Controller Access-Control System   |
-| 53             | DNS                  | Domain Name System                                 |
-| 67, 68         | DHCP                 | Dynamic Host Configuration Protocol                |
-| 69             | TFTP                 | Trivial File Transfer Protocol                     |
-| 80, 8080       | HTTP                 | Hypertext Transfer Protocol                        |
-| 109, 110       | POP                  | Post Office Protocol                               |
-| 123            | NTP                  | Network Time Protocol                              |
-| 137, 138, 139  | NetBIOS              | NetBIOS                                            |
-| 143, 220       | IMAP                 | Internet Message Access Protocol                   |
-| 161, 162, 199  | SNMP                 | Simple Network Management Protocol                 |
-| 179            | BGP                  | Border Gateway Protocol                            |
-| 389            | LDAP                 | Lightweight Directory Access Protocol              |
-| 443            | HTTPS                | Hypertext Transfer Protocol over SSL/TLS           |
-| 636            | LDAPS                | Lightweight Directory Access Protocol over TLS/SSL |
-| 989, 990       | FTPS                 | File Transfer Protocol over TLS/SSL                |
-| 993            | IMAPS                | Internet Message Access Protocol over TLS/SSL      |
-| 995            | POP3S                | Post Office Protocol 3 over TLS/SSL                |
-| 1900           | SSDP                 | Simple Service Discovery Protocol                  |
-| 5222           | XMPP                 | Extensible Messaging and Presence Protocol         |
-| 5353           | mDNS                 | Multicast DNS                                      |
-
-</div>
+  
+  The full list of services is generated from Nmap's service collection and is available in the file `services.txt`.
 
 </details>
 

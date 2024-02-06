@@ -27,7 +27,7 @@ pub struct InfoAddressPortPair {
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: DateTime<Local>,
     /// Application layer protocol carried by the associated address:port pair.
-    pub app_protocol: Service,
+    pub service: Service,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)

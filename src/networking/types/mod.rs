@@ -1,5 +1,4 @@
 pub mod address_port_pair;
-pub mod app_protocol;
 pub mod asn;
 pub mod byte_multiple;
 pub mod data_info;
@@ -17,5 +16,6 @@ pub mod packet_filters_fields;
 pub mod port_collection;
 pub mod protocol;
 pub mod search_parameters;
+pub mod service;
 pub mod traffic_direction;
 pub mod traffic_type;

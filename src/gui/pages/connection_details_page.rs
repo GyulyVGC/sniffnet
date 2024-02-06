@@ -27,15 +27,17 @@ use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
-    address_translation, application_protocol_translation, incoming_translation,
-    outgoing_translation, packets_translation, protocol_translation,
+    address_translation, incoming_translation, outgoing_translation, packets_translation,
+    protocol_translation,
 };
 use crate::translations::translations_2::{
     administrative_entity_translation, connection_details_translation, destination_translation,
     fqdn_translation, mac_address_translation, socket_address_translation, source_translation,
     transmitted_data_translation,
 };
-use crate::translations::translations_3::{copy_translation, messages_translation};
+use crate::translations::translations_3::{
+    copy_translation, messages_translation, service_translation,
+};
 use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
@@ -212,8 +214,8 @@ fn col_info(
 
     if !is_icmp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
-            application_protocol_translation(language),
-            &val.app_protocol.to_string(),
+            service_translation(language),
+            &val.service.to_string(),
             font,
         ));
     }
