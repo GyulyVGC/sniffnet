@@ -6,9 +6,12 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
+include!("./src/networking/types/service_query.rs");
+include!("./src/networking/types/protocol.rs");
+include!("./src/networking/types/service.rs");
+
 fn main() {
     set_icon();
-
     build_services_phf();
 }
 
@@ -28,18 +31,56 @@ fn build_services_phf() {
     let mut services_map = phf_codegen::Map::new();
 
     let input = BufReader::new(File::open("./services.txt").unwrap());
-    for line in input.lines().flatten() {
+    for line_res in input.lines() {
+        // we want to panic if one of the lines is err...
+        let line = line_res.unwrap();
         let mut parts = line.split('\t');
-        let service = format!("\"{}\"", parts.next().unwrap());
-        let key = parts.next().unwrap().to_uppercase();
-        services_map.entry(key, &service);
+        // we want to panic if one of the service names is invalid
+        let val = get_valid_service_fmt_const(parts.next().unwrap());
+        // we want to panic if port is not a u16, or protocol is not TCP or UDP
+        let key = get_valid_service_query(parts.next().unwrap());
+        assert!(parts.next().is_none());
+        services_map.entry(key, &val);
     }
 
     writeln!(
         &mut file,
         "#[allow(clippy::unreadable_literal)]\n\
-        static SERVICES: phf::Map<&'static str, &'static str> = {};",
+        static SERVICES: phf::Map<ServiceQuery, Service> = {};",
         services_map.build()
     )
     .unwrap();
+}
+
+fn get_valid_service_fmt_const(s: &str) -> String {
+    assert!(
+        s.is_ascii(),
+        "Service names must be ASCII strings, found: {s}"
+    );
+    match s.trim() {
+        invalid if ["", "unknown", "?", "-"].contains(&invalid) || invalid.starts_with('#') => {
+            panic!("Invalid service name found: {invalid}")
+        }
+        name => format!("Service::Name(\"{name}\")"),
+    }
+}
+
+fn get_valid_service_query(s: &str) -> ServiceQuery {
+    let mut parts = s.split('/');
+    let port = parts.next().unwrap().parse::<u16>().unwrap();
+    let protocol_str = parts.next().unwrap();
+    let protocol = match protocol_str {
+        "tcp" => Protocol::TCP,
+        "udp" => Protocol::UDP,
+        invalid => panic!("Invalid protocol found: {invalid}"),
+    };
+    assert!(parts.next().is_none());
+    ServiceQuery(port, protocol)
+}
+
+impl phf_shared::FmtConst for ServiceQuery {
+    fn fmt_const(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let ServiceQuery(port, protocol) = self;
+        write!(f, "ServiceQuery({port}, Protocol::{protocol})",)
+    }
 }

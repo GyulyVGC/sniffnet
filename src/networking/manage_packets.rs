@@ -19,6 +19,7 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::service::Service;
+use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
@@ -159,15 +160,13 @@ pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirecti
         return Service::NotApplicable;
     }
 
-    let get_query_key = |port: u16, protocol: Protocol| format!("{port}/{protocol}");
-
     // to return the service associated with the highest score:
     // score = service_is_some * (port_is_well_known + bonus_direction)
     // service_is_some: 1 if some, 0 if unknown
     // port_is_well_known: 3 if well known, 1 if not
     // bonus_direction: +1 assigned to remote port
     let compute_service_score = |service: &Service, port: u16, bonus_direction: bool| {
-        let service_is_some = u8::from(service != &Service::Unknown);
+        let service_is_some = u8::from(matches!(service, Service::Name(_)));
         let port_is_well_known = if port < 1024 { 3 } else { 1 };
         let bonus_direction = u8::from(bonus_direction);
         service_is_some * (port_is_well_known + bonus_direction)
@@ -176,18 +175,14 @@ pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirecti
     let port1 = key.port1.unwrap();
     let port2 = key.port2.unwrap();
 
-    let service1 = Service::from_str(
-        SERVICES
-            .get(&get_query_key(port1, key.protocol))
-            .unwrap_or(&"?"),
-    )
-    .unwrap_or_default();
-    let service2 = Service::from_str(
-        SERVICES
-            .get(&get_query_key(port2, key.protocol))
-            .unwrap_or(&"?"),
-    )
-    .unwrap_or_default();
+    let service1 = SERVICES
+        .get(&ServiceQuery(port1, key.protocol))
+        .cloned()
+        .unwrap_or_default();
+    let service2 = SERVICES
+        .get(&ServiceQuery(port2, key.protocol))
+        .cloned()
+        .unwrap_or_default();
 
     let score1 = compute_service_score(
         &service1,
@@ -604,8 +599,11 @@ mod tests {
     use crate::networking::manage_packets::{
         get_traffic_direction, get_traffic_type, is_local_connection, mac_from_dec_to_hex,
     };
+    use crate::networking::types::service_query::ServiceQuery;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
+    use crate::Protocol;
+    use crate::Service;
 
     include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -1076,6 +1074,9 @@ mod tests {
     #[test]
     fn is_services_ok() {
         // TODO!
-        assert_eq!(SERVICES.get("443/TCP").unwrap(), &"https");
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(443, Protocol::TCP)).unwrap(),
+            &Service::Name("https")
+        );
     }
 }

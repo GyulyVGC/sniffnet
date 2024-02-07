@@ -17,5 +17,6 @@ pub mod port_collection;
 pub mod protocol;
 pub mod search_parameters;
 pub mod service;
+pub mod service_query;
 pub mod traffic_direction;
 pub mod traffic_type;

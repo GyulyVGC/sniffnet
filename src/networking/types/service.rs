@@ -1,11 +1,8 @@
-use std::fmt;
-use std::str::FromStr;
-
 /// Upper layer services.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum Service {
     /// One of the known services.
-    Name(String),
+    Name(&'static str),
     /// Not identified
     #[default]
     Unknown,
@@ -13,25 +10,13 @@ pub enum Service {
     NotApplicable,
 }
 
-impl fmt::Display for Service {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl std::fmt::Display for Service {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Service::Name(name) => write!(f, "{name}"),
             Service::Unknown => write!(f, "?"),
             Service::NotApplicable => write!(f, "-"),
         }
-    }
-}
-
-impl FromStr for Service {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(match s {
-            "" | "?" => Self::Unknown,
-            "-" => Self::NotApplicable,
-            name => Self::Name(name.to_string()),
-        })
     }
 }
 

@@ -8,5 +8,5 @@ OUT=./services.txt
 
 curl https://raw.githubusercontent.com/nmap/nmap/master/nmap-services \
   | grep -E '/tcp|/udp' \
-  | grep -E -v '^unknown\t|^#|^\?\t|^\-\t' \
+  | grep -E -v '^#|^unknown\t' \
   | cut -d$'\t' -f 1,2 > $OUT

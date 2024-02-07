@@ -3387,6 +3387,7 @@ dependencies = [
  "pcap",
  "phf",
  "phf_codegen",
+ "phf_shared",
  "plotters",
  "plotters-iced",
  "reqwest",
