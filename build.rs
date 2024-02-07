@@ -8,9 +8,12 @@ use std::path::Path;
 
 include!("./src/networking/types/service_query.rs");
 include!("./src/networking/types/protocol.rs");
-include!("./src/networking/types/service.rs");
+
+const SERVICES_LIST_PATH: &str = "./services.txt";
 
 fn main() {
+    println!("cargo:rerun-if-changed={SERVICES_LIST_PATH}");
+
     set_icon();
     build_services_phf();
 }
@@ -30,7 +33,7 @@ fn build_services_phf() {
 
     let mut services_map = phf_codegen::Map::new();
 
-    let input = BufReader::new(File::open("./services.txt").unwrap());
+    let input = BufReader::new(File::open(SERVICES_LIST_PATH).unwrap());
     for line_res in input.lines() {
         // we want to panic if one of the lines is err...
         let line = line_res.unwrap();
@@ -76,11 +79,4 @@ fn get_valid_service_query(s: &str) -> ServiceQuery {
     };
     assert!(parts.next().is_none());
     ServiceQuery(port, protocol)
-}
-
-impl phf_shared::FmtConst for ServiceQuery {
-    fn fmt_const(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let ServiceQuery(port, protocol) = self;
-        write!(f, "ServiceQuery({port}, Protocol::{protocol})",)
-    }
 }

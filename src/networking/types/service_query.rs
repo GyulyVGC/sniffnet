@@ -17,3 +17,10 @@ impl phf_shared::PhfBorrow<ServiceQuery> for ServiceQuery {
         self
     }
 }
+
+impl phf_shared::FmtConst for ServiceQuery {
+    fn fmt_const(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let ServiceQuery(port, protocol) = self;
+        write!(f, "ServiceQuery({port}, Protocol::{protocol})",)
+    }
+}
