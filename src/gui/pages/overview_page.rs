@@ -682,7 +682,7 @@ fn get_bars_length(
             MIN_BAR_LENGTH
         };
     }
-    if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
+    if outgoing_bar_len > 0.0 && outgoing_bar_len < MIN_BAR_LENGTH {
         outgoing_bar_len = if incoming_bar_len > 0.0 {
             MIN_BAR_LENGTH / 2.0
         } else {
