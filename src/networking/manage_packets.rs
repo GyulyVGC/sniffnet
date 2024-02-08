@@ -155,7 +155,7 @@ fn analyze_transport_header(
     }
 }
 
-pub fn get_app_protocol(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
+pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
     if key.port1.is_none() || key.port2.is_none() {
         return Service::NotApplicable;
     }
@@ -213,7 +213,7 @@ pub fn modify_or_insert_in_map(
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
-    let mut application_protocol = Service::Unknown;
+    let mut service = Service::Unknown;
 
     if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
         // first occurrence of key
@@ -240,7 +240,7 @@ pub fn modify_or_insert_in_map(
             &my_interface_addresses,
         );
         // determine upper layer service
-        application_protocol = get_app_protocol(key, traffic_direction);
+        service = get_service(key, traffic_direction);
     };
 
     let mut info_traffic = info_traffic_mutex
@@ -268,7 +268,7 @@ pub fn modify_or_insert_in_map(
             transmitted_packets: 1,
             initial_timestamp: now,
             final_timestamp: now,
-            service: application_protocol,
+            service,
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
                 HashMap::from([(icmp_type, 1)])
@@ -592,6 +592,7 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
     use std::net::IpAddr;
 
     use pcap::Address;
@@ -1072,11 +1073,230 @@ mod tests {
     }
 
     #[test]
-    fn is_services_ok() {
-        // TODO!
+    fn test_all_services_map_key_and_values_are_valid() {
+        assert_eq!(SERVICES.len(), 12066);
+        let mut distinct_services = HashSet::new();
+        for (sq, s) in &SERVICES {
+            // only tcp or udp
+            assert!(sq.1 == Protocol::TCP || sq.1 == Protocol::UDP);
+            // no unknown or not applicable services
+            let name = match *s {
+                Service::Name(name) => name,
+                _ => panic!(),
+            };
+            // name is valid...
+            assert!(
+                !["", "unknown", "?", "-"].contains(&name)
+                    && name.is_ascii()
+                    && !name.starts_with('#')
+                    && !name.contains(' ')
+            );
+            // just to count and verify number of distinct services
+            distinct_services.insert(name.to_string());
+        }
+        assert_eq!(distinct_services.len(), 6438);
+    }
+
+    #[test]
+    fn test_service_names_of_old_application_protocols() {
+        for p in [Protocol::TCP, Protocol::UDP] {
+            // FTP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(20, p)).unwrap(),
+                &Service::Name("ftp-data")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(21, p)).unwrap(),
+                &Service::Name("ftp")
+            );
+
+            // SSH
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(22, p)).unwrap(),
+                &Service::Name("ssh")
+            );
+
+            // Telnet
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(23, p)).unwrap(),
+                &Service::Name("telnet")
+            );
+
+            // SMTP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(25, p)).unwrap(),
+                &Service::Name("smtp")
+            );
+
+            // TACACS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(49, p)).unwrap(),
+                &Service::Name("tacacs")
+            );
+
+            // DNS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(53, p)).unwrap(),
+                &Service::Name("domain")
+            );
+
+            // DHCP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(67, p)).unwrap(),
+                &Service::Name("dhcps")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(68, p)).unwrap(),
+                &Service::Name("dhcpc")
+            );
+
+            // TFTP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(69, p)).unwrap(),
+                &Service::Name("tftp")
+            );
+
+            // HTTP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(80, p)).unwrap(),
+                &Service::Name("http")
+            );
+
+            // POP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(109, p)).unwrap(),
+                &Service::Name("pop2")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(110, p)).unwrap(),
+                &Service::Name("pop3")
+            );
+
+            // NTP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(123, p)).unwrap(),
+                &Service::Name("ntp")
+            );
+
+            // NetBIOS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(137, p)).unwrap(),
+                &Service::Name("netbios-ns")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(138, p)).unwrap(),
+                &Service::Name("netbios-dgm")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(139, p)).unwrap(),
+                &Service::Name("netbios-ssn")
+            );
+
+            // IMAP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(143, p)).unwrap(),
+                &Service::Name("imap")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(220, p)).unwrap(),
+                &Service::Name("imap3")
+            );
+
+            // SNMP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(161, p)).unwrap(),
+                &Service::Name("snmp")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(162, p)).unwrap(),
+                &Service::Name("snmptrap")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(199, p)).unwrap(),
+                &Service::Name("smux")
+            );
+
+            // BGP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(179, p)).unwrap(),
+                &Service::Name("bgp")
+            );
+
+            // LDAP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(389, p)).unwrap(),
+                &Service::Name("ldap")
+            );
+
+            // HTTPS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(443, p)).unwrap(),
+                &Service::Name("https")
+            );
+
+            // FTPS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(989, p)).unwrap(),
+                &Service::Name("ftps-data")
+            );
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(990, p)).unwrap(),
+                &Service::Name("ftps")
+            );
+
+            // IMAPS
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(993, p)).unwrap(),
+                &Service::Name("imaps")
+            );
+
+            // POP3S
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(995, p)).unwrap(),
+                &Service::Name("pop3s")
+            );
+
+            // SSDP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(1900, p)).unwrap(),
+                &Service::Name("upnp")
+            );
+
+            // XMPP
+            assert_eq!(
+                SERVICES.get(&ServiceQuery(5222, p)).unwrap(),
+                &Service::Name("xmpp-client")
+            );
+        }
+
+        // HTTP
         assert_eq!(
-            SERVICES.get(&ServiceQuery(443, Protocol::TCP)).unwrap(),
-            &Service::Name("https")
+            SERVICES.get(&ServiceQuery(8080, Protocol::TCP)).unwrap(),
+            &Service::Name("http-proxy")
+        );
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(8080, Protocol::UDP)).unwrap(),
+            &Service::Name("http-alt")
+        );
+
+        // LDAPS
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(636, Protocol::TCP)).unwrap(),
+            &Service::Name("ldapssl")
+        );
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(636, Protocol::UDP)).unwrap(),
+            &Service::Name("ldaps")
+        );
+
+        // mDNS
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(5353, Protocol::TCP)).unwrap(),
+            &Service::Name("mdns")
+        );
+        assert_eq!(
+            SERVICES.get(&ServiceQuery(5353, Protocol::UDP)).unwrap(),
+            &Service::Name("zeroconf")
         );
     }
 }

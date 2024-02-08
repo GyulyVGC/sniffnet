@@ -25,13 +25,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn app_protocol_display_unknown() {
+    fn test_service_display_unknown() {
         let test_str = Service::Unknown.to_string();
         assert_eq!(test_str, "?");
     }
 
     #[test]
-    fn app_protocol_display_not_applicable() {
+    fn test_service_display_not_applicable() {
         let test_str = Service::NotApplicable.to_string();
         assert_eq!(test_str, "-");
     }

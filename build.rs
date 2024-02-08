@@ -1,7 +1,6 @@
 #[cfg(windows)]
 extern crate winres;
 
-use std::collections::HashSet;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
@@ -36,16 +35,12 @@ fn build_services_phf() {
 
     let input = BufReader::new(File::open(SERVICES_LIST_PATH).unwrap());
     let mut num_entries = 0;
-    let mut distinct_services = HashSet::new();
     for line_res in input.lines() {
         // we want to panic if one of the lines is err...
         let line = line_res.unwrap();
         let mut parts = line.split('\t');
-        // just to count and verify number of distinct services
-        let service_str = parts.next().unwrap();
-        distinct_services.insert(service_str.to_string());
         // we want to panic if one of the service names is invalid
-        let val = get_valid_service_fmt_const(service_str);
+        let val = get_valid_service_fmt_const(parts.next().unwrap());
         // we want to panic if port is not a u16, or protocol is not TCP or UDP
         let key = get_valid_service_query(parts.next().unwrap());
         assert!(parts.next().is_none());
@@ -53,7 +48,6 @@ fn build_services_phf() {
         num_entries += 1;
     }
     assert_eq!(num_entries, 12066);
-    assert_eq!(distinct_services.len(), 6438);
 
     writeln!(
         &mut file,
