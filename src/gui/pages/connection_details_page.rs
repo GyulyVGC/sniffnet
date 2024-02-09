@@ -82,7 +82,7 @@ fn page_content(
     let host_info_option = info_traffic_lock
         .hosts
         .get(&host_option.clone().unwrap_or_default().1)
-        .cloned();
+        .copied();
     drop(info_traffic_lock);
 
     let header_and_content = Column::new().width(Length::Fill).push(page_header(

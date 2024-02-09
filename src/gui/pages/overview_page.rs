@@ -47,7 +47,7 @@ use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
-use crate::{ChartType, ConfigSettings, Language, RunningPage, Service, StyleType};
+use crate::{ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -259,9 +259,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
 
     Container::new(row_report)
         .height(FillPortion(4))
-        .width(Length::Fixed(1170.0))
         .style(ContainerType::BorderedRound)
-        .align_x(Horizontal::Center)
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
@@ -275,12 +273,13 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
+    let first_entry_data_info = entries.first().unwrap().1.data_info;
 
     for (host, data_info_host) in &entries {
         let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
-            &entries.first().unwrap().1.data_info.clone(),
+            &first_entry_data_info,
             &data_info_host.data_info,
         );
 
@@ -375,35 +374,15 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut col_service = Column::new()
-        .width(Length::Fixed(width + 11.0))
-        .push(
-            Text::new(service_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(vertical_space(Length::Fixed(10.0)));
-
     let mut scroll_service = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type);
+    let first_entry_data_info = entries.first().unwrap().1;
 
     for (service, data_info) in &entries {
-        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width * 0.88,
-            chart_type,
-            &entries.first().unwrap().1.clone(),
-            data_info,
-        );
-
-        // check if Unknown is longer than the first entry
-        if service == &Service::Unknown && incoming_bar_len + outgoing_bar_len > width * 0.88 {
-            let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
-            incoming_bar_len = width * 0.88 * incoming_proportion;
-            outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
-        }
+        let (incoming_bar_len, outgoing_bar_len) =
+            get_bars_length(width * 0.88, chart_type, &first_entry_data_info, data_info);
 
         let content = Column::new()
             .spacing(1)
@@ -444,12 +423,19 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
             );
     }
 
-    col_service = col_service.push(
-        Scrollable::new(Container::new(scroll_service).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-    );
-
-    col_service
+    Column::new()
+        .width(Length::Fixed(width + 11.0))
+        .push(
+            Text::new(service_translation(language))
+                .font(font)
+                .style(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Scrollable::new(Container::new(scroll_service).width(Length::Fill))
+                .direction(Direction::Vertical(ScrollbarType::properties())),
+        )
 }
 
 fn lazy_col_info(
