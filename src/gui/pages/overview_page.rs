@@ -425,7 +425,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    service: service.to_string(),
+                    service: service.to_string_with_equal_prefix(),
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),

@@ -123,7 +123,7 @@ impl ReportCol {
             ReportCol::SrcPort => FilterInputType::PortSrc,
             ReportCol::DstPort => FilterInputType::PortDst,
             ReportCol::Proto => FilterInputType::Proto,
-            ReportCol::Service => FilterInputType::AppProto,
+            ReportCol::Service => FilterInputType::Service,
             ReportCol::Bytes | ReportCol::Packets => FilterInputType::Country, // just to not panic...
         }
     }

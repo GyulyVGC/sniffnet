@@ -26,7 +26,7 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: DateTime<Local>,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: DateTime<Local>,
-    /// Application layer protocol carried by the associated address:port pair.
+    /// Upper layer service carried by the associated address:port pair.
     pub service: Service,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,

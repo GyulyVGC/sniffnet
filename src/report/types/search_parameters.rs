@@ -15,7 +15,7 @@ pub struct SearchParameters {
     pub port_dst: String,
     /// Protocol
     pub proto: String,
-    /// Application protocol
+    /// Service
     pub service: String,
     /// Country
     pub country: String,
@@ -80,7 +80,7 @@ pub enum FilterInputType {
     AddressDst,
     PortDst,
     Proto,
-    AppProto,
+    Service,
     Country,
     Domain,
     AsName,
@@ -93,7 +93,7 @@ impl FilterInputType {
         Self::AddressDst,
         Self::PortDst,
         Self::Proto,
-        Self::AppProto,
+        Self::Service,
         Self::Country,
         Self::Domain,
         Self::AsName,
@@ -118,17 +118,7 @@ impl FilterInputType {
             return entry_value.eq(stripped_filter);
         }
 
-        match self {
-            FilterInputType::AddressSrc
-            | FilterInputType::AddressDst
-            | FilterInputType::Domain
-            | FilterInputType::AsName => entry_value.contains(&filter_value),
-            FilterInputType::PortSrc
-            | FilterInputType::PortDst
-            | FilterInputType::Proto
-            | FilterInputType::AppProto
-            | FilterInputType::Country => entry_value.starts_with(&filter_value),
-        }
+        entry_value.contains(&filter_value)
     }
 
     pub fn current_value(self, search_params: &SearchParameters) -> &str {
@@ -138,7 +128,7 @@ impl FilterInputType {
             FilterInputType::AddressDst => &search_params.address_dst,
             FilterInputType::PortDst => &search_params.port_dst,
             FilterInputType::Proto => &search_params.proto,
-            FilterInputType::AppProto => &search_params.service,
+            FilterInputType::Service => &search_params.service,
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
@@ -169,7 +159,7 @@ impl FilterInputType {
                 }
             }
             FilterInputType::Proto => key.protocol.to_string(),
-            FilterInputType::AppProto => value.service.to_string(),
+            FilterInputType::Service => value.service.to_string(),
             FilterInputType::Country => r_dns_host.unwrap().1.country.to_string(),
             FilterInputType::Domain => r_dns_host.unwrap().0.to_string(),
             FilterInputType::AsName => r_dns_host.unwrap().1.asn.name.to_string(),
@@ -198,7 +188,7 @@ impl FilterInputType {
                 proto: String::new(),
                 ..search_params.clone()
             },
-            FilterInputType::AppProto => SearchParameters {
+            FilterInputType::Service => SearchParameters {
                 service: String::new(),
                 ..search_params.clone()
             },
@@ -243,7 +233,7 @@ impl FilterInputType {
                 proto: new_value.trim().to_string(),
                 ..search_params.clone()
             },
-            FilterInputType::AppProto => SearchParameters {
+            FilterInputType::Service => SearchParameters {
                 service: new_value.trim().to_string(),
                 ..search_params.clone()
             },

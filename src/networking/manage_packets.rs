@@ -1324,10 +1324,11 @@ mod tests {
             };
             // name is valid...
             assert!(
-                !["", "unknown", "?", "-"].contains(&name)
+                !["", "unknown", "-"].contains(&name)
                     && name.is_ascii()
                     && !name.starts_with('#')
                     && !name.contains(' ')
+                    && !name.contains('?')
             );
             // just to count and verify number of distinct services
             distinct_services.insert(name.to_string());

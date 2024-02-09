@@ -64,10 +64,11 @@ fn build_services_phf() {
 fn get_valid_service_fmt_const(s: &str) -> String {
     match s.trim() {
         invalid
-            if ["", "unknown", "?", "-"].contains(&invalid)
+            if ["", "unknown", "-"].contains(&invalid)
                 || !invalid.is_ascii()
                 || invalid.starts_with('#')
-                || invalid.contains(' ') =>
+                || invalid.contains(' ')
+                || invalid.contains('?') =>
         {
             panic!("Invalid service name found: {invalid}")
         }
