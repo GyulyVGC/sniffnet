@@ -35,4 +35,10 @@ mod tests {
         let test_str = Service::NotApplicable.to_string();
         assert_eq!(test_str, "-");
     }
+
+    #[test]
+    fn test_service_display_known() {
+        let test_str = Service::Name("https").to_string();
+        assert_eq!(test_str, "https");
+    }
 }

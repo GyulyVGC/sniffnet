@@ -1,6 +1,6 @@
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::search_parameters::FilterInputType;
+use crate::report::types::search_parameters::FilterInputType;
 use crate::translations::translations::{
     address_translation, bytes_translation, packets_translation, protocol_translation,
 };

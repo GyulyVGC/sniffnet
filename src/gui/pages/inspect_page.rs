@@ -19,10 +19,10 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
+use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, showing_results_translation,

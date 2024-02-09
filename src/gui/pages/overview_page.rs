@@ -30,8 +30,8 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::search_parameters::SearchParameters;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
+use crate::report::types::search_parameters::SearchParameters;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
     filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
