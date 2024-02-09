@@ -133,7 +133,6 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
     }
 }
 
-// referred to a network service like https, dns, and similar
 pub fn service_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Service",

@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/bash
 
 # Script used to generate the file ./services.txt
 # The source for port-to-service mappings is provided by nmap
