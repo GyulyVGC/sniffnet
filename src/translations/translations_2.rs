@@ -146,27 +146,27 @@ pub fn host_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn only_top_30_hosts_translation(language: Language) -> &'static str {
+pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Only the top 30 hosts are displayed here",
-        Language::IT => "Solo i maggiori 30 host sono mostrati qui",
-        Language::RU => "Тут показываются только первые 30 хостов",
-        Language::SV => "Endast de 30 främsta värdarna visas här",
-        Language::FI => "Vain 30 parasta isäntää näytetään tässä",
-        Language::DE => "Nur die obersten 30 Hosts werden hier angezeigt",
-        Language::TR => "Sadece ilk 30 sunucu burda gösterilmektedir",
-        // Language::FA => "تنها ۳۰ میزبان برتر در اینجا نمایش داده شده اند",
-        Language::ES => "Aquí sólo se muestran los 30 mejores anfitriones",
-        Language::KO => "상위 30개의 호스트만 노출됩니다",
-        Language::ZH => "仅展示前 30 个主机",
-        Language::UK => "Лише верхні 30 хостів відображаються тут",
-        Language::RO => "Doar primele 30 de host-uri sunt afișate aici",
-        Language::PL => "Tylko 30 pierwszych hostów jest wyświetlanych",
-        Language::FR => "Seuls les 30 premiers hôtes sont affichés ici",
-        Language::JA => "上位 30 件のホストのみが表示されます",
-        Language::UZ => "Bu erda faqat dastlabki 30 ta server ko'rsatiladi",
-        Language::PT => "Apenas os 30 melhores hosts são expostos aqui",
-        _ => "Only the top 30 hosts are displayed here",
+        Language::EN => "Only the top 30 items are displayed here",
+        Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
+        Language::RU => "Тут показываются только первые 30 предметы",
+        Language::SV => "Endast de 30 främsta föremål visas här",
+        Language::FI => "Vain 30 parasta kohteita näytetään tässä",
+        Language::DE => "Nur die obersten 30 artikel werden hier angezeigt",
+        Language::TR => "Sadece ilk 30 öğeler burda gösterilmektedir",
+        // Language::FA => "تنها ۳۰ موارد برتر در اینجا نمایش داده شده اند",
+        Language::ES => "Aquí sólo se muestran los 30 mejores elementos",
+        Language::KO => "상위 30개의 아이템만 노출됩니다",
+        Language::ZH => "仅展示前 30 个项目",
+        Language::UK => "Лише верхні 30 елементи відображаються тут",
+        Language::RO => "Doar primele 30 de articole sunt afișate aici",
+        Language::PL => "Tylko 30 pierwszych rzeczy jest wyświetlanych",
+        Language::FR => "Seuls les 30 premiers articles sont affichés ici",
+        Language::JA => "上位 30 件のアイテムのみが表示されます",
+        Language::UZ => "Bu erda faqat dastlabki 30 ta buyumlar ko'rsatiladi",
+        Language::PT => "Apenas os 30 melhores unid são expostos aqui",
+        _ => "Only the top 30 items are displayed here",
     }
 }
 

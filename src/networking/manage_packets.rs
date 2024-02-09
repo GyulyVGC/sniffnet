@@ -195,9 +195,9 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
     );
 
     if score1 > score2 {
-        service1.clone()
+        *service1
     } else {
-        service2.clone()
+        *service2
     }
 }
 

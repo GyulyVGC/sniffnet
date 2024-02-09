@@ -40,7 +40,7 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
-    only_top_30_hosts_translation,
+    only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
 use crate::utils::formatted_strings::{
@@ -347,7 +347,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 
     if entries.len() >= 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
-            Text::new(only_top_30_hosts_translation(language))
+            Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .horizontal_alignment(Horizontal::Center),
         );
@@ -385,7 +385,9 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
         )
         .push(vertical_space(Length::Fixed(10.0)));
 
-    let mut scroll_service = Column::new().width(Length::Fixed(width));
+    let mut scroll_service = Column::new()
+        .width(Length::Fixed(width))
+        .align_items(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type);
 
     for (service, data_info) in &entries {
@@ -431,6 +433,17 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
                 .style(ButtonType::Neutral),
         );
     }
+
+    if entries.len() >= 30 {
+        scroll_service = scroll_service
+            .push(vertical_space(Length::Fixed(25.0)))
+            .push(
+                Text::new(only_top_30_items_translation(language))
+                    .font(font)
+                    .horizontal_alignment(Horizontal::Center),
+            );
+    }
+
     col_service = col_service.push(
         Scrollable::new(Container::new(scroll_service).width(Length::Fill))
             .direction(Direction::Vertical(ScrollbarType::properties())),

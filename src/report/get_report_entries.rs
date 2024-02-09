@@ -1,4 +1,4 @@
-use std::cmp::{min, Ordering};
+use std::cmp::min;
 use std::sync::{Arc, Mutex};
 
 use crate::networking::manage_packets::get_address_to_lookup;
@@ -59,7 +59,7 @@ pub fn get_searched_entries(
             .get((sniffer.page_number - 1) * 20..upper_bound)
             .unwrap_or(&Vec::new())
             .iter()
-            .map(|key_val| (key_val.0.clone(), key_val.1.clone()))
+            .map(|&(key, val)| (key.to_owned(), val.to_owned()))
             .collect(),
         all_results.len(),
     )
@@ -80,7 +80,7 @@ pub fn get_host_entries(
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
         .iter()
-        .map(|e| (e.0.clone(), e.1.clone()))
+        .map(|&(host, data_info_host)| (host.to_owned(), data_info_host.to_owned()))
         .collect()
 }
 
@@ -95,18 +95,14 @@ pub fn get_service_entries(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
-    sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if p1 == &Service::Unknown {
-            Ordering::Greater
-        } else if p2 == &Service::Unknown {
-            Ordering::Less
-        } else {
-            match chart_type {
-                ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
-                ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
-            }
-        }
+    sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
+        ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
+        ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
     });
 
-    sorted_vec.iter().map(|e| (e.0.clone(), *e.1)).collect()
+    let n_entry = min(sorted_vec.len(), 30);
+    sorted_vec[0..n_entry]
+        .iter()
+        .map(|&(service, data_info)| (*service, *data_info))
+        .collect()
 }

@@ -1,5 +1,5 @@
 /// Upper layer services.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum Service {
     /// One of the known services.
     Name(&'static str),
@@ -11,7 +11,7 @@ pub enum Service {
 }
 
 impl Service {
-    pub fn to_string_with_equal_prefix(&self) -> String {
+    pub fn to_string_with_equal_prefix(self) -> String {
         match self {
             Service::Name(_) | Service::NotApplicable => ["=", &self.to_string()].concat(),
             Service::Unknown => self.to_string(),
