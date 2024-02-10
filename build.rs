@@ -31,8 +31,8 @@ fn set_icon() {
 }
 
 fn build_services_phf() {
-    let path = Path::new(&env::var("OUT_DIR").unwrap()).join("services.rs");
-    let mut file = BufWriter::new(File::create(path).unwrap());
+    let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join("services.rs");
+    let mut output = BufWriter::new(File::create(out_path).unwrap());
 
     let mut services_map = phf_codegen::Map::new();
 
@@ -53,7 +53,7 @@ fn build_services_phf() {
     assert_eq!(num_entries, 12066);
 
     writeln!(
-        &mut file,
+        &mut output,
         "#[allow(clippy::unreadable_literal)]\n\
         static SERVICES: phf::Map<ServiceQuery, Service> = {};",
         services_map.build()

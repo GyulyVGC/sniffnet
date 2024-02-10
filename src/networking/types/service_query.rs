@@ -1,3 +1,5 @@
+// WARNING: this file is imported in build.rs
+
 use std::hash::Hash;
 
 /// Used to query the phf services map (key of the map).

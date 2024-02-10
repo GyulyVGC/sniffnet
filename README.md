@@ -330,13 +330,14 @@ sudo sniffnet
 
   Please, remember that this is just a convention:
 
-  > **Warning**
+  > [!WARNING]
   >
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
   > However, many unofficial uses of well-known port numbers occur in practice.
   
-  The full list of services is generated from Nmap's service collection and is available in the file `services.txt`.
+  Sniffnet's list of services is generated from [Nmap's service collection](https://nmap.org/book/nmap-services.html)
+  and is available in the file [`services.txt`](https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/services.txt).
 
 </details>
 
