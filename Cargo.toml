@@ -52,7 +52,7 @@ toml = "0.8.9"
 once_cell = "1.19.0"
 ctrlc = { version = "3.4.2", features = ["termination"] }
 rfd = "0.13.0"
-phf = { version = "0.11.2", default-features = false }
+phf = "0.11.2"
 phf_shared = "0.11.2"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
