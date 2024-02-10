@@ -653,7 +653,7 @@ fn col_bytes_packets(
         ))
 }
 
-const MIN_BAR_LENGTH: f32 = 10.0;
+const MIN_BARS_LENGTH: f32 = 10.0;
 
 fn get_bars_length(
     tot_width: f32,
@@ -661,35 +661,67 @@ fn get_bars_length(
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (f32, f32) {
-    #[allow(clippy::cast_precision_loss)]
-    let (mut incoming_bar_len, mut outgoing_bar_len) = match chart_type {
+    let (in_val, out_val, first_entry_tot_val) = match chart_type {
         ChartType::Packets => (
-            tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
-            tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
+            data_info.incoming_packets,
+            data_info.outgoing_packets,
+            first_entry.tot_packets(),
         ),
         ChartType::Bytes => (
-            tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
-            tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
+            data_info.incoming_bytes,
+            data_info.outgoing_bytes,
+            first_entry.tot_bytes(),
         ),
     };
 
-    // normalize smaller values
-    if incoming_bar_len > 0.0 && incoming_bar_len < MIN_BAR_LENGTH {
-        incoming_bar_len = if outgoing_bar_len > 0.0 {
-            MIN_BAR_LENGTH / 2.0
-        } else {
-            MIN_BAR_LENGTH
-        };
-    }
-    if outgoing_bar_len > 0.0 && outgoing_bar_len < MIN_BAR_LENGTH {
-        outgoing_bar_len = if incoming_bar_len > 0.0 {
-            MIN_BAR_LENGTH / 2.0
-        } else {
-            MIN_BAR_LENGTH
-        };
+    let tot_val = in_val + out_val;
+    if tot_val == 0 {
+        return (0.0, 0.0);
     }
 
-    (incoming_bar_len, outgoing_bar_len)
+    #[allow(clippy::cast_precision_loss)]
+    let tot_len = tot_width * tot_val as f32 / first_entry_tot_val as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let (mut in_len, mut out_len) = (
+        tot_len * in_val as f32 / tot_val as f32,
+        tot_len * out_val as f32 / tot_val as f32,
+    );
+
+    if tot_len <= MIN_BARS_LENGTH {
+        // normalize small values
+        if in_val > 0 {
+            if out_val == 0 {
+                in_len = MIN_BARS_LENGTH;
+            } else {
+                in_len = MIN_BARS_LENGTH / 2.0;
+            }
+        }
+        if out_val > 0 {
+            if in_val == 0 {
+                out_len = MIN_BARS_LENGTH;
+            } else {
+                out_len = MIN_BARS_LENGTH / 2.0;
+            }
+        }
+    } else {
+        // tot_len is longer than minimum
+        if in_val > 0 && in_len < MIN_BARS_LENGTH / 2.0 {
+            let diff = MIN_BARS_LENGTH / 2.0 - in_len;
+            in_len += diff;
+            out_len -= diff;
+        }
+        if out_val > 0 && out_len < MIN_BARS_LENGTH / 2.0 {
+            let diff = MIN_BARS_LENGTH / 2.0 - out_len;
+            out_len += diff;
+            in_len -= diff;
+        }
+    }
+
+    // cut to 3 significant digits
+    in_len = (in_len * 1000.0).round() / 1000.0;
+    out_len = (out_len * 1000.0).round() / 1000.0;
+
+    (in_len, out_len)
 }
 
 fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, Renderer<StyleType>> {
@@ -766,4 +798,288 @@ fn get_active_filters_col(
         });
     }
     ret_val
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::chart::types::chart_type::ChartType;
+    use crate::gui::pages::overview_page::{get_bars_length, MIN_BARS_LENGTH};
+    use crate::networking::types::data_info::DataInfo;
+
+    #[test]
+    fn test_get_bars_length_simple() {
+        let first_entry = DataInfo {
+            incoming_packets: 50,
+            outgoing_packets: 50,
+            incoming_bytes: 150,
+            outgoing_bytes: 50,
+        };
+        let data_info = DataInfo {
+            incoming_packets: 25,
+            outgoing_packets: 55,
+            incoming_bytes: 165,
+            outgoing_bytes: 30,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (50.0, 110.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (165.0, 30.0)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_normalize_small_values() {
+        let first_entry = DataInfo {
+            incoming_packets: 50,
+            outgoing_packets: 50,
+            incoming_bytes: 150,
+            outgoing_bytes: 50,
+        };
+        let mut data_info = DataInfo {
+            incoming_packets: 2,
+            outgoing_packets: 1,
+            incoming_bytes: 1,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 3,
+            incoming_bytes: 0,
+            outgoing_bytes: 2,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_normalize_very_small_values() {
+        let first_entry = DataInfo {
+            incoming_packets: u128::MAX / 2,
+            outgoing_packets: u128::MAX / 2,
+            incoming_bytes: u128::MAX / 2,
+            outgoing_bytes: u128::MAX / 2,
+        };
+        let mut data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 1,
+            incoming_bytes: 1,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 1,
+            incoming_bytes: 0,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 0,
+            incoming_bytes: 1,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_complex() {
+        let first_entry = DataInfo {
+            incoming_packets: 350,
+            outgoing_packets: 50,
+            incoming_bytes: 12,
+            outgoing_bytes: 88,
+        };
+
+        let mut data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 9,
+            incoming_bytes: 0,
+            outgoing_bytes: 10,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, 16.245)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        data_info = DataInfo {
+            incoming_packets: 9,
+            outgoing_packets: 0,
+            incoming_bytes: 13,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (16.245, 0.0)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (13.0, 0.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 4,
+            outgoing_packets: 5,
+            incoming_bytes: 6,
+            outgoing_bytes: 7,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                (1000.0_f32 * 16.245 * 4.0 / 9.0).round() / 1000.0,
+                (1000.0_f32 * 16.245 * 5.0 / 9.0).round() / 1000.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (6.0, 7.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 5,
+            outgoing_packets: 4,
+            incoming_bytes: 7,
+            outgoing_bytes: 6,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                (1000.0_f32 * 16.245 * 5.0 / 9.0).round() / 1000.0,
+                (1000.0_f32 * 16.245 * 4.0 / 9.0).round() / 1000.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (7.0, 6.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 8,
+            incoming_bytes: 1,
+            outgoing_bytes: 12,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, 11.245)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, 8.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 8,
+            outgoing_packets: 1,
+            incoming_bytes: 12,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (11.245, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (8.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 6,
+            outgoing_packets: 1,
+            incoming_bytes: 10,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                16.245 * 7.0 / 9.0 - MIN_BARS_LENGTH / 2.0,
+                MIN_BARS_LENGTH / 2.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (6.0, MIN_BARS_LENGTH / 2.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 6,
+            incoming_bytes: 1,
+            outgoing_bytes: 9,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                MIN_BARS_LENGTH / 2.0,
+                16.245 * 7.0 / 9.0 - MIN_BARS_LENGTH / 2.0,
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info.incoming_bytes = 5;
+        data_info.outgoing_bytes = 5;
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 0,
+            incoming_bytes: 0,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, 0.0,)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, 0.0)
+        );
+    }
 }
