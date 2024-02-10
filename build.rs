@@ -12,9 +12,11 @@ use rustrict::{Censor, Trie, Type};
 include!("./src/networking/types/service_query.rs");
 include!("./src/networking/types/protocol.rs");
 
+const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
 const SERVICES_LIST_PATH: &str = "./services.txt";
 
 fn main() {
+    println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
     println!("cargo:rerun-if-changed={SERVICES_LIST_PATH}");
 
     set_icon();
@@ -25,7 +27,7 @@ fn set_icon() {
     #[cfg(windows)]
     {
         let mut res = winres::WindowsResource::new();
-        res.set_icon("resources/packaging/windows/graphics/sniffnet.ico");
+        res.set_icon(WINDOWS_ICON_PATH);
         res.compile().unwrap();
     }
 }
