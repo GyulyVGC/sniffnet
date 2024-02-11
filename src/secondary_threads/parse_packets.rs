@@ -1,11 +1,13 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets and
 //! inserting them in the shared map.
 
-use std::io::ErrorKind;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use etherparse::{PacketHeaders, ReadError};
+use etherparse::err::ip::HeaderError;
+use etherparse::err::packet::SliceError;
+use etherparse::err::{Layer, LenError};
+use etherparse::{LenSource, PacketHeaders};
 use pcap::{Active, Capture, Packet};
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
@@ -171,7 +173,7 @@ pub fn parse_packets(
                             }
                         }
 
-                        //increment the packet count for the sniffed app protocol
+                        //increment the packet count for the sniffed service
                         info_traffic
                             .services
                             .entry(new_info.service)
@@ -194,7 +196,7 @@ pub fn parse_packets(
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     my_link_type: MyLinkType,
-) -> Result<PacketHeaders<'a>, ReadError> {
+) -> Result<PacketHeaders<'a>, SliceError> {
     match my_link_type {
         MyLinkType::Ethernet(_) => PacketHeaders::from_ethernet_slice(packet),
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
@@ -207,9 +209,15 @@ fn get_sniffable_headers<'a>(
     }
 }
 
-fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, ReadError> {
+fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, SliceError> {
     if packet.len() <= 4 {
-        return Err(ReadError::UnexpectedEndOfSlice(packet.len()));
+        return Err(SliceError::Len(LenError {
+            required_len: 4,
+            len: packet.len(),
+            len_source: LenSource::Slice,
+            layer: Layer::Ethernet2Header,
+            layer_start_offset: 0,
+        }));
     }
 
     let is_valid_af_inet = {
@@ -232,9 +240,8 @@ fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, ReadError> {
     if is_valid_af_inet {
         PacketHeaders::from_ip_slice(&packet[4..])
     } else {
-        Err(ReadError::IoError(std::io::Error::new(
-            ErrorKind::InvalidData,
-            "Invalid AF_INET / AF_INET6 value",
-        )))
+        Err(SliceError::Ip(HeaderError::UnsupportedIpVersion {
+            version_number: 0,
+        }))
     }
 }

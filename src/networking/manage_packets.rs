@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{Ethernet2Header, IpHeader, PacketHeaders, TransportHeader};
+use etherparse::{Ethernet2Header, NetHeaders, PacketHeaders, TransportHeader};
 use pcap::{Active, Address, Capture, Device};
 
 use crate::mmdb::asn::get_asn;
@@ -37,10 +37,15 @@ pub fn analyze_headers(
     icmp_type: &mut IcmpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
-    analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1);
+    analyze_link_header(
+        headers.link,
+        &mut mac_addresses.0,
+        &mut mac_addresses.1,
+        exchanged_bytes,
+    );
 
     if !analyze_network_header(
-        headers.ip,
+        headers.net,
         exchanged_bytes,
         &mut packet_filters_fields.ip_version,
         &mut packet_filters_fields.source,
@@ -75,8 +80,10 @@ fn analyze_link_header(
     link_header: Option<Ethernet2Header>,
     mac_address1: &mut Option<String>,
     mac_address2: &mut Option<String>,
+    exchanged_bytes: &mut u128,
 ) {
     if let Some(header) = link_header {
+        *exchanged_bytes += 14;
         *mac_address1 = Some(mac_from_dec_to_hex(header.source));
         *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
     } else {
@@ -89,25 +96,25 @@ fn analyze_link_header(
 /// passed by reference on the basis of the packet header content.
 /// Returns false if packet has to be skipped.
 fn analyze_network_header(
-    network_header: Option<IpHeader>,
+    network_header: Option<NetHeaders>,
     exchanged_bytes: &mut u128,
     network_protocol: &mut IpVersion,
     address1: &mut IpAddr,
     address2: &mut IpAddr,
 ) -> bool {
     match network_header {
-        Some(IpHeader::Version4(ipv4header, _)) => {
+        Some(NetHeaders::Ipv4(ipv4header, _)) => {
             *network_protocol = IpVersion::IPv4;
             *address1 = IpAddr::from(ipv4header.source);
             *address2 = IpAddr::from(ipv4header.destination);
-            *exchanged_bytes = u128::from(ipv4header.payload_len);
+            *exchanged_bytes += u128::from(ipv4header.total_len);
             true
         }
-        Some(IpHeader::Version6(ipv6header, _)) => {
+        Some(NetHeaders::Ipv6(ipv6header, _)) => {
             *network_protocol = IpVersion::IPv6;
             *address1 = IpAddr::from(ipv6header.source);
             *address2 = IpAddr::from(ipv6header.destination);
-            *exchanged_bytes = u128::from(ipv6header.payload_length);
+            *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
             true
         }
         _ => false,
