@@ -30,25 +30,24 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::search_parameters::SearchParameters;
-use crate::report::get_report_entries::{get_app_entries, get_host_entries};
+use crate::report::get_report_entries::{get_host_entries, get_service_entries};
+use crate::report::types::search_parameters::SearchParameters;
 use crate::translations::translations::{
-    active_filters_translation, application_protocol_translation, bytes_chart_translation,
-    error_translation, filtered_bytes_translation, filtered_packets_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, of_total_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    active_filters_translation, bytes_chart_translation, error_translation,
+    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
+    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
-    only_top_30_hosts_translation,
+    only_top_30_items_translation,
 };
-use crate::translations::translations_3::unsupported_link_type_translation;
+use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
 use crate::utils::formatted_strings::{
     get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
 };
 use crate::utils::types::icon::Icon;
-use crate::{AppProtocol, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -251,18 +250,16 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
         .width(Length::Fill);
 
     let col_host = col_host(840.0, sniffer);
-    let col_app = col_app(250.0, sniffer);
+    let col_service = col_service(250.0, sniffer);
 
     row_report = row_report
         .push(col_host)
         .push(Rule::vertical(40))
-        .push(col_app);
+        .push(col_service);
 
     Container::new(row_report)
         .height(FillPortion(4))
-        .width(Length::Fixed(1170.0))
         .style(ContainerType::BorderedRound)
-        .align_x(Horizontal::Center)
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
@@ -276,12 +273,13 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type);
+    let first_entry_data_info = entries.first().unwrap().1.data_info;
 
     for (host, data_info_host) in &entries {
         let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
             width * 0.86,
             chart_type,
-            &entries.first().unwrap().1.data_info.clone(),
+            &first_entry_data_info,
             &data_info_host.data_info,
         );
 
@@ -348,7 +346,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
 
     if entries.len() >= 30 {
         scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
-            Text::new(only_top_30_hosts_translation(language))
+            Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .horizontal_alignment(Horizontal::Center),
         );
@@ -369,47 +367,29 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         )
 }
 
-fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut col_app = Column::new()
-        .width(Length::Fixed(width + 11.0))
-        .push(
-            Text::new(application_protocol_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(vertical_space(Length::Fixed(10.0)));
+    let mut scroll_service = Column::new()
+        .width(Length::Fixed(width))
+        .align_items(Alignment::Center);
+    let entries = get_service_entries(&sniffer.info_traffic, chart_type);
+    let first_entry_data_info = entries.first().unwrap().1;
 
-    let mut scroll_app = Column::new().width(Length::Fixed(width));
-    let entries = get_app_entries(&sniffer.info_traffic, chart_type);
-
-    for (app, data_info) in &entries {
-        let (mut incoming_bar_len, mut outgoing_bar_len) = get_bars_length(
-            width * 0.88,
-            chart_type,
-            &entries.first().unwrap().1.clone(),
-            data_info,
-        );
-
-        // check if Unknown is longer than the first entry
-        if app.eq(&AppProtocol::Unknown) && incoming_bar_len + outgoing_bar_len > width * 0.88 {
-            let incoming_proportion = incoming_bar_len / (incoming_bar_len + outgoing_bar_len);
-            incoming_bar_len = width * 0.88 * incoming_proportion;
-            outgoing_bar_len = width * 0.88 * (1.0 - incoming_proportion);
-        }
+    for (service, data_info) in &entries {
+        let (incoming_bar_len, outgoing_bar_len) =
+            get_bars_length(width * 0.88, chart_type, &first_entry_data_info, data_info);
 
         let content = Column::new()
             .spacing(1)
             .width(Length::Fixed(width))
             .push(
                 Row::new()
-                    .push(Text::new(app.to_string()).font(font))
+                    .push(Text::new(service.to_string()).font(font))
                     .push(horizontal_space(Length::FillPortion(1)))
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
@@ -422,22 +402,40 @@ fn col_app(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<S
             )
             .push(get_bars(incoming_bar_len, outgoing_bar_len));
 
-        scroll_app = scroll_app.push(
+        scroll_service = scroll_service.push(
             button(content)
                 .padding([5, 15, 8, 10])
                 .on_press(Message::Search(SearchParameters {
-                    app_proto: app.to_string(),
+                    service: service.to_string_with_equal_prefix(),
                     ..SearchParameters::default()
                 }))
                 .style(ButtonType::Neutral),
         );
     }
-    col_app = col_app.push(
-        Scrollable::new(Container::new(scroll_app).width(Length::Fill))
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-    );
 
-    col_app
+    if entries.len() >= 30 {
+        scroll_service = scroll_service
+            .push(vertical_space(Length::Fixed(25.0)))
+            .push(
+                Text::new(only_top_30_items_translation(language))
+                    .font(font)
+                    .horizontal_alignment(Horizontal::Center),
+            );
+    }
+
+    Column::new()
+        .width(Length::Fixed(width + 11.0))
+        .push(
+            Text::new(service_translation(language))
+                .font(font)
+                .style(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(vertical_space(Length::Fixed(10.0)))
+        .push(
+            Scrollable::new(Container::new(scroll_service).width(Length::Fill))
+                .direction(Direction::Vertical(ScrollbarType::properties())),
+        )
 }
 
 fn lazy_col_info(
@@ -655,33 +653,75 @@ fn col_bytes_packets(
         ))
 }
 
+const MIN_BARS_LENGTH: f32 = 10.0;
+
 fn get_bars_length(
     tot_width: f32,
     chart_type: ChartType,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (f32, f32) {
-    #[allow(clippy::cast_precision_loss)]
-    let (mut incoming_bar_len, mut outgoing_bar_len) = match chart_type {
+    let (in_val, out_val, first_entry_tot_val) = match chart_type {
         ChartType::Packets => (
-            tot_width * data_info.incoming_packets as f32 / first_entry.tot_packets() as f32,
-            tot_width * data_info.outgoing_packets as f32 / first_entry.tot_packets() as f32,
+            data_info.incoming_packets,
+            data_info.outgoing_packets,
+            first_entry.tot_packets(),
         ),
         ChartType::Bytes => (
-            tot_width * data_info.incoming_bytes as f32 / first_entry.tot_bytes() as f32,
-            tot_width * data_info.outgoing_bytes as f32 / first_entry.tot_bytes() as f32,
+            data_info.incoming_bytes,
+            data_info.outgoing_bytes,
+            first_entry.tot_bytes(),
         ),
     };
 
-    // normalize smaller values
-    if incoming_bar_len > 0.0 && incoming_bar_len < 3.0 {
-        incoming_bar_len = 3.0;
-    }
-    if outgoing_bar_len > 0.0 && outgoing_bar_len < 3.0 {
-        outgoing_bar_len = 3.0;
+    let tot_val = in_val + out_val;
+    if tot_val == 0 {
+        return (0.0, 0.0);
     }
 
-    (incoming_bar_len, outgoing_bar_len)
+    #[allow(clippy::cast_precision_loss)]
+    let tot_len = tot_width * tot_val as f32 / first_entry_tot_val as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let (mut in_len, mut out_len) = (
+        tot_len * in_val as f32 / tot_val as f32,
+        tot_len * out_val as f32 / tot_val as f32,
+    );
+
+    if tot_len <= MIN_BARS_LENGTH {
+        // normalize small values
+        if in_val > 0 {
+            if out_val == 0 {
+                in_len = MIN_BARS_LENGTH;
+            } else {
+                in_len = MIN_BARS_LENGTH / 2.0;
+            }
+        }
+        if out_val > 0 {
+            if in_val == 0 {
+                out_len = MIN_BARS_LENGTH;
+            } else {
+                out_len = MIN_BARS_LENGTH / 2.0;
+            }
+        }
+    } else {
+        // tot_len is longer than minimum
+        if in_val > 0 && in_len < MIN_BARS_LENGTH / 2.0 {
+            let diff = MIN_BARS_LENGTH / 2.0 - in_len;
+            in_len += diff;
+            out_len -= diff;
+        }
+        if out_val > 0 && out_len < MIN_BARS_LENGTH / 2.0 {
+            let diff = MIN_BARS_LENGTH / 2.0 - out_len;
+            out_len += diff;
+            in_len -= diff;
+        }
+    }
+
+    // cut to 3 significant digits
+    in_len = (in_len * 1000.0).round() / 1000.0;
+    out_len = (out_len * 1000.0).round() / 1000.0;
+
+    (in_len, out_len)
 }
 
 fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, Renderer<StyleType>> {
@@ -758,4 +798,288 @@ fn get_active_filters_col(
         });
     }
     ret_val
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::chart::types::chart_type::ChartType;
+    use crate::gui::pages::overview_page::{get_bars_length, MIN_BARS_LENGTH};
+    use crate::networking::types::data_info::DataInfo;
+
+    #[test]
+    fn test_get_bars_length_simple() {
+        let first_entry = DataInfo {
+            incoming_packets: 50,
+            outgoing_packets: 50,
+            incoming_bytes: 150,
+            outgoing_bytes: 50,
+        };
+        let data_info = DataInfo {
+            incoming_packets: 25,
+            outgoing_packets: 55,
+            incoming_bytes: 165,
+            outgoing_bytes: 30,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (50.0, 110.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (165.0, 30.0)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_normalize_small_values() {
+        let first_entry = DataInfo {
+            incoming_packets: 50,
+            outgoing_packets: 50,
+            incoming_bytes: 150,
+            outgoing_bytes: 50,
+        };
+        let mut data_info = DataInfo {
+            incoming_packets: 2,
+            outgoing_packets: 1,
+            incoming_bytes: 1,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 3,
+            incoming_bytes: 0,
+            outgoing_bytes: 2,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_normalize_very_small_values() {
+        let first_entry = DataInfo {
+            incoming_packets: u128::MAX / 2,
+            outgoing_packets: u128::MAX / 2,
+            incoming_bytes: u128::MAX / 2,
+            outgoing_bytes: u128::MAX / 2,
+        };
+        let mut data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 1,
+            incoming_bytes: 1,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 1,
+            incoming_bytes: 0,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 0,
+            incoming_bytes: 1,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+        assert_eq!(
+            get_bars_length(200.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH, 0.0)
+        );
+    }
+
+    #[test]
+    fn test_get_bars_length_complex() {
+        let first_entry = DataInfo {
+            incoming_packets: 350,
+            outgoing_packets: 50,
+            incoming_bytes: 12,
+            outgoing_bytes: 88,
+        };
+
+        let mut data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 9,
+            incoming_bytes: 0,
+            outgoing_bytes: 10,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, 16.245)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, MIN_BARS_LENGTH)
+        );
+        data_info = DataInfo {
+            incoming_packets: 9,
+            outgoing_packets: 0,
+            incoming_bytes: 13,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (16.245, 0.0)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (13.0, 0.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 4,
+            outgoing_packets: 5,
+            incoming_bytes: 6,
+            outgoing_bytes: 7,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                (1000.0_f32 * 16.245 * 4.0 / 9.0).round() / 1000.0,
+                (1000.0_f32 * 16.245 * 5.0 / 9.0).round() / 1000.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (6.0, 7.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 5,
+            outgoing_packets: 4,
+            incoming_bytes: 7,
+            outgoing_bytes: 6,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                (1000.0_f32 * 16.245 * 5.0 / 9.0).round() / 1000.0,
+                (1000.0_f32 * 16.245 * 4.0 / 9.0).round() / 1000.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (7.0, 6.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 8,
+            incoming_bytes: 1,
+            outgoing_bytes: 12,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, 11.245)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, 8.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 8,
+            outgoing_packets: 1,
+            incoming_bytes: 12,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (11.245, MIN_BARS_LENGTH / 2.0)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (8.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 6,
+            outgoing_packets: 1,
+            incoming_bytes: 10,
+            outgoing_bytes: 1,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                16.245 * 7.0 / 9.0 - MIN_BARS_LENGTH / 2.0,
+                MIN_BARS_LENGTH / 2.0
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (6.0, MIN_BARS_LENGTH / 2.0)
+        );
+        data_info = DataInfo {
+            incoming_packets: 1,
+            outgoing_packets: 6,
+            incoming_bytes: 1,
+            outgoing_bytes: 9,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (
+                MIN_BARS_LENGTH / 2.0,
+                16.245 * 7.0 / 9.0 - MIN_BARS_LENGTH / 2.0,
+            )
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info.incoming_bytes = 5;
+        data_info.outgoing_bytes = 5;
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
+        );
+
+        data_info = DataInfo {
+            incoming_packets: 0,
+            outgoing_packets: 0,
+            incoming_bytes: 0,
+            outgoing_bytes: 0,
+        };
+        assert_eq!(
+            get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
+            (0.0, 0.0,)
+        );
+        assert_eq!(
+            get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
+            (0.0, 0.0)
+        );
+    }
 }

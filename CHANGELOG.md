@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Added support for ICMP connections and messages ([#417](https://github.com/GyulyVGC/sniffnet/pull/417) — fixes [#288](https://github.com/GyulyVGC/sniffnet/issues/288))
+- Added capability to identify 6000+ upper layer services, protocols, trojans, and worms ([#450](https://github.com/GyulyVGC/sniffnet/pull/450) — fixes [#374](https://github.com/GyulyVGC/sniffnet/issues/374))
 - Introduced new filtering capabilities to allow users specify custom values of ports and IP addresses ([#414](https://github.com/GyulyVGC/sniffnet/pull/414))
 - The size of text and widgets can now be customised by setting a proper zoom value (fixes [#202](https://github.com/GyulyVGC/sniffnet/issues/202) and [#344](https://github.com/GyulyVGC/sniffnet/issues/344))
 - Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286) and [#419](https://github.com/GyulyVGC/sniffnet/pull/419))
@@ -27,6 +28,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fixed a build failure on `powerpc64` ([#356](https://github.com/GyulyVGC/sniffnet/pull/356) — fixes [#353](https://github.com/GyulyVGC/sniffnet/issues/353))
 - Fixed a typo in Russian translation ([#389](https://github.com/GyulyVGC/sniffnet/pull/389))
 - Fixed icon inconsistency in case of directed broadcast traffic
+- Fixed hosts and services data bar lengths inconsistencies in overview page
 
 ## [1.2.2] - 2023-08-08
 - Added option to set different shades of color gradients for each of the available themes

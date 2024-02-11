@@ -56,7 +56,7 @@ impl Default for PacketsNotification {
 }
 
 impl PacketsNotification {
-    /// Arbitrary string constructor. Will fallback values to existing notification if set, default() otherwise
+    /// Arbitrary string constructor. Will fallback values to existing notification if set, or default otherwise
     pub fn from(value: &str, existing: Option<Self>) -> Self {
         let default = existing.unwrap_or_default();
 
@@ -97,7 +97,7 @@ impl Default for BytesNotification {
 }
 
 impl BytesNotification {
-    /// Arbitrary string constructor. Will fallback values to existing notification if set, default() otherwise
+    /// Arbitrary string constructor. Will fallback values to existing notification if set, or default otherwise
     pub fn from(value: &str, existing: Option<Self>) -> Self {
         let default = existing.unwrap_or_default();
 

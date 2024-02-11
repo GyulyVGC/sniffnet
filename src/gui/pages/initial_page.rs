@@ -186,7 +186,7 @@ fn col_protocol_buttons(
 }
 
 fn col_address_input(
-    value: &String,
+    value: &str,
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {
@@ -221,7 +221,7 @@ fn col_address_input(
 }
 
 fn col_port_input(
-    value: &String,
+    value: &str,
     font: Font,
     language: Language,
 ) -> Column<'static, Message, Renderer<StyleType>> {

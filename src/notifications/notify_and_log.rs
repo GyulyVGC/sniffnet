@@ -99,7 +99,7 @@ pub fn notify_and_log(
                 .push_front(LoggedNotification::FavoriteTransmitted(
                     FavoriteTransmitted {
                         host: host.clone(),
-                        data_info_host: info_traffic_lock.hosts.get(host).unwrap().clone(),
+                        data_info_host: *info_traffic_lock.hosts.get(host).unwrap(),
                         timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
                     },
                 ));
