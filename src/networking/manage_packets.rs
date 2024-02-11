@@ -37,7 +37,12 @@ pub fn analyze_headers(
     icmp_type: &mut IcmpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
-    analyze_link_header(headers.link, &mut mac_addresses.0, &mut mac_addresses.1);
+    analyze_link_header(
+        headers.link,
+        &mut mac_addresses.0,
+        &mut mac_addresses.1,
+        exchanged_bytes,
+    );
 
     if !analyze_network_header(
         headers.net,
@@ -75,8 +80,10 @@ fn analyze_link_header(
     link_header: Option<Ethernet2Header>,
     mac_address1: &mut Option<String>,
     mac_address2: &mut Option<String>,
+    exchanged_bytes: &mut u128,
 ) {
     if let Some(header) = link_header {
+        *exchanged_bytes += 14;
         *mac_address1 = Some(mac_from_dec_to_hex(header.source));
         *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
     } else {
@@ -100,14 +107,14 @@ fn analyze_network_header(
             *network_protocol = IpVersion::IPv4;
             *address1 = IpAddr::from(ipv4header.source);
             *address2 = IpAddr::from(ipv4header.destination);
-            *exchanged_bytes = u128::from(ipv4header.total_len);
+            *exchanged_bytes += u128::from(ipv4header.total_len);
             true
         }
         Some(NetHeaders::Ipv6(ipv6header, _)) => {
             *network_protocol = IpVersion::IPv6;
             *address1 = IpAddr::from(ipv6header.source);
             *address2 = IpAddr::from(ipv6header.destination);
-            *exchanged_bytes = u128::from(40 + ipv6header.payload_length);
+            *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
             true
         }
         _ => false,

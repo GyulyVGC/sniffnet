@@ -173,7 +173,7 @@ pub fn parse_packets(
                             }
                         }
 
-                        //increment the packet count for the sniffed app protocol
+                        //increment the packet count for the sniffed service
                         info_traffic
                             .services
                             .entry(new_info.service)
