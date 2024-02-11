@@ -10,8 +10,7 @@ use pcap::{Active, Capture, Packet};
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_app_protocol, modify_or_insert_in_map,
-    reverse_dns_lookup,
+    analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
@@ -67,7 +66,6 @@ pub fn parse_packets(
                     }
 
                     let key = key_option.unwrap();
-                    let application_protocol = get_app_protocol(key.port1, key.port2);
                     let mut new_info = InfoAddressPortPair::default();
 
                     let passed_filters = filters.matches(&packet_filters_fields);
@@ -79,7 +77,6 @@ pub fn parse_packets(
                             mac_addresses,
                             icmp_type,
                             exchanged_bytes,
-                            application_protocol,
                         );
                     }
 
@@ -176,8 +173,8 @@ pub fn parse_packets(
 
                         //increment the packet count for the sniffed app protocol
                         info_traffic
-                            .app_protocols
-                            .entry(application_protocol)
+                            .services
+                            .entry(new_info.service)
                             .and_modify(|data_info| {
                                 data_info.add_packet(exchanged_bytes, new_info.traffic_direction);
                             })

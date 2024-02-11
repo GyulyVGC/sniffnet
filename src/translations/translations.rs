@@ -30,29 +30,29 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, Renderer
     })
 }
 
-pub fn application_protocol_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Application protocol",
-        Language::IT => "Protocollo applicativo",
-        Language::FR => "Protocole applicatif",
-        Language::ES => "Protocolo de aplicación",
-        Language::PL => "Protokół aplikacji",
-        Language::DE => "Anwendungs-Protokoll",
-        Language::UK => "Протокол аплікації",
-        Language::ZH => "目标应用层协议",
-        Language::RO => "Protocol aplicație",
-        Language::KO => "어플리케이션 프로토콜",
-        Language::TR => "Uygulama protokolü",
-        Language::RU => "Прикладной протокол",
-        Language::PT => "Protocolo de aplicação",
-        Language::EL => "Πρωτόκολλο εφαρμογής",
-        // Language::FA => "پیوندنامهٔ درخواست",
-        Language::SV => "Applikationsprotokoll",
-        Language::FI => "Sovellusprotokolla",
-        Language::JA => "アプリケーション プロトコル",
-        Language::UZ => "Ilova protokoli",
-    }
-}
+// pub fn application_protocol_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Application protocol",
+//         Language::IT => "Protocollo applicativo",
+//         Language::FR => "Protocole applicatif",
+//         Language::ES => "Protocolo de aplicación",
+//         Language::PL => "Protokół aplikacji",
+//         Language::DE => "Anwendungs-Protokoll",
+//         Language::UK => "Протокол аплікації",
+//         Language::ZH => "目标应用层协议",
+//         Language::RO => "Protocol aplicație",
+//         Language::KO => "어플리케이션 프로토콜",
+//         Language::TR => "Uygulama protokolü",
+//         Language::RU => "Прикладной протокол",
+//         Language::PT => "Protocolo de aplicação",
+//         Language::EL => "Πρωτόκολλο εφαρμογής",
+//         // Language::FA => "پیوندنامهٔ درخواست",
+//         Language::SV => "Applikationsprotokoll",
+//         Language::FI => "Sovellusprotokolla",
+//         Language::JA => "アプリケーション プロトコル",
+//         Language::UZ => "Ilova protokoli",
+//     }
+// }
 
 pub fn select_filters_translation(language: Language) -> Text<'static, Renderer<StyleType>> {
     Text::new(match language {

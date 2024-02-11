@@ -132,3 +132,11 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         _ => "Filter by network host",
     }
 }
+
+pub fn service_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Service",
+        Language::IT => "Servizio",
+        _ => "Service",
+    }
+}

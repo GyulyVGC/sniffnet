@@ -7,7 +7,7 @@ use chrono::{DateTime, Local};
 
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::AppProtocol;
+use crate::Service;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -26,8 +26,8 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: DateTime<Local>,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: DateTime<Local>,
-    /// Application layer protocol carried by the associated address:port pair.
-    pub app_protocol: AppProtocol,
+    /// Upper layer service carried by the associated address:port pair.
+    pub service: Service,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)

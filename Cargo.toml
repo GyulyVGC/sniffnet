@@ -11,14 +11,17 @@ license     = "MIT OR Apache-2.0"
 keywords    = [ "filter", "network", "packet", "sniffer", "gui" ]
 categories  = [ "visualization", "gui", "network-programming" ]
 include     = [
-    "src/**/*",
-    "LICENSE-*",
-    "README.md",
-    "CHANGELOG.md",
-    "resources/countries_flags/**/*",
-    "resources/DB/*",
-    "resources/fonts/subset/*",
-    "resources/sounds/*"
+    "/src/**/*.rs",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/resources/countries_flags/**/*.svg",
+    "/resources/DB/*.mmdb",
+    "/resources/fonts/subset/*.ttf",
+    "/resources/sounds/*.mp3",
+    "/services.txt",
+    "/build.rs",
 ]
 
 [target."cfg(windows)"]
@@ -49,6 +52,8 @@ toml = "0.8.9"
 once_cell = "1.19.0"
 ctrlc = { version = "3.4.2", features = ["termination"] }
 rfd = "0.13.0"
+phf = "0.11.2"
+phf_shared = "0.11.2"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
 reqwest = { version = "0.11.24", default-features = false, features = ["json", "blocking", "rustls-tls"] }
@@ -64,6 +69,12 @@ rstest = "0.18.2"
 serial_test = { version = "3.0.0", default_features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+[build-dependencies]
+phf_codegen = "0.11.2"
+phf_shared = "0.11.2"
+rustrict = { version = "0.7.21", default-features = false, features = ["censor"] }
+once_cell = "1.19.0"
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"
