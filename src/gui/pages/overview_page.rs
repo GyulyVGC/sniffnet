@@ -852,12 +852,14 @@ mod tests {
             outgoing_packets: 50,
             incoming_bytes: 150,
             outgoing_bytes: 50,
+            final_timestamp: Default::default(),
         };
         let data_info = DataInfo {
             incoming_packets: 25,
             outgoing_packets: 55,
             incoming_bytes: 165,
             outgoing_bytes: 30,
+            final_timestamp: Default::default(),
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -876,12 +878,14 @@ mod tests {
             outgoing_packets: 50,
             incoming_bytes: 150,
             outgoing_bytes: 50,
+            final_timestamp: Default::default(),
         };
         let mut data_info = DataInfo {
             incoming_packets: 2,
             outgoing_packets: 1,
             incoming_bytes: 1,
             outgoing_bytes: 0,
+            final_timestamp: Default::default(),
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -897,6 +901,7 @@ mod tests {
             outgoing_packets: 3,
             incoming_bytes: 0,
             outgoing_bytes: 2,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -915,12 +920,14 @@ mod tests {
             outgoing_packets: u128::MAX / 2,
             incoming_bytes: u128::MAX / 2,
             outgoing_bytes: u128::MAX / 2,
+            final_timestamp: Default::default(),
         };
         let mut data_info = DataInfo {
             incoming_packets: 1,
             outgoing_packets: 1,
             incoming_bytes: 1,
             outgoing_bytes: 1,
+            final_timestamp: Default::default(),
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -936,6 +943,7 @@ mod tests {
             outgoing_packets: 1,
             incoming_bytes: 0,
             outgoing_bytes: 1,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -951,6 +959,7 @@ mod tests {
             outgoing_packets: 0,
             incoming_bytes: 1,
             outgoing_bytes: 0,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
@@ -969,6 +978,7 @@ mod tests {
             outgoing_packets: 50,
             incoming_bytes: 12,
             outgoing_bytes: 88,
+            final_timestamp: Default::default(),
         };
 
         let mut data_info = DataInfo {
@@ -976,6 +986,7 @@ mod tests {
             outgoing_packets: 9,
             incoming_bytes: 0,
             outgoing_bytes: 10,
+            final_timestamp: Default::default(),
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -990,6 +1001,7 @@ mod tests {
             outgoing_packets: 0,
             incoming_bytes: 13,
             outgoing_bytes: 0,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1005,6 +1017,7 @@ mod tests {
             outgoing_packets: 5,
             incoming_bytes: 6,
             outgoing_bytes: 7,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1022,6 +1035,7 @@ mod tests {
             outgoing_packets: 4,
             incoming_bytes: 7,
             outgoing_bytes: 6,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1040,6 +1054,7 @@ mod tests {
             outgoing_packets: 8,
             incoming_bytes: 1,
             outgoing_bytes: 12,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1054,6 +1069,7 @@ mod tests {
             outgoing_packets: 1,
             incoming_bytes: 12,
             outgoing_bytes: 1,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1069,6 +1085,7 @@ mod tests {
             outgoing_packets: 1,
             incoming_bytes: 10,
             outgoing_bytes: 1,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1086,6 +1103,7 @@ mod tests {
             outgoing_packets: 6,
             incoming_bytes: 1,
             outgoing_bytes: 9,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
@@ -1111,6 +1129,7 @@ mod tests {
             outgoing_packets: 0,
             incoming_bytes: 0,
             outgoing_bytes: 0,
+            ..data_info
         };
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
