@@ -275,7 +275,14 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
-    let first_entry_data_info = entries.first().unwrap().1.data_info;
+    let first_entry_data_info = entries
+        .iter()
+        .map(|(_, d)| d.data_info)
+        .max_by(|d1, d2| match chart_type {
+            ChartType::Packets => d1.tot_packets().cmp(&d2.tot_packets()),
+            ChartType::Bytes => d1.tot_bytes().cmp(&d2.tot_bytes()),
+        })
+        .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
         let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
@@ -380,7 +387,14 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
-    let first_entry_data_info = entries.first().unwrap().1;
+    let first_entry_data_info = entries
+        .iter()
+        .map(|&(_, d)| d)
+        .max_by(|d1, d2| match chart_type {
+            ChartType::Packets => d1.tot_packets().cmp(&d2.tot_packets()),
+            ChartType::Bytes => d1.tot_bytes().cmp(&d2.tot_bytes()),
+        })
+        .unwrap_or_default();
 
     for (service, data_info) in &entries {
         let (incoming_bar_len, outgoing_bar_len) =
