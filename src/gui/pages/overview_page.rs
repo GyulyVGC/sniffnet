@@ -15,7 +15,6 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
-use crate::countries::types::country::Country;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -333,16 +332,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         scroll_host = scroll_host.push(
             button(content)
                 .padding([5, 15, 5, 10])
-                .on_press(Message::Search(SearchParameters {
-                    domain: host.domain.clone(),
-                    as_name: host.asn.name.clone(),
-                    country: if host.country == Country::ZZ {
-                        String::new()
-                    } else {
-                        host.country.to_string()
-                    },
-                    ..SearchParameters::default()
-                }))
+                .on_press(Message::Search(SearchParameters::new_host_search(host)))
                 .style(ButtonType::Neutral),
         );
     }
@@ -417,10 +407,9 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
         scroll_service = scroll_service.push(
             button(content)
                 .padding([5, 15, 8, 10])
-                .on_press(Message::Search(SearchParameters {
-                    service: service.to_string_with_equal_prefix(),
-                    ..SearchParameters::default()
-                }))
+                .on_press(Message::Search(SearchParameters::new_service_search(
+                    service,
+                )))
                 .style(ButtonType::Neutral),
         );
     }
