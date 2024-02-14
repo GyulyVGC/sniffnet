@@ -32,6 +32,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
     filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
@@ -110,6 +111,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                         style,
                         language,
                         sniffer.traffic_chart.chart_type,
+                        sniffer.host_sort_type,
+                        sniffer.service_sort_type,
                     ),
                     move |_| lazy_row_report(sniffer),
                 );
@@ -245,7 +248,7 @@ fn body_pcap_error(
 
 fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let mut row_report = Row::new()
-        .padding(10)
+        .padding([0, 10, 5, 10])
         .height(Length::Fill)
         .width(Length::Fill);
 
@@ -272,7 +275,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     let mut scroll_host = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, chart_type);
+    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
     let first_entry_data_info = entries.first().unwrap().1.data_info;
 
     for (host, data_info_host) in &entries {
@@ -355,12 +358,21 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(host_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
+            Row::new()
+                .height(Length::Fixed(45.0))
+                .align_items(Alignment::Center)
+                .push(
+                    Text::new(host_translation(language))
+                        .font(font)
+                        .style(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(horizontal_space(Length::Fill))
+                .push(sort_arrows(
+                    sniffer.host_sort_type,
+                    Message::HostSortSelection,
+                )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Scrollable::new(Container::new(scroll_host).width(Length::Fill))
                 .direction(Direction::Vertical(ScrollbarType::properties())),
@@ -377,7 +389,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     let mut scroll_service = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, chart_type);
+    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
     let first_entry_data_info = entries.first().unwrap().1;
 
     for (service, data_info) in &entries {
@@ -426,12 +438,21 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(service_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
+            Row::new()
+                .height(Length::Fixed(45.0))
+                .align_items(Alignment::Center)
+                .push(
+                    Text::new(service_translation(language))
+                        .font(font)
+                        .style(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(horizontal_space(Length::Fill))
+                .push(sort_arrows(
+                    sniffer.service_sort_type,
+                    Message::ServiceSortSelection,
+                )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Scrollable::new(Container::new(scroll_service).width(Length::Fill))
                 .direction(Direction::Vertical(ScrollbarType::properties())),
@@ -798,6 +819,24 @@ fn get_active_filters_col(
         });
     }
     ret_val
+}
+
+fn sort_arrows(
+    active_sort_type: SortType,
+    message: fn(SortType) -> Message,
+) -> Container<'static, Message, Renderer<StyleType>> {
+    Container::new(
+        button(
+            active_sort_type
+                .icon()
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        )
+        .style(active_sort_type.button_type())
+        .on_press(message(active_sort_type.next_sort())),
+    )
+    .width(60.0)
+    .align_x(Horizontal::Center)
 }
 
 #[cfg(test)]

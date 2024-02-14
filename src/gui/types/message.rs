@@ -7,6 +7,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::Host;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
+use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
@@ -30,8 +31,12 @@ pub enum Message {
     PortFilter(String),
     /// Select chart type to be displayed
     ChartSelection(ChartType),
-    /// Select report type to be displayed
+    /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(ReportSortType),
+    /// Select host sort type to be displayed (overview page)
+    HostSortSelection(SortType),
+    /// Select service sort type to be displayed (overview page)
+    ServiceSortSelection(SortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
     /// Open the supplied web page

@@ -68,13 +68,28 @@ pub fn get_searched_entries(
 pub fn get_host_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
+    sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic_lock.hosts.iter().collect();
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
-        ChartType::Packets => b.data_info.tot_packets().cmp(&a.data_info.tot_packets()),
-        ChartType::Bytes => b.data_info.tot_bytes().cmp(&a.data_info.tot_bytes()),
+        ChartType::Packets => match sort_type {
+            SortType::Ascending => a.data_info.tot_packets().cmp(&b.data_info.tot_packets()),
+            SortType::Descending => b.data_info.tot_packets().cmp(&a.data_info.tot_packets()),
+            SortType::Neutral => b
+                .data_info
+                .final_timestamp
+                .cmp(&a.data_info.final_timestamp),
+        },
+        ChartType::Bytes => match sort_type {
+            SortType::Ascending => a.data_info.tot_bytes().cmp(&b.data_info.tot_bytes()),
+            SortType::Descending => b.data_info.tot_bytes().cmp(&a.data_info.tot_bytes()),
+            SortType::Neutral => b
+                .data_info
+                .final_timestamp
+                .cmp(&a.data_info.final_timestamp),
+        },
     });
 
     let n_entry = min(sorted_vec.len(), 30);
@@ -87,6 +102,7 @@ pub fn get_host_entries(
 pub fn get_service_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
+    sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic_lock
@@ -96,8 +112,16 @@ pub fn get_service_entries(
         .collect();
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
-        ChartType::Packets => b.tot_packets().cmp(&a.tot_packets()),
-        ChartType::Bytes => b.tot_bytes().cmp(&a.tot_bytes()),
+        ChartType::Packets => match sort_type {
+            SortType::Ascending => a.tot_packets().cmp(&b.tot_packets()),
+            SortType::Descending => b.tot_packets().cmp(&a.tot_packets()),
+            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+        },
+        ChartType::Bytes => match sort_type {
+            SortType::Ascending => a.tot_bytes().cmp(&b.tot_bytes()),
+            SortType::Descending => b.tot_bytes().cmp(&a.tot_bytes()),
+            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
+        },
     });
 
     let n_entry = min(sorted_vec.len(), 30);
