@@ -73,24 +73,7 @@ pub fn get_host_entries(
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic_lock.hosts.iter().collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
-        ChartType::Packets => match sort_type {
-            SortType::Ascending => a.data_info.tot_packets().cmp(&b.data_info.tot_packets()),
-            SortType::Descending => b.data_info.tot_packets().cmp(&a.data_info.tot_packets()),
-            SortType::Neutral => b
-                .data_info
-                .final_timestamp
-                .cmp(&a.data_info.final_timestamp),
-        },
-        ChartType::Bytes => match sort_type {
-            SortType::Ascending => a.data_info.tot_bytes().cmp(&b.data_info.tot_bytes()),
-            SortType::Descending => b.data_info.tot_bytes().cmp(&a.data_info.tot_bytes()),
-            SortType::Neutral => b
-                .data_info
-                .final_timestamp
-                .cmp(&a.data_info.final_timestamp),
-        },
-    });
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, chart_type));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -111,18 +94,7 @@ pub fn get_service_entries(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| match chart_type {
-        ChartType::Packets => match sort_type {
-            SortType::Ascending => a.tot_packets().cmp(&b.tot_packets()),
-            SortType::Descending => b.tot_packets().cmp(&a.tot_packets()),
-            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
-        },
-        ChartType::Bytes => match sort_type {
-            SortType::Ascending => a.tot_bytes().cmp(&b.tot_bytes()),
-            SortType::Descending => b.tot_bytes().cmp(&a.tot_bytes()),
-            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
-        },
-    });
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, chart_type));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]

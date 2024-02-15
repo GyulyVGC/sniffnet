@@ -1,9 +1,12 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
+use crate::chart::types::chart_type::ChartType;
 use chrono::{DateTime, Local};
+use std::cmp::Ordering;
 use std::ops::AddAssign;
 
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::report::types::sort_type::SortType;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
 // data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
@@ -74,6 +77,21 @@ impl DataInfo {
                 outgoing_bytes: 0,
                 final_timestamp: Local::now(),
             }
+        }
+    }
+
+    pub fn compare(&self, other: &Self, sort_type: SortType, chart_type: ChartType) -> Ordering {
+        match chart_type {
+            ChartType::Packets => match sort_type {
+                SortType::Ascending => self.tot_packets().cmp(&other.tot_packets()),
+                SortType::Descending => other.tot_packets().cmp(&self.tot_packets()),
+                SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+            },
+            ChartType::Bytes => match sort_type {
+                SortType::Ascending => self.tot_bytes().cmp(&other.tot_bytes()),
+                SortType::Descending => other.tot_bytes().cmp(&self.tot_bytes()),
+                SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+            },
         }
     }
 

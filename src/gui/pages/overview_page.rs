@@ -278,10 +278,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
-        .max_by(|d1, d2| match chart_type {
-            ChartType::Packets => d1.tot_packets().cmp(&d2.tot_packets()),
-            ChartType::Bytes => d1.tot_bytes().cmp(&d2.tot_bytes()),
-        })
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
         .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
@@ -390,10 +387,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
-        .max_by(|d1, d2| match chart_type {
-            ChartType::Packets => d1.tot_packets().cmp(&d2.tot_packets()),
-            ChartType::Bytes => d1.tot_bytes().cmp(&d2.tot_bytes()),
-        })
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
