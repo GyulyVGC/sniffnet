@@ -6,21 +6,38 @@ use std::ops::AddAssign;
 use crate::networking::types::traffic_direction::TrafficDirection;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
+// data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
 #[derive(Clone, Default, Copy)]
 pub struct DataInfo {
     /// Incoming packets
-    pub incoming_packets: u128,
+    incoming_packets: u128,
     /// Outgoing packets
-    pub outgoing_packets: u128,
+    outgoing_packets: u128,
     /// Incoming bytes
-    pub incoming_bytes: u128,
+    incoming_bytes: u128,
     /// Outgoing bytes
-    pub outgoing_bytes: u128,
+    outgoing_bytes: u128,
     /// Latest time of occurrence
     pub final_timestamp: DateTime<Local>,
 }
 
 impl DataInfo {
+    pub fn incoming_packets(&self) -> u128 {
+        self.incoming_packets
+    }
+
+    pub fn outgoing_packets(&self) -> u128 {
+        self.outgoing_packets
+    }
+
+    pub fn incoming_bytes(&self) -> u128 {
+        self.incoming_bytes
+    }
+
+    pub fn outgoing_bytes(&self) -> u128 {
+        self.outgoing_bytes
+    }
+
     pub fn tot_packets(&self) -> u128 {
         self.incoming_packets + self.outgoing_packets
     }
@@ -57,6 +74,22 @@ impl DataInfo {
                 outgoing_bytes: 0,
                 final_timestamp: Local::now(),
             }
+        }
+    }
+
+    #[cfg(test)]
+    pub fn new_for_tests(
+        incoming_packets: u128,
+        outgoing_packets: u128,
+        incoming_bytes: u128,
+        outgoing_bytes: u128,
+    ) -> Self {
+        Self {
+            incoming_packets,
+            outgoing_packets,
+            incoming_bytes,
+            outgoing_bytes,
+            final_timestamp: Default::default(),
         }
     }
 }

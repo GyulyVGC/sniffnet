@@ -687,13 +687,13 @@ fn get_bars_length(
 ) -> (f32, f32) {
     let (in_val, out_val, first_entry_tot_val) = match chart_type {
         ChartType::Packets => (
-            data_info.incoming_packets,
-            data_info.outgoing_packets,
+            data_info.incoming_packets(),
+            data_info.outgoing_packets(),
             first_entry.tot_packets(),
         ),
         ChartType::Bytes => (
-            data_info.incoming_bytes,
-            data_info.outgoing_bytes,
+            data_info.incoming_bytes(),
+            data_info.outgoing_bytes(),
             first_entry.tot_bytes(),
         ),
     };
@@ -850,20 +850,8 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_simple() {
-        let first_entry = DataInfo {
-            incoming_packets: 50,
-            outgoing_packets: 50,
-            incoming_bytes: 150,
-            outgoing_bytes: 50,
-            final_timestamp: Default::default(),
-        };
-        let data_info = DataInfo {
-            incoming_packets: 25,
-            outgoing_packets: 55,
-            incoming_bytes: 165,
-            outgoing_bytes: 30,
-            final_timestamp: Default::default(),
-        };
+        let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
+        let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (50.0, 110.0)
@@ -876,20 +864,8 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_normalize_small_values() {
-        let first_entry = DataInfo {
-            incoming_packets: 50,
-            outgoing_packets: 50,
-            incoming_bytes: 150,
-            outgoing_bytes: 50,
-            final_timestamp: Default::default(),
-        };
-        let mut data_info = DataInfo {
-            incoming_packets: 2,
-            outgoing_packets: 1,
-            incoming_bytes: 1,
-            outgoing_bytes: 0,
-            final_timestamp: Default::default(),
-        };
+        let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
+        let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
@@ -899,13 +875,7 @@ mod tests {
             (MIN_BARS_LENGTH, 0.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 3,
-            incoming_bytes: 0,
-            outgoing_bytes: 2,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
@@ -918,20 +888,9 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_normalize_very_small_values() {
-        let first_entry = DataInfo {
-            incoming_packets: u128::MAX / 2,
-            outgoing_packets: u128::MAX / 2,
-            incoming_bytes: u128::MAX / 2,
-            outgoing_bytes: u128::MAX / 2,
-            final_timestamp: Default::default(),
-        };
-        let mut data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 1,
-            incoming_bytes: 1,
-            outgoing_bytes: 1,
-            final_timestamp: Default::default(),
-        };
+        let first_entry =
+            DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
+        let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
@@ -941,13 +900,7 @@ mod tests {
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 1,
-            incoming_bytes: 0,
-            outgoing_bytes: 1,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
@@ -957,13 +910,7 @@ mod tests {
             (0.0, MIN_BARS_LENGTH)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 0,
-            incoming_bytes: 1,
-            outgoing_bytes: 0,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH, 0.0)
@@ -976,21 +923,9 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_complex() {
-        let first_entry = DataInfo {
-            incoming_packets: 350,
-            outgoing_packets: 50,
-            incoming_bytes: 12,
-            outgoing_bytes: 88,
-            final_timestamp: Default::default(),
-        };
+        let first_entry = DataInfo::new_for_tests(350, 50, 12, 88);
 
-        let mut data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 9,
-            incoming_bytes: 0,
-            outgoing_bytes: 10,
-            final_timestamp: Default::default(),
-        };
+        let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, 16.245)
@@ -999,13 +934,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
         );
-        data_info = DataInfo {
-            incoming_packets: 9,
-            outgoing_packets: 0,
-            incoming_bytes: 13,
-            outgoing_bytes: 0,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (16.245, 0.0)
@@ -1015,13 +944,7 @@ mod tests {
             (13.0, 0.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 4,
-            outgoing_packets: 5,
-            incoming_bytes: 6,
-            outgoing_bytes: 7,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1033,13 +956,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (6.0, 7.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 5,
-            outgoing_packets: 4,
-            incoming_bytes: 7,
-            outgoing_bytes: 6,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1052,13 +969,7 @@ mod tests {
             (7.0, 6.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 8,
-            incoming_bytes: 1,
-            outgoing_bytes: 12,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, 11.245)
@@ -1067,13 +978,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, 8.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 8,
-            outgoing_packets: 1,
-            incoming_bytes: 12,
-            outgoing_bytes: 1,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (11.245, MIN_BARS_LENGTH / 2.0)
@@ -1083,13 +988,7 @@ mod tests {
             (8.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 6,
-            outgoing_packets: 1,
-            incoming_bytes: 10,
-            outgoing_bytes: 1,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1101,13 +1000,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (6.0, MIN_BARS_LENGTH / 2.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 6,
-            incoming_bytes: 1,
-            outgoing_bytes: 9,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1120,20 +1013,13 @@ mod tests {
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info.incoming_bytes = 5;
-        data_info.outgoing_bytes = 5;
+        data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 0,
-            incoming_bytes: 0,
-            outgoing_bytes: 0,
-            ..data_info
-        };
+        data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, 0.0,)
