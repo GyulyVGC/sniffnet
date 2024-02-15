@@ -792,6 +792,50 @@ mod tests {
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_update_host_sort_kind() {
+        let mut sniffer = new_sniffer();
+
+        let mut sort = SortType::Neutral;
+
+        assert_eq!(sniffer.host_sort_type, sort);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Descending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Ascending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Neutral);
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_update_service_sort_kind() {
+        let mut sniffer = new_sniffer();
+
+        let mut sort = SortType::Neutral;
+
+        assert_eq!(sniffer.service_sort_type, sort);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Descending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Ascending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Neutral);
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_style() {
         let mut sniffer = new_sniffer();
 
