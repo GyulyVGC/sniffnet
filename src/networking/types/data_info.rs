@@ -21,7 +21,7 @@ pub struct DataInfo {
     /// Outgoing bytes
     outgoing_bytes: u128,
     /// Latest time of occurrence
-    pub final_timestamp: DateTime<Local>,
+    final_timestamp: DateTime<Local>,
 }
 
 impl DataInfo {

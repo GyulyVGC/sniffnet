@@ -10,6 +10,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added possibility to totally customize the app's theme via styles defined in TOML files ([#286](https://github.com/GyulyVGC/sniffnet/pull/286) and [#419](https://github.com/GyulyVGC/sniffnet/pull/419))
 - Upgraded inspect page table: multiple new search filters, additional sorting options, and always keep a correct fields alignment ([#442](https://github.com/GyulyVGC/sniffnet/pull/442) — fixes [#63](https://github.com/GyulyVGC/sniffnet/issues/63))
 - Added support for more link types in addition to Ethernet: raw IP packets and null/loopback packets are now correctly parsed ([#421](https://github.com/GyulyVGC/sniffnet/pull/421))
+- Support changing sort strategy for network hosts and services in overview page, showing most recent items by default ([#452](https://github.com/GyulyVGC/sniffnet/pull/452))
 - IP addresses can now be copied to clipboard from the popup related to a given entry of the connections table, and a new search parameter has been introduced in Inspect page to allow users filter their connections based on IP address values ([#409](https://github.com/GyulyVGC/sniffnet/pull/409))
 - Added Japanese translation 🇯🇵 ([#343](https://github.com/GyulyVGC/sniffnet/pull/343))
 - Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))
