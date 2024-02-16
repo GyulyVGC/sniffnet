@@ -34,6 +34,7 @@ use crate::notifications::types::sound::{play, Sound};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
+use crate::report::types::sort_type::SortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::types::file_info::FileInfo;
@@ -64,8 +65,12 @@ pub struct Sniffer {
     pub waiting: String,
     /// Chart displayed
     pub traffic_chart: TrafficChart,
-    /// Report type to be displayed
+    /// Report sort type (inspect page)
     pub report_sort_type: ReportSortType,
+    /// Host sort type (overview page)
+    pub host_sort_type: SortType,
+    /// Service sort type (overview page)
+    pub service_sort_type: SortType,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -113,6 +118,8 @@ impl Sniffer {
             waiting: ".".to_string(),
             traffic_chart: TrafficChart::new(style, language),
             report_sort_type: ReportSortType::default(),
+            host_sort_type: SortType::default(),
+            service_sort_type: SortType::default(),
             modal: None,
             settings_page: None,
             last_opened_setting: SettingsPage::Notifications,
@@ -302,6 +309,12 @@ impl Sniffer {
                     ),
                     consumer_message,
                 );
+            }
+            Message::HostSortSelection(sort_type) => {
+                self.host_sort_type = sort_type;
+            }
+            Message::ServiceSortSelection(sort_type) => {
+                self.service_sort_type = sort_type;
             }
             Message::TickInit | Message::FontLoaded(_) => {}
         }
@@ -775,6 +788,50 @@ mod tests {
                 packet_sort: SortType::Neutral
             }
         );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_update_host_sort_kind() {
+        let mut sniffer = new_sniffer();
+
+        let mut sort = SortType::Neutral;
+
+        assert_eq!(sniffer.host_sort_type, sort);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Descending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Ascending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::HostSortSelection(sort));
+        assert_eq!(sniffer.host_sort_type, SortType::Neutral);
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_update_service_sort_kind() {
+        let mut sniffer = new_sniffer();
+
+        let mut sort = SortType::Neutral;
+
+        assert_eq!(sniffer.service_sort_type, sort);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Descending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Ascending);
+
+        sort = sort.next_sort();
+        sniffer.update(Message::ServiceSortSelection(sort));
+        assert_eq!(sniffer.service_sort_type, SortType::Neutral);
     }
 
     #[test]

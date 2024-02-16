@@ -1,6 +1,8 @@
+use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
 #[derive(Clone, Debug, Default, Hash)]
@@ -69,6 +71,26 @@ impl SearchParameters {
             as_name: String::new(),
             only_favorites: false,
             ..self.clone()
+        }
+    }
+
+    pub fn new_host_search(host: &Host) -> Self {
+        Self {
+            domain: host.domain.clone(),
+            as_name: host.asn.name.clone(),
+            country: if host.country == Country::ZZ {
+                String::new()
+            } else {
+                host.country.to_string()
+            },
+            ..SearchParameters::default()
+        }
+    }
+
+    pub fn new_service_search(service: &Service) -> Self {
+        Self {
+            service: service.to_string_with_equal_prefix(),
+            ..SearchParameters::default()
         }
     }
 }

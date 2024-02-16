@@ -15,7 +15,6 @@ use iced::{Alignment, Font, Length, Renderer};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
-use crate::countries::types::country::Country;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -32,6 +31,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::my_device::MyDevice;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
     filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
@@ -110,6 +110,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
                         style,
                         language,
                         sniffer.traffic_chart.chart_type,
+                        sniffer.host_sort_type,
+                        sniffer.service_sort_type,
                     ),
                     move |_| lazy_row_report(sniffer),
                 );
@@ -245,7 +247,7 @@ fn body_pcap_error(
 
 fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
     let mut row_report = Row::new()
-        .padding(10)
+        .padding([0, 10, 5, 10])
         .height(Length::Fill)
         .width(Length::Fill);
 
@@ -272,8 +274,12 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     let mut scroll_host = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, chart_type);
-    let first_entry_data_info = entries.first().unwrap().1.data_info;
+    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
+    let first_entry_data_info = entries
+        .iter()
+        .map(|(_, d)| d.data_info)
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
         let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
@@ -330,16 +336,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         scroll_host = scroll_host.push(
             button(content)
                 .padding([5, 15, 5, 10])
-                .on_press(Message::Search(SearchParameters {
-                    domain: host.domain.clone(),
-                    as_name: host.asn.name.clone(),
-                    country: if host.country == Country::ZZ {
-                        String::new()
-                    } else {
-                        host.country.to_string()
-                    },
-                    ..SearchParameters::default()
-                }))
+                .on_press(Message::Search(SearchParameters::new_host_search(host)))
                 .style(ButtonType::Neutral),
         );
     }
@@ -355,12 +352,21 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(host_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
+            Row::new()
+                .height(Length::Fixed(45.0))
+                .align_items(Alignment::Center)
+                .push(
+                    Text::new(host_translation(language))
+                        .font(font)
+                        .style(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(horizontal_space(Length::Fill))
+                .push(sort_arrows(
+                    sniffer.host_sort_type,
+                    Message::HostSortSelection,
+                )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Scrollable::new(Container::new(scroll_host).width(Length::Fill))
                 .direction(Direction::Vertical(ScrollbarType::properties())),
@@ -377,8 +383,12 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     let mut scroll_service = Column::new()
         .width(Length::Fixed(width))
         .align_items(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, chart_type);
-    let first_entry_data_info = entries.first().unwrap().1;
+    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
+    let first_entry_data_info = entries
+        .iter()
+        .map(|&(_, d)| d)
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .unwrap_or_default();
 
     for (service, data_info) in &entries {
         let (incoming_bar_len, outgoing_bar_len) =
@@ -405,10 +415,9 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
         scroll_service = scroll_service.push(
             button(content)
                 .padding([5, 15, 8, 10])
-                .on_press(Message::Search(SearchParameters {
-                    service: service.to_string_with_equal_prefix(),
-                    ..SearchParameters::default()
-                }))
+                .on_press(Message::Search(SearchParameters::new_service_search(
+                    service,
+                )))
                 .style(ButtonType::Neutral),
         );
     }
@@ -426,12 +435,21 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     Column::new()
         .width(Length::Fixed(width + 11.0))
         .push(
-            Text::new(service_translation(language))
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
+            Row::new()
+                .height(Length::Fixed(45.0))
+                .align_items(Alignment::Center)
+                .push(
+                    Text::new(service_translation(language))
+                        .font(font)
+                        .style(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(horizontal_space(Length::Fill))
+                .push(sort_arrows(
+                    sniffer.service_sort_type,
+                    Message::ServiceSortSelection,
+                )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
         .push(
             Scrollable::new(Container::new(scroll_service).width(Length::Fill))
                 .direction(Direction::Vertical(ScrollbarType::properties())),
@@ -663,13 +681,13 @@ fn get_bars_length(
 ) -> (f32, f32) {
     let (in_val, out_val, first_entry_tot_val) = match chart_type {
         ChartType::Packets => (
-            data_info.incoming_packets,
-            data_info.outgoing_packets,
+            data_info.incoming_packets(),
+            data_info.outgoing_packets(),
             first_entry.tot_packets(),
         ),
         ChartType::Bytes => (
-            data_info.incoming_bytes,
-            data_info.outgoing_bytes,
+            data_info.incoming_bytes(),
+            data_info.outgoing_bytes(),
             first_entry.tot_bytes(),
         ),
     };
@@ -800,6 +818,24 @@ fn get_active_filters_col(
     ret_val
 }
 
+fn sort_arrows(
+    active_sort_type: SortType,
+    message: fn(SortType) -> Message,
+) -> Container<'static, Message, Renderer<StyleType>> {
+    Container::new(
+        button(
+            active_sort_type
+                .icon()
+                .horizontal_alignment(Horizontal::Center)
+                .vertical_alignment(Vertical::Center),
+        )
+        .style(active_sort_type.button_type())
+        .on_press(message(active_sort_type.next_sort())),
+    )
+    .width(60.0)
+    .align_x(Horizontal::Center)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::chart::types::chart_type::ChartType;
@@ -808,18 +844,8 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_simple() {
-        let first_entry = DataInfo {
-            incoming_packets: 50,
-            outgoing_packets: 50,
-            incoming_bytes: 150,
-            outgoing_bytes: 50,
-        };
-        let data_info = DataInfo {
-            incoming_packets: 25,
-            outgoing_packets: 55,
-            incoming_bytes: 165,
-            outgoing_bytes: 30,
-        };
+        let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
+        let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (50.0, 110.0)
@@ -832,18 +858,8 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_normalize_small_values() {
-        let first_entry = DataInfo {
-            incoming_packets: 50,
-            outgoing_packets: 50,
-            incoming_bytes: 150,
-            outgoing_bytes: 50,
-        };
-        let mut data_info = DataInfo {
-            incoming_packets: 2,
-            outgoing_packets: 1,
-            incoming_bytes: 1,
-            outgoing_bytes: 0,
-        };
+        let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
+        let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
@@ -853,12 +869,7 @@ mod tests {
             (MIN_BARS_LENGTH, 0.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 3,
-            incoming_bytes: 0,
-            outgoing_bytes: 2,
-        };
+        data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
@@ -871,18 +882,9 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_normalize_very_small_values() {
-        let first_entry = DataInfo {
-            incoming_packets: u128::MAX / 2,
-            outgoing_packets: u128::MAX / 2,
-            incoming_bytes: u128::MAX / 2,
-            outgoing_bytes: u128::MAX / 2,
-        };
-        let mut data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 1,
-            incoming_bytes: 1,
-            outgoing_bytes: 1,
-        };
+        let first_entry =
+            DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
+        let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
@@ -892,12 +894,7 @@ mod tests {
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 1,
-            incoming_bytes: 0,
-            outgoing_bytes: 1,
-        };
+        data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
@@ -907,12 +904,7 @@ mod tests {
             (0.0, MIN_BARS_LENGTH)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 0,
-            incoming_bytes: 1,
-            outgoing_bytes: 0,
-        };
+        data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
             get_bars_length(200.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH, 0.0)
@@ -925,19 +917,9 @@ mod tests {
 
     #[test]
     fn test_get_bars_length_complex() {
-        let first_entry = DataInfo {
-            incoming_packets: 350,
-            outgoing_packets: 50,
-            incoming_bytes: 12,
-            outgoing_bytes: 88,
-        };
+        let first_entry = DataInfo::new_for_tests(350, 50, 12, 88);
 
-        let mut data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 9,
-            incoming_bytes: 0,
-            outgoing_bytes: 10,
-        };
+        let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, 16.245)
@@ -946,12 +928,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (0.0, MIN_BARS_LENGTH)
         );
-        data_info = DataInfo {
-            incoming_packets: 9,
-            outgoing_packets: 0,
-            incoming_bytes: 13,
-            outgoing_bytes: 0,
-        };
+        data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (16.245, 0.0)
@@ -961,12 +938,7 @@ mod tests {
             (13.0, 0.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 4,
-            outgoing_packets: 5,
-            incoming_bytes: 6,
-            outgoing_bytes: 7,
-        };
+        data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -978,12 +950,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (6.0, 7.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 5,
-            outgoing_packets: 4,
-            incoming_bytes: 7,
-            outgoing_bytes: 6,
-        };
+        data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -996,12 +963,7 @@ mod tests {
             (7.0, 6.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 8,
-            incoming_bytes: 1,
-            outgoing_bytes: 12,
-        };
+        data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, 11.245)
@@ -1010,12 +972,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, 8.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 8,
-            outgoing_packets: 1,
-            incoming_bytes: 12,
-            outgoing_bytes: 1,
-        };
+        data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (11.245, MIN_BARS_LENGTH / 2.0)
@@ -1025,12 +982,7 @@ mod tests {
             (8.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 6,
-            outgoing_packets: 1,
-            incoming_bytes: 10,
-            outgoing_bytes: 1,
-        };
+        data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1042,12 +994,7 @@ mod tests {
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (6.0, MIN_BARS_LENGTH / 2.0)
         );
-        data_info = DataInfo {
-            incoming_packets: 1,
-            outgoing_packets: 6,
-            incoming_bytes: 1,
-            outgoing_bytes: 9,
-        };
+        data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (
@@ -1060,19 +1007,13 @@ mod tests {
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info.incoming_bytes = 5;
-        data_info.outgoing_bytes = 5;
+        data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
             get_bars_length(100.0, ChartType::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH / 2.0, MIN_BARS_LENGTH / 2.0)
         );
 
-        data_info = DataInfo {
-            incoming_packets: 0,
-            outgoing_packets: 0,
-            incoming_bytes: 0,
-            outgoing_bytes: 0,
-        };
+        data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
             get_bars_length(722.0, ChartType::Packets, &first_entry, &data_info),
             (0.0, 0.0,)
