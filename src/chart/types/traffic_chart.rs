@@ -1,5 +1,6 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
+use std::cmp::{max};
 use std::collections::VecDeque;
 
 use iced::alignment::{Horizontal, Vertical};
@@ -7,6 +8,7 @@ use iced::widget::{Column, Container};
 use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use splines::{Interpolation, Key, Spline};
 
 use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -21,13 +23,13 @@ pub struct TrafficChart {
     /// Current time interval number
     pub ticks: u32,
     /// Sent bytes filtered and their time occurrence
-    pub sent_bytes: VecDeque<(u32, i64)>,
+    pub out_bytes: VecDeque<(u32, i64)>,
     /// Received bytes filtered and their time occurrence
-    pub received_bytes: VecDeque<(u32, i64)>,
+    pub in_bytes: VecDeque<(u32, i64)>,
     /// Sent packets filtered and their time occurrence
-    pub sent_packets: VecDeque<(u32, i64)>,
+    pub out_packets: VecDeque<(u32, i64)>,
     /// Received packets filtered and their time occurrence
-    pub received_packets: VecDeque<(u32, i64)>,
+    pub in_packets: VecDeque<(u32, i64)>,
     /// Minimum number of bytes per time interval (computed on last 30 intervals)
     pub min_bytes: i64,
     /// Maximum number of bytes per time interval (computed on last 30 intervals)
@@ -48,10 +50,10 @@ impl TrafficChart {
     pub fn new(style: StyleType, language: Language) -> Self {
         TrafficChart {
             ticks: 0,
-            sent_bytes: VecDeque::default(),
-            received_bytes: VecDeque::default(),
-            sent_packets: VecDeque::default(),
-            received_packets: VecDeque::default(),
+            out_bytes: VecDeque::default(),
+            in_bytes: VecDeque::default(),
+            out_packets: VecDeque::default(),
+            in_packets: VecDeque::default(),
             min_bytes: 0,
             max_bytes: 0,
             min_packets: 0,
@@ -79,6 +81,26 @@ impl TrafficChart {
 
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
+    }
+
+    fn interp(&self) -> VecDeque<(f32, f32)> {
+        let mut keys = Vec::new();
+        for (x, y) in &self.in_packets {
+            keys.push(Key::new(*x as f32, *y as f32, Interpolation::Cosine));
+        }
+        let spline = Spline::from_vec(keys);
+
+        let mut ret_val = VecDeque::new();
+        let len = self.in_packets.len();
+        let first = self.in_packets.get(0).unwrap().0;
+        let delta_x = max(30, len - first as usize) as f32;
+        let first = first as f32;
+        let d = delta_x / 1000.0;
+        for i in 0..1000 {
+            let p = spline.sample(first + i as f32*d).unwrap_or_default();
+            ret_val.push_back((first + i as f32*d, p));
+        }
+        ret_val
     }
 }
 
@@ -116,7 +138,7 @@ impl Chart<Message> for TrafficChart {
             let fs = max - min;
             #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
             let gap = (fs as f64 * 0.1) as i64;
-            min - gap..max + gap
+            min as f32 - gap as f32..max as f32 + gap as f32
         };
 
         let y_axis_range = match self.chart_type {
@@ -125,7 +147,7 @@ impl Chart<Message> for TrafficChart {
         };
 
         let mut chart = chart_builder
-            .build_cartesian_2d(first_time_displayed..tot_seconds, y_axis_range)
+            .build_cartesian_2d(first_time_displayed as f32..tot_seconds as f32, y_axis_range)
             .expect("Error drawing chart");
 
         // Mesh
@@ -145,21 +167,23 @@ impl Chart<Message> for TrafficChart {
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
-                &|bytes| get_formatted_bytes_string_with_b(u128::from(bytes.unsigned_abs()), 0)
+                &|_| String::from("djedjei")
             })
             .draw()
             .unwrap();
 
         // Incoming series
+        let x = self.interp();
+        let y = VecDeque::new();
         chart
             .draw_series(
                 AreaSeries::new(
                     if self.chart_type.eq(&ChartType::Packets) {
-                        self.received_packets.iter().copied()
+                        x.iter().copied()
                     } else {
-                        self.received_bytes.iter().copied()
+                        y.iter().copied()
                     },
-                    0,
+                    0.0,
                     color_incoming.mix(color_mix.into()),
                 )
                 .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
@@ -171,15 +195,17 @@ impl Chart<Message> for TrafficChart {
             });
 
         // Outgoing series
+        let x = self.interp();
+        let y = VecDeque::new();
         chart
             .draw_series(
                 AreaSeries::new(
                     if self.chart_type.eq(&ChartType::Packets) {
-                        self.sent_packets.iter().copied()
+                        x.iter().copied()
                     } else {
-                        self.sent_bytes.iter().copied()
+                        y.iter().copied()
                     },
-                    0,
+                    0.0,
                     color_outgoing.mix(color_mix.into()),
                 )
                 .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
