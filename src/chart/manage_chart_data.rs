@@ -9,12 +9,10 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     let tot_seconds = traffic_chart.ticks;
     traffic_chart.ticks += 1;
 
-    let sent_bytes_entry = runtime_data.tot_sent_bytes - runtime_data.tot_sent_bytes_prev;
-    let received_bytes_entry =
-        runtime_data.tot_received_bytes - runtime_data.tot_received_bytes_prev;
-    let sent_packets_entry = runtime_data.tot_sent_packets - runtime_data.tot_sent_packets_prev;
-    let received_packets_entry =
-        runtime_data.tot_received_packets - runtime_data.tot_received_packets_prev;
+    let out_bytes_entry = runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev;
+    let in_bytes_entry = runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev;
+    let out_packets_entry = runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev;
+    let in_packets_entry = runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev;
 
     // update sent bytes traffic data
     if traffic_chart.out_bytes.len() >= 30 {
@@ -22,19 +20,19 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     }
     traffic_chart.out_bytes.push_back((
         tot_seconds,
-        -<u128 as TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
+        -<u128 as TryInto<i64>>::try_into(out_bytes_entry).unwrap(),
     ));
     traffic_chart.min_bytes = get_min(&traffic_chart.out_bytes);
-    runtime_data.tot_sent_bytes_prev = runtime_data.tot_sent_bytes;
+    runtime_data.tot_out_bytes_prev = runtime_data.tot_out_bytes;
     // update received bytes traffic data
     if traffic_chart.in_bytes.len() >= 30 {
         traffic_chart.in_bytes.pop_front();
     }
     traffic_chart
         .in_bytes
-        .push_back((tot_seconds, received_bytes_entry.try_into().unwrap()));
+        .push_back((tot_seconds, in_bytes_entry.try_into().unwrap()));
     traffic_chart.max_bytes = get_max(&traffic_chart.in_bytes);
-    runtime_data.tot_received_bytes_prev = runtime_data.tot_received_bytes;
+    runtime_data.tot_in_bytes_prev = runtime_data.tot_in_bytes;
 
     // update sent packets traffic data
     if traffic_chart.out_packets.len() >= 30 {
@@ -42,19 +40,19 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     }
     traffic_chart.out_packets.push_back((
         tot_seconds,
-        -<u128 as TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
+        -<u128 as TryInto<i64>>::try_into(out_packets_entry).unwrap(),
     ));
     traffic_chart.min_packets = get_min(&traffic_chart.out_packets);
-    runtime_data.tot_sent_packets_prev = runtime_data.tot_sent_packets;
+    runtime_data.tot_out_packets_prev = runtime_data.tot_out_packets;
     // update received packets traffic data
     if traffic_chart.in_packets.len() >= 30 {
         traffic_chart.in_packets.pop_front();
     }
     traffic_chart
         .in_packets
-        .push_back((tot_seconds, received_packets_entry.try_into().unwrap()));
+        .push_back((tot_seconds, in_packets_entry.try_into().unwrap()));
     traffic_chart.max_packets = get_max(&traffic_chart.in_packets);
-    runtime_data.tot_received_packets_prev = runtime_data.tot_received_packets;
+    runtime_data.tot_in_packets_prev = runtime_data.tot_in_packets;
 }
 
 /// Finds the minimum y value to be displayed in chart
@@ -169,15 +167,15 @@ mod tests {
         let mut runtime_data = RunTimeData {
             all_bytes: 0,
             all_packets: 0,
-            tot_sent_bytes: tot_sent + 1111,
-            tot_received_bytes: tot_received + 2222,
-            tot_sent_packets: tot_sent + 3333,
-            tot_received_packets: tot_received + 4444,
+            tot_out_bytes: tot_sent + 1111,
+            tot_in_bytes: tot_received + 2222,
+            tot_out_packets: tot_sent + 3333,
+            tot_in_packets: tot_received + 4444,
             dropped_packets: 0,
-            tot_sent_bytes_prev: tot_sent,
-            tot_received_bytes_prev: tot_received,
-            tot_sent_packets_prev: tot_sent,
-            tot_received_packets_prev: tot_received,
+            tot_out_bytes_prev: tot_sent,
+            tot_in_bytes_prev: tot_received,
+            tot_out_packets_prev: tot_sent,
+            tot_in_packets_prev: tot_received,
             logged_notifications: Default::default(),
             tot_emitted_notifications: 0,
         };
@@ -191,10 +189,10 @@ mod tests {
         assert_eq!(get_max(&traffic_chart.in_bytes), 21000);
 
         // runtime_data correctly updated?
-        assert_eq!(runtime_data.tot_sent_bytes_prev, tot_sent + 1111);
-        assert_eq!(runtime_data.tot_received_bytes_prev, tot_received + 2222);
-        assert_eq!(runtime_data.tot_sent_packets_prev, tot_sent + 3333);
-        assert_eq!(runtime_data.tot_received_packets_prev, tot_received + 4444);
+        assert_eq!(runtime_data.tot_out_bytes_prev, tot_sent + 1111);
+        assert_eq!(runtime_data.tot_in_bytes_prev, tot_received + 2222);
+        assert_eq!(runtime_data.tot_out_packets_prev, tot_sent + 3333);
+        assert_eq!(runtime_data.tot_in_packets_prev, tot_received + 4444);
 
         let mut sent_bytes = sent.clone();
         sent_bytes.push_back((29, -1111));
@@ -216,13 +214,13 @@ mod tests {
         assert_eq!(traffic_chart.out_packets, sent_packets);
         assert_eq!(traffic_chart.in_bytes, received_bytes);
 
-        runtime_data.tot_sent_bytes += 99;
-        runtime_data.tot_received_packets += 990;
-        runtime_data.tot_received_bytes += 2;
+        runtime_data.tot_out_bytes += 99;
+        runtime_data.tot_in_packets += 990;
+        runtime_data.tot_in_bytes += 2;
         update_charts_data(&mut runtime_data, &mut traffic_chart);
-        runtime_data.tot_sent_bytes += 77;
-        runtime_data.tot_received_packets += 1;
-        runtime_data.tot_sent_packets += 220;
+        runtime_data.tot_out_bytes += 77;
+        runtime_data.tot_in_packets += 1;
+        runtime_data.tot_out_packets += 220;
         update_charts_data(&mut runtime_data, &mut traffic_chart);
 
         sent_bytes.pop_front();

@@ -1,6 +1,6 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
-use std::cmp::{max};
+use std::cmp::max;
 use std::collections::VecDeque;
 
 use iced::alignment::{Horizontal, Vertical};
@@ -97,8 +97,8 @@ impl TrafficChart {
         let first = first as f32;
         let d = delta_x / 1000.0;
         for i in 0..1000 {
-            let p = spline.sample(first + i as f32*d).unwrap_or_default();
-            ret_val.push_back((first + i as f32*d, p));
+            let p = spline.sample(first + i as f32 * d).unwrap_or_default();
+            ret_val.push_back((first + i as f32 * d, p));
         }
         ret_val
     }
@@ -147,7 +147,10 @@ impl Chart<Message> for TrafficChart {
         };
 
         let mut chart = chart_builder
-            .build_cartesian_2d(first_time_displayed as f32..tot_seconds as f32, y_axis_range)
+            .build_cartesian_2d(
+                first_time_displayed as f32..tot_seconds as f32,
+                y_axis_range,
+            )
             .expect("Error drawing chart");
 
         // Mesh

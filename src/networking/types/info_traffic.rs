@@ -14,13 +14,13 @@ use crate::Service;
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {
     /// Total amount of filtered bytes received.
-    pub tot_received_bytes: u128,
+    pub tot_in_bytes: u128,
     /// Total amount of filtered bytes sent.
-    pub tot_sent_bytes: u128,
+    pub tot_out_bytes: u128,
     /// Total amount of filtered packets received.
-    pub tot_received_packets: u128,
+    pub tot_in_packets: u128,
     /// Total amount of filtered packets sent.
-    pub tot_sent_packets: u128,
+    pub tot_out_packets: u128,
     /// Total packets including those not filtered
     pub all_packets: u128,
     /// Total bytes including those not filtered
@@ -47,10 +47,10 @@ impl InfoTraffic {
     /// Constructs a new `InfoTraffic` element.
     pub fn new() -> Self {
         InfoTraffic {
-            tot_received_bytes: 0,
-            tot_sent_bytes: 0,
-            tot_received_packets: 0,
-            tot_sent_packets: 0,
+            tot_in_bytes: 0,
+            tot_out_bytes: 0,
+            tot_in_packets: 0,
+            tot_out_packets: 0,
             all_packets: 0,
             all_bytes: 0,
             dropped_packets: 0,
@@ -67,12 +67,12 @@ impl InfoTraffic {
     pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {
         if traffic_direction == TrafficDirection::Outgoing {
             //increment number of sent packets and bytes
-            self.tot_sent_packets += 1;
-            self.tot_sent_bytes += bytes;
+            self.tot_out_packets += 1;
+            self.tot_out_bytes += bytes;
         } else {
             //increment number of received packets and bytes
-            self.tot_received_packets += 1;
-            self.tot_received_bytes += bytes;
+            self.tot_in_packets += 1;
+            self.tot_in_bytes += bytes;
         }
     }
 }

@@ -63,8 +63,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
         let observed = sniffer.runtime_data.all_packets;
-        let filtered =
-            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
+        let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
         let total = observed + u128::from(dropped);
 
@@ -617,8 +616,7 @@ fn col_bytes_packets(
     font_headers: Font,
     sniffer: &Sniffer,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let filtered_bytes =
-        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
     let filters = &sniffer.filters;
 

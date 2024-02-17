@@ -48,7 +48,7 @@ pub fn connection_details_page(
 ) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
         (
-            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
             sniffer.timing_events.was_just_copy_ip(&key.address1),
             sniffer.timing_events.was_just_copy_ip(&key.address2),
         ),
