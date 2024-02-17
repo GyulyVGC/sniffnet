@@ -395,7 +395,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::DE => "Name des autonomen Systems",
         Language::TR => "Yönetim varlığı",
         // Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
-        Language::ES => "Entidad administrativa",
+        Language::ES => "Nombre del sistema autónomo",
         Language::KO => "관리 엔티티",
         Language::ZH => "ASN 信息",
         Language::UK => "Адміністративна одиниця",
