@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{Ethernet2Header, NetHeaders, PacketHeaders, TransportHeader};
+use etherparse::{Ethernet2Header, LaxPacketHeaders, NetHeaders, TransportHeader};
 use pcap::{Active, Address, Capture, Device};
 
 use crate::mmdb::asn::get_asn;
@@ -31,7 +31,7 @@ include!(concat!(env!("OUT_DIR"), "/services.rs"));
 /// Calls methods to analyze link, network, and transport headers.
 /// Returns the relevant collected information.
 pub fn analyze_headers(
-    headers: PacketHeaders,
+    headers: LaxPacketHeaders,
     mac_addresses: &mut (Option<String>, Option<String>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,

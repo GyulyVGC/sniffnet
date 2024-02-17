@@ -4,10 +4,9 @@
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use etherparse::err::ip::HeaderError;
-use etherparse::err::packet::SliceError;
+use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
-use etherparse::{LenSource, PacketHeaders};
+use etherparse::{LaxPacketHeaders, LenSource};
 use pcap::{Active, Capture, Packet};
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
@@ -196,22 +195,21 @@ pub fn parse_packets(
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     my_link_type: MyLinkType,
-) -> Result<PacketHeaders<'a>, SliceError> {
+) -> Result<LaxPacketHeaders<'a>, LaxHeaderSliceError> {
     match my_link_type {
-        MyLinkType::Ethernet(_) => PacketHeaders::from_ethernet_slice(packet),
+        MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
+            LaxPacketHeaders::from_ethernet(packet).map_err(LaxHeaderSliceError::Len)
+        }
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
-            PacketHeaders::from_ip_slice(packet)
+            LaxPacketHeaders::from_ip(packet)
         }
-        MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null_slice(packet),
-        MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
-            PacketHeaders::from_ethernet_slice(packet)
-        }
+        MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
 
-fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, SliceError> {
+fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
     if packet.len() <= 4 {
-        return Err(SliceError::Len(LenError {
+        return Err(LaxHeaderSliceError::Len(LenError {
             required_len: 4,
             len: packet.len(),
             len_source: LenSource::Slice,
@@ -238,10 +236,10 @@ fn from_null_slice(packet: &[u8]) -> Result<PacketHeaders, SliceError> {
     };
 
     if is_valid_af_inet {
-        PacketHeaders::from_ip_slice(&packet[4..])
+        LaxPacketHeaders::from_ip(&packet[4..])
     } else {
-        Err(SliceError::Ip(HeaderError::UnsupportedIpVersion {
-            version_number: 0,
-        }))
+        Err(LaxHeaderSliceError::Content(
+            HeaderError::UnsupportedIpVersion { version_number: 0 },
+        ))
     }
 }
