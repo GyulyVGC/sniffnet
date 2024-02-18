@@ -30,6 +30,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fixed a typo in Russian translation ([#389](https://github.com/GyulyVGC/sniffnet/pull/389))
 - Fixed icon inconsistency in case of directed broadcast traffic
 - Fixed hosts and services data bar lengths inconsistencies in overview page
+- Minor improvements to Spanish translation ([#454](https://github.com/GyulyVGC/sniffnet/pull/454))
 
 ## [1.2.2] - 2023-08-08
 - Added option to set different shades of color gradients for each of the available themes
