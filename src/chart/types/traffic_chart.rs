@@ -1,14 +1,11 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
-use std::cmp::max;
-use std::collections::VecDeque;
-
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
 use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::{Interpolation, Key, Spline};
+use splines::{Spline};
 
 use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -23,21 +20,21 @@ pub struct TrafficChart {
     /// Current time interval number
     pub ticks: u32,
     /// Sent bytes filtered and their time occurrence
-    pub out_bytes: VecDeque<(u32, i64)>,
+    pub out_bytes: Spline<f32, f32>,
     /// Received bytes filtered and their time occurrence
-    pub in_bytes: VecDeque<(u32, i64)>,
+    pub in_bytes: Spline<f32, f32>,
     /// Sent packets filtered and their time occurrence
-    pub out_packets: VecDeque<(u32, i64)>,
+    pub out_packets: Spline<f32, f32>,
     /// Received packets filtered and their time occurrence
-    pub in_packets: VecDeque<(u32, i64)>,
+    pub in_packets: Spline<f32, f32>,
     /// Minimum number of bytes per time interval (computed on last 30 intervals)
-    pub min_bytes: i64,
+    pub min_bytes: f32,
     /// Maximum number of bytes per time interval (computed on last 30 intervals)
-    pub max_bytes: i64,
+    pub max_bytes: f32,
     /// Minimum number of packets per time interval (computed on last 30 intervals)
-    pub min_packets: i64,
+    pub min_packets: f32,
     /// Maximum number of packets per time interval (computed on last 30 intervals)
-    pub max_packets: i64,
+    pub max_packets: f32,
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
@@ -50,14 +47,14 @@ impl TrafficChart {
     pub fn new(style: StyleType, language: Language) -> Self {
         TrafficChart {
             ticks: 0,
-            out_bytes: VecDeque::default(),
-            in_bytes: VecDeque::default(),
-            out_packets: VecDeque::default(),
-            in_packets: VecDeque::default(),
-            min_bytes: 0,
-            max_bytes: 0,
-            min_packets: 0,
-            max_packets: 0,
+            out_bytes: Spline::default(),
+            in_bytes: Spline::default(),
+            out_packets: Spline::default(),
+            in_packets: Spline::default(),
+            min_bytes: 0.0,
+            max_bytes: 0.0,
+            min_packets: 0.0,
+            max_packets: 0.0,
             language,
             chart_type: ChartType::Bytes,
             style,
@@ -81,26 +78,6 @@ impl TrafficChart {
 
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
-    }
-
-    fn interp(&self) -> VecDeque<(f32, f32)> {
-        let mut keys = Vec::new();
-        for (x, y) in &self.in_packets {
-            keys.push(Key::new(*x as f32, *y as f32, Interpolation::Cosine));
-        }
-        let spline = Spline::from_vec(keys);
-
-        let mut ret_val = VecDeque::new();
-        let len = self.in_packets.len();
-        let first = self.in_packets.get(0).unwrap().0;
-        let delta_x = max(30, len - first as usize) as f32;
-        let first = first as f32;
-        let d = delta_x / 1000.0;
-        for i in 0..1000 {
-            let p = spline.sample(first + i as f32 * d).unwrap_or_default();
-            ret_val.push_back((first + i as f32 * d, p));
-        }
-        ret_val
     }
 }
 
@@ -134,11 +111,11 @@ impl Chart<Message> for TrafficChart {
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
-        let get_y_axis_range = |min: i64, max: i64| {
+        let get_y_axis_range = |min: f32, max: f32| {
             let fs = max - min;
             #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-            let gap = (fs as f64 * 0.1) as i64;
-            min as f32 - gap as f32..max as f32 + gap as f32
+            let gap = fs * 0.05;
+            min - gap..max + gap
         };
 
         let y_axis_range = match self.chart_type {
@@ -157,9 +134,8 @@ impl Chart<Message> for TrafficChart {
         chart
             .configure_mesh()
             .axis_style(buttons_color)
-            .bold_line_style(buttons_color.mix(0.4))
-            .light_line_style(buttons_color.mix(0.2))
-            .y_max_light_lines(1)
+            .bold_line_style(buttons_color.mix(0.3))
+            .light_line_style(buttons_color.mix(0.0))
             .y_labels(7)
             .label_style(
                 (FONT_FAMILY_NAME, 12.5)
@@ -176,20 +152,18 @@ impl Chart<Message> for TrafficChart {
             .unwrap();
 
         // Incoming series
-        let x = self.interp();
-        let y = VecDeque::new();
         chart
             .draw_series(
                 AreaSeries::new(
                     if self.chart_type.eq(&ChartType::Packets) {
-                        x.iter().copied()
+                        sample_spline(&self.in_packets)
                     } else {
-                        y.iter().copied()
+                        sample_spline(&self.in_bytes)
                     },
                     0.0,
                     color_incoming.mix(color_mix.into()),
                 )
-                .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
+                    .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
             )
             .expect("Error drawing graph")
             .label(incoming_translation(self.language))
@@ -198,20 +172,18 @@ impl Chart<Message> for TrafficChart {
             });
 
         // Outgoing series
-        let x = self.interp();
-        let y = VecDeque::new();
         chart
             .draw_series(
                 AreaSeries::new(
                     if self.chart_type.eq(&ChartType::Packets) {
-                        x.iter().copied()
+                        sample_spline(&self.out_packets)
                     } else {
-                        y.iter().copied()
+                        sample_spline(&self.out_bytes)
                     },
                     0.0,
                     color_outgoing.mix(color_mix.into()),
                 )
-                .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
+                    .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
             )
             .expect("Error drawing graph")
             .label(outgoing_translation(self.language))
@@ -234,4 +206,19 @@ impl Chart<Message> for TrafficChart {
             .draw()
             .expect("Error drawing graph");
     }
+}
+
+const PTS: f32 = 300.0;
+fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
+    let mut ret_val = Vec::new();
+    let len = spline.len();
+    let first_x = spline.get(0).unwrap().t;
+    let last_x = spline.get(len-1).unwrap().t;
+    let delta = (last_x - first_x) / PTS;
+    for i in 0..=PTS as usize {
+        let x = first_x + i as f32 * delta;
+        let p = spline.clamped_sample(x).unwrap_or_default();
+        ret_val.push((x, p));
+    }
+    ret_val
 }
