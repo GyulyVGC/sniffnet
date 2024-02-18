@@ -438,6 +438,15 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "marc-gav",
+      "name": "Marc Gavilán",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45849876?v=4",
+      "profile": "https://www.linkedin.com/in/marcgavilangil/",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
