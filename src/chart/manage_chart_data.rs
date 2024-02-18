@@ -9,9 +9,11 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     let tot_seconds = traffic_chart.ticks as f32;
     traffic_chart.ticks += 1;
 
-    let out_bytes_entry = -1.0 * (runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev) as f32;
+    let out_bytes_entry =
+        -1.0 * (runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev) as f32;
     let in_bytes_entry = (runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev) as f32;
-    let out_packets_entry = -1.0 * (runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev) as f32;
+    let out_packets_entry =
+        -1.0 * (runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev) as f32;
     let in_packets_entry = (runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev) as f32;
 
     let out_bytes_key = Key::new(tot_seconds, out_bytes_entry, Interpolation::Cosine);

@@ -5,7 +5,8 @@ use iced::widget::{Column, Container};
 use iced::{Element, Renderer};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::{Spline};
+use splines::Spline;
+use std::cmp::min;
 
 use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -91,7 +92,7 @@ impl Chart<Message> for TrafficChart {
     ) {
         let font_weight = self.style.get_font_weight();
 
-        if self.ticks == 0 {
+        if self.ticks <= 1 {
             return;
         }
         let tot_seconds = self.ticks - 1;
@@ -136,18 +137,20 @@ impl Chart<Message> for TrafficChart {
             .axis_style(buttons_color)
             .bold_line_style(buttons_color.mix(0.3))
             .light_line_style(buttons_color.mix(0.0))
-            .y_labels(7)
             .label_style(
                 (FONT_FAMILY_NAME, 12.5)
                     .into_font()
                     .style(font_weight)
                     .color(&color_font),
             )
+            .y_labels(7)
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
-                &|_| String::from("djedjei")
+                &|bytes| get_formatted_bytes_string_with_b(bytes.abs() as u128)
             })
+            .x_labels(min(6, self.ticks as usize))
+            .x_label_formatter(&|t| t.to_string())
             .draw()
             .unwrap();
 
@@ -163,7 +166,7 @@ impl Chart<Message> for TrafficChart {
                     0.0,
                     color_incoming.mix(color_mix.into()),
                 )
-                    .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
+                .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
             )
             .expect("Error drawing graph")
             .label(incoming_translation(self.language))
@@ -183,7 +186,7 @@ impl Chart<Message> for TrafficChart {
                     0.0,
                     color_outgoing.mix(color_mix.into()),
                 )
-                    .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
+                .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
             )
             .expect("Error drawing graph")
             .label(outgoing_translation(self.language))
@@ -213,7 +216,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     let mut ret_val = Vec::new();
     let len = spline.len();
     let first_x = spline.get(0).unwrap().t;
-    let last_x = spline.get(len-1).unwrap().t;
+    let last_x = spline.get(len - 1).unwrap().t;
     let delta = (last_x - first_x) / PTS;
     for i in 0..=PTS as usize {
         let x = first_x + i as f32 * delta;

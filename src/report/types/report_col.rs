@@ -90,7 +90,7 @@ impl ReportCol {
             }
             ReportCol::Proto => key.protocol.to_string(),
             ReportCol::Service => val.service.to_string(),
-            ReportCol::Bytes => get_formatted_bytes_string(val.transmitted_bytes, 1),
+            ReportCol::Bytes => get_formatted_bytes_string(val.transmitted_bytes),
             ReportCol::Packets => val.transmitted_packets.to_string(),
         }
     }

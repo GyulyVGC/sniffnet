@@ -78,7 +78,7 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
 }
 
 /// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
-pub fn get_formatted_bytes_string(bytes: u128, precision: usize) -> String {
+pub fn get_formatted_bytes_string(bytes: u128) -> String {
     let mut multiple_transmitted = String::new();
     #[allow(clippy::cast_precision_loss)]
     let mut n = bytes as f32;
@@ -108,13 +108,14 @@ pub fn get_formatted_bytes_string(bytes: u128, precision: usize) -> String {
         n.to_string()
     } else {
         // with multiple
+        let precision = usize::from(n <= 9.95);
         format!("{n:.precision$} {multiple_transmitted}")
     }
 }
 
 /// Returns a String representing a quantity of bytes with its proper multiple (B, KB, MB, GB, TB)
-pub fn get_formatted_bytes_string_with_b(bytes: u128, precision: usize) -> String {
-    let mut bytes_string = get_formatted_bytes_string(bytes, precision);
+pub fn get_formatted_bytes_string_with_b(bytes: u128) -> String {
+    let mut bytes_string = get_formatted_bytes_string(bytes);
     if bytes_string.parse::<f32>().is_ok() {
         // no multiple
         bytes_string.push(' ');
