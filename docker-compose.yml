@@ -1,0 +1,5 @@
+services:
+  build-image:
+    build: .
+    <<: &default
+      image: sniffnet
