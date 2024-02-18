@@ -546,8 +546,20 @@ mod tests {
                         ]
                         .concat()
                     );
-                    // displayed values have max len -1 (they include "…" that counts for 2 units)
-                    assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+                    if report_col.get_title_direction_info(language).len() == 0 {
+                        // displayed values have max len -1 (they include "…" that counts for 2 units)
+                        assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+                    } else {
+                        match title_chars.len() {
+                            x if x == max_chars - 4 || x == max_chars - 3 => {
+                                assert_eq!(title_small_chars.len(), 1)
+                            }
+                            _ => assert_eq!(
+                                title_chars.len() + title_small_chars.len(),
+                                max_chars - 1
+                            ),
+                        }
+                    }
                     if title != report_col.get_title(language) {
                         // first title part is not full, so second one is suspensions
                         assert_eq!(title_small, "…");
@@ -565,22 +577,22 @@ mod tests {
                         );
                     } else {
                         // first part is untouched
-                        // second part has correct len
-                        assert_eq!(title_small_chars.len(), max_chars - title_chars.len() - 1);
                         // second title part is max - title.len - 2 chars of full self, plus suspensions
-                        assert_eq!(
-                            title_small,
-                            [
-                                &report_col
-                                    .get_title_direction_info(language)
-                                    .chars()
-                                    .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
-                                    .iter()
-                                    .collect::<String>(),
-                                "…"
-                            ]
-                            .concat()
-                        );
+                        let mut second_part = [
+                            &report_col
+                                .get_title_direction_info(language)
+                                .chars()
+                                .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
+                                .iter()
+                                .collect::<String>(),
+                            "…",
+                        ]
+                        .concat();
+                        if second_part == String::from(" (…") || second_part == String::from(" …")
+                        {
+                            second_part = String::from("…");
+                        }
+                        assert_eq!(title_small, second_part);
                         // second part never terminates with "(…"
                         assert!(!title_small.ends_with("(…"));
                         // second part never terminates with " …"
