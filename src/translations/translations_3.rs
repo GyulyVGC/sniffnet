@@ -10,6 +10,7 @@ use crate::{Language, StyleType};
 pub fn general_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "General",
+        Language::ES => "Generales",
         Language::IT => "Generali",
         _ => "General",
     }
@@ -17,7 +18,7 @@ pub fn general_translation(language: Language) -> &'static str {
 
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT => "Zoom",
+        Language::EN | Language::IT | Language::ES => "Zoom",
         _ => "Zoom",
     }
 }
@@ -25,6 +26,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
 pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",
+        Language::ES => "Archivos de la base de datos",
         Language::IT => "File di database",
         _ => "Database files",
     }
@@ -33,6 +35,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
 pub fn params_not_editable_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "The following parameters can't be modified during the analysis",
+        Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
         _ => "The following parameters can't be modified during the analysis",
     }
@@ -49,6 +52,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
 pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
+        Language::ES => "Estilo personalizado",
         Language::IT => "Stile personalizzato",
         _ => "Custom style",
     }
@@ -57,7 +61,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
 pub fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
-        Language::IT => "Copia",
+        Language::IT | Language::ES => "Copia",
         _ => "Copy",
     }
 }
@@ -65,6 +69,7 @@ pub fn copy_translation(language: Language) -> &'static str {
 pub fn port_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Port",
+        Language::ES => "Puerto",
         Language::IT => "Porta",
         _ => "Port",
     }
@@ -73,6 +78,7 @@ pub fn port_translation(language: Language) -> &'static str {
 pub fn invalid_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Invalid filters",
+        Language::ES => "Filtros inválidos",
         Language::IT => "Filtri non validi",
         _ => "Invalid filters",
     }
@@ -81,6 +87,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
 pub fn messages_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Messages",
+        Language::ES => "Mensajes",
         Language::IT => "Messaggi",
         _ => "Messages",
     }
@@ -89,6 +96,7 @@ pub fn messages_translation(language: Language) -> &'static str {
 pub fn link_type_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Link type",
+        Language::ES => "Tipo de conexión",
         Language::IT => "Tipo di collegamento",
         _ => "Link type",
     }
@@ -100,6 +108,7 @@ pub fn unsupported_link_type_translation(
 ) -> Text<'static, Renderer<StyleType>> {
     let mut string = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
+        Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
@@ -112,6 +121,7 @@ pub fn unsupported_link_type_translation(
 pub fn style_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select style from a file",
+        Language::ES => "Selecciona el estilo desde un archivo",
         Language::IT => "Seleziona lo stile da un file",
         _ => "Select style from a file",
     }
@@ -120,6 +130,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
 pub fn database_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select database file",
+        Language::ES => "Selecciona un archivo de base de datos",
         Language::IT => "Seleziona file di database",
         _ => "Select database file",
     }
@@ -128,6 +139,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
 pub fn filter_by_host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Filter by network host",
+        Language::ES => "Filtra por host de red",
         Language::IT => "Filtra per host di rete",
         _ => "Filter by network host",
     }
@@ -136,6 +148,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
 pub fn service_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Service",
+        Language::ES => "Servicio",
         Language::IT => "Servizio",
         _ => "Service",
     }
