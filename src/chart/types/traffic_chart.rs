@@ -92,7 +92,7 @@ impl Chart<Message> for TrafficChart {
     ) {
         let font_weight = self.style.get_font_weight();
 
-        if self.ticks <= 1 {
+        if self.ticks < 1 {
             return;
         }
         let tot_seconds = self.ticks - 1;
@@ -124,6 +124,13 @@ impl Chart<Message> for TrafficChart {
             ChartType::Bytes => get_y_axis_range(self.min_bytes, self.max_bytes),
         };
 
+        let x_labels = if self.ticks == 1 {
+            0
+        } else {
+            self.ticks as usize
+        };
+        let y_labels = 1 + (y_axis_range.end - y_axis_range.start) as usize;
+
         let mut chart = chart_builder
             .build_cartesian_2d(
                 first_time_displayed as f32..tot_seconds as f32,
@@ -143,13 +150,13 @@ impl Chart<Message> for TrafficChart {
                     .style(font_weight)
                     .color(&color_font),
             )
-            .y_labels(7)
+            .y_labels(min(5, y_labels))
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
                 &|bytes| get_formatted_bytes_string_with_b(bytes.abs() as u128)
             })
-            .x_labels(min(6, self.ticks as usize))
+            .x_labels(min(6, x_labels as usize))
             .x_label_formatter(&|t| t.to_string())
             .draw()
             .unwrap();
