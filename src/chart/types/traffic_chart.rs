@@ -218,17 +218,84 @@ impl Chart<Message> for TrafficChart {
     }
 }
 
-const PTS: f32 = 300.0;
+const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     let mut ret_val = Vec::new();
     let len = spline.len();
     let first_x = spline.get(0).unwrap().t;
     let last_x = spline.get(len - 1).unwrap().t;
-    let delta = (last_x - first_x) / PTS;
-    for i in 0..=PTS as usize {
+    let delta = (last_x - first_x) / (PTS as f32 - 1.0);
+    for i in 0..PTS {
         let x = first_x + i as f32 * delta;
         let p = spline.clamped_sample(x).unwrap_or_default();
         ret_val.push((x, p));
     }
     ret_val
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::chart::types::traffic_chart::{sample_spline, PTS};
+    use splines::{Interpolation, Key, Spline};
+
+    #[test]
+    fn test_spline_samples() {
+        let vec = vec![
+            (0, -500),
+            (1, -1000),
+            (2, -1000),
+            (3, -1000),
+            (4, -1000),
+            (5, -1000),
+            (6, -1000),
+            (7, -1000),
+            (8, -1000),
+            (9, -1000),
+            (10, -1000),
+            (11, -1000),
+            (12, -1000),
+            (13, -1000),
+            (14, -1000),
+            (15, -1000),
+            (16, -1000),
+            (17, -1000),
+            (18, -1000),
+            (19, -1000),
+            (20, -1000),
+            (21, -1000),
+            (22, -1000),
+            (23, -1000),
+            (24, -1000),
+            (25, -1000),
+            (26, -1000),
+            (27, -1000),
+            (28, -1000),
+        ];
+        let spline = Spline::from_vec(
+            vec.iter()
+                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
+                .collect(),
+        );
+
+        let eps = 0.001;
+
+        let samples = sample_spline(&spline);
+        assert_eq!(samples.len(), PTS);
+
+        let delta = samples[1].0 - samples[0].0;
+
+        assert_eq!(samples[0].0, 0.0);
+        assert_eq!(samples[0].1, -500.0);
+        for i in 0..PTS - 1 {
+            assert_eq!(
+                (samples[i + 1].0 * 10_000.0 - samples[i].0 * 10_000.0).round() / 10_000.0,
+                (delta * 10_000.0).round() / 10_000.0
+            );
+            assert!(samples[i].1 <= -500.0);
+            assert!(samples[i].1 >= -1000.0 - eps);
+            assert!(samples[i + 1].1 < samples[i].1 + eps);
+        }
+        assert_eq!(samples[PTS - 1].0, 28.0);
+        assert_eq!(samples[PTS - 1].1, -1000.0);
+    }
 }
