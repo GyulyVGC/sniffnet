@@ -27,9 +27,8 @@ use crate::translations::translations::{
     packets_exceeded_translation, packets_exceeded_value_translation, per_second_translation,
     threshold_translation,
 };
-use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
+use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -233,7 +232,7 @@ fn bytes_notification_log(
 ) -> Container<'static, Message, Renderer<StyleType>> {
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(": ");
-    threshold_str.push_str(&get_formatted_bytes_string_with_b(
+    threshold_str.push_str(&ByteMultiple::formatted_string(
         (logged_notification.threshold).into(),
     ));
 
@@ -241,13 +240,13 @@ fn bytes_notification_log(
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
-    incoming_str.push_str(&get_formatted_bytes_string_with_b(u128::from(
+    incoming_str.push_str(&ByteMultiple::formatted_string(u128::from(
         logged_notification.incoming,
     )));
     let mut outgoing_str = " - ".to_string();
     outgoing_str.push_str(outgoing_translation(language));
     outgoing_str.push_str(": ");
-    outgoing_str.push_str(&get_formatted_bytes_string_with_b(u128::from(
+    outgoing_str.push_str(&ByteMultiple::formatted_string(u128::from(
         logged_notification.outgoing,
     )));
     let content = Row::new()
@@ -291,7 +290,7 @@ fn bytes_notification_log(
                 .push(
                     Text::new(bytes_exceeded_value_translation(
                         language,
-                        &get_formatted_bytes_string_with_b(u128::from(
+                        &ByteMultiple::formatted_string(u128::from(
                             logged_notification.incoming + logged_notification.outgoing,
                         )),
                     ))

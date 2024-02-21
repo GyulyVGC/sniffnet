@@ -38,9 +38,9 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
+use crate::utils::formatted_strings::get_socket_address;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -232,7 +232,7 @@ fn col_info(
         ),
         &format!(
             "{}\n   {} {}",
-            get_formatted_bytes_string_with_b(val.transmitted_bytes),
+            ByteMultiple::formatted_string(val.transmitted_bytes),
             val.transmitted_packets,
             packets_translation(language)
         ),

@@ -308,7 +308,7 @@ fn input_group_bytes(
         specify_multiples_translation(language)
     );
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
-        / bytes_notification.byte_multiple.get_multiplier())
+        / bytes_notification.byte_multiple.multiplier())
     .to_string();
     curr_threshold_str.push_str(bytes_notification.byte_multiple.get_char());
     let input_row = Row::new()
