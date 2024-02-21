@@ -109,20 +109,14 @@ impl TrafficChart {
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
         match self.chart_type {
-            ChartType::Packets => {
-                if direction == TrafficDirection::Incoming {
-                    &self.in_packets
-                } else {
-                    &self.out_packets
-                }
-            }
-            ChartType::Bytes => {
-                if direction == TrafficDirection::Incoming {
-                    &self.in_bytes
-                } else {
-                    &self.out_bytes
-                }
-            }
+            ChartType::Packets => match direction {
+                TrafficDirection::Incoming => &self.in_packets,
+                TrafficDirection::Outgoing => &self.out_packets,
+            },
+            ChartType::Bytes => match direction {
+                TrafficDirection::Incoming => &self.in_bytes,
+                TrafficDirection::Outgoing => &self.out_bytes,
+            },
         }
     }
 
@@ -195,6 +189,7 @@ impl Chart<Message> for TrafficChart {
             .axis_style(buttons_color)
             .bold_line_style(buttons_color.mix(0.3))
             .light_line_style(buttons_color.mix(0.0))
+            .max_light_lines(0)
             .label_style(self.font(12.5))
             .y_labels(min(5, y_labels))
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
