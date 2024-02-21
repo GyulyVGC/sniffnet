@@ -7,11 +7,13 @@ use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
 use std::cmp::min;
+use std::ops::Range;
 
 use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::formatted_strings::get_formatted_bytes_string_with_b;
 use crate::{ChartType, Language, StyleType};
@@ -80,6 +82,77 @@ impl TrafficChart {
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
     }
+
+    fn x_axis_range(&self) -> Range<f32> {
+        let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
+        let tot_seconds = self.ticks - 1;
+        #[allow(clippy::cast_precision_loss)]
+        let range = first_time_displayed as f32..tot_seconds as f32;
+        range
+    }
+
+    fn y_axis_range(&self) -> Range<f32> {
+        let (min, max) = match self.chart_type {
+            ChartType::Packets => (self.min_packets, self.max_packets),
+            ChartType::Bytes => (self.min_bytes, self.max_bytes),
+        };
+        let fs = max - min;
+        let gap = fs * 0.05;
+        min - gap..max + gap
+    }
+
+    fn font(&self, size: f64) -> TextStyle<'static> {
+        (FONT_FAMILY_NAME, size)
+            .into_font()
+            .style(self.style.get_font_weight())
+            .color(&to_rgb_color(self.style.get_palette().text_body))
+    }
+
+    fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
+        match self.chart_type {
+            ChartType::Packets => {
+                if direction == TrafficDirection::Incoming {
+                    &self.in_packets
+                } else {
+                    &self.out_packets
+                }
+            }
+            ChartType::Bytes => {
+                if direction == TrafficDirection::Incoming {
+                    &self.in_bytes
+                } else {
+                    &self.out_bytes
+                }
+            }
+        }
+    }
+
+    fn series_label(&self, direction: TrafficDirection) -> &str {
+        match direction {
+            TrafficDirection::Incoming => incoming_translation(self.language),
+            TrafficDirection::Outgoing => outgoing_translation(self.language),
+        }
+    }
+
+    fn series_color(&self, direction: TrafficDirection) -> RGBColor {
+        match direction {
+            TrafficDirection::Incoming => to_rgb_color(self.style.get_palette().secondary),
+            TrafficDirection::Outgoing => to_rgb_color(self.style.get_palette().outgoing),
+        }
+    }
+
+    fn area_series<DB: DrawingBackend>(
+        &self,
+        direction: TrafficDirection,
+    ) -> AreaSeries<DB, f32, f32> {
+        let color = self.series_color(direction);
+        AreaSeries::new(
+            sample_spline(self.spline_to_plot(direction)),
+            0.0,
+            color.mix(self.style.get_extension().alpha_chart_badge.into()),
+        )
+        .border_style(ShapeStyle::from(&color).stroke_width(CHARTS_LINE_BORDER))
+    }
 }
 
 impl Chart<Message> for TrafficChart {
@@ -90,21 +163,9 @@ impl Chart<Message> for TrafficChart {
         _state: &Self::State,
         mut chart_builder: ChartBuilder<DB>,
     ) {
-        let font_weight = self.style.get_font_weight();
-
         if self.ticks < 1 {
             return;
         }
-        let tot_seconds = self.ticks - 1;
-        let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
-
-        let colors = self.style.get_palette();
-        let ext = self.style.get_extension();
-        let color_incoming = to_rgb_color(colors.secondary);
-        let color_outgoing = to_rgb_color(colors.outgoing);
-        let color_font = to_rgb_color(colors.text_body);
-        let color_mix = ext.alpha_chart_badge;
-        let buttons_color = to_rgb_color(ext.buttons_color);
 
         chart_builder
             .margin_right(30)
@@ -112,107 +173,61 @@ impl Chart<Message> for TrafficChart {
             .set_label_area_size(LabelAreaPosition::Left, 60)
             .set_label_area_size(LabelAreaPosition::Bottom, 50);
 
-        let get_y_axis_range = |min: f32, max: f32| {
-            let fs = max - min;
-            #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-            let gap = fs * 0.05;
-            min - gap..max + gap
-        };
-
-        let y_axis_range = match self.chart_type {
-            ChartType::Packets => get_y_axis_range(self.min_packets, self.max_packets),
-            ChartType::Bytes => get_y_axis_range(self.min_bytes, self.max_bytes),
-        };
+        let x_axis_range = self.x_axis_range();
+        let y_axis_range = self.y_axis_range();
 
         let x_labels = if self.ticks == 1 {
             0
         } else {
             self.ticks as usize
         };
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let y_labels = 1 + (y_axis_range.end - y_axis_range.start) as usize;
 
         let mut chart = chart_builder
-            .build_cartesian_2d(
-                first_time_displayed as f32..tot_seconds as f32,
-                y_axis_range,
-            )
+            .build_cartesian_2d(x_axis_range, y_axis_range)
             .expect("Error drawing chart");
 
-        // Mesh
+        let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
+
+        // chart mesh
         chart
             .configure_mesh()
             .axis_style(buttons_color)
             .bold_line_style(buttons_color.mix(0.3))
             .light_line_style(buttons_color.mix(0.0))
-            .label_style(
-                (FONT_FAMILY_NAME, 12.5)
-                    .into_font()
-                    .style(font_weight)
-                    .color(&color_font),
-            )
+            .label_style(self.font(12.5))
             .y_labels(min(5, y_labels))
             .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
                 &|packets| packets.abs().to_string()
             } else {
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
                 &|bytes| get_formatted_bytes_string_with_b(bytes.abs() as u128)
             })
-            .x_labels(min(6, x_labels as usize))
-            .x_label_formatter(&|t| t.to_string())
+            .x_labels(min(6, x_labels))
+            .x_label_formatter(&std::string::ToString::to_string)
             .draw()
             .unwrap();
 
-        // Incoming series
-        chart
-            .draw_series(
-                AreaSeries::new(
-                    if self.chart_type.eq(&ChartType::Packets) {
-                        sample_spline(&self.in_packets)
-                    } else {
-                        sample_spline(&self.in_bytes)
-                    },
-                    0.0,
-                    color_incoming.mix(color_mix.into()),
-                )
-                .border_style(ShapeStyle::from(&color_incoming).stroke_width(CHARTS_LINE_BORDER)),
-            )
-            .expect("Error drawing graph")
-            .label(incoming_translation(self.language))
-            .legend(move |(x, y)| {
-                Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_incoming.filled())
-            });
+        // draw incoming and outgoing series
+        for direction in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
+            let area_series = self.area_series(direction);
+            let label = self.series_label(direction);
+            let legend_style = self.series_color(direction).filled();
+            chart
+                .draw_series(area_series)
+                .expect("Error drawing graph")
+                .label(label)
+                .legend(move |(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], legend_style));
+        }
 
-        // Outgoing series
-        chart
-            .draw_series(
-                AreaSeries::new(
-                    if self.chart_type.eq(&ChartType::Packets) {
-                        sample_spline(&self.out_packets)
-                    } else {
-                        sample_spline(&self.out_bytes)
-                    },
-                    0.0,
-                    color_outgoing.mix(color_mix.into()),
-                )
-                .border_style(ShapeStyle::from(&color_outgoing).stroke_width(CHARTS_LINE_BORDER)),
-            )
-            .expect("Error drawing graph")
-            .label(outgoing_translation(self.language))
-            .legend(move |(x, y)| {
-                Rectangle::new([(x, y - 5), (x + 25, y + 5)], color_outgoing.filled())
-            });
-
-        // Legend
+        // chart legend
         chart
             .configure_series_labels()
             .position(SeriesLabelPosition::UpperRight)
             .background_style(buttons_color.mix(0.6))
             .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
-            .label_font(
-                (FONT_FAMILY_NAME, 13.5)
-                    .into_font()
-                    .style(font_weight)
-                    .color(&color_font),
-            )
+            .label_font(self.font(13.5))
             .draw()
             .expect("Error drawing graph");
     }
@@ -224,9 +239,11 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     let len = spline.len();
     let first_x = spline.get(0).unwrap().t;
     let last_x = spline.get(len - 1).unwrap().t;
+    #[allow(clippy::cast_precision_loss)]
     let delta = (last_x - first_x) / (PTS as f32 - 1.0);
     for i in 0..PTS {
-        let x = first_x + i as f32 * delta;
+        #[allow(clippy::cast_precision_loss)]
+        let x = first_x + delta * i as f32;
         let p = spline.clamped_sample(x).unwrap_or_default();
         ret_val.push((x, p));
     }

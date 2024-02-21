@@ -6,14 +6,19 @@ use crate::{RunTimeData, TrafficChart};
 ///
 /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
 pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut TrafficChart) {
+    #[allow(clippy::cast_precision_loss)]
     let tot_seconds = traffic_chart.ticks as f32;
     traffic_chart.ticks += 1;
 
+    #[allow(clippy::cast_precision_loss)]
     let out_bytes_entry =
         -1.0 * (runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
     let in_bytes_entry = (runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
     let out_packets_entry =
         -1.0 * (runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
     let in_packets_entry = (runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev) as f32;
 
     let out_bytes_key = Key::new(tot_seconds, out_bytes_entry, Interpolation::Cosine);
