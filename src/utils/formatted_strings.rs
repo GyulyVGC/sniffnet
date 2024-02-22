@@ -77,52 +77,6 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
     filters_string
 }
 
-/// Returns a String representing a quantity of bytes with its proper multiple (K, M, G, T)
-pub fn get_formatted_bytes_string(bytes: u128, precision: usize) -> String {
-    let mut multiple_transmitted = String::new();
-    #[allow(clippy::cast_precision_loss)]
-    let mut n = bytes as f32;
-
-    match bytes {
-        0..=999 => {}
-        1_000..=999_999 => {
-            n /= 1000_f32;
-            multiple_transmitted.push('K');
-        } // kilo
-        1_000_000..=999_999_999 => {
-            n /= 1_000_000_f32;
-            multiple_transmitted.push('M');
-        } // mega
-        1_000_000_000..=999_999_999_999 => {
-            n /= 1_000_000_000_f32;
-            multiple_transmitted.push('G');
-        } // giga
-        _ => {
-            n /= 1_000_000_000_000_f32;
-            multiple_transmitted.push('T');
-        } // tera
-    }
-
-    if multiple_transmitted.is_empty() {
-        // no multiple
-        n.to_string()
-    } else {
-        // with multiple
-        format!("{n:.precision$} {multiple_transmitted}")
-    }
-}
-
-/// Returns a String representing a quantity of bytes with its proper multiple (B, KB, MB, GB, TB)
-pub fn get_formatted_bytes_string_with_b(bytes: u128, precision: usize) -> String {
-    let mut bytes_string = get_formatted_bytes_string(bytes, precision);
-    if bytes_string.parse::<f32>().is_ok() {
-        // no multiple
-        bytes_string.push(' ');
-    }
-    bytes_string.push('B');
-    bytes_string
-}
-
 // /// Returns the default report path
 // pub fn get_default_report_file_path() -> String {
 //     return if let Ok(mut config_path) = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "file") {

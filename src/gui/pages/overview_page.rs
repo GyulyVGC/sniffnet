@@ -43,11 +43,9 @@ use crate::translations::translations_2::{
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::utils::formatted_strings::{
-    get_active_filters_string, get_formatted_bytes_string_with_b, get_percentage_string,
-};
+use crate::utils::formatted_strings::{get_active_filters_string, get_percentage_string};
 use crate::utils::types::icon::Icon;
-use crate::{ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
@@ -63,8 +61,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType
     if sniffer.pcap_error.is_none() {
         // NO pcap error detected
         let observed = sniffer.runtime_data.all_packets;
-        let filtered =
-            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets;
+        let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
         let dropped = sniffer.runtime_data.dropped_packets;
         let total = observed + u128::from(dropped);
 
@@ -310,10 +307,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info_host.data_info.tot_packets().to_string()
                         } else {
-                            get_formatted_bytes_string_with_b(
-                                data_info_host.data_info.tot_bytes(),
-                                1,
-                            )
+                            ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
                         })
                         .font(font),
                     ),
@@ -405,7 +399,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info.tot_packets().to_string()
                         } else {
-                            get_formatted_bytes_string_with_b(data_info.tot_bytes(), 1)
+                            ByteMultiple::formatted_string(data_info.tot_bytes())
                         })
                         .font(font),
                     ),
@@ -617,8 +611,7 @@ fn col_bytes_packets(
     font_headers: Font,
     sniffer: &Sniffer,
 ) -> Column<'static, Message, Renderer<StyleType>> {
-    let filtered_bytes =
-        sniffer.runtime_data.tot_sent_bytes + sniffer.runtime_data.tot_received_bytes;
+    let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
     let filters = &sniffer.filters;
 
@@ -632,11 +625,11 @@ fn col_bytes_packets(
         none_translation(language).to_string()
     };
     let bytes_value = if dropped > 0 {
-        get_formatted_bytes_string_with_b(filtered_bytes, 1)
+        ByteMultiple::formatted_string(filtered_bytes)
     } else {
         format!(
             "{} {}",
-            &get_formatted_bytes_string_with_b(filtered_bytes, 1),
+            &ByteMultiple::formatted_string(filtered_bytes),
             of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
         )
     };

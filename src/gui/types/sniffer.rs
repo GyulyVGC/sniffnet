@@ -324,15 +324,15 @@ impl Sniffer {
     fn refresh_data(&mut self) -> Command<Message> {
         let info_traffic_lock = self.info_traffic.lock().unwrap();
         self.runtime_data.all_packets = info_traffic_lock.all_packets;
-        if info_traffic_lock.tot_received_packets + info_traffic_lock.tot_sent_packets == 0 {
+        if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
             drop(info_traffic_lock);
             return self.update(Message::Waiting);
         }
-        self.runtime_data.tot_sent_packets = info_traffic_lock.tot_sent_packets;
-        self.runtime_data.tot_received_packets = info_traffic_lock.tot_received_packets;
+        self.runtime_data.tot_out_packets = info_traffic_lock.tot_out_packets;
+        self.runtime_data.tot_in_packets = info_traffic_lock.tot_in_packets;
         self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
-        self.runtime_data.tot_received_bytes = info_traffic_lock.tot_received_bytes;
-        self.runtime_data.tot_sent_bytes = info_traffic_lock.tot_sent_bytes;
+        self.runtime_data.tot_in_bytes = info_traffic_lock.tot_in_bytes;
+        self.runtime_data.tot_out_bytes = info_traffic_lock.tot_out_bytes;
         self.runtime_data.dropped_packets = info_traffic_lock.dropped_packets;
         drop(info_traffic_lock);
         let emitted_notifications = notify_and_log(
@@ -527,7 +527,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.runtime_data.tot_sent_packets + self.runtime_data.tot_received_packets > 0 {
+                if self.runtime_data.tot_out_packets + self.runtime_data.tot_in_packets > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()
@@ -1550,7 +1550,7 @@ mod tests {
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer.runtime_data.tot_received_packets += 1;
+        sniffer.runtime_data.tot_in_packets += 1;
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);

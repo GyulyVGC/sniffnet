@@ -7,7 +7,7 @@ use crate::translations::translations::{
 use crate::translations::translations_2::{destination_translation, source_translation};
 use crate::translations::translations_3::{port_translation, service_translation};
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::get_formatted_bytes_string;
+use crate::ByteMultiple;
 
 // total width: 1012.0
 
@@ -90,7 +90,7 @@ impl ReportCol {
             }
             ReportCol::Proto => key.protocol.to_string(),
             ReportCol::Service => val.service.to_string(),
-            ReportCol::Bytes => get_formatted_bytes_string(val.transmitted_bytes, 1),
+            ReportCol::Bytes => ByteMultiple::formatted_string(val.transmitted_bytes),
             ReportCol::Packets => val.transmitted_packets.to_string(),
         }
     }

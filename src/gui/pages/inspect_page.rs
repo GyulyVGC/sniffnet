@@ -59,7 +59,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
 
     let report = lazy(
         (
-            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
             style,
             language,
             sniffer.report_sort_type,

@@ -38,9 +38,9 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::utils::formatted_strings::{get_formatted_bytes_string_with_b, get_socket_address};
+use crate::utils::formatted_strings::get_socket_address;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -48,7 +48,7 @@ pub fn connection_details_page(
 ) -> Container<Message, Renderer<StyleType>> {
     Container::new(lazy(
         (
-            sniffer.runtime_data.tot_sent_packets + sniffer.runtime_data.tot_received_packets,
+            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
             sniffer.timing_events.was_just_copy_ip(&key.address1),
             sniffer.timing_events.was_just_copy_ip(&key.address2),
         ),
@@ -232,7 +232,7 @@ fn col_info(
         ),
         &format!(
             "{}\n   {} {}",
-            get_formatted_bytes_string_with_b(val.transmitted_bytes, 1),
+            ByteMultiple::formatted_string(val.transmitted_bytes),
             val.transmitted_packets,
             packets_translation(language)
         ),

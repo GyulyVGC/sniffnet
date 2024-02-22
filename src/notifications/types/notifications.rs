@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::networking::types::byte_multiple::from_char_to_multiple;
 use crate::notifications::types::sound::Sound;
 use crate::ByteMultiple;
 
@@ -110,16 +109,16 @@ impl BytesNotification {
         } else {
             // multiple
             let last_char = value.chars().last().unwrap();
-            byte_multiple_inserted = from_char_to_multiple(last_char);
+            byte_multiple_inserted = ByteMultiple::from_char(last_char);
             let without_multiple = value[0..value.len() - 1].trim().to_string();
             if without_multiple.parse::<u64>().is_ok()
                 && TryInto::<u64>::try_into(
                     without_multiple.parse::<u128>().unwrap()
-                        * u128::from(byte_multiple_inserted.get_multiplier()),
+                        * u128::from(byte_multiple_inserted.multiplier()),
                 )
                 .is_ok()
             {
-                without_multiple.parse::<u64>().unwrap() * byte_multiple_inserted.get_multiplier()
+                without_multiple.parse::<u64>().unwrap() * byte_multiple_inserted.multiplier()
             } else if without_multiple.is_empty() {
                 byte_multiple_inserted = ByteMultiple::B;
                 0

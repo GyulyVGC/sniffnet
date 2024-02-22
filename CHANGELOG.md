@@ -12,6 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added support for more link types in addition to Ethernet: raw IP packets and null/loopback packets are now correctly parsed ([#421](https://github.com/GyulyVGC/sniffnet/pull/421))
 - Support changing sort strategy for network hosts and services in overview page, showing most recent items by default ([#452](https://github.com/GyulyVGC/sniffnet/pull/452))
 - IP addresses can now be copied to clipboard from the popup related to a given entry of the connections table, and a new search parameter has been introduced in Inspect page to allow users filter their connections based on IP address values ([#409](https://github.com/GyulyVGC/sniffnet/pull/409))
+- Traffic chart is now smoother and overall better-looking thanks to the new spline-based interpolation ([#461](https://github.com/GyulyVGC/sniffnet/pull/461))
 - Added Japanese translation 🇯🇵 ([#343](https://github.com/GyulyVGC/sniffnet/pull/343))
 - Added Uzbek translation 🇺🇿 ([#385](https://github.com/GyulyVGC/sniffnet/pull/385))
 - Window size and position are now remembered, so that Sniffnet can reopen with the same window properties
@@ -29,6 +30,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fixed a build failure on `powerpc64` ([#356](https://github.com/GyulyVGC/sniffnet/pull/356) — fixes [#353](https://github.com/GyulyVGC/sniffnet/issues/353))
 - Fixed a typo in Russian translation ([#389](https://github.com/GyulyVGC/sniffnet/pull/389))
 - Fixed icon inconsistency in case of directed broadcast traffic
+- Made byte strings consistent across the app, and added support for Terabytes and Petabytes representations
 - Fixed hosts and services data bar lengths inconsistencies in overview page
 - Minor improvements to Spanish translation ([#454](https://github.com/GyulyVGC/sniffnet/pull/454))
 

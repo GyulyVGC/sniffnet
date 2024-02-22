@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use splines::{Interpolation, Key, Spline};
 
 use crate::{RunTimeData, TrafficChart};
 
@@ -6,74 +6,71 @@ use crate::{RunTimeData, TrafficChart};
 ///
 /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
 pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut TrafficChart) {
-    let tot_seconds = traffic_chart.ticks;
+    #[allow(clippy::cast_precision_loss)]
+    let tot_seconds = traffic_chart.ticks as f32;
     traffic_chart.ticks += 1;
 
-    let sent_bytes_entry = runtime_data.tot_sent_bytes - runtime_data.tot_sent_bytes_prev;
-    let received_bytes_entry =
-        runtime_data.tot_received_bytes - runtime_data.tot_received_bytes_prev;
-    let sent_packets_entry = runtime_data.tot_sent_packets - runtime_data.tot_sent_packets_prev;
-    let received_packets_entry =
-        runtime_data.tot_received_packets - runtime_data.tot_received_packets_prev;
+    #[allow(clippy::cast_precision_loss)]
+    let out_bytes_entry =
+        -1.0 * (runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let in_bytes_entry = (runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let out_packets_entry =
+        -1.0 * (runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev) as f32;
+    #[allow(clippy::cast_precision_loss)]
+    let in_packets_entry = (runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev) as f32;
+
+    let out_bytes_key = Key::new(tot_seconds, out_bytes_entry, Interpolation::Cosine);
+    let in_bytes_key = Key::new(tot_seconds, in_bytes_entry, Interpolation::Cosine);
+    let out_packets_key = Key::new(tot_seconds, out_packets_entry, Interpolation::Cosine);
+    let in_packets_key = Key::new(tot_seconds, in_packets_entry, Interpolation::Cosine);
 
     // update sent bytes traffic data
-    if traffic_chart.sent_bytes.len() >= 30 {
-        traffic_chart.sent_bytes.pop_front();
-    }
-    traffic_chart.sent_bytes.push_back((
-        tot_seconds,
-        -<u128 as TryInto<i64>>::try_into(sent_bytes_entry).unwrap(),
-    ));
-    traffic_chart.min_bytes = get_min(&traffic_chart.sent_bytes);
-    runtime_data.tot_sent_bytes_prev = runtime_data.tot_sent_bytes;
+    update_spline(&mut traffic_chart.out_bytes, out_bytes_key);
+    traffic_chart.min_bytes = get_min(&traffic_chart.out_bytes);
+    runtime_data.tot_out_bytes_prev = runtime_data.tot_out_bytes;
+
     // update received bytes traffic data
-    if traffic_chart.received_bytes.len() >= 30 {
-        traffic_chart.received_bytes.pop_front();
-    }
-    traffic_chart
-        .received_bytes
-        .push_back((tot_seconds, received_bytes_entry.try_into().unwrap()));
-    traffic_chart.max_bytes = get_max(&traffic_chart.received_bytes);
-    runtime_data.tot_received_bytes_prev = runtime_data.tot_received_bytes;
+    update_spline(&mut traffic_chart.in_bytes, in_bytes_key);
+    traffic_chart.max_bytes = get_max(&traffic_chart.in_bytes);
+    runtime_data.tot_in_bytes_prev = runtime_data.tot_in_bytes;
 
     // update sent packets traffic data
-    if traffic_chart.sent_packets.len() >= 30 {
-        traffic_chart.sent_packets.pop_front();
-    }
-    traffic_chart.sent_packets.push_back((
-        tot_seconds,
-        -<u128 as TryInto<i64>>::try_into(sent_packets_entry).unwrap(),
-    ));
-    traffic_chart.min_packets = get_min(&traffic_chart.sent_packets);
-    runtime_data.tot_sent_packets_prev = runtime_data.tot_sent_packets;
+    update_spline(&mut traffic_chart.out_packets, out_packets_key);
+    traffic_chart.min_packets = get_min(&traffic_chart.out_packets);
+    runtime_data.tot_out_packets_prev = runtime_data.tot_out_packets;
+
     // update received packets traffic data
-    if traffic_chart.received_packets.len() >= 30 {
-        traffic_chart.received_packets.pop_front();
-    }
-    traffic_chart
-        .received_packets
-        .push_back((tot_seconds, received_packets_entry.try_into().unwrap()));
-    traffic_chart.max_packets = get_max(&traffic_chart.received_packets);
-    runtime_data.tot_received_packets_prev = runtime_data.tot_received_packets;
+    update_spline(&mut traffic_chart.in_packets, in_packets_key);
+    traffic_chart.max_packets = get_max(&traffic_chart.in_packets);
+    runtime_data.tot_in_packets_prev = runtime_data.tot_in_packets;
 }
 
-/// Finds the minimum y value to be displayed in chart
-fn get_min(deque: &VecDeque<(u32, i64)>) -> i64 {
-    let mut min = 0;
-    for (_, x) in deque {
-        if *x < min {
-            min = *x;
+fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>) {
+    if spline.len() >= 30 {
+        spline.remove(0);
+    }
+    spline.add(new_key);
+}
+
+/// Finds the minimum y value to be displayed in chart.
+fn get_min(spline: &Spline<f32, f32>) -> f32 {
+    let mut min = 0.0;
+    for key in spline {
+        if key.value < min {
+            min = key.value;
         }
     }
     min
 }
 
-/// Finds the maximum y value to be displayed in chart
-fn get_max(deque: &VecDeque<(u32, i64)>) -> i64 {
-    let mut max = 0;
-    for (_, x) in deque {
-        if *x > max {
-            max = *x;
+/// Finds the maximum y value to be displayed in chart.
+fn get_max(spline: &Spline<f32, f32>) -> f32 {
+    let mut max = 0.0;
+    for key in spline {
+        if key.value > max {
+            max = key.value;
         }
     }
     max
@@ -81,14 +78,14 @@ fn get_max(deque: &VecDeque<(u32, i64)>) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::VecDeque;
+    use splines::{Interpolation, Key, Spline};
 
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
     use crate::{ChartType, Language, RunTimeData, StyleType, TrafficChart};
 
     #[test]
     fn test_chart_data_updates() {
-        let sent = VecDeque::from([
+        let sent_vec = vec![
             (0, -500),
             (1, -1000),
             (2, -1000),
@@ -118,8 +115,14 @@ mod tests {
             (26, -1000),
             (27, -1000),
             (28, -1000),
-        ]);
-        let received = VecDeque::from([
+        ];
+        let sent = Spline::from_vec(
+            sent_vec
+                .iter()
+                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
+                .collect(),
+        );
+        let received_vec = vec![
             (0, 1000),
             (1, 21000),
             (2, 21000),
@@ -149,19 +152,25 @@ mod tests {
             (26, 21000),
             (27, 21000),
             (28, 21000),
-        ]);
+        ];
+        let received = Spline::from_vec(
+            received_vec
+                .iter()
+                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
+                .collect(),
+        );
         let tot_sent = 1000 * 28 + 500;
         let tot_received = 21000 * 28 + 1000;
         let mut traffic_chart = TrafficChart {
             ticks: 29,
-            sent_bytes: sent.clone(),
-            received_bytes: received.clone(),
-            sent_packets: sent.clone(),
-            received_packets: received.clone(),
-            min_bytes: -1000,
-            max_bytes: 21000,
-            min_packets: -1000,
-            max_packets: 21000,
+            out_bytes: sent.clone(),
+            in_bytes: received.clone(),
+            out_packets: sent.clone(),
+            in_packets: received.clone(),
+            min_bytes: -1000.0,
+            max_bytes: 21000.0,
+            min_packets: -1000.0,
+            max_packets: 21000.0,
             language: Language::default(),
             chart_type: ChartType::Packets,
             style: StyleType::default(),
@@ -169,88 +178,88 @@ mod tests {
         let mut runtime_data = RunTimeData {
             all_bytes: 0,
             all_packets: 0,
-            tot_sent_bytes: tot_sent + 1111,
-            tot_received_bytes: tot_received + 2222,
-            tot_sent_packets: tot_sent + 3333,
-            tot_received_packets: tot_received + 4444,
+            tot_out_bytes: tot_sent + 1111,
+            tot_in_bytes: tot_received + 2222,
+            tot_out_packets: tot_sent + 3333,
+            tot_in_packets: tot_received + 4444,
             dropped_packets: 0,
-            tot_sent_bytes_prev: tot_sent,
-            tot_received_bytes_prev: tot_received,
-            tot_sent_packets_prev: tot_sent,
-            tot_received_packets_prev: tot_received,
+            tot_out_bytes_prev: tot_sent,
+            tot_in_bytes_prev: tot_received,
+            tot_out_packets_prev: tot_sent,
+            tot_in_packets_prev: tot_received,
             logged_notifications: Default::default(),
             tot_emitted_notifications: 0,
         };
 
-        assert_eq!(get_min(&sent), -1000);
-        assert_eq!(get_max(&received), 21000);
+        assert_eq!(get_min(&sent), -1000.0);
+        assert_eq!(get_max(&received), 21000.0);
 
         update_charts_data(&mut runtime_data, &mut traffic_chart);
 
-        assert_eq!(get_min(&traffic_chart.sent_packets), -3333);
-        assert_eq!(get_max(&traffic_chart.received_bytes), 21000);
+        assert_eq!(get_min(&traffic_chart.out_packets), -3333.0);
+        assert_eq!(get_max(&traffic_chart.in_bytes), 21000.0);
 
         // runtime_data correctly updated?
-        assert_eq!(runtime_data.tot_sent_bytes_prev, tot_sent + 1111);
-        assert_eq!(runtime_data.tot_received_bytes_prev, tot_received + 2222);
-        assert_eq!(runtime_data.tot_sent_packets_prev, tot_sent + 3333);
-        assert_eq!(runtime_data.tot_received_packets_prev, tot_received + 4444);
+        assert_eq!(runtime_data.tot_out_bytes_prev, tot_sent + 1111);
+        assert_eq!(runtime_data.tot_in_bytes_prev, tot_received + 2222);
+        assert_eq!(runtime_data.tot_out_packets_prev, tot_sent + 3333);
+        assert_eq!(runtime_data.tot_in_packets_prev, tot_received + 4444);
 
         let mut sent_bytes = sent.clone();
-        sent_bytes.push_back((29, -1111));
+        sent_bytes.add(Key::new(29.0, -1111.0, Interpolation::Cosine));
         let mut received_packets = received.clone();
-        received_packets.push_back((29, 4444));
+        received_packets.add(Key::new(29.0, 4444.0, Interpolation::Cosine));
         let mut sent_packets = sent;
-        sent_packets.push_back((29, -3333));
+        sent_packets.add(Key::new(29.0, -3333.0, Interpolation::Cosine));
         let mut received_bytes = received;
-        received_bytes.push_back((29, 2222));
+        received_bytes.add(Key::new(29.0, 2222.0, Interpolation::Cosine));
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 30);
-        assert_eq!(traffic_chart.min_bytes, -1111);
-        assert_eq!(traffic_chart.min_packets, -3333);
-        assert_eq!(traffic_chart.max_bytes, 21000);
-        assert_eq!(traffic_chart.max_packets, 21000);
-        assert_eq!(traffic_chart.sent_bytes, sent_bytes);
-        assert_eq!(traffic_chart.received_packets, received_packets);
-        assert_eq!(traffic_chart.sent_packets, sent_packets);
-        assert_eq!(traffic_chart.received_bytes, received_bytes);
+        assert_eq!(traffic_chart.min_bytes, -1111.0);
+        assert_eq!(traffic_chart.min_packets, -3333.0);
+        assert_eq!(traffic_chart.max_bytes, 21000.0);
+        assert_eq!(traffic_chart.max_packets, 21000.0);
+        assert_eq!(traffic_chart.out_bytes.keys(), sent_bytes.keys());
+        assert_eq!(traffic_chart.in_packets.keys(), received_packets.keys());
+        assert_eq!(traffic_chart.out_packets.keys(), sent_packets.keys());
+        assert_eq!(traffic_chart.in_bytes.keys(), received_bytes.keys());
 
-        runtime_data.tot_sent_bytes += 99;
-        runtime_data.tot_received_packets += 990;
-        runtime_data.tot_received_bytes += 2;
+        runtime_data.tot_out_bytes += 99;
+        runtime_data.tot_in_packets += 990;
+        runtime_data.tot_in_bytes += 2;
         update_charts_data(&mut runtime_data, &mut traffic_chart);
-        runtime_data.tot_sent_bytes += 77;
-        runtime_data.tot_received_packets += 1;
-        runtime_data.tot_sent_packets += 220;
+        runtime_data.tot_out_bytes += 77;
+        runtime_data.tot_in_packets += 1;
+        runtime_data.tot_out_packets += 220;
         update_charts_data(&mut runtime_data, &mut traffic_chart);
 
-        sent_bytes.pop_front();
-        sent_bytes.pop_front();
-        sent_bytes.push_back((30, -99));
-        sent_bytes.push_back((31, -77));
-        received_packets.pop_front();
-        received_packets.pop_front();
-        received_packets.push_back((30, 990));
-        received_packets.push_back((31, 1));
-        sent_packets.pop_front();
-        sent_packets.pop_front();
-        sent_packets.push_back((30, 0));
-        sent_packets.push_back((31, -220));
-        received_bytes.pop_front();
-        received_bytes.pop_front();
-        received_bytes.push_back((30, 2));
-        received_bytes.push_back((31, 0));
+        sent_bytes.remove(0);
+        sent_bytes.remove(0);
+        sent_bytes.add(Key::new(30.0, -99.0, Interpolation::Cosine));
+        sent_bytes.add(Key::new(31.0, -77.0, Interpolation::Cosine));
+        received_packets.remove(0);
+        received_packets.remove(0);
+        received_packets.add(Key::new(30.0, 990.0, Interpolation::Cosine));
+        received_packets.add(Key::new(31.0, 1.0, Interpolation::Cosine));
+        sent_packets.remove(0);
+        sent_packets.remove(0);
+        sent_packets.add(Key::new(30.0, 0.0, Interpolation::Cosine));
+        sent_packets.add(Key::new(31.0, -220.0, Interpolation::Cosine));
+        received_bytes.remove(0);
+        received_bytes.remove(0);
+        received_bytes.add(Key::new(30.0, 2.0, Interpolation::Cosine));
+        received_bytes.add(Key::new(31.0, 0.0, Interpolation::Cosine));
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 32);
-        assert_eq!(traffic_chart.min_bytes, -1111);
-        assert_eq!(traffic_chart.min_packets, -3333);
-        assert_eq!(traffic_chart.max_bytes, 21000);
-        assert_eq!(traffic_chart.max_packets, 21000);
-        assert_eq!(traffic_chart.sent_bytes, sent_bytes);
-        assert_eq!(traffic_chart.received_packets, received_packets);
-        assert_eq!(traffic_chart.sent_packets, sent_packets);
-        assert_eq!(traffic_chart.received_bytes, received_bytes);
+        assert_eq!(traffic_chart.min_bytes, -1111.0);
+        assert_eq!(traffic_chart.min_packets, -3333.0);
+        assert_eq!(traffic_chart.max_bytes, 21000.0);
+        assert_eq!(traffic_chart.max_packets, 21000.0);
+        assert_eq!(traffic_chart.out_bytes.keys(), sent_bytes.keys());
+        assert_eq!(traffic_chart.in_packets.keys(), received_packets.keys());
+        assert_eq!(traffic_chart.out_packets.keys(), sent_packets.keys());
+        assert_eq!(traffic_chart.in_bytes.keys(), received_bytes.keys());
     }
 }
