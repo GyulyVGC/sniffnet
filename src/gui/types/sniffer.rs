@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use iced::{window, Command};
+use iced::window::Id;
 use pcap::Device;
 use rfd::FileHandle;
 
@@ -277,8 +278,8 @@ impl Sniffer {
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled_width = (f64::from(width) * scale_factor) as u32;
-                let scaled_height = (f64::from(height) * scale_factor) as u32;
+                let scaled_width = width * scale_factor as f32;
+                let scaled_height = height * scale_factor as f32;
                 self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => {
@@ -294,7 +295,7 @@ impl Sniffer {
             // }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close();
+                return window::close(Id::MAIN);
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());

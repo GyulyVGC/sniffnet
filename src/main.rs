@@ -4,10 +4,11 @@
 
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
+use std::borrow::Cow;
 
 #[cfg(target_os = "linux")]
 use iced::window::PlatformSpecific;
-use iced::{window, Application, Font, Settings};
+use iced::{window, Application, Font, Settings, Pixels};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -28,9 +29,10 @@ use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
-use crate::configs::types::config_window::{ConfigWindow, ToPosition};
+use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::Configs;
 use crate::gui::app::FONT_FAMILY_NAME;
+use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
@@ -91,9 +93,9 @@ pub fn main() -> iced::Result {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some(String::from(SNIFFNET_LOWERCASE)),
         window: window::Settings {
-            size, // start size
+            size: size.to_size(), // start size
             position: position.to_position(),
-            min_size: Some((800, 500)), // min size allowed
+            min_size: Some((800.0, 500.0).to_size()), // min size allowed
             max_size: None,
             visible: true,
             resizable: true,
@@ -104,12 +106,13 @@ pub fn main() -> iced::Result {
             platform_specific: PlatformSpecific {
                 application_id: String::from(SNIFFNET_LOWERCASE),
             },
+            exit_on_close_request: false,
             ..Default::default()
         },
         flags: Sniffer::new(&configs1, newer_release_available1),
+        fonts: vec![Cow::Borrowed(SARASA_MONO_BYTES), Cow::Borrowed(SARASA_MONO_BOLD_BYTES), Cow::Borrowed(ICONS_BYTES)],
         default_font: Font::with_name(FONT_FAMILY_NAME),
-        default_text_size: FONT_SIZE_BODY,
+        default_text_size: Pixels(FONT_SIZE_BODY),
         antialiasing: false,
-        exit_on_close_request: false,
     })
 }

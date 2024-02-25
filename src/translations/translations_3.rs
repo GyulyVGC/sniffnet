@@ -1,7 +1,7 @@
 #![allow(clippy::match_same_arms)]
 
 use iced::widget::Text;
-use iced::Renderer;
+use iced::{Renderer, Theme};
 
 use crate::translations::translations::network_adapter_translation;
 use crate::{Language, StyleType};
@@ -105,7 +105,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
 pub fn unsupported_link_type_translation(
     language: Language,
     adapter: &str,
-) -> Text<'static, Renderer<StyleType>> {
+) -> Text<'static, StyleType> {
     let mut string = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",

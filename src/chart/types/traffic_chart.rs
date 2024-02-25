@@ -2,7 +2,7 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
-use iced::{Element, Renderer};
+use iced::{Element, Renderer, Theme};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
@@ -63,7 +63,7 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self) -> Element<Message, Renderer<StyleType>> {
+    pub fn view(&self) -> Element<Message, StyleType> {
         Container::new(Column::new().push(ChartWidget::new(self)))
             .align_x(Horizontal::Left)
             .align_y(Vertical::Bottom)

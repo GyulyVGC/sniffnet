@@ -3,10 +3,10 @@ use std::net::IpAddr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
+use iced::widget::{button, lazy, Rule, Scrollable, Space};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::{Alignment, Font, Length, Renderer, Theme};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -45,7 +45,7 @@ use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType
 pub fn connection_details_page(
     sniffer: &Sniffer,
     key: AddressPortPair,
-) -> Container<Message, Renderer<StyleType>> {
+) -> Container<Message, StyleType> {
     Container::new(lazy(
         (
             sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
@@ -59,7 +59,7 @@ pub fn connection_details_page(
 fn page_content(
     sniffer: &Sniffer,
     key: &AddressPortPair,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -159,10 +159,10 @@ fn page_header(
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space(Length::FillPortion(1)))
+            .push(Space::with_width(Length::FillPortion(1)))
             .push(
                 Text::new(connection_details_translation(language))
                     .font(font_headers)
@@ -188,14 +188,14 @@ fn col_info(
     val: &InfoAddressPortPair,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
 
     let mut ret_val = Column::new()
         .spacing(10)
         .padding([20, 10, 20, 40])
         .width(Length::FillPortion(2))
-        .push(vertical_space(Length::FillPortion(1)))
+        .push(Space::with_height(Length::FillPortion(1)))
         .push(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
@@ -260,7 +260,7 @@ fn col_info(
             );
     }
 
-    ret_val = ret_val.push(vertical_space(Length::FillPortion(1)));
+    ret_val = ret_val.push(Space::with_height(Length::FillPortion(1)));
 
     ret_val
 }
@@ -270,7 +270,7 @@ fn get_host_info_col(
     host: &Host,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
         host_info_col = host_info_col.push(Rule::horizontal(10.0));
@@ -296,7 +296,7 @@ fn get_local_tooltip(
     sniffer: &Sniffer,
     address_to_lookup: &str,
     key: &AddressPortPair,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -325,14 +325,14 @@ fn get_local_tooltip(
 }
 
 fn get_src_or_dest_col(
-    caption: Row<'static, Message, Renderer<StyleType>>,
+    caption: Row<'static, Message, StyleType>,
     ip: &String,
     port: Option<u16>,
     mac: &Option<String>,
     font: Font,
     language: Language,
     timing_events: &TimingEvents,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let address_caption = if port.is_some() {
         socket_address_translation(language)
     } else {
@@ -368,10 +368,10 @@ fn get_src_or_dest_col(
 }
 
 fn assemble_widgets(
-    col_info: Column<'static, Message, Renderer<StyleType>>,
-    source_col: Column<'static, Message, Renderer<StyleType>>,
-    dest_col: Column<'static, Message, Renderer<StyleType>>,
-) -> Row<'static, Message, Renderer<StyleType>> {
+    col_info: Column<'static, Message, StyleType>,
+    source_col: Column<'static, Message, StyleType>,
+    dest_col: Column<'static, Message, StyleType>,
+) -> Row<'static, Message, StyleType> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)
             .padding(7)
@@ -390,11 +390,11 @@ fn assemble_widgets(
                 .width(Length::FillPortion(3))
                 .align_items(Alignment::Center)
                 .spacing(5)
-                .push(vertical_space(Length::FillPortion(1)))
+                .push(Space::with_height(Length::FillPortion(1)))
                 .push(source_container)
                 .push(Icon::ArrowsDown.to_text())
                 .push(dest_container)
-                .push(vertical_space(Length::FillPortion(1))),
+                .push(Space::with_height(Length::FillPortion(1))),
         )
 }
 
@@ -403,7 +403,7 @@ fn get_button_copy(
     font: Font,
     string: &String,
     timing_events: &TimingEvents,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let icon = if timing_events.was_just_copy_ip(string) {
         Text::new("✔").font(font).size(14)
     } else {
@@ -421,10 +421,9 @@ fn get_button_copy(
 
     Tooltip::new(
         content,
-        format!("{} (IP)", copy_translation(language)),
+        Text::new(format!("{} (IP)", copy_translation(language))).font(font),
         Position::Right,
     )
     .gap(5)
-    .font(font)
     .style(ContainerType::Tooltip)
 }

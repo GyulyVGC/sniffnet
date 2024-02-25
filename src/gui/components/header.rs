@@ -3,9 +3,9 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Container, Row, Tooltip};
+use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::{Alignment, Font, Length, Renderer, Theme};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
@@ -21,7 +21,7 @@ pub fn header(
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let logo = Icon::Sniffnet
         .to_text()
         .horizontal_alignment(Horizontal::Center)
@@ -58,10 +58,7 @@ pub fn header(
     .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset(
-    font: Font,
-    language: Language,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::ArrowBack
             .to_text()
@@ -76,11 +73,10 @@ fn get_button_reset(
 
     Tooltip::new(
         content,
-        quit_analysis_translation(language),
+        Text::new(quit_analysis_translation(language)).font(font),
         Position::Right,
     )
     .gap(5)
-    .font(font)
     .style(ContainerType::Tooltip)
 }
 
@@ -88,7 +84,7 @@ pub fn get_button_settings(
     font: Font,
     language: Language,
     open_overlay: SettingsPage,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::Settings
             .to_text()
@@ -101,8 +97,11 @@ pub fn get_button_settings(
     .width(Length::Fixed(60.0))
     .on_press(Message::OpenSettings(open_overlay));
 
-    Tooltip::new(content, settings_translation(language), Position::Left)
-        .gap(5)
-        .font(font)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        Text::new(settings_translation(language)).font(font),
+        Position::Left,
+    )
+    .gap(5)
+    .style(ContainerType::Tooltip)
 }

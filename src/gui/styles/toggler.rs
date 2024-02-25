@@ -4,6 +4,7 @@
 
 use iced::widget::toggler::Appearance;
 use iced::Color;
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 
 use crate::StyleType;
 
@@ -28,13 +29,15 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             } else {
                 ext.buttons_color
             },
-            background_border: Some(ext.buttons_color),
+            background_border_width: BORDER_WIDTH,
             foreground: colors.primary,
-            foreground_border: Some(if is_active {
+            foreground_border_width: BORDER_WIDTH,
+            background_border_color: ext.buttons_color,
+            foreground_border_color: if is_active {
                 colors.secondary
             } else {
                 ext.buttons_color
-            }),
+            }
         }
     }
 
@@ -50,13 +53,15 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             } else {
                 ext.buttons_color
             },
-            background_border: Some(colors.secondary),
+            background_border_width: BORDER_WIDTH,
             foreground: colors.primary,
-            foreground_border: Some(if is_active {
+            foreground_border_width: BORDER_WIDTH,
+            background_border_color: colors.secondary,
+            foreground_border_color: if is_active {
                 colors.secondary
             } else {
                 ext.buttons_color
-            }),
+            }
         }
     }
 }

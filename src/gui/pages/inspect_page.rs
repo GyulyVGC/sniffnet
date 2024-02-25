@@ -4,9 +4,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Toggler, Tooltip};
+use iced::widget::{button, text_input, Rule, Space, Toggler, Tooltip};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Renderer};
+use iced::{alignment, Alignment, Font, Length, Pixels, Renderer, Theme};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -32,7 +32,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -79,7 +79,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             font,
             sniffer.report_sort_type,
         ))
-        .push(vertical_space(4))
+        .push(Space::with_height(4))
         .push(Rule::horizontal(5))
         .push(report);
 
@@ -101,7 +101,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -151,11 +151,11 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType
                 .height(Length::Fill)
                 .padding(20)
                 .align_items(Alignment::Center)
-                .push(vertical_space(Length::FillPortion(1)))
+                .push(Space::with_height(Length::FillPortion(1)))
                 .push(Icon::Funnel.to_text().size(60))
-                .push(vertical_space(Length::Fixed(15.0)))
+                .push(Space::with_height(Length::Fixed(15.0)))
                 .push(Text::new(no_search_results_translation(language)).font(font))
-                .push(vertical_space(Length::FillPortion(2))),
+                .push(Space::with_height(Length::FillPortion(2))),
         );
     }
 
@@ -167,7 +167,7 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
@@ -185,9 +185,12 @@ fn report_header_row(
         } else {
             ContainerType::Tooltip
         };
-        let title_tooltip = Tooltip::new(title_row, tooltip_val, Position::FollowCursor)
-            .font(font)
-            .style(tooltip_style);
+        let title_tooltip = Tooltip::new(
+            title_row,
+            Text::new(tooltip_val).font(font),
+            Position::FollowCursor,
+        )
+        .style(tooltip_style);
 
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
@@ -250,7 +253,7 @@ fn title_report_col_display(
 fn sort_arrows(
     active_sort_type: ReportSortType,
     report_col: &ReportCol,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
@@ -271,7 +274,7 @@ fn row_report_entry(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
     } else {
@@ -304,7 +307,7 @@ fn host_filters_col(
     search_params: &SearchParameters,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
@@ -378,7 +381,7 @@ fn host_filters_col(
     Column::new()
         .align_items(Alignment::Start)
         .push(title_row)
-        .push(vertical_space(10))
+        .push(Space::with_height(10))
         .push(
             Row::new()
                 .align_items(Alignment::Center)
@@ -392,7 +395,7 @@ fn filter_input(
     filter_input_type: FilterInputType,
     search_params: SearchParameters,
     font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params);
     let is_filter_active = !filter_value.is_empty();
 
@@ -416,7 +419,7 @@ fn filter_input(
         input = input.icon(text_input::Icon {
             font: ICONS,
             code_point: Icon::Funnel.codepoint(),
-            size: Some(12.0),
+            size: Some(Pixels(12.0)),
             spacing: 2.0,
             side: Side::Left,
         });
@@ -444,7 +447,7 @@ fn filter_input(
         })
 }
 
-fn get_button_change_page(increment: bool) -> Button<'static, Message, Renderer<StyleType>> {
+fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType> {
     button(
         if increment {
             Icon::ArrowRight
@@ -469,16 +472,16 @@ fn get_change_page_row(
     start_entry_num: usize,
     end_entry_num: usize,
     results_number: usize,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .height(Length::Fixed(40.0))
         .align_items(Alignment::Center)
         .spacing(10)
-        .push(horizontal_space(Length::Fill))
+        .push(Space::with_width(Length::Fill))
         .push(if page_number > 1 {
             Container::new(get_button_change_page(false).width(25.0))
         } else {
-            Container::new(horizontal_space(25.0))
+            Container::new(Space::with_width(25.0))
         })
         .push(
             Text::new(showing_results_translation(
@@ -492,15 +495,15 @@ fn get_change_page_row(
         .push(if page_number < (results_number + 20 - 1) / 20 {
             Container::new(get_button_change_page(true).width(25.0))
         } else {
-            Container::new(horizontal_space(25.0))
+            Container::new(Space::with_width(25.0))
         })
-        .push(horizontal_space(Length::Fill))
+        .push(Space::with_width(Length::Fill))
 }
 
 fn button_clear_filter(
     new_search_parameters: SearchParameters,
     font: Font,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     button(
         Text::new("×")
             .font(font)

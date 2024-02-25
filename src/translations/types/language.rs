@@ -2,7 +2,7 @@ use std::fmt;
 
 use iced::widget::svg::Handle;
 use iced::widget::Svg;
-use iced::{Length, Renderer};
+use iced::{Length, Renderer, Theme};
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
@@ -81,7 +81,7 @@ impl Language {
         Language::ZH,
     ];
 
-    pub fn get_flag(self) -> Svg<Renderer<StyleType>> {
+    pub fn get_flag(self) -> Svg<StyleType> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
             Language::DE => DE,

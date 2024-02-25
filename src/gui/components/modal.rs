@@ -4,10 +4,10 @@ use iced::advanced::renderer;
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{self, Clipboard, Shell};
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::{button, horizontal_space, vertical_space, Column, Container, Row, Text};
+use iced::widget::{button, horizontal_space, Column, Container, Row, Space, Text};
 use iced::{
-    event, mouse, BorderRadius, Color, Element, Event, Font, Length, Point, Rectangle, Renderer,
-    Size,
+    event, mouse, Border, Color, Element, Event, Font, Length, Point, Rectangle, Renderer, Size,
+    Theme, Vector,
 };
 
 use crate::gui::components::button::button_hide;
@@ -27,7 +27,7 @@ pub fn get_exit_overlay(
     font: Font,
     font_headers: Font,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let row_buttons = confirm_button_row(language, font, Message::Reset);
 
     let content = Column::new()
@@ -40,7 +40,7 @@ pub fn get_exit_overlay(
             language,
             quit_analysis_translation(language),
         ))
-        .push(vertical_space(Length::Fixed(20.0)))
+        .push(Space::with_height(Length::Fixed(20.0)))
         .push(
             ask_quit_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -59,7 +59,7 @@ pub fn get_clear_all_overlay(
     font: Font,
     font_headers: Font,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
 
     let content = Column::new()
@@ -72,7 +72,7 @@ pub fn get_clear_all_overlay(
             language,
             clear_all_translation(language),
         ))
-        .push(vertical_space(Length::Fixed(20.0)))
+        .push(Space::with_height(Length::Fixed(20.0)))
         .push(
             ask_clear_all_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -92,10 +92,10 @@ fn get_modal_header(
     color_gradient: GradientType,
     language: Language,
     title: String,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space(Length::FillPortion(1)))
+            .push(Space::with_width(Length::FillPortion(1)))
             .push(
                 Text::new(title)
                     .font(font_headers)
@@ -120,7 +120,7 @@ fn confirm_button_row(
     language: Language,
     font: Font,
     message: Message,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .height(Length::Fill)
         .align_items(Alignment::Center)
@@ -140,18 +140,17 @@ fn confirm_button_row(
 }
 
 /// A widget that centers a modal element over some base element
-pub struct Modal<'a, Message, Renderer> {
-    base: Element<'a, Message, Renderer>,
-    #[allow(clippy::struct_field_names)]
-    modal: Element<'a, Message, Renderer>,
+pub struct Modal<'a, Message, Theme, Renderer> {
+    base: Element<'a, Message, Theme, Renderer>,
+    modal: Element<'a, Message, Theme, Renderer>,
     on_blur: Option<Message>,
 }
 
-impl<'a, Message, Renderer> Modal<'a, Message, Renderer> {
+impl<'a, Message, Theme, Renderer> Modal<'a, Message, Theme, Renderer> {
     /// Returns a new [`Modal`]
     pub fn new(
-        base: impl Into<Element<'a, Message, Renderer>>,
-        modal: impl Into<Element<'a, Message, Renderer>>,
+        base: impl Into<Element<'a, Message, Theme, Renderer>>,
+        modal: impl Into<Element<'a, Message, Theme, Renderer>>,
     ) -> Self {
         Self {
             base: base.into(),
@@ -170,7 +169,8 @@ impl<'a, Message, Renderer> Modal<'a, Message, Renderer> {
     }
 }
 
-impl<'a, Message, Renderer> Widget<Message, Renderer> for Modal<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> Widget<Message, Theme, Renderer>
+    for Modal<'a, Message, Theme, Renderer>
 where
     Renderer: advanced::Renderer,
     Message: Clone,
@@ -186,16 +186,19 @@ where
         tree.diff_children(&[&self.base, &self.modal]);
     }
 
-    fn width(&self) -> Length {
-        self.base.as_widget().width()
+    fn size(&self) -> Size<Length> {
+        self.base.as_widget().size()
     }
 
-    fn height(&self) -> Length {
-        self.base.as_widget().height()
-    }
-
-    fn layout(&self, renderer: &Renderer, limits: &layout::Limits) -> layout::Node {
-        self.base.as_widget().layout(renderer, limits)
+    fn layout(
+        &self,
+        tree: &mut widget::Tree,
+        renderer: &Renderer,
+        limits: &layout::Limits,
+    ) -> layout::Node {
+        self.base
+            .as_widget()
+            .layout(&mut tree.children[0], renderer, limits)
     }
 
     fn on_event(
@@ -225,7 +228,7 @@ where
         &self,
         state: &widget::Tree,
         renderer: &mut Renderer,
-        theme: &<Renderer as advanced::Renderer>::Theme,
+        theme: &Theme,
         style: &renderer::Style,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
@@ -247,16 +250,15 @@ where
         state: &'b mut widget::Tree,
         layout: Layout<'_>,
         _renderer: &Renderer,
-    ) -> Option<overlay::Element<'b, Message, Renderer>> {
-        Some(overlay::Element::new(
-            layout.position(),
-            Box::new(Overlay {
-                content: &mut self.modal,
-                tree: &mut state.children[1],
-                size: layout.bounds().size(),
-                on_blur: self.on_blur.clone(),
-            }),
-        ))
+        translation: Vector,
+    ) -> Option<overlay::Element<'b, Message, Theme, Renderer>> {
+        Some(overlay::Element::new(Box::new(Overlay {
+            position: layout.position() + translation,
+            content: &mut self.modal,
+            tree: &mut state.children[1],
+            size: layout.bounds().size(),
+            on_blur: self.on_blur.clone(),
+        })))
     }
 
     fn mouse_interaction(
@@ -289,31 +291,32 @@ where
     }
 }
 
-struct Overlay<'a, 'b, Message, Renderer> {
-    content: &'b mut Element<'a, Message, Renderer>,
+struct Overlay<'a, 'b, Message, Theme, Renderer> {
+    position: Point,
+    content: &'b mut Element<'a, Message, Theme, Renderer>,
     tree: &'b mut widget::Tree,
     size: Size,
     on_blur: Option<Message>,
 }
 
-impl<'a, 'b, Message, Renderer> overlay::Overlay<Message, Renderer>
-    for Overlay<'a, 'b, Message, Renderer>
+impl<'a, 'b, Message, Theme, Renderer> overlay::Overlay<Message, Theme, Renderer>
+    for Overlay<'a, 'b, Message, Theme, Renderer>
 where
     Renderer: advanced::Renderer,
     Message: Clone,
 {
-    fn layout(&self, renderer: &Renderer, _bounds: Size, position: Point) -> layout::Node {
+    fn layout(&mut self, renderer: &Renderer, _bounds: Size) -> layout::Node {
         let limits = layout::Limits::new(Size::ZERO, self.size)
             .width(Length::Fill)
             .height(Length::Fill);
 
-        let mut child = self.content.as_widget().layout(renderer, &limits);
-        child.align(Alignment::Center, Alignment::Center, limits.max());
+        let child = self
+            .content
+            .as_widget()
+            .layout(self.tree, renderer, &limits)
+            .align(Alignment::Center, Alignment::Center, limits.max());
 
-        let mut node = layout::Node::with_children(self.size, vec![child]);
-        node.move_to(position);
-
-        node
+        layout::Node::with_children(self.size, vec![child]).move_to(self.position)
     }
 
     fn on_event(
@@ -351,7 +354,7 @@ where
     fn draw(
         &self,
         renderer: &mut Renderer,
-        theme: &Renderer::Theme,
+        theme: &Theme,
         style: &renderer::Style,
         layout: Layout<'_>,
         cursor: mouse::Cursor,
@@ -359,9 +362,7 @@ where
         renderer.fill_quad(
             renderer::Quad {
                 bounds: layout.bounds(),
-                border_radius: BorderRadius::default(),
-                border_width: 0.0,
-                border_color: Color::TRANSPARENT,
+                ..renderer::Quad::default()
             },
             Color {
                 a: 0.80,
@@ -414,19 +415,24 @@ where
         &'c mut self,
         layout: Layout<'_>,
         renderer: &Renderer,
-    ) -> Option<overlay::Element<'c, Message, Renderer>> {
-        self.content
-            .as_widget_mut()
-            .overlay(self.tree, layout.children().next().unwrap(), renderer)
+    ) -> Option<overlay::Element<'c, Message, Theme, Renderer>> {
+        self.content.as_widget_mut().overlay(
+            self.tree,
+            layout.children().next().unwrap(),
+            renderer,
+            Vector::ZERO,
+        )
     }
 }
 
-impl<'a, Message, Renderer> From<Modal<'a, Message, Renderer>> for Element<'a, Message, Renderer>
+impl<'a, Message, Theme, Renderer> From<Modal<'a, Message, Theme, Renderer>>
+    for Element<'a, Message, Theme, Renderer>
 where
-    Renderer: 'a + advanced::Renderer,
+    Theme: 'a,
     Message: 'a + Clone,
+    Renderer: 'a + advanced::Renderer,
 {
-    fn from(modal: Modal<'a, Message, Renderer>) -> Self {
+    fn from(modal: Modal<'a, Message, Theme, Renderer>) -> Self {
         Element::new(modal)
     }
 }

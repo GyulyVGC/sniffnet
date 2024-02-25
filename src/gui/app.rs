@@ -4,11 +4,14 @@
 
 use std::time::Duration;
 
-use iced::keyboard::{Event, KeyCode, Modifiers};
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
 use iced::widget::Column;
+use iced::window::Id;
 use iced::Event::{Keyboard, Window};
 use iced::{
     executor, font, subscription, window, Application, Command, Element, Renderer, Subscription,
+    Theme,
 };
 
 use crate::gui::components::footer::footer;
@@ -46,9 +49,9 @@ impl Application for Sniffer {
         (
             flags,
             Command::batch(vec![
-                font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
-                font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
-                font::load(ICONS_BYTES).map(Message::FontLoaded),
+                // font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
+                // font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
+                // font::load(ICONS_BYTES).map(Message::FontLoaded),
             ]),
         )
     }
@@ -61,7 +64,7 @@ impl Application for Sniffer {
         self.update(message)
     }
 
-    fn view(&self) -> Element<Message, Renderer<StyleType>> {
+    fn view(&self) -> Element<Message, StyleType> {
         let ConfigSettings {
             style,
             language,
@@ -130,37 +133,34 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
-        let window_events_subscription = subscription::events_with(|event, _| match event {
-            Window(window::Event::Focused) => Some(Message::WindowFocused),
-            Window(window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
-            Window(window::Event::Resized { width, height }) => {
-                Some(Message::WindowResized(width, height))
+        let window_events_subscription = iced::event::listen_with(|event, _| match event {
+            Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
+            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x as f32, y as f32)),
+            Window(Id::MAIN, window::Event::Resized { width, height }) => {
+                Some(Message::WindowResized(width as f32, height as f32))
             }
-            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
+            Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,
         });
-        let hot_keys_subscription = subscription::events_with(|event, _| match event {
-            Keyboard(Event::KeyPressed {
-                key_code,
-                modifiers,
-            }) => match modifiers {
-                Modifiers::COMMAND => match key_code {
-                    KeyCode::Q => Some(Message::CloseRequested),
-                    KeyCode::Comma => Some(Message::OpenLastSettings),
-                    KeyCode::Backspace => Some(Message::ResetButtonPressed),
-                    KeyCode::D => Some(Message::CtrlDPressed),
-                    KeyCode::Left => Some(Message::ArrowPressed(false)),
-                    KeyCode::Right => Some(Message::ArrowPressed(true)),
+        let hot_keys_subscription = iced::event::listen_with(|event, _| match event {
+            Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
+                Modifiers::COMMAND => match key.as_ref() {
+                    Key::Character("q") => Some(Message::CloseRequested),
+                    Key::Character(",") => Some(Message::OpenLastSettings),
+                    Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
+                    Key::Character("d") => Some(Message::CtrlDPressed),
+                    Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
+                    Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
                     _ => None,
                 },
-                Modifiers::SHIFT => match key_code {
-                    KeyCode::Tab => Some(Message::SwitchPage(false)),
+                Modifiers::SHIFT => match key {
+                    Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
                     _ => None,
                 },
-                NO_MODIFIER => match key_code {
-                    KeyCode::Enter => Some(Message::ReturnKeyPressed),
-                    KeyCode::Escape => Some(Message::EscKeyPressed),
-                    KeyCode::Tab => Some(Message::SwitchPage(true)),
+                NO_MODIFIER => match key {
+                    Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
+                    Key::Named(Named::Backspace) => Some(Message::EscKeyPressed),
+                    Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
                     _ => None,
                 },
                 _ => None,

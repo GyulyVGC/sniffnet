@@ -61,7 +61,7 @@ impl MyLinkType {
         self,
         language: Language,
         font: Font,
-    ) -> Column<'static, Message, Renderer<StyleType>> {
+    ) -> Column<'static, Message, StyleType> {
         match self {
             Self::Null(l)
             | Self::Ethernet(l)

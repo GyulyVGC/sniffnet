@@ -1,9 +1,9 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
+use iced::widget::{button, horizontal_space, lazy, Rule, Space};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Color, Element, Font, Length, Renderer};
+use iced::{Alignment, Color, Element, Font, Length, Renderer, Theme};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -31,7 +31,7 @@ use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -53,16 +53,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
             language,
         ))
         .push(get_settings_tabs(SettingsPage::Appearance, font, language))
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(Length::Fixed(15.0)))
         .push(
             appearance_title_translation(language)
                 .style(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(Length::Fixed(15.0)))
         .push(gradients_row(font, color_gradient, language))
-        .push(vertical_space(Length::Fixed(15.0)));
+        .push(Space::with_height(Length::Fixed(15.0)));
 
     let mut styles_col = Column::new()
         .align_items(Alignment::Center)
@@ -75,7 +75,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     yeti_night_translation(language).to_string(),
                     Night,
                 ))
-                .push(horizontal_space(Length::Fixed(15.0)))
+                .push(Space::with_width(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     style,
                     "Yeti Day".to_string(),
@@ -83,7 +83,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     Day,
                 )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
+        .push(Space::with_height(Length::Fixed(10.0)))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -92,7 +92,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
-                .push(horizontal_space(Length::Fixed(15.0)))
+                .push(Space::with_width(Length::Fixed(15.0)))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
@@ -100,7 +100,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     MonAmour,
                 )),
         )
-        .push(vertical_space(Length::Fixed(10.0)));
+        .push(Space::with_height(Length::Fixed(10.0)));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
@@ -108,7 +108,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         .push(lazy((style_path.clone(), style), move |_| {
             lazy_custom_style_input(language, font, &style_path, style)
         }))
-        .push(vertical_space(10));
+        .push(Space::with_height(10));
 
     let styles_scroll =
         Scrollable::new(styles_col).direction(Direction::Vertical(ScrollbarType::properties()));
@@ -125,7 +125,7 @@ fn gradients_row(
     font: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .align_items(Alignment::Center)
         .spacing(10)
@@ -191,7 +191,7 @@ fn get_palette_container(
     name: String,
     description: String,
     on_press: StyleType,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let font = style.get_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
@@ -227,7 +227,7 @@ fn get_palette_rule(
     palette: Palette,
     buttons_color: Color,
     is_custom: bool,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let height = if is_custom { 25 } else { 40 };
 
     Container::new(
@@ -256,7 +256,7 @@ fn get_palette_rule(
 fn get_extra_palettes(
     styles: &[ExtraStyles],
     current_style: StyleType,
-) -> Vec<Element<'static, Message, Renderer<StyleType>>> {
+) -> Vec<Element<'static, Message, StyleType>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
@@ -277,17 +277,17 @@ fn get_extra_palettes(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(horizontal_space(Length::Fixed(15.0)))
+                    .push(Space::with_width(Length::Fixed(15.0)))
                     .push(second)
                     .into(),
-                <Space as Into<Element<Message, Renderer<StyleType>>>>::into(vertical_space(
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(
                     Length::Fixed(10.0),
                 )),
             ]);
         } else {
             children.extend([
                 Row::new().push(first).into(),
-                <Space as Into<Element<Message, Renderer<StyleType>>>>::into(vertical_space(
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(
                     Length::Fixed(10.0),
                 )),
             ]);
@@ -302,7 +302,7 @@ fn lazy_custom_style_input(
     font: Font,
     custom_path: &str,
     style: StyleType,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
     let custom_palette = Palette::from_file(custom_path);

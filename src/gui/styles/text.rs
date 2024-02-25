@@ -28,7 +28,7 @@ impl TextType {
         subtitle: &str,
         desc: &str,
         font: Font,
-    ) -> Column<'static, Message, Renderer<StyleType>> {
+    ) -> Column<'static, Message, StyleType> {
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))

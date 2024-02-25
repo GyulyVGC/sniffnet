@@ -3,10 +3,10 @@
 use std::sync::{Arc, Mutex};
 
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::horizontal_space;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
-use iced::{Alignment, Font, Length, Renderer};
+use iced::widget::{horizontal_space, Space};
+use iced::{Alignment, Font, Length, Renderer, Theme};
 
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -27,7 +27,7 @@ pub fn footer(
     font: Font,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Option<bool>>>,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let release_details_row =
         get_release_details(language, font, font_footer, newer_release_available);
 
@@ -56,7 +56,7 @@ pub fn footer(
         .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_website(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::Globe
             .to_text()
@@ -68,12 +68,11 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, Renderer<StyleTyp
     .width(Length::Fixed(30.0))
     .on_press(Message::OpenWebPage(WebPage::Website));
 
-    Tooltip::new(content, "Website", Position::Top)
-        .font(font)
+    Tooltip::new(content, Text::new("Website").font(font), Position::Top)
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_github(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::GitHub
             .to_text()
@@ -85,12 +84,11 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, Renderer<StyleType
     .width(Length::Fixed(40.0))
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
-    Tooltip::new(content, "GitHub", Position::Top)
-        .font(font)
+    Tooltip::new(content, Text::new("GitHub").font(font), Position::Top)
         .style(ContainerType::Tooltip)
 }
 
-fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Text::new('❤'.to_string())
             .font(font)
@@ -104,8 +102,7 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, Renderer<StyleTyp
     .width(Length::Fixed(30.0))
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
-    Tooltip::new(content, "Sponsor", Position::Top)
-        .font(font)
+    Tooltip::new(content, Text::new("Sponsor").font(font), Position::Top)
         .style(ContainerType::Tooltip)
 }
 
@@ -114,7 +111,7 @@ fn get_release_details(
     font: Font,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Option<bool>>>,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
         .height(Length::Fill)
@@ -141,13 +138,12 @@ fn get_release_details(
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
-                new_version_available_translation(language),
+                Text::new(new_version_available_translation(language)).font(font),
                 Position::Top,
             )
-            .font(font)
             .style(ContainerType::Tooltip);
             ret_val = ret_val
-                .push(horizontal_space(Length::Fixed(10.0)))
+                .push(Space::with_width(Length::Fixed(10.0)))
                 .push(tooltip);
         } else {
             // this is the latest release

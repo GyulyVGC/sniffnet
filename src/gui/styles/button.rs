@@ -4,7 +4,7 @@
 
 use iced::widget::button;
 use iced::widget::button::Appearance;
-use iced::{Background, Color, Vector};
+use iced::{Background, Border, Color, Vector};
 
 use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{
@@ -59,23 +59,33 @@ impl button::StyleSheet for StyleType {
                 )),
                 _ => Background::Color(ext.buttons_color),
             }),
-            border_radius: match style {
-                ButtonType::Neutral => 0.0.into(),
-                ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
-                ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
-                ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
-                _ => BORDER_BUTTON_RADIUS.into(),
-            },
-            border_width: match style {
-                ButtonType::TabActive
-                | ButtonType::TabInactive
-                | ButtonType::SortArrows
-                | ButtonType::SortArrowActive
-                | ButtonType::Starred
-                | ButtonType::NotStarred
-                | ButtonType::Neutral => 0.0,
-                ButtonType::BorderedRound => BORDER_WIDTH * 2.0,
-                _ => BORDER_WIDTH,
+            border: Border{
+                radius: match style {
+                    ButtonType::Neutral => 0.0.into(),
+                    ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
+                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
+                    _ => BORDER_BUTTON_RADIUS.into(),
+                },
+                width: match style {
+                    ButtonType::TabActive
+                    | ButtonType::TabInactive
+                    | ButtonType::SortArrows
+                    | ButtonType::SortArrowActive
+                    | ButtonType::Starred
+                    | ButtonType::NotStarred
+                    | ButtonType::Neutral => 0.0,
+                    ButtonType::BorderedRound => BORDER_WIDTH * 2.0,
+                    _ => BORDER_WIDTH,
+                },
+                color: match style {
+                    ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
+                    ButtonType::BorderedRound => Color {
+                        a: ext.alpha_round_borders,
+                        ..ext.buttons_color
+                    },
+                    _ => colors.secondary,
+                },
             },
             shadow_offset: match style {
                 ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 2.0),
@@ -91,14 +101,7 @@ impl button::StyleSheet for StyleType {
                 ButtonType::Gradient(_) => colors.text_headers,
                 _ => colors.text_body,
             },
-            border_color: match style {
-                ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
-                ButtonType::BorderedRound => Color {
-                    a: ext.alpha_round_borders,
-                    ..ext.buttons_color
-                },
-                _ => colors.secondary,
-            },
+            shadow: Default::default()
         }
     }
 
@@ -130,30 +133,32 @@ impl button::StyleSheet for StyleType {
                 ),
                 _ => Background::Color(mix_colors(colors.primary, ext.buttons_color)),
             }),
-            border_radius: match style {
-                ButtonType::Neutral => 0.0.into(),
-                ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
-                ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
-                ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
-                _ => BORDER_BUTTON_RADIUS.into(),
-            },
-            border_width: match style {
-                ButtonType::Starred
-                | ButtonType::TabActive
-                | ButtonType::SortArrows
-                | ButtonType::SortArrowActive
-                | ButtonType::TabInactive
-                | ButtonType::BorderedRound => 0.0,
-                _ => BORDER_WIDTH,
-            },
-            border_color: match style {
-                ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
-                ButtonType::BorderedRound | ButtonType::NotStarred => Color {
-                    a: ext.alpha_round_borders,
-                    ..ext.buttons_color
+            border: Border{
+                radius: match style {
+                    ButtonType::Neutral => 0.0.into(),
+                    ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
+                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
+                    _ => BORDER_BUTTON_RADIUS.into(),
                 },
-                ButtonType::Neutral => ext.buttons_color,
-                _ => colors.secondary,
+                width: match style {
+                    ButtonType::Starred
+                    | ButtonType::TabActive
+                    | ButtonType::SortArrows
+                    | ButtonType::SortArrowActive
+                    | ButtonType::TabInactive
+                    | ButtonType::BorderedRound => 0.0,
+                    _ => BORDER_WIDTH,
+                },
+                color: match style {
+                    ButtonType::Alert => Color::new(0.8, 0.15, 0.15, 1.0),
+                    ButtonType::BorderedRound | ButtonType::NotStarred => Color {
+                        a: ext.alpha_round_borders,
+                        ..ext.buttons_color
+                    },
+                    ButtonType::Neutral => ext.buttons_color,
+                    _ => colors.secondary,
+                },
             },
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
@@ -161,6 +166,7 @@ impl button::StyleSheet for StyleType {
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
+            shadow: Default::default()
         }
     }
 
@@ -184,17 +190,20 @@ impl button::StyleSheet for StyleType {
                     }
                     _ => Background::Color(ext.buttons_color),
                 }),
-                border_radius: BORDER_BUTTON_RADIUS.into(),
-                border_width: BORDER_WIDTH,
+                border: Border{
+                    radius: BORDER_BUTTON_RADIUS.into(),
+                    width: BORDER_WIDTH,
+                    color: Color {
+                        a: ext.alpha_chart_badge,
+                        ..colors.secondary
+                    },
+                },
                 shadow_offset: Vector::new(0.0, 0.0),
                 text_color: Color {
                     a: ext.alpha_chart_badge,
                     ..colors.text_headers
                 },
-                border_color: Color {
-                    a: ext.alpha_chart_badge,
-                    ..colors.secondary
-                },
+                shadow: Default::default()
             },
             ButtonType::Standard => Appearance {
                 shadow_offset: Vector::new(0.0, 0.0),
@@ -202,16 +211,19 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_chart_badge,
                     ..ext.buttons_color
                 })),
-                border_radius: BORDER_BUTTON_RADIUS.into(),
-                border_width: BORDER_WIDTH,
-                border_color: Color {
-                    a: ext.alpha_chart_badge,
-                    ..colors.secondary
+                border: Border{
+                    radius: BORDER_BUTTON_RADIUS.into(),
+                    width: BORDER_WIDTH,
+                    color: Color {
+                        a: ext.alpha_chart_badge,
+                        ..colors.secondary
+                    },
                 },
                 text_color: Color {
                     a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
+                shadow: Default::default()
             },
             _ => button::StyleSheet::active(self, style),
         }

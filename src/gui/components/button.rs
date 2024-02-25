@@ -3,7 +3,7 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Text, Tooltip};
-use iced::{Font, Length, Renderer};
+use iced::{Font, Length, Renderer, Theme};
 
 use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;
@@ -16,7 +16,7 @@ pub fn button_hide(
     message: Message,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     Tooltip::new(
         button(
             Text::new("×")
@@ -29,11 +29,10 @@ pub fn button_hide(
         .height(Length::Fixed(20.0))
         .width(Length::Fixed(20.0))
         .on_press(message),
-        hide_translation(language),
+        Text::new(hide_translation(language)).font(font),
         Position::Right,
     )
     .gap(5)
-    .font(font)
     .style(ContainerType::Tooltip)
 }
 
@@ -44,7 +43,7 @@ pub fn button_open_file(
     font: Font,
     is_editable: bool,
     action: fn(String) -> Message,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let mut tooltip_str = "";
     let mut tooltip_style = ContainerType::Neutral;
 
@@ -65,8 +64,7 @@ pub fn button_open_file(
         button = button.on_press(Message::OpenFile(old_file, file_info, action));
     }
 
-    Tooltip::new(button, tooltip_str, Position::Right)
+    Tooltip::new(button, Text::new(tooltip_str).font(font), Position::Right)
         .gap(5)
-        .font(font)
         .style(tooltip_style)
 }
