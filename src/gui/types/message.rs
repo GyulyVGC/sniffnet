@@ -89,8 +89,6 @@ pub enum Message {
     ArrowPressed(bool),
     /// Emit when the main window be focused
     WindowFocused,
-    /// Result after loading a custom font
-    FontLoaded(Result<(), font::Error>),
     /// Enable or disable gradients
     GradientsSelection(GradientType),
     /// Set UI scale factor

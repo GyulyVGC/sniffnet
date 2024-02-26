@@ -40,7 +40,7 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
         Appearance {
             background: Background::Color(ext.buttons_color),
             icon_color: colors.text_body,
-            border: Border{
+            border: Border {
                 radius: CHECKBOX_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: colors.secondary,

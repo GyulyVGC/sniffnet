@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::container::Appearance;
-use iced::{Background, Border, Color};
+use iced::{Background, Border, Color, Shadow};
 
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
@@ -56,7 +56,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                 ContainerType::Modal => Background::Color(colors.primary),
                 ContainerType::Standard => Background::Color(Color::TRANSPARENT),
             }),
-            border: Border{
+            border: Border {
                 radius: match style {
                     ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
                     ContainerType::Modal => {
@@ -84,7 +84,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                     },
                 },
             },
-            shadow: Default::default()
+            shadow: Shadow::default(),
         }
     }
 }

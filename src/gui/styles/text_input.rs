@@ -32,7 +32,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border: Border{
+            border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match style {
@@ -53,7 +53,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let is_nightly = self.get_extension().is_nightly;
         Appearance {
             background: Background::Color(colors.primary),
-            border: Border{
+            border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match style {
@@ -107,7 +107,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => ext.buttons_color,
             }),
-            border: Border{
+            border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match style {
@@ -133,7 +133,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border: Border{
+            border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match style {

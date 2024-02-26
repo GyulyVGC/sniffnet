@@ -26,7 +26,7 @@ impl iced::overlay::menu::StyleSheet for StyleType {
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border: Border{
+            border: Border {
                 width: BORDER_WIDTH,
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 color: colors.secondary,
@@ -48,7 +48,7 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border: Border{
+            border: Border {
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 width: 0.0,
                 color: Color::TRANSPARENT,
@@ -64,7 +64,7 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
-            border: Border{
+            border: Border {
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: colors.secondary,

@@ -58,9 +58,9 @@ pub trait ToSize {
 
 impl ToSize for (f32, f32) {
     fn to_size(self) -> Size {
-        Size{
+        Size {
             width: self.0,
-            height: self.1
+            height: self.1,
         }
     }
 }

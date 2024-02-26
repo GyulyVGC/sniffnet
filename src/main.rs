@@ -2,13 +2,13 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
-use std::borrow::Cow;
 
 #[cfg(target_os = "linux")]
 use iced::window::PlatformSpecific;
-use iced::{window, Application, Font, Settings, Pixels};
+use iced::{window, Application, Font, Pixels, Settings};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -110,7 +110,11 @@ pub fn main() -> iced::Result {
             ..Default::default()
         },
         flags: Sniffer::new(&configs1, newer_release_available1),
-        fonts: vec![Cow::Borrowed(SARASA_MONO_BYTES), Cow::Borrowed(SARASA_MONO_BOLD_BYTES), Cow::Borrowed(ICONS_BYTES)],
+        fonts: vec![
+            Cow::Borrowed(SARASA_MONO_BYTES),
+            Cow::Borrowed(SARASA_MONO_BOLD_BYTES),
+            Cow::Borrowed(ICONS_BYTES),
+        ],
         default_font: Font::with_name(FONT_FAMILY_NAME),
         default_text_size: Pixels(FONT_SIZE_BODY),
         antialiasing: false,

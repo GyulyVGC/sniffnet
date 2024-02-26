@@ -2,9 +2,9 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::toggler::Appearance;
 use iced::Color;
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 
 use crate::StyleType;
 
@@ -37,7 +37,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
                 colors.secondary
             } else {
                 ext.buttons_color
-            }
+            },
         }
     }
 
@@ -61,7 +61,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
                 colors.secondary
             } else {
                 ext.buttons_color
-            }
+            },
         }
     }
 }

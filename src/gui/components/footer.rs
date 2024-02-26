@@ -3,6 +3,7 @@
 use std::sync::{Arc, Mutex};
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::widget::{horizontal_space, Space};
@@ -33,7 +34,6 @@ pub fn footer(
 
     let footer_row = Row::new()
         .spacing(10)
-        .width(Length::Fill)
         .padding([0, 20])
         .align_items(Alignment::Center)
         .push(release_details_row)
@@ -50,9 +50,7 @@ pub fn footer(
 
     Container::new(footer_row)
         .height(Length::Fixed(45.0))
-        .width(Length::Fill)
         .align_y(Vertical::Center)
-        .align_x(Horizontal::Center)
         .style(ContainerType::Gradient(color_gradient))
 }
 
@@ -62,7 +60,8 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
             .to_text()
             .size(17)
             .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .vertical_alignment(Vertical::Center)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .height(Length::Fixed(30.0))
     .width(Length::Fixed(30.0))
@@ -78,7 +77,8 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
             .to_text()
             .size(26)
             .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .vertical_alignment(Vertical::Center)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .height(Length::Fixed(40.0))
     .width(Length::Fixed(40.0))
@@ -95,7 +95,8 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
             .size(23)
             .style(TextType::Sponsor)
             .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .vertical_alignment(Vertical::Center)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .padding([2, 0, 0, 0])
     .height(Length::Fixed(30.0))
@@ -129,7 +130,8 @@ fn get_release_details(
                     .style(TextType::Danger)
                     .size(28)
                     .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center),
+                    .vertical_alignment(Vertical::Center)
+                    .line_height(LineHeight::Relative(0.8)),
             )
             .padding(0)
             .height(Length::Fixed(35.0))

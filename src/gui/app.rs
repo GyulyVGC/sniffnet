@@ -46,14 +46,7 @@ impl Application for Sniffer {
     type Flags = Sniffer;
 
     fn new(flags: Sniffer) -> (Sniffer, Command<Message>) {
-        (
-            flags,
-            Command::batch(vec![
-                // font::load(SARASA_MONO_BOLD_BYTES).map(Message::FontLoaded),
-                // font::load(SARASA_MONO_BYTES).map(Message::FontLoaded),
-                // font::load(ICONS_BYTES).map(Message::FontLoaded),
-            ]),
-        )
+        (flags, Command::none())
     }
 
     fn title(&self) -> String {
@@ -135,7 +128,9 @@ impl Application for Sniffer {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
         let window_events_subscription = iced::event::listen_with(|event, _| match event {
             Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
-            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x as f32, y as f32)),
+            Window(Id::MAIN, window::Event::Moved { x, y }) => {
+                Some(Message::WindowMoved(x as f32, y as f32))
+            }
             Window(Id::MAIN, window::Event::Resized { width, height }) => {
                 Some(Message::WindowResized(width as f32, height as f32))
             }

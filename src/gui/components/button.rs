@@ -1,6 +1,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Text, Tooltip};
 use iced::{Font, Length, Renderer, Theme};
@@ -23,7 +24,8 @@ pub fn button_hide(
                 .font(font)
                 .vertical_alignment(Vertical::Center)
                 .horizontal_alignment(Horizontal::Center)
-                .size(15),
+                .size(15)
+                .line_height(LineHeight::Relative(1.0)),
         )
         .padding(2)
         .height(Length::Fixed(20.0))

@@ -4,7 +4,7 @@
 
 use iced::widget::button;
 use iced::widget::button::Appearance;
-use iced::{Background, Border, Color, Vector};
+use iced::{Background, Border, Color, Shadow, Vector};
 
 use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{
@@ -59,10 +59,12 @@ impl button::StyleSheet for StyleType {
                 )),
                 _ => Background::Color(ext.buttons_color),
             }),
-            border: Border{
+            border: Border {
                 radius: match style {
                     ButtonType::Neutral => 0.0.into(),
-                    ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
+                    ButtonType::TabActive | ButtonType::TabInactive => {
+                        [0.0, 0.0, 30.0, 30.0].into()
+                    }
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
@@ -101,7 +103,14 @@ impl button::StyleSheet for StyleType {
                 ButtonType::Gradient(_) => colors.text_headers,
                 _ => colors.text_body,
             },
-            shadow: Default::default()
+            shadow: match style {
+                ButtonType::TabActive | ButtonType::TabInactive => Shadow {
+                    color: Color::BLACK,
+                    offset: Vector::new(3.0, 2.0),
+                    blur_radius: 5.0,
+                },
+                _ => Shadow::default(),
+            },
         }
     }
 
@@ -115,6 +124,19 @@ impl button::StyleSheet for StyleType {
                 }
                 ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
                 _ => Vector::new(0.0, 2.0),
+            },
+            shadow: match style {
+                ButtonType::Neutral | ButtonType::SortArrows | ButtonType::SortArrowActive => {
+                    Shadow::default()
+                }
+                _ => Shadow {
+                    color: Color::BLACK,
+                    offset: match style {
+                        ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
+                        _ => Vector::new(0.0, 2.0),
+                    },
+                    blur_radius: 5.0,
+                },
             },
             background: Some(match style {
                 ButtonType::Starred => Background::Color(colors.starred),
@@ -133,10 +155,12 @@ impl button::StyleSheet for StyleType {
                 ),
                 _ => Background::Color(mix_colors(colors.primary, ext.buttons_color)),
             }),
-            border: Border{
+            border: Border {
                 radius: match style {
                     ButtonType::Neutral => 0.0.into(),
-                    ButtonType::TabActive | ButtonType::TabInactive => [0.0, 0.0, 30.0, 30.0].into(),
+                    ButtonType::TabActive | ButtonType::TabInactive => {
+                        [0.0, 0.0, 30.0, 30.0].into()
+                    }
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
@@ -166,7 +190,6 @@ impl button::StyleSheet for StyleType {
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
-            shadow: Default::default()
         }
     }
 
@@ -190,7 +213,7 @@ impl button::StyleSheet for StyleType {
                     }
                     _ => Background::Color(ext.buttons_color),
                 }),
-                border: Border{
+                border: Border {
                     radius: BORDER_BUTTON_RADIUS.into(),
                     width: BORDER_WIDTH,
                     color: Color {
@@ -203,7 +226,7 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_chart_badge,
                     ..colors.text_headers
                 },
-                shadow: Default::default()
+                shadow: Shadow::default(),
             },
             ButtonType::Standard => Appearance {
                 shadow_offset: Vector::new(0.0, 0.0),
@@ -211,7 +234,7 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_chart_badge,
                     ..ext.buttons_color
                 })),
-                border: Border{
+                border: Border {
                     radius: BORDER_BUTTON_RADIUS.into(),
                     width: BORDER_WIDTH,
                     color: Color {
@@ -223,7 +246,7 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
-                shadow: Default::default()
+                shadow: Default::default(),
             },
             _ => button::StyleSheet::active(self, style),
         }
