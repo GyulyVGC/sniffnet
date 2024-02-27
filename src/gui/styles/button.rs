@@ -107,7 +107,7 @@ impl button::StyleSheet for StyleType {
                 ButtonType::TabActive | ButtonType::TabInactive => Shadow {
                     color: Color::BLACK,
                     offset: Vector::new(3.0, 2.0),
-                    blur_radius: 5.0,
+                    blur_radius: 4.0,
                 },
                 _ => Shadow::default(),
             },
@@ -133,9 +133,9 @@ impl button::StyleSheet for StyleType {
                     color: Color::BLACK,
                     offset: match style {
                         ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
-                        _ => Vector::new(0.0, 2.0),
+                        _ => Vector::new(1.0, 1.0),
                     },
-                    blur_radius: 5.0,
+                    blur_radius: 4.0,
                 },
             },
             background: Some(match style {

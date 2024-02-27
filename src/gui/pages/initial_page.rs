@@ -59,41 +59,43 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let port_active = &sniffer.filters.port_str;
     let col_port_filter = col_port_input(port_active, font, language);
 
-    let filters_pane = Column::new()
-        .width(FillPortion(6))
-        .padding(10)
-        .spacing(15)
-        .push(
-            select_filters_translation(language)
-                .font(font)
-                .style(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(
-            Row::new()
-                .spacing(20)
-                .push(col_ip_buttons)
-                .push(col_protocol_buttons),
-        )
-        .push(
-            Row::new()
-                .spacing(20)
-                .push(col_address_filter)
-                .push(col_port_filter),
-        )
-        .push(Rule::horizontal(40))
-        .push(
-            Container::new(button_start(
-                font,
-                language,
-                color_gradient,
-                &sniffer.filters,
-            ))
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .align_y(Vertical::Center)
-            .align_x(Horizontal::Center),
-        );
+    let filters_pane = Container::new(
+        Column::new()
+            .spacing(15)
+            .push(
+                select_filters_translation(language)
+                    .font(font)
+                    .style(TextType::Title)
+                    .size(FONT_SIZE_TITLE),
+            )
+            .push(
+                Row::new()
+                    .spacing(20)
+                    .push(col_ip_buttons)
+                    .push(col_protocol_buttons),
+            )
+            .push(
+                Row::new()
+                    .spacing(20)
+                    .push(col_address_filter)
+                    .push(col_port_filter),
+            )
+            .push(Rule::horizontal(40))
+            .push(
+                Container::new(button_start(
+                    font,
+                    language,
+                    color_gradient,
+                    &sniffer.filters,
+                ))
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .align_y(Vertical::Center)
+                .align_x(Horizontal::Center),
+            ),
+    )
+    .width(FillPortion(6))
+    .padding(10);
 
     let body = Column::new()
         .push(Space::with_height(Length::Fixed(5.0)))
@@ -158,7 +160,6 @@ fn col_protocol_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .width(Length::Fill)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),
