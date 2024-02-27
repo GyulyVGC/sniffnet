@@ -5,9 +5,11 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, lazy, Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip,
+    button, horizontal_space, lazy, Button, Column, Container, Row, Rule, Scrollable, Space, Text,
+    Tooltip,
 };
 use iced::Length::{Fill, FillPortion, Fixed};
 use iced::{Alignment, Font, Length, Renderer, Theme};
@@ -242,15 +244,11 @@ fn body_pcap_error(
 }
 
 fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
-    let mut row_report = Row::new()
-        .padding([0, 10, 5, 10])
-        .height(Length::Fill)
-        .width(Length::Fill);
-
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
-    row_report = row_report
+    let row_report = Row::new()
+        .padding([0, 10, 5, 10])
         .push(col_host)
         .push(Rule::vertical(40))
         .push(col_service);
@@ -301,7 +299,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
                         })
                         .font(font),
                     )
-                    .push(Space::with_width(Length::FillPortion(1)))
+                    .push(horizontal_space())
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info_host.data_info.tot_packets().to_string()
@@ -356,14 +354,15 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
                         .style(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(Space::with_width(Length::Fill))
+                .push(horizontal_space())
                 .push(sort_arrows(
                     sniffer.host_sort_type,
                     Message::HostSortSelection,
                 )),
         )
         .push(
-            Scrollable::new(Container::new(scroll_host).width(Length::Fill))
+            Scrollable::new(scroll_host)
+                .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }
@@ -395,7 +394,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
             .push(
                 Row::new()
                     .push(Text::new(service.to_string()).font(font))
-                    .push(Space::with_width(Length::FillPortion(1)))
+                    .push(horizontal_space())
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info.tot_packets().to_string()
@@ -446,7 +445,8 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
                 )),
         )
         .push(
-            Scrollable::new(Container::new(scroll_service).width(Length::Fill))
+            Scrollable::new(scroll_service)
+                .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }
@@ -487,15 +487,16 @@ fn lazy_col_info(
                 .height(Length::Fixed(120.0))
                 .push(
                     Scrollable::new(col_device)
-                        .width(Length::FillPortion(1))
+                        .width(Length::Fill)
                         .direction(Direction::Horizontal(ScrollbarType::properties())),
                 )
-                .push(Rule::vertical(25))
+                .push(Container::new(Rule::vertical(25)).height(Length::Shrink))
                 .push(col_data_representation.width(Length::FillPortion(1))),
         )
         .push(Rule::horizontal(15))
         .push(
             Scrollable::new(col_bytes_packets)
+                .height(Length::Fill)
                 .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         );
@@ -503,7 +504,6 @@ fn lazy_col_info(
     Container::new(content)
         .width(Length::Fixed(400.0))
         .padding([10, 5, 5, 5])
-        .height(Length::Fill)
         .align_x(Horizontal::Center)
         .style(ContainerType::BorderedRound)
 }
@@ -525,7 +525,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
             .align_items(Alignment::Center)
             .push(
                 Row::new()
-                    .padding([10, 0, 15, 0])
+                    .padding([10, 0])
                     .spacing(10)
                     .align_items(Alignment::Center)
                     .push(
@@ -560,6 +560,7 @@ fn col_device(
     let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
 
     Column::new()
+        .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
@@ -795,12 +796,17 @@ fn get_active_filters_col(
         } else {
             Row::new().padding([0, 0, 0, 20]).push(
                 Tooltip::new(
-                    Container::new(Text::new("i").font(font_headers).size(15))
-                        .align_x(Horizontal::Center)
-                        .padding(2)
-                        .height(Fixed(20.0))
-                        .width(Fixed(20.0))
-                        .style(ContainerType::Highlighted),
+                    Container::new(
+                        Text::new("i")
+                            .font(font_headers)
+                            .size(15)
+                            .line_height(LineHeight::Relative(1.0)),
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .height(Fixed(20.0))
+                    .width(Fixed(20.0))
+                    .style(ContainerType::Highlighted),
                     Text::new(filters_string).font(font),
                     Position::FollowCursor,
                 )

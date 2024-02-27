@@ -2,7 +2,7 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container};
-use iced::{Element, Renderer, Theme};
+use iced::{Element, Length, Renderer, Theme};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
@@ -64,7 +64,8 @@ impl TrafficChart {
     }
 
     pub fn view(&self) -> Element<Message, StyleType> {
-        Container::new(Column::new().push(ChartWidget::new(self)))
+        Container::new(ChartWidget::new(self))
+            .height(Length::Shrink)
             .align_x(Horizontal::Left)
             .align_y(Vertical::Bottom)
             .into()
@@ -161,10 +162,10 @@ impl Chart<Message> for TrafficChart {
         }
 
         chart_builder
-            .margin_right(30)
-            .margin_bottom(0)
-            .set_label_area_size(LabelAreaPosition::Left, 60)
-            .set_label_area_size(LabelAreaPosition::Bottom, 50);
+            .margin_right(25)
+            .margin_top(6)
+            .set_label_area_size(LabelAreaPosition::Left, 55)
+            .set_label_area_size(LabelAreaPosition::Bottom, 40);
 
         let x_axis_range = self.x_axis_range();
         let y_axis_range = self.y_axis_range();

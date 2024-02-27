@@ -71,8 +71,9 @@ fn new_page_tab(
     unread: Option<usize>,
 ) -> Button<'static, Message, StyleType> {
     let mut content = Row::new()
+        .height(Length::Fill)
         .align_items(Alignment::Center)
-        .push(Space::with_width(Length::FillPortion(1)))
+        .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
@@ -112,7 +113,7 @@ fn new_page_tab(
         }
     }
 
-    content = content.push(Space::with_width(Length::FillPortion(1)));
+    content = content.push(horizontal_space());
 
     button(content)
         .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
@@ -133,8 +134,9 @@ fn new_settings_tab(
     font: Font,
 ) -> Button<'static, Message, StyleType> {
     let content = Row::new()
+        .height(Length::Fill)
         .align_items(Alignment::Center)
-        .push(Space::with_width(Length::FillPortion(1)))
+        .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
@@ -159,7 +161,7 @@ fn new_settings_tab(
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
-        .push(Space::with_width(Length::FillPortion(1)));
+        .push(horizontal_space());
 
     button(content)
         .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
