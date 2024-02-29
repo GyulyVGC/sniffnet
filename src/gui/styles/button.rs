@@ -91,7 +91,7 @@ impl button::StyleSheet for StyleType {
             },
             shadow_offset: match style {
                 ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 2.0),
-                _ => Vector::new(0.0, 0.0),
+                _ => Vector::default(),
             },
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
@@ -133,9 +133,12 @@ impl button::StyleSheet for StyleType {
                     color: Color::BLACK,
                     offset: match style {
                         ButtonType::TabActive | ButtonType::TabInactive => Vector::new(3.0, 3.0),
-                        _ => Vector::new(1.0, 1.0),
+                        _ => Vector::new(0.0, 2.0),
                     },
-                    blur_radius: 4.0,
+                    blur_radius: match style {
+                        ButtonType::TabActive | ButtonType::TabInactive => 4.0,
+                        _ => 2.0,
+                    },
                 },
             },
             background: Some(match style {
@@ -221,7 +224,7 @@ impl button::StyleSheet for StyleType {
                         ..colors.secondary
                     },
                 },
-                shadow_offset: Vector::new(0.0, 0.0),
+                shadow_offset: Vector::default(),
                 text_color: Color {
                     a: ext.alpha_chart_badge,
                     ..colors.text_headers
@@ -229,7 +232,7 @@ impl button::StyleSheet for StyleType {
                 shadow: Shadow::default(),
             },
             ButtonType::Standard => Appearance {
-                shadow_offset: Vector::new(0.0, 0.0),
+                shadow_offset: Vector::default(),
                 background: Some(Background::Color(Color {
                     a: ext.alpha_chart_badge,
                     ..ext.buttons_color
