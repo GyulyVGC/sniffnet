@@ -1,4 +1,11 @@
-<p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+<div align="center">
+
+<a href="https://www.sniffnet.net"><img alt="" src="resources/logos/raw/icon.svg" width="200px"/></a>
+# Sniffnet
+
+</div>
+
+
 
 <h4 align="center">
   <!-- <a href="https://github.com/GyulyVGC/sniffnet/wiki">User manual</a> | -->
