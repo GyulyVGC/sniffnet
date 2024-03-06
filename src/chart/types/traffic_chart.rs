@@ -64,11 +64,7 @@ impl TrafficChart {
     }
 
     pub fn view(&self) -> Element<Message, StyleType> {
-        Container::new(ChartWidget::new(self))
-            .height(Length::Shrink)
-            .align_x(Horizontal::Left)
-            .align_y(Vertical::Bottom)
-            .into()
+        Container::new(ChartWidget::new(self)).into()
     }
 
     pub fn change_kind(&mut self, kind: ChartType) {

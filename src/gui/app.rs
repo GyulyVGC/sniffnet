@@ -154,7 +154,7 @@ impl Application for Sniffer {
                 },
                 NO_MODIFIER => match key {
                     Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
-                    Key::Named(Named::Backspace) => Some(Message::EscKeyPressed),
+                    Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
                     Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
                     _ => None,
                 },

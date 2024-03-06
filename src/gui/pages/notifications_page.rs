@@ -1,5 +1,6 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Space};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
@@ -176,7 +177,10 @@ fn packets_notification_log(
         .spacing(30)
         .push(
             Tooltip::new(
-                Icon::PacketsThreshold.to_text().size(80),
+                Icon::PacketsThreshold
+                    .to_text()
+                    .size(80)
+                    .line_height(LineHeight::Relative(1.0)),
                 Text::new(packets_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
@@ -254,7 +258,10 @@ fn bytes_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::BytesThreshold.to_text().size(80),
+                Icon::BytesThreshold
+                    .to_text()
+                    .size(80)
+                    .line_height(LineHeight::Relative(1.0)),
                 Text::new(bytes_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
@@ -335,7 +342,11 @@ fn favorite_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::Star.to_text().size(80).style(TextType::Starred),
+                Icon::Star
+                    .to_text()
+                    .size(80)
+                    .style(TextType::Starred)
+                    .line_height(LineHeight::Relative(1.0)),
                 Text::new(favorite_transmitted_translation(language)).font(font),
                 Position::FollowCursor,
             )

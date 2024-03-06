@@ -1,6 +1,7 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::alignment::Vertical;
+use iced::widget::text::LineHeight;
 use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
 use iced::{alignment, Alignment, Font, Length, Renderer, Theme};
 
@@ -101,12 +102,16 @@ fn new_page_tab(
 
     if let Some(num) = unread {
         if num > 0 {
-            let notifications_badge =
-                Container::new(Text::new(num.to_string()).font(font_headers).size(14))
-                    .align_y(Vertical::Center)
-                    .padding([2, 4])
-                    .height(Length::Fixed(20.0))
-                    .style(ContainerType::Highlighted);
+            let notifications_badge = Container::new(
+                Text::new(num.to_string())
+                    .font(font_headers)
+                    .size(14)
+                    .line_height(LineHeight::Relative(1.0)),
+            )
+            .align_y(Vertical::Center)
+            .padding([2, 4])
+            .height(Length::Fixed(20.0))
+            .style(ContainerType::Highlighted);
             content = content
                 .push(Space::with_width(Length::Fixed(7.0)))
                 .push(notifications_badge);

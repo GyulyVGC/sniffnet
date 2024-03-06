@@ -333,6 +333,7 @@ fn lazy_custom_style_input(
         ));
 
     let mut content = Column::new()
+        .width(Length::Fill)
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(custom_style_translation(language)).font(font))
