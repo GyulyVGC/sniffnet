@@ -14,15 +14,7 @@
    xmlns:svg="http://www.w3.org/2000/svg">
 <defs
    id="defs2" />
-<rect
-   style="clip-rule:evenodd;display:none;fill:#0f1e3c;fill-opacity:1;fill-rule:evenodd;stroke-width:32.3866;stroke-linecap:round;stroke-linejoin:round"
-   id="rect24-6"
-   width="1024"
-   height="1024"
-   x="-3.8146973e-06"
-   y="7.6293945e-05"
-   ry="180"
-   rx="180" /><g
+<g
    id="glyph-5"
    style="clip-rule:evenodd;fill-rule:nonzero;stroke-linecap:round;stroke-linejoin:round"
    transform="matrix(0.99999842,0,0,1,7.7185303e-5,-6.8798828e-6)">
