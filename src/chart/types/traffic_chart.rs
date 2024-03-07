@@ -282,7 +282,7 @@ mod tests {
         let spline = Spline::from_vec(
             vec.iter()
                 .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
-                .collect(),
+                .collect::<Vec<Key<f32, f32>>>(),
         );
 
         let eps = 0.001;

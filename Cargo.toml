@@ -1,16 +1,16 @@
 [package]
-name        = "sniffnet"
-version     = "1.2.2"
-authors     = [ "Giuliano Bellini <gyulyvgc99@gmail.com>" ]
-edition     = "2021"
+name = "sniffnet"
+version = "1.2.2"
+authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
+edition = "2021"
 description = "Application to comfortably monitor your network traffic"
-readme      = "README.md"
-homepage    = "https://sniffnet.net"
-repository  = "https://github.com/GyulyVGC/sniffnet"
-license     = "MIT OR Apache-2.0"
-keywords    = [ "filter", "network", "packet", "sniffer", "gui" ]
-categories  = [ "visualization", "gui", "network-programming" ]
-include     = [
+readme = "README.md"
+homepage = "https://sniffnet.net"
+repository = "https://github.com/GyulyVGC/sniffnet"
+license = "MIT OR Apache-2.0"
+keywords = ["filter", "network", "packet", "sniffer", "gui"]
+categories = ["visualization", "gui", "network-programming"]
+include = [
     "/src/**/*.rs",
     "/LICENSE-MIT",
     "/LICENSE-APACHE",
@@ -51,7 +51,7 @@ dns-lookup = "2.0.4"
 toml = "0.8.10"
 once_cell = "1.19.0"
 ctrlc = { version = "3.4.2", features = ["termination"] }
-rfd = "0.13.0"
+rfd = "0.14.0"
 phf = "0.11.2"
 phf_shared = "0.11.2"
 splines = "4.3.1"
@@ -114,31 +114,31 @@ pre-build = [
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [package.metadata.deb]
-section="Network"
-license-file="resources/packaging/LICENSE"
-extended-description-file="resources/packaging/linux/description.txt"
-maintainer-scripts="resources/packaging/linux/scripts/"
+section = "Network"
+license-file = "resources/packaging/LICENSE"
+extended-description-file = "resources/packaging/linux/description.txt"
+maintainer-scripts = "resources/packaging/linux/scripts/"
 depends = "libasound2, libpcap0.8, libfontconfig1"
 assets = [
     ["target/release/sniffnet", "/usr/bin/", "755"],
     ["resources/packaging/linux/sniffnet.desktop", "/usr/share/applications/", "644"],
-    ["resources/packaging/linux/graphics/sniffnet_8x8.png",       "/usr/share/icons/hicolor/8x8/apps/sniffnet.png",       "644"],
-    ["resources/packaging/linux/graphics/sniffnet_16x16.png",     "/usr/share/icons/hicolor/16x16/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_22x22.png",     "/usr/share/icons/hicolor/22x22/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_24x24.png",     "/usr/share/icons/hicolor/24x24/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_32x32.png",     "/usr/share/icons/hicolor/32x32/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_36x36.png",     "/usr/share/icons/hicolor/36x36/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_42x42.png",     "/usr/share/icons/hicolor/42x42/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_48x48.png",     "/usr/share/icons/hicolor/48x48/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_64x64.png",     "/usr/share/icons/hicolor/64x64/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_72x72.png",     "/usr/share/icons/hicolor/72x72/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_96x96.png",     "/usr/share/icons/hicolor/96x96/apps/sniffnet.png",     "644"],
-    ["resources/packaging/linux/graphics/sniffnet_128x128.png",   "/usr/share/icons/hicolor/128x128/apps/sniffnet.png",   "644"],
-    ["resources/packaging/linux/graphics/sniffnet_160x160.png",   "/usr/share/icons/hicolor/160x160/apps/sniffnet.png",   "644"],
-    ["resources/packaging/linux/graphics/sniffnet_192x192.png",   "/usr/share/icons/hicolor/192x192/apps/sniffnet.png",   "644"],
-    ["resources/packaging/linux/graphics/sniffnet_256x256.png",   "/usr/share/icons/hicolor/256x256/apps/sniffnet.png",   "644"],
-    ["resources/packaging/linux/graphics/sniffnet_384x384.png",   "/usr/share/icons/hicolor/384x384/apps/sniffnet.png",   "644"],
-    ["resources/packaging/linux/graphics/sniffnet_512x512.png",   "/usr/share/icons/hicolor/512x512/apps/sniffnet.png",   "644"],
+    ["resources/packaging/linux/graphics/sniffnet_8x8.png", "/usr/share/icons/hicolor/8x8/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_16x16.png", "/usr/share/icons/hicolor/16x16/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_22x22.png", "/usr/share/icons/hicolor/22x22/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_24x24.png", "/usr/share/icons/hicolor/24x24/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_32x32.png", "/usr/share/icons/hicolor/32x32/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_36x36.png", "/usr/share/icons/hicolor/36x36/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_42x42.png", "/usr/share/icons/hicolor/42x42/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_48x48.png", "/usr/share/icons/hicolor/48x48/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_64x64.png", "/usr/share/icons/hicolor/64x64/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_72x72.png", "/usr/share/icons/hicolor/72x72/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_96x96.png", "/usr/share/icons/hicolor/96x96/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_128x128.png", "/usr/share/icons/hicolor/128x128/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_160x160.png", "/usr/share/icons/hicolor/160x160/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_192x192.png", "/usr/share/icons/hicolor/192x192/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_256x256.png", "/usr/share/icons/hicolor/256x256/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_384x384.png", "/usr/share/icons/hicolor/384x384/apps/sniffnet.png", "644"],
+    ["resources/packaging/linux/graphics/sniffnet_512x512.png", "/usr/share/icons/hicolor/512x512/apps/sniffnet.png", "644"],
     ["resources/packaging/linux/graphics/sniffnet_1024x1024.png", "/usr/share/icons/hicolor/1024x1024/apps/sniffnet.png", "644"]
 ]
 
@@ -150,23 +150,23 @@ pre_uninstall_script = "setcap '' /usr/bin/sniffnet"
 assets = [
     { source = "target/release/sniffnet", dest = "/usr/bin/", mode = "755" },
     { source = "resources/packaging/linux/sniffnet.desktop", dest = "/usr/share/applications/", mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_8x8.png",       dest = "/usr/share/icons/hicolor/8x8/apps/sniffnet.png",       mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_16x16.png",     dest = "/usr/share/icons/hicolor/16x16/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_22x22.png",     dest = "/usr/share/icons/hicolor/22x22/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_24x24.png",     dest = "/usr/share/icons/hicolor/24x24/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_32x32.png",     dest = "/usr/share/icons/hicolor/32x32/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_36x36.png",     dest = "/usr/share/icons/hicolor/36x36/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_42x42.png",     dest = "/usr/share/icons/hicolor/42x42/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_48x48.png",     dest = "/usr/share/icons/hicolor/48x48/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_64x64.png",     dest = "/usr/share/icons/hicolor/64x64/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_72x72.png",     dest = "/usr/share/icons/hicolor/72x72/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_96x96.png",     dest = "/usr/share/icons/hicolor/96x96/apps/sniffnet.png",     mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_128x128.png",   dest = "/usr/share/icons/hicolor/128x128/apps/sniffnet.png",   mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_160x160.png",   dest = "/usr/share/icons/hicolor/160x160/apps/sniffnet.png",   mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_192x192.png",   dest = "/usr/share/icons/hicolor/192x192/apps/sniffnet.png",   mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_256x256.png",   dest = "/usr/share/icons/hicolor/256x256/apps/sniffnet.png",   mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_384x384.png",   dest = "/usr/share/icons/hicolor/384x384/apps/sniffnet.png",   mode = "644" },
-    { source = "resources/packaging/linux/graphics/sniffnet_512x512.png",   dest = "/usr/share/icons/hicolor/512x512/apps/sniffnet.png",   mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_8x8.png", dest = "/usr/share/icons/hicolor/8x8/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_16x16.png", dest = "/usr/share/icons/hicolor/16x16/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_22x22.png", dest = "/usr/share/icons/hicolor/22x22/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_24x24.png", dest = "/usr/share/icons/hicolor/24x24/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_32x32.png", dest = "/usr/share/icons/hicolor/32x32/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_36x36.png", dest = "/usr/share/icons/hicolor/36x36/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_42x42.png", dest = "/usr/share/icons/hicolor/42x42/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_48x48.png", dest = "/usr/share/icons/hicolor/48x48/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_64x64.png", dest = "/usr/share/icons/hicolor/64x64/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_72x72.png", dest = "/usr/share/icons/hicolor/72x72/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_96x96.png", dest = "/usr/share/icons/hicolor/96x96/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_128x128.png", dest = "/usr/share/icons/hicolor/128x128/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_160x160.png", dest = "/usr/share/icons/hicolor/160x160/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_192x192.png", dest = "/usr/share/icons/hicolor/192x192/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_256x256.png", dest = "/usr/share/icons/hicolor/256x256/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_384x384.png", dest = "/usr/share/icons/hicolor/384x384/apps/sniffnet.png", mode = "644" },
+    { source = "resources/packaging/linux/graphics/sniffnet_512x512.png", dest = "/usr/share/icons/hicolor/512x512/apps/sniffnet.png", mode = "644" },
     { source = "resources/packaging/linux/graphics/sniffnet_1024x1024.png", dest = "/usr/share/icons/hicolor/1024x1024/apps/sniffnet.png", mode = "644" }
 ]
 

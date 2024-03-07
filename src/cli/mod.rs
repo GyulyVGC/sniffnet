@@ -88,8 +88,8 @@ mod tests {
                 device_name: "hey-hey".to_string(),
             },
             window: ConfigWindow {
-                position: (440, 99),
-                size: (452, 870),
+                position: (440.0, 99.0),
+                size: (452.0, 870.0),
             },
         };
         // we want to be sure that modified config is different from defaults
