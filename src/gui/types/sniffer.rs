@@ -278,8 +278,8 @@ impl Sniffer {
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled_width = width * scale_factor as f32;
-                let scaled_height = height * scale_factor as f32;
+                let scaled_width = (f64::from(width) * scale_factor) as u32;
+                let scaled_height = (f64::from(height) * scale_factor) as u32;
                 self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
             }
             Message::CustomCountryDb(db) => {

@@ -1,5 +1,4 @@
 use iced::widget::Text;
-use iced::{Renderer, Theme};
 
 use crate::gui::styles::style_constants::ICONS;
 use crate::StyleType;

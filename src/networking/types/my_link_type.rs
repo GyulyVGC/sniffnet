@@ -1,5 +1,5 @@
 use iced::widget::Column;
-use iced::{Font, Renderer};
+use iced::Font;
 use pcap::Linktype;
 
 use crate::gui::styles::text::TextType;

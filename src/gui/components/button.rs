@@ -4,7 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Text, Tooltip};
-use iced::{Font, Length, Renderer, Theme};
+use iced::{Font, Length};
 
 use crate::gui::styles::container::ContainerType;
 use crate::gui::types::message::Message;

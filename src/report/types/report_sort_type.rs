@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 
 use iced::widget::Text;
-use iced::{Renderer, Theme};
 
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;

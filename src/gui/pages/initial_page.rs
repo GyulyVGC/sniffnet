@@ -11,7 +11,7 @@ use iced::widget::{
     button, Button, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Font, Length, Renderer, Theme};
+use iced::{alignment, Font, Length};
 use pcap::Device;
 
 use crate::gui::styles::button::ButtonType;

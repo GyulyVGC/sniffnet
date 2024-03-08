@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip};
 use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer, Theme};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -125,7 +126,8 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
                         .font(font)
                         .vertical_alignment(Vertical::Center)
                         .horizontal_alignment(Horizontal::Center)
-                        .size(15),
+                        .size(15)
+                        .line_height(LineHeight::Relative(1.0)),
                 )
                 .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
                 .padding(2)

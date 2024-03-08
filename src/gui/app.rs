@@ -9,10 +9,7 @@ use iced::keyboard::{Event, Key, Modifiers};
 use iced::widget::Column;
 use iced::window::Id;
 use iced::Event::{Keyboard, Window};
-use iced::{
-    executor, font, subscription, window, Application, Command, Element, Renderer, Subscription,
-    Theme,
-};
+use iced::{executor, window, Application, Command, Element, Subscription};
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -28,7 +25,6 @@ use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::{ConfigSettings, StyleType, SNIFFNET_TITLECASE};
@@ -128,11 +124,9 @@ impl Application for Sniffer {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
         let window_events_subscription = iced::event::listen_with(|event, _| match event {
             Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
-            Window(Id::MAIN, window::Event::Moved { x, y }) => {
-                Some(Message::WindowMoved(x as f32, y as f32))
-            }
+            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
             Window(Id::MAIN, window::Event::Resized { width, height }) => {
-                Some(Message::WindowResized(width as f32, height as f32))
+                Some(Message::WindowResized(width, height))
             }
             Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,

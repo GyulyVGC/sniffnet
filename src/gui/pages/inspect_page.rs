@@ -7,7 +7,7 @@ use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, text_input, Rule, Space, Toggler, Tooltip};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Pixels, Renderer, Theme};
+use iced::{alignment, Alignment, Font, Length, Pixels};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;

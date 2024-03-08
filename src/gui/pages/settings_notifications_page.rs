@@ -3,7 +3,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::{Button, Slider};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer, Theme};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;

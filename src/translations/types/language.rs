@@ -2,7 +2,7 @@ use std::fmt;
 
 use iced::widget::svg::Handle;
 use iced::widget::Svg;
-use iced::{Length, Renderer, Theme};
+use iced::Length;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{

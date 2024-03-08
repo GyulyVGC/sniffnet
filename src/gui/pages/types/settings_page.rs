@@ -1,5 +1,3 @@
-use iced::{Renderer, Theme};
-
 use crate::gui::types::message::Message;
 use crate::translations::translations::{notifications_translation, style_translation};
 use crate::translations::translations_3::general_translation;

@@ -1,5 +1,3 @@
-use iced::font;
-
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -94,9 +92,9 @@ pub enum Message {
     /// Set UI scale factor
     ChangeScaleFactor(f64),
     /// The app window position has been changed
-    WindowMoved(f32, f32),
+    WindowMoved(i32, i32),
     /// The app window size has been changed
-    WindowResized(f32, f32),
+    WindowResized(u32, u32),
     /// The country MMDB custom path has been updated
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated

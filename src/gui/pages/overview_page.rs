@@ -12,7 +12,7 @@ use iced::widget::{
     Tooltip,
 };
 use iced::Length::{Fill, FillPortion, Fixed};
-use iced::{Alignment, Font, Length, Renderer, Theme};
+use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

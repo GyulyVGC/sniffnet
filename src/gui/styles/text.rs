@@ -4,7 +4,7 @@
 
 use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
-use iced::{Color, Font, Renderer};
+use iced::{Color, Font};
 
 use crate::gui::types::message::Message;
 use crate::StyleType;

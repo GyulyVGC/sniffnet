@@ -7,8 +7,8 @@ use crate::SNIFFNET_LOWERCASE;
 
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
 pub struct ConfigWindow {
-    pub position: (f32, f32),
-    pub size: (f32, f32),
+    pub position: (i32, i32),
+    pub size: (u32, u32),
 }
 
 impl ConfigWindow {
@@ -33,8 +33,8 @@ impl ConfigWindow {
 impl Default for ConfigWindow {
     fn default() -> Self {
         Self {
-            position: (0.0, 0.0),
-            size: (1190.0, 670.0),
+            position: (0, 0),
+            size: (1190, 670),
         }
     }
 }
@@ -43,11 +43,12 @@ pub trait ToPosition {
     fn to_position(self) -> Position;
 }
 
-impl ToPosition for (f32, f32) {
+impl ToPosition for (i32, i32) {
     fn to_position(self) -> Position {
+        #[allow(clippy::cast_precision_loss)]
         Position::Specific(Point {
-            x: self.0,
-            y: self.1,
+            x: self.0 as f32,
+            y: self.1 as f32,
         })
     }
 }
@@ -56,11 +57,12 @@ pub trait ToSize {
     fn to_size(self) -> Size;
 }
 
-impl ToSize for (f32, f32) {
+impl ToSize for (u32, u32) {
     fn to_size(self) -> Size {
+        #[allow(clippy::cast_precision_loss)]
         Size {
-            width: self.0,
-            height: self.1,
+            width: self.0 as f32,
+            height: self.1 as f32,
         }
     }
 }

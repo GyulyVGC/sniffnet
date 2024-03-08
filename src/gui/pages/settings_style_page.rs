@@ -1,9 +1,9 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, lazy, Rule, Space};
+use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
 use iced::Length::Fixed;
-use iced::{Alignment, Color, Element, Font, Length, Renderer, Theme};
+use iced::{Alignment, Color, Element, Font, Length};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -75,7 +75,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     yeti_night_translation(language).to_string(),
                     Night,
                 ))
-                .push(Space::with_width(Length::Fixed(15.0)))
+                .push(Space::with_width(Length::Fixed(10.0)))
                 .push(get_palette_container(
                     style,
                     "Yeti Day".to_string(),
@@ -92,7 +92,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
-                .push(Space::with_width(Length::Fixed(15.0)))
+                .push(Space::with_width(Length::Fixed(10.0)))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
@@ -277,7 +277,7 @@ fn get_extra_palettes(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(Space::with_width(Length::Fixed(15.0)))
+                    .push(Space::with_width(Length::Fixed(10.0)))
                     .push(second)
                     .into(),
                 <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(

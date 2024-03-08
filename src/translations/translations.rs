@@ -1,7 +1,6 @@
 // EXTRA NEEDED CHARACTERS: Б
 
 use iced::widget::Text;
-use iced::{Renderer, Theme};
 
 use crate::translations::types::language::Language;
 use crate::StyleType;

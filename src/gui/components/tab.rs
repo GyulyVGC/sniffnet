@@ -3,7 +3,7 @@
 use iced::alignment::Vertical;
 use iced::widget::text::LineHeight;
 use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
-use iced::{alignment, Alignment, Font, Length, Renderer, Theme};
+use iced::{alignment, Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;

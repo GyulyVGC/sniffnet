@@ -2,7 +2,7 @@ use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
 use iced::widget::Tooltip;
 use iced::widget::{Svg, Text};
-use iced::{Font, Length, Renderer, Theme};
+use iced::{Font, Length};
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,

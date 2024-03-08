@@ -4,11 +4,8 @@ use iced::advanced::renderer;
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{self, Clipboard, Shell};
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::{button, horizontal_space, Column, Container, Row, Space, Text};
-use iced::{
-    event, mouse, Border, Color, Element, Event, Font, Length, Point, Rectangle, Renderer, Size,
-    Theme, Vector,
-};
+use iced::widget::{button, Column, Container, Row, Space, Text};
+use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size, Vector};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::button::ButtonType;
@@ -139,10 +136,10 @@ fn confirm_button_row(
         )
 }
 
-/// A widget that centers a modal element over some base element
+/// A widget that centers an overlay element over some base element
 pub struct Modal<'a, Message, Theme, Renderer> {
     base: Element<'a, Message, Theme, Renderer>,
-    modal: Element<'a, Message, Theme, Renderer>,
+    overlay: Element<'a, Message, Theme, Renderer>,
     on_blur: Option<Message>,
 }
 
@@ -154,7 +151,7 @@ impl<'a, Message, Theme, Renderer> Modal<'a, Message, Theme, Renderer> {
     ) -> Self {
         Self {
             base: base.into(),
-            modal: modal.into(),
+            overlay: modal.into(),
             on_blur: None,
         }
     }
@@ -178,12 +175,12 @@ where
     fn children(&self) -> Vec<widget::Tree> {
         vec![
             widget::Tree::new(&self.base),
-            widget::Tree::new(&self.modal),
+            widget::Tree::new(&self.overlay),
         ]
     }
 
     fn diff(&self, tree: &mut widget::Tree) {
-        tree.diff_children(&[&self.base, &self.modal]);
+        tree.diff_children(&[&self.base, &self.overlay]);
     }
 
     fn size(&self) -> Size<Length> {
@@ -254,7 +251,7 @@ where
     ) -> Option<overlay::Element<'b, Message, Theme, Renderer>> {
         Some(overlay::Element::new(Box::new(Overlay {
             position: layout.position() + translation,
-            content: &mut self.modal,
+            content: &mut self.overlay,
             tree: &mut state.children[1],
             size: layout.bounds().size(),
             on_blur: self.on_blur.clone(),

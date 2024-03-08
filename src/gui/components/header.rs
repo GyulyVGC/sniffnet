@@ -4,8 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
-use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length, Renderer, Theme};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;

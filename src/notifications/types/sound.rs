@@ -3,7 +3,7 @@ use std::thread;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
-use iced::{Font, Length, Renderer, Theme};
+use iced::{Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 

@@ -1,8 +1,7 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container};
-use iced::{Element, Length, Renderer, Theme};
+use iced::widget::Container;
+use iced::Element;
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;

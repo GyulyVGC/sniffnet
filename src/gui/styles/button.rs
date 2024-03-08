@@ -249,7 +249,7 @@ impl button::StyleSheet for StyleType {
                     a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
-                shadow: Default::default(),
+                shadow: Shadow::default(),
             },
             _ => button::StyleSheet::active(self, style),
         }

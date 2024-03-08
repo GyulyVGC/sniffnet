@@ -1,7 +1,6 @@
 #![allow(clippy::match_same_arms)]
 
 use iced::widget::Text;
-use iced::{Renderer, Theme};
 
 use crate::translations::translations::network_adapter_translation;
 use crate::{Language, StyleType};

@@ -5,7 +5,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{button, Space};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length, Renderer, Theme};
+use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;

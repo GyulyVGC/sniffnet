@@ -2,6 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use iced::widget::container;
 use iced::widget::scrollable::{Appearance, Properties};
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Border, Color};
@@ -28,7 +29,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
     fn active(&self, _: &Self::Style) -> Appearance {
         let ext = self.get_extension();
         Appearance {
-            container: Default::default(),
+            container: container::Appearance::default(),
             scrollbar: Scrollbar {
                 background: Some(Background::Color(Color::TRANSPARENT)),
                 scroller: Scroller {
@@ -56,7 +57,7 @@ impl iced::widget::scrollable::StyleSheet for StyleType {
         let colors = self.get_palette();
         let ext = self.get_extension();
         Appearance {
-            container: Default::default(),
+            container: container::Appearance::default(),
             scrollbar: Scrollbar {
                 background: Some(Background::Color(Color {
                     a: ext.alpha_round_borders,
