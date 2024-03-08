@@ -3,10 +3,11 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Text, Tooltip};
-use iced::{Font, Length};
+use iced::widget::{button, Row, Text, Tooltip};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::hide_translation;
 use crate::utils::types::file_info::FileInfo;
@@ -69,4 +70,12 @@ pub fn button_open_file(
     Tooltip::new(button, Text::new(tooltip_str).font(font), Position::Right)
         .gap(5)
         .style(tooltip_style)
+}
+
+pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Message, StyleType> {
+    Row::new()
+        .align_items(Alignment::Center)
+        .spacing(10)
+        .push(Text::new(text).font(font))
+        .push(Icon::OpenLink.to_text().size(16).style(TextType::Title))
 }

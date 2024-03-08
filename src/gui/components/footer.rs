@@ -9,6 +9,7 @@ use iced::widget::Space;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::{Alignment, Font, Length};
 
+use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
@@ -67,8 +68,12 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
     .width(Length::Fixed(30.0))
     .on_press(Message::OpenWebPage(WebPage::Website));
 
-    Tooltip::new(content, Text::new("Website").font(font), Position::Top)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        row_open_link_tooltip("Website", font),
+        Position::Top,
+    )
+    .style(ContainerType::Tooltip)
 }
 
 fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
@@ -84,8 +89,12 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
     .width(Length::Fixed(40.0))
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
-    Tooltip::new(content, Text::new("GitHub").font(font), Position::Top)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        row_open_link_tooltip("GitHub", font),
+        Position::Top,
+    )
+    .style(ContainerType::Tooltip)
 }
 
 fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
@@ -103,8 +112,12 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
     .width(Length::Fixed(30.0))
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
-    Tooltip::new(content, Text::new("Sponsor").font(font), Position::Top)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        row_open_link_tooltip("Sponsor", font),
+        Position::Top,
+    )
+    .style(ContainerType::Tooltip)
 }
 
 fn get_release_details(
@@ -140,7 +153,7 @@ fn get_release_details(
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
-                Text::new(new_version_available_translation(language)).font(font),
+                row_open_link_tooltip(new_version_available_translation(language), font),
                 Position::Top,
             )
             .style(ContainerType::Tooltip);

@@ -28,6 +28,7 @@ pub enum Icon {
     Inspect,
     Lightning,
     Notification,
+    OpenLink,
     Overview,
     PacketsThreshold,
     // Restore,
@@ -81,6 +82,7 @@ impl Icon {
             Icon::SortAscending => 'm',
             Icon::SortDescending => 'l',
             Icon::SortNeutral => 'n',
+            Icon::OpenLink => 'o',
         }
     }
 

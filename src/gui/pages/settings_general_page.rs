@@ -7,7 +7,7 @@ use iced::widget::{button, Column, Container, PickList, Row, Rule, Slider, Space
 use iced::Length::Fixed;
 use iced::{Alignment, Font, Length};
 
-use crate::gui::components::button::button_open_file;
+use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -133,8 +133,10 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
                 .padding(2)
                 .height(Fixed(20.0))
                 .width(Fixed(20.0)),
-                Text::new("The selected language is not\nfully updated to version 1.3 ↗")
-                    .font(font),
+                row_open_link_tooltip(
+                    "The selected language is not\nfully updated to version 1.3",
+                    font,
+                ),
                 Position::FollowCursor,
             )
             .style(ContainerType::Tooltip),
