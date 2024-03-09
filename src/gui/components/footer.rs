@@ -43,14 +43,14 @@ pub fn footer(
         .push(get_button_sponsor(font))
         .push(
             Text::new("Made with ❤ by Giuliano Bellini")
-                .width(Length::FillPortion(1))
+                .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Right)
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );
 
     Container::new(footer_row)
-        .height(Length::Fixed(45.0))
+        .height(45)
         .align_y(Vertical::Center)
         .style(ContainerType::Gradient(color_gradient))
 }
@@ -64,8 +64,8 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
             .vertical_alignment(Vertical::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .height(Length::Fixed(30.0))
-    .width(Length::Fixed(30.0))
+    .height(30)
+    .width(30)
     .on_press(Message::OpenWebPage(WebPage::Website));
 
     Tooltip::new(
@@ -85,8 +85,8 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
             .vertical_alignment(Vertical::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .height(Length::Fixed(40.0))
-    .width(Length::Fixed(40.0))
+    .height(40)
+    .width(40)
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
     Tooltip::new(
@@ -108,8 +108,8 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding([2, 0, 0, 0])
-    .height(Length::Fixed(30.0))
-    .width(Length::Fixed(30.0))
+    .height(30)
+    .width(30)
     .on_press(Message::OpenWebPage(WebPage::Sponsor));
 
     Tooltip::new(
@@ -129,7 +129,7 @@ fn get_release_details(
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
         .height(Length::Fill)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .push(
             Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
                 .size(FONT_SIZE_FOOTER)
@@ -147,8 +147,8 @@ fn get_release_details(
                     .line_height(LineHeight::Relative(0.8)),
             )
             .padding(0)
-            .height(Length::Fixed(35.0))
-            .width(Length::Fixed(35.0))
+            .height(35)
+            .width(35)
             .style(ButtonType::Alert)
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
@@ -157,9 +157,7 @@ fn get_release_details(
                 Position::Top,
             )
             .style(ContainerType::Tooltip);
-            ret_val = ret_val
-                .push(Space::with_width(Length::Fixed(10.0)))
-                .push(tooltip);
+            ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
         } else {
             // this is the latest release
             ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE).font(font_footer));

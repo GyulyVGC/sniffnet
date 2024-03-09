@@ -1668,14 +1668,14 @@ mod tests {
         assert_eq!(
             window_start,
             ConfigWindow {
-                position: (0.0, 0.0),
-                size: (1190.0, 670.0),
+                position: (0, 0),
+                size: (1190, 670),
             }
         );
 
         // change window properties by sending messages
-        sniffer.update(Message::WindowMoved(-10.0, 555.0));
-        sniffer.update(Message::WindowResized(1000.0, 999.0));
+        sniffer.update(Message::WindowMoved(-10, 555));
+        sniffer.update(Message::WindowResized(1000, 999));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::CloseRequested);
@@ -1692,8 +1692,8 @@ mod tests {
         assert_eq!(
             window_end,
             ConfigWindow {
-                position: (-10.0, 555.0),
-                size: (1000.0, 999.0),
+                position: (-10, 555),
+                size: (1000, 999),
             }
         );
     }

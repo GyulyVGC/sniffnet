@@ -4,7 +4,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Row, Text, Tooltip};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font};
 
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::text::TextType;
@@ -29,8 +29,8 @@ pub fn button_hide(
                 .line_height(LineHeight::Relative(1.0)),
         )
         .padding(2)
-        .height(Length::Fixed(20.0))
-        .width(Length::Fixed(20.0))
+        .height(20)
+        .width(20)
         .on_press(message),
         Text::new(hide_translation(language)).font(font),
         Position::Right,
@@ -58,8 +58,8 @@ pub fn button_open_file(
             .size(16.0),
     )
     .padding(0)
-    .height(Length::Fixed(25.0))
-    .width(Length::Fixed(40.0));
+    .height(25)
+    .width(40);
 
     if is_editable {
         tooltip_str = file_info.action_info(language);

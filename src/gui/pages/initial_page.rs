@@ -95,14 +95,12 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             .align_x(Horizontal::Center),
         );
 
-    let body = Column::new()
-        .push(Space::with_height(Length::Fixed(5.0)))
-        .push(
-            Row::new()
-                .push(col_adapter)
-                .push(Space::with_width(Length::Fixed(30.0)))
-                .push(filters_pane),
-        );
+    let body = Column::new().push(Space::with_height(5)).push(
+        Row::new()
+            .push(col_adapter)
+            .push(Space::with_width(30))
+            .push(filters_pane),
+    );
 
     Container::new(body).height(Length::Fill)
 }
@@ -123,8 +121,8 @@ fn col_ip_buttons(
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(90.0))
-            .height(Length::Fixed(35.0))
+            .width(90)
+            .height(35)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -162,8 +160,8 @@ fn col_protocol_buttons(
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(90.0))
-            .height(Length::Fixed(35.0))
+            .width(90)
+            .height(35)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -200,7 +198,7 @@ fn col_address_input(
             .padding([3, 5])
             .on_input(Message::AddressFilter)
             .font(font)
-            .width(Length::Fixed(310.0))
+            .width(310)
             .style(if is_error {
                 TextInputType::Error
             } else {
@@ -235,7 +233,7 @@ fn col_port_input(
             .padding([3, 5])
             .on_input(Message::PortFilter)
             .font(font)
-            .width(Length::Fixed(180.0))
+            .width(180)
             .style(if is_error {
                 TextInputType::Error
             } else {
@@ -269,8 +267,8 @@ fn button_start(
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
-    .height(Length::Fixed(80.0))
-    .width(Length::Fixed(160.0))
+    .height(80)
+    .width(160)
     .style(ButtonType::Gradient(color_gradient));
 
     let mut tooltip = start_translation(language).to_string();

@@ -2,7 +2,7 @@ use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
 use iced::widget::Tooltip;
 use iced::widget::{Svg, Text};
-use iced::{Font, Length};
+use iced::Font;
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
@@ -310,8 +310,8 @@ fn get_flag_from_country(
         }
     })))
     .style(svg_style)
-    .width(Length::Fixed(width))
-    .height(Length::Fixed(width * 0.75));
+    .width(width)
+    .height(width * 0.75);
 
     (svg, tooltip)
 }
@@ -367,8 +367,8 @@ pub fn get_computer_tooltip(
         },
     )))
     .style(SvgType::AdaptColor)
-    .width(Length::Fixed(FLAGS_WIDTH_BIG))
-    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75));
+    .width(FLAGS_WIDTH_BIG)
+    .height(FLAGS_WIDTH_BIG * 0.75);
 
     let tooltip = match (is_my_address, is_local, traffic_type) {
         (true, _, _) => your_network_adapter_translation(language),

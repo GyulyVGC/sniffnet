@@ -2,7 +2,6 @@ use std::fmt;
 
 use iced::widget::svg::Handle;
 use iced::widget::Svg;
-use iced::Length;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
@@ -103,7 +102,7 @@ impl Language {
             Language::JA => JP,
             Language::UZ => UZ,
         })))
-        .width(Length::Fixed(FLAGS_WIDTH_BIG))
+        .width(FLAGS_WIDTH_BIG)
     }
 }
 

@@ -46,7 +46,7 @@ pub fn header(
                 last_opened_setting,
             ))),
     )
-    .height(Length::Fixed(90.0))
+    .height(90)
     .align_y(Vertical::Center)
     .style(ContainerType::Gradient(color_gradient))
 }
@@ -61,8 +61,8 @@ fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message,
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding(10)
-    .height(Length::Fixed(40.0))
-    .width(Length::Fixed(60.0))
+    .height(40)
+    .width(60)
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -87,8 +87,8 @@ pub fn get_button_settings(
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(Length::Fixed(40.0))
-    .width(Length::Fixed(60.0))
+    .height(40)
+    .width(60)
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(

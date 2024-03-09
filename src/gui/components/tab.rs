@@ -110,20 +110,18 @@ fn new_page_tab(
             )
             .align_y(Vertical::Center)
             .padding([2, 4])
-            .height(Length::Fixed(20.0))
+            .height(20)
             .style(ContainerType::Highlighted);
-            content = content
-                .push(Space::with_width(Length::Fixed(7.0)))
-                .push(notifications_badge);
+            content = content.push(Space::with_width(7)).push(notifications_badge);
         }
     }
 
     content = content.push(horizontal_space());
 
     button(content)
-        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .style(if active {
             ButtonType::TabActive
         } else {
@@ -169,9 +167,9 @@ fn new_settings_tab(
         .push(horizontal_space());
 
     button(content)
-        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .style(if active {
             ButtonType::TabActive
         } else {

@@ -2,7 +2,6 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
-use iced::Length::Fixed;
 use iced::{Alignment, Color, Element, Font, Length};
 
 use crate::gui::components::button::button_open_file;
@@ -53,16 +52,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             language,
         ))
         .push(get_settings_tabs(SettingsPage::Appearance, font, language))
-        .push(Space::with_height(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(
             appearance_title_translation(language)
                 .style(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(Space::with_height(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(gradients_row(font, color_gradient, language))
-        .push(Space::with_height(Length::Fixed(15.0)));
+        .push(Space::with_height(15));
 
     let mut styles_col = Column::new()
         .align_items(Alignment::Center)
@@ -75,7 +74,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     yeti_night_translation(language).to_string(),
                     Night,
                 ))
-                .push(Space::with_width(Length::Fixed(10.0)))
+                .push(Space::with_width(10))
                 .push(get_palette_container(
                     style,
                     "Yeti Day".to_string(),
@@ -83,7 +82,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     Day,
                 )),
         )
-        .push(Space::with_height(Length::Fixed(10.0)))
+        .push(Space::with_height(10))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -92,7 +91,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
-                .push(Space::with_width(Length::Fixed(10.0)))
+                .push(Space::with_width(10))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
@@ -100,7 +99,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     MonAmour,
                 )),
         )
-        .push(Space::with_height(Length::Fixed(10.0)));
+        .push(Space::with_height(10));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
@@ -116,8 +115,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     content = content.push(styles_scroll);
 
     Container::new(content)
-        .height(Length::Fixed(400.0))
-        .width(Length::Fixed(800.0))
+        .height(400)
+        .width(800)
         .style(ContainerType::Modal)
 }
 
@@ -140,11 +139,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::None) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::None) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .style(ButtonType::Gradient(GradientType::None))
             .on_press(Message::GradientsSelection(GradientType::None)),
         )
@@ -158,11 +157,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::Mild) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .on_press(Message::GradientsSelection(GradientType::Mild))
             .style(ButtonType::Gradient(GradientType::Mild)),
         )
@@ -176,11 +175,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::Wild) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .on_press(Message::GradientsSelection(GradientType::Wild))
             .style(ButtonType::Gradient(GradientType::Wild)),
         )
@@ -212,8 +211,8 @@ fn get_palette_container(
     }
 
     Button::new(content)
-        .height(Length::Fixed(if is_custom { 75.0 } else { 110.0 }))
-        .width(Length::Fixed(380.0))
+        .height(if is_custom { 75 } else { 110 })
+        .width(380)
         .padding(5)
         .style(if on_press.eq(&style) {
             ButtonType::BorderedRoundSelected
@@ -232,16 +231,16 @@ fn get_palette_rule(
 
     Container::new(
         Row::new()
-            .push(Row::new().width(Length::Fixed(120.0)).push(
+            .push(Row::new().width(120).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, height)),
             ))
-            .push(Row::new().width(Length::Fixed(80.0)).push(
+            .push(Row::new().width(80).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.secondary, height)),
             ))
-            .push(Row::new().width(Length::Fixed(60.0)).push(
+            .push(Row::new().width(60).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, height)),
             ))
-            .push(Row::new().width(Length::Fixed(40.0)).push(
+            .push(Row::new().width(40).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(buttons_color, height)),
             )),
     )
@@ -277,19 +276,15 @@ fn get_extra_palettes(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(Space::with_width(Length::Fixed(10.0)))
+                    .push(Space::with_width(10))
                     .push(second)
                     .into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(
-                    Length::Fixed(10.0),
-                )),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
             ]);
         } else {
             children.extend([
                 Row::new().push(first).into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(
-                    Length::Fixed(10.0),
-                )),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
             ]);
         }
     }
@@ -354,14 +349,12 @@ fn lazy_custom_style_input(
     }
 
     Button::new(content)
-        .height(Length::Fixed(
-            if custom_palette.is_ok() || is_custom_toml_style_set {
-                110.0
-            } else {
-                75.0
-            },
-        ))
-        .width(Length::Fixed(380.0))
+        .height(if custom_palette.is_ok() || is_custom_toml_style_set {
+            110
+        } else {
+            75
+        })
+        .width(380)
         .padding([10, 0, 5, 0])
         .style(if is_custom_toml_style_set {
             ButtonType::BorderedRoundSelected

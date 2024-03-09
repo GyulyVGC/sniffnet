@@ -2,7 +2,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Space};
+use iced::widget::{button, vertical_space, Space};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
@@ -54,9 +54,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         sniffer.unread_notifications,
     );
 
-    tab_and_body = tab_and_body
-        .push(tabs)
-        .push(Space::with_height(Length::Fixed(15.0)));
+    tab_and_body = tab_and_body.push(tabs).push(Space::with_height(15));
 
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
@@ -87,7 +85,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     Text::new(only_last_30_translation(language)).font(font)
                 })
                 .padding(10)
-                .width(Length::FillPortion(1))
+                .width(Length::Fill)
                 .height(Length::Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center),
@@ -98,7 +96,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             )
             .push(
                 Container::new(get_button_clear_all(font, language))
-                    .width(Length::FillPortion(1))
+                    .width(Length::Fill)
                     .height(Length::Fill)
                     .align_x(Horizontal::Center)
                     .align_y(Vertical::Center),
@@ -118,7 +116,7 @@ fn body_no_notifications_set(
         .spacing(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(Space::with_height(FillPortion(1)))
+        .push(vertical_space())
         .push(
             no_notifications_set_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -142,7 +140,7 @@ fn body_no_notifications_received(
         .spacing(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(Space::with_height(FillPortion(1)))
+        .push(vertical_space())
         .push(
             no_notifications_received_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -189,7 +187,7 @@ fn packets_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .push(
                     Row::new()
                         .spacing(5)
@@ -222,8 +220,8 @@ fn packets_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120.0)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
@@ -270,7 +268,7 @@ fn bytes_notification_log(
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .push(
                     Row::new()
                         .spacing(5)
@@ -305,8 +303,8 @@ fn bytes_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
@@ -354,7 +352,7 @@ fn favorite_notification_log(
         )
         .push(
             Column::new()
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .spacing(7)
                 .push(
                     Row::new()
@@ -375,8 +373,8 @@ fn favorite_notification_log(
                 .push(row_flag_details),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
@@ -390,8 +388,8 @@ fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Mess
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Fixed(50.0))
-    .width(Length::Fixed(75.0))
+    .height(50)
+    .width(75)
     .on_press(Message::ShowModal(MyModal::ClearAll));
 
     Tooltip::new(
@@ -409,7 +407,7 @@ fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Styl
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
-        .width(Length::Fixed(830.0))
+        .width(830)
         .padding(5)
         .spacing(10)
         .align_items(Alignment::Center);

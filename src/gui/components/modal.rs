@@ -4,7 +4,7 @@ use iced::advanced::renderer;
 use iced::advanced::widget::{self, Widget};
 use iced::advanced::{self, Clipboard, Shell};
 use iced::alignment::{Alignment, Horizontal, Vertical};
-use iced::widget::{button, Column, Container, Row, Space, Text};
+use iced::widget::{button, horizontal_space, Column, Container, Row, Space, Text};
 use iced::{event, mouse, Color, Element, Event, Font, Length, Point, Rectangle, Size, Vector};
 
 use crate::gui::components::button::button_hide;
@@ -37,7 +37,7 @@ pub fn get_exit_overlay(
             language,
             quit_analysis_translation(language),
         ))
-        .push(Space::with_height(Length::Fixed(20.0)))
+        .push(Space::with_height(20))
         .push(
             ask_quit_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -46,8 +46,8 @@ pub fn get_exit_overlay(
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Fixed(160.0))
-        .width(Length::Fixed(450.0))
+        .height(160)
+        .width(450)
         .style(ContainerType::Modal)
 }
 
@@ -69,7 +69,7 @@ pub fn get_clear_all_overlay(
             language,
             clear_all_translation(language),
         ))
-        .push(Space::with_height(Length::Fixed(20.0)))
+        .push(Space::with_height(20))
         .push(
             ask_clear_all_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -78,8 +78,8 @@ pub fn get_clear_all_overlay(
         .push(row_buttons);
 
     Container::new(content)
-        .height(Length::Fixed(160.0))
-        .width(Length::Fixed(450.0))
+        .height(160)
+        .width(450)
         .style(ContainerType::Modal)
 }
 
@@ -92,7 +92,7 @@ fn get_modal_header(
 ) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(Space::with_width(Length::FillPortion(1)))
+            .push(horizontal_space())
             .push(
                 Text::new(title)
                     .font(font_headers)
@@ -102,13 +102,13 @@ fn get_modal_header(
             )
             .push(
                 Container::new(button_hide(Message::HideModal, language, font))
-                    .width(Length::FillPortion(1))
+                    .width(Length::Fill)
                     .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Length::Fixed(40.0))
+    .height(40)
     .width(Length::Fill)
     .style(ContainerType::Gradient(color_gradient))
 }
@@ -129,8 +129,8 @@ fn confirm_button_row(
                     .horizontal_alignment(Horizontal::Center),
             )
             .padding(5)
-            .height(Length::Fixed(40.0))
-            .width(Length::Fixed(80.0))
+            .height(40)
+            .width(80)
             .style(ButtonType::Alert)
             .on_press(message),
         )

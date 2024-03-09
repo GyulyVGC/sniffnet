@@ -8,10 +8,10 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, lazy, Button, Column, Container, Row, Rule, Scrollable, Space, Text,
-    Tooltip,
+    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
+    Scrollable, Space, Text, Tooltip,
 };
-use iced::Length::{Fill, FillPortion, Fixed};
+use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
@@ -179,9 +179,9 @@ fn body_no_packets(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(Space::with_height(FillPortion(1)))
+        .push(vertical_space())
         .push(icon_text)
-        .push(Space::with_height(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(nothing_to_see_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
@@ -204,7 +204,7 @@ fn body_no_observed(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(Space::with_height(FillPortion(1)))
+        .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
         .push(get_active_filters_col(
             filters,
@@ -235,9 +235,9 @@ fn body_pcap_error(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(Space::with_height(FillPortion(1)))
+        .push(vertical_space())
         .push(Icon::Error.to_text().size(60))
-        .push(Space::with_height(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(error_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
@@ -265,9 +265,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_host = Column::new()
-        .width(Length::Fixed(width))
-        .align_items(Alignment::Center);
+    let mut scroll_host = Column::new().width(width).align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -286,7 +284,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
         let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
         let host_bar = Column::new()
-            .width(Length::Fixed(width))
+            .width(width)
             .spacing(1)
             .push(
                 Row::new()
@@ -333,20 +331,18 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host
-            .push(Space::with_height(Length::Fixed(25.0)))
-            .push(
-                Text::new(only_top_30_items_translation(language))
-                    .font(font)
-                    .horizontal_alignment(Horizontal::Center),
-            );
+        scroll_host = scroll_host.push(Space::with_height(25.0)).push(
+            Text::new(only_top_30_items_translation(language))
+                .font(font)
+                .horizontal_alignment(Horizontal::Center),
+        );
     }
 
     Column::new()
-        .width(Length::Fixed(width + 11.0))
+        .width(width + 11.0)
         .push(
             Row::new()
-                .height(Length::Fixed(45.0))
+                .height(45)
                 .align_items(Alignment::Center)
                 .push(
                     Text::new(host_translation(language))
@@ -374,9 +370,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_service = Column::new()
-        .width(Length::Fixed(width))
-        .align_items(Alignment::Center);
+    let mut scroll_service = Column::new().width(width).align_items(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -390,7 +384,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
 
         let content = Column::new()
             .spacing(1)
-            .width(Length::Fixed(width))
+            .width(width)
             .push(
                 Row::new()
                     .push(Text::new(service.to_string()).font(font))
@@ -417,20 +411,18 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
     }
 
     if entries.len() >= 30 {
-        scroll_service = scroll_service
-            .push(Space::with_height(Length::Fixed(25.0)))
-            .push(
-                Text::new(only_top_30_items_translation(language))
-                    .font(font)
-                    .horizontal_alignment(Horizontal::Center),
-            );
+        scroll_service = scroll_service.push(Space::with_height(25)).push(
+            Text::new(only_top_30_items_translation(language))
+                .font(font)
+                .horizontal_alignment(Horizontal::Center),
+        );
     }
 
     Column::new()
-        .width(Length::Fixed(width + 11.0))
+        .width(width + 11.0)
         .push(
             Row::new()
-                .height(Length::Fixed(45.0))
+                .height(45)
                 .align_items(Alignment::Center)
                 .push(
                     Text::new(service_translation(language))
@@ -484,14 +476,14 @@ fn lazy_col_info(
         .padding([5, 10])
         .push(
             Row::new()
-                .height(Length::Fixed(120.0))
+                .height(120)
                 .push(
                     Scrollable::new(col_device)
                         .width(Length::Fill)
                         .direction(Direction::Horizontal(ScrollbarType::properties())),
                 )
                 .push(Container::new(Rule::vertical(25)).height(Length::Shrink))
-                .push(col_data_representation.width(Length::FillPortion(1))),
+                .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
         .push(
@@ -502,7 +494,7 @@ fn lazy_col_info(
         );
 
     Container::new(content)
-        .width(Length::Fixed(400.0))
+        .width(400)
         .padding([10, 5, 5, 5])
         .align_x(Horizontal::Center)
         .style(ContainerType::BorderedRound)
@@ -592,7 +584,7 @@ fn col_data_representation(
                     .font(font),
             )
             .width(Length::Fill)
-            .height(Length::Fixed(33.0))
+            .height(33)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -741,14 +733,14 @@ fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, StyleType> {
     Row::new()
         .push(if in_len > 0.0 {
             Row::new()
-                .width(Length::Fixed(in_len))
+                .width(in_len)
                 .push(Rule::horizontal(1).style(RuleType::Incoming))
         } else {
             Row::new()
         })
         .push(if out_len > 0.0 {
             Row::new()
-                .width(Length::Fixed(out_len))
+                .width(out_len)
                 .push(Rule::horizontal(1).style(RuleType::Outgoing))
         } else {
             Row::new()
@@ -764,8 +756,8 @@ fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, St
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
-    .width(Length::Fixed(FLAGS_WIDTH_BIG))
+    .height(FLAGS_WIDTH_BIG * 0.75)
+    .width(FLAGS_WIDTH_BIG)
     .style(if is_favorite {
         ButtonType::Starred
     } else {
@@ -804,8 +796,8 @@ fn get_active_filters_col(
                     )
                     .align_x(Horizontal::Center)
                     .align_y(Vertical::Center)
-                    .height(Fixed(20.0))
-                    .width(Fixed(20.0))
+                    .height(20)
+                    .width(20)
                     .style(ContainerType::Highlighted),
                     Text::new(filters_string).font(font),
                     Position::FollowCursor,

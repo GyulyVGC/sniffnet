@@ -5,7 +5,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, text_input, Rule, Space, Toggler, Tooltip};
+use iced::widget::{button, text_input, vertical_space, Rule, Space, Toggler, Tooltip};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Pixels};
 
@@ -95,7 +95,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .align_y(Vertical::Center)
                 .align_x(Horizontal::Center)
                 .padding([10, 7, 3, 7])
-                .width(Length::Fixed(1042.0))
+                .width(1042)
                 .style(ContainerType::BorderedRound),
         );
 
@@ -152,9 +152,9 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
                 .height(Length::Fill)
                 .padding(20)
                 .align_items(Alignment::Center)
-                .push(Space::with_height(Length::FillPortion(1)))
+                .push(vertical_space())
                 .push(Icon::Funnel.to_text().size(60))
-                .push(Space::with_height(Length::Fixed(15.0)))
+                .push(Space::with_height(15))
                 .push(Text::new(no_search_results_translation(language)).font(font))
                 .push(Space::with_height(Length::FillPortion(2))),
         );
@@ -195,8 +195,8 @@ fn report_header_row(
 
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
-            .width(Length::Fixed(report_col.get_width()))
-            .height(Length::Fixed(56.0))
+            .width(report_col.get_width())
+            .height(56)
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
             col_header = col_header.push(
@@ -298,7 +298,7 @@ fn row_report_entry(
                 .style(text_type),
             )
             .align_x(Horizontal::Center)
-            .width(Length::Fixed(report_col.get_width())),
+            .width(report_col.get_width()),
         );
     }
     ret_val
@@ -324,12 +324,12 @@ fn host_filters_col(
         ));
     }
 
-    let input_country = filter_input(FilterInputType::Country, search_params.clone(), font)
-        .width(Length::Fixed(95.0));
-    let input_domain = filter_input(FilterInputType::Domain, search_params.clone(), font)
-        .width(Length::Fixed(190.0));
-    let input_as_name = filter_input(FilterInputType::AsName, search_params.clone(), font)
-        .width(Length::Fixed(190.0));
+    let input_country =
+        filter_input(FilterInputType::Country, search_params.clone(), font).width(95);
+    let input_domain =
+        filter_input(FilterInputType::Domain, search_params.clone(), font).width(190);
+    let input_as_name =
+        filter_input(FilterInputType::AsName, search_params.clone(), font).width(190);
 
     let container_country = Row::new()
         .spacing(5)
@@ -461,8 +461,8 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType
         .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(2)
-    .height(Length::Fixed(20.0))
-    .width(Length::Fixed(25.0))
+    .height(20)
+    .width(25)
     .on_press(Message::UpdatePageNumber(increment))
 }
 
@@ -475,7 +475,7 @@ fn get_change_page_row(
     results_number: usize,
 ) -> Row<'static, Message, StyleType> {
     Row::new()
-        .height(Length::Fixed(40.0))
+        .height(40)
         .align_items(Alignment::Center)
         .spacing(10)
         .push(Space::with_width(Length::Fill))
@@ -514,8 +514,8 @@ fn button_clear_filter(
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding(2)
-    .height(Length::Fixed(20.0))
-    .width(Length::Fixed(20.0))
+    .height(20)
+    .width(20)
     .on_press(Message::Search(new_search_parameters))
 }
 

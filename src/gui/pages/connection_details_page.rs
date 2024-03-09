@@ -3,9 +3,8 @@ use std::net::IpAddr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, lazy, Rule, Scrollable, Space};
+use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::Length::Fixed;
 use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
@@ -149,8 +148,8 @@ fn page_content(
     let content = assemble_widgets(col_info, source_col, dest_col);
 
     Container::new(header_and_content.push(content))
-        .width(Length::Fixed(1000.0))
-        .height(Length::Fixed(500.0))
+        .width(1000)
+        .height(500)
         .style(ContainerType::Modal)
 }
 
@@ -162,7 +161,7 @@ fn page_header(
 ) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(Space::with_width(Length::FillPortion(1)))
+            .push(horizontal_space())
             .push(
                 Text::new(connection_details_translation(language))
                     .font(font_headers)
@@ -172,13 +171,13 @@ fn page_header(
             )
             .push(
                 Container::new(button_hide(Message::HideModal, language, font))
-                    .width(Length::FillPortion(1))
+                    .width(Length::Fill)
                     .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Fixed(40.0))
+    .height(40.0)
     .width(Length::Fill)
     .style(ContainerType::Gradient(color_gradient))
 }
@@ -195,7 +194,7 @@ fn col_info(
         .spacing(10)
         .padding([20, 10, 20, 40])
         .width(Length::FillPortion(2))
-        .push(Space::with_height(Length::FillPortion(1)))
+        .push(vertical_space())
         .push(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
@@ -260,7 +259,7 @@ fn col_info(
             );
     }
 
-    ret_val = ret_val.push(Space::with_height(Length::FillPortion(1)));
+    ret_val = ret_val.push(vertical_space());
 
     ret_val
 }
@@ -390,11 +389,11 @@ fn assemble_widgets(
                 .width(Length::FillPortion(3))
                 .align_items(Alignment::Center)
                 .spacing(5)
-                .push(Space::with_height(Length::FillPortion(1)))
+                .push(vertical_space())
                 .push(source_container)
                 .push(Icon::ArrowsDown.to_text())
                 .push(dest_container)
-                .push(Space::with_height(Length::FillPortion(1))),
+                .push(vertical_space()),
         )
 }
 
@@ -415,8 +414,8 @@ fn get_button_copy(
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(Length::Fixed(25.0))
-    .width(Length::Fixed(25.0))
+    .height(25.0)
+    .width(25)
     .on_press(Message::CopyIp(string.clone()));
 
     Tooltip::new(
