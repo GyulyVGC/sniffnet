@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
 
 #[cfg(target_os = "linux")]
-use iced::window::PlatformSpecific;
+use iced::window::settings::PlatformSpecific;
 use iced::{window, Application, Font, Pixels, Settings};
 
 use chart::types::chart_type::ChartType;
