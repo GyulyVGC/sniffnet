@@ -294,8 +294,8 @@ fn button_clear_mmdb(
             .size(15),
     )
     .padding(2)
-    .height(20.0)
-    .width(20.0);
+    .height(20)
+    .width(20);
 
     if is_editable {
         button = button.on_press(message(String::new()));

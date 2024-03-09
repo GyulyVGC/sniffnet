@@ -37,7 +37,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             foreground_border_color: if is_active {
                 colors.secondary
             } else {
-                ext.buttons_color
+                Color::TRANSPARENT
             },
         }
     }
@@ -62,7 +62,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             foreground_border_color: if is_active {
                 colors.secondary
             } else {
-                ext.buttons_color
+                Color::TRANSPARENT
             },
         }
     }

@@ -414,7 +414,7 @@ fn get_button_copy(
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(25.0)
+    .height(25)
     .width(25)
     .on_press(Message::CopyIp(string.clone()));
 

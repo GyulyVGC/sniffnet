@@ -220,7 +220,7 @@ fn packets_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(120.0)
+        .height(120)
         .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)

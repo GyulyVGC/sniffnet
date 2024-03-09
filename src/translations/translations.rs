@@ -235,7 +235,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, StyleType> 
     })
 }
 
-// pub fn relevant_connections_translation(language: Language) -> Text<'static, StyleType>> {
+// pub fn relevant_connections_translation(language: Language) -> Text<'static, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Relevant connections:",
 //         Language::IT => "Connessioni rilevanti:",
@@ -723,7 +723,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
     }
 }
 
-// pub fn filtered_application_translation(language: Language) -> Text<'static,StyleType>> {
+// pub fn filtered_application_translation(language: Language) -> Text<'static,StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
 //         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
@@ -745,7 +745,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //     })
 // }
 
-// pub fn no_favorites_translation(language: Language) -> Text<'static, StyleType>> {
+// pub fn no_favorites_translation(language: Language) -> Text<'static, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Nothing to show at the moment.\n\
 //                          To add a connection to your favorites, click on the star symbol near the connection.",

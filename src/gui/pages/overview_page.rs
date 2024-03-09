@@ -331,7 +331,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host.push(Space::with_height(25.0)).push(
+        scroll_host = scroll_host.push(Space::with_height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .horizontal_alignment(Horizontal::Center),
@@ -430,7 +430,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
                         .style(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(Space::with_width(Length::Fill))
+                .push(horizontal_space())
                 .push(sort_arrows(
                     sniffer.service_sort_type,
                     Message::ServiceSortSelection,

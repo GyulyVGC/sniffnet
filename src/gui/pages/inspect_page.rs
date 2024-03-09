@@ -5,7 +5,9 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, text_input, vertical_space, Rule, Space, Toggler, Tooltip};
+use iced::widget::{
+    button, horizontal_space, text_input, vertical_space, Rule, Space, Toggler, Tooltip,
+};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Pixels};
 
@@ -478,11 +480,11 @@ fn get_change_page_row(
         .height(40)
         .align_items(Alignment::Center)
         .spacing(10)
-        .push(Space::with_width(Length::Fill))
+        .push(horizontal_space())
         .push(if page_number > 1 {
-            Container::new(get_button_change_page(false).width(25.0))
+            Container::new(get_button_change_page(false).width(25))
         } else {
-            Container::new(Space::with_width(25.0))
+            Container::new(Space::with_width(25))
         })
         .push(
             Text::new(showing_results_translation(
@@ -494,11 +496,11 @@ fn get_change_page_row(
             .font(font),
         )
         .push(if page_number < (results_number + 20 - 1) / 20 {
-            Container::new(get_button_change_page(true).width(25.0))
+            Container::new(get_button_change_page(true).width(25))
         } else {
-            Container::new(Space::with_width(25.0))
+            Container::new(Space::with_width(25))
         })
-        .push(Space::with_width(Length::Fill))
+        .push(horizontal_space())
 }
 
 fn button_clear_filter(
