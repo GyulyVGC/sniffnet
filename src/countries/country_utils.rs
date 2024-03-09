@@ -1,8 +1,8 @@
 use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
-use iced::widget::Svg;
 use iced::widget::Tooltip;
-use iced::{Font, Length, Renderer};
+use iced::widget::{Svg, Text};
+use iced::Font;
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
@@ -35,7 +35,7 @@ fn get_flag_from_country(
     is_loopback: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<Renderer<StyleType>>, String) {
+) -> (Svg<StyleType>, String) {
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;
@@ -310,8 +310,8 @@ fn get_flag_from_country(
         }
     })))
     .style(svg_style)
-    .width(Length::Fixed(width))
-    .height(Length::Fixed(width * 0.75));
+    .width(width)
+    .height(width * 0.75);
 
     (svg, tooltip)
 }
@@ -322,7 +322,7 @@ pub fn get_flag_tooltip(
     host_info: &DataInfoHost,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let is_local = host_info.is_local;
     let is_loopback = host_info.is_loopback;
     let traffic_type = host_info.traffic_type;
@@ -335,10 +335,13 @@ pub fn get_flag_tooltip(
         language,
     );
 
-    let mut tooltip = Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(font)
-        .snap_within_viewport(true)
-        .style(ContainerType::Tooltip);
+    let mut tooltip = Tooltip::new(
+        content,
+        Text::new(tooltip).font(font),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .style(ContainerType::Tooltip);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -353,7 +356,7 @@ pub fn get_computer_tooltip(
     traffic_type: TrafficType,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, is_local, traffic_type) {
             (true, _, _) => COMPUTER,
@@ -364,8 +367,8 @@ pub fn get_computer_tooltip(
         },
     )))
     .style(SvgType::AdaptColor)
-    .width(Length::Fixed(FLAGS_WIDTH_BIG))
-    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75));
+    .width(FLAGS_WIDTH_BIG)
+    .height(FLAGS_WIDTH_BIG * 0.75);
 
     let tooltip = match (is_my_address, is_local, traffic_type) {
         (true, _, _) => your_network_adapter_translation(language),
@@ -375,8 +378,11 @@ pub fn get_computer_tooltip(
         (false, false, TrafficType::Unicast) => unknown_translation(language),
     };
 
-    Tooltip::new(content, tooltip, Position::FollowCursor)
-        .font(font)
-        .snap_within_viewport(true)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        Text::new(tooltip).font(font),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .style(ContainerType::Tooltip)
 }

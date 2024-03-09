@@ -4,7 +4,7 @@
 
 use iced::widget::text::Appearance;
 use iced::widget::{Column, Text};
-use iced::{Color, Font, Renderer};
+use iced::{Color, Font};
 
 use crate::gui::types::message::Message;
 use crate::StyleType;
@@ -28,7 +28,7 @@ impl TextType {
         subtitle: &str,
         desc: &str,
         font: Font,
-    ) -> Column<'static, Message, Renderer<StyleType>> {
+    ) -> Column<'static, Message, StyleType> {
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))

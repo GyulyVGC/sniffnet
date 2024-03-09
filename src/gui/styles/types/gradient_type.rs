@@ -25,7 +25,7 @@ pub fn get_gradient_headers(
         Color::WHITE
     };
     Gradient::Linear(
-        iced::gradient::Linear::new(Degrees(180.0))
+        iced::gradient::Linear::new(Degrees(90.0))
             .add_stop(
                 0.0,
                 match gradient_type {
@@ -59,7 +59,7 @@ pub fn get_gradient_buttons(
         Color::WHITE
     };
     Gradient::Linear(
-        iced::gradient::Linear::new(Degrees(225.0))
+        iced::gradient::Linear::new(Degrees(135.0))
             .add_stop(
                 0.0,
                 Color {
@@ -92,7 +92,7 @@ pub fn get_gradient_hovered_buttons(
         Color::WHITE
     };
     Gradient::Linear(
-        iced::gradient::Linear::new(Degrees(225.0))
+        iced::gradient::Linear::new(Degrees(135.0))
             .add_stop(0.0, colors.secondary)
             .add_stop(
                 1.0,

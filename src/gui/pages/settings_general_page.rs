@@ -1,15 +1,14 @@
 use std::sync::Arc;
 
 use iced::alignment::{Horizontal, Vertical};
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Column, Container, PickList, Row, Rule, Slider, Text,
-    Tooltip,
+    button, horizontal_space, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip,
 };
-use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::{Alignment, Font, Length};
 
-use crate::gui::components::button::button_open_file;
+use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -28,7 +27,7 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
-pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -48,19 +47,19 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, Renderer<S
             language,
         ))
         .push(get_settings_tabs(SettingsPage::General, font, language))
-        .push(vertical_space(Fixed(10.0)))
+        .push(Space::with_height(10))
         .push(column_all_general_setting(sniffer, font));
 
     Container::new(content)
-        .height(Fixed(400.0))
-        .width(Fixed(800.0))
+        .height(400)
+        .width(800)
         .style(ContainerType::Modal)
 }
 
 fn column_all_general_setting(
     sniffer: &Sniffer,
     font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         language,
         scale_factor,
@@ -84,7 +83,7 @@ fn column_all_general_setting(
                     .padding(10.0)
                     .style(ContainerType::Badge),
             )
-            .push(vertical_space(Fixed(10.0)));
+            .push(Space::with_height(10));
     }
 
     column = column.push(mmdb_settings(
@@ -104,21 +103,18 @@ fn row_language_scale_factor(
     language: Language,
     font: Font,
     scale_factor: f64,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .align_items(Alignment::Start)
-        .height(Length::Fixed(90.0))
+        .height(90)
         .push(language_picklist(language, font))
         .push(Rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
         .push(Rule::vertical(25))
-        .push(horizontal_space(Length::FillPortion(1)))
+        .push(horizontal_space())
 }
 
-fn language_picklist(
-    language: Language,
-    font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+fn language_picklist(language: Language, font: Font) -> Container<'static, Message, StyleType> {
     let mut flag_row = Row::new()
         .align_items(Alignment::Center)
         .spacing(10)
@@ -131,16 +127,19 @@ fn language_picklist(
                         .font(font)
                         .vertical_alignment(Vertical::Center)
                         .horizontal_alignment(Horizontal::Center)
-                        .size(15),
+                        .size(15)
+                        .line_height(LineHeight::Relative(1.0)),
                 )
                 .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
                 .padding(2)
-                .height(Fixed(20.0))
-                .width(Fixed(20.0)),
-                "The selected language is not\nfully updated to version 1.3 ↗",
+                .height(20)
+                .width(20),
+                row_open_link_tooltip(
+                    "The selected language is not\nfully updated to version 1.3",
+                    font,
+                ),
                 Position::FollowCursor,
             )
-            .font(font)
             .style(ContainerType::Tooltip),
         );
     }
@@ -166,7 +165,7 @@ fn language_picklist(
         );
 
     Container::new(content)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .align_x(Horizontal::Center)
         .align_y(Vertical::Center)
 }
@@ -175,7 +174,7 @@ fn scale_factor_slider(
     language: Language,
     font: Font,
     scale_factor: f64,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     #[allow(clippy::cast_possible_truncation)]
     let slider_width = 150.0 / scale_factor as f32;
     Container::new(
@@ -192,10 +191,10 @@ fn scale_factor_slider(
             .push(
                 Slider::new(0.5..=1.5, scale_factor, Message::ChangeScaleFactor)
                     .step(0.05)
-                    .width(Fixed(slider_width)),
+                    .width(slider_width),
             ),
     )
-    .width(Length::FillPortion(1))
+    .width(Length::Fill)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
@@ -208,7 +207,7 @@ fn mmdb_settings(
     asn_path: &str,
     country_reader: &Arc<MmdbReader>,
     asn_reader: &Arc<MmdbReader>,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     Column::new()
         .spacing(5)
         .align_items(Alignment::Center)
@@ -246,7 +245,7 @@ fn mmdb_selection_row(
     mmdb_reader: &Arc<MmdbReader>,
     caption: &str,
     language: Language,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let is_error = if custom_path.is_empty() {
         false
     } else {
@@ -286,7 +285,7 @@ fn button_clear_mmdb(
     message: fn(String) -> Message,
     font: Font,
     is_editable: bool,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let mut button = button(
         Text::new("×")
             .font(font)
@@ -295,8 +294,8 @@ fn button_clear_mmdb(
             .size(15),
     )
     .padding(2)
-    .height(Fixed(20.0))
-    .width(Fixed(20.0));
+    .height(20)
+    .width(20);
 
     if is_editable {
         button = button.on_press(message(String::new()));

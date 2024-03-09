@@ -3,9 +3,8 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Container, Row, Tooltip};
-use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
@@ -21,66 +20,57 @@ pub fn header(
     back_button: bool,
     language: Language,
     last_opened_setting: SettingsPage,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let logo = Icon::Sniffnet
         .to_text()
-        .horizontal_alignment(Horizontal::Center)
         .vertical_alignment(Vertical::Center)
-        .width(FillPortion(6))
         .height(Length::Fill)
-        .line_height(LineHeight::Relative(1.0))
-        .size(100);
+        .line_height(LineHeight::Relative(0.8))
+        .size(95);
 
     Container::new(
         Row::new()
-            .height(Length::Fill)
-            .width(Length::Fill)
+            .padding([0, 20])
             .align_items(Alignment::Center)
             .push(if back_button {
                 Container::new(get_button_reset(font, language))
-                    .width(FillPortion(1))
-                    .align_x(Horizontal::Center)
             } else {
-                Container::new(Row::new())
-                    .width(FillPortion(1))
-                    .align_x(Horizontal::Center)
+                Container::new(Space::with_width(60))
             })
+            .push(horizontal_space())
             .push(logo)
-            .push(
-                Container::new(get_button_settings(font, language, last_opened_setting))
-                    .width(FillPortion(1))
-                    .align_x(Horizontal::Center),
-            ),
+            .push(horizontal_space())
+            .push(Container::new(get_button_settings(
+                font,
+                language,
+                last_opened_setting,
+            ))),
     )
-    .height(Length::Fixed(95.0))
+    .height(90)
     .align_y(Vertical::Center)
-    .width(Length::Fill)
     .style(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset(
-    font: Font,
-    language: Language,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::ArrowBack
             .to_text()
             .size(20)
             .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .vertical_alignment(Vertical::Center)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .padding(10)
-    .height(Length::Fixed(40.0))
-    .width(Length::Fixed(60.0))
+    .height(40)
+    .width(60)
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
         content,
-        quit_analysis_translation(language),
+        Text::new(quit_analysis_translation(language)).font(font),
         Position::Right,
     )
     .gap(5)
-    .font(font)
     .style(ContainerType::Tooltip)
 }
 
@@ -88,7 +78,7 @@ pub fn get_button_settings(
     font: Font,
     language: Language,
     open_overlay: SettingsPage,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::Settings
             .to_text()
@@ -97,12 +87,15 @@ pub fn get_button_settings(
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(Length::Fixed(40.0))
-    .width(Length::Fixed(60.0))
+    .height(40)
+    .width(60)
     .on_press(Message::OpenSettings(open_overlay));
 
-    Tooltip::new(content, settings_translation(language), Position::Left)
-        .gap(5)
-        .font(font)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        Text::new(settings_translation(language)).font(font),
+        Position::Left,
+    )
+    .gap(5)
+    .style(ContainerType::Tooltip)
 }

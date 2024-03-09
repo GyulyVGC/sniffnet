@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::pick_list;
-use iced::{Background, Color};
+use iced::{Background, Border, Color};
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::gui::styles::types::palette::mix_colors;
@@ -26,9 +26,11 @@ impl iced::overlay::menu::StyleSheet for StyleType {
         iced::overlay::menu::Appearance {
             text_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border_width: BORDER_WIDTH,
-            border_radius: PICKLIST_BORDER_RADIUS.into(),
-            border_color: colors.secondary,
+            border: Border {
+                width: BORDER_WIDTH,
+                radius: PICKLIST_BORDER_RADIUS.into(),
+                color: colors.secondary,
+            },
             selected_text_color: colors.text_body,
             selected_background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
         }
@@ -46,9 +48,11 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(ext.buttons_color),
-            border_radius: PICKLIST_BORDER_RADIUS.into(),
-            border_width: 0.0,
-            border_color: Color::TRANSPARENT,
+            border: Border {
+                radius: PICKLIST_BORDER_RADIUS.into(),
+                width: 0.0,
+                color: Color::TRANSPARENT,
+            },
         }
     }
 
@@ -60,9 +64,11 @@ impl pick_list::StyleSheet for StyleType {
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
             background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
-            border_radius: PICKLIST_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: colors.secondary,
+            border: Border {
+                radius: PICKLIST_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: colors.secondary,
+            },
         }
     }
 }

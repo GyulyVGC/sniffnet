@@ -23,6 +23,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Settings "Language" tab has been removed. Language selection and other options are now included in a new settings tab "General" ([#365](https://github.com/GyulyVGC/sniffnet/pull/365))
 - Updated Portuguese translation to v1.2 ([#398](https://github.com/GyulyVGC/sniffnet/pull/398))
 - Cleaned code implementing the concept of first class theming ([#339](https://github.com/GyulyVGC/sniffnet/pull/339))
+- Migrate to Iced 0.12 ([#470](https://github.com/GyulyVGC/sniffnet/pull/470))
 - Added documentation about Sniffnet installation on Nix and Tiny Core Linux (respectively [#394](https://github.com/GyulyVGC/sniffnet/pull/394) and [#341](https://github.com/GyulyVGC/sniffnet/pull/341))
 - General aesthetic improvements
 - Fixed bug about not delivered favorite notifications in presence of old outgoing connections

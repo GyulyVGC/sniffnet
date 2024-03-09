@@ -1,5 +1,3 @@
-use iced::Renderer;
-
 use crate::gui::types::message::Message;
 use crate::translations::translations::{notifications_translation, style_translation};
 use crate::translations::translations_3::general_translation;
@@ -48,7 +46,7 @@ impl SettingsPage {
         }
     }
 
-    pub fn icon(self) -> iced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn icon(self) -> iced::widget::Text<'static, StyleType> {
         match self {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,

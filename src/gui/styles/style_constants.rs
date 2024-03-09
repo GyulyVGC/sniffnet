@@ -1,6 +1,6 @@
 //! Module defining the constants used for aesthetic purposes (colors, borders...)
 
-use iced::font::{Family, Stretch, Weight};
+use iced::font::{Family, Stretch, Style, Weight};
 use iced::{Color, Font};
 
 use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
@@ -196,7 +196,7 @@ pub const SARASA_MONO_BOLD: Font = Font {
     family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Bold,
     stretch: Stretch::Normal,
-    monospaced: true,
+    style: Style::Normal,
 };
 
 pub const SARASA_MONO_BYTES: &[u8] =
@@ -205,7 +205,7 @@ pub const SARASA_MONO: Font = Font {
     family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Normal,
     stretch: Stretch::Normal,
-    monospaced: true,
+    style: Style::Normal,
 };
 
 //font to display icons

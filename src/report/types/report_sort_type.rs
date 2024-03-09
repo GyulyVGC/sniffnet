@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 
 use iced::widget::Text;
-use iced::Renderer;
 
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -31,7 +30,7 @@ impl ReportSortType {
         }
     }
 
-    pub fn icon(self, report_col: &ReportCol) -> Text<'static, Renderer<StyleType>> {
+    pub fn icon(self, report_col: &ReportCol) -> Text<'static, StyleType> {
         match report_col {
             ReportCol::Bytes => self.byte_sort.icon(),
             ReportCol::Packets => self.packet_sort.icon(),

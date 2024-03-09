@@ -2,11 +2,14 @@ use std::cmp::min;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, text_input, vertical_space, Rule, Toggler, Tooltip};
+use iced::widget::{
+    button, horizontal_space, text_input, vertical_space, Rule, Space, Toggler, Tooltip,
+};
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Renderer};
+use iced::{alignment, Alignment, Font, Length, Pixels};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -32,7 +35,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -79,7 +82,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             font,
             sniffer.report_sort_type,
         ))
-        .push(vertical_space(4))
+        .push(Space::with_height(4))
         .push(Rule::horizontal(5))
         .push(report);
 
@@ -94,14 +97,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
                 .align_y(Vertical::Center)
                 .align_x(Horizontal::Center)
                 .padding([10, 7, 3, 7])
-                .width(Length::Fixed(1042.0))
+                .width(1042)
                 .style(ContainerType::BorderedRound),
         );
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -151,11 +154,11 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType
                 .height(Length::Fill)
                 .padding(20)
                 .align_items(Alignment::Center)
-                .push(vertical_space(Length::FillPortion(1)))
+                .push(vertical_space())
                 .push(Icon::Funnel.to_text().size(60))
-                .push(vertical_space(Length::Fixed(15.0)))
+                .push(Space::with_height(15))
                 .push(Text::new(no_search_results_translation(language)).font(font))
-                .push(vertical_space(Length::FillPortion(2))),
+                .push(Space::with_height(Length::FillPortion(2))),
         );
     }
 
@@ -167,7 +170,7 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
@@ -185,14 +188,17 @@ fn report_header_row(
         } else {
             ContainerType::Tooltip
         };
-        let title_tooltip = Tooltip::new(title_row, tooltip_val, Position::FollowCursor)
-            .font(font)
-            .style(tooltip_style);
+        let title_tooltip = Tooltip::new(
+            title_row,
+            Text::new(tooltip_val).font(font),
+            Position::FollowCursor,
+        )
+        .style(tooltip_style);
 
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
-            .width(Length::Fixed(report_col.get_width()))
-            .height(Length::Fixed(56.0))
+            .width(report_col.get_width())
+            .height(56)
             .push(title_tooltip);
         if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
             col_header = col_header.push(
@@ -250,7 +256,7 @@ fn title_report_col_display(
 fn sort_arrows(
     active_sort_type: ReportSortType,
     report_col: &ReportCol,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
@@ -271,7 +277,7 @@ fn row_report_entry(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
     } else {
@@ -294,7 +300,7 @@ fn row_report_entry(
                 .style(text_type),
             )
             .align_x(Horizontal::Center)
-            .width(Length::Fixed(report_col.get_width())),
+            .width(report_col.get_width()),
         );
     }
     ret_val
@@ -304,7 +310,7 @@ fn host_filters_col(
     search_params: &SearchParameters,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
@@ -320,12 +326,12 @@ fn host_filters_col(
         ));
     }
 
-    let input_country = filter_input(FilterInputType::Country, search_params.clone(), font)
-        .width(Length::Fixed(95.0));
-    let input_domain = filter_input(FilterInputType::Domain, search_params.clone(), font)
-        .width(Length::Fixed(190.0));
-    let input_as_name = filter_input(FilterInputType::AsName, search_params.clone(), font)
-        .width(Length::Fixed(190.0));
+    let input_country =
+        filter_input(FilterInputType::Country, search_params.clone(), font).width(95);
+    let input_domain =
+        filter_input(FilterInputType::Domain, search_params.clone(), font).width(190);
+    let input_as_name =
+        filter_input(FilterInputType::AsName, search_params.clone(), font).width(190);
 
     let container_country = Row::new()
         .spacing(5)
@@ -378,7 +384,7 @@ fn host_filters_col(
     Column::new()
         .align_items(Alignment::Start)
         .push(title_row)
-        .push(vertical_space(10))
+        .push(Space::with_height(10))
         .push(
             Row::new()
                 .align_items(Alignment::Center)
@@ -392,7 +398,7 @@ fn filter_input(
     filter_input_type: FilterInputType,
     search_params: SearchParameters,
     font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params);
     let is_filter_active = !filter_value.is_empty();
 
@@ -416,7 +422,7 @@ fn filter_input(
         input = input.icon(text_input::Icon {
             font: ICONS,
             code_point: Icon::Funnel.codepoint(),
-            size: Some(12.0),
+            size: Some(Pixels(12.0)),
             spacing: 2.0,
             side: Side::Left,
         });
@@ -444,7 +450,7 @@ fn filter_input(
         })
 }
 
-fn get_button_change_page(increment: bool) -> Button<'static, Message, Renderer<StyleType>> {
+fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType> {
     button(
         if increment {
             Icon::ArrowRight
@@ -457,8 +463,8 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, Renderer<
         .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(2)
-    .height(Length::Fixed(20.0))
-    .width(Length::Fixed(25.0))
+    .height(20)
+    .width(25)
     .on_press(Message::UpdatePageNumber(increment))
 }
 
@@ -469,16 +475,16 @@ fn get_change_page_row(
     start_entry_num: usize,
     end_entry_num: usize,
     results_number: usize,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
-        .height(Length::Fixed(40.0))
+        .height(40)
         .align_items(Alignment::Center)
         .spacing(10)
-        .push(horizontal_space(Length::Fill))
+        .push(horizontal_space())
         .push(if page_number > 1 {
-            Container::new(get_button_change_page(false).width(25.0))
+            Container::new(get_button_change_page(false).width(25))
         } else {
-            Container::new(horizontal_space(25.0))
+            Container::new(Space::with_width(25))
         })
         .push(
             Text::new(showing_results_translation(
@@ -490,27 +496,28 @@ fn get_change_page_row(
             .font(font),
         )
         .push(if page_number < (results_number + 20 - 1) / 20 {
-            Container::new(get_button_change_page(true).width(25.0))
+            Container::new(get_button_change_page(true).width(25))
         } else {
-            Container::new(horizontal_space(25.0))
+            Container::new(Space::with_width(25))
         })
-        .push(horizontal_space(Length::Fill))
+        .push(horizontal_space())
 }
 
 fn button_clear_filter(
     new_search_parameters: SearchParameters,
     font: Font,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     button(
         Text::new("×")
             .font(font)
             .vertical_alignment(Vertical::Center)
             .horizontal_alignment(Horizontal::Center)
-            .size(15),
+            .size(15)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .padding(2)
-    .height(Length::Fixed(20.0))
-    .width(Length::Fixed(20.0))
+    .height(20)
+    .width(20)
     .on_press(Message::Search(new_search_parameters))
 }
 

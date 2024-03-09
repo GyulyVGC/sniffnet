@@ -5,13 +5,14 @@
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, lazy, vertical_space, Button, Column, Container, Row, Scrollable, Text, Tooltip,
+    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
+    Scrollable, Space, Text, Tooltip,
 };
-use iced::widget::{horizontal_space, Rule};
-use iced::Length::{Fill, FillPortion, Fixed};
-use iced::{Alignment, Font, Length, Renderer};
+use iced::Length::{Fill, FillPortion};
+use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -48,7 +49,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -146,7 +147,7 @@ fn body_no_packets(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let link_type = device.link_type;
     let mut adapter_info = device.name.clone();
     adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
@@ -178,12 +179,12 @@ fn body_no_packets(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(vertical_space(FillPortion(1)))
+        .push(vertical_space())
         .push(icon_text)
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(nothing_to_see_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
-        .push(vertical_space(FillPortion(2)))
+        .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_no_observed(
@@ -193,7 +194,7 @@ fn body_no_observed(
     font_headers: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
         .horizontal_alignment(Horizontal::Center)
         .font(font);
@@ -203,7 +204,7 @@ fn body_no_observed(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(vertical_space(FillPortion(1)))
+        .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
         .push(get_active_filters_col(
             filters,
@@ -215,7 +216,7 @@ fn body_no_observed(
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
-        .push(vertical_space(FillPortion(2)))
+        .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_pcap_error(
@@ -223,7 +224,7 @@ fn body_pcap_error(
     waiting: &str,
     language: Language,
     font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .horizontal_alignment(Horizontal::Center)
@@ -234,24 +235,20 @@ fn body_pcap_error(
         .padding(10)
         .spacing(10)
         .align_items(Alignment::Center)
-        .push(vertical_space(FillPortion(1)))
+        .push(vertical_space())
         .push(Icon::Error.to_text().size(60))
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(error_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
-        .push(vertical_space(FillPortion(2)))
+        .push(Space::with_height(FillPortion(2)))
 }
 
-fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<StyleType>> {
-    let mut row_report = Row::new()
-        .padding([0, 10, 5, 10])
-        .height(Length::Fill)
-        .width(Length::Fill);
-
+fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
-    row_report = row_report
+    let row_report = Row::new()
+        .padding([0, 10, 5, 10])
         .push(col_host)
         .push(Rule::vertical(40))
         .push(col_service);
@@ -261,16 +258,14 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, Renderer<St
         .style(ContainerType::BorderedRound)
 }
 
-fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_host = Column::new()
-        .width(Length::Fixed(width))
-        .align_items(Alignment::Center);
+    let mut scroll_host = Column::new().width(width).align_items(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -289,7 +284,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
         let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
         let host_bar = Column::new()
-            .width(Length::Fixed(width))
+            .width(width)
             .spacing(1)
             .push(
                 Row::new()
@@ -302,7 +297,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                         })
                         .font(font),
                     )
-                    .push(horizontal_space(Length::FillPortion(1)))
+                    .push(horizontal_space())
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info_host.data_info.tot_packets().to_string()
@@ -336,7 +331,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host.push(vertical_space(Length::Fixed(25.0))).push(
+        scroll_host = scroll_host.push(Space::with_height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .horizontal_alignment(Horizontal::Center),
@@ -344,10 +339,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
     }
 
     Column::new()
-        .width(Length::Fixed(width + 11.0))
+        .width(width + 11.0)
         .push(
             Row::new()
-                .height(Length::Fixed(45.0))
+                .height(45)
                 .align_items(Alignment::Center)
                 .push(
                     Text::new(host_translation(language))
@@ -355,28 +350,27 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<
                         .style(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(horizontal_space(Length::Fill))
+                .push(horizontal_space())
                 .push(sort_arrows(
                     sniffer.host_sort_type,
                     Message::HostSortSelection,
                 )),
         )
         .push(
-            Scrollable::new(Container::new(scroll_host).width(Length::Fill))
+            Scrollable::new(scroll_host)
+                .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }
 
-fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_service = Column::new()
-        .width(Length::Fixed(width))
-        .align_items(Alignment::Center);
+    let mut scroll_service = Column::new().width(width).align_items(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -390,11 +384,11 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
 
         let content = Column::new()
             .spacing(1)
-            .width(Length::Fixed(width))
+            .width(width)
             .push(
                 Row::new()
                     .push(Text::new(service.to_string()).font(font))
-                    .push(horizontal_space(Length::FillPortion(1)))
+                    .push(horizontal_space())
                     .push(
                         Text::new(if chart_type.eq(&ChartType::Packets) {
                             data_info.tot_packets().to_string()
@@ -417,20 +411,18 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
     }
 
     if entries.len() >= 30 {
-        scroll_service = scroll_service
-            .push(vertical_space(Length::Fixed(25.0)))
-            .push(
-                Text::new(only_top_30_items_translation(language))
-                    .font(font)
-                    .horizontal_alignment(Horizontal::Center),
-            );
+        scroll_service = scroll_service.push(Space::with_height(25)).push(
+            Text::new(only_top_30_items_translation(language))
+                .font(font)
+                .horizontal_alignment(Horizontal::Center),
+        );
     }
 
     Column::new()
-        .width(Length::Fixed(width + 11.0))
+        .width(width + 11.0)
         .push(
             Row::new()
-                .height(Length::Fixed(45.0))
+                .height(45)
                 .align_items(Alignment::Center)
                 .push(
                     Text::new(service_translation(language))
@@ -438,14 +430,15 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, Render
                         .style(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(horizontal_space(Length::Fill))
+                .push(horizontal_space())
                 .push(sort_arrows(
                     sniffer.service_sort_type,
                     Message::ServiceSortSelection,
                 )),
         )
         .push(
-            Scrollable::new(Container::new(scroll_service).width(Length::Fill))
+            Scrollable::new(scroll_service)
+                .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         )
 }
@@ -455,7 +448,7 @@ fn lazy_col_info(
     filtered: u128,
     dropped: u32,
     sniffer: &Sniffer,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -483,31 +476,31 @@ fn lazy_col_info(
         .padding([5, 10])
         .push(
             Row::new()
-                .height(Length::Fixed(120.0))
+                .height(120)
                 .push(
                     Scrollable::new(col_device)
-                        .width(Length::FillPortion(1))
+                        .width(Length::Fill)
                         .direction(Direction::Horizontal(ScrollbarType::properties())),
                 )
-                .push(Rule::vertical(25))
-                .push(col_data_representation.width(Length::FillPortion(1))),
+                .push(Container::new(Rule::vertical(25)).height(Length::Shrink))
+                .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
         .push(
             Scrollable::new(col_bytes_packets)
+                .height(Length::Fill)
                 .width(Length::Fill)
                 .direction(Direction::Vertical(ScrollbarType::properties())),
         );
 
     Container::new(content)
-        .width(Length::Fixed(400.0))
+        .width(400)
         .padding([10, 5, 5, 5])
-        .height(Length::Fill)
         .align_x(Horizontal::Center)
         .style(ContainerType::BorderedRound)
 }
 
-fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer<StyleType>> {
+fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
     let traffic_chart = &sniffer.traffic_chart;
 
@@ -524,7 +517,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, Renderer
             .align_items(Alignment::Center)
             .push(
                 Row::new()
-                    .padding([10, 0, 15, 0])
+                    .padding([10, 0])
                     .spacing(10)
                     .align_items(Alignment::Center)
                     .push(
@@ -551,7 +544,7 @@ fn col_device(
     language: Language,
     font: Font,
     device: &MyDevice,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let link_type = device.link_type;
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
@@ -559,6 +552,7 @@ fn col_device(
     let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
 
     Column::new()
+        .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             network_adapter_translation(language),
@@ -572,7 +566,7 @@ fn col_data_representation(
     language: Language,
     font: Font,
     chart_type: ChartType,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
             .style(TextType::Subtitle)
@@ -590,7 +584,7 @@ fn col_data_representation(
                     .font(font),
             )
             .width(Length::Fill)
-            .height(Length::Fixed(33.0))
+            .height(33)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -610,7 +604,7 @@ fn col_bytes_packets(
     font: Font,
     font_headers: Font,
     sniffer: &Sniffer,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
     let filters = &sniffer.filters;
@@ -735,25 +729,25 @@ fn get_bars_length(
     (in_len, out_len)
 }
 
-fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, Renderer<StyleType>> {
+fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, StyleType> {
     Row::new()
         .push(if in_len > 0.0 {
             Row::new()
-                .width(Length::Fixed(in_len))
+                .width(in_len)
                 .push(Rule::horizontal(1).style(RuleType::Incoming))
         } else {
             Row::new()
         })
         .push(if out_len > 0.0 {
             Row::new()
-                .width(Length::Fixed(out_len))
+                .width(out_len)
                 .push(Rule::horizontal(1).style(RuleType::Outgoing))
         } else {
             Row::new()
         })
 }
 
-fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Renderer<StyleType>> {
+fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, StyleType> {
     button(
         Icon::Star
             .to_text()
@@ -762,8 +756,8 @@ fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, Re
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(Length::Fixed(FLAGS_WIDTH_BIG * 0.75))
-    .width(Length::Fixed(FLAGS_WIDTH_BIG))
+    .height(FLAGS_WIDTH_BIG * 0.75)
+    .width(FLAGS_WIDTH_BIG)
     .style(if is_favorite {
         ButtonType::Starred
     } else {
@@ -778,7 +772,7 @@ fn get_active_filters_col(
     font: Font,
     font_headers: Font,
     show: bool,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
@@ -794,16 +788,20 @@ fn get_active_filters_col(
         } else {
             Row::new().padding([0, 0, 0, 20]).push(
                 Tooltip::new(
-                    Container::new(Text::new("i").font(font_headers).size(15))
-                        .align_x(Horizontal::Center)
-                        .padding(2)
-                        .height(Fixed(20.0))
-                        .width(Fixed(20.0))
-                        .style(ContainerType::Highlighted),
-                    filters_string,
+                    Container::new(
+                        Text::new("i")
+                            .font(font_headers)
+                            .size(15)
+                            .line_height(LineHeight::Relative(1.0)),
+                    )
+                    .align_x(Horizontal::Center)
+                    .align_y(Vertical::Center)
+                    .height(20)
+                    .width(20)
+                    .style(ContainerType::Highlighted),
+                    Text::new(filters_string).font(font),
                     Position::FollowCursor,
                 )
-                .font(font)
                 .style(ContainerType::Tooltip),
             )
         });
@@ -814,7 +812,7 @@ fn get_active_filters_col(
 fn sort_arrows(
     active_sort_type: SortType,
     message: fn(SortType) -> Message,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         button(
             active_sort_type

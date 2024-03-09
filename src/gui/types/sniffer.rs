@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use iced::window::Id;
 use iced::{window, Command};
 use pcap::Device;
 use rfd::FileHandle;
@@ -294,7 +295,7 @@ impl Sniffer {
             // }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close();
+                return window::close(Id::MAIN);
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());
@@ -316,7 +317,7 @@ impl Sniffer {
             Message::ServiceSortSelection(sort_type) => {
                 self.service_sort_type = sort_type;
             }
-            Message::TickInit | Message::FontLoaded(_) => {}
+            Message::TickInit => {}
         }
         Command::none()
     }

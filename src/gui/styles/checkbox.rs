@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::checkbox::Appearance;
-use iced::Background;
+use iced::{Background, Border};
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
@@ -25,9 +25,11 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
         Appearance {
             background: Background::Color(ext.buttons_color),
             icon_color: colors.text_body,
-            border_radius: CHECKBOX_BORDER_RADIUS.into(),
-            border_width: if is_checked { BORDER_WIDTH } else { 0.0 },
-            border_color: colors.secondary,
+            border: Border {
+                radius: CHECKBOX_BORDER_RADIUS.into(),
+                width: if is_checked { BORDER_WIDTH } else { 0.0 },
+                color: colors.secondary,
+            },
             text_color: None,
         }
     }
@@ -38,9 +40,11 @@ impl iced::widget::checkbox::StyleSheet for StyleType {
         Appearance {
             background: Background::Color(ext.buttons_color),
             icon_color: colors.text_body,
-            border_radius: CHECKBOX_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: colors.secondary,
+            border: Border {
+                radius: CHECKBOX_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: colors.secondary,
+            },
             text_color: None,
         }
     }

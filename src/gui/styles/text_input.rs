@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::text_input::Appearance;
-use iced::{Background, Color};
+use iced::{Background, Border, Color};
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
@@ -32,12 +32,14 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: match style {
-                TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => ext.buttons_color,
-                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+            border: Border {
+                radius: TEXT_INPUT_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: match style {
+                    TextInputType::Badge => Color::TRANSPARENT,
+                    TextInputType::Standard => ext.buttons_color,
+                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                },
             },
             icon_color: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
@@ -51,11 +53,13 @@ impl iced::widget::text_input::StyleSheet for StyleType {
         let is_nightly = self.get_extension().is_nightly;
         Appearance {
             background: Background::Color(colors.primary),
-            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: match style {
-                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
-                _ => colors.secondary,
+            border: Border {
+                radius: TEXT_INPUT_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: match style {
+                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                    _ => colors.secondary,
+                },
             },
             icon_color: Color {
                 a: if is_nightly { 0.2 } else { 0.7 },
@@ -103,11 +107,13 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => ext.buttons_color,
             }),
-            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: match style {
-                TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
-                _ => colors.secondary,
+            border: Border {
+                radius: TEXT_INPUT_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: match style {
+                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                    _ => colors.secondary,
+                },
             },
             icon_color: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
@@ -127,15 +133,17 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             }),
-            border_radius: TEXT_INPUT_BORDER_RADIUS.into(),
-            border_width: BORDER_WIDTH,
-            border_color: match style {
-                TextInputType::Badge => Color::TRANSPARENT,
-                TextInputType::Standard => Color {
-                    a: ext.alpha_round_borders,
-                    ..ext.buttons_color
+            border: Border {
+                radius: TEXT_INPUT_BORDER_RADIUS.into(),
+                width: BORDER_WIDTH,
+                color: match style {
+                    TextInputType::Badge => Color::TRANSPARENT,
+                    TextInputType::Standard => Color {
+                        a: ext.alpha_round_borders,
+                        ..ext.buttons_color
+                    },
+                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
                 },
-                TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
             },
             icon_color: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },

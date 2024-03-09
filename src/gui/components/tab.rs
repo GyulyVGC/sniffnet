@@ -1,8 +1,9 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::alignment::Vertical;
-use iced::widget::{button, horizontal_space, Button, Container, Row, Text};
-use iced::{alignment, Alignment, Font, Length, Renderer};
+use iced::widget::text::LineHeight;
+use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
+use iced::{alignment, Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
@@ -16,7 +17,7 @@ pub fn get_settings_tabs(
     active: SettingsPage,
     font: Font,
     language: Language,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Start)
@@ -36,7 +37,7 @@ pub fn get_pages_tabs(
     font_headers: Font,
     language: Language,
     unread_notifications: usize,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_items(Alignment::Start)
@@ -69,10 +70,11 @@ fn new_page_tab(
     font: Font,
     font_headers: Font,
     unread: Option<usize>,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let mut content = Row::new()
+        .height(Length::Fill)
         .align_items(Alignment::Center)
-        .push(horizontal_space(Length::FillPortion(1)))
+        .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
@@ -84,7 +86,7 @@ fn new_page_tab(
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
-        .push(horizontal_space(10))
+        .push(Space::with_width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
@@ -100,24 +102,26 @@ fn new_page_tab(
 
     if let Some(num) = unread {
         if num > 0 {
-            let notifications_badge =
-                Container::new(Text::new(num.to_string()).font(font_headers).size(14))
-                    .align_y(Vertical::Center)
-                    .padding([2, 4])
-                    .height(Length::Fixed(20.0))
-                    .style(ContainerType::Highlighted);
-            content = content
-                .push(horizontal_space(Length::Fixed(7.0)))
-                .push(notifications_badge);
+            let notifications_badge = Container::new(
+                Text::new(num.to_string())
+                    .font(font_headers)
+                    .size(14)
+                    .line_height(LineHeight::Relative(1.0)),
+            )
+            .align_y(Vertical::Center)
+            .padding([2, 4])
+            .height(20)
+            .style(ContainerType::Highlighted);
+            content = content.push(Space::with_width(7)).push(notifications_badge);
         }
     }
 
-    content = content.push(horizontal_space(Length::FillPortion(1)));
+    content = content.push(horizontal_space());
 
     button(content)
-        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .style(if active {
             ButtonType::TabActive
         } else {
@@ -131,10 +135,11 @@ fn new_settings_tab(
     active: bool,
     language: Language,
     font: Font,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let content = Row::new()
+        .height(Length::Fill)
         .align_items(Alignment::Center)
-        .push(horizontal_space(Length::FillPortion(1)))
+        .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
@@ -146,7 +151,7 @@ fn new_settings_tab(
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
-        .push(horizontal_space(10))
+        .push(Space::with_width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
@@ -159,12 +164,12 @@ fn new_settings_tab(
                 .horizontal_alignment(alignment::Horizontal::Center)
                 .vertical_alignment(alignment::Vertical::Center),
         )
-        .push(horizontal_space(Length::FillPortion(1)));
+        .push(horizontal_space());
 
     button(content)
-        .height(Length::Fixed(if active { 35.0 } else { 30.0 }))
+        .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(1))
+        .width(Length::Fill)
         .style(if active {
             ButtonType::TabActive
         } else {

@@ -1,8 +1,7 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
-use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container};
-use iced::{Element, Renderer};
+use iced::widget::Container;
+use iced::Element;
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
@@ -63,11 +62,8 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self) -> Element<Message, Renderer<StyleType>> {
-        Container::new(Column::new().push(ChartWidget::new(self)))
-            .align_x(Horizontal::Left)
-            .align_y(Vertical::Bottom)
-            .into()
+    pub fn view(&self) -> Element<Message, StyleType> {
+        Container::new(ChartWidget::new(self)).into()
     }
 
     pub fn change_kind(&mut self, kind: ChartType) {
@@ -161,10 +157,10 @@ impl Chart<Message> for TrafficChart {
         }
 
         chart_builder
-            .margin_right(30)
-            .margin_bottom(0)
-            .set_label_area_size(LabelAreaPosition::Left, 60)
-            .set_label_area_size(LabelAreaPosition::Bottom, 50);
+            .margin_right(25)
+            .margin_top(6)
+            .set_label_area_size(LabelAreaPosition::Left, 55)
+            .set_label_area_size(LabelAreaPosition::Bottom, 40);
 
         let x_axis_range = self.x_axis_range();
         let y_axis_range = self.y_axis_range();
@@ -285,7 +281,7 @@ mod tests {
         let spline = Spline::from_vec(
             vec.iter()
                 .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
-                .collect(),
+                .collect::<Vec<Key<f32, f32>>>(),
         );
 
         let eps = 0.001;

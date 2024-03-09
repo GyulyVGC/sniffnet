@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::container::Appearance;
-use iced::{Background, Color};
+use iced::{Background, Border, Color, Shadow};
 
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
@@ -56,32 +56,35 @@ impl iced::widget::container::StyleSheet for StyleType {
                 ContainerType::Modal => Background::Color(colors.primary),
                 ContainerType::Standard => Background::Color(Color::TRANSPARENT),
             }),
-            border_radius: match style {
-                ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
-                ContainerType::Modal => {
-                    [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
-                }
-                ContainerType::Tooltip => 7.0.into(),
-                ContainerType::Badge | ContainerType::Highlighted => 100.0.into(),
-                _ => 0.0.into(),
-            },
-            border_width: match style {
-                ContainerType::Standard
-                | ContainerType::Modal
-                | ContainerType::Neutral
-                | ContainerType::Gradient(_)
-                | ContainerType::Highlighted => 0.0,
-                ContainerType::Tooltip => BORDER_WIDTH / 2.0,
-                ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
-                _ => BORDER_WIDTH,
-            },
-            border_color: match style {
-                ContainerType::Palette => Color::BLACK,
-                _ => Color {
-                    a: ext.alpha_round_borders,
-                    ..ext.buttons_color
+            border: Border {
+                radius: match style {
+                    ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
+                    ContainerType::Modal => {
+                        [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
+                    }
+                    ContainerType::Tooltip => 7.0.into(),
+                    ContainerType::Badge | ContainerType::Highlighted => 100.0.into(),
+                    _ => 0.0.into(),
+                },
+                width: match style {
+                    ContainerType::Standard
+                    | ContainerType::Modal
+                    | ContainerType::Neutral
+                    | ContainerType::Gradient(_)
+                    | ContainerType::Highlighted => 0.0,
+                    ContainerType::Tooltip => BORDER_WIDTH / 2.0,
+                    ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
+                    _ => BORDER_WIDTH,
+                },
+                color: match style {
+                    ContainerType::Palette => Color::BLACK,
+                    _ => Color {
+                        a: ext.alpha_round_borders,
+                        ..ext.buttons_color
+                    },
                 },
             },
+            shadow: Shadow::default(),
         }
     }
 }

@@ -8,11 +8,10 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, vertical_space, Button, Column, Container, Row, Rule, Scrollable,
-    Text, TextInput, Tooltip,
+    button, Button, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Font, Length, Renderer};
+use iced::{alignment, Font, Length};
 use pcap::Device;
 
 use crate::gui::styles::button::ButtonType;
@@ -37,7 +36,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -96,10 +95,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>
             .align_x(Horizontal::Center),
         );
 
-    let body = Column::new().push(vertical_space(Length::Fixed(5.0))).push(
+    let body = Column::new().push(Space::with_height(5)).push(
         Row::new()
             .push(col_adapter)
-            .push(horizontal_space(Length::Fixed(30.0)))
+            .push(Space::with_width(30))
             .push(filters_pane),
     );
 
@@ -110,7 +109,7 @@ fn col_ip_buttons(
     active_ip_filters: &HashSet<IpVersion>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
@@ -122,8 +121,8 @@ fn col_ip_buttons(
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(90.0))
-            .height(Length::Fixed(35.0))
+            .width(90)
+            .height(35)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -149,7 +148,7 @@ fn col_protocol_buttons(
     active_protocol_filters: &HashSet<Protocol>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in Protocol::ALL {
         let is_active = active_protocol_filters.contains(&option);
@@ -157,13 +156,12 @@ fn col_protocol_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .width(Length::Fill)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
                     .font(font),
             )
-            .width(Length::Fixed(90.0))
-            .height(Length::Fixed(35.0))
+            .width(90)
+            .height(35)
             .style(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
@@ -189,7 +187,7 @@ fn col_address_input(
     value: &str,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -200,7 +198,7 @@ fn col_address_input(
             .padding([3, 5])
             .on_input(Message::AddressFilter)
             .font(font)
-            .width(Length::Fixed(310.0))
+            .width(310)
             .style(if is_error {
                 TextInputType::Error
             } else {
@@ -224,7 +222,7 @@ fn col_port_input(
     value: &str,
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -235,7 +233,7 @@ fn col_port_input(
             .padding([3, 5])
             .on_input(Message::PortFilter)
             .font(font)
-            .width(Length::Fixed(180.0))
+            .width(180)
             .style(if is_error {
                 TextInputType::Error
             } else {
@@ -260,7 +258,7 @@ fn button_start(
     language: Language,
     color_gradient: GradientType,
     filters: &Filters,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+) -> Tooltip<'static, Message, StyleType> {
     let mut content = button(
         Icon::Rocket
             .to_text()
@@ -269,8 +267,8 @@ fn button_start(
             .vertical_alignment(alignment::Vertical::Center),
     )
     .padding(10)
-    .height(Length::Fixed(80.0))
-    .width(Length::Fixed(160.0))
+    .height(80)
+    .width(160)
     .style(ButtonType::Gradient(color_gradient));
 
     let mut tooltip = start_translation(language).to_string();
@@ -284,13 +282,12 @@ fn button_start(
         position = Position::FollowCursor;
     }
 
-    Tooltip::new(content, tooltip, position)
+    Tooltip::new(content, Text::new(tooltip).font(font), position)
         .gap(5)
-        .font(font)
         .style(ContainerType::Tooltip)
 }
 
-fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, Renderer<StyleType>> {
+fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
 
     let mut dev_str_list = vec![];

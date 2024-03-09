@@ -3,7 +3,7 @@ use std::thread;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
-use iced::{Font, Length, Renderer};
+use iced::{Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
@@ -43,7 +43,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, StyleType> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),

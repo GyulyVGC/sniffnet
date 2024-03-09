@@ -83,6 +83,14 @@ mod tests {
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
     use crate::{ChartType, Language, RunTimeData, StyleType, TrafficChart};
 
+    fn spline_from_vec(vec: Vec<(i32, i32)>) -> Spline<f32, f32> {
+        Spline::from_vec(
+            vec.iter()
+                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
+                .collect::<Vec<Key<f32, f32>>>(),
+        )
+    }
+
     #[test]
     fn test_chart_data_updates() {
         let sent_vec = vec![
@@ -116,12 +124,7 @@ mod tests {
             (27, -1000),
             (28, -1000),
         ];
-        let sent = Spline::from_vec(
-            sent_vec
-                .iter()
-                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
-                .collect(),
-        );
+        let sent = spline_from_vec(sent_vec);
         let received_vec = vec![
             (0, 1000),
             (1, 21000),
@@ -153,12 +156,7 @@ mod tests {
             (27, 21000),
             (28, 21000),
         ];
-        let received = Spline::from_vec(
-            received_vec
-                .iter()
-                .map(|&(x, y)| Key::new(x as f32, y as f32, Interpolation::Cosine))
-                .collect(),
-        );
+        let received = spline_from_vec(received_vec);
         let tot_sent = 1000 * 28 + 500;
         let tot_received = 21000 * 28 + 1000;
         let mut traffic_chart = TrafficChart {

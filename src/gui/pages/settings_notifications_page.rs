@@ -1,11 +1,8 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{
-    horizontal_space, vertical_space, Checkbox, Column, Container, Row, Scrollable, Text, TextInput,
-};
-use iced::widget::{Button, Slider};
-use iced::Length::Fixed;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::widget::{horizontal_space, Button, Slider};
+use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
@@ -30,7 +27,7 @@ use crate::translations::translations::{
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -54,7 +51,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
             font,
             language,
         ))
-        .push(vertical_space(Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(
             notifications_title_translation(language)
                 .font(font)
@@ -63,7 +60,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
         )
-        .push(vertical_space(Fixed(5.0)));
+        .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
         .padding([0, 0, 5, 0])
@@ -73,7 +70,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
         .push(
             Scrollable::new(
                 Column::new()
-                    .width(Fixed(720.0))
+                    .width(720)
                     .push(get_packets_notify(
                         notifications.packets_notification,
                         language,
@@ -96,8 +93,8 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Rend
     content = content.push(volume_notification_col);
 
     Container::new(content)
-        .height(Fixed(400.0))
-        .width(Fixed(800.0))
+        .height(400)
+        .width(800)
         .style(ContainerType::Modal)
 }
 
@@ -105,30 +102,30 @@ fn get_packets_notify(
     packets_notification: PacketsNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let checkbox = Checkbox::new(
         packets_threshold_translation(language),
         packets_notification.threshold.is_some(),
-        move |toggled| {
-            if toggled {
-                Message::UpdateNotificationSettings(
-                    Notification::Packets(PacketsNotification {
-                        threshold: Some(packets_notification.previous_threshold),
-                        ..packets_notification
-                    }),
-                    false,
-                )
-            } else {
-                Message::UpdateNotificationSettings(
-                    Notification::Packets(PacketsNotification {
-                        threshold: None,
-                        ..packets_notification
-                    }),
-                    false,
-                )
-            }
-        },
     )
+    .on_toggle(move |toggled| {
+        if toggled {
+            Message::UpdateNotificationSettings(
+                Notification::Packets(PacketsNotification {
+                    threshold: Some(packets_notification.previous_threshold),
+                    ..packets_notification
+                }),
+                false,
+            )
+        } else {
+            Message::UpdateNotificationSettings(
+                Notification::Packets(PacketsNotification {
+                    threshold: None,
+                    ..packets_notification
+                }),
+                false,
+            )
+        }
+    })
     .size(18)
     .font(font);
 
@@ -138,7 +135,7 @@ fn get_packets_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     } else {
@@ -148,7 +145,7 @@ fn get_packets_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     }
@@ -158,30 +155,30 @@ fn get_bytes_notify(
     bytes_notification: BytesNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let checkbox = Checkbox::new(
         bytes_threshold_translation(language),
         bytes_notification.threshold.is_some(),
-        move |toggled| {
-            if toggled {
-                Message::UpdateNotificationSettings(
-                    Notification::Bytes(BytesNotification {
-                        threshold: Some(bytes_notification.previous_threshold),
-                        ..bytes_notification
-                    }),
-                    false,
-                )
-            } else {
-                Message::UpdateNotificationSettings(
-                    Notification::Bytes(BytesNotification {
-                        threshold: None,
-                        ..bytes_notification
-                    }),
-                    false,
-                )
-            }
-        },
     )
+    .on_toggle(move |toggled| {
+        if toggled {
+            Message::UpdateNotificationSettings(
+                Notification::Bytes(BytesNotification {
+                    threshold: Some(bytes_notification.previous_threshold),
+                    ..bytes_notification
+                }),
+                false,
+            )
+        } else {
+            Message::UpdateNotificationSettings(
+                Notification::Bytes(BytesNotification {
+                    threshold: None,
+                    ..bytes_notification
+                }),
+                false,
+            )
+        }
+    })
     .size(18)
     .font(font);
 
@@ -191,7 +188,7 @@ fn get_bytes_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     } else {
@@ -201,7 +198,7 @@ fn get_bytes_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     }
@@ -211,21 +208,21 @@ fn get_favorite_notify(
     favorite_notification: FavoriteNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     let checkbox = Checkbox::new(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
-        move |toggled| {
-            Message::UpdateNotificationSettings(
-                if toggled {
-                    Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
-                } else {
-                    Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
-                },
-                false,
-            )
-        },
     )
+    .on_toggle(move |toggled| {
+        Message::UpdateNotificationSettings(
+            if toggled {
+                Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
+            } else {
+                Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
+            },
+            false,
+        )
+    })
     .size(18)
     .font(font);
 
@@ -241,14 +238,14 @@ fn get_favorite_notify(
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
-                .width(Fixed(700.0))
+                .width(700)
                 .style(ContainerType::BorderedRound),
         )
     }
@@ -258,12 +255,12 @@ fn input_group_packets(
     packets_notification: PacketsNotification,
     font: Font,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
         .align_items(Alignment::Center)
         .spacing(5)
-        .push(horizontal_space(Fixed(45.0)))
+        .push(Space::with_width(45))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
@@ -284,7 +281,7 @@ fn input_group_packets(
             })
             .padding([3, 5])
             .font(font)
-            .width(Length::Fixed(100.0)),
+            .width(100),
         )
         .push(
             Text::new(per_second_translation(language))
@@ -301,7 +298,7 @@ fn input_group_bytes(
     bytes_notification: BytesNotification,
     font: Font,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let info_str = format!(
         "{}; {}",
         per_second_translation(language),
@@ -314,7 +311,7 @@ fn input_group_bytes(
     let input_row = Row::new()
         .spacing(5)
         .align_items(Alignment::Center)
-        .push(horizontal_space(Fixed(45.0)))
+        .push(Space::with_width(45))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
@@ -331,7 +328,7 @@ fn input_group_bytes(
             })
             .padding([3, 5])
             .font(font)
-            .width(Length::Fixed(100.0)),
+            .width(100),
         )
         .push(
             Text::new(info_str)
@@ -348,7 +345,7 @@ fn volume_slider(
     language: Language,
     font: Font,
     volume: u8,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         Column::new()
             .spacing(5)
@@ -359,16 +356,16 @@ fn volume_slider(
                     .push(
                         Icon::AudioMute
                             .to_text()
-                            .width(Fixed(30.0))
+                            .width(30)
                             .vertical_alignment(Vertical::Center)
                             .size(20),
                     )
                     .push(
                         Slider::new(0..=100, volume, Message::ChangeVolume)
                             .step(5)
-                            .width(Fixed(200.0)),
+                            .width(200),
                     )
-                    .push(horizontal_space(Length::Fixed(15.0)))
+                    .push(Space::with_width(15))
                     .push(
                         Icon::AudioHigh
                             .to_text()
@@ -379,7 +376,7 @@ fn volume_slider(
     )
     .padding(5)
     .width(Length::Fill)
-    .height(Length::Fixed(60.0))
+    .height(60)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
 }
@@ -388,7 +385,7 @@ fn sound_buttons(
     notification: Notification,
     font: Font,
     language: Language,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     let current_sound = match notification {
         Notification::Packets(n) => n.sound,
         Notification::Bytes(n) => n.sound,
@@ -398,7 +395,7 @@ fn sound_buttons(
     let mut ret_val = Row::new()
         .align_items(Alignment::Center)
         .spacing(5)
-        .push(horizontal_space(Fixed(45.0)))
+        .push(Space::with_width(45))
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
 
     for option in Sound::ALL {
@@ -415,8 +412,8 @@ fn sound_buttons(
         ret_val = ret_val.push(
             Button::new(option.get_text(font))
                 .padding(0)
-                .width(Length::Fixed(80.0))
-                .height(Length::Fixed(25.0))
+                .width(80)
+                .height(25)
                 .style(if is_active {
                     ButtonType::BorderedRoundSelected
                 } else {
@@ -436,10 +433,10 @@ pub fn settings_header(
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space(Length::FillPortion(1)))
+            .push(horizontal_space())
             .push(
                 Text::new(settings_translation(language))
                     .font(font_headers)
@@ -449,13 +446,13 @@ pub fn settings_header(
             )
             .push(
                 Container::new(button_hide(Message::CloseSettings, language, font))
-                    .width(Length::FillPortion(1))
+                    .width(Length::Fill)
                     .align_x(Horizontal::Center),
             ),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .height(Fixed(40.0))
+    .height(40)
     .width(Length::Fill)
     .style(ContainerType::Gradient(color_gradient))
 }

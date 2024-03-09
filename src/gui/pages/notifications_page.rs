@@ -1,10 +1,11 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, vertical_space};
+use iced::widget::{button, vertical_space, Space};
 use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::Length::FillPortion;
-use iced::{Alignment, Font, Length, Renderer};
+use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -31,7 +32,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
-pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -53,9 +54,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
         sniffer.unread_notifications,
     );
 
-    tab_and_body = tab_and_body
-        .push(tabs)
-        .push(vertical_space(Length::Fixed(15.0)));
+    tab_and_body = tab_and_body.push(tabs).push(Space::with_height(15));
 
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
@@ -86,7 +85,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
                     Text::new(only_last_30_translation(language)).font(font)
                 })
                 .padding(10)
-                .width(Length::FillPortion(1))
+                .width(Length::Fill)
                 .height(Length::Fill)
                 .align_x(Horizontal::Center)
                 .align_y(Vertical::Center),
@@ -97,7 +96,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
             )
             .push(
                 Container::new(get_button_clear_all(font, language))
-                    .width(Length::FillPortion(1))
+                    .width(Length::Fill)
                     .height(Length::Fill)
                     .align_x(Horizontal::Center)
                     .align_y(Vertical::Center),
@@ -111,13 +110,13 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, Renderer<Styl
 fn body_no_notifications_set(
     font: Font,
     language: Language,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space(FillPortion(1)))
+        .push(vertical_space())
         .push(
             no_notifications_set_translation(language)
                 .horizontal_alignment(Horizontal::Center)
@@ -128,34 +127,34 @@ fn body_no_notifications_set(
             language,
             SettingsPage::Notifications,
         ))
-        .push(vertical_space(FillPortion(2)))
+        .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_no_notifications_received(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, Renderer<StyleType>> {
+) -> Column<'static, Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)
         .align_items(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space(FillPortion(1)))
+        .push(vertical_space())
         .push(
             no_notifications_received_translation(language)
                 .horizontal_alignment(Horizontal::Center)
                 .font(font),
         )
         .push(Text::new(waiting.to_owned()).font(font).size(50))
-        .push(vertical_space(FillPortion(2)))
+        .push(Space::with_height(FillPortion(2)))
 }
 
 fn packets_notification_log(
     logged_notification: PacketsThresholdExceeded,
     language: Language,
     font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let threshold_str = format!(
         "{}: {} {}",
         threshold_translation(language),
@@ -176,17 +175,19 @@ fn packets_notification_log(
         .spacing(30)
         .push(
             Tooltip::new(
-                Icon::PacketsThreshold.to_text().size(80),
-                packets_exceeded_translation(language),
+                Icon::PacketsThreshold
+                    .to_text()
+                    .size(80)
+                    .line_height(LineHeight::Relative(1.0)),
+                Text::new(packets_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .font(font)
             .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .push(
                     Row::new()
                         .spacing(5)
@@ -219,8 +220,8 @@ fn packets_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
@@ -229,7 +230,7 @@ fn bytes_notification_log(
     logged_notification: BytesThresholdExceeded,
     language: Language,
     font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let mut threshold_str = threshold_translation(language);
     threshold_str.push_str(": ");
     threshold_str.push_str(&ByteMultiple::formatted_string(
@@ -255,17 +256,19 @@ fn bytes_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::BytesThreshold.to_text().size(80),
-                bytes_exceeded_translation(language),
+                Icon::BytesThreshold
+                    .to_text()
+                    .size(80)
+                    .line_height(LineHeight::Relative(1.0)),
+                Text::new(bytes_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .font(font)
             .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
                 .spacing(7)
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .push(
                     Row::new()
                         .spacing(5)
@@ -300,8 +303,8 @@ fn bytes_notification_log(
                 .push(Text::new(outgoing_str).font(font)),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
@@ -310,7 +313,7 @@ fn favorite_notification_log(
     logged_notification: FavoriteTransmitted,
     language: Language,
     font: Font,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let country = logged_notification.host.country;
     let asn = &logged_notification.host.asn;
 
@@ -337,16 +340,19 @@ fn favorite_notification_log(
         .height(Length::Fill)
         .push(
             Tooltip::new(
-                Icon::Star.to_text().size(80).style(TextType::Starred),
-                favorite_transmitted_translation(language),
+                Icon::Star
+                    .to_text()
+                    .size(80)
+                    .style(TextType::Starred)
+                    .line_height(LineHeight::Relative(1.0)),
+                Text::new(favorite_transmitted_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .font(font)
             .style(ContainerType::Tooltip),
         )
         .push(
             Column::new()
-                .width(Length::Fixed(250.0))
+                .width(250)
                 .spacing(7)
                 .push(
                     Row::new()
@@ -367,16 +373,13 @@ fn favorite_notification_log(
                 .push(row_flag_details),
         );
     Container::new(content)
-        .height(Length::Fixed(120.0))
-        .width(Length::Fixed(800.0))
+        .height(120)
+        .width(800)
         .padding(10)
         .style(ContainerType::BorderedRound)
 }
 
-fn get_button_clear_all(
-    font: Font,
-    language: Language,
-) -> Tooltip<'static, Message, Renderer<StyleType>> {
+fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
     let content = button(
         Icon::Bin
             .to_text()
@@ -385,23 +388,26 @@ fn get_button_clear_all(
             .vertical_alignment(Vertical::Center),
     )
     .padding(10)
-    .height(Length::Fixed(50.0))
-    .width(Length::Fixed(75.0))
+    .height(50)
+    .width(75)
     .on_press(Message::ShowModal(MyModal::ClearAll));
 
-    Tooltip::new(content, clear_all_translation(language), Position::Top)
-        .gap(5)
-        .font(font)
-        .style(ContainerType::Tooltip)
+    Tooltip::new(
+        content,
+        Text::new(clear_all_translation(language)).font(font),
+        Position::Top,
+    )
+    .gap(5)
+    .style(ContainerType::Tooltip)
 }
 
-fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Renderer<StyleType>> {
+fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
-        .width(Length::Fixed(830.0))
+        .width(830)
         .padding(5)
         .spacing(10)
         .align_items(Alignment::Center);

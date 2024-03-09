@@ -1,9 +1,8 @@
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule};
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text};
-use iced::Length::Fixed;
-use iced::{Alignment, Color, Element, Font, Length, Renderer};
+use iced::widget::{button, lazy, Rule, Space};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::{Alignment, Color, Element, Font, Length};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -31,7 +30,7 @@ use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<StyleType>> {
+pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -53,16 +52,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
             language,
         ))
         .push(get_settings_tabs(SettingsPage::Appearance, font, language))
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(
             appearance_title_translation(language)
                 .style(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(vertical_space(Length::Fixed(15.0)))
+        .push(Space::with_height(15))
         .push(gradients_row(font, color_gradient, language))
-        .push(vertical_space(Length::Fixed(15.0)));
+        .push(Space::with_height(15));
 
     let mut styles_col = Column::new()
         .align_items(Alignment::Center)
@@ -75,7 +74,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     yeti_night_translation(language).to_string(),
                     Night,
                 ))
-                .push(horizontal_space(Length::Fixed(15.0)))
+                .push(Space::with_width(10))
                 .push(get_palette_container(
                     style,
                     "Yeti Day".to_string(),
@@ -83,7 +82,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     Day,
                 )),
         )
-        .push(vertical_space(Length::Fixed(10.0)))
+        .push(Space::with_height(10))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -92,7 +91,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
-                .push(horizontal_space(Length::Fixed(15.0)))
+                .push(Space::with_width(10))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
@@ -100,7 +99,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
                     MonAmour,
                 )),
         )
-        .push(vertical_space(Length::Fixed(10.0)));
+        .push(Space::with_height(10));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
@@ -108,7 +107,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
         .push(lazy((style_path.clone(), style), move |_| {
             lazy_custom_style_input(language, font, &style_path, style)
         }))
-        .push(vertical_space(10));
+        .push(Space::with_height(10));
 
     let styles_scroll =
         Scrollable::new(styles_col).direction(Direction::Vertical(ScrollbarType::properties()));
@@ -116,8 +115,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, Renderer<Sty
     content = content.push(styles_scroll);
 
     Container::new(content)
-        .height(Length::Fixed(400.0))
-        .width(Length::Fixed(800.0))
+        .height(400)
+        .width(800)
         .style(ContainerType::Modal)
 }
 
@@ -125,7 +124,7 @@ fn gradients_row(
     font: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Row<'static, Message, Renderer<StyleType>> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .align_items(Alignment::Center)
         .spacing(10)
@@ -140,11 +139,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::None) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::None) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .style(ButtonType::Gradient(GradientType::None))
             .on_press(Message::GradientsSelection(GradientType::None)),
         )
@@ -158,11 +157,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::Mild) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::Mild) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .on_press(Message::GradientsSelection(GradientType::Mild))
             .style(ButtonType::Gradient(GradientType::Mild)),
         )
@@ -176,11 +175,11 @@ fn gradients_row(
             )
             .padding(0)
             .height(20.0)
-            .width(Fixed(if color_gradient.eq(&GradientType::Wild) {
-                60.0
+            .width(if color_gradient.eq(&GradientType::Wild) {
+                60
             } else {
-                20.0
-            }))
+                20
+            })
             .on_press(Message::GradientsSelection(GradientType::Wild))
             .style(ButtonType::Gradient(GradientType::Wild)),
         )
@@ -191,7 +190,7 @@ fn get_palette_container(
     name: String,
     description: String,
     on_press: StyleType,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let font = style.get_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
@@ -212,8 +211,8 @@ fn get_palette_container(
     }
 
     Button::new(content)
-        .height(Length::Fixed(if is_custom { 75.0 } else { 110.0 }))
-        .width(Length::Fixed(380.0))
+        .height(if is_custom { 75 } else { 110 })
+        .width(380)
         .padding(5)
         .style(if on_press.eq(&style) {
             ButtonType::BorderedRoundSelected
@@ -227,21 +226,21 @@ fn get_palette_rule(
     palette: Palette,
     buttons_color: Color,
     is_custom: bool,
-) -> Container<'static, Message, Renderer<StyleType>> {
+) -> Container<'static, Message, StyleType> {
     let height = if is_custom { 25 } else { 40 };
 
     Container::new(
         Row::new()
-            .push(Row::new().width(Length::Fixed(120.0)).push(
+            .push(Row::new().width(120).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, height)),
             ))
-            .push(Row::new().width(Length::Fixed(80.0)).push(
+            .push(Row::new().width(80).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.secondary, height)),
             ))
-            .push(Row::new().width(Length::Fixed(60.0)).push(
+            .push(Row::new().width(60).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, height)),
             ))
-            .push(Row::new().width(Length::Fixed(40.0)).push(
+            .push(Row::new().width(40).push(
                 Rule::horizontal(height).style(RuleType::PaletteColor(buttons_color, height)),
             )),
     )
@@ -256,7 +255,7 @@ fn get_palette_rule(
 fn get_extra_palettes(
     styles: &[ExtraStyles],
     current_style: StyleType,
-) -> Vec<Element<'static, Message, Renderer<StyleType>>> {
+) -> Vec<Element<'static, Message, StyleType>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
@@ -277,19 +276,15 @@ fn get_extra_palettes(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(horizontal_space(Length::Fixed(15.0)))
+                    .push(Space::with_width(10))
                     .push(second)
                     .into(),
-                <Space as Into<Element<Message, Renderer<StyleType>>>>::into(vertical_space(
-                    Length::Fixed(10.0),
-                )),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
             ]);
         } else {
             children.extend([
                 Row::new().push(first).into(),
-                <Space as Into<Element<Message, Renderer<StyleType>>>>::into(vertical_space(
-                    Length::Fixed(10.0),
-                )),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
             ]);
         }
     }
@@ -302,7 +297,7 @@ fn lazy_custom_style_input(
     font: Font,
     custom_path: &str,
     style: StyleType,
-) -> Button<'static, Message, Renderer<StyleType>> {
+) -> Button<'static, Message, StyleType> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
     let custom_palette = Palette::from_file(custom_path);
@@ -333,6 +328,7 @@ fn lazy_custom_style_input(
         ));
 
     let mut content = Column::new()
+        .width(Length::Fill)
         .align_items(Alignment::Center)
         .spacing(5)
         .push(Text::new(custom_style_translation(language)).font(font))
@@ -353,14 +349,12 @@ fn lazy_custom_style_input(
     }
 
     Button::new(content)
-        .height(Length::Fixed(
-            if custom_palette.is_ok() || is_custom_toml_style_set {
-                110.0
-            } else {
-                75.0
-            },
-        ))
-        .width(Length::Fixed(380.0))
+        .height(if custom_palette.is_ok() || is_custom_toml_style_set {
+            110
+        } else {
+            75
+        })
+        .width(380)
         .padding([10, 0, 5, 0])
         .style(if is_custom_toml_style_set {
             ButtonType::BorderedRoundSelected

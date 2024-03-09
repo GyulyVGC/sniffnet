@@ -1,5 +1,3 @@
-use iced::Renderer;
-
 use crate::gui::types::message::Message;
 use crate::translations::translations::{notifications_translation, overview_translation};
 use crate::translations::translations_2::inspect_translation;
@@ -53,7 +51,7 @@ impl RunningPage {
         }
     }
 
-    pub fn icon(self) -> iced::widget::Text<'static, Renderer<StyleType>> {
+    pub fn icon(self) -> iced::widget::Text<'static, StyleType> {
         match self {
             RunningPage::Overview => Icon::Overview,
             RunningPage::Inspect => Icon::Inspect,

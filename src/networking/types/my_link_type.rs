@@ -1,5 +1,5 @@
 use iced::widget::Column;
-use iced::{Font, Renderer};
+use iced::Font;
 use pcap::Linktype;
 
 use crate::gui::styles::text::TextType;
@@ -61,7 +61,7 @@ impl MyLinkType {
         self,
         language: Language,
         font: Font,
-    ) -> Column<'static, Message, Renderer<StyleType>> {
+    ) -> Column<'static, Message, StyleType> {
         match self {
             Self::Null(l)
             | Self::Ethernet(l)

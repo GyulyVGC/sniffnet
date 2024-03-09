@@ -1,4 +1,5 @@
 use iced::window::Position;
+use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(test))]
@@ -44,7 +45,25 @@ pub trait ToPosition {
 
 impl ToPosition for (i32, i32) {
     fn to_position(self) -> Position {
-        Position::Specific(self.0, self.1)
+        #[allow(clippy::cast_precision_loss)]
+        Position::Specific(Point {
+            x: self.0 as f32,
+            y: self.1 as f32,
+        })
+    }
+}
+
+pub trait ToSize {
+    fn to_size(self) -> Size;
+}
+
+impl ToSize for (u32, u32) {
+    fn to_size(self) -> Size {
+        #[allow(clippy::cast_precision_loss)]
+        Size {
+            width: self.0 as f32,
+            height: self.1 as f32,
+        }
     }
 }
 
