@@ -1,0 +1,9 @@
+services:
+  build-image:
+    build: .
+    network_mode: "host"
+    privileged: true
+    environment:
+      - DISPLAY
+    <<: &default
+      image: sniffnet

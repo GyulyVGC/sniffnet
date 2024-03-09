@@ -1,0 +1,45 @@
+name: Publish Docker image
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  release:
+    types: [published]
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'Dockerfile'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/docker.yml'
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: sniffnet/sniffnet
+          flavor: latest=true
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ contains(fromJson('["push", "release"]'), github.event_name) }} # Publish to docker registry only on push event or new release.
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
