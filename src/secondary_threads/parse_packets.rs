@@ -22,7 +22,7 @@ use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::InfoTraffic;
 
-/// The calling thread enters in a loop in which it waits for network packets, parses them according
+/// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
     current_capture_id: &Arc<Mutex<usize>>,
@@ -36,6 +36,8 @@ pub fn parse_packets(
     let capture_id = *current_capture_id.lock().unwrap();
 
     let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+
+    let mut output = cap.savefile("sniffnet.pcap").unwrap();
 
     loop {
         match cap.next_packet() {
@@ -87,10 +89,6 @@ pub fn parse_packets(
                     //increment number of sniffed packets and bytes
                     info_traffic.all_packets += 1;
                     info_traffic.all_bytes += exchanged_bytes;
-                    // update dropped packets number
-                    if let Ok(stats) = cap.stats() {
-                        info_traffic.dropped_packets = stats.dropped;
-                    }
 
                     if passed_filters {
                         info_traffic.add_packet(exchanged_bytes, new_info.traffic_direction);
@@ -185,6 +183,14 @@ pub fn parse_packets(
                                     new_info.traffic_direction,
                                 )
                             });
+
+                        // save this packet to PCAP file
+                        output.write(&packet);
+
+                        // update dropped packets number
+                        if let Ok(stats) = cap.stats() {
+                            info_traffic.dropped_packets = stats.dropped;
+                        }
                     }
                 }
             }

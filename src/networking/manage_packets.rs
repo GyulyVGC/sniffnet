@@ -568,7 +568,7 @@ pub fn get_capture_result(device: &MyDevice) -> (Option<String>, Option<Capture<
     let cap_result = Capture::from_device(device.to_pcap_device())
         .expect("Capture initialization error\n\r")
         .promisc(true)
-        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
+        .snaplen(u16::MAX as i32) //limit stored packets slice dimension (to keep more in the buffer)
         .immediate_mode(true) //parse packets ASAP!
         .open();
     if cap_result.is_err() {
