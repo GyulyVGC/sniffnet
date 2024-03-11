@@ -99,12 +99,16 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
-    // /// The path for the output report has been updated
-    // CustomReport(String),
     /// Save the configurations of the app and quit
     CloseRequested,
     /// Copies the given string to clipboard
     CopyIp(String),
     /// Launch a new file dialog
     OpenFile(String, FileInfo, fn(String) -> Message),
+    /// Toggle export pcap file
+    ToggleExportPcap,
+    /// The output PCAP directory has been updated
+    OutputPcapDir(String),
+    /// The output PCAP file name has been updated
+    OutputPcapFile(String),
 }

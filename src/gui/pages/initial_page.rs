@@ -3,17 +3,20 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use std::collections::HashSet;
+use std::path::PathBuf;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, Button, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
+    button, Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput,
+    Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length};
 use pcap::Device;
 
+use crate::gui::components::button::button_open_file;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -30,8 +33,11 @@ use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
     ip_version_translation, protocol_translation, select_filters_translation, start_translation,
 };
-use crate::translations::translations_3::port_translation;
-use crate::utils::formatted_strings::get_invalid_filters_string;
+use crate::translations::translations_3::{
+    directory_translation, export_capture_translation, file_name_translation, port_translation,
+};
+use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
@@ -82,6 +88,13 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .push(col_port_filter),
         )
         .push(Rule::horizontal(40))
+        .push(get_export_pcap_group(
+            sniffer.export_pcap,
+            sniffer.output_pcap_dir.clone(),
+            sniffer.output_pcap_file.clone(),
+            language,
+            font,
+        ))
         .push(
             Container::new(button_start(
                 font,
@@ -354,4 +367,70 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             ))
             .direction(Direction::Vertical(ScrollbarType::properties())),
         )
+}
+
+fn get_export_pcap_group(
+    export_pcap: bool,
+    output_pcap_path: PathBuf,
+    output_pcap_file: String,
+    language: Language,
+    font: Font,
+) -> Container<'static, Message, StyleType> {
+    let caption = export_capture_translation(language);
+    let checkbox = Checkbox::new(caption, export_pcap)
+        .on_toggle(move |_| Message::ToggleExportPcap)
+        .size(18)
+        .font(font);
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if export_pcap {
+        let inner_col = Column::new()
+            .spacing(10)
+            .padding([0, 0, 0, 45])
+            .push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new(format!("{}:", directory_translation(language))).font(font))
+                    .push(
+                        Text::new(get_path_termination_string(
+                            &output_pcap_path.to_string_lossy().to_string(),
+                            25,
+                        ))
+                        .font(font),
+                    )
+                    .push(button_open_file(
+                        output_pcap_path.to_string_lossy().to_string(),
+                        FileInfo::Directory,
+                        language,
+                        font,
+                        true,
+                        Message::OutputPcapDir,
+                    )),
+            )
+            .push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
+                    .push(
+                        TextInput::new("sniffnet.pcap", &output_pcap_file)
+                            .on_input(Message::OutputPcapFile)
+                            .padding([2, 5])
+                            .font(font)
+                            .width(200),
+                    ),
+            );
+        ret_val = ret_val.push(inner_col);
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .style(ContainerType::BorderedRound)
+    } else {
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .style(ContainerType::BorderedRound)
+    }
 }

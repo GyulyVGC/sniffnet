@@ -32,12 +32,13 @@ pub fn parse_packets(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
+    pcap_path: String,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
 
-    let mut output = cap.savefile("sniffnet.pcap").unwrap();
+    let mut output_opt = cap.savefile(pcap_path).ok();
 
     loop {
         match cap.next_packet() {
@@ -73,6 +74,11 @@ pub fn parse_packets(
 
                     let passed_filters = filters.matches(&packet_filters_fields);
                     if passed_filters {
+                        // save this packet to PCAP file
+                        if let Some(output) = output_opt.as_mut() {
+                            output.write(&packet);
+                        }
+                        // update the shared map
                         new_info = modify_or_insert_in_map(
                             info_traffic_mutex,
                             &key,
@@ -89,6 +95,10 @@ pub fn parse_packets(
                     //increment number of sniffed packets and bytes
                     info_traffic.all_packets += 1;
                     info_traffic.all_bytes += exchanged_bytes;
+                    // update dropped packets number
+                    if let Ok(stats) = cap.stats() {
+                        info_traffic.dropped_packets = stats.dropped;
+                    }
 
                     if passed_filters {
                         info_traffic.add_packet(exchanged_bytes, new_info.traffic_direction);
@@ -183,14 +193,6 @@ pub fn parse_packets(
                                     new_info.traffic_direction,
                                 )
                             });
-
-                        // save this packet to PCAP file
-                        output.write(&packet);
-
-                        // update dropped packets number
-                        if let Ok(stats) = cap.stats() {
-                            info_traffic.dropped_packets = stats.dropped;
-                        }
                     }
                 }
             }

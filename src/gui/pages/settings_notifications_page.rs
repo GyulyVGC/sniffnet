@@ -279,7 +279,7 @@ fn input_group_packets(
                     false,
                 )
             })
-            .padding([3, 5])
+            .padding([2, 5])
             .font(font)
             .width(100),
         )
@@ -326,7 +326,7 @@ fn input_group_bytes(
                 let bytes_notification = BytesNotification::from(&value, Some(bytes_notification));
                 Message::UpdateNotificationSettings(Notification::Bytes(bytes_notification), false)
             })
-            .padding([3, 5])
+            .padding([2, 5])
             .font(font)
             .width(100),
         )

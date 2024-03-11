@@ -152,3 +152,36 @@ pub fn service_translation(language: Language) -> &'static str {
         _ => "Service",
     }
 }
+
+pub fn export_capture_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Export capture file",
+        Language::IT => "Esporta file di cattura",
+        _ => "Export capture file",
+    }
+}
+
+// (a filesystem directory)
+pub fn directory_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Directory",
+        Language::IT => "Cartella",
+        _ => "Directory",
+    }
+}
+
+pub fn select_directory_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Select destination directory",
+        Language::IT => "Seleziona cartella di destinazione",
+        _ => "Select destination directory",
+    }
+}
+
+pub fn file_name_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "File name",
+        Language::IT => "Nome del file",
+        _ => "File name",
+    }
+}
