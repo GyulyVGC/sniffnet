@@ -32,13 +32,17 @@ pub fn parse_packets(
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
-    pcap_path: String,
+    pcap_path: Option<String>,
 ) {
     let capture_id = *current_capture_id.lock().unwrap();
 
     let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
 
-    let mut output_opt = cap.savefile(pcap_path).ok();
+    let mut output_opt = if let Some(path) = pcap_path {
+        cap.savefile(path).ok()
+    } else {
+        None
+    };
 
     loop {
         match cap.next_packet() {

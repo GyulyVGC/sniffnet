@@ -3,7 +3,7 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::Path;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -88,13 +88,17 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .push(col_port_filter),
         )
         .push(Rule::horizontal(40))
-        .push(get_export_pcap_group(
-            sniffer.export_pcap,
-            sniffer.output_pcap_dir.clone(),
-            sniffer.output_pcap_file.clone(),
-            language,
-            font,
-        ))
+        .push(
+            Container::new(get_export_pcap_group(
+                sniffer.export_pcap,
+                &sniffer.output_pcap_dir,
+                &sniffer.output_pcap_file,
+                language,
+                font,
+            ))
+            .height(Length::Fill)
+            .align_y(Vertical::Top),
+        )
         .push(
             Container::new(button_start(
                 font,
@@ -104,7 +108,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             ))
             .width(Length::Fill)
             .height(Length::Fill)
-            .align_y(Vertical::Center)
+            .align_y(Vertical::Top)
             .align_x(Horizontal::Center),
         );
 
@@ -371,8 +375,8 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
 
 fn get_export_pcap_group(
     export_pcap: bool,
-    output_pcap_path: PathBuf,
-    output_pcap_file: String,
+    output_pcap_path: &Path,
+    output_pcap_file: &str,
     language: Language,
     font: Font,
 ) -> Container<'static, Message, StyleType> {
@@ -392,10 +396,23 @@ fn get_export_pcap_group(
                 Row::new()
                     .align_items(Alignment::Center)
                     .spacing(5)
+                    .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
+                    .push(
+                        TextInput::new("sniffnet.pcap", output_pcap_file)
+                            .on_input(Message::OutputPcapFile)
+                            .padding([2, 5])
+                            .font(font)
+                            .width(200),
+                    ),
+            )
+            .push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .spacing(5)
                     .push(Text::new(format!("{}:", directory_translation(language))).font(font))
                     .push(
                         Text::new(get_path_termination_string(
-                            &output_pcap_path.to_string_lossy().to_string(),
+                            &output_pcap_path.to_string_lossy(),
                             25,
                         ))
                         .font(font),
@@ -408,19 +425,6 @@ fn get_export_pcap_group(
                         true,
                         Message::OutputPcapDir,
                     )),
-            )
-            .push(
-                Row::new()
-                    .align_items(Alignment::Center)
-                    .spacing(5)
-                    .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
-                    .push(
-                        TextInput::new("sniffnet.pcap", &output_pcap_file)
-                            .on_input(Message::OutputPcapFile)
-                            .padding([2, 5])
-                            .font(font)
-                            .width(200),
-                    ),
             );
         ret_val = ret_val.push(inner_col);
         Container::new(ret_val)

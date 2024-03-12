@@ -566,17 +566,30 @@ pub fn is_my_address(local_address: &String, my_interface_addresses: &Vec<Addres
 /// Determines if the capture opening resolves into an Error
 pub fn get_capture_result(
     device: &MyDevice,
-    export_pcap: bool,
+    pcap_path: &Option<String>,
 ) -> (Option<String>, Option<Capture<Active>>) {
     let cap_result = Capture::from_device(device.to_pcap_device())
         .expect("Capture initialization error\n\r")
         .promisc(true)
-        .snaplen(if export_pcap { u16::MAX as i32 } else { 256 }) //limit stored packets slice dimension (to keep more in the buffer)
+        .snaplen(if pcap_path.is_some() {
+            i32::from(u16::MAX)
+        } else {
+            256
+        }) //limit stored packets slice dimension (to keep more in the buffer)
         .immediate_mode(true) //parse packets ASAP!
         .open();
     if cap_result.is_err() {
         let err_string = cap_result.err().unwrap().to_string();
         (Some(err_string), None)
+    } else if let Some(path) = pcap_path {
+        // assert the file can be created
+        let file = cap_result.as_ref().unwrap().savefile(path);
+        if file.is_err() {
+            let err_string = file.err().unwrap().to_string();
+            (Some(err_string), None)
+        } else {
+            (None, cap_result.ok())
+        }
     } else {
         (None, cap_result.ok())
     }

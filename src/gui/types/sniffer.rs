@@ -401,7 +401,8 @@ impl Sniffer {
         let current_device_name = &*self.device.name.clone();
         self.set_adapter(current_device_name);
         let device = self.device.clone();
-        let (pcap_error, cap_result) = get_capture_result(&device, self.export_pcap);
+        let pcap_path = self.get_output_pcap_full_path();
+        let (pcap_error, cap_result) = get_capture_result(&device, &pcap_path);
         self.pcap_error = pcap_error.clone();
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
@@ -420,7 +421,6 @@ impl Sniffer {
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
             self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
-            let pcap_path = self.get_output_pcap_full_path();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -615,14 +615,12 @@ impl Sniffer {
     async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
         let starting_directory = if old_file.is_empty() {
             std::env::var("HOME").unwrap_or_default()
+        } else if file_info == FileInfo::Directory {
+            old_file.clone()
         } else {
-            if file_info == FileInfo::Directory {
-                old_file.clone()
-            } else {
-                let mut folder_path = PathBuf::from(&old_file);
-                folder_path.pop();
-                folder_path.to_string_lossy().to_string()
-            }
+            let mut folder_path = PathBuf::from(&old_file);
+            folder_path.pop();
+            folder_path.to_string_lossy().to_string()
         };
 
         let dialog = rfd::AsyncFileDialog::new().set_title(file_info.action_info(language));
@@ -643,13 +641,18 @@ impl Sniffer {
         picked.path().to_string_lossy().to_string()
     }
 
-    pub fn get_output_pcap_full_path(&self) -> String {
+    pub fn get_output_pcap_full_path(&self) -> Option<String> {
         if self.export_pcap {
             let mut full_path = self.output_pcap_dir.clone();
-            full_path.push(&self.output_pcap_file);
-            full_path.to_string_lossy().to_string()
+            let file_name = if self.output_pcap_file.is_empty() {
+                "sniffnet.pcap"
+            } else {
+                &self.output_pcap_file
+            };
+            full_path.push(file_name);
+            Some(full_path.to_string_lossy().to_string())
         } else {
-            String::new()
+            None
         }
     }
 }
