@@ -8,12 +8,14 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, Button, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
+    button, Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput,
+    Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length};
 use pcap::Device;
 
+use crate::gui::components::button::button_open_file;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -21,6 +23,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::filters::Filters;
@@ -30,8 +33,11 @@ use crate::translations::translations::{
     address_translation, addresses_translation, choose_adapters_translation,
     ip_version_translation, protocol_translation, select_filters_translation, start_translation,
 };
-use crate::translations::translations_3::port_translation;
-use crate::utils::formatted_strings::get_invalid_filters_string;
+use crate::translations::translations_3::{
+    directory_translation, export_capture_translation, file_name_translation, port_translation,
+};
+use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
+use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
@@ -83,6 +89,11 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         )
         .push(Rule::horizontal(40))
         .push(
+            Container::new(get_export_pcap_group(&sniffer.export_pcap, language, font))
+                .height(Length::Fill)
+                .align_y(Vertical::Top),
+        )
+        .push(
             Container::new(button_start(
                 font,
                 language,
@@ -91,7 +102,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             ))
             .width(Length::Fill)
             .height(Length::Fill)
-            .align_y(Vertical::Center)
+            .align_y(Vertical::Top)
             .align_x(Horizontal::Center),
         );
 
@@ -354,4 +365,66 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             ))
             .direction(Direction::Vertical(ScrollbarType::properties())),
         )
+}
+
+fn get_export_pcap_group(
+    export_pcap: &ExportPcap,
+    language: Language,
+    font: Font,
+) -> Container<'static, Message, StyleType> {
+    let enabled = export_pcap.enabled();
+    let file_name = export_pcap.file_name();
+    let directory = export_pcap.directory();
+
+    let caption = export_capture_translation(language);
+    let checkbox = Checkbox::new(caption, enabled)
+        .on_toggle(move |_| Message::ToggleExportPcap)
+        .size(18)
+        .font(font);
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if enabled {
+        let inner_col = Column::new()
+            .spacing(10)
+            .padding([0, 0, 0, 45])
+            .push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
+                    .push(
+                        TextInput::new(ExportPcap::DEFAULT_FILE_NAME, file_name)
+                            .on_input(Message::OutputPcapFile)
+                            .padding([2, 5])
+                            .font(font)
+                            .width(200),
+                    ),
+            )
+            .push(
+                Row::new()
+                    .align_items(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new(format!("{}:", directory_translation(language))).font(font))
+                    .push(Text::new(get_path_termination_string(directory, 25)).font(font))
+                    .push(button_open_file(
+                        directory.to_owned(),
+                        FileInfo::Directory,
+                        language,
+                        font,
+                        true,
+                        Message::OutputPcapDir,
+                    )),
+            );
+        ret_val = ret_val.push(inner_col);
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .style(ContainerType::BorderedRound)
+    } else {
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .style(ContainerType::BorderedRound)
+    }
 }

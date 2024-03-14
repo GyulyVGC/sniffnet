@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{Ethernet2Header, LaxPacketHeaders, NetHeaders, TransportHeader};
-use pcap::{Active, Address, Capture, Device};
+use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
@@ -561,22 +561,6 @@ pub fn is_my_address(local_address: &String, my_interface_addresses: &Vec<Addres
         }
     }
     is_loopback(local_address)
-}
-
-/// Determines if the capture opening resolves into an Error
-pub fn get_capture_result(device: &MyDevice) -> (Option<String>, Option<Capture<Active>>) {
-    let cap_result = Capture::from_device(device.to_pcap_device())
-        .expect("Capture initialization error\n\r")
-        .promisc(true)
-        .snaplen(256) //limit stored packets slice dimension (to keep more in the buffer)
-        .immediate_mode(true) //parse packets ASAP!
-        .open();
-    if cap_result.is_err() {
-        let err_string = cap_result.err().unwrap().to_string();
-        (Some(err_string), None)
-    } else {
-        (None, cap_result.ok())
-    }
 }
 
 /// Converts a MAC address in its hexadecimal form

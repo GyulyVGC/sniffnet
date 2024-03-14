@@ -1,12 +1,13 @@
 use crate::translations::translations_3::{
-    database_from_file_translation, style_from_file_translation,
+    database_from_file_translation, select_directory_translation, style_from_file_translation,
 };
 use crate::translations::types::language::Language;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum FileInfo {
     Style,
     Database,
+    Directory,
 }
 
 impl FileInfo {
@@ -14,6 +15,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => "toml",
             FileInfo::Database => "mmdb",
+            FileInfo::Directory => "",
         }
     }
 
@@ -21,6 +23,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => style_from_file_translation(language),
             FileInfo::Database => database_from_file_translation(language),
+            FileInfo::Directory => select_directory_translation(language),
         }
     }
 }

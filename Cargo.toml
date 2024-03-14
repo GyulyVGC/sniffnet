@@ -39,13 +39,13 @@ strip = true
 [dependencies]
 pcap = "1.2.0"
 etherparse = "0.14.2"
-chrono = { version = "0.4.33", default_features = false, features = ["clock"] }
+chrono = { version = "0.4.35", default_features = false, features = ["clock"] }
 plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
 iced = { version = "0.12.1", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.10.0"
 maxminddb = "0.24.0"
-confy = "0.6.0"
-serde = { version = "1.0.196", default_features = false, features = ["derive"] }
+confy = "0.6.1"
+serde = { version = "1.0.197", default_features = false, features = ["derive"] }
 rodio = { version = "0.17.3", default_features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
 toml = "0.8.10"

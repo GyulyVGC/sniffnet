@@ -57,3 +57,4 @@ $RECYCLE.BIN/
 ### Custom... ###
 Dockerfile
 lcov.info
+*.pcap

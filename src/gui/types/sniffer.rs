@@ -17,12 +17,13 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
+use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
-use crate::networking::manage_packets::get_capture_result;
+use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::ip_collection::AddressCollection;
@@ -92,6 +93,8 @@ pub struct Sniffer {
     pub asn_mmdb_reader: Arc<MmdbReader>,
     /// Time-related events
     pub timing_events: TimingEvents,
+    /// Information about PCAP file export
+    pub export_pcap: ExportPcap,
 }
 
 impl Sniffer {
@@ -131,6 +134,7 @@ impl Sniffer {
             country_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
             asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
+            export_pcap: ExportPcap::default(),
         }
     }
 
@@ -317,6 +321,15 @@ impl Sniffer {
             Message::ServiceSortSelection(sort_type) => {
                 self.service_sort_type = sort_type;
             }
+            Message::ToggleExportPcap => {
+                self.export_pcap.toggle();
+            }
+            Message::OutputPcapDir(path) => {
+                self.export_pcap.set_directory(path);
+            }
+            Message::OutputPcapFile(name) => {
+                self.export_pcap.set_file_name(name);
+            }
             Message::TickInit => {}
         }
         Command::none()
@@ -383,8 +396,9 @@ impl Sniffer {
         let current_device_name = &*self.device.name.clone();
         self.set_adapter(current_device_name);
         let device = self.device.clone();
-        let (pcap_error, cap_result) = get_capture_result(&device);
-        self.pcap_error = pcap_error.clone();
+        let pcap_path = self.export_pcap.full_path();
+        let capture_context = CaptureContext::new(&device, &pcap_path);
+        self.pcap_error = capture_context.error().map(ToString::to_string);
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
@@ -394,25 +408,24 @@ impl Sniffer {
         self.traffic_chart = TrafficChart::new(style, language);
         self.running_page = RunningPage::Overview;
 
-        if pcap_error.is_none() {
+        if capture_context.error().is_none() {
             // no pcap error
-            let cap = cap_result.unwrap();
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+            self.device.link_type = capture_context.my_link_type();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
                         &device,
-                        cap,
                         &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
                         &asn_mmdb_reader,
+                        capture_context,
                     );
                 })
                 .unwrap();
@@ -440,7 +453,7 @@ impl Sniffer {
                     name: dev.name,
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
-                    link_type: MyLinkType::NotYetAssigned,
+                    link_type: MyLinkType::default(),
                 };
                 break;
             }
@@ -595,20 +608,29 @@ impl Sniffer {
     async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
         let starting_directory = if old_file.is_empty() {
             std::env::var("HOME").unwrap_or_default()
+        } else if file_info == FileInfo::Directory {
+            old_file.clone()
         } else {
             let mut folder_path = PathBuf::from(&old_file);
             folder_path.pop();
             folder_path.to_string_lossy().to_string()
         };
-        let picked_file = rfd::AsyncFileDialog::new()
-            .set_title(file_info.action_info(language))
-            .add_filter(file_info.get_extension(), &[file_info.get_extension()])
-            .set_directory(starting_directory)
-            .pick_file()
-            .await
-            .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
-        picked_file.path().to_string_lossy().to_string()
+        let dialog = rfd::AsyncFileDialog::new()
+            .set_title(file_info.action_info(language))
+            .set_directory(starting_directory);
+
+        let picked = if file_info == FileInfo::Directory {
+            dialog.pick_folder().await
+        } else {
+            dialog
+                .add_filter(file_info.get_extension(), &[file_info.get_extension()])
+                .pick_file()
+                .await
+        }
+        .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
+
+        picked.path().to_string_lossy().to_string()
     }
 }
 

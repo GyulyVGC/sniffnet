@@ -291,7 +291,8 @@ fn button_clear_mmdb(
             .font(font)
             .vertical_alignment(Vertical::Center)
             .horizontal_alignment(Horizontal::Center)
-            .size(15),
+            .size(15)
+            .line_height(LineHeight::Relative(1.0)),
     )
     .padding(2)
     .height(20)
