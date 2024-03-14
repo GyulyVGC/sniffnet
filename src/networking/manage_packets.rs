@@ -6,13 +6,12 @@ use std::sync::{Arc, Mutex};
 use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{Ethernet2Header, LaxPacketHeaders, NetHeaders, TransportHeader};
-use pcap::{Address, Capture, Device};
+use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
@@ -562,37 +561,6 @@ pub fn is_my_address(local_address: &String, my_interface_addresses: &Vec<Addres
         }
     }
     is_loopback(local_address)
-}
-
-/// Determines if the capture opening resolves into an Error
-pub fn get_capture_context(device: &MyDevice, pcap_path: &Option<String>) -> CaptureContext {
-    let cap_res = Capture::from_device(device.to_pcap_device())
-        .expect("Capture initialization error\n\r")
-        .promisc(true)
-        .snaplen(if pcap_path.is_some() {
-            i32::from(u16::MAX)
-        } else {
-            256 //limit stored packets slice dimension (to keep more in the buffer)
-        })
-        .immediate_mode(true) //parse packets ASAP!
-        .open();
-
-    if let Err(e) = &cap_res {
-        return CaptureContext::Error(e.to_string());
-    }
-
-    let cap = cap_res.unwrap();
-
-    if let Some(path) = pcap_path {
-        let savefile_res = cap.savefile(path);
-        if let Err(e) = savefile_res {
-            CaptureContext::Error(e.to_string())
-        } else {
-            CaptureContext::new_online_with_savefile(cap, savefile_res.unwrap())
-        }
-    } else {
-        CaptureContext::new_online(cap)
-    }
 }
 
 /// Converts a MAC address in its hexadecimal form

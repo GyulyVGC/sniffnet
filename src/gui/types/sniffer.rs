@@ -23,7 +23,7 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
-use crate::networking::manage_packets::get_capture_context;
+use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::ip_collection::AddressCollection;
@@ -397,8 +397,8 @@ impl Sniffer {
         self.set_adapter(current_device_name);
         let device = self.device.clone();
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = get_capture_context(&device, &pcap_path);
-        self.pcap_error = capture_context.error();
+        let capture_context = CaptureContext::new(&device, &pcap_path);
+        self.pcap_error = capture_context.error().map(ToString::to_string);
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
@@ -414,7 +414,7 @@ impl Sniffer {
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.device.link_type = capture_context.my_link_type().unwrap_or_default();
+            self.device.link_type = capture_context.my_link_type();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {

@@ -34,7 +34,7 @@ pub fn parse_packets(
     asn_mmdb_reader: &Arc<MmdbReader>,
     capture_context: CaptureContext,
 ) {
-    let my_link_type = capture_context.my_link_type().unwrap_or_default();
+    let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
 
     let capture_id = *current_capture_id.lock().unwrap();
