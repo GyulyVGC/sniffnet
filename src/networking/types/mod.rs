@@ -1,6 +1,7 @@
 pub mod address_port_pair;
 pub mod asn;
 pub mod byte_multiple;
+pub mod capture_context;
 pub mod data_info;
 pub mod data_info_host;
 pub mod filters;

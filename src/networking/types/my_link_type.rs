@@ -8,7 +8,7 @@ use crate::translations::translations_3::link_type_translation;
 use crate::{Language, StyleType};
 
 /// Currently supported link types
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub enum MyLinkType {
     Null(Linktype),
     Ethernet(Linktype),
@@ -17,6 +17,7 @@ pub enum MyLinkType {
     IPv4(Linktype),
     IPv6(Linktype),
     Unsupported(Linktype),
+    #[default]
     NotYetAssigned,
 }
 

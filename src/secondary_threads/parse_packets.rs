@@ -7,12 +7,13 @@ use std::thread;
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::{Active, Capture, Packet};
+use pcap::Packet;
 
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
+use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::icmp_type::IcmpType;
@@ -27,22 +28,16 @@ use crate::InfoTraffic;
 pub fn parse_packets(
     current_capture_id: &Arc<Mutex<usize>>,
     device: &MyDevice,
-    mut cap: Capture<Active>,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
-    pcap_path: Option<String>,
+    capture_context: CaptureContext,
 ) {
+    let my_link_type = capture_context.my_link_type().unwrap_or_default();
+    let (mut cap, mut savefile) = capture_context.consume();
+
     let capture_id = *current_capture_id.lock().unwrap();
-
-    let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
-
-    let mut output_opt = if let Some(path) = pcap_path {
-        cap.savefile(path).ok()
-    } else {
-        None
-    };
 
     loop {
         match cap.next_packet() {
@@ -79,8 +74,8 @@ pub fn parse_packets(
                     let passed_filters = filters.matches(&packet_filters_fields);
                     if passed_filters {
                         // save this packet to PCAP file
-                        if let Some(output) = output_opt.as_mut() {
-                            output.write(&packet);
+                        if let Some(file) = savefile.as_mut() {
+                            file.write(&packet);
                         }
                         // update the shared map
                         new_info = modify_or_insert_in_map(

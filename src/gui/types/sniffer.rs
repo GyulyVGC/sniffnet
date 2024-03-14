@@ -22,7 +22,7 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
-use crate::networking::manage_packets::get_capture_result;
+use crate::networking::manage_packets::get_capture_context;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::ip_collection::AddressCollection;
@@ -402,8 +402,8 @@ impl Sniffer {
         self.set_adapter(current_device_name);
         let device = self.device.clone();
         let pcap_path = self.get_output_pcap_full_path();
-        let (pcap_error, cap_result) = get_capture_result(&device, &pcap_path);
-        self.pcap_error = pcap_error.clone();
+        let capture_context = get_capture_context(&device, &pcap_path);
+        self.pcap_error = capture_context.error();
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
         self.runtime_data = RunTimeData::new();
@@ -413,26 +413,24 @@ impl Sniffer {
         self.traffic_chart = TrafficChart::new(style, language);
         self.running_page = RunningPage::Overview;
 
-        if pcap_error.is_none() {
+        if capture_context.error().is_none() {
             // no pcap error
-            let cap = cap_result.unwrap();
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
-            self.device.link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+            self.device.link_type = capture_context.my_link_type().unwrap_or_default();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
                         &device,
-                        cap,
                         &filters,
                         &info_traffic_mutex,
                         &country_mmdb_reader,
                         &asn_mmdb_reader,
-                        pcap_path,
+                        capture_context,
                     );
                 })
                 .unwrap();
@@ -460,7 +458,7 @@ impl Sniffer {
                     name: dev.name,
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
-                    link_type: MyLinkType::NotYetAssigned,
+                    link_type: MyLinkType::default(),
                 };
                 break;
             }

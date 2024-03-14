@@ -58,7 +58,7 @@ impl ConfigDevice {
                     name: device.name,
                     desc: device.desc,
                     addresses: Arc::new(Mutex::new(device.addresses)),
-                    link_type: MyLinkType::NotYetAssigned,
+                    link_type: MyLinkType::default(),
                 };
             }
         }
@@ -72,7 +72,7 @@ impl ConfigDevice {
             name: standard_device.name,
             desc: standard_device.desc,
             addresses: Arc::new(Mutex::new(standard_device.addresses)),
-            link_type: MyLinkType::NotYetAssigned,
+            link_type: MyLinkType::default(),
         }
     }
 }
