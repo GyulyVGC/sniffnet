@@ -406,15 +406,9 @@ fn get_export_pcap_group(
                     .align_items(Alignment::Center)
                     .spacing(5)
                     .push(Text::new(format!("{}:", directory_translation(language))).font(font))
-                    .push(
-                        Text::new(get_path_termination_string(
-                            &directory.to_string_lossy(),
-                            25,
-                        ))
-                        .font(font),
-                    )
+                    .push(Text::new(get_path_termination_string(directory, 25)).font(font))
                     .push(button_open_file(
-                        directory.to_string_lossy().to_string(),
+                        directory.to_owned(),
                         FileInfo::Directory,
                         language,
                         font,

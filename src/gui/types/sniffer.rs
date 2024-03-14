@@ -325,7 +325,7 @@ impl Sniffer {
                 self.export_pcap.toggle();
             }
             Message::OutputPcapDir(path) => {
-                self.export_pcap.set_directory(path.into());
+                self.export_pcap.set_directory(path);
             }
             Message::OutputPcapFile(name) => {
                 self.export_pcap.set_file_name(name);

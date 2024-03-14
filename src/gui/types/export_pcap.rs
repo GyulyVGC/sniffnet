@@ -3,7 +3,7 @@ use std::path::PathBuf;
 pub struct ExportPcap {
     enabled: bool,
     file_name: String,
-    directory: PathBuf,
+    directory: String,
 }
 
 impl ExportPcap {
@@ -17,7 +17,7 @@ impl ExportPcap {
         self.file_name = file_name;
     }
 
-    pub fn set_directory(&mut self, directory: PathBuf) {
+    pub fn set_directory(&mut self, directory: String) {
         self.directory = directory;
     }
 
@@ -29,13 +29,13 @@ impl ExportPcap {
         &self.file_name
     }
 
-    pub fn directory(&self) -> &PathBuf {
+    pub fn directory(&self) -> &str {
         &self.directory
     }
 
     pub fn full_path(&self) -> Option<String> {
         if self.enabled {
-            let mut full_path = self.directory.clone();
+            let mut full_path = PathBuf::from(&self.directory);
             let file_name = if self.file_name.is_empty() {
                 Self::DEFAULT_FILE_NAME
             } else {
@@ -54,7 +54,101 @@ impl Default for ExportPcap {
         ExportPcap {
             enabled: false,
             file_name: String::from(Self::DEFAULT_FILE_NAME),
-            directory: PathBuf::from(std::env::var("HOME").unwrap_or_default()),
+            directory: std::env::var("HOME").unwrap_or_default(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default() {
+        let export_pcap = ExportPcap::default();
+        assert_eq!(export_pcap.enabled(), false);
+        assert_eq!(export_pcap.file_name(), "sniffnet.pcap");
+        assert_eq!(
+            export_pcap.directory(),
+            std::env::var("HOME").unwrap_or_default()
+        );
+    }
+
+    #[test]
+    fn test_toggle() {
+        let mut export_pcap = ExportPcap::default();
+        assert_eq!(export_pcap.enabled(), false);
+
+        export_pcap.toggle();
+        assert_eq!(export_pcap.enabled(), true);
+
+        export_pcap.toggle();
+        assert_eq!(export_pcap.enabled(), false);
+    }
+
+    #[test]
+    fn test_set_file_name() {
+        let mut export_pcap = ExportPcap::default();
+        assert_eq!(export_pcap.file_name(), "sniffnet.pcap");
+
+        export_pcap.set_file_name("test.pcap".to_string());
+        assert_eq!(export_pcap.file_name(), "test.pcap");
+
+        export_pcap.set_file_name("".to_string());
+        assert_eq!(export_pcap.file_name(), "");
+    }
+
+    #[test]
+    fn test_set_directory() {
+        let mut export_pcap = ExportPcap::default();
+        assert_eq!(
+            export_pcap.directory(),
+            std::env::var("HOME").unwrap_or_default()
+        );
+
+        export_pcap.set_directory("/tmp".to_string());
+        assert_eq!(export_pcap.directory(), "/tmp");
+    }
+
+    #[test]
+    fn test_full_path() {
+        let mut export_pcap = ExportPcap::default();
+        assert_eq!(export_pcap.full_path(), None);
+
+        export_pcap.toggle();
+        assert_eq!(
+            export_pcap.full_path(),
+            Some(format!(
+                "{}/sniffnet.pcap",
+                std::env::var("HOME").unwrap_or_default(),
+            ))
+        );
+
+        export_pcap.set_file_name("test.pcap".to_string());
+        assert_eq!(
+            export_pcap.full_path(),
+            Some(format!(
+                "{}/test.pcap",
+                std::env::var("HOME").unwrap_or_default()
+            ))
+        );
+
+        export_pcap.set_directory("/tmp".to_string());
+        assert_eq!(export_pcap.full_path(), Some("/tmp/test.pcap".to_string()));
+
+        export_pcap.toggle();
+        assert_eq!(export_pcap.full_path(), None);
+
+        export_pcap.toggle();
+        assert_eq!(export_pcap.full_path(), Some("/tmp/test.pcap".to_string()));
+
+        export_pcap.set_file_name("".to_string());
+        assert_eq!(
+            export_pcap.full_path(),
+            Some("/tmp/sniffnet.pcap".to_string())
+        );
+
+        export_pcap.set_directory("".to_string());
+        assert_eq!(export_pcap.full_path(), Some("sniffnet.pcap".to_string()));
     }
 }
