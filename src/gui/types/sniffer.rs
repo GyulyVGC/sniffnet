@@ -17,6 +17,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
+use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
@@ -92,12 +93,8 @@ pub struct Sniffer {
     pub asn_mmdb_reader: Arc<MmdbReader>,
     /// Time-related events
     pub timing_events: TimingEvents,
-    /// Whether to export PCAP file
-    pub export_pcap: bool,
-    /// Path of the output PCAP directory
-    pub output_pcap_dir: PathBuf,
-    /// Name of the output PCAP file
-    pub output_pcap_file: String,
+    /// Information about PCAP file export
+    pub export_pcap: ExportPcap,
 }
 
 impl Sniffer {
@@ -137,9 +134,7 @@ impl Sniffer {
             country_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
             asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
-            export_pcap: false,
-            output_pcap_dir: PathBuf::from(std::env::var("HOME").unwrap_or_default()),
-            output_pcap_file: String::from("sniffnet.pcap"),
+            export_pcap: ExportPcap::default(),
         }
     }
 
@@ -327,13 +322,13 @@ impl Sniffer {
                 self.service_sort_type = sort_type;
             }
             Message::ToggleExportPcap => {
-                self.export_pcap = !self.export_pcap;
+                self.export_pcap.toggle();
             }
             Message::OutputPcapDir(path) => {
-                self.output_pcap_dir = path.into();
+                self.export_pcap.set_directory(path.into());
             }
             Message::OutputPcapFile(name) => {
-                self.output_pcap_file = name;
+                self.export_pcap.set_file_name(name);
             }
             Message::TickInit => {}
         }
@@ -401,7 +396,7 @@ impl Sniffer {
         let current_device_name = &*self.device.name.clone();
         self.set_adapter(current_device_name);
         let device = self.device.clone();
-        let pcap_path = self.get_output_pcap_full_path();
+        let pcap_path = self.export_pcap.full_path();
         let capture_context = get_capture_context(&device, &pcap_path);
         self.pcap_error = capture_context.error();
         let info_traffic_mutex = self.info_traffic.clone();
@@ -637,21 +632,6 @@ impl Sniffer {
         };
 
         picked.path().to_string_lossy().to_string()
-    }
-
-    pub fn get_output_pcap_full_path(&self) -> Option<String> {
-        if self.export_pcap {
-            let mut full_path = self.output_pcap_dir.clone();
-            let file_name = if self.output_pcap_file.is_empty() {
-                "sniffnet.pcap"
-            } else {
-                &self.output_pcap_file
-            };
-            full_path.push(file_name);
-            Some(full_path.to_string_lossy().to_string())
-        } else {
-            None
-        }
     }
 }
 

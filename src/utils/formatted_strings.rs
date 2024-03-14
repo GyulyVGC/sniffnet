@@ -11,8 +11,6 @@ use crate::Language;
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-// pub const PCAP_FILE_NAME: &str = "sniffnet.pcap";
-
 /// Computes the String representing the percentage of filtered bytes/packets
 pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
     #[allow(clippy::cast_precision_loss)]
@@ -76,39 +74,6 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
     }
     filters_string
 }
-
-// /// Returns the default report path
-// pub fn get_default_report_file_path() -> String {
-//     return if let Ok(mut config_path) = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "file") {
-//         config_path.pop();
-//         config_path.push(PCAP_FILE_NAME);
-//         config_path.to_string_lossy().to_string()
-//     } else {
-//         let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
-//         path.push(PCAP_FILE_NAME);
-//         path.to_string_lossy().to_string()
-//     };
-// }
-
-// /// Returns the file to use for the output PCAP report
-// /// It tries and fallbacks in the order: custom path, configs path, home directory path
-// // /// This function also updates the custom path text input TODO!
-// pub fn set_report_file_to_use(custom_path: &str) -> File {
-//     if let Ok(custom_file) = File::create(custom_path) {
-//         return custom_file;
-//     } else if let Ok(mut config_path) =
-//         confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "file")
-//     {
-//         config_path.pop();
-//         config_path.push(PCAP_FILE_NAME);
-//         if let Ok(file) = File::create(config_path) {
-//             return file;
-//         }
-//     }
-//     let mut path = PathBuf::from(std::env::var_os("HOME").unwrap());
-//     path.push(PCAP_FILE_NAME);
-//     File::create(path).unwrap()
-// }
 
 pub fn print_cli_welcome_message() {
     print!(

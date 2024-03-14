@@ -3,7 +3,6 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use std::collections::HashSet;
-use std::path::Path;
 
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -24,6 +23,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::filters::Filters;
@@ -89,15 +89,9 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         )
         .push(Rule::horizontal(40))
         .push(
-            Container::new(get_export_pcap_group(
-                sniffer.export_pcap,
-                &sniffer.output_pcap_dir,
-                &sniffer.output_pcap_file,
-                language,
-                font,
-            ))
-            .height(Length::Fill)
-            .align_y(Vertical::Top),
+            Container::new(get_export_pcap_group(&sniffer.export_pcap, language, font))
+                .height(Length::Fill)
+                .align_y(Vertical::Top),
         )
         .push(
             Container::new(button_start(
@@ -374,21 +368,23 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
 }
 
 fn get_export_pcap_group(
-    export_pcap: bool,
-    output_pcap_path: &Path,
-    output_pcap_file: &str,
+    export_pcap: &ExportPcap,
     language: Language,
     font: Font,
 ) -> Container<'static, Message, StyleType> {
+    let enabled = export_pcap.enabled();
+    let file_name = export_pcap.file_name();
+    let directory = export_pcap.directory();
+
     let caption = export_capture_translation(language);
-    let checkbox = Checkbox::new(caption, export_pcap)
+    let checkbox = Checkbox::new(caption, enabled)
         .on_toggle(move |_| Message::ToggleExportPcap)
         .size(18)
         .font(font);
 
     let mut ret_val = Column::new().spacing(10).push(checkbox);
 
-    if export_pcap {
+    if enabled {
         let inner_col = Column::new()
             .spacing(10)
             .padding([0, 0, 0, 45])
@@ -398,7 +394,7 @@ fn get_export_pcap_group(
                     .spacing(5)
                     .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
                     .push(
-                        TextInput::new("sniffnet.pcap", output_pcap_file)
+                        TextInput::new(ExportPcap::DEFAULT_FILE_NAME, file_name)
                             .on_input(Message::OutputPcapFile)
                             .padding([2, 5])
                             .font(font)
@@ -412,13 +408,13 @@ fn get_export_pcap_group(
                     .push(Text::new(format!("{}:", directory_translation(language))).font(font))
                     .push(
                         Text::new(get_path_termination_string(
-                            &output_pcap_path.to_string_lossy(),
+                            &directory.to_string_lossy(),
                             25,
                         ))
                         .font(font),
                     )
                     .push(button_open_file(
-                        output_pcap_path.to_string_lossy().to_string(),
+                        directory.to_string_lossy().to_string(),
                         FileInfo::Directory,
                         language,
                         font,
