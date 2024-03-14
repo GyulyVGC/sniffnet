@@ -616,20 +616,19 @@ impl Sniffer {
             folder_path.to_string_lossy().to_string()
         };
 
-        let dialog = rfd::AsyncFileDialog::new().set_title(file_info.action_info(language));
+        let dialog = rfd::AsyncFileDialog::new()
+            .set_title(file_info.action_info(language))
+            .set_directory(starting_directory);
+
         let picked = if file_info == FileInfo::Directory {
-            dialog
-                .pick_folder()
-                .await
-                .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)))
+            dialog.pick_folder().await
         } else {
             dialog
                 .add_filter(file_info.get_extension(), &[file_info.get_extension()])
-                .set_directory(starting_directory)
                 .pick_file()
                 .await
-                .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)))
-        };
+        }
+        .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
         picked.path().to_string_lossy().to_string()
     }
