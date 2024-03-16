@@ -112,26 +112,22 @@ mod tests {
 
     #[test]
     fn test_full_path() {
+        let mut dir = std::env::var("HOME").unwrap_or_default();
+        if !dir.is_empty() {
+            dir.push('/');
+        }
+
         let mut export_pcap = ExportPcap::default();
         assert_eq!(export_pcap.full_path(), None);
 
         export_pcap.toggle();
         assert_eq!(
             export_pcap.full_path(),
-            Some(format!(
-                "{}/sniffnet.pcap",
-                std::env::var("HOME").unwrap_or_default(),
-            ))
+            Some(format!("{dir}sniffnet.pcap",))
         );
 
         export_pcap.set_file_name("test.pcap".to_string());
-        assert_eq!(
-            export_pcap.full_path(),
-            Some(format!(
-                "{}/test.pcap",
-                std::env::var("HOME").unwrap_or_default()
-            ))
-        );
+        assert_eq!(export_pcap.full_path(), Some(format!("{dir}test.pcap",)));
 
         export_pcap.set_directory("/tmp".to_string());
         assert_eq!(export_pcap.full_path(), Some("/tmp/test.pcap".to_string()));
