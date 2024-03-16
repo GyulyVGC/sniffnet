@@ -129,19 +129,31 @@ mod tests {
         export_pcap.set_file_name("test.pcap".to_string());
         assert_eq!(export_pcap.full_path(), Some(format!("{dir}test.pcap",)));
 
+        let mut full_path = PathBuf::from("/tmp");
+        full_path.push("test.pcap");
+
         export_pcap.set_directory("/tmp".to_string());
-        assert_eq!(export_pcap.full_path(), Some("/tmp/test.pcap".to_string()));
+        assert_eq!(
+            export_pcap.full_path(),
+            Some(full_path.to_string_lossy().to_string())
+        );
 
         export_pcap.toggle();
         assert_eq!(export_pcap.full_path(), None);
 
         export_pcap.toggle();
-        assert_eq!(export_pcap.full_path(), Some("/tmp/test.pcap".to_string()));
+        assert_eq!(
+            export_pcap.full_path(),
+            Some(full_path.to_string_lossy().to_string())
+        );
+
+        let mut full_path = PathBuf::from("/tmp");
+        full_path.push("sniffnet.pcap");
 
         export_pcap.set_file_name("".to_string());
         assert_eq!(
             export_pcap.full_path(),
-            Some("/tmp/sniffnet.pcap".to_string())
+            Some(full_path.to_string_lossy().to_string())
         );
 
         export_pcap.set_directory("".to_string());
