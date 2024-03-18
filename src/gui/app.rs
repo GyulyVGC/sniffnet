@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::Id;
 use iced::Event::{Keyboard, Window};
@@ -156,17 +157,29 @@ impl Application for Sniffer {
             },
             _ => None,
         });
+        let click_subscription = iced::event::listen_with(|event, _| match event {
+            iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
+            _ => None,
+        });
         let time_subscription = if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
         } else {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
         };
 
-        Subscription::batch([
-            window_events_subscription,
-            hot_keys_subscription,
-            time_subscription,
-        ])
+        return if self.thumbnail {
+            Subscription::batch([
+                window_events_subscription,
+                click_subscription,
+                time_subscription,
+            ])
+        } else {
+            Subscription::batch([
+                window_events_subscription,
+                hot_keys_subscription,
+                time_subscription,
+            ])
+        };
     }
 
     fn theme(&self) -> Self::Theme {

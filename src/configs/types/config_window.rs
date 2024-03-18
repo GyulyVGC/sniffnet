@@ -9,6 +9,7 @@ use crate::SNIFFNET_LOWERCASE;
 pub struct ConfigWindow {
     pub position: (i32, i32),
     pub size: (u32, u32),
+    pub thumbnail_position: (i32, i32),
 }
 
 impl ConfigWindow {
@@ -35,6 +36,7 @@ impl Default for ConfigWindow {
         Self {
             position: (0, 0),
             size: (1190, 670),
+            thumbnail_position: (0, 0),
         }
     }
 }
@@ -50,6 +52,20 @@ impl ToPosition for (i32, i32) {
             x: self.0 as f32,
             y: self.1 as f32,
         })
+    }
+}
+
+pub trait ToPoint {
+    fn to_point(self) -> Point;
+}
+
+impl ToPoint for (i32, i32) {
+    fn to_point(self) -> Point {
+        #[allow(clippy::cast_precision_loss)]
+        Point {
+            x: self.0 as f32,
+            y: self.1 as f32,
+        }
     }
 }
 

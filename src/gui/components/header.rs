@@ -7,17 +7,19 @@ use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Toolti
 use iced::{Alignment, Font, Length};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
+use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
 pub fn header(
     font: Font,
     color_gradient: GradientType,
-    back_button: bool,
+    is_running: bool,
     language: Language,
     last_opened_setting: SettingsPage,
 ) -> Container<'static, Message, StyleType> {
@@ -32,19 +34,23 @@ pub fn header(
         Row::new()
             .padding([0, 20])
             .align_items(Alignment::Center)
-            .push(if back_button {
+            .push(if is_running {
                 Container::new(get_button_reset(font, language))
             } else {
                 Container::new(Space::with_width(60))
             })
             .push(horizontal_space())
+            .push(Container::new(Space::with_width(40)))
+            .push(Space::with_width(20))
             .push(logo)
+            .push(Space::with_width(20))
+            .push(if is_running {
+                Container::new(get_button_minimize(font, language))
+            } else {
+                Container::new(Space::with_width(40))
+            })
             .push(horizontal_space())
-            .push(Container::new(get_button_settings(
-                font,
-                language,
-                last_opened_setting,
-            ))),
+            .push(get_button_settings(font, language, last_opened_setting)),
     )
     .height(90)
     .align_y(Vertical::Center)
@@ -97,5 +103,28 @@ pub fn get_button_settings(
         Position::Left,
     )
     .gap(5)
+    .style(ContainerType::Tooltip)
+}
+
+pub fn get_button_minimize(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
+    let content = button(
+        Icon::ThumbnailOpen
+            .to_text()
+            .size(26)
+            .horizontal_alignment(Horizontal::Center)
+            .vertical_alignment(Vertical::Center),
+    )
+    .padding(0)
+    .height(40)
+    .width(40)
+    .style(ButtonType::Thumbnail)
+    .on_press(Message::ToggleThumbnail);
+
+    Tooltip::new(
+        content,
+        Text::new(thumbnail_mode_translation(language)).font(font),
+        Position::Right,
+    )
+    .gap(0)
     .style(ContainerType::Tooltip)
 }

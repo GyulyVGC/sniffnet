@@ -87,7 +87,7 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position } = configs1.lock().unwrap().window;
+    let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
 
     Sniffer::run(Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292

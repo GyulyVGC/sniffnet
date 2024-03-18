@@ -6,12 +6,13 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use iced::window::Id;
-use iced::{window, Command};
+use iced::window::{Id, Level};
+use iced::{window, Command, Size};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
+use crate::configs::types::config_window::{ToPoint, ToSize};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -95,9 +96,16 @@ pub struct Sniffer {
     pub timing_events: TimingEvents,
     /// Information about PCAP file export
     pub export_pcap: ExportPcap,
+    /// Whether thumbnail mode is currently active
+    pub thumbnail: bool,
 }
 
 impl Sniffer {
+    pub const THUMBNAIL_SIZE: Size = Size {
+        width: 360.0,
+        height: 222.0,
+    };
+
     pub fn new(
         configs: &Arc<Mutex<Configs>>,
         newer_release_available: Arc<Mutex<Option<bool>>>,
@@ -135,6 +143,7 @@ impl Sniffer {
             asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
+            thumbnail: false,
         }
     }
 
@@ -277,14 +286,30 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.scale_factor = multiplier;
             }
             Message::WindowMoved(x, y) => {
-                self.configs.lock().unwrap().window.position = (x, y);
+                if self.thumbnail {
+                    self.configs.lock().unwrap().window.thumbnail_position = (x, y);
+                } else {
+                    self.configs.lock().unwrap().window.position = (x, y);
+                }
             }
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
                 let scaled_width = (f64::from(width) * scale_factor) as u32;
                 let scaled_height = (f64::from(height) * scale_factor) as u32;
-                self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
+
+                if !self.thumbnail {
+                    self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
+                } else if scaled_width > (1.5 * Self::THUMBNAIL_SIZE.width) as u32
+                    || scaled_height > (1.5 * Self::THUMBNAIL_SIZE.height) as u32
+                {
+                    self.thumbnail = false;
+                    return Command::batch([
+                        window::toggle_decorations(Id::MAIN),
+                        // window::maximize(Id::MAIN, true),
+                        window::change_level(Id::MAIN, Level::Normal),
+                    ]);
+                }
             }
             Message::CustomCountryDb(db) => {
                 self.configs.lock().unwrap().settings.mmdb_country = db.clone();
@@ -294,9 +319,6 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            // Message::CustomReport(path) => {
-            //     self.settings.output_path = path;
-            // }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
                 return window::close(Id::MAIN);
@@ -329,6 +351,37 @@ impl Sniffer {
             }
             Message::OutputPcapFile(name) => {
                 self.export_pcap.set_file_name(name);
+            }
+            Message::ToggleThumbnail => {
+                self.thumbnail = !self.thumbnail;
+                return if self.thumbnail {
+                    let size = Self::THUMBNAIL_SIZE;
+                    let position = self
+                        .configs
+                        .lock()
+                        .unwrap()
+                        .window
+                        .thumbnail_position
+                        .to_point();
+                    Command::batch([
+                        window::toggle_decorations(Id::MAIN),
+                        window::resize(Id::MAIN, size),
+                        window::move_to(Id::MAIN, position),
+                        window::change_level(Id::MAIN, Level::AlwaysOnTop),
+                    ])
+                } else {
+                    let size = self.configs.lock().unwrap().window.size.to_size();
+                    let position = self.configs.lock().unwrap().window.position.to_point();
+                    Command::batch([
+                        window::toggle_decorations(Id::MAIN),
+                        window::resize(Id::MAIN, size),
+                        window::move_to(Id::MAIN, position),
+                        window::change_level(Id::MAIN, Level::Normal),
+                    ])
+                };
+            }
+            Message::Drag => {
+                return window::drag(Id::MAIN);
             }
             Message::TickInit => {}
         }

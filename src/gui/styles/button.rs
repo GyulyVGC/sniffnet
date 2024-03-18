@@ -28,6 +28,7 @@ pub enum ButtonType {
     Gradient(GradientType),
     SortArrows,
     SortArrowActive,
+    Thumbnail,
 }
 
 impl button::StyleSheet for StyleType {
@@ -47,6 +48,7 @@ impl button::StyleSheet for StyleType {
                     ..ext.buttons_color
                 }),
                 ButtonType::Neutral
+                | ButtonType::Thumbnail
                 | ButtonType::NotStarred
                 | ButtonType::SortArrows
                 | ButtonType::SortArrowActive => Background::Color(Color::TRANSPARENT),
@@ -76,7 +78,8 @@ impl button::StyleSheet for StyleType {
                     | ButtonType::SortArrowActive
                     | ButtonType::Starred
                     | ButtonType::NotStarred
-                    | ButtonType::Neutral => 0.0,
+                    | ButtonType::Neutral
+                    | ButtonType::Thumbnail => 0.0,
                     ButtonType::BorderedRound => BORDER_WIDTH * 2.0,
                     _ => BORDER_WIDTH,
                 },
@@ -101,6 +104,7 @@ impl button::StyleSheet for StyleType {
                 },
                 ButtonType::SortArrowActive => colors.secondary,
                 ButtonType::Gradient(_) => colors.text_headers,
+                ButtonType::Thumbnail => mix_colors(colors.text_headers, colors.secondary),
                 _ => colors.text_body,
             },
             shadow: match style {
@@ -126,9 +130,10 @@ impl button::StyleSheet for StyleType {
                 _ => Vector::new(0.0, 2.0),
             },
             shadow: match style {
-                ButtonType::Neutral | ButtonType::SortArrows | ButtonType::SortArrowActive => {
-                    Shadow::default()
-                }
+                ButtonType::Neutral
+                | ButtonType::SortArrows
+                | ButtonType::SortArrowActive
+                | ButtonType::Thumbnail => Shadow::default(),
                 _ => Shadow {
                     color: Color::BLACK,
                     offset: match style {
@@ -143,7 +148,7 @@ impl button::StyleSheet for StyleType {
             },
             background: Some(match style {
                 ButtonType::Starred => Background::Color(colors.starred),
-                ButtonType::SortArrows | ButtonType::SortArrowActive => {
+                ButtonType::SortArrows | ButtonType::SortArrowActive | ButtonType::Thumbnail => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ButtonType::Neutral => Background::Color(Color {
@@ -174,6 +179,7 @@ impl button::StyleSheet for StyleType {
                     | ButtonType::SortArrows
                     | ButtonType::SortArrowActive
                     | ButtonType::TabInactive
+                    | ButtonType::Thumbnail
                     | ButtonType::BorderedRound => 0.0,
                     _ => BORDER_WIDTH,
                 },
@@ -189,7 +195,7 @@ impl button::StyleSheet for StyleType {
             },
             text_color: match style {
                 ButtonType::Starred => Color::BLACK,
-                ButtonType::Gradient(_) => colors.text_headers,
+                ButtonType::Gradient(_) | ButtonType::Thumbnail => colors.text_headers,
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },

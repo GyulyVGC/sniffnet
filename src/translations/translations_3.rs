@@ -185,3 +185,11 @@ pub fn file_name_translation(language: Language) -> &'static str {
         _ => "File name",
     }
 }
+
+pub fn thumbnail_mode_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Thumbnail mode",
+        Language::IT => "Modalità miniatura",
+        _ => "Thumbnail mode",
+    }
+}
