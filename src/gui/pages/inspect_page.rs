@@ -184,7 +184,7 @@ fn report_header_row(
                     .size(FONT_SIZE_FOOTER),
             );
         let tooltip_style = if tooltip_val.is_empty() {
-            ContainerType::Neutral
+            ContainerType::Standard
         } else {
             ContainerType::Tooltip
         };
@@ -446,7 +446,7 @@ fn filter_input(
         .style(if is_filter_active {
             ContainerType::Badge
         } else {
-            ContainerType::Neutral
+            ContainerType::Standard
         })
 }
 

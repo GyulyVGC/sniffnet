@@ -17,7 +17,6 @@ pub enum ContainerType {
     Tooltip,
     Badge,
     Palette,
-    Neutral,
     Gradient(GradientType),
     Modal,
     Highlighted,
@@ -43,9 +42,6 @@ impl iced::widget::container::StyleSheet for StyleType {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 }),
-                ContainerType::Neutral | ContainerType::Palette => {
-                    Background::Color(Color::TRANSPARENT)
-                }
                 ContainerType::Badge => Background::Color(Color {
                     a: ext.alpha_chart_badge,
                     ..colors.secondary
@@ -54,7 +50,9 @@ impl iced::widget::container::StyleSheet for StyleType {
                     get_gradient_headers(&colors, *gradient_type, ext.is_nightly),
                 ),
                 ContainerType::Modal => Background::Color(colors.primary),
-                ContainerType::Standard => Background::Color(Color::TRANSPARENT),
+                ContainerType::Standard | ContainerType::Palette => {
+                    Background::Color(Color::TRANSPARENT)
+                }
             }),
             border: Border {
                 radius: match style {
@@ -69,7 +67,6 @@ impl iced::widget::container::StyleSheet for StyleType {
                 width: match style {
                     ContainerType::Standard
                     | ContainerType::Modal
-                    | ContainerType::Neutral
                     | ContainerType::Gradient(_)
                     | ContainerType::Highlighted => 0.0,
                     ContainerType::Tooltip => BORDER_WIDTH / 2.0,

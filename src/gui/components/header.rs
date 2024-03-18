@@ -14,15 +14,21 @@ use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
-use crate::{Language, StyleType};
+use crate::{Language, StyleType, SNIFFNET_TITLECASE};
 
 pub fn header(
+    thumbnail: bool,
     font: Font,
+    font_headers: Font,
     color_gradient: GradientType,
     is_running: bool,
     language: Language,
     last_opened_setting: SettingsPage,
 ) -> Container<'static, Message, StyleType> {
+    if thumbnail {
+        return thumbnail_header(font, font_headers, language, color_gradient);
+    }
+
     let logo = Icon::Sniffnet
         .to_text()
         .vertical_alignment(Vertical::Center)
@@ -45,7 +51,7 @@ pub fn header(
             .push(logo)
             .push(Space::with_width(20))
             .push(if is_running {
-                Container::new(get_button_minimize(font, language))
+                Container::new(get_button_minimize(font, language, false))
             } else {
                 Container::new(Space::with_width(40))
             })
@@ -106,25 +112,64 @@ pub fn get_button_settings(
     .style(ContainerType::Tooltip)
 }
 
-pub fn get_button_minimize(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
-    let content = button(
+pub fn get_button_minimize(
+    font: Font,
+    language: Language,
+    thumbnail: bool,
+) -> Tooltip<'static, Message, StyleType> {
+    let size = if thumbnail { 20 } else { 26 };
+    let button_size = if thumbnail { 30 } else { 40 };
+    let icon = if thumbnail {
+        Icon::ThumbnailClose
+    } else {
         Icon::ThumbnailOpen
-            .to_text()
-            .size(26)
+    };
+    let tooltip = if thumbnail {
+        ""
+    } else {
+        thumbnail_mode_translation(language)
+    };
+    let tooltip_style = if thumbnail {
+        ContainerType::Standard
+    } else {
+        ContainerType::Tooltip
+    };
+
+    let content = button(
+        icon.to_text()
+            .size(size)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
     .padding(0)
-    .height(40)
-    .width(40)
+    .height(button_size)
+    .width(button_size)
     .style(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail);
 
-    Tooltip::new(
-        content,
-        Text::new(thumbnail_mode_translation(language)).font(font),
-        Position::Right,
+    Tooltip::new(content, Text::new(tooltip).font(font), Position::Right)
+        .gap(0)
+        .style(tooltip_style)
+}
+
+fn thumbnail_header(
+    font: Font,
+    font_headers: Font,
+    language: Language,
+    color_gradient: GradientType,
+) -> Container<'static, Message, StyleType> {
+    Container::new(
+        Row::new()
+            .align_items(Alignment::Center)
+            .push(horizontal_space())
+            .push(Container::new(Space::with_width(30)))
+            .push(Space::with_width(10))
+            .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
+            .push(Space::with_width(10))
+            .push(get_button_minimize(font, language, true))
+            .push(horizontal_space()),
     )
-    .gap(0)
-    .style(ContainerType::Tooltip)
+    .height(30)
+    .align_y(Vertical::Center)
+    .style(ContainerType::Gradient(color_gradient))
 }

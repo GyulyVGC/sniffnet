@@ -24,6 +24,7 @@ use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
+use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::message::Message;
@@ -65,21 +66,28 @@ impl Application for Sniffer {
         let font_headers = style.get_extension().font_headers;
 
         let header = header(
+            self.thumbnail,
             font,
+            font_headers,
             color_gradient,
             self.running_page.ne(&RunningPage::Init),
             language,
             self.last_opened_setting,
         );
 
-        let body = match self.running_page {
-            RunningPage::Init => initial_page(self),
-            RunningPage::Overview => overview_page(self),
-            RunningPage::Inspect => inspect_page(self),
-            RunningPage::Notifications => notifications_page(self),
+        let body = if self.thumbnail {
+            thumbnail_page(self)
+        } else {
+            match self.running_page {
+                RunningPage::Init => initial_page(self),
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            }
         };
 
         let footer = footer(
+            self.thumbnail,
             language,
             color_gradient,
             font,

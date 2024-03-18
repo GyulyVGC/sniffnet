@@ -48,7 +48,7 @@ pub fn button_open_file(
     action: fn(String) -> Message,
 ) -> Tooltip<'static, Message, StyleType> {
     let mut tooltip_str = "";
-    let mut tooltip_style = ContainerType::Neutral;
+    let mut tooltip_style = ContainerType::Standard;
 
     let mut button = button(
         Icon::File

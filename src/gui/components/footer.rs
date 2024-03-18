@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::Space;
 use iced::widget::{button, Container, Row, Text, Tooltip};
+use iced::widget::{horizontal_space, Space};
 use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::row_open_link_tooltip;
@@ -24,12 +24,17 @@ use crate::utils::types::web_page::WebPage;
 use crate::{Language, SNIFFNET_TITLECASE};
 
 pub fn footer(
+    thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
     newer_release_available: &Arc<Mutex<Option<bool>>>,
 ) -> Container<'static, Message, StyleType> {
+    if thumbnail {
+        return thumbnail_footer();
+    }
+
     let release_details_row =
         get_release_details(language, font, font_footer, newer_release_available);
 
@@ -164,4 +169,8 @@ fn get_release_details(
         }
     }
     ret_val
+}
+
+fn thumbnail_footer() -> Container<'static, Message, StyleType> {
+    Container::new(horizontal_space()).height(0)
 }
