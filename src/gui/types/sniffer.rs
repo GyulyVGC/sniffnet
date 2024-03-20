@@ -304,6 +304,8 @@ impl Sniffer {
                     || scaled_height > (1.5 * Self::THUMBNAIL_SIZE.height) as u32
                 {
                     self.thumbnail = false;
+                    self.traffic_chart.thumbnail = false;
+
                     return Command::batch([
                         window::toggle_decorations(Id::MAIN),
                         // window::maximize(Id::MAIN, true),
@@ -354,6 +356,8 @@ impl Sniffer {
             }
             Message::ToggleThumbnail => {
                 self.thumbnail = !self.thumbnail;
+                self.traffic_chart.thumbnail = self.thumbnail;
+
                 return if self.thumbnail {
                     let size = Self::THUMBNAIL_SIZE;
                     let position = self

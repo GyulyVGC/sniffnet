@@ -175,7 +175,7 @@ impl Application for Sniffer {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
         };
 
-        return if self.thumbnail {
+        if self.thumbnail {
             Subscription::batch([
                 window_events_subscription,
                 click_subscription,
@@ -187,7 +187,7 @@ impl Application for Sniffer {
                 hot_keys_subscription,
                 time_subscription,
             ])
-        };
+        }
     }
 
     fn theme(&self) -> Self::Theme {
