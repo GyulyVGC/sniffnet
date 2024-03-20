@@ -6,28 +6,44 @@ use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
 use iced::{Alignment, Font, Length};
 
+use crate::configs::types::config_settings::ConfigSettings;
+use crate::gui::components::tab::notifications_badge;
+use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::sniffer::Sniffer;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType, SNIFFNET_TITLECASE};
 
-pub fn header(
-    thumbnail: bool,
-    font: Font,
-    font_headers: Font,
-    color_gradient: GradientType,
-    is_running: bool,
-    language: Language,
-    last_opened_setting: SettingsPage,
-) -> Container<'static, Message, StyleType> {
+pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
+    let thumbnail = sniffer.thumbnail;
+    let ConfigSettings {
+        style,
+        language,
+        color_gradient,
+        ..
+    } = sniffer.configs.lock().unwrap().settings;
+    let font = style.get_extension().font;
+
     if thumbnail {
-        return thumbnail_header(font, font_headers, language, color_gradient);
+        let font_headers = style.get_extension().font_headers;
+        let unread_notifications = sniffer.unread_notifications;
+        return thumbnail_header(
+            font,
+            font_headers,
+            language,
+            color_gradient,
+            unread_notifications,
+        );
     }
+
+    let last_opened_setting = sniffer.last_opened_setting;
+    let is_running = sniffer.running_page.ne(&RunningPage::Init);
 
     let logo = Icon::Sniffnet
         .to_text()
@@ -157,17 +173,27 @@ fn thumbnail_header(
     font_headers: Font,
     language: Language,
     color_gradient: GradientType,
+    unread_notifications: usize,
 ) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
             .align_items(Alignment::Center)
             .push(horizontal_space())
-            .push(Container::new(Space::with_width(30)))
-            .push(Space::with_width(10))
+            .push(Space::with_width(80))
             .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
             .push(Space::with_width(10))
             .push(get_button_minimize(font, language, true))
-            .push(horizontal_space()),
+            .push(horizontal_space())
+            .push(if unread_notifications > 0 {
+                Container::new(
+                    notifications_badge(font, unread_notifications)
+                        .style(ContainerType::HighlightedOnHeader),
+                )
+                .width(40)
+                .align_x(Horizontal::Center)
+            } else {
+                Container::new(Space::with_width(40))
+            }),
     )
     .height(30)
     .align_y(Vertical::Center)

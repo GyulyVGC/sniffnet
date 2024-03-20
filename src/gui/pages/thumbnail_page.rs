@@ -7,7 +7,8 @@ use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::host::Host;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::sort_type::SortType;
-use iced::widget::{Column, Container, Row, Rule, Text};
+use iced::alignment::Horizontal;
+use iced::widget::{vertical_space, Column, Container, Row, Rule, Space, Text};
 use iced::{Alignment, Font, Length};
 use std::cmp::min;
 use std::net::IpAddr;
@@ -18,6 +19,17 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
+
+    if sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets == 0 {
+        return Container::new(
+            Column::new()
+                .push(vertical_space())
+                .push(Text::new(&sniffer.waiting).font(font).size(50))
+                .push(Space::with_height(Length::FillPortion(2))),
+        )
+        .width(Length::Fill)
+        .align_x(Horizontal::Center);
+    }
 
     let max_chars_host = 26;
     let max_chars_service = 13;
@@ -51,7 +63,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
     for service in services {
         service_col = service_col.push(
-            Text::new(clip_text(service.0.to_string(), max_chars_service))
+            Text::new(clip_text(&service.0.to_string(), max_chars_service))
                 .font(font)
                 .size(FONT_SIZE_FOOTER),
         );
@@ -70,8 +82,6 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(host_service_row);
 
     Container::new(content)
-        .width(Length::Fill)
-        .height(Length::Fill)
 }
 
 fn host_text(host: Host, font: Font, max_chars: usize) -> Text<'static, StyleType> {
@@ -84,12 +94,12 @@ fn host_text(host: Host, font: Font, max_chars: usize) -> Text<'static, StyleTyp
         asn
     };
 
-    Text::new(clip_text(text, max_chars))
+    Text::new(clip_text(&text, max_chars))
         .font(font)
         .size(FONT_SIZE_FOOTER)
 }
 
-fn clip_text(text: String, max_chars: usize) -> String {
+fn clip_text(text: &str, max_chars: usize) -> String {
     let chars = text.chars().collect::<Vec<char>>();
     let tot_len = chars.len();
     let slice_len = min(max_chars, tot_len);

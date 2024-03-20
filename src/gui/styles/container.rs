@@ -20,6 +20,7 @@ pub enum ContainerType {
     Gradient(GradientType),
     Modal,
     Highlighted,
+    HighlightedOnHeader,
 }
 
 impl iced::widget::container::StyleSheet for StyleType {
@@ -49,7 +50,9 @@ impl iced::widget::container::StyleSheet for StyleType {
                 ContainerType::Gradient(gradient_type) => Background::Gradient(
                     get_gradient_headers(&colors, *gradient_type, ext.is_nightly),
                 ),
-                ContainerType::Modal => Background::Color(colors.primary),
+                ContainerType::Modal | ContainerType::HighlightedOnHeader => {
+                    Background::Color(colors.primary)
+                }
                 ContainerType::Standard | ContainerType::Palette => {
                     Background::Color(Color::TRANSPARENT)
                 }
@@ -61,13 +64,16 @@ impl iced::widget::container::StyleSheet for StyleType {
                         [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
                     }
                     ContainerType::Tooltip => 7.0.into(),
-                    ContainerType::Badge | ContainerType::Highlighted => 100.0.into(),
+                    ContainerType::Badge
+                    | ContainerType::Highlighted
+                    | ContainerType::HighlightedOnHeader => 100.0.into(),
                     _ => 0.0.into(),
                 },
                 width: match style {
                     ContainerType::Standard
                     | ContainerType::Modal
                     | ContainerType::Gradient(_)
+                    | ContainerType::HighlightedOnHeader
                     | ContainerType::Highlighted => 0.0,
                     ContainerType::Tooltip => BORDER_WIDTH / 2.0,
                     ContainerType::BorderedRound => BORDER_WIDTH * 2.0,

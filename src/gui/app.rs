@@ -65,15 +65,7 @@ impl Application for Sniffer {
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
-        let header = header(
-            self.thumbnail,
-            font,
-            font_headers,
-            color_gradient,
-            self.running_page.ne(&RunningPage::Init),
-            language,
-            self.last_opened_setting,
-        );
+        let header = header(self);
 
         let body = if self.thumbnail {
             thumbnail_page(self)

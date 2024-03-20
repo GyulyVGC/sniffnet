@@ -413,7 +413,7 @@ impl Sniffer {
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;
-        if self.running_page.ne(&RunningPage::Notifications) {
+        if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
         update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
