@@ -88,8 +88,8 @@ impl TrafficChart {
         if self.thumbnail {
             chart_builder.margin_right(0);
             chart_builder.margin_left(0);
+            chart_builder.margin_bottom(0);
             chart_builder.margin_top(5);
-            chart_builder.margin_bottom(5);
         } else {
             chart_builder
                 .margin_right(25)

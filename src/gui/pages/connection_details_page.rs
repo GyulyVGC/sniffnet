@@ -8,7 +8,6 @@ use iced::widget::{Column, Container, Row, Text, Tooltip};
 use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
-use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -107,7 +106,7 @@ fn page_content(
     if let Some((r_dns, host)) = host_option {
         host_info_col = get_host_info_col(&r_dns, &host, font, language);
         let host_info = host_info_option.unwrap_or_default();
-        let flag = get_flag_tooltip(host.country, FLAGS_WIDTH_BIG, &host_info, language, font);
+        let flag = get_flag_tooltip(host.country, &host_info, language, font, false);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);

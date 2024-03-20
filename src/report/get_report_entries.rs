@@ -69,13 +69,15 @@ pub fn get_host_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
     sort_type: SortType,
+    thumbnail: bool,
 ) -> Vec<(Host, DataInfoHost)> {
+    let max_entries = if thumbnail { 4 } else { 30 };
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic_lock.hosts.iter().collect();
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, chart_type));
 
-    let n_entry = min(sorted_vec.len(), 30);
+    let n_entry = min(sorted_vec.len(), max_entries);
     sorted_vec[0..n_entry]
         .iter()
         .map(|&(host, data_info_host)| (host.to_owned(), data_info_host.to_owned()))
@@ -86,7 +88,9 @@ pub fn get_service_entries(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
     sort_type: SortType,
+    thumbnail: bool,
 ) -> Vec<(Service, DataInfo)> {
+    let max_entries = if thumbnail { 4 } else { 30 };
     let info_traffic_lock = info_traffic.lock().unwrap();
     let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic_lock
         .services
@@ -96,7 +100,7 @@ pub fn get_service_entries(
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, chart_type));
 
-    let n_entry = min(sorted_vec.len(), 30);
+    let n_entry = min(sorted_vec.len(), max_entries);
     sorted_vec[0..n_entry]
         .iter()
         .map(|&(service, data_info)| (*service, *data_info))
