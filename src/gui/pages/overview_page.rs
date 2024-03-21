@@ -266,12 +266,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut scroll_host = Column::new().width(width).align_items(Alignment::Center);
-    let entries = get_host_entries(
-        &sniffer.info_traffic,
-        chart_type,
-        sniffer.host_sort_type,
-        false,
-    );
+    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
@@ -376,12 +371,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let mut scroll_service = Column::new().width(width).align_items(Alignment::Center);
-    let entries = get_service_entries(
-        &sniffer.info_traffic,
-        chart_type,
-        sniffer.service_sort_type,
-        false,
-    );
+    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
