@@ -1747,12 +1747,15 @@ mod tests {
             ConfigWindow {
                 position: (0, 0),
                 size: (1190, 670),
+                thumbnail_position: (0, 0),
             }
         );
 
         // change window properties by sending messages
         sniffer.update(Message::WindowMoved(-10, 555));
         sniffer.update(Message::WindowResized(1000, 999));
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(40, 40));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::CloseRequested);
@@ -1771,6 +1774,7 @@ mod tests {
             ConfigWindow {
                 position: (-10, 555),
                 size: (1000, 999),
+                thumbnail_position: (40, 40),
             }
         );
     }

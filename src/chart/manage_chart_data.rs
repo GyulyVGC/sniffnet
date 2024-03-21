@@ -172,6 +172,7 @@ mod tests {
             language: Language::default(),
             chart_type: ChartType::Packets,
             style: StyleType::default(),
+            thumbnail: false,
         };
         let mut runtime_data = RunTimeData {
             all_bytes: 0,

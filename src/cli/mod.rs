@@ -90,6 +90,7 @@ mod tests {
             window: ConfigWindow {
                 position: (440, 99),
                 size: (452, 870),
+                thumbnail_position: (20, 20),
             },
         };
         // we want to be sure that modified config is different from defaults

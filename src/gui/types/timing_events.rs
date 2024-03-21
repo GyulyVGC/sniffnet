@@ -2,7 +2,7 @@ use std::time::Duration;
 
 pub struct TimingEvents {
     /// Instant of the last window focus
-    focus: std::time::Instant,
+    pub(crate) focus: std::time::Instant,
     /// Instant of the last press on Copy IP button, with the related IP address
     copy_ip: (std::time::Instant, String),
     /// Instant of the last thumbnail mode enter
