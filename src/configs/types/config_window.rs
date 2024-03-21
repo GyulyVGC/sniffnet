@@ -13,6 +13,10 @@ pub struct ConfigWindow {
 }
 
 impl ConfigWindow {
+    pub const DEFAULT_SIZE: (u32, u32) = (1190, 670);
+    pub const MIN_SIZE: (u32, u32) = (800, 500);
+    pub const THUMBNAIL_SIZE: (u32, u32) = (360, 222);
+
     const FILE_NAME: &'static str = "window";
     #[cfg(not(test))]
     pub fn load() -> Self {
@@ -35,7 +39,7 @@ impl Default for ConfigWindow {
     fn default() -> Self {
         Self {
             position: (0, 0),
-            size: (1190, 670),
+            size: ConfigWindow::DEFAULT_SIZE,
             thumbnail_position: (0, 0),
         }
     }
@@ -80,6 +84,28 @@ impl ToSize for (u32, u32) {
             width: self.0 as f32,
             height: self.1 as f32,
         }
+    }
+}
+
+pub trait Scale {
+    fn scale(self, factor: f64) -> Self;
+}
+
+impl Scale for (u32, u32) {
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    fn scale(self, factor: f64) -> (u32, u32) {
+        let x = (f64::from(self.0) * factor) as u32;
+        let y = (f64::from(self.1) * factor) as u32;
+        (x, y)
+    }
+}
+
+impl Scale for (i32, i32) {
+    #[allow(clippy::cast_possible_truncation)]
+    fn scale(self, factor: f64) -> (i32, i32) {
+        let x = (f64::from(self.0) * factor) as i32;
+        let y = (f64::from(self.1) * factor) as i32;
+        (x, y)
     }
 }
 

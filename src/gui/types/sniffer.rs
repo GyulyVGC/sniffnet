@@ -7,12 +7,12 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use iced::window::{Id, Level};
-use iced::{window, Command, Size};
+use iced::{window, Command};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
-use crate::configs::types::config_window::{ToPoint, ToSize};
+use crate::configs::types::config_window::{ConfigWindow, Scale, ToPoint, ToSize};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -101,11 +101,6 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub const THUMBNAIL_SIZE: Size = Size {
-        width: 360.0,
-        height: 222.0,
-    };
-
     pub fn new(
         configs: &Arc<Mutex<Configs>>,
         newer_release_available: Arc<Mutex<Option<bool>>>,
@@ -286,20 +281,18 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.scale_factor = multiplier;
             }
             Message::WindowMoved(x, y) => {
+                let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                let scaled = (x, y).scale(scale_factor);
                 if self.thumbnail {
-                    self.configs.lock().unwrap().window.thumbnail_position = (x, y);
+                    self.configs.lock().unwrap().window.thumbnail_position = scaled;
                 } else {
-                    self.configs.lock().unwrap().window.position = (x, y);
+                    self.configs.lock().unwrap().window.position = scaled;
                 }
             }
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             Message::WindowResized(width, height) => {
-                let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled_width = (f64::from(width) * scale_factor) as u32;
-                let scaled_height = (f64::from(height) * scale_factor) as u32;
-
                 if !self.thumbnail {
-                    self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
+                    let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                    self.configs.lock().unwrap().window.size = (width, height).scale(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
                     return self.update(Message::ToggleThumbnail(true));
                 }
@@ -350,7 +343,8 @@ impl Sniffer {
                 self.traffic_chart.thumbnail = self.thumbnail;
 
                 return if self.thumbnail {
-                    let size = Self::THUMBNAIL_SIZE;
+                    let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                    let size = ConfigWindow::THUMBNAIL_SIZE.scale(scale_factor).to_size();
                     let position = self
                         .configs
                         .lock()

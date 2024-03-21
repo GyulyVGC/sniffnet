@@ -95,7 +95,7 @@ pub fn main() -> iced::Result {
         window: window::Settings {
             size: size.to_size(), // start size
             position: position.to_position(),
-            min_size: Some((800, 500).to_size()), // min size allowed
+            min_size: Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
             max_size: None,
             visible: true,
             resizable: true,
