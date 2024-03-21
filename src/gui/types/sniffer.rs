@@ -300,17 +300,8 @@ impl Sniffer {
 
                 if !self.thumbnail {
                     self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
-                } else if scaled_width > (1.5 * Self::THUMBNAIL_SIZE.width) as u32
-                    || scaled_height > (1.5 * Self::THUMBNAIL_SIZE.height) as u32
-                {
-                    self.thumbnail = false;
-                    self.traffic_chart.thumbnail = false;
-
-                    return Command::batch([
-                        window::toggle_decorations(Id::MAIN),
-                        // window::maximize(Id::MAIN, true),
-                        window::change_level(Id::MAIN, Level::Normal),
-                    ]);
+                } else if !self.timing_events.was_just_thumbnail_enter() {
+                    return self.update(Message::ToggleThumbnail(true));
                 }
             }
             Message::CustomCountryDb(db) => {
@@ -354,7 +345,7 @@ impl Sniffer {
             Message::OutputPcapFile(name) => {
                 self.export_pcap.set_file_name(name);
             }
-            Message::ToggleThumbnail => {
+            Message::ToggleThumbnail(triggered_by_resize) => {
                 self.thumbnail = !self.thumbnail;
                 self.traffic_chart.thumbnail = self.thumbnail;
 
@@ -367,21 +358,28 @@ impl Sniffer {
                         .window
                         .thumbnail_position
                         .to_point();
+                    self.timing_events.thumbnail_enter_now();
                     Command::batch([
-                        window::toggle_decorations(Id::MAIN),
                         window::resize(Id::MAIN, size),
+                        window::toggle_decorations(Id::MAIN),
                         window::move_to(Id::MAIN, position),
                         window::change_level(Id::MAIN, Level::AlwaysOnTop),
                     ])
                 } else {
+                    if self.running_page.eq(&RunningPage::Notifications) {
+                        self.unread_notifications = 0;
+                    }
                     let size = self.configs.lock().unwrap().window.size.to_size();
                     let position = self.configs.lock().unwrap().window.position.to_point();
-                    Command::batch([
+                    let mut commands = vec![
                         window::toggle_decorations(Id::MAIN),
-                        window::resize(Id::MAIN, size),
-                        window::move_to(Id::MAIN, position),
                         window::change_level(Id::MAIN, Level::Normal),
-                    ])
+                    ];
+                    if !triggered_by_resize {
+                        commands.push(window::resize(Id::MAIN, size));
+                        commands.push(window::move_to(Id::MAIN, position));
+                    }
+                    Command::batch(commands)
                 };
             }
             Message::Drag => {

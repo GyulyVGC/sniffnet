@@ -161,7 +161,7 @@ pub fn get_button_minimize(
     .height(button_size)
     .width(button_size)
     .style(ButtonType::Thumbnail)
-    .on_press(Message::ToggleThumbnail);
+    .on_press(Message::ToggleThumbnail(false));
 
     Tooltip::new(content, Text::new(tooltip).font(font), Position::Right)
         .gap(0)

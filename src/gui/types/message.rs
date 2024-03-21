@@ -112,7 +112,7 @@ pub enum Message {
     /// The output PCAP file name has been updated
     OutputPcapFile(String),
     /// Toggle thumbnail mode
-    ToggleThumbnail,
+    ToggleThumbnail(bool),
     /// Drag the window
     Drag,
 }
