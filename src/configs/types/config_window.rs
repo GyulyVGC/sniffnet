@@ -15,7 +15,7 @@ pub struct ConfigWindow {
 impl ConfigWindow {
     pub const DEFAULT_SIZE: (u32, u32) = (1190, 670);
     pub const MIN_SIZE: (u32, u32) = (800, 500);
-    pub const THUMBNAIL_SIZE: (u32, u32) = (360, 222);
+    const THUMBNAIL_SIZE: (u32, u32) = (360, 222);
 
     const FILE_NAME: &'static str = "window";
     #[cfg(not(test))]
@@ -32,6 +32,10 @@ impl ConfigWindow {
     #[cfg(not(test))]
     pub fn store(self) {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
+    }
+
+    pub fn thumbnail_size(factor: f64) -> (u32, u32) {
+        Self::THUMBNAIL_SIZE.scale(factor)
     }
 }
 

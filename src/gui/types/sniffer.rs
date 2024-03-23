@@ -344,32 +344,26 @@ impl Sniffer {
 
                 return if self.thumbnail {
                     let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                    let size = ConfigWindow::THUMBNAIL_SIZE.scale(scale_factor).to_size();
-                    let position = self
-                        .configs
-                        .lock()
-                        .unwrap()
-                        .window
-                        .thumbnail_position
-                        .to_point();
+                    let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
+                    let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
                     Command::batch([
                         window::resize(Id::MAIN, size),
                         window::toggle_decorations(Id::MAIN),
-                        window::move_to(Id::MAIN, position),
+                        window::move_to(Id::MAIN, position.to_point()),
                         window::change_level(Id::MAIN, Level::AlwaysOnTop),
                     ])
                 } else {
                     if self.running_page.eq(&RunningPage::Notifications) {
                         self.unread_notifications = 0;
                     }
-                    let size = self.configs.lock().unwrap().window.size.to_size();
-                    let position = self.configs.lock().unwrap().window.position.to_point();
                     let mut commands = vec![
                         window::toggle_decorations(Id::MAIN),
                         window::change_level(Id::MAIN, Level::Normal),
                     ];
                     if !triggered_by_resize {
+                        let size = self.configs.lock().unwrap().window.size.to_size();
+                        let position = self.configs.lock().unwrap().window.position.to_point();
                         commands.push(window::resize(Id::MAIN, size));
                         commands.push(window::move_to(Id::MAIN, position));
                     }
@@ -1771,5 +1765,122 @@ mod tests {
                 thumbnail_position: (40, 40),
             }
         );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_window_resized() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 1.0);
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1190, 670));
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (360, 222));
+
+        sniffer.update(Message::WindowResized(850, 600));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (850, 600));
+
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 1.5);
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (540, 333));
+        sniffer.update(Message::WindowResized(1000, 800));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1500, 1200));
+
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 0.5);
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (180, 111));
+        sniffer.update(Message::WindowResized(1000, 800));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (500, 400));
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_window_moved() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.0);
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (0, 0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (0, 0)
+        );
+
+        sniffer.update(Message::WindowMoved(850, 600));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (0, 0)
+        );
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(400, 1000));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (400, 1000)
+        );
+
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.5);
+        sniffer.update(Message::WindowMoved(20, 40));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+        sniffer.thumbnail = false;
+        sniffer.update(Message::WindowMoved(-400, 1000));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            (-600, 1500)
+        );
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 0.5);
+        sniffer.update(Message::WindowMoved(500, -100));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(-2, -250));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (-1, -125)
+        );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_toggle_thumbnail() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        assert!(!sniffer.traffic_chart.thumbnail);
+
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert!(sniffer.thumbnail);
+        assert!(sniffer.traffic_chart.thumbnail);
+
+        sniffer.unread_notifications = 8;
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert!(!sniffer.thumbnail);
+        assert!(!sniffer.traffic_chart.thumbnail);
+        assert_eq!(sniffer.unread_notifications, 8);
+
+        sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
+        assert_eq!(sniffer.unread_notifications, 0);
+
+        sniffer.update(Message::ToggleThumbnail(false));
+        sniffer.unread_notifications = 8;
+        assert_eq!(sniffer.unread_notifications, 8);
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert_eq!(sniffer.unread_notifications, 0);
     }
 }
