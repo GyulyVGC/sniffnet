@@ -1,5 +1,5 @@
 <div align="center">
-<a href="https://www.sniffnet.net"><img alt="" src="resources/repository/header_repository.svg" width="250px"/></a>
+<a href="https://www.sniffnet.net"><img alt="" src="resources/repository/header_repository.png" width="250px"/></a>
 
 <h1>Sniffnet</h1>
 
