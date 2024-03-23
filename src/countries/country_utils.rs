@@ -318,11 +318,16 @@ fn get_flag_from_country(
 
 pub fn get_flag_tooltip(
     country: Country,
-    width: f32,
     host_info: &DataInfoHost,
     language: Language,
     font: Font,
+    thumbnail: bool,
 ) -> Tooltip<'static, Message, StyleType> {
+    let width = if thumbnail {
+        FLAGS_WIDTH_SMALL
+    } else {
+        FLAGS_WIDTH_BIG
+    };
     let is_local = host_info.is_local;
     let is_loopback = host_info.is_loopback;
     let traffic_type = host_info.traffic_type;
@@ -335,13 +340,19 @@ pub fn get_flag_tooltip(
         language,
     );
 
+    let actual_tooltip = if thumbnail { String::new() } else { tooltip };
+    let tooltip_style = if thumbnail {
+        ContainerType::Standard
+    } else {
+        ContainerType::Tooltip
+    };
     let mut tooltip = Tooltip::new(
         content,
-        Text::new(tooltip).font(font),
+        Text::new(actual_tooltip).font(font),
         Position::FollowCursor,
     )
     .snap_within_viewport(true)
-    .style(ContainerType::Tooltip);
+    .style(tooltip_style);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);

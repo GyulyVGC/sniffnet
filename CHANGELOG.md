@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Introduced thumbnail mode, enabling users to keep an eye on Sniffnet while doing other tasks ([#484](https://github.com/GyulyVGC/sniffnet/pull/484))
 - Added support for ICMP connections and messages ([#417](https://github.com/GyulyVGC/sniffnet/pull/417) — fixes [#288](https://github.com/GyulyVGC/sniffnet/issues/288))
 - Added capability to identify 6000+ upper layer services, protocols, trojans, and worms ([#450](https://github.com/GyulyVGC/sniffnet/pull/450) — fixes [#374](https://github.com/GyulyVGC/sniffnet/issues/374))
 - Added feature to optionally export the analysis as a PCAP file with a custom path ([#473](https://github.com/GyulyVGC/sniffnet/pull/473) — fixes [#162](https://github.com/GyulyVGC/sniffnet/issues/162) and [#291](https://github.com/GyulyVGC/sniffnet/issues/291))

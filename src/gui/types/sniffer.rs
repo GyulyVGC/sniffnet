@@ -6,12 +6,13 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use iced::window::Id;
+use iced::window::{Id, Level};
 use iced::{window, Command};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
+use crate::configs::types::config_window::{ConfigWindow, Scale, ToPoint, ToSize};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -95,6 +96,8 @@ pub struct Sniffer {
     pub timing_events: TimingEvents,
     /// Information about PCAP file export
     pub export_pcap: ExportPcap,
+    /// Whether thumbnail mode is currently active
+    pub thumbnail: bool,
 }
 
 impl Sniffer {
@@ -135,6 +138,7 @@ impl Sniffer {
             asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
+            thumbnail: false,
         }
     }
 
@@ -277,14 +281,21 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.scale_factor = multiplier;
             }
             Message::WindowMoved(x, y) => {
-                self.configs.lock().unwrap().window.position = (x, y);
-            }
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            Message::WindowResized(width, height) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled_width = (f64::from(width) * scale_factor) as u32;
-                let scaled_height = (f64::from(height) * scale_factor) as u32;
-                self.configs.lock().unwrap().window.size = (scaled_width, scaled_height);
+                let scaled = (x, y).scale(scale_factor);
+                if self.thumbnail {
+                    self.configs.lock().unwrap().window.thumbnail_position = scaled;
+                } else {
+                    self.configs.lock().unwrap().window.position = scaled;
+                }
+            }
+            Message::WindowResized(width, height) => {
+                if !self.thumbnail {
+                    let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                    self.configs.lock().unwrap().window.size = (width, height).scale(scale_factor);
+                } else if !self.timing_events.was_just_thumbnail_enter() {
+                    return self.update(Message::ToggleThumbnail(true));
+                }
             }
             Message::CustomCountryDb(db) => {
                 self.configs.lock().unwrap().settings.mmdb_country = db.clone();
@@ -294,9 +305,6 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.mmdb_asn = db.clone();
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            // Message::CustomReport(path) => {
-            //     self.settings.output_path = path;
-            // }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
                 return window::close(Id::MAIN);
@@ -330,6 +338,41 @@ impl Sniffer {
             Message::OutputPcapFile(name) => {
                 self.export_pcap.set_file_name(name);
             }
+            Message::ToggleThumbnail(triggered_by_resize) => {
+                self.thumbnail = !self.thumbnail;
+                self.traffic_chart.thumbnail = self.thumbnail;
+
+                return if self.thumbnail {
+                    let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                    let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
+                    let position = self.configs.lock().unwrap().window.thumbnail_position;
+                    self.timing_events.thumbnail_enter_now();
+                    Command::batch([
+                        window::resize(Id::MAIN, size),
+                        window::toggle_decorations(Id::MAIN),
+                        window::move_to(Id::MAIN, position.to_point()),
+                        window::change_level(Id::MAIN, Level::AlwaysOnTop),
+                    ])
+                } else {
+                    if self.running_page.eq(&RunningPage::Notifications) {
+                        self.unread_notifications = 0;
+                    }
+                    let mut commands = vec![
+                        window::toggle_decorations(Id::MAIN),
+                        window::change_level(Id::MAIN, Level::Normal),
+                    ];
+                    if !triggered_by_resize {
+                        let size = self.configs.lock().unwrap().window.size.to_size();
+                        let position = self.configs.lock().unwrap().window.position.to_point();
+                        commands.push(window::resize(Id::MAIN, size));
+                        commands.push(window::move_to(Id::MAIN, position));
+                    }
+                    Command::batch(commands)
+                };
+            }
+            Message::Drag => {
+                return window::drag(Id::MAIN);
+            }
             Message::TickInit => {}
         }
         Command::none()
@@ -356,7 +399,7 @@ impl Sniffer {
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;
-        if self.running_page.ne(&RunningPage::Notifications) {
+        if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
         update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
@@ -1692,12 +1735,15 @@ mod tests {
             ConfigWindow {
                 position: (0, 0),
                 size: (1190, 670),
+                thumbnail_position: (0, 0),
             }
         );
 
         // change window properties by sending messages
         sniffer.update(Message::WindowMoved(-10, 555));
         sniffer.update(Message::WindowResized(1000, 999));
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(40, 40));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::CloseRequested);
@@ -1716,7 +1762,125 @@ mod tests {
             ConfigWindow {
                 position: (-10, 555),
                 size: (1000, 999),
+                thumbnail_position: (40, 40),
             }
         );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_window_resized() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 1.0);
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1190, 670));
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (360, 222));
+
+        sniffer.update(Message::WindowResized(850, 600));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (850, 600));
+
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 1.5);
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (540, 333));
+        sniffer.update(Message::WindowResized(1000, 800));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1500, 1200));
+
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
+        assert_eq!(factor, 0.5);
+        assert_eq!(ConfigWindow::thumbnail_size(factor), (180, 111));
+        sniffer.update(Message::WindowResized(1000, 800));
+        assert_eq!(sniffer.configs.lock().unwrap().window.size, (500, 400));
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_window_moved() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.0);
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (0, 0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (0, 0)
+        );
+
+        sniffer.update(Message::WindowMoved(850, 600));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (0, 0)
+        );
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(400, 1000));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (400, 1000)
+        );
+
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.5);
+        sniffer.update(Message::WindowMoved(20, 40));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+        sniffer.thumbnail = false;
+        sniffer.update(Message::WindowMoved(-400, 1000));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            (-600, 1500)
+        );
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 0.5);
+        sniffer.update(Message::WindowMoved(500, -100));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (30, 60)
+        );
+        sniffer.thumbnail = true;
+        sniffer.update(Message::WindowMoved(-2, -250));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.thumbnail_position,
+            (-1, -125)
+        );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_toggle_thumbnail() {
+        let mut sniffer = new_sniffer();
+        assert!(!sniffer.thumbnail);
+        assert!(!sniffer.traffic_chart.thumbnail);
+
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert!(sniffer.thumbnail);
+        assert!(sniffer.traffic_chart.thumbnail);
+
+        sniffer.unread_notifications = 8;
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert!(!sniffer.thumbnail);
+        assert!(!sniffer.traffic_chart.thumbnail);
+        assert_eq!(sniffer.unread_notifications, 8);
+
+        sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
+        assert_eq!(sniffer.unread_notifications, 0);
+
+        sniffer.update(Message::ToggleThumbnail(false));
+        sniffer.unread_notifications = 8;
+        assert_eq!(sniffer.unread_notifications, 8);
+        sniffer.update(Message::ToggleThumbnail(false));
+        assert_eq!(sniffer.unread_notifications, 0);
     }
 }

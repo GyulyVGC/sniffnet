@@ -1,15 +1,18 @@
 use std::time::Duration;
 
 pub struct TimingEvents {
-    /// Timestamp of last window focus
-    pub focus: std::time::Instant,
-    /// Timestamp of the last press on Copy IP button, with the related IP address
-    pub copy_ip: (std::time::Instant, String),
+    /// Instant of the last window focus
+    pub(crate) focus: std::time::Instant,
+    /// Instant of the last press on Copy IP button, with the related IP address
+    copy_ip: (std::time::Instant, String),
+    /// Instant of the last thumbnail mode enter
+    thumbnail_enter: std::time::Instant,
 }
 
 impl TimingEvents {
     const TIMEOUT_FOCUS: u64 = 200;
     const TIMEOUT_COPY_IP: u64 = 1500;
+    const TIMEOUT_THUMBNAIL_ENTER: u64 = 1000;
 
     pub fn focus_now(&mut self) {
         self.focus = std::time::Instant::now();
@@ -27,6 +30,15 @@ impl TimingEvents {
         self.copy_ip.0.elapsed() < Duration::from_millis(TimingEvents::TIMEOUT_COPY_IP)
             && self.copy_ip.1.eq(ip)
     }
+
+    pub fn thumbnail_enter_now(&mut self) {
+        self.thumbnail_enter = std::time::Instant::now();
+    }
+
+    pub fn was_just_thumbnail_enter(&self) -> bool {
+        self.thumbnail_enter.elapsed()
+            < Duration::from_millis(TimingEvents::TIMEOUT_THUMBNAIL_ENTER)
+    }
 }
 
 impl Default for TimingEvents {
@@ -34,6 +46,7 @@ impl Default for TimingEvents {
         Self {
             focus: std::time::Instant::now(),
             copy_ip: (std::time::Instant::now(), String::new()),
+            thumbnail_enter: std::time::Instant::now(),
         }
     }
 }

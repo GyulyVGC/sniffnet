@@ -302,5 +302,5 @@ fn button_clear_mmdb(
         button = button.on_press(message(String::new()));
     }
 
-    Tooltip::new(button, "", Position::Right).style(ContainerType::Neutral)
+    Tooltip::new(button, "", Position::Right)
 }

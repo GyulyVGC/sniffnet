@@ -102,17 +102,9 @@ fn new_page_tab(
 
     if let Some(num) = unread {
         if num > 0 {
-            let notifications_badge = Container::new(
-                Text::new(num.to_string())
-                    .font(font_headers)
-                    .size(14)
-                    .line_height(LineHeight::Relative(1.0)),
-            )
-            .align_y(Vertical::Center)
-            .padding([2, 4])
-            .height(20)
-            .style(ContainerType::Highlighted);
-            content = content.push(Space::with_width(7)).push(notifications_badge);
+            content = content
+                .push(Space::with_width(7))
+                .push(notifications_badge(font_headers, num));
         }
     }
 
@@ -176,4 +168,20 @@ fn new_settings_tab(
             ButtonType::TabInactive
         })
         .on_press(page.action())
+}
+
+pub fn notifications_badge(
+    font_headers: Font,
+    num: usize,
+) -> Container<'static, Message, StyleType> {
+    Container::new(
+        Text::new(num.to_string())
+            .font(font_headers)
+            .size(14)
+            .line_height(LineHeight::Relative(1.0)),
+    )
+    .align_y(Vertical::Center)
+    .padding([2, 4])
+    .height(20)
+    .style(ContainerType::Highlighted)
 }

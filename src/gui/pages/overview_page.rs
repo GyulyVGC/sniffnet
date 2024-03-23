@@ -315,10 +315,10 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
             .push(star_button)
             .push(get_flag_tooltip(
                 host.country,
-                FLAGS_WIDTH_BIG,
                 data_info_host,
                 language,
                 font,
+                false,
             ))
             .push(host_bar);
 

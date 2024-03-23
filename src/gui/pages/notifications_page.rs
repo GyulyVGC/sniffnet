@@ -8,7 +8,6 @@ use iced::Length::FillPortion;
 use iced::{Alignment, Font, Length};
 
 use crate::countries::country_utils::get_flag_tooltip;
-use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -327,10 +326,10 @@ fn favorite_notification_log(
         .spacing(5)
         .push(get_flag_tooltip(
             country,
-            FLAGS_WIDTH_BIG,
             &logged_notification.data_info_host,
             language,
             font,
+            false,
         ))
         .push(Text::new(domain_asn_str).font(font));
 

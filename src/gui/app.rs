@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::Id;
 use iced::Event::{Keyboard, Window};
@@ -23,6 +24,7 @@ use crate::gui::pages::overview_page::overview_page;
 use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
+use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::message::Message;
@@ -63,22 +65,21 @@ impl Application for Sniffer {
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
-        let header = header(
-            font,
-            color_gradient,
-            self.running_page.ne(&RunningPage::Init),
-            language,
-            self.last_opened_setting,
-        );
+        let header = header(self);
 
-        let body = match self.running_page {
-            RunningPage::Init => initial_page(self),
-            RunningPage::Overview => overview_page(self),
-            RunningPage::Inspect => inspect_page(self),
-            RunningPage::Notifications => notifications_page(self),
+        let body = if self.thumbnail {
+            thumbnail_page(self)
+        } else {
+            match self.running_page {
+                RunningPage::Init => initial_page(self),
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            }
         };
 
         let footer = footer(
+            self.thumbnail,
             language,
             color_gradient,
             font,
@@ -122,7 +123,9 @@ impl Application for Sniffer {
 
     fn subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
-        let window_events_subscription = iced::event::listen_with(|event, _| match event {
+
+        // Window subscription
+        let window_sub = iced::event::listen_with(|event, _| match event {
             Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
             Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
             Window(Id::MAIN, window::Event::Resized { width, height }) => {
@@ -131,7 +134,9 @@ impl Application for Sniffer {
             Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,
         });
-        let hot_keys_subscription = iced::event::listen_with(|event, _| match event {
+
+        // Keyboard subscription
+        let keyboard_sub = iced::event::listen_with(|event, _| match event {
             Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
                 Modifiers::COMMAND => match key.as_ref() {
                     Key::Character("q") => Some(Message::CloseRequested),
@@ -156,17 +161,27 @@ impl Application for Sniffer {
             },
             _ => None,
         });
-        let time_subscription = if self.running_page.eq(&RunningPage::Init) {
+
+        // Mouse subscription
+        let mouse_sub = iced::event::listen_with(|event, _| match event {
+            iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
+            _ => None,
+        });
+
+        // Time subscription
+        let time_sub = if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
         } else {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
         };
 
-        Subscription::batch([
-            window_events_subscription,
-            hot_keys_subscription,
-            time_subscription,
-        ])
+        let mut subscriptions = Vec::from([window_sub, time_sub]);
+        if self.thumbnail {
+            subscriptions.push(mouse_sub);
+        } else {
+            subscriptions.push(keyboard_sub);
+        }
+        Subscription::batch(subscriptions)
     }
 
     fn theme(&self) -> Self::Theme {

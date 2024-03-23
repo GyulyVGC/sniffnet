@@ -87,7 +87,7 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position } = configs1.lock().unwrap().window;
+    let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
 
     Sniffer::run(Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
@@ -95,7 +95,7 @@ pub fn main() -> iced::Result {
         window: window::Settings {
             size: size.to_size(), // start size
             position: position.to_position(),
-            min_size: Some((800, 500).to_size()), // min size allowed
+            min_size: Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
             max_size: None,
             visible: true,
             resizable: true,
