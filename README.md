@@ -1,28 +1,18 @@
-<p align="center"><a href="https://www.sniffnet.net"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
-
-<h4 align="center">
-  <!-- <a href="https://github.com/GyulyVGC/sniffnet/wiki">User manual</a> | -->
-  <a href="https://sniffnet.net">Website</a> |
-  <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md">Roadmap</a> |
-  <a href="https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTING.md">Contribute</a>
-</h4>
-
-<p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/blob/main/LICENSE-APACHE"><img alt="" src="https://img.shields.io/crates/l/sniffnet?&color=orange"/></a>
-&nbsp;
-<a href="https://crates.io/crates/sniffnet"><img alt="" src="https://img.shields.io/crates/v/sniffnet?&logo=rust&color=blue"/></a> <br>
-</p>
-
-<p align="center">
-Application to comfortably monitor your Internet traffic <br>
-Multithreaded, cross-platform, reliable <br>
-</p>
-
 <div align="center">
+<a href="https://www.sniffnet.net"><img alt="" src="resources/repository/header_repository.svg" width="250px"/></a>
+
+<h1>Sniffnet</h1>
+
+<a href="#download"><img alt="Download" src="resources/repository/badges/download.svg"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="Roadmap" src="resources/repository/badges/roadmap.svg"/></a>
+<a href="https://sniffnet.net"><img alt="Website" src="resources/repository/badges/website.svg"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="Wiki" src="resources/repository/badges/wiki.svg"/></a>
+
+Application to comfortably monitor your Internet traffic <br>
+Multithreaded, cross-platform, reliable
 
 Graphical interface translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;11&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)<br>
-
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;11&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
@@ -65,9 +55,9 @@ A special mention goes to these awesome organizations and folks who are sponsori
 </p>
 
 
-## Installation
+## Download
 
-You can install Sniffnet in one of the following ways:
+You can download Sniffnet in one of the following ways:
 
 
 <details>
