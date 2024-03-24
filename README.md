@@ -1,7 +1,5 @@
 <div align="center">
-<a href="https://www.sniffnet.net"><img alt="" src="resources/repository/header_repository.png" width="250px"/></a>
-
-<h1>Sniffnet</h1>
+<a href="https://www.sniffnet.net"><img alt="Sniffnet" src="resources/repository/header_repository.png" width="95%"/></a>
 
 <a href="#download"><img alt="Download" src="resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="Roadmap" src="resources/repository/badges/roadmap.svg"/></a>
@@ -9,94 +7,71 @@
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="Wiki" src="resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your Internet traffic <br>
-Multithreaded, cross-platform, reliable
+Cross-platform, Intuitive, Reliable
 
-Graphical interface translated in:<br>
+Translated in:<br>
 🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;11&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
 <a href="#x">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
+<img alt="" src="resources/repository/hr.png" width="100%"/>
 </a>
 </p>
 
-<div align="center"><img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/overview_page.png?raw=true" width="100%"/></div>
-
 <div align="center">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/inspect_page.png?raw=true" width="49%"/>
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/pages/notifications_page.png?raw=true" width="49%"/>
+<img alt="Overview page" src="resources/repository/pages/overview_page.png" width="95%"/>
+<img alt="Inspect page" src="resources/repository/pages/inspect_page.png" width="47%"/>
+<img alt="Notifications page" src="resources/repository/pages/notifications_page.png" width="47%"/>
 </div>
 
 <p>
 <a href="#x">
-<img alt="" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/hr.png?raw=true" width="100%"/>
+<img alt="" src="resources/repository/hr.png" width="100%"/>
 </a>
 </p>
 
 
 ## _Support Sniffnet's development_ 💖
+<i>
+Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.
 
-Sniffnet is **completely free, open-source software** which needs lots of effort and time to develop and maintain.
-
-If you appreciate Sniffnet, [**consider sponsoring**](https://github.com/sponsors/GyulyVGC):
-***your support will allow me to dedicate more and more time to this project***,
-constantly expanding it including [**new features and functionalities**](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md). <br/>
+If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
+your support will allow me to dedicate more and more time to this project,
+constantly expanding it including [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
 A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
+</i>
 
 <p align="center">
-<a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="75px" alt="GitHub"/></a>&nbsp;&nbsp;
-<a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="75px" alt="IPinfo"/></a>&nbsp;&nbsp;
-<a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="75px" alt="Cthulu201"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="75px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
-<a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="75px" alt="ZEROF"/></a>&nbsp;&nbsp;
-<a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="75px" alt="Jan Walter"/></a>
+<a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="60px" alt="GitHub"/></a>&nbsp;&nbsp;
+<a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="60px" alt="IPinfo"/></a>&nbsp;&nbsp;
+<a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="60px" alt="Cthulu201"/></a>&nbsp;&nbsp;
+<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="60px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
+<a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
+<a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
 </p>
 
 
 ## Download
 
-You can download Sniffnet in one of the following ways:
-
-
-<details>
-
-  <summary>from GitHub releases&ensp;<img alt="" src="https://img.shields.io/github/downloads/gyulyvgc/sniffnet/total?color=success&logo=github"/></summary>
-
-  You can download the latest version of Sniffnet through the installers available **below**. <br>
-  _Choose from a Windows Installer, an Apple Disk Image, a DEB package, or an RPM package (depending on your operating system)._
-
 > **Note**
 >
 > If you are unsure which package to download, you should probably choose the first from your operating system list.
 
-  ### Windows
+<div align="center">
 
-  - [64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi) |
-[32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)
+|                                                                     <img alt="Windows" src="resources/repository/badges/windows.svg"/>                                                                     |                                                                          <img alt="macOS" src="resources/repository/badges/macos.svg"/>                                                                           |                                                                                                                                                                     <img alt="Linux (.deb)" src="resources/repository/badges/linux_deb.svg"/>                                                                                                                                                                      |                                                                   <img alt="Linux (.rpm)" src="resources/repository/badges/linux_rpm.svg"/>                                                                    |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| [64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi) \| [32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi) | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) \| [Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) \| [arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) \| [i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) \| [armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) \| [aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm) |
 
-  ### macOS
+</div>
 
-  - [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) |
-[Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)
-
-  ### Linux
-
-  - deb: [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) |
-[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) |
-[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) |
-[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb)
-
-  - rpm: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) |
-[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)
-
-</details>
-
+**Alternative installation methods** are reported in the following:
 
 <details>
 
-  <summary>from Crates.io&ensp;<img alt="" src="https://img.shields.io/crates/d/sniffnet?color=success&label=downloads&logo=rust"/></summary>
+  <summary>from Crates.io</summary>
 
 Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
 In this case, the application binary can be built and installed with:
