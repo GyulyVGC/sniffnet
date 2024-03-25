@@ -33,15 +33,14 @@ Translated in:<br>
 
 
 ## _Support Sniffnet's development_ 💖
-<i>
-Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.
 
-If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
-your support will allow me to dedicate more and more time to this project,
-constantly expanding it including [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
+<i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
 
-A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:
-</i>
+<i>If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
+your support will allow me to dedicate more time to this project,
+constantly expanding it including [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).</i>
+
+<i>A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
 <p align="center">
 <a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="60px" alt="GitHub"/></a>&nbsp;&nbsp;
@@ -55,15 +54,16 @@ A special mention goes to these awesome organizations and folks who are sponsori
 
 ## Download
 
-> [!NOTE]
->
-> Remember to install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
-
 |                                                                                                             <a href="#download"><img alt="Windows" height="35px" src="resources/repository/badges/windows.svg"/></a>                                                                                                             |                                                               <a href="#download"><img alt="macOS" height="35px" src="resources/repository/badges/macos.svg"/></a>                                                               |                                                                                                                                                                 <a href="#download"><img alt="Linux (.deb)" height="35px" src="resources/repository/badges/linux_deb.svg"/></a>                                                                                                                                                                  |                                                                                                     <a href="#download"><img alt="Linux (.rpm)" height="35px" src="resources/repository/badges/linux_rpm.svg"/></a>                                                                                                      |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[64&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)&nbsp;\|&nbsp;[32&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)&nbsp;\|&nbsp;[Apple&nbsp;silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)&nbsp;\|&nbsp;[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)&nbsp;\|&nbsp;[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)&nbsp;\|&nbsp;[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)&nbsp;\|&nbsp;[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
-**Alternative installation methods** are reported in the following:
+> [!NOTE]
+>
+> Remember to also install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
+
+Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
+Alternative installation methods are reported in the following:
 
 <details>
 
@@ -170,21 +170,18 @@ tce-load -wi sniffnet
 - 💻 choose a network adapter of your PC to inspect
 - 🏷️ select a set of filters to apply to the observed traffic
 - 📖 view overall statistics about your Internet traffic
-- 📈 view real-time charts about traffic intensity (bytes and packets per second, incoming and outgoing)
-- 🌐 get details about domain names and network providers of the hosts you are exchanging traffic with
+- 📈 view real-time charts about traffic intensity
+- 📌 keep an eye on your network even when the application is minimized
+- 📁 export comprehensive capture reports as PCAP files
+- 🔎 identify 6000+ upper layer services, protocols, trojans, and worms
+- 🌐 find out domain name and ASN of the hosts you are exchanging traffic with
 - 🏠 identify connections in your local network
-- 🌍 get information about the country of the remote hosts (IP geolocation)
+- 🌍 get information about the country of remote hosts (IP geolocation)
 - ⭐ save your favorite network hosts
+- 🕵️‍♂️ search and inspect each of your network connections in real time
 - 🔉 set custom notifications to inform you when defined network events occur
-- 🎨 choose the style that fits you the most from 12 different available themes, plus custom theme support
-- 🕵️ inspect each of your network connections in real time
-- 📁 save complete textual reports with detailed information for each network connection:
-  * source and destination IP addresses
-  * source and destination ports
-  * carried protocols
-  * amount of exchanged packets and bytes
-  * initial and final timestamp of information exchange
-- ... and more!
+- 🎨 choose the style that fits you the most, including custom themes support
+- ...and more!
 
 
 ## IP geolocation and network providers (ASN)
@@ -225,7 +222,7 @@ tce-load -wi sniffnet
 
   Please, remember that this is just a convention:
 
-  > [!WARNING]
+  > **WARNING**
   >
   > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
   > the official assignments of port numbers for specific uses. <br>
@@ -282,6 +279,7 @@ The currently usable hotkeys are reported in the following.
   Custom themes are specified as a TOML file.
 
   The TOML must follow this format:
+  
   ```toml
   # all colors are in RGB/RGBA hexadecimal.
   primary = "#303446"           # background color
@@ -309,21 +307,22 @@ The currently usable hotkeys are reported in the following.
 
 ### Missing dependencies
 
-Most of the errors that can occur are likely due to your system missing required `pcap` dependencies,
-necessary to correctly analyze a network adapter. <br>
-Check the [required dependencies](#required-dependencies) section for instructions on how to proceed, depending on your operating system.
+Most of the errors that may arise are likely due to your system missing dependencies
+required to correctly analyze a network adapter. <br>
+Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) 
+for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems
 
 In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
 the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
-may cause problems (country icons are completely black, or the interface glitches). <br>
-In these cases you can download an alternative version of the application,
-which is based on `tiny-skia`, a CPU-only software renderer that should work properly on every environment: <br>
-[Windows](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225849) |
-[macOS](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225848) |
-[Linux DEB](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225847) |
-[Linux RPM](https://github.com/GyulyVGC/sniffnet/suites/18338999542/artifacts/1061225850)
+may have bugs (the interface glitches, color gradients are unsupported, or some icons are completely black). <br>
+In these cases you can set an environment variable to switch to the `tiny-skia` renderer,
+a CPU-only software renderer that should work properly on every environment:
+
+```sh
+ICED_BACKEND=tiny-skia
+```
 
 ### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
 
@@ -336,6 +335,10 @@ which is based on `tiny-skia`, a CPU-only software renderer that should work pro
 
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 
-<p align="center"><a href="https://github.com/iced-rs/iced"><img alt="" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="50%"/></a></p>
+<p align="center">
+<a href="https://github.com/iced-rs/iced">
+<img alt="iced" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="350px"/>
+</a>
+</p>
 
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
