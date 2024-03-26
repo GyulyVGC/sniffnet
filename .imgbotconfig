@@ -3,5 +3,6 @@
     "ignoredFiles": [
         "*inkscape.svg",
     ],
-    "compressWiki": "true"
+    "compressWiki": "true",
+    "minKBReduced": null,
 }
