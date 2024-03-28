@@ -183,121 +183,17 @@ tce-load -wi sniffnet
 - 🎨 choose the style that fits you the most, including custom themes support
 - ...and more!
 
+## User manual
 
-## IP geolocation and network providers (ASN)
+If you want to learn more, it’s recommended to check out the [Sniffnet Wiki](https://github.com/GyulyVGC/sniffnet/wiki),
+a **comprehensive manual** to help you thoroughly master the application, from basic setup to the most advanced functionalities. <br>
+The wiki includes step-by-step guides, examples of usage, tips, and answers to frequently asked questions.
 
-<details>
-
-  <summary>See details</summary>
-
-  <br>
-
-  Geolocation and network providers (ASN) refer to the remote IP address of each connection. They are retrieved performing lookups against [MMDB files](https://maxmind.github.io/MaxMind-DB/):
-
-  > **Note**
-  >
-  > The MMDB (MaxMind database) format has been developed especially for IP lookup.<br>
-  > It is optimized to perform lookups on data indexed by IP network ranges quickly and efficiently.<br>
-  > It permits the best performance on IP lookups, and it's suitable for use in a production environment.
-  >
-  > This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com">https://www.maxmind.com </a>
-
-  This file format potentially allows Sniffnet to execute hundreds of different IP lookups in a matter of a few milliseconds.
-
-</details>
-
-
-## Supported network services
-
-<details>
-
-  <summary>See details</summary>
-
-  <br>
-
-  Sniffnet supports more than 6000 services, including common upper layer protocols, trojans, and worms.
-
-  Network services are inferred from the transport protocol and port number,
-  following the convention maintained by [IANA](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml).
-
-  Please, remember that this is just a convention:
-
-  > **WARNING**
-  >
-  > The Internet Assigned Numbers Authority (IANA) is responsible for maintaining
-  > the official assignments of port numbers for specific uses. <br>
-  > However, many unofficial uses of well-known port numbers occur in practice.
-  
-  Sniffnet's list of services is generated from [Nmap's service collection](https://nmap.org/book/nmap-services.html)
-  and is available in the file [`services.txt`](https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/services.txt).
-
-</details>
-
-
-## Keyboard shortcuts
-
-<details>
-
-  <summary>See details</summary>
-
-<br>
-
-Some keyboard shortcuts are available to improve the efficiency of use and the overall user experience.
-
-If you want to suggest a different key combination for one of the existing shortcuts or if you want to propose a new shortcut,
-have a look at [this](https://github.com/GyulyVGC/sniffnet/issues/97) issue.
-
-The currently usable hotkeys are reported in the following.
-
-> **Note**
->
-> On macOS, use the <kbd>cmd</kbd> key instead of <kbd>ctrl</kbd>
-
-<div align="center">
-
-| Event                                                         | Shortcut keys                                                                   |
-|---------------------------------------------------------------|---------------------------------------------------------------------------------|
-| Quit the application                                          | <kbd>ctrl</kbd>+<kbd>Q</kbd>                                                    |
-| Open full report                                              | <kbd>ctrl</kbd>+<kbd>O</kbd>                                                    |
-| Open settings                                                 | <kbd>ctrl</kbd>+<kbd>,</kbd>                                                    |
-| Clear all notifications                                       | <kbd>ctrl</kbd>+<kbd>D</kbd>                                                    |
-| Interrupt the ongoing analysis                                | <kbd>ctrl</kbd>+<kbd>backspace</kbd>                                            |
-| Start the analysis and confirm modal actions                  | <kbd>enter</kbd>                                                                |
-| Close settings and modal popups                               | <kbd>esc</kbd>                                                                  |
-| Switch from a tab to the next (or previous) one               | <kbd>tab</kbd> (or <kbd>shift</kbd>+<kbd>tab</kbd>)                             |
-| Change inspect connections page to the next (or previous) one | <kbd>ctrl</kbd>+<kbd>rightArrow</kbd> (or <kbd>ctrl</kbd>+<kbd>leftArrow</kbd>) |
-
-</div>
-
-</details>
-
-## Custom themes
-<details>
-
-  <summary>See details</summary>
-
-  Custom themes are specified as a TOML file.
-
-  The TOML must follow this format:
-  
-  ```toml
-  # all colors are in RGB/RGBA hexadecimal.
-  primary = "#303446"           # background color
-  secondary = "#a6d189"         # header, footer, and incoming connections color
-  outgoing = "#f4b8e4"          # outgoing connections color
-  text_body = "#c6d0f5"         # body text color 
-  text_headers = "#232634"      # header and footer text color
-  starred = "#e5c890aa"         # favorites' star color
-  ```
-
-  The example theme above uses colors from [Catppuccin](https://github.com/catppuccin/catppuccin).
-
-  You can also check the [`resources/themes`](https://github.com/GyulyVGC/sniffnet/tree/main/resources/themes) folder,
-  which contains sample TOML files with additional themes.
-
-  To use a custom theme for your instance of Sniffnet, specify the path of your TOML file in the application's 
-  settings (at the bottom of the style tab).
-</details>
+<p align="center">
+<a href="https://github.com/GyulyVGC/sniffnet/wiki" title="Sniffnet Wiki">
+<img src="resources/logos/wiki/wikilogo.svg" width="300px" alt="Sniffnet Wiki"/>
+</a>
+</p>
 
 ## Troubleshooting
 
@@ -324,7 +220,7 @@ a CPU-only software renderer that should work properly on every environment:
 ICED_BACKEND=tiny-skia
 ```
 
-### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues), and I will do my best to help you!***
+### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!***
 
 </details>
 

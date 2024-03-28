@@ -1,8 +1,6 @@
 {
-    "schedule": "monthly",
     "ignoredFiles": [
         "*inkscape.svg",
     ],
-    "compressWiki": "true",
-    "minKBReduced": null,
+    "minKBReduced": 1,
 }
