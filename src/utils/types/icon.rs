@@ -11,6 +11,7 @@ pub enum Icon {
     AudioHigh,
     AudioMute,
     Bin,
+    Book,
     BytesThreshold,
     Clock,
     Copy,
@@ -87,6 +88,7 @@ impl Icon {
             Icon::OpenLink => 'o',
             Icon::ThumbnailOpen => 's',
             Icon::ThumbnailClose => 'r',
+            Icon::Book => 'B',
         }
     }
 

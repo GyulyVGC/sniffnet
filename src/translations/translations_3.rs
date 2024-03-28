@@ -193,3 +193,11 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         _ => "Thumbnail mode",
     }
 }
+
+pub fn need_help_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Do you need help?",
+        Language::IT => "Hai bisogno di aiuto?",
+        _ => "Do you need help?",
+    }
+}

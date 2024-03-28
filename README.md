@@ -58,12 +58,13 @@ constantly expanding it including [new features and functionalities](https://git
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[64&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)&nbsp;\|&nbsp;[32&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)&nbsp;\|&nbsp;[Apple&nbsp;silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)&nbsp;\|&nbsp;[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)&nbsp;\|&nbsp;[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)&nbsp;\|&nbsp;[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)&nbsp;\|&nbsp;[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
+Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
+
 > [!NOTE]
 >
 > Remember to also install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
 
-Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
-Alternative installation methods are reported in the following:
+**Alternative installation methods** are reported in the following:
 
 <details>
 
@@ -185,9 +186,10 @@ tce-load -wi sniffnet
 
 ## User manual
 
-If you want to learn more, it’s recommended to check out the [Sniffnet Wiki](https://github.com/GyulyVGC/sniffnet/wiki),
-a **comprehensive manual** to help you thoroughly master the application, from basic setup to the most advanced functionalities. <br>
-The wiki includes step-by-step guides, examples of usage, tips, and answers to frequently asked questions.
+Do you want to **learn more**? <br>
+Check out the [**Sniffnet Wiki**](https://github.com/GyulyVGC/sniffnet/wiki), a comprehensive manual to help you
+thoroughly master the application from a basic setup to the most advanced functionalities. <br>
+The wiki includes step-by-step guides, examples of usage, tips, and answers to frequent questions.
 
 <p align="center">
 <a href="https://github.com/GyulyVGC/sniffnet/wiki" title="Sniffnet Wiki">
