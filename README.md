@@ -1,10 +1,10 @@
 <div align="center">
-<a href="https://www.sniffnet.net"><img alt="Sniffnet" src="resources/repository/header_repository.png" width="95%"/></a>
+<a href="https://www.sniffnet.net"><img alt="" title="Sniffnet" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/header_repository.png" width="95%"/></a>
 
-<a href="#download"><img alt="Download" src="resources/repository/badges/download.svg"/></a>
-<a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="Roadmap" src="resources/repository/badges/roadmap.svg"/></a>
-<a href="https://sniffnet.net"><img alt="Website" src="resources/repository/badges/website.svg"/></a>
-<a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="Wiki" src="resources/repository/badges/wiki.svg"/></a>
+<a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.png"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
+<a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
+<a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your Internet traffic <br>
 Cross-platform, Intuitive, Reliable
@@ -15,19 +15,20 @@ Translated in:<br>
 
 <p>
 <a href="#x">
-<img alt="" src="resources/repository/hr.png" width="100%"/>
+<img alt="" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/hr.png" width="100%"/>
 </a>
 </p>
 
 <div align="center">
-<img alt="Overview page" src="resources/repository/pages/overview_page.png" width="95%"/>
-<img alt="Inspect page" src="resources/repository/pages/inspect_page.png" width="47%"/>
-<img alt="Notifications page" src="resources/repository/pages/notifications_page.png" width="47%"/>
+<img alt="" title="Overview page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/overview.png" width="95%"/>
+<img alt="" title="Inspect page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/inspect.png" width="47%"/>
+<img alt="" title="Notifications page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/notifications.png" width="47%"/>
+<img alt="" title="Thumbnail mode" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/thumbnail.png" width="95%"/>
 </div>
 
 <p>
 <a href="#x">
-<img alt="" src="resources/repository/hr.png" width="100%"/>
+<img alt="" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/hr.png" width="100%"/>
 </a>
 </p>
 
@@ -54,7 +55,7 @@ constantly expanding it including [new features and functionalities](https://git
 
 ## Download
 
-|                                                                                                             <a href="#download"><img alt="Windows" height="35px" src="resources/repository/badges/windows.svg"/></a>                                                                                                             |                                                               <a href="#download"><img alt="macOS" height="35px" src="resources/repository/badges/macos.svg"/></a>                                                               |                                                                                                                                                                 <a href="#download"><img alt="Linux (.deb)" height="35px" src="resources/repository/badges/linux_deb.svg"/></a>                                                                                                                                                                  |                                                                                                     <a href="#download"><img alt="Linux (.rpm)" height="35px" src="resources/repository/badges/linux_rpm.svg"/></a>                                                                                                      |
+|                                                                        <a href="#download"><img alt="Windows" title="Windows" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/windows.svg"/></a>                                                                         |                           <a href="#download"><img alt="macOS" title="macOS" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></a>                            |                                                                                                                          <a href="#download"><img alt="Linux (.deb)" title="Linux (.deb)" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux_deb.svg"/></a>                                                                                                                           |                                                              <a href="#download"><img alt="Linux (.rpm)" title="Linux (.rpm)" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux_rpm.svg"/></a>                                                               |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[64&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)&nbsp;\|&nbsp;[32&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)&nbsp;\|&nbsp;[Apple&nbsp;silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)&nbsp;\|&nbsp;[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)&nbsp;\|&nbsp;[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)&nbsp;\|&nbsp;[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)&nbsp;\|&nbsp;[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
@@ -189,11 +190,11 @@ tce-load -wi sniffnet
 Do you want to **learn more**? <br>
 Check out the [**Sniffnet Wiki**](https://github.com/GyulyVGC/sniffnet/wiki), a comprehensive manual to help you
 thoroughly master the application from a basic setup to the most advanced functionalities. <br>
-The wiki includes step-by-step guides, examples of usage, tips, and answers to frequent questions.
+The Wiki includes step-by-step guides, tips, examples of usage, and answers to frequent questions.
 
 <p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/wiki" title="Sniffnet Wiki">
-<img src="resources/logos/wiki/wikilogo.svg" width="300px" alt="Sniffnet Wiki"/>
+<a href="https://github.com/GyulyVGC/sniffnet/wiki">
+<img alt="" title="Sniffnet Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/logos/wiki/wikilogo.svg" width="300px"/>
 </a>
 </p>
 
@@ -212,9 +213,9 @@ for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems
 
-In some circumstances, especially if you are running on an old architecture or your graphical drivers are not up-to-date,
+In some circumstances, especially if you are running on an old architecture or your graphical drivers are not updated,
 the `wgpu` default renderer used by [iced](https://github.com/iced-rs/iced)
-may have bugs (the interface glitches, color gradients are unsupported, or some icons are completely black). <br>
+may manifest bugs (the interface glitches, color gradients are unsupported, or some icons are completely black). <br>
 In these cases you can set an environment variable to switch to the `tiny-skia` renderer,
 a CPU-only software renderer that should work properly on every environment:
 
@@ -222,7 +223,7 @@ a CPU-only software renderer that should work properly on every environment:
 ICED_BACKEND=tiny-skia
 ```
 
-### ***In any case don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!***
+### ***In any case, don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!***
 
 </details>
 
@@ -235,7 +236,7 @@ ICED_BACKEND=tiny-skia
 
 <p align="center">
 <a href="https://github.com/iced-rs/iced">
-<img alt="iced" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="350px"/>
+<img alt="" title="iced" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="350px"/>
 </a>
 </p>
 

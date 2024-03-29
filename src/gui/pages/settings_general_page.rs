@@ -20,7 +20,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    mmdb_files_translation, need_help_translation, params_not_editable_translation,
+    learn_more_translation, mmdb_files_translation, params_not_editable_translation,
     zoom_translation,
 };
 use crate::utils::formatted_strings::get_path_termination_string;
@@ -209,7 +209,7 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
     let content = Column::new()
         .align_items(Alignment::Center)
         .push(
-            Text::new(need_help_translation(language))
+            Text::new(learn_more_translation(language))
                 .style(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),

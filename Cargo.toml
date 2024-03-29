@@ -1,12 +1,13 @@
 [package]
 name = "sniffnet"
-version = "1.2.2"
+version = "1.3.0"
 authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
 readme = "README.md"
 homepage = "https://sniffnet.net"
 repository = "https://github.com/GyulyVGC/sniffnet"
+documentation = "https://github.com/GyulyVGC/sniffnet/wiki"
 license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
