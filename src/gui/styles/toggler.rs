@@ -2,10 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use iced::widget::toggler::Appearance;
 use iced::Color;
 
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
 
 #[derive(Clone, Copy, Default)]

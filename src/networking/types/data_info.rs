@@ -1,10 +1,11 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use crate::chart::types::chart_type::ChartType;
-use chrono::{DateTime, Local};
 use std::cmp::Ordering;
 use std::ops::AddAssign;
 
+use chrono::{DateTime, Local};
+
+use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 
