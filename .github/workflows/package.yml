@@ -70,7 +70,7 @@ jobs:
 
       - name: Install Cross
         if: matrix.os == 'ubuntu'
-        run: cargo install cross --git https://github.com/cross-rs/cross
+        run: cargo install cross
 
       - name: Build binary
         if: matrix.os == 'ubuntu'
