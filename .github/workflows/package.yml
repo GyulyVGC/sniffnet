@@ -70,8 +70,6 @@ jobs:
 
       - name: Install Cross
         if: matrix.os == 'ubuntu'
-        env:
-          CROSS_NO_WARNINGS: 0
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build binary
