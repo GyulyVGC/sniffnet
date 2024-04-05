@@ -169,20 +169,20 @@ tce-load -wi sniffnet
 
 ## Features
 
-- 💻 choose a network adapter of your PC to inspect
-- 🏷️ select a set of filters to apply to the observed traffic
-- 📖 view overall statistics about your Internet traffic
-- 📈 view real-time charts about traffic intensity
-- 📌 keep an eye on your network even when the application is minimized
-- 📁 export comprehensive capture reports as PCAP files
-- 🔎 identify 6000+ upper layer services, protocols, trojans, and worms
-- 🌐 find out domain name and ASN of the hosts you are exchanging traffic with
-- 🏠 identify connections in your local network
-- 🌍 get information about the country of remote hosts (IP geolocation)
-- ⭐ save your favorite network hosts
-- 🕵️‍♂️ search and inspect each of your network connections in real time
-- 🔉 set custom notifications to inform you when defined network events occur
-- 🎨 choose the style that fits you the most, including custom themes support
+- 💻 choose a **network adapter** of your PC to inspect
+- 🏷️ select a set of **filters** to apply to the observed traffic
+- 📖 view overall **statistics** about your Internet traffic
+- 📈 view **real-time charts** about traffic intensity
+- 📌 keep an eye on your network even when the application is **minimized**
+- 📁 **export** comprehensive capture reports as **PCAP files**
+- 🔎 identify **6000+ upper layer services**, protocols, trojans, and worms
+- 🌐 find out **domain name** and **ASN** of the hosts you are exchanging traffic with
+- 🏠 identify connections in your **local network**
+- 🌍 get information about the country of remote hosts (**IP geolocation**)
+- ⭐ save your **favorite** network hosts
+- 🕵️‍♂️ search and **inspect** each of your network connections in real time
+- 🔉 set **custom notifications** to inform you when defined network events occur
+- 🎨 choose the **style** that fits you the most, including custom themes support
 - ...and more!
 
 ## User manual

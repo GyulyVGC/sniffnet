@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="" title="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
 
 # How can you contribute to the Sniffnet project?
 
@@ -28,6 +28,6 @@ Ensure the pull request description clearly describes the problem and your solut
 
 ## Are you willing to help but don't know where to start?
 
-You can give a look at the [project roadmap](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md) to see the features I'd like to implement next, or check out issues labeled with the tag "[help wanted](https://github.com/GyulyVGC/sniffnet/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)" to see what I'm struggling with.
+You can give a look at the [project roadmap](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md) to see the features I'd like to implement next, or check out issues labeled with the tag "[help wanted](https://github.com/GyulyVGC/sniffnet/labels/help%20wanted)" to see what I'm struggling with.
 
 All proposals to enlarge or improve Sniffnet are warmly welcomed, join the discussion and don't hesitate to share your thoughts!
