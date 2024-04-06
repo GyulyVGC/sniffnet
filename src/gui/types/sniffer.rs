@@ -348,6 +348,7 @@ impl Sniffer {
                     let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
                     Command::batch([
+                        window::maximize(Id::MAIN, false),
                         window::resize(Id::MAIN, size),
                         window::toggle_decorations(Id::MAIN),
                         window::move_to(Id::MAIN, position.to_point()),
