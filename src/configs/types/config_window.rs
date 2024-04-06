@@ -14,7 +14,7 @@ pub struct ConfigWindow {
 
 impl ConfigWindow {
     pub const DEFAULT_SIZE: (u32, u32) = (1190, 670);
-    pub const MIN_SIZE: (u32, u32) = (800, 500);
+    // pub const MIN_SIZE: (u32, u32) = (800, 500);
     const THUMBNAIL_SIZE: (u32, u32) = (360, 222);
 
     const FILE_NAME: &'static str = "window";
