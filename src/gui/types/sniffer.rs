@@ -349,8 +349,8 @@ impl Sniffer {
                     self.timing_events.thumbnail_enter_now();
                     Command::batch([
                         window::maximize(Id::MAIN, false),
-                        window::resize(Id::MAIN, size),
                         window::toggle_decorations(Id::MAIN),
+                        window::resize(Id::MAIN, size),
                         window::move_to(Id::MAIN, position.to_point()),
                         window::change_level(Id::MAIN, Level::AlwaysOnTop),
                     ])
@@ -365,8 +365,8 @@ impl Sniffer {
                     if !triggered_by_resize {
                         let size = self.configs.lock().unwrap().window.size.to_size();
                         let position = self.configs.lock().unwrap().window.position.to_point();
-                        commands.push(window::resize(Id::MAIN, size));
                         commands.push(window::move_to(Id::MAIN, position));
+                        commands.push(window::resize(Id::MAIN, size));
                     }
                     Command::batch(commands)
                 };
