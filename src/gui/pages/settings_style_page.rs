@@ -144,7 +144,6 @@ fn gradients_row(
             } else {
                 20
             })
-            .style(ButtonType::Gradient(GradientType::None))
             .on_press(Message::GradientsSelection(GradientType::None)),
         )
         .push(
@@ -162,8 +161,7 @@ fn gradients_row(
             } else {
                 20
             })
-            .on_press(Message::GradientsSelection(GradientType::Mild))
-            .style(ButtonType::Gradient(GradientType::Mild)),
+            .on_press(Message::GradientsSelection(GradientType::Mild)),
         )
         .push(
             button(
@@ -180,8 +178,7 @@ fn gradients_row(
             } else {
                 20
             })
-            .on_press(Message::GradientsSelection(GradientType::Wild))
-            .style(ButtonType::Gradient(GradientType::Wild)),
+            .on_press(Message::GradientsSelection(GradientType::Wild)),
         )
 }
 
