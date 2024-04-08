@@ -150,7 +150,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
         Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
-        Language::RU => "Тут показываются только первые 30 элементов",
+        Language::RU => "Показываются только первые 30 элементов",
         Language::SV => "Endast de 30 främsta föremål visas här",
         Language::FI => "Vain 30 parasta kohteita näytetään tässä",
         Language::DE => "Nur die obersten 30 artikel werden hier angezeigt",
