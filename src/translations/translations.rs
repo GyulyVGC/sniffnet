@@ -8,7 +8,7 @@ use crate::StyleType;
 pub fn choose_adapters_translation(language: Language) -> Text<'static, StyleType> {
     Text::new(match language {
         Language::EN => "Select network adapter to inspect",
-        Language::IT => "Seleziona la scheda di rete da ispezionare",
+        Language::IT => "Seleziona scheda di rete da moniotorare",
         Language::FR => "Sélectionnez une carte réseau à inspecter",
         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
         Language::PL => "Wybierz adapter sieciowy do inspekcji",
@@ -32,7 +32,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, StyleTyp
 // pub fn application_protocol_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Application protocol",
-//         Language::IT => "Protocollo applicativo",
+//         Language::IT => "Protocollo applicazione",
 //         Language::FR => "Protocole applicatif",
 //         Language::ES => "Protocolo de aplicación",
 //         Language::PL => "Protokół aplikacji",
@@ -56,7 +56,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, StyleTyp
 pub fn select_filters_translation(language: Language) -> Text<'static, StyleType> {
     Text::new(match language {
         Language::EN => "Select filters to be applied on network traffic",
-        Language::IT => "Seleziona i filtri da applicare al traffico di rete",
+        Language::IT => "Seleziona filtri da applicare al traffico di rete",
         Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
         Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
         Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
@@ -214,7 +214,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
 pub fn traffic_rate_translation(language: Language) -> Text<'static, StyleType> {
     Text::new(match language {
         Language::EN => "Traffic rate",
-        Language::IT => "Intensità del traffico",
+        Language::IT => "Intensità traffico",
         Language::FR => "Fréquence du traffic",
         Language::ES => "Tasa de tráfico",
         Language::PL => "Prędkość ruchu",
@@ -427,7 +427,7 @@ pub fn hide_translation(language: Language) -> &'static str {
 pub fn network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Network adapter",
-        Language::IT => "Adattatore di rete",
+        Language::IT => "Schede di rete",
         Language::FR => "Carte réseau",
         Language::ES => "Adaptador de red",
         Language::PL => "Adapter sieciowy",
@@ -454,7 +454,7 @@ pub fn no_addresses_translation(language: Language, adapter: &str) -> Text<'stat
         Language::EN => format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  If you are sure you are connected to the internet, try choosing a different adapter."),
-        Language::IT => format!("Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
+        Language::IT => format!("Non è osservabile alcun traffico perché la scheda di rete selezionata non ha indirizzi attivi...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
                                 Se sei sicuro di essere connesso ad internet, prova a scegliere un adattatore diverso."),
         Language::FR => format!("Aucun trafic ne peut être observé, car la carte réseau que vous avez saisie n'a pas d'adresse...\n\n\
@@ -517,7 +517,7 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static, S
         Language::EN => format!("No traffic has been observed yet. Waiting for network packets...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Are you sure you are connected to the internet and you have selected the correct adapter?"),
-        Language::IT => format!("Nessun tipo di traffico è stato osservato finora. Attendo pacchetti di rete...\n\n\
+        Language::IT => format!("Nessun tipo di traffico è stato osservato finora. Attesa pacchetti di rete...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
                                 Sei sicuro di esser connesso ad internet e di aver selezionato l'adattatore corretto?"),
         Language::FR => format!("Aucun trafic n'a été capturé pour le moment. En attente de paquets...\n\n\
@@ -726,7 +726,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 // pub fn filtered_application_translation(language: Language) -> Text<'static,StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
-//         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
+//         Language::IT => "Pacchetti filtrati per protocollo applicazione:",
 //         Language::FR => "Paquets filtrés par protocole applicatif:",
 //         Language::ES => "Paquetes filtrados por protocolo de aplicación:",
 //         Language::PL => "Przefiltrowane pakiety według protokołu aplikacji:",
@@ -750,7 +750,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //         Language::EN => "Nothing to show at the moment.\n\
 //                          To add a connection to your favorites, click on the star symbol near the connection.",
 //         Language::IT => "Nulla da vedere per il momento.\n\
-//                          Per aggiungere una connessione ai tuoi preferiti, clicca sul simbolo della stella vicino alla connessione.",
+//                          Per aggiungere una connessione ai preferiti, seleziona il simbolo della stella vicino alla connessione.",
 //         Language::FR => "Rien a voir pour le moment.\n\
 //                          Pour ajouter une connexion à vos favoris, cliquez sur l'étoile à côté de la connexion.",
 //         Language::ES => "Nada que mostrar por el momento.\n\
@@ -1112,7 +1112,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 pub fn notifications_title_translation(language: Language) -> Text<'static, StyleType> {
     Text::new(match language {
         Language::EN => "Customize your notifications",
-        Language::IT => "Personalizza le tue notifiche",
+        Language::IT => "Personalizza le notifiche",
         Language::FR => "Personnalisez vos notifications",
         Language::ES => "Personaliza tus notificaciones",
         Language::PL => "Dostosuj powiadomienia",
@@ -1136,7 +1136,7 @@ pub fn notifications_title_translation(language: Language) -> Text<'static, Styl
 pub fn appearance_title_translation(language: Language) -> Text<'static, StyleType> {
     Text::new(match language {
         Language::EN => "Choose your favorite theme",
-        Language::IT => "Scegli il tuo tema preferito",
+        Language::IT => "Scegli il tema preferito",
         Language::FR => "Sélectionnez votre thème préféré",
         Language::ES => "Elige tu tema favorito",
         Language::PL => "Wybierz swój ulubiony motyw",
@@ -1392,7 +1392,7 @@ pub fn style_translation(language: Language) -> &'static str {
 pub fn language_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Language",
-        Language::IT => "Lingua",
+        Language::IT => "Lingua interfaccia",
         Language::FR => "Langue",
         Language::ES => "Idioma",
         Language::PL => "Język",
@@ -1440,7 +1440,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 pub fn packets_threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when a packets threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di pacchetti è superata",
+        Language::IT => "Notifica quando è superata una soglia pacchetti",
         Language::FR => "Me notifier lorsqu'un seuil de paquet est atteint",
         Language::ES => "Notificarme cuando se supere un límite de paquetes",
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg pakietów",
@@ -1464,7 +1464,7 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
 pub fn bytes_threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when a bytes threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di byte è superata",
+        Language::IT => "Notifica quando è superata una soglia byte",
         Language::FR => "Me notifier lorsqu'un seuil de donnée est atteint",
         Language::ES => "Notificarme cuando se exceda un límite de bytes",
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg bajtów",
@@ -1534,7 +1534,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
 pub fn favorite_notification_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when new data are exchanged from my favorites",
-        Language::IT => "Notificami quando nuovi dati sono scambiati dai miei preferiti",
+        Language::IT => "Notifica quando nuovi dati sono scambiati dai preferiti",
         Language::FR => "Notifiez-moi lorsque des données sont échangées depuis mes favoris",
         Language::ES => "Notificarme cuando se intercambien nuevos datos de mis favoritos",
         Language::PL => "Powiadom mnie, gdy nowe dane z moich ulubionych zostaną wymienione",
@@ -1626,7 +1626,7 @@ pub fn sound_translation(language: Language) -> &'static str {
 pub fn bytes_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bytes threshold exceeded!",
-        Language::IT => "Soglia di Byte superata!",
+        Language::IT => "Soglia byte superata!",
         Language::FR => "Seuil de donnée atteint!",
         Language::ES => "¡Límite de bytes superado!",
         Language::PL => "Próg bajtów przekroczony!",
@@ -1674,7 +1674,7 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
 pub fn packets_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Packets threshold exceeded!",
-        Language::IT => "Soglia di pacchetti superata!",
+        Language::IT => "Soglia pacchetti superata!",
         Language::FR => "Le seuil de paquet a été atteint!",
         Language::ES => "¡Se ha superado el límite de paquetes!",
         Language::PL => "Próg pakietów przekroczony!",
@@ -1770,7 +1770,7 @@ pub fn no_notifications_set_translation(language: Language) -> Text<'static, Sty
                                  After enabling them, this page will display a log of your notifications\n\n\
                                  You can enable notifications from settings:",
         Language::IT => "Non hai ancora abilitato le notifiche!\n\n\
-                                Dopo che le avrai abilitate, questa pagina mostrerà una collezione delle tue notifiche\n\n\
+                                Dopo che le avrai abilitate, questa pagina visualizzerà il registro delle notifiche\n\n\
                                 Puoi abilitare le notifiche dalle impostazioni:",
         Language::FR => "Vous n'avez pas activé les notifications!\n\n\
                                     Une fois activées, cette page affichera le journal des notifications\n\n\
@@ -1834,7 +1834,7 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
         }
         Language::IT => {
             "Nulla da vedere al momento...\n\n\
-                                Quando riceverai una notifica, essa verrà mostrata qui"
+                                Quando riceverai una notifica, verrà visualizzata qui"
         }
         Language::FR => {
             "Rien à voir pour le moment...\n\n\
@@ -1910,7 +1910,7 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
 pub fn only_last_30_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the last 30 notifications are displayed",
-        Language::IT => "Solo le ultime 30 notifiche sono mostrate",
+        Language::IT => "Sono visualizzate solo le ultime 30 notifiche",
         Language::FR => "Seulement les 30 dernières notifications sont affichées",
         Language::ES => "Sólo se muestran las últimas 30 notificaciones",
         Language::PL => "Wyświetlane jest tylko 30 ostatnich powiadomień",
