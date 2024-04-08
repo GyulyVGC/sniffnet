@@ -1816,11 +1816,11 @@ mod tests {
             (0, 0)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(400, 1000));
+        sniffer.update(Message::WindowMoved(400, 600));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (400, 1000)
+            (400, 600)
         );
 
         sniffer.update(Message::ChangeScaleFactor(1.5));
@@ -1832,11 +1832,8 @@ mod tests {
             (30, 60)
         );
         sniffer.thumbnail = false;
-        sniffer.update(Message::WindowMoved(-400, 1000));
-        assert_eq!(
-            sniffer.configs.lock().unwrap().window.position,
-            (-600, 1500)
-        );
+        sniffer.update(Message::WindowMoved(-20, 300));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (-30, 450));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
             (30, 60)
@@ -1851,11 +1848,11 @@ mod tests {
             (30, 60)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(-2, -250));
+        sniffer.update(Message::WindowMoved(-2, -34));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (-1, -125)
+            (-1, -17)
         );
     }
 
