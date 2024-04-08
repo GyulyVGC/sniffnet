@@ -1,7 +1,7 @@
 <div align="center">
-<a href="https://www.sniffnet.net"><img alt="" title="Sniffnet" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/header_repository.png" width="95%"/></a>
+<a href="https://sniffnet.net"><img alt="" title="Sniffnet" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/header_repository.png" width="95%"/></a>
 
-<a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.png"/></a>
+<a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
 <a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
@@ -23,7 +23,8 @@ Translated in:<br>
 <img alt="" title="Overview page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/overview.png" width="95%"/>
 <img alt="" title="Inspect page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/inspect.png" width="47%"/>
 <img alt="" title="Notifications page" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/notifications.png" width="47%"/>
-<img alt="" title="Thumbnail mode" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/thumbnail.png" width="95%"/>
+<img alt="" title="Custom theme" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/catppuccin.png" width="47%"/>
+<img alt="" title="Thumbnail mode" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/pages/thumbnail.png" width="47%"/>
 </div>
 
 <p>
