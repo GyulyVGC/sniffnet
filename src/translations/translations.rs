@@ -975,9 +975,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
 
 pub fn bytes_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV => {
-            "bytes"
-        },
+        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV => "bytes",
         Language::DE => "Bytes",
         Language::IT => "byte",
         Language::FR => "octets",
