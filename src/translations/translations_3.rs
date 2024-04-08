@@ -182,7 +182,7 @@ pub fn directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Directory",
         Language::IT => "Cartella",
-        Language::RU => "Каталог",
+        Language::RU => "Директория",
         _ => "Directory",
     }
 }
@@ -191,7 +191,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
         Language::IT => "Seleziona cartella di destinazione",
-        Language::RU => "Выберите целевой каталог",
+        Language::RU => "Выберите директорию назначения",
         _ => "Select destination directory",
     }
 }
