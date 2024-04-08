@@ -44,6 +44,14 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
     }
 }
 
+// pub fn file_path_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "File path",
+//         Language::IT => "Percorso del file",
+//         _ => "File path",
+//     }
+// }
+
 pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
