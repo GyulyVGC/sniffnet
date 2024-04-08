@@ -5,7 +5,7 @@ use crate::Language;
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "A newer version is available!",
-        Language::IT => "Una versione più recente è disponibile!",
+        Language::IT => "È disponibile una versione aggiornata!",
         Language::RU => "Новая версия доступна!",
         Language::EL => "Μια νεότερη έκδοση είναι διαθέσιμη!",
         // Language::FA => "یک نسخه جدیدتر روی GitHub موجود است",
@@ -29,7 +29,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
 pub fn inspect_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Inspect",
-        Language::IT => "Ispeziona",
+        Language::IT => "Monitora",
         Language::FR => "Inspecter",
         Language::ES => "Inspeccionar",
         Language::PL => "Sprawdź",
@@ -53,7 +53,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
 pub fn connection_details_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Connection details",
-        Language::IT => "Dettagli della connessione",
+        Language::IT => "Dettagli connessione",
         Language::RU => "Подробнее о соединении",
         Language::SV => "Anslutningsdetaljer",
         Language::FI => "Yhteyden tiedot",
@@ -77,7 +77,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
 pub fn dropped_packets_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Dropped packets",
-        Language::IT => "Pacchetti mancati",
+        Language::IT => "Pacchetti scartati",
         Language::RU => "Потеряно пакетов",
         Language::SV => "Tappade paket",
         Language::FI => "Pudotetut paketit",
@@ -101,7 +101,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
 pub fn data_representation_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data representation",
-        Language::IT => "Rappresentazione dei dati",
+        Language::IT => "Rappresentazione dati",
         Language::RU => "Показывать в виде", // there is selector below: "байтов" or "пакетов"
         Language::SV => "Datarepresentation",
         Language::FI => "Tietojen esitys",
@@ -149,7 +149,7 @@ pub fn host_translation(language: Language) -> &'static str {
 pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
-        Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
+        Language::IT => "Sono visulizzati solo i principali 30 elementi",
         Language::RU => "Тут показываются только первые 30 предметы",
         Language::SV => "Endast de 30 främsta föremål visas här",
         Language::FI => "Vain 30 parasta kohteita näytetään tässä",
@@ -221,7 +221,7 @@ pub fn local_translation(language: Language) -> String {
 pub fn unknown_translation(language: Language) -> String {
     match language {
         Language::EN => "Unknown location",
-        Language::IT => "Localizzazione sconosciuta",
+        Language::IT => "Locazione sconosciuta",
         Language::RU => "Неизвестный регион",
         Language::SV => "Okänd plats",
         Language::FI => "Tuntematon sijanti",
@@ -246,7 +246,7 @@ pub fn unknown_translation(language: Language) -> String {
 pub fn your_network_adapter_translation(language: Language) -> String {
     match language {
         Language::EN => "Your network adapter",
-        Language::IT => "La tua scheda di rete",
+        Language::IT => "La scheda di rete",
         Language::RU => "Ваш сетевой адаптер",
         Language::SV => "Din nätverksadapter",
         Language::FI => "Sinun verkkosovitin",
@@ -271,7 +271,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
 pub fn socket_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Socket address",
-        Language::IT => "Indirizzo del socket",
+        Language::IT => "Indirizzo socket",
         Language::RU => "Адрес сокекта",
         Language::SV => "Socketadress",
         Language::FI => "Socket osoite",
@@ -365,7 +365,7 @@ pub fn destination_translation(language: Language) -> &'static str {
 pub fn fqdn_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Fully qualified domain name",
-        Language::IT => "Nome di dominio completo",
+        Language::IT => "Nome dominio completo",
         Language::RU => "Полное доменное имя",
         Language::SV => "Fullständigt domännamn",
         Language::FI => "Täysin määritelty verkkotunnus",
@@ -388,7 +388,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
 pub fn administrative_entity_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Autonomous System name",
-        Language::IT => "Nome del sistema autonomo",
+        Language::IT => "Nome sistema autonomo",
         Language::RU => "Имя автономной системы",
         Language::SV => "Administrativ enhet",
         Language::FI => "Autonomisen järjestelmän nimi",
@@ -436,7 +436,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
 pub fn country_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Country",
-        Language::IT => "Paese",
+        Language::IT => "Nazione",
         Language::RU => "Страна",
         Language::SV => "Land",
         Language::FI => "Maa",
@@ -459,7 +459,7 @@ pub fn country_translation(language: Language) -> &'static str {
 pub fn domain_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Domain name",
-        Language::IT => "Nome di dominio",
+        Language::IT => "Nome dominio",
         Language::RU => "Доменное имя",
         Language::SV => "Domännamn",
         Language::FI => "Verkkotunnus",
@@ -483,7 +483,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
 pub fn only_show_favorites_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only show favorites",
-        Language::IT => "Mostra solo i preferiti",
+        Language::IT => "Visualizza solo i preferiti",
         Language::RU => "Показывать только избранные",
         Language::SV => "Visa endast favoriter",
         Language::FI => "Näytä vain suosikit",
@@ -560,7 +560,7 @@ pub fn showing_results_translation(
 ) -> String {
     match language {
         Language::EN => format!("Showing {start}-{end} of {total} total results"),
-        Language::IT => format!("Sono mostrati {start}-{end} di {total} risultati totali"),
+        Language::IT => format!("Sono visualizzati {start}-{end} di {total} risultati totali"),
         Language::RU => format!("Показываются {start}-{end} из {total} общего числа результатов"),
         Language::SV => format!("Visar {start}-{end} av {total} totala resultat"),
         Language::FI => format!("Näytetään {start}-{end} tulosta, kaikista tuloksista {total}"),
@@ -585,7 +585,7 @@ pub fn showing_results_translation(
 pub fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",
-        Language::IT => "Applica sfumature di colore",
+        Language::IT => "Applica sfumature colore",
         Language::RU => "Применить цветовой градиент", // recheck
         Language::SV => "Applicera färggradient",
         Language::FI => "Käytä värigradientteja",
