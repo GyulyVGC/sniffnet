@@ -10,7 +10,7 @@ pub fn general_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "General",
         Language::ES => "Generales",
-        Language::IT => "Generali",
+        Language::IT => "Generale",
         _ => "General",
     }
 }
@@ -26,7 +26,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",
         Language::ES => "Archivos de la base de datos",
-        Language::IT => "File di database",
+        Language::IT => "File database",
         _ => "Database files",
     }
 }
@@ -43,7 +43,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
 // pub fn file_path_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "File path",
-//         Language::IT => "Percorso del file",
+//         Language::IT => "Percorso file",
 //         _ => "File path",
 //     }
 // }
@@ -108,7 +108,7 @@ pub fn unsupported_link_type_translation(
     let mut string = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
-        Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
+        Language::IT => "Il tipo di collegamento associato a questa scheda di rete non è ancora supportato da Sniffnet...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
 
@@ -121,7 +121,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select style from a file",
         Language::ES => "Selecciona el estilo desde un archivo",
-        Language::IT => "Seleziona lo stile da un file",
+        Language::IT => "Seleziona stile da un file",
         _ => "Select style from a file",
     }
 }
@@ -130,7 +130,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select database file",
         Language::ES => "Selecciona un archivo de base de datos",
-        Language::IT => "Seleziona file di database",
+        Language::IT => "Seleziona file database",
         _ => "Select database file",
     }
 }
@@ -156,7 +156,7 @@ pub fn service_translation(language: Language) -> &'static str {
 pub fn export_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Export capture file",
-        Language::IT => "Esporta file di cattura",
+        Language::IT => "Esporta file cattura",
         _ => "Export capture file",
     }
 }
@@ -173,7 +173,7 @@ pub fn directory_translation(language: Language) -> &'static str {
 pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
-        Language::IT => "Seleziona cartella di destinazione",
+        Language::IT => "Seleziona cartella destinazione",
         _ => "Select destination directory",
     }
 }
@@ -181,7 +181,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
 pub fn file_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "File name",
-        Language::IT => "Nome del file",
+        Language::IT => "Nome file",
         _ => "File name",
     }
 }
@@ -197,7 +197,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
 pub fn learn_more_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Do you want to learn more?",
-        Language::IT => "Vuoi saperne di più?",
+        Language::IT => "Maggiori info",
         _ => "Do you want to learn more?",
     }
 }
