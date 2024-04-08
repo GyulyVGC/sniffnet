@@ -12,7 +12,7 @@ use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
-use crate::configs::types::config_window::{ConfigWindow, Scale, ToPoint, ToSize};
+use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -282,7 +282,7 @@ impl Sniffer {
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled = (x, y).scale(scale_factor);
+                let scaled = (x, y).scale_and_check(scale_factor);
                 if self.thumbnail {
                     self.configs.lock().unwrap().window.thumbnail_position = scaled;
                 } else {
@@ -292,7 +292,8 @@ impl Sniffer {
             Message::WindowResized(width, height) => {
                 if !self.thumbnail {
                     let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                    self.configs.lock().unwrap().window.size = (width, height).scale(scale_factor);
+                    self.configs.lock().unwrap().window.size =
+                        (width, height).scale_and_check(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
                     return self.update(Message::ToggleThumbnail(true));
                 }
@@ -348,8 +349,9 @@ impl Sniffer {
                     let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
                     Command::batch([
-                        window::resize(Id::MAIN, size),
+                        window::maximize(Id::MAIN, false),
                         window::toggle_decorations(Id::MAIN),
+                        window::resize(Id::MAIN, size),
                         window::move_to(Id::MAIN, position.to_point()),
                         window::change_level(Id::MAIN, Level::AlwaysOnTop),
                     ])
@@ -364,8 +366,8 @@ impl Sniffer {
                     if !triggered_by_resize {
                         let size = self.configs.lock().unwrap().window.size.to_size();
                         let position = self.configs.lock().unwrap().window.position.to_point();
-                        commands.push(window::resize(Id::MAIN, size));
                         commands.push(window::move_to(Id::MAIN, position));
+                        commands.push(window::resize(Id::MAIN, size));
                     }
                     Command::batch(commands)
                 };
@@ -1814,11 +1816,11 @@ mod tests {
             (0, 0)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(400, 1000));
+        sniffer.update(Message::WindowMoved(400, 600));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (400, 1000)
+            (400, 600)
         );
 
         sniffer.update(Message::ChangeScaleFactor(1.5));
@@ -1830,11 +1832,8 @@ mod tests {
             (30, 60)
         );
         sniffer.thumbnail = false;
-        sniffer.update(Message::WindowMoved(-400, 1000));
-        assert_eq!(
-            sniffer.configs.lock().unwrap().window.position,
-            (-600, 1500)
-        );
+        sniffer.update(Message::WindowMoved(-20, 300));
+        assert_eq!(sniffer.configs.lock().unwrap().window.position, (-30, 450));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
             (30, 60)
@@ -1849,11 +1848,11 @@ mod tests {
             (30, 60)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(-2, -250));
+        sniffer.update(Message::WindowMoved(-2, -34));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (-1, -125)
+            (-1, -17)
         );
     }
 

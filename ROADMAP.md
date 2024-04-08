@@ -11,35 +11,42 @@ Known open problems are reported at the bottom of this file.
 
 ## Major features
   
-Feature | Release | 
--|-|
-IP geolocation | ✅ (v1.1)
-Custom notifications | ✅ (v1.1)
-Host names and ASN availability | ✅ (v1.2)
-Full connections report in a dedicated page | ✅ (v1.2)
-Read and write of PCAP files | 🔜 (v1.3)
-ICMP support | 🔜 (v1.3)
-Packets' payload inspection | ❓(TBD)
-IP addresses' reputation | ❓(TBD)
-Malicious traffic detection | ❓(TBD)
-PIDs identification | ❓(TBD)
-Sniffnet agent to monitor a remote host | ❓(TBD)
+| Feature                                     | Release  | 
+|---------------------------------------------|----------|
+| IP geolocation                              | ✅ (v1.1) |
+| Custom notifications                        | ✅ (v1.1) |
+| Host names and ASN availability             | ✅ (v1.2) |
+| Full connections report in a dedicated page | ✅ (v1.2) |
+| Thumbnail mode                              | ✅ (v1.3) |
+| Extended upper layer services recognition   | ✅ (v1.3) |
+| ICMP support                                | ✅ (v1.3) |
+| PCAP file export                            | ✅ (v1.3) |
+| PCAP file import                            | ❓(TBD)   |
+| IP addresses' reputation                    | ❓(TBD)   |
+| Malicious traffic detection                 | ❓(TBD)   |
+| PIDs identification                         | ❓(TBD)   |
+| Packets' payload inspection                 | ❓(TBD)   |
+| Firewall capabilities                       | ❓(TBD)   |
+| Sniffnet agent to monitor a remote host     | ❓(TBD)   |
+| Web interface                               | ❓(TBD)   |
 
 ## Other features
   
-Feature | Release | 
--|-|
-Settings page: notifications, style, language | ✅ (v1.1.0)
-Keyboard shortcuts | ✅ (v1.1.2)
-Notify user when new release is available | ✅ (v1.1.3)
-Styles based on color gradients | ✅ (v1.2.2)
-Filter traffic by port number | 🔜 (v1.3.0)
-Advanced settings: UI scale factor and MMDBs paths | 🔜 (v1.3.0)
-Proper table structure for connections list | ❓(TBD)
-Filter inputs autocompletion | ❓(TBD)
-Details about unassigned IPs | ❓(TBD)
-Custom TOML themes support | ❓(TBD)
-Additional details about each notification event | ❓(TBD)
+| Feature                                            | Release    | 
+|----------------------------------------------------|------------|
+| Settings page: notifications, style, language      | ✅ (v1.1.0) |
+| Keyboard shortcuts                                 | ✅ (v1.1.2) |
+| Notify user when new release is available          | ✅ (v1.1.3) |
+| Styles based on color gradients                    | ✅ (v1.2.2) |
+| Custom TOML themes support                         | ✅ (v1.3.0) |
+| Filter traffic by port number                      | ✅ (v1.3.0) |
+| Advanced settings: UI scale factor and MMDBs paths | ✅ (v1.3.0) |
+| Proper table structure for connections list        | ✅ (v1.3.0) |
+| Extended documentation (Wiki)                      | ✅ (v1.3.0) |
+| Support more link types                            | ✅ (v1.3.0) |
+| Filter inputs autocompletion                       | ❓(TBD)     |
+| Details about unassigned IPs                       | ❓(TBD)     |
+| Additional details about each notification event   | ❓(TBD)     |
 
 ## Known problems
 
@@ -50,12 +57,6 @@ This section only contains currently open problems.
   - only the 30 top hosts are shown in GUI at the moment
 - Notifications startegy should be changed
   - too many notifications are delivered, related to similar events, in a short amount of time
-- Improve output report update strategy
-  - currently the output is generated once per second
-- Using the default renderer in some environments can cause some layout problems:
-  - flags are not renderer correctly (they appear black)
-  - the UI screen glitches
-  - see [this section](https://github.com/GyulyVGC/sniffnet#troubleshooting) to solve
 - Improve packages
   - remove previous version of Sniffnet in Windows
   - solve problems related to osascript on macOS

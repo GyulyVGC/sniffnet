@@ -193,3 +193,11 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         _ => "Thumbnail mode",
     }
 }
+
+pub fn learn_more_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Do you want to learn more?",
+        Language::IT => "Vuoi saperne di più?",
+        _ => "Do you want to learn more?",
+    }
+}

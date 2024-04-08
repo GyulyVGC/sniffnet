@@ -1,12 +1,13 @@
 //! This module defines the behavior of the `TrafficChart` struct, used to display chart in GUI run page
 
+use std::cmp::min;
+use std::ops::Range;
+
 use iced::widget::Container;
 use iced::Element;
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
-use std::cmp::min;
-use std::ops::Range;
 
 use crate::gui::app::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -265,8 +266,9 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
 
 #[cfg(test)]
 mod tests {
-    use crate::chart::types::traffic_chart::{sample_spline, PTS};
     use splines::{Interpolation, Key, Spline};
+
+    use crate::chart::types::traffic_chart::{sample_spline, PTS};
 
     #[test]
     fn test_spline_samples() {

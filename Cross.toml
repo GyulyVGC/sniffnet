@@ -1,0 +1,23 @@
+[target.x86_64-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture amd64",
+    "apt update -y && apt install -y libfreetype6-dev:amd64 libexpat1-dev:amd64 libpcap-dev:amd64 libasound2-dev:amd64 libfontconfig1-dev:amd64 libgtk-3-dev:amd64"
+]
+
+[target.i686-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture i386",
+    "apt update -y && apt install -y libfreetype6-dev:i386 libexpat1-dev:i386 libpcap-dev:i386 libasound2-dev:i386 libfontconfig1-dev:i386 libgtk-3-dev:i386"
+]
+
+[target.aarch64-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture arm64",
+    "apt update -y && apt install -y libfreetype6-dev:arm64 libexpat1-dev:arm64 libpcap-dev:arm64 libasound2-dev:arm64 libfontconfig1-dev:arm64 libgtk-3-dev:arm64"
+]
+
+[target.armv7-unknown-linux-gnueabihf]
+pre-build = [
+    "dpkg --add-architecture armhf",
+    "apt update -y && apt install -y libfreetype6-dev:armhf libexpat1-dev:armhf libpcap-dev:armhf libasound2-dev:armhf libfontconfig1-dev:armhf libgtk-3-dev:armhf"
+]

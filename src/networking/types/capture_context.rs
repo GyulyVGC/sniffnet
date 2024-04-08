@@ -1,6 +1,7 @@
+use pcap::{Active, Capture, Savefile};
+
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
-use pcap::{Active, Capture, Savefile};
 
 pub enum CaptureContext {
     Online(Online),

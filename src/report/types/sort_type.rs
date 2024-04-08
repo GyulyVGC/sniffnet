@@ -1,7 +1,8 @@
+use iced::widget::Text;
+
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::utils::types::icon::Icon;
-use iced::widget::Text;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum SortType {

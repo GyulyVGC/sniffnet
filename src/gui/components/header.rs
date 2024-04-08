@@ -50,7 +50,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
         .vertical_alignment(Vertical::Center)
         .height(Length::Fill)
         .line_height(LineHeight::Relative(0.8))
-        .size(95);
+        .size(90);
 
     Container::new(
         Row::new()
@@ -74,7 +74,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
             .push(horizontal_space())
             .push(get_button_settings(font, language, last_opened_setting)),
     )
-    .height(90)
+    .height(80)
     .align_y(Vertical::Center)
     .style(ContainerType::Gradient(color_gradient))
 }
@@ -110,7 +110,7 @@ pub fn get_button_settings(
     let content = button(
         Icon::Settings
             .to_text()
-            .size(20.5)
+            .size(20)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center),
     )
@@ -133,7 +133,7 @@ pub fn get_button_minimize(
     language: Language,
     thumbnail: bool,
 ) -> Tooltip<'static, Message, StyleType> {
-    let size = if thumbnail { 20 } else { 26 };
+    let size = if thumbnail { 20 } else { 24 };
     let button_size = if thumbnail { 30 } else { 40 };
     let icon = if thumbnail {
         Icon::ThumbnailClose

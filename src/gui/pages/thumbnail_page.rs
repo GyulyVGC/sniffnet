@@ -1,3 +1,11 @@
+use std::cmp::min;
+use std::net::IpAddr;
+use std::sync::{Arc, Mutex};
+
+use iced::alignment::Horizontal;
+use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
+use iced::{Alignment, Font, Length};
+
 use crate::chart::types::chart_type::ChartType;
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
@@ -10,12 +18,6 @@ use crate::networking::types::info_traffic::InfoTraffic;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
-use iced::alignment::Horizontal;
-use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
-use iced::{Alignment, Font, Length};
-use std::cmp::min;
-use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
 
 const MAX_ENTRIES: usize = 4;
 const MAX_CHARS_HOST: usize = 26;

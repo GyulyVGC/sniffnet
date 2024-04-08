@@ -2,7 +2,7 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.3.0] - 2024-04-08
 - Introduced thumbnail mode, enabling users to keep an eye on Sniffnet while doing other tasks ([#484](https://github.com/GyulyVGC/sniffnet/pull/484))
 - Added support for ICMP connections and messages ([#417](https://github.com/GyulyVGC/sniffnet/pull/417) — fixes [#288](https://github.com/GyulyVGC/sniffnet/issues/288))
 - Added capability to identify 6000+ upper layer services, protocols, trojans, and worms ([#450](https://github.com/GyulyVGC/sniffnet/pull/450) — fixes [#374](https://github.com/GyulyVGC/sniffnet/issues/374))
