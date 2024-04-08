@@ -11,13 +11,14 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::EN => "General",
         Language::ES => "Generales",
         Language::IT => "Generali",
+        Language::DE => "Allgemein",
         _ => "General",
     }
 }
 
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::ES => "Zoom",
+        Language::EN | Language::IT | Language::ES | Language::DE => "Zoom",
         _ => "Zoom",
     }
 }
@@ -27,6 +28,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::EN => "Database files",
         Language::ES => "Archivos de la base de datos",
         Language::IT => "File di database",
+        Language::DE => "Datenbank Dateien",
         _ => "Database files",
     }
 }
@@ -36,6 +38,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::EN => "The following parameters can't be modified during the analysis",
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
+        Language::DE => "Die folgenden Paramter können während der Analyse nicht verändert werden",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -44,6 +47,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "File path",
 //         Language::IT => "Percorso del file",
+//         Language::DE => "Dateipfad",
 //         _ => "File path",
 //     }
 // }
@@ -53,6 +57,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::EN => "Custom style",
         Language::ES => "Estilo personalizado",
         Language::IT => "Stile personalizzato",
+        Language::DE => "Benutzerdefinierter Stil",
         _ => "Custom style",
     }
 }
@@ -61,13 +66,14 @@ pub fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
         Language::IT | Language::ES => "Copia",
+        Language::DE => "Kopieren",
         _ => "Copy",
     }
 }
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Port",
+        Language::EN | Language::DE => "Port",
         Language::ES => "Puerto",
         Language::IT => "Porta",
         _ => "Port",
@@ -79,6 +85,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::EN => "Invalid filters",
         Language::ES => "Filtros inválidos",
         Language::IT => "Filtri non validi",
+        Language::DE => "Ungültige Filter",
         _ => "Invalid filters",
     }
 }
@@ -88,6 +95,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::EN => "Messages",
         Language::ES => "Mensajes",
         Language::IT => "Messaggi",
+        Language::DE => "Nachrichten",
         _ => "Messages",
     }
 }
@@ -97,6 +105,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::EN => "Link type",
         Language::ES => "Tipo de conexión",
         Language::IT => "Tipo di collegamento",
+        Language::DE => "Verbindungsart",
         _ => "Link type",
     }
 }
@@ -109,6 +118,7 @@ pub fn unsupported_link_type_translation(
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
+        Language::DE => "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
 
@@ -122,6 +132,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::EN => "Select style from a file",
         Language::ES => "Selecciona el estilo desde un archivo",
         Language::IT => "Seleziona lo stile da un file",
+        Language::DE => "Stil aus einer Datei wählen",
         _ => "Select style from a file",
     }
 }
@@ -131,6 +142,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::EN => "Select database file",
         Language::ES => "Selecciona un archivo de base de datos",
         Language::IT => "Seleziona file di database",
+        Language::DE => "Datenbank Datei auswählen",
         _ => "Select database file",
     }
 }
@@ -140,13 +152,14 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::EN => "Filter by network host",
         Language::ES => "Filtra por host de red",
         Language::IT => "Filtra per host di rete",
+        Language::DE => "Nach Netzwerk-Host filtern",
         _ => "Filter by network host",
     }
 }
 
 pub fn service_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Service",
+        Language::EN | Language::DE => "Service",
         Language::ES => "Servicio",
         Language::IT => "Servizio",
         _ => "Service",
@@ -157,6 +170,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Export capture file",
         Language::IT => "Esporta file di cattura",
+        Language::DE => "Aufzeichnungsdatei exportieren",
         _ => "Export capture file",
     }
 }
@@ -166,6 +180,7 @@ pub fn directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Directory",
         Language::IT => "Cartella",
+        Language::DE => "Ordner",
         _ => "Directory",
     }
 }
@@ -174,6 +189,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
         Language::IT => "Seleziona cartella di destinazione",
+        Language::DE => "Zielorder wählen",
         _ => "Select destination directory",
     }
 }
@@ -182,6 +198,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "File name",
         Language::IT => "Nome del file",
+        Language::DE => "Dateiname",
         _ => "File name",
     }
 }
@@ -190,6 +207,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Thumbnail mode",
         Language::IT => "Modalità miniatura",
+        Language::DE => "Bild-in-Bild Modus",
         _ => "Thumbnail mode",
     }
 }
@@ -198,6 +216,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Do you want to learn more?",
         Language::IT => "Vuoi saperne di più?",
+        Language::DE => "Mehr erfahren",
         _ => "Do you want to learn more?",
     }
 }
