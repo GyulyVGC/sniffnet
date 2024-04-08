@@ -150,7 +150,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
         Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
-        Language::RU => "Тут показываются только первые 30 предметы",
+        Language::RU => "Тут показываются только первые 30 элементов",
         Language::SV => "Endast de 30 främsta föremål visas här",
         Language::FI => "Vain 30 parasta kohteita näytetään tässä",
         Language::DE => "Nur die obersten 30 artikel werden hier angezeigt",
@@ -272,7 +272,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Socket address",
         Language::IT => "Indirizzo del socket",
-        Language::RU => "Адрес сокекта",
+        Language::RU => "Адрес сокета",
         Language::SV => "Socketadress",
         Language::FI => "Socket osoite",
         Language::DE => "Socket Adresse",
@@ -532,7 +532,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No result available according to the specified search filters",
         Language::IT => "Nessun risultato disponibile secondo i filtri di ricerca specificati",
-        Language::RU => "После применения выбранных фильтров результат поиска пустой",
+        Language::RU => "Ничего не найдено после применения выбранных фильтров",
         Language::SV => "Inga resultat tillgängliga utifrån de angivna sökfilterna",
         Language::FI => "Ei tuloksia saatavilla määritellyille hakusuodattimille",
         Language::DE => "Keine Resultate für die spezifizierten Such-Filter verfügbar",
