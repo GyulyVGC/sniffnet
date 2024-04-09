@@ -189,7 +189,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::EN | Language::FR | Language::DE => "Service",
         Language::ES => "Servicio",
         Language::IT => "Servizio",
-        Language::PL => "Usługa", // Could be "Serwis" - Depends on the context, but "Usługa" is more common
+        Language::PL => "Usługa",
         _ => "Service",
     }
 }
@@ -212,7 +212,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::IT => "Cartella",
         Language::FR => "Répertoire",
         Language::DE => "Ordner",
-        Language::PL => "Katalog", // Katalog usually refers to Linux based directory while "Folder" is more common between Windows users (eg. windows explorer refers to directories as "Folders")
+        Language::PL => "Katalog", // Katalog usually refers to Linux based directory while "Folder" is more common between Windows users (e.g. windows explorer refers to directories as "Folders")
         _ => "Directory",
     }
 }
