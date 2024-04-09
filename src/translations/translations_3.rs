@@ -27,6 +27,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::EN => "Database files",
         Language::ES => "Archivos de la base de datos",
         Language::IT => "File di database",
+        Language::RO => "Fișiere bază de date",
         _ => "Database files",
     }
 }
@@ -36,6 +37,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::EN => "The following parameters can't be modified during the analysis",
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
+        Language::RO => "Următorii parametri nu sunt modificabili în timpul analizei",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -53,6 +55,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::EN => "Custom style",
         Language::ES => "Estilo personalizado",
         Language::IT => "Stile personalizzato",
+        Language::RO => "Temă personalizată",
         _ => "Custom style",
     }
 }
@@ -61,6 +64,7 @@ pub fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
         Language::IT | Language::ES => "Copia",
+        Language::RO => "Copie",
         _ => "Copy",
     }
 }
@@ -79,6 +83,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::EN => "Invalid filters",
         Language::ES => "Filtros inválidos",
         Language::IT => "Filtri non validi",
+        Language::RO => "Filtre invalide",
         _ => "Invalid filters",
     }
 }
@@ -88,6 +93,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::EN => "Messages",
         Language::ES => "Mensajes",
         Language::IT => "Messaggi",
+        Language::RO => "Mesaje",
         _ => "Messages",
     }
 }
@@ -97,6 +103,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::EN => "Link type",
         Language::ES => "Tipo de conexión",
         Language::IT => "Tipo di collegamento",
+        Language::RO => "Tipul conexiunii",
         _ => "Link type",
     }
 }
@@ -109,6 +116,7 @@ pub fn unsupported_link_type_translation(
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
+        Language::RO => "Tipul conexiunii asociate acestui adaptor de rețea nu este încă suportat de Sniffnet...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
 
@@ -122,6 +130,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::EN => "Select style from a file",
         Language::ES => "Selecciona el estilo desde un archivo",
         Language::IT => "Seleziona lo stile da un file",
+        Language::RO => "Selectează tema dintr-un fișier",
         _ => "Select style from a file",
     }
 }
@@ -131,6 +140,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::EN => "Select database file",
         Language::ES => "Selecciona un archivo de base de datos",
         Language::IT => "Seleziona file di database",
+        Language::RO => "Selectează fișier bază de date",
         _ => "Select database file",
     }
 }
@@ -140,6 +150,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::EN => "Filter by network host",
         Language::ES => "Filtra por host de red",
         Language::IT => "Filtra per host di rete",
+        Language::RO => "Filtrează după host-ul de rețea",
         _ => "Filter by network host",
     }
 }
@@ -149,6 +160,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::EN => "Service",
         Language::ES => "Servicio",
         Language::IT => "Servizio",
+        Language::RO => "Serviciu",
         _ => "Service",
     }
 }
@@ -157,6 +169,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Export capture file",
         Language::IT => "Esporta file di cattura",
+        Language::RO => "Export fișier captură",
         _ => "Export capture file",
     }
 }
@@ -166,6 +179,7 @@ pub fn directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Directory",
         Language::IT => "Cartella",
+        Language::RO => "Director",
         _ => "Directory",
     }
 }
@@ -174,6 +188,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
         Language::IT => "Seleziona cartella di destinazione",
+        Language::RO => "Selectează directorul destinație",
         _ => "Select destination directory",
     }
 }
@@ -182,6 +197,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "File name",
         Language::IT => "Nome del file",
+        Language::RO => "Nume fișier",
         _ => "File name",
     }
 }
@@ -190,6 +206,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Thumbnail mode",
         Language::IT => "Modalità miniatura",
+        Language::RO => "Mod thumbnail",
         _ => "Thumbnail mode",
     }
 }
@@ -198,6 +215,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Do you want to learn more?",
         Language::IT => "Vuoi saperne di più?",
+        Language::RO => "Vrei să înveți mai multe?",
         _ => "Do you want to learn more?",
     }
 }
