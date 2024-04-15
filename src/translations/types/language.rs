@@ -106,7 +106,10 @@ impl Language {
     }
 
     pub fn is_up_to_date(self) -> bool {
-        matches!(self, Language::FR | Language::EN | Language::IT | Language::DE)
+        matches!(
+            self,
+            Language::FR | Language::EN | Language::IT | Language::DE
+        )
     }
 }
 
