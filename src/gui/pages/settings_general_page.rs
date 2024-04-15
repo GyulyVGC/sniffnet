@@ -12,6 +12,7 @@ use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
@@ -121,11 +122,12 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
         .align_items(Alignment::Center)
         .spacing(10)
         .push(language.get_flag());
-    if ![Language::EN, Language::IT].contains(&language) {
+    if !language.is_up_to_date() {
         flag_row = flag_row.push(
             Tooltip::new(
                 button(
                     Text::new("!")
+                        .style(TextType::Danger)
                         .font(font)
                         .vertical_alignment(Vertical::Center)
                         .horizontal_alignment(Horizontal::Center)
@@ -135,7 +137,8 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
                 .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
                 .padding(2)
                 .height(20)
-                .width(20),
+                .width(20)
+                .style(ButtonType::Alert),
                 row_open_link_tooltip(
                     "The selected language is not\nfully updated to version 1.3",
                     font,
