@@ -373,7 +373,11 @@ impl Sniffer {
                 };
             }
             Message::Drag => {
-                return window::drag(Id::MAIN);
+                let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
+                self.timing_events.thumbnail_click_now();
+                if was_just_thumbnail_click {
+                    return window::drag(Id::MAIN);
+                }
             }
             Message::TickInit => {}
         }
