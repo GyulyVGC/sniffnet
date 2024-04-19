@@ -5,14 +5,20 @@ use std::collections::{HashSet, VecDeque};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
 use iced::window::{Id, Level};
-use iced::{window, Command};
+use iced::Event::{Keyboard, Window};
+use iced::{window, Command, Subscription};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
+use crate::gui::app::PERIOD_TICK;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -140,6 +146,83 @@ impl Sniffer {
             export_pcap: ExportPcap::default(),
             thumbnail: false,
         }
+    }
+
+    pub(crate) fn keyboard_subscription(&self) -> Subscription<Message> {
+        const NO_MODIFIER: Modifiers = Modifiers::empty();
+
+        if self.thumbnail {
+            iced::event::listen_with(|event, _| match event {
+                Keyboard(Event::KeyPressed {
+                    key,
+                    modifiers: Modifiers::COMMAND,
+                    ..
+                }) => match key.as_ref() {
+                    Key::Character("q") => Some(Message::CloseRequested),
+                    Key::Character("t") => Some(Message::CtrlTPressed),
+                    _ => None,
+                },
+                _ => None,
+            })
+        } else {
+            iced::event::listen_with(|event, _| match event {
+                Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
+                    Modifiers::COMMAND => match key.as_ref() {
+                        Key::Character("q") => Some(Message::CloseRequested),
+                        Key::Character("t") => Some(Message::CtrlTPressed),
+                        Key::Character(",") => Some(Message::OpenLastSettings),
+                        Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
+                        Key::Character("d") => Some(Message::CtrlDPressed),
+                        Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
+                        Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
+                        _ => None,
+                    },
+                    Modifiers::SHIFT => match key {
+                        Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
+                        _ => None,
+                    },
+                    NO_MODIFIER => match key {
+                        Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
+                        Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
+                        Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
+                        _ => None,
+                    },
+                    _ => None,
+                },
+                _ => None,
+            })
+        }
+    }
+
+    pub(crate) fn mouse_subscription(&self) -> Subscription<Message> {
+        if self.thumbnail {
+            iced::event::listen_with(|event, _| match event {
+                iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
+                _ => None,
+            })
+        } else {
+            Subscription::none()
+        }
+    }
+
+    pub(crate) fn time_subscription(&self) -> Subscription<Message> {
+        if self.running_page.eq(&RunningPage::Init) {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
+        } else {
+            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
+        }
+    }
+
+    pub(crate) fn window_subscription() -> Subscription<Message> {
+        iced::event::listen_with(|event, _| match event {
+            Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
+            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
+            Window(Id::MAIN, window::Event::Resized { width, height }) => {
+                Some(Message::WindowResized(width, height))
+            }
+            Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
+            _ => None,
+        })
     }
 
     pub fn update(&mut self, message: Message) -> Command<Message> {
@@ -377,6 +460,14 @@ impl Sniffer {
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
                     return window::drag(Id::MAIN);
+                }
+            }
+            Message::CtrlTPressed => {
+                if self.running_page.ne(&RunningPage::Init)
+                    && self.settings_page.is_none()
+                    && self.modal.is_none()
+                {
+                    return self.update(Message::ToggleThumbnail(false));
                 }
             }
             Message::TickInit => {}
