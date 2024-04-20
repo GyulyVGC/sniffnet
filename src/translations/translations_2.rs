@@ -354,7 +354,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::ZH => "目标",
         Language::UK => "Призначення",
         Language::RO => "Destinație",
-        Language::PL => "Miejsce docelowe", // Depending on context these two are also valid: "Przeznaczenie" / "Cel"
+        Language::PL => "Miejsce docelowe",
         Language::FR => "Destination",
         Language::JA => "送信先",
         Language::UZ => "Qabul qiluvchi",
