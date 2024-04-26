@@ -2226,16 +2226,6 @@ checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 
 [[package]]
 name = "libloading"
-version = "0.6.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "351a32417a12d5f7e82c368a66781e307834dae04c6ce0cd4456d52989229883"
-dependencies = [
- "cfg-if",
- "winapi",
-]
-
-[[package]]
-name = "libloading"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
@@ -2251,7 +2241,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c2a198fb6b0eada2a8df47933734e6d35d350665a33a3593d7164fa52c75c19"
 dependencies = [
  "cfg-if",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.4",
 ]
 
 [[package]]
@@ -2911,14 +2901,14 @@ checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
 
 [[package]]
 name = "pcap"
-version = "1.3.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99e935fc73d54a89fff576526c2ccd42bbf8247aae05b358693475b14fd4ff79"
+checksum = "45f1686828a29fd8002fbf9c01506b4b2dd575c2305e1b884da3731abae8b9e0"
 dependencies = [
  "bitflags 1.3.2",
  "errno 0.2.8",
  "libc",
- "libloading 0.6.7",
+ "libloading 0.8.3",
  "pkg-config",
  "regex",
  "windows-sys 0.36.1",
