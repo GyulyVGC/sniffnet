@@ -456,6 +456,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "much",
+      "name": "much",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2566280?v=4",
+      "profile": "https://github.com/MUCH",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
