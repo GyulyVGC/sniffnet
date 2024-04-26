@@ -23,7 +23,6 @@ pub fn zoom_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::ES | Language::FR | Language::DE => "Zoom",
         Language::PL => "Powiększenie",
-        Language::EN | Language::IT | Language::ES | "Zoom",
         Language::RU => "Масштаб интерфейса",
         _ => "Zoom",
     }
@@ -55,17 +54,6 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn file_path_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "File path",
-//         Language::IT => "Percorso del file",
-//         Language::FR => "Chemin du fichier",
-//         Language::DE => "Dateipfad",
-//         Language::PL => "Ścieżka pliku",
-//         _ => "File path",
-//     }
-// }
-
 pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
@@ -86,7 +74,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::FR => "Copie",
         Language::DE => "Kopieren",
         Language::PL => "Kopiuj",
-        Language::RU => "Скопировать"
+        Language::RU => "Скопировать",
         _ => "Copy",
     }
 }
