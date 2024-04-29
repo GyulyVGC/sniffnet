@@ -286,7 +286,6 @@ fn get_flag_from_country(
         Country::ZM => ZM,
         Country::ZW => ZW,
         Country::ZZ => {
-            svg_style = SvgType::AdaptColor;
             let (flag, new_tooltip) = if is_loopback {
                 (COMPUTER, your_network_adapter_translation(language))
             } else if traffic_type.eq(&TrafficType::Multicast) {
@@ -299,6 +298,7 @@ fn get_flag_from_country(
                 (UNKNOWN, unknown_translation(language))
             };
 
+            svg_style = SvgType::AdaptColor;
             tooltip = new_tooltip.to_string();
             flag
         }
