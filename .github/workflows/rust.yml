@@ -59,7 +59,7 @@ jobs:
 
       - name: clippy
         if:  matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo clippy -- -D warnings
+        run: cargo clippy -- -W clippy::all -D clippy::missing_const_for_fn -D warnings
 
       - name: test
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
