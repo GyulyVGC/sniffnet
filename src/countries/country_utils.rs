@@ -381,7 +381,8 @@ pub fn get_computer_tooltip(
         (false, _, TrafficType::Broadcast) => "Broadcast",
         (false, true, _) => local_translation(language),
         (false, false, TrafficType::Unicast) => unknown_translation(language),
-    }.to_string();
+    }
+    .to_string();
 
     Tooltip::new(
         content,

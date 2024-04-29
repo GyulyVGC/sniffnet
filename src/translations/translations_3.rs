@@ -142,7 +142,10 @@ pub fn unsupported_link_type_translation(
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
-    Text::new(format!("{translation}\n\n{}: {adapter}", network_adapter_translation(language)))
+    Text::new(format!(
+        "{translation}\n\n{}: {adapter}",
+        network_adapter_translation(language)
+    ))
 }
 
 pub fn style_from_file_translation(language: Language) -> &'static str {
