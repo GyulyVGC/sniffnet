@@ -35,7 +35,7 @@ pub fn get_exit_overlay(
             font_headers,
             color_gradient,
             language,
-            quit_analysis_translation(language).to_string(),
+            quit_analysis_translation(language),
         ))
         .push(Space::with_height(20))
         .push(
@@ -67,7 +67,7 @@ pub fn get_clear_all_overlay(
             font_headers,
             color_gradient,
             language,
-            clear_all_translation(language).to_string(),
+            clear_all_translation(language),
         ))
         .push(Space::with_height(20))
         .push(
@@ -88,7 +88,7 @@ fn get_modal_header(
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-    title: String,
+    title: &'static str,
 ) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()
