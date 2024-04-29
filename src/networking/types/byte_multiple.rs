@@ -26,7 +26,7 @@ impl fmt::Display for ByteMultiple {
 }
 
 impl ByteMultiple {
-    pub fn multiplier(self) -> u64 {
+    pub const fn multiplier(self) -> u64 {
         match self {
             ByteMultiple::B => 1,
             ByteMultiple::KB => 1_000,
@@ -77,7 +77,7 @@ impl ByteMultiple {
             .to_owned()
     }
 
-    pub fn from_char(ch: char) -> Self {
+    pub const fn from_char(ch: char) -> Self {
         match ch.to_ascii_uppercase() {
             'K' => ByteMultiple::KB,
             'M' => ByteMultiple::MB,

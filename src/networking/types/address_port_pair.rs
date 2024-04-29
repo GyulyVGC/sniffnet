@@ -25,7 +25,7 @@ impl AddressPortPair {
     /// * `address` - A string representing the network layer IPv4 or IPv6 address.
     ///
     /// * `port` - An integer representing the transport layer port number (in the range 0..=65535).
-    pub fn new(
+    pub const fn new(
         address1: String,
         port1: Option<u16>,
         address2: String,

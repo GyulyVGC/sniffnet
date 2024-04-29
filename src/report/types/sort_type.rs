@@ -13,7 +13,7 @@ pub enum SortType {
 }
 
 impl SortType {
-    pub fn next_sort(self) -> Self {
+    pub const fn next_sort(self) -> Self {
         match self {
             SortType::Ascending => SortType::Neutral,
             SortType::Descending => SortType::Ascending,
@@ -35,7 +35,7 @@ impl SortType {
         .size(size)
     }
 
-    pub fn button_type(self) -> ButtonType {
+    pub const fn button_type(self) -> ButtonType {
         match self {
             SortType::Ascending | SortType::Descending => ButtonType::SortArrowActive,
             SortType::Neutral => ButtonType::SortArrows,

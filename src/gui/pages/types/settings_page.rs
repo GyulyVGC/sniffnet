@@ -22,7 +22,7 @@ impl SettingsPage {
         SettingsPage::General,
     ];
 
-    pub fn get_tab_label(&self, language: Language) -> &str {
+    pub const fn get_tab_label(&self, language: Language) -> &str {
         match self {
             SettingsPage::Notifications => notifications_translation(language),
             SettingsPage::Appearance => style_translation(language),
@@ -30,7 +30,7 @@ impl SettingsPage {
         }
     }
 
-    pub fn next(self) -> Self {
+    pub const fn next(self) -> Self {
         match self {
             SettingsPage::Notifications => SettingsPage::Appearance,
             SettingsPage::Appearance => SettingsPage::General,
@@ -38,7 +38,7 @@ impl SettingsPage {
         }
     }
 
-    pub fn previous(self) -> Self {
+    pub const fn previous(self) -> Self {
         match self {
             SettingsPage::Notifications => SettingsPage::General,
             SettingsPage::Appearance => SettingsPage::Notifications,
@@ -55,7 +55,7 @@ impl SettingsPage {
         .to_text()
     }
 
-    pub fn action(self) -> Message {
+    pub const fn action(self) -> Message {
         Message::OpenSettings(self)
     }
 }

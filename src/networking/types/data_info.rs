@@ -26,27 +26,27 @@ pub struct DataInfo {
 }
 
 impl DataInfo {
-    pub fn incoming_packets(&self) -> u128 {
+    pub const fn incoming_packets(&self) -> u128 {
         self.incoming_packets
     }
 
-    pub fn outgoing_packets(&self) -> u128 {
+    pub const fn outgoing_packets(&self) -> u128 {
         self.outgoing_packets
     }
 
-    pub fn incoming_bytes(&self) -> u128 {
+    pub const fn incoming_bytes(&self) -> u128 {
         self.incoming_bytes
     }
 
-    pub fn outgoing_bytes(&self) -> u128 {
+    pub const fn outgoing_bytes(&self) -> u128 {
         self.outgoing_bytes
     }
 
-    pub fn tot_packets(&self) -> u128 {
+    pub const fn tot_packets(&self) -> u128 {
         self.incoming_packets + self.outgoing_packets
     }
 
-    pub fn tot_bytes(&self) -> u128 {
+    pub const fn tot_bytes(&self) -> u128 {
         self.incoming_bytes + self.outgoing_bytes
     }
 

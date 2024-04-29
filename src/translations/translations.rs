@@ -29,7 +29,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, StyleTyp
     })
 }
 
-// pub fn application_protocol_translation(language: Language) -> &'static str {
+// pub const fn application_protocol_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Application protocol",
 //         Language::IT => "Protocollo applicativo",
@@ -77,7 +77,7 @@ pub fn select_filters_translation(language: Language) -> Text<'static, StyleType
     })
 }
 
-pub fn start_translation(language: Language) -> &'static str {
+pub const fn start_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::RO | Language::KO => "Start!",
         Language::IT => "Avvia!",
@@ -98,7 +98,7 @@ pub fn start_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn address_translation(language: Language) -> &'static str {
+pub const fn address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Address",
         Language::IT => "Indirizzo",
@@ -120,7 +120,7 @@ pub fn address_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn addresses_translation(language: Language) -> &'static str {
+pub const fn addresses_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Addresses",
         Language::IT => "Indirizzi",
@@ -144,7 +144,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn ip_version_translation(language: Language) -> &'static str {
+pub const fn ip_version_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "IP version",
         Language::IT => "Versione IP",
@@ -168,7 +168,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn transport_protocol_translation(language: Language) -> &'static str {
+// pub const fn transport_protocol_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Transport protocol",
 //         Language::IT => "Protocollo di trasporto",
@@ -191,7 +191,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn protocol_translation(language: Language) -> &'static str {
+pub const fn protocol_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::RO => "Protocol",
         Language::IT => "Protocollo",
@@ -235,7 +235,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, StyleType> 
     })
 }
 
-// pub fn relevant_connections_translation(language: Language) -> Text<'static, StyleType> {
+// pub const fn relevant_connections_translation(language: Language) -> Text<'static, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Relevant connections:",
 //         Language::IT => "Connessioni rilevanti:",
@@ -257,7 +257,7 @@ pub fn traffic_rate_translation(language: Language) -> Text<'static, StyleType> 
 //     })
 // }
 
-pub fn settings_translation(language: Language) -> &'static str {
+pub const fn settings_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Settings",
         Language::IT => "Impostazioni",
@@ -330,26 +330,27 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, StyleType> {
 
 pub fn quit_analysis_translation(language: Language) -> String {
     match language {
-        Language::EN => "Quit analysis".to_string(),
-        Language::IT => "Interrompi analisi".to_string(),
-        Language::FR => "Quitter l'analyse".to_string(),
-        Language::ES => "Quitar el análisis".to_string(),
-        Language::PL => "Zakończ analize".to_string(),
-        Language::DE => "Analyse beenden".to_string(),
-        Language::UK => "Закінчити аналіз".to_string(),
-        Language::ZH => "退出监控".to_string(),
-        Language::RO => "Renunță la analiză".to_string(),
-        Language::KO => "분석종료".to_string(),
-        Language::TR => "Analizden çık".to_string(),
-        Language::RU => "Закончить анализ".to_string(),
-        Language::PT => "Sair da análise".to_string(),
-        Language::EL => "Έξοδος ανάλυσης".to_string(),
-        // Language::FA => "خروج از تحلیل".to_string(),
-        Language::SV => "Avsluta analys".to_string(),
-        Language::FI => "Lopeta analyysi".to_string(),
-        Language::JA => "分析の終了".to_string(),
-        Language::UZ => "Tahlildan chiqish".to_string(),
+        Language::EN => "Quit analysis",
+        Language::IT => "Interrompi analisi",
+        Language::FR => "Quitter l'analyse",
+        Language::ES => "Quitar el análisis",
+        Language::PL => "Zakończ analize",
+        Language::DE => "Analyse beenden",
+        Language::UK => "Закінчити аналіз",
+        Language::ZH => "退出监控",
+        Language::RO => "Renunță la analiză",
+        Language::KO => "분석종료",
+        Language::TR => "Analizden çık",
+        Language::RU => "Закончить анализ",
+        Language::PT => "Sair da análise",
+        Language::EL => "Έξοδος ανάλυσης",
+        // Language::FA => "خروج از تحلیل",
+        Language::SV => "Avsluta analys",
+        Language::FI => "Lopeta analyysi",
+        Language::JA => "分析の終了",
+        Language::UZ => "Tahlildan chiqish",
     }
+    .to_string()
 }
 
 pub fn ask_clear_all_translation(language: Language) -> Text<'static, StyleType> {
@@ -378,29 +379,30 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, StyleType>
 
 pub fn clear_all_translation(language: Language) -> String {
     match language {
-        Language::EN => "Clear all".to_string(),
-        Language::IT => "Elimina tutto".to_string(),
-        Language::FR => "Tout effacer".to_string(),
-        Language::ES => "Borrar todo".to_string(),
-        Language::PL => "Wyczyść wszystko".to_string(),
-        Language::DE => "Alle löschen".to_string(),
-        Language::UK => "Видалити все".to_string(),
-        Language::ZH => "清除所有".to_string(),
-        Language::RO => "Ștergeți tot".to_string(),
-        Language::KO => "모두 지우기".to_string(),
-        Language::TR => "Hepsini temizle".to_string(),
-        Language::RU => "Очистить всё".to_string(),
-        Language::PT => "Limpar tudo".to_string(),
-        Language::EL => "Εκκαθάριση όλων".to_string(),
-        // Language::FA => "پاک کردن همه".to_string(),
-        Language::SV => "Radera alla".to_string(),
-        Language::FI => "Tyhjennä kaikki".to_string(),
-        Language::JA => "すべて削除".to_string(),
-        Language::UZ => "Barchasini tozalash".to_string(),
+        Language::EN => "Clear all",
+        Language::IT => "Elimina tutto",
+        Language::FR => "Tout effacer",
+        Language::ES => "Borrar todo",
+        Language::PL => "Wyczyść wszystko",
+        Language::DE => "Alle löschen",
+        Language::UK => "Видалити все",
+        Language::ZH => "清除所有",
+        Language::RO => "Ștergeți tot",
+        Language::KO => "모두 지우기",
+        Language::TR => "Hepsini temizle",
+        Language::RU => "Очистить всё",
+        Language::PT => "Limpar tudo",
+        Language::EL => "Εκκαθάριση όλων",
+        // Language::FA => "پاک کردن همه",
+        Language::SV => "Radera alla",
+        Language::FI => "Tyhjennä kaikki",
+        Language::JA => "すべて削除",
+        Language::UZ => "Barchasini tozalash",
     }
+    .to_string()
 }
 
-pub fn hide_translation(language: Language) -> &'static str {
+pub const fn hide_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Hide",
         Language::IT => "Nascondi",
@@ -424,7 +426,7 @@ pub fn hide_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn network_adapter_translation(language: Language) -> &'static str {
+pub const fn network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Network adapter",
         Language::IT => "Adattatore di rete",
@@ -638,7 +640,7 @@ pub fn some_observed_translation(language: Language, observed: u128) -> Text<'st
     })
 }
 
-pub fn filtered_packets_translation(language: Language) -> &'static str {
+pub const fn filtered_packets_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Filtered packets",
         Language::IT => "Pacchetti filtrati",
@@ -662,7 +664,7 @@ pub fn filtered_packets_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn filtered_bytes_translation(language: Language) -> &'static str {
+pub const fn filtered_bytes_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Filtered bytes",
         Language::IT => "Byte filtrati",
@@ -723,7 +725,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
     }
 }
 
-// pub fn filtered_application_translation(language: Language) -> Text<'static,StyleType> {
+// pub const fn filtered_application_translation(language: Language) -> Text<'static,StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
 //         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
@@ -745,7 +747,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //     })
 // }
 
-// pub fn no_favorites_translation(language: Language) -> Text<'static, StyleType> {
+// pub const fn no_favorites_translation(language: Language) -> Text<'static, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Nothing to show at the moment.\n\
 //                          To add a connection to your favorites, click on the star symbol near the connection.",
@@ -865,7 +867,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Style
     })
 }
 
-// pub fn both_translation(language: Language) -> &'static str {
+// pub const fn both_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "both",
 //         Language::IT => "entrambi",
@@ -888,7 +890,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Style
 //     }
 // }
 
-// pub fn all_protocols_translation(language: Language) -> &'static str {
+// pub const fn all_protocols_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "All protocols",
 //         Language::IT => "Tutti i protocolli",
@@ -903,7 +905,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Style
 //     }
 // }
 
-// pub fn all_translation(language: Language) -> &'static str {
+// pub const fn all_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "All",
 //         Language::IT => "Tutti",
@@ -926,7 +928,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'static, Style
 //     }
 // }
 
-pub fn packets_translation(language: Language) -> &'static str {
+pub const fn packets_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "packets",
         Language::IT => "pacchetti",
@@ -949,7 +951,7 @@ pub fn packets_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn packets_chart_translation(language: Language) -> &'static str {
+pub const fn packets_chart_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "packets per second",
         Language::IT => "pacchetti al secondo",
@@ -973,7 +975,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_translation(language: Language) -> &'static str {
+pub const fn bytes_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::ES | Language::PT | Language::EL | Language::SV => "bytes",
         Language::DE => "Bytes",
@@ -992,7 +994,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_chart_translation(language: Language) -> &'static str {
+pub const fn bytes_chart_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "bytes per second",
         Language::IT => "byte al secondo",
@@ -1015,7 +1017,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn recent_report_translation(language: Language) -> &'static str {
+// pub const fn recent_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most recent",
 //         Language::IT => "più recenti",
@@ -1039,7 +1041,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //     }
 // }
 
-// pub fn packets_report_translation(language: Language) -> &'static str {
+// pub const fn packets_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most packets",
 //         Language::IT => "più pacchetti",
@@ -1063,7 +1065,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //     }
 // }
 
-// pub fn bytes_report_translation(language: Language) -> &'static str {
+// pub const fn bytes_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most bytes",
 //         Language::IT => "più byte",
@@ -1087,7 +1089,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //     }
 // }
 
-// pub fn favorite_report_translation(language: Language) -> &'static str {
+// pub const fn favorite_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "favorites",
 //         Language::IT => "preferiti",
@@ -1156,7 +1158,7 @@ pub fn appearance_title_translation(language: Language) -> Text<'static, StyleTy
     })
 }
 
-pub fn active_filters_translation(language: Language) -> &'static str {
+pub const fn active_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Active filters",
         Language::IT => "Filtri attivi",
@@ -1205,7 +1207,7 @@ pub fn none_translation(language: Language) -> String {
     .to_string()
 }
 
-pub fn yeti_night_translation(language: Language) -> &'static str {
+pub const fn yeti_night_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Sniffnet's original dark theme",
         Language::IT => "Il tema scuro originale di Sniffnet",
@@ -1229,7 +1231,7 @@ pub fn yeti_night_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn yeti_day_translation(language: Language) -> &'static str {
+pub const fn yeti_day_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Sniffnet's original light theme",
         Language::IT => "Il tema chiaro originale di Sniffnet",
@@ -1252,7 +1254,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn deep_sea_translation(language: Language) -> &'static str {
+pub const fn deep_sea_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "To dive into network traffic",
         Language::IT => "Per immergersi nel traffico di rete",
@@ -1276,7 +1278,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn mon_amour_translation(language: Language) -> &'static str {
+pub const fn mon_amour_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Lovely theme made for dreamers",
         Language::IT => "Tema incantevole fatto per i sognatori",
@@ -1300,7 +1302,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn incoming_translation(language: Language) -> &'static str {
+pub const fn incoming_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Incoming",
         Language::IT => "In entrata",
@@ -1324,7 +1326,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn outgoing_translation(language: Language) -> &'static str {
+pub const fn outgoing_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Outgoing",
         Language::IT => "In uscita",
@@ -1348,7 +1350,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn notifications_translation(language: Language) -> &'static str {
+pub const fn notifications_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Notifications",
         Language::IT => "Notifiche",
@@ -1370,7 +1372,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn style_translation(language: Language) -> &'static str {
+pub const fn style_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Style",
         Language::IT => "Stile",
@@ -1389,7 +1391,7 @@ pub fn style_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn language_translation(language: Language) -> &'static str {
+pub const fn language_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Language",
         Language::IT => "Lingua",
@@ -1413,7 +1415,7 @@ pub fn language_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn overview_translation(language: Language) -> &'static str {
+pub const fn overview_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Overview",
         Language::IT => "Panoramica",
@@ -1437,7 +1439,7 @@ pub fn overview_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn packets_threshold_translation(language: Language) -> &'static str {
+pub const fn packets_threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when a packets threshold is exceeded",
         Language::IT => "Notificami quando una soglia di pacchetti è superata",
@@ -1461,7 +1463,7 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_threshold_translation(language: Language) -> &'static str {
+pub const fn bytes_threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when a bytes threshold is exceeded",
         Language::IT => "Notificami quando una soglia di byte è superata",
@@ -1485,7 +1487,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn per_second_translation(language: Language) -> &'static str {
+pub const fn per_second_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "(per second)",
         Language::IT => "(al secondo)",
@@ -1507,7 +1509,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn specify_multiples_translation(language: Language) -> &'static str {
+pub const fn specify_multiples_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "you can also specify 'K', 'M' and 'G'",
         Language::IT => "puoi anche specificare 'K', 'M' e 'G'",
@@ -1531,7 +1533,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn favorite_notification_translation(language: Language) -> &'static str {
+pub const fn favorite_notification_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Notify me when new data are exchanged from my favorites",
         Language::IT => "Notificami quando nuovi dati sono scambiati dai miei preferiti",
@@ -1559,29 +1561,30 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
 
 pub fn threshold_translation(language: Language) -> String {
     match language {
-        Language::EN => "Threshold".to_string(),
-        Language::IT => "Soglia".to_string(),
-        Language::FR => "Seuil".to_string(),
-        Language::ES => "Límite".to_string(),
-        Language::PL => "Próg".to_string(),
-        Language::DE => "Schwellenwert".to_string(),
-        Language::UK => "Ліміт".to_string(),
-        Language::ZH => "阈值".to_string(),
-        Language::RO => "Prag".to_string(),
-        Language::KO => "임계값".to_string(),
-        Language::TR => "Eşik".to_string(),
-        Language::RU => "Порог".to_string(),
-        Language::PT => "Limite".to_string(),
-        Language::EL => "όριο".to_string(),
-        // Language::FA => "آستانه".to_string(),
-        Language::SV => "Gräns".to_string(),
-        Language::FI => "Raja".to_string(),
-        Language::JA => "閾値".to_string(),
-        Language::UZ => "Eshik".to_string(),
+        Language::EN => "Threshold",
+        Language::IT => "Soglia",
+        Language::FR => "Seuil",
+        Language::ES => "Límite",
+        Language::PL => "Próg",
+        Language::DE => "Schwellenwert",
+        Language::UK => "Ліміт",
+        Language::ZH => "阈值",
+        Language::RO => "Prag",
+        Language::KO => "임계값",
+        Language::TR => "Eşik",
+        Language::RU => "Порог",
+        Language::PT => "Limite",
+        Language::EL => "όριο",
+        // Language::FA => "آستانه",
+        Language::SV => "Gräns",
+        Language::FI => "Raja",
+        Language::JA => "閾値",
+        Language::UZ => "Eshik",
     }
+    .to_string()
 }
 
-pub fn volume_translation(language: Language) -> &'static str {
+pub const fn volume_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::FR | Language::PT => "Volume",
         Language::ES => "Volumen",
@@ -1601,7 +1604,7 @@ pub fn volume_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn sound_translation(language: Language) -> &'static str {
+pub const fn sound_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Sound",
         Language::IT => "Suono",
@@ -1623,7 +1626,7 @@ pub fn sound_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_exceeded_translation(language: Language) -> &'static str {
+pub const fn bytes_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bytes threshold exceeded!",
         Language::IT => "Soglia di Byte superata!",
@@ -1671,7 +1674,7 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
     }
 }
 
-pub fn packets_exceeded_translation(language: Language) -> &'static str {
+pub const fn packets_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Packets threshold exceeded!",
         Language::IT => "Soglia di pacchetti superata!",
@@ -1743,7 +1746,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
     }
 }
 
-pub fn favorite_transmitted_translation(language: Language) -> &'static str {
+pub const fn favorite_transmitted_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "New data exchanged from favorites!",
         Language::IT => "Nuovi dati scambiati dai preferiti!",
@@ -1910,7 +1913,7 @@ pub fn no_notifications_received_translation(language: Language) -> Text<'static
     })
 }
 
-pub fn only_last_30_translation(language: Language) -> &'static str {
+pub const fn only_last_30_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the last 30 notifications are displayed",
         Language::IT => "Solo le ultime 30 notifiche sono mostrate",

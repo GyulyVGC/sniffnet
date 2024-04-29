@@ -22,11 +22,11 @@ pub enum MyLinkType {
 }
 
 impl MyLinkType {
-    pub fn is_supported(self) -> bool {
+    pub const fn is_supported(self) -> bool {
         !matches!(self, Self::Unsupported(_) | Self::NotYetAssigned)
     }
 
-    pub fn from_pcap_link_type(link_type: Linktype) -> Self {
+    pub const fn from_pcap_link_type(link_type: Linktype) -> Self {
         match link_type {
             Linktype::NULL => Self::Null(link_type),
             Linktype::ETHERNET => Self::Ethernet(link_type),

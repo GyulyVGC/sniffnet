@@ -227,7 +227,7 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
 
     let is_valid_af_inet = {
         // based on https://wiki.wireshark.org/NullLoopback.md (2023-12-31)
-        fn matches(value: u32) -> bool {
+        const fn matches(value: u32) -> bool {
             match value {
                 // 2 = IPv4 on all platforms
                 // 24, 28, or 30 = IPv6 depending on platform

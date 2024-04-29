@@ -6,7 +6,7 @@ use crate::translations::translations::network_adapter_translation;
 use crate::{Language, StyleType};
 
 // This is referred to settings (General settings)
-pub fn general_translation(language: Language) -> &'static str {
+pub const fn general_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "General",
         Language::ES => "Generales",
@@ -19,7 +19,7 @@ pub fn general_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn zoom_translation(language: Language) -> &'static str {
+pub const fn zoom_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::ES | Language::FR | Language::DE => "Zoom",
         Language::PL => "Powiększenie",
@@ -28,7 +28,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn mmdb_files_translation(language: Language) -> &'static str {
+pub const fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",
         Language::ES => "Archivos de la base de datos",
@@ -41,7 +41,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn params_not_editable_translation(language: Language) -> &'static str {
+pub const fn params_not_editable_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "The following parameters can't be modified during the analysis",
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
@@ -54,7 +54,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn custom_style_translation(language: Language) -> &'static str {
+pub const fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
         Language::ES => "Estilo personalizado",
@@ -67,7 +67,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn copy_translation(language: Language) -> &'static str {
+pub const fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
         Language::IT | Language::ES => "Copia",
@@ -79,7 +79,7 @@ pub fn copy_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn port_translation(language: Language) -> &'static str {
+pub const fn port_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR | Language::DE | Language::PL => "Port",
         Language::ES => "Puerto",
@@ -89,7 +89,7 @@ pub fn port_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn invalid_filters_translation(language: Language) -> &'static str {
+pub const fn invalid_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Invalid filters",
         Language::ES => "Filtros inválidos",
@@ -102,7 +102,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn messages_translation(language: Language) -> &'static str {
+pub const fn messages_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Messages",
         Language::ES => "Mensajes",
@@ -114,7 +114,7 @@ pub fn messages_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn link_type_translation(language: Language) -> &'static str {
+pub const fn link_type_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Link type",
         Language::ES => "Tipo de conexión",
@@ -147,7 +147,7 @@ pub fn unsupported_link_type_translation(
     Text::new(string)
 }
 
-pub fn style_from_file_translation(language: Language) -> &'static str {
+pub const fn style_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select style from a file",
         Language::ES => "Selecciona el estilo desde un archivo",
@@ -160,7 +160,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn database_from_file_translation(language: Language) -> &'static str {
+pub const fn database_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select database file",
         Language::ES => "Selecciona un archivo de base de datos",
@@ -173,7 +173,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn filter_by_host_translation(language: Language) -> &'static str {
+pub const fn filter_by_host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Filter by network host",
         Language::ES => "Filtra por host de red",
@@ -186,7 +186,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn service_translation(language: Language) -> &'static str {
+pub const fn service_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR | Language::DE => "Service",
         Language::ES => "Servicio",
@@ -197,7 +197,7 @@ pub fn service_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn export_capture_translation(language: Language) -> &'static str {
+pub const fn export_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Export capture file",
         Language::IT => "Esporta file di cattura",
@@ -210,7 +210,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
 }
 
 // (a filesystem directory)
-pub fn directory_translation(language: Language) -> &'static str {
+pub const fn directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Directory",
         Language::IT => "Cartella",
@@ -222,7 +222,7 @@ pub fn directory_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn select_directory_translation(language: Language) -> &'static str {
+pub const fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
         Language::IT => "Seleziona cartella di destinazione",
@@ -234,7 +234,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn file_name_translation(language: Language) -> &'static str {
+pub const fn file_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "File name",
         Language::IT => "Nome del file",
@@ -246,7 +246,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn thumbnail_mode_translation(language: Language) -> &'static str {
+pub const fn thumbnail_mode_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Thumbnail mode",
         Language::IT => "Modalità miniatura",
@@ -258,7 +258,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn learn_more_translation(language: Language) -> &'static str {
+pub const fn learn_more_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Do you want to learn more?",
         Language::IT => "Vuoi saperne di più?",

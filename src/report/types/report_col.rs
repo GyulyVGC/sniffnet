@@ -95,7 +95,7 @@ impl ReportCol {
         }
     }
 
-    pub(crate) fn get_width(&self) -> f32 {
+    pub(crate) const fn get_width(&self) -> f32 {
         match self {
             ReportCol::SrcIp | ReportCol::DstIp => LARGE_COL_WIDTH,
             _ => SMALL_COL_WIDTH,
@@ -116,7 +116,7 @@ impl ReportCol {
         }
     }
 
-    pub(crate) fn get_filter_input_type(&self) -> FilterInputType {
+    pub(crate) const fn get_filter_input_type(&self) -> FilterInputType {
         match self {
             ReportCol::SrcIp => FilterInputType::AddressSrc,
             ReportCol::DstIp => FilterInputType::AddressDst,

@@ -155,7 +155,7 @@ impl Default for FavoriteNotification {
 
 impl FavoriteNotification {
     /// Constructor when the notification is in use
-    pub fn on(sound: Sound) -> Self {
+    pub const fn on(sound: Sound) -> Self {
         FavoriteNotification {
             notify_on_favorite: true,
             sound,
@@ -163,7 +163,7 @@ impl FavoriteNotification {
     }
 
     /// Constructor when the notification is not in use. Note that sound is used here for caching, although it won't actively be used.
-    pub fn off(sound: Sound) -> Self {
+    pub const fn off(sound: Sound) -> Self {
         FavoriteNotification {
             notify_on_favorite: false,
             sound,

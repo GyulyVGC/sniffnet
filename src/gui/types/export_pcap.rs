@@ -21,7 +21,7 @@ impl ExportPcap {
         self.directory = directory;
     }
 
-    pub fn enabled(&self) -> bool {
+    pub const fn enabled(&self) -> bool {
         self.enabled
     }
 

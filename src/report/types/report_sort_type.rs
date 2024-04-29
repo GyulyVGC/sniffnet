@@ -38,7 +38,7 @@ impl ReportSortType {
         }
     }
 
-    pub fn button_type(self, report_col: &ReportCol) -> ButtonType {
+    pub const fn button_type(self, report_col: &ReportCol) -> ButtonType {
         match report_col {
             ReportCol::Bytes => self.byte_sort.button_type(),
             ReportCol::Packets => self.packet_sort.button_type(),

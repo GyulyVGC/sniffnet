@@ -2,7 +2,7 @@
 
 use crate::Language;
 
-pub fn new_version_available_translation(language: Language) -> &'static str {
+pub const fn new_version_available_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "A newer version is available!",
         Language::IT => "Una versione più recente è disponibile!",
@@ -26,7 +26,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn inspect_translation(language: Language) -> &'static str {
+pub const fn inspect_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Inspect",
         Language::IT => "Ispeziona",
@@ -50,7 +50,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn connection_details_translation(language: Language) -> &'static str {
+pub const fn connection_details_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Connection details",
         Language::IT => "Dettagli della connessione",
@@ -74,7 +74,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn dropped_packets_translation(language: Language) -> &'static str {
+pub const fn dropped_packets_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Dropped packets",
         Language::IT => "Pacchetti mancati",
@@ -98,7 +98,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn data_representation_translation(language: Language) -> &'static str {
+pub const fn data_representation_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data representation",
         Language::IT => "Rappresentazione dei dati",
@@ -122,7 +122,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn host_translation(language: Language) -> &'static str {
+pub const fn host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Network host",
         Language::IT => "Host di rete",
@@ -146,7 +146,7 @@ pub fn host_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn only_top_30_items_translation(language: Language) -> &'static str {
+pub const fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
         Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
@@ -170,7 +170,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn sort_by_translation(language: Language) -> &'static str {
+// pub fn const sort_by_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Sort by",
 //         Language::IT => "Ordina per",
@@ -268,7 +268,7 @@ pub fn your_network_adapter_translation(language: Language) -> String {
     .to_string()
 }
 
-pub fn socket_address_translation(language: Language) -> &'static str {
+pub const fn socket_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Socket address",
         Language::IT => "Indirizzo del socket",
@@ -292,7 +292,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn mac_address_translation(language: Language) -> &'static str {
+pub const fn mac_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "MAC address",
         Language::IT => "Indirizzo MAC",
@@ -316,7 +316,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn source_translation(language: Language) -> &'static str {
+pub const fn source_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Source",
         Language::IT => "Sorgente",
@@ -340,7 +340,7 @@ pub fn source_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn destination_translation(language: Language) -> &'static str {
+pub const fn destination_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::SV => "Destination",
         Language::IT => "Destinazione",
@@ -362,7 +362,7 @@ pub fn destination_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn fqdn_translation(language: Language) -> &'static str {
+pub const fn fqdn_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Fully qualified domain name",
         Language::IT => "Nome di dominio completo",
@@ -385,7 +385,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn administrative_entity_translation(language: Language) -> &'static str {
+pub const fn administrative_entity_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Autonomous System name",
         Language::IT => "Nome del sistema autonomo",
@@ -409,7 +409,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn transmitted_data_translation(language: Language) -> &'static str {
+pub const fn transmitted_data_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Transmitted data",
         Language::IT => "Dati trasmessi",
@@ -433,7 +433,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn country_translation(language: Language) -> &'static str {
+pub const fn country_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Country",
         Language::IT => "Paese",
@@ -456,7 +456,7 @@ pub fn country_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn domain_name_translation(language: Language) -> &'static str {
+pub const fn domain_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Domain name",
         Language::IT => "Nome di dominio",
@@ -480,7 +480,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn only_show_favorites_translation(language: Language) -> &'static str {
+pub const fn only_show_favorites_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only show favorites",
         Language::IT => "Mostra solo i preferiti",
@@ -504,7 +504,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
     }
 }
 
-// pub fn search_filters_translation(language: Language) -> &'static str {
+// pub const fn search_filters_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Search filters",
 //         Language::IT => "Filtri di ricerca",
@@ -528,7 +528,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn no_search_results_translation(language: Language) -> &'static str {
+pub const fn no_search_results_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No result available according to the specified search filters",
         Language::IT => "Nessun risultato disponibile secondo i filtri di ricerca specificati",
@@ -582,7 +582,7 @@ pub fn showing_results_translation(
 }
 
 #[allow(dead_code)]
-pub fn color_gradients_translation(language: Language) -> &'static str {
+pub const fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",
         Language::IT => "Applica sfumature di colore",

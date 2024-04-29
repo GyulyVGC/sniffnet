@@ -24,7 +24,7 @@ impl RunningPage {
         RunningPage::Notifications,
     ];
 
-    pub fn get_tab_label(&self, language: Language) -> &str {
+    pub const fn get_tab_label(&self, language: Language) -> &str {
         match self {
             RunningPage::Overview => overview_translation(language),
             RunningPage::Inspect => inspect_translation(language),
@@ -33,7 +33,7 @@ impl RunningPage {
         }
     }
 
-    pub fn next(self) -> Self {
+    pub const fn next(self) -> Self {
         match self {
             RunningPage::Overview => RunningPage::Inspect,
             RunningPage::Inspect => RunningPage::Notifications,
@@ -42,7 +42,7 @@ impl RunningPage {
         }
     }
 
-    pub fn previous(self) -> Self {
+    pub const fn previous(self) -> Self {
         match self {
             RunningPage::Overview => RunningPage::Notifications,
             RunningPage::Inspect => RunningPage::Overview,
@@ -61,7 +61,7 @@ impl RunningPage {
         .to_text()
     }
 
-    pub fn action(self) -> Message {
+    pub const fn action(self) -> Message {
         Message::ChangeRunningPage(self)
     }
 }

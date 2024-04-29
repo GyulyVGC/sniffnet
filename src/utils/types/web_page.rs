@@ -16,7 +16,7 @@ pub enum WebPage {
 }
 
 impl WebPage {
-    pub fn get_url(&self) -> &str {
+    pub const fn get_url(&self) -> &str {
         match self {
             WebPage::Repo => "https://github.com/GyulyVGC/sniffnet",
             WebPage::Website => "https://www.sniffnet.net",

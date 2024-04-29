@@ -34,7 +34,7 @@ impl fmt::Display for Sound {
 impl Sound {
     pub(crate) const ALL: [Sound; 4] = [Gulp, Pop, Swhoosh, Sound::None];
 
-    fn mp3_sound(self) -> &'static [u8] {
+    const fn mp3_sound(self) -> &'static [u8] {
         match self {
             Gulp => GULP,
             Pop => POP,

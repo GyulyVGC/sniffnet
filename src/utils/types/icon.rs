@@ -47,7 +47,7 @@ pub enum Icon {
 }
 
 impl Icon {
-    pub fn codepoint(&self) -> char {
+    pub const fn codepoint(&self) -> char {
         match self {
             Icon::ArrowBack => 'C',
             Icon::ArrowLeft => 'i',

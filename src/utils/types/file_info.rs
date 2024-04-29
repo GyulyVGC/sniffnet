@@ -11,7 +11,7 @@ pub enum FileInfo {
 }
 
 impl FileInfo {
-    pub fn get_extension(&self) -> &'static str {
+    pub const fn get_extension(&self) -> &'static str {
         match self {
             FileInfo::Style => "toml",
             FileInfo::Database => "mmdb",
@@ -19,7 +19,7 @@ impl FileInfo {
         }
     }
 
-    pub fn action_info(&self, language: Language) -> &'static str {
+    pub const fn action_info(&self, language: Language) -> &'static str {
         match self {
             FileInfo::Style => style_from_file_translation(language),
             FileInfo::Database => database_from_file_translation(language),

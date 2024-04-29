@@ -100,7 +100,7 @@ impl TrafficChart {
         }
     }
 
-    fn x_axis_range(&self) -> Range<f32> {
+    const fn x_axis_range(&self) -> Range<f32> {
         let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
         let tot_seconds = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
@@ -125,7 +125,7 @@ impl TrafficChart {
             .color(&to_rgb_color(self.style.get_palette().text_body))
     }
 
-    fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
+    const fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
         match self.chart_type {
             ChartType::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets,
@@ -138,7 +138,7 @@ impl TrafficChart {
         }
     }
 
-    fn series_label(&self, direction: TrafficDirection) -> &str {
+    const fn series_label(&self, direction: TrafficDirection) -> &str {
         match direction {
             TrafficDirection::Incoming => incoming_translation(self.language),
             TrafficDirection::Outgoing => outgoing_translation(self.language),
