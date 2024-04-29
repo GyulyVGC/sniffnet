@@ -193,7 +193,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn local_translation(language: Language) -> String {
+pub fn local_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Local network",
         Language::IT => "Rete locale",
@@ -215,10 +215,9 @@ pub fn local_translation(language: Language) -> String {
         Language::PT => "Rede local",
         _ => "Local network",
     }
-    .to_string()
 }
 
-pub fn unknown_translation(language: Language) -> String {
+pub fn unknown_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Unknown location",
         Language::IT => "Localizzazione sconosciuta",
@@ -240,10 +239,9 @@ pub fn unknown_translation(language: Language) -> String {
         Language::PT => "Localização desconhecida",
         _ => "Unknown location",
     }
-    .to_string()
 }
 
-pub fn your_network_adapter_translation(language: Language) -> String {
+pub fn your_network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Your network adapter",
         Language::IT => "La tua scheda di rete",
@@ -265,7 +263,6 @@ pub fn your_network_adapter_translation(language: Language) -> String {
         Language::PT => "Seu adaptador de rede",
         _ => "Your network adapter",
     }
-    .to_string()
 }
 
 pub fn socket_address_translation(language: Language) -> &'static str {

@@ -616,7 +616,7 @@ fn col_bytes_packets(
             of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
         )
     } else {
-        none_translation(language)
+        none_translation(language).to_string()
     };
     let bytes_value = if dropped > 0 {
         ByteMultiple::formatted_string(filtered_bytes)

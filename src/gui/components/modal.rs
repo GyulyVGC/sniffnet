@@ -35,7 +35,7 @@ pub fn get_exit_overlay(
             font_headers,
             color_gradient,
             language,
-            quit_analysis_translation(language),
+            quit_analysis_translation(language).to_string(),
         ))
         .push(Space::with_height(20))
         .push(
@@ -67,7 +67,7 @@ pub fn get_clear_all_overlay(
             font_headers,
             color_gradient,
             language,
-            clear_all_translation(language),
+            clear_all_translation(language).to_string(),
         ))
         .push(Space::with_height(20))
         .push(

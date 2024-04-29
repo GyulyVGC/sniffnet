@@ -328,7 +328,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, StyleType> {
     })
 }
 
-pub fn quit_analysis_translation(language: Language) -> String {
+pub fn quit_analysis_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Quit analysis",
         Language::IT => "Interrompi analisi",
@@ -349,7 +349,7 @@ pub fn quit_analysis_translation(language: Language) -> String {
         Language::FI => "Lopeta analyysi",
         Language::JA => "分析の終了",
         Language::UZ => "Tahlildan chiqish",
-    }.to_string()
+    }
 }
 
 pub fn ask_clear_all_translation(language: Language) -> Text<'static, StyleType> {
@@ -376,7 +376,7 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, StyleType>
     })
 }
 
-pub fn clear_all_translation(language: Language) -> String {
+pub fn clear_all_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Clear all",
         Language::IT => "Elimina tutto",
@@ -397,7 +397,7 @@ pub fn clear_all_translation(language: Language) -> String {
         Language::FI => "Tyhjennä kaikki",
         Language::JA => "すべて削除",
         Language::UZ => "Barchasini tozalash",
-    }.to_string()
+    }
 }
 
 pub fn hide_translation(language: Language) -> &'static str {
@@ -1180,7 +1180,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn none_translation(language: Language) -> String {
+pub fn none_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "none",
         Language::IT => "nessuno",
@@ -1202,7 +1202,6 @@ pub fn none_translation(language: Language) -> String {
         Language::JA => "なし",
         Language::UZ => "hech biri",
     }
-    .to_string()
 }
 
 pub fn yeti_night_translation(language: Language) -> &'static str {
@@ -1557,7 +1556,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn threshold_translation(language: Language) -> String {
+pub fn threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Threshold",
         Language::IT => "Soglia",
@@ -1578,7 +1577,7 @@ pub fn threshold_translation(language: Language) -> String {
         Language::FI => "Raja",
         Language::JA => "閾値",
         Language::UZ => "Eshik",
-    }.to_string()
+    }
 }
 
 pub fn volume_translation(language: Language) -> &'static str {
