@@ -3537,9 +3537,9 @@ dependencies = [
 
 [[package]]
 name = "rustrict"
-version = "0.7.24"
+version = "0.7.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86de32b27f8b83173349732696062156b2a26dbe7a7e403f2499346b5fb379e6"
+checksum = "cebc0d1cc8f43e997a7461f911da7d42731f7872802a27c1511960ea1e6fc2ba"
 dependencies = [
  "arrayvec",
  "bitflags 1.3.2",
