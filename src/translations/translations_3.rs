@@ -242,7 +242,7 @@ pub fn directory_translation(language: Language) -> &'static str {
 pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
-        // Language::FA => "انتخاب مقصد پوشه"
+        // Language::FA => "انتخاب پوشه مقصد"
         Language::IT => "Seleziona cartella di destinazione",
         Language::FR => "Sélectionner le répertoire de destination",
         Language::DE => "Zielorder wählen",
