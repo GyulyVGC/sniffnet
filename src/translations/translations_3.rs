@@ -10,6 +10,7 @@ pub fn general_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "General",
         Language::ES => "Generales",
+        // Language::FA => "عمومی",
         Language::IT => "Generali",
         Language::FR => "Général",
         Language::DE => "Allgemein",
@@ -22,6 +23,7 @@ pub fn general_translation(language: Language) -> &'static str {
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::ES | Language::FR | Language::DE => "Zoom",
+        // Language::FA => "بزرگنمایی",
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
         _ => "Zoom",
@@ -32,6 +34,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",
         Language::ES => "Archivos de la base de datos",
+        // Language::FA => "پرونده های پایگاه داده",
         Language::IT => "File di database",
         Language::FR => "Fichiers de la base de données",
         Language::DE => "Datenbank Dateien",
@@ -45,6 +48,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "The following parameters can't be modified during the analysis",
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
+        // Language::FA => "مولفه های روبرو هنگام تحلیل قابل تغییر نیستند",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
         Language::FR => "Les paramètres suivants ne peuvent pas être modifiés durant l'analyse",
         Language::DE => "Die folgenden Paramter können während der Analyse nicht verändert werden",
@@ -58,6 +62,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
         Language::ES => "Estilo personalizado",
+        // Language::FA => "شیوه سفارشی",
         Language::IT => "Stile personalizzato",
         Language::FR => "Style personnalisé",
         Language::DE => "Benutzerdefinierter Stil",
@@ -71,6 +76,7 @@ pub fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
         Language::IT | Language::ES => "Copia",
+        // Language::FA => "رونوشت",
         Language::FR => "Copie",
         Language::DE => "Kopieren",
         Language::PL => "Kopiuj",
@@ -82,6 +88,7 @@ pub fn copy_translation(language: Language) -> &'static str {
 pub fn port_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR | Language::DE | Language::PL => "Port",
+        // Language::FA => "درگاه",
         Language::ES => "Puerto",
         Language::IT => "Porta",
         Language::RU => "Порт",
@@ -93,6 +100,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Invalid filters",
         Language::ES => "Filtros inválidos",
+        // Language::FA => "صافی نامعتبر",
         Language::IT => "Filtri non validi",
         Language::FR => "Filtres invalides",
         Language::DE => "Ungültige Filter",
@@ -106,6 +114,7 @@ pub fn messages_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Messages",
         Language::ES => "Mensajes",
+        // Language::FA => "پیام ها",
         Language::IT => "Messaggi",
         Language::DE => "Nachrichten",
         Language::PL => "Wiadomości",
@@ -118,6 +127,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Link type",
         Language::ES => "Tipo de conexión",
+        // Language::FA => "نوع پیوند",
         Language::IT => "Tipo di collegamento",
         Language::FR => "Type de connexion",
         Language::DE => "Verbindungsart",
@@ -134,6 +144,7 @@ pub fn unsupported_link_type_translation(
     let mut string = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
+        // Language::FA => "نوع پیوند مرتبط با این مبدل هنوز توسط Sniffnet پشتیبانی نمی شود...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
         Language::FR => "Le type de connexion associé à cet adaptateur n'est pas encore supporté par Sniffnet...",
         Language::DE => "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt",
@@ -151,6 +162,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select style from a file",
         Language::ES => "Selecciona el estilo desde un archivo",
+        // Language::FA => "انتخاب شیوه از یک پرونده",
         Language::IT => "Seleziona lo stile da un file",
         Language::FR => "Sélectionner un style à partir d'un fichier",
         Language::DE => "Stil aus einer Datei wählen",
@@ -164,6 +176,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select database file",
         Language::ES => "Selecciona un archivo de base de datos",
+        // Language::FA => "پرونده پایگاه داده را انتخاب کنید",
         Language::IT => "Seleziona file di database",
         Language::FR => "Sélection d'un fichier de base de données",
         Language::DE => "Datenbank Datei auswählen",
@@ -177,6 +190,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Filter by network host",
         Language::ES => "Filtra por host de red",
+        // Language::FA => "صافی بر اساس میزبان شبکه",
         Language::IT => "Filtra per host di rete",
         Language::FR => "Filtrer par réseau hôte",
         Language::DE => "Nach Netzwerk-Host filtern",
@@ -190,6 +204,7 @@ pub fn service_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR | Language::DE => "Service",
         Language::ES => "Servicio",
+        // Language::FA => "خدمت"
         Language::IT => "Servizio",
         Language::PL => "Usługa",
         Language::RU => "Сервис",
@@ -200,6 +215,7 @@ pub fn service_translation(language: Language) -> &'static str {
 pub fn export_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Export capture file",
+        // Language::FA => "خروجی گرفتن پرونده تسخیری"
         Language::IT => "Esporta file di cattura",
         Language::FR => "Exporter le fichier de capture",
         Language::DE => "Aufzeichnungsdatei exportieren",
@@ -213,6 +229,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
 pub fn directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Directory",
+        // Language::FA => "پوشه"
         Language::IT => "Cartella",
         Language::FR => "Répertoire",
         Language::DE => "Ordner",
@@ -225,6 +242,7 @@ pub fn directory_translation(language: Language) -> &'static str {
 pub fn select_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
+        // Language::FA => "انتخاب مقصد پوشه"
         Language::IT => "Seleziona cartella di destinazione",
         Language::FR => "Sélectionner le répertoire de destination",
         Language::DE => "Zielorder wählen",
@@ -237,6 +255,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
 pub fn file_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "File name",
+        // Language::FA => "نام پرونده"
         Language::IT => "Nome del file",
         Language::FR => "Nom du fichier",
         Language::DE => "Dateiname",
@@ -249,6 +268,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
 pub fn thumbnail_mode_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Thumbnail mode",
+        // Language::FA => "حالت تصویر بندانگشتی"
         Language::IT => "Modalità miniatura",
         Language::FR => "Mode miniature",
         Language::DE => "Bild-in-Bild Modus",
@@ -261,6 +281,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
 pub fn learn_more_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Do you want to learn more?",
+        // Language::FA => "آیا می خواهید بیشتر یاد بگیرید؟"
         Language::IT => "Vuoi saperne di più?",
         Language::FR => "Voulez-vous en savoir davantage?",
         Language::DE => "Mehr erfahren",
