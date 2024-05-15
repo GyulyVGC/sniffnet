@@ -12,7 +12,7 @@ pub fn choose_adapters_translation(language: Language) -> Text<'static, StyleTyp
         Language::FR => "Sélectionnez une carte réseau à inspecter",
         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
         Language::PL => "Wybierz adapter sieciowy do inspekcji",
-        Language::DE => "Wähle einen Netzwerkadapter zum inspizieren aus",
+        Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
         Language::UK => "Вибрати мережевий адаптер для інспекції",
         Language::ZH => "选择需要监控的网络适配器",
         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
@@ -310,7 +310,7 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, StyleType> {
         Language::IT => "Sei sicuro di voler interrompere questa analisi?",
         Language::FR => "Êtes-vous sûr de vouloir quitter l'application ?",
         Language::ES => "¿Estás seguro de que quieres dejar este análisis?",
-        Language::PL => "Czy na pewno chcesz zakończyć analizę?",
+        Language::PL => "Jesteś pewien, że chcesz zakończyć analizę?",
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
         Language::UK => "Чи справді хочеш закінчити аналіз?",
         Language::ZH => "您确定退出当前监控吗?",
@@ -383,7 +383,7 @@ pub fn clear_all_translation(language: Language) -> String {
         Language::FR => "Tout effacer".to_string(),
         Language::ES => "Borrar todo".to_string(),
         Language::PL => "Wyczyść wszystko".to_string(),
-        Language::DE => "Alle leeren".to_string(),
+        Language::DE => "Alle löschen".to_string(),
         Language::UK => "Видалити все".to_string(),
         Language::ZH => "清除所有".to_string(),
         Language::RO => "Ștergeți tot".to_string(),
@@ -529,7 +529,7 @@ pub fn waiting_translation(language: Language, adapter: &str) -> Text<'static, S
         Language::PL => format!("Nie zaobserowano żadnego ruchu sieciowego. Oczekiwanie na pakiety...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Czy na pewno jesteś podłączony do internetu i wybrałeś właściwy adapter?"),
-        Language::DE => format!("Noch kein Netzwerkverkehr beobachtet. Warte auf Pakete...\n\n\
+        Language::DE => format!("Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Bist du sicher, dass du mit dem Internet verbunden bist und den richtigen Adapter ausgewählt hast?"),
         Language::UK => format!("Не зафіксовано жодного мережевого трафіку. Очікування на пакети...\n\n\
@@ -594,7 +594,7 @@ pub fn some_observed_translation(language: Language, observed: u128) -> Text<'st
                                  Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."),
         Language::DE => format!("Anzahl der empfangenen Pakete: {observed}\n\n\
                                  Gefilterte Pakete: 0\n\n\
-                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den spezifizierten Filtern..."),
+                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."),
         Language::UK => format!("Сума перехоплених пакетів: {observed}\n\n\
                                  Відфільтровані пакеті: 0\n\n\
                                  Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."),
@@ -933,7 +933,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::FR => "paquets",
         Language::ES => "paquetes",
         Language::PL => "pakiety",
-        Language::DE => "pakete",
+        Language::DE => "Pakete",
         Language::UK => "пакети",
         Language::ZH => "数据包",
         Language::RO => "pachete",
@@ -956,7 +956,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::FR => "paquets par seconde",
         Language::ES => "paquetes por segundo",
         Language::PL => "pakiety na sekundę",
-        Language::DE => "pakete pro Sekunde",
+        Language::DE => "Pakete pro Sekunde",
         Language::UK => "пакети на секунду",
         Language::ZH => "数据包",
         Language::RO => "pachete pe secundă",
@@ -975,9 +975,8 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
 
 pub fn bytes_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::ES | Language::PT | Language::DE | Language::EL | Language::SV => {
-            "bytes"
-        }
+        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV => "bytes",
+        Language::DE => "Bytes",
         Language::IT => "byte",
         Language::FR => "octets",
         Language::PL => "bajty",
@@ -1000,7 +999,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::FR => "octets par seconde",
         Language::ES | Language::PT => "bytes por segundo",
         Language::PL => "bajty na sekundę",
-        Language::DE => "bytes pro Sekunde",
+        Language::DE => "Bytes pro Sekunde",
         Language::UK => "байти на секунду",
         Language::ZH => "网络流量",
         Language::RO => "octeți pe secundă",
@@ -1116,7 +1115,7 @@ pub fn notifications_title_translation(language: Language) -> Text<'static, Styl
         Language::FR => "Personnalisez vos notifications",
         Language::ES => "Personaliza tus notificaciones",
         Language::PL => "Dostosuj powiadomienia",
-        Language::DE => "Personalisier deine Benachrichtigungen",
+        Language::DE => "Stell deine Benachrichtigungen ein",
         Language::UK => "Достосуй повідомлення",
         Language::ZH => "自定义通知",
         Language::RO => "Personalizați-vă notificările",
@@ -1188,7 +1187,7 @@ pub fn none_translation(language: Language) -> String {
         Language::FR => "aucun",
         Language::ES => "ninguno",
         Language::PL => "brak",
-        Language::DE => "keine",
+        Language::DE => "Keine",
         Language::UK => "бракує",
         Language::ZH => "无",
         Language::RO => "niciunul",
@@ -1284,7 +1283,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::FR => "Thème romantique fait pour les rêveurs",
         Language::ES => "Tema encantador hecho para soñadores",
         Language::PL => "Uroczy motyw stworzony dla marzycieli",
-        Language::DE => "Liebevolles Design für Träumer",
+        Language::DE => "Schönes Design für Träumer",
         Language::UK => "Прекрасна тема для мрійників",
         Language::ZH => "梦想家的主题",
         Language::RO => "O temă minunată creată pentru visători",
@@ -1308,7 +1307,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::FR => "Entrant",
         Language::ES => "Entrante",
         Language::PL => "Przychodzące",
-        Language::DE => "Ankommend",
+        Language::DE => "Eingehend",
         Language::UK => "Вхідні",
         Language::ZH => "入站",
         Language::RO => "de intrare",
@@ -1377,7 +1376,8 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::IT => "Stile",
         Language::ES | Language::PT => "Estilo",
         Language::PL => "Styl",
-        Language::DE | Language::RO | Language::TR | Language::SV => "Stil",
+        Language::RO | Language::TR | Language::SV => "Stil",
+        Language::DE => "Design",
         Language::UK | Language::RU => "Стиль",
         Language::ZH => "主题",
         Language::KO => "스타일",
@@ -1474,7 +1474,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::RO => "Anunță-mă când este depășit un prag de octeți",
         Language::KO => "바이트 임계값을 초과하면 알림",
         Language::TR => "Bayt eşiği aşıldığında beni bilgilendir",
-        Language::RU => "Уведомить, когда порог по полосе в байтах превышен",
+        Language::RU => "Уведомить, когда порог в байтах превышен",
         Language::PT => "Notifique-me quando um limite de bytes for excedido",
         Language::EL => "Ειδοποίησέ με όταν το όριο των bytes ξεπεραστεί",
         // Language::FA => "به من اطلاع بده وقتی آستانه یک بایت فراتر رفت",
@@ -1514,7 +1514,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::FR => "vous pouvez également spécifier 'K', 'M' et 'G'",
         Language::ES => "también puede especificar 'K', 'M' y 'G'",
         Language::PL => "możesz również określić 'K', 'M' i 'G'",
-        Language::DE => "du kannst auch 'K', 'M' und 'G' festlegen",
+        Language::DE => "du kannst auch 'K', 'M' und 'G' verwenden",
         Language::UK => "можеш також вибрати 'K', 'M' i 'G'",
         Language::ZH => "您可指定 'K', 'M', 'G'",
         Language::RO => "puteți specifica 'K', 'M', 'G'",
@@ -1677,7 +1677,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::IT => "Soglia di pacchetti superata!",
         Language::FR => "Le seuil de paquet a été atteint!",
         Language::ES => "¡Se ha superado el límite de paquetes!",
-        Language::PL => "Próg pakietów przekroczony!",
+        Language::PL => "Przekroczono próg pakietów!",
         Language::DE => "Paket-Schwellenwert überschritten!",
         Language::UK => "Ліміт пакетів перевищено!",
         Language::ZH => "达到设定的数据包数量阈值!",
@@ -1711,7 +1711,10 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         },
         Language::ES => format!("{value} paquete/s han sido intercambiado/s"),
         Language::PL => format!("Wymieniono {value} pakietów"),
-        Language::DE => format!("{value} Pakete wurden ausgetauscht"),
+        Language::DE => match value {
+            1 => "1 Paket wurde ausgetauscht".to_owned(),
+            npackets => format!("{npackets} Pakete wurden ausgetauscht"),
+        },
         Language::UK => format!("Обміняно {value} пакетів"),
         Language::ZH => format!("已交换数据包 {value}"),
         Language::RO => format!("au fost transferate {value} pachete"),
@@ -1747,7 +1750,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::FR => "Nouvel échange de donnée depuis un favori!",
         Language::ES => "¡Nuevos datos intercambiados de favoritos!",
         Language::PL => "Nowe dane wymienione z ulubionych!",
-        Language::DE => "Neue Daten mit den Favoriten ausgetauscht!",
+        Language::DE => "Neue Daten mit deinen Favoriten ausgetauscht!",
         Language::UK => "Нові дані обміняно з улюблених!",
         Language::ZH => "收藏夹内的连接有新活动!",
         Language::RO => "Date noi transferate de la favorite!",
@@ -1920,7 +1923,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::RO => "Sunt afișate doar ultimele 30 de notificări",
         Language::KO => "최근 30개의 알림만 표시됩니다",
         Language::TR => "Sadece son 30 bildirim gösterilmektedir",
-        Language::RU => "Тут показываются только последние 30 уведомлений",
+        Language::RU => "Показываются только последние 30 уведомлений",
         Language::PT => "São mostradas apenas as últimas 30 notificações",
         Language::EL => "Μόνο οι τελευταίες 30 ειδοποιήσεις απεικονίζονται",
         // Language::FA => "تنها ۳۰ اعلان آخر نمایش داده شده اند",
