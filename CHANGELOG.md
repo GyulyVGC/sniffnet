@@ -8,6 +8,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - German - [#495](https://github.com/GyulyVGC/sniffnet/pull/495)
   - Russian - [#496](https://github.com/GyulyVGC/sniffnet/pull/496)
   - Polish - [#498](https://github.com/GyulyVGC/sniffnet/pull/498)
+  - Romanian - [#499](https://github.com/GyulyVGC/sniffnet/pull/499)
 
 ## [1.3.0] - 2024-04-08
 - Introduced thumbnail mode, enabling users to keep an eye on Sniffnet while doing other tasks ([#484](https://github.com/GyulyVGC/sniffnet/pull/484))
