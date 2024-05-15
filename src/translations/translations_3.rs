@@ -8,7 +8,7 @@ use crate::{Language, StyleType};
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "General",
+        Language::EN | Language::RO => "General",
         Language::ES => "Generales",
         Language::IT => "Generali",
         Language::FR => "Général",
@@ -21,7 +21,9 @@ pub fn general_translation(language: Language) -> &'static str {
 
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::ES | Language::FR | Language::DE => "Zoom",
+        Language::EN | Language::IT | Language::ES | Language::FR | Language::DE | Language::RO => {
+            "Zoom"
+        }
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
         _ => "Zoom",
@@ -74,18 +76,17 @@ pub fn copy_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Copy",
         Language::IT | Language::ES => "Copia",
-        Language::FR => "Copie",
+        Language::FR | Language::RO => "Copie",
         Language::DE => "Kopieren",
         Language::PL => "Kopiuj",
         Language::RU => "Скопировать",
-        Language::RO => "Copie",
         _ => "Copy",
     }
 }
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE | Language::PL => "Port",
+        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO => "Port",
         Language::ES => "Puerto",
         Language::IT => "Porta",
         Language::RU => "Порт",
