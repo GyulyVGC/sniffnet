@@ -229,7 +229,7 @@ pub fn modify_or_insert_in_map(
         for dev in Device::list().expect("Error retrieving device list\r\n") {
             if dev.name.eq(&my_device.name) {
                 let mut my_interface_addresses_mutex = my_device.addresses.lock().unwrap();
-                *my_interface_addresses_mutex = dev.addresses.clone();
+                my_interface_addresses_mutex.clone_from(&dev.addresses);
                 drop(my_interface_addresses_mutex);
                 my_interface_addresses = dev.addresses;
                 break;
