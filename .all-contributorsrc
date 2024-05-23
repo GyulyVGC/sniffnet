@@ -456,6 +456,25 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "Dinozavvvr",
+      "name": "Dinar Shagaliev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45518871?v=4",
+      "profile": "https://github.com/Dinozavvvr",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "abdullahdevrel",
+      "name": "Abdullah",
+      "avatar_url": "https://avatars.githubusercontent.com/u/111275753?v=4",
+      "profile": "https://github.com/abdullahdevrel",
+      "contributions": [
+        "ideas",
+        "content"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -38,18 +38,18 @@ strip = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "1.3.0"
+pcap = "2.0.0"
 etherparse = "0.14.3"
-chrono = { version = "0.4.37", default_features = false, features = ["clock"] }
-plotters = { version = "0.3.5", default_features = false, features = ["area_series"] }
+chrono = { version = "0.4.38", default_features = false, features = ["clock"] }
+plotters = { version = "0.3.6", default_features = false, features = ["area_series"] }
 iced = { version = "0.12.1", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.10.0"
 maxminddb = "0.24.0"
 confy = "0.6.1"
-serde = { version = "1.0.197", default_features = false, features = ["derive"] }
-rodio = { version = "0.17.3", default_features = false, features = ["mp3"] }
+serde = { version = "1.0.202", default_features = false, features = ["derive"] }
+rodio = { version = "0.18.0", default_features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
-toml = "0.8.12"
+toml = "0.8.13"
 once_cell = "1.19.0"
 ctrlc = { version = "3.4.4", features = ["termination"] }
 rfd = "0.14.1"
@@ -58,24 +58,24 @@ phf_shared = "0.11.2"
 splines = "4.3.1"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.2", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+reqwest = { version = "0.12.4", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.2", features = ["json", "blocking"] }
+reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
 serde_test = "1.0.176"
 rstest = "0.19.0"
-serial_test = { version = "3.0.0", default_features = false }
+serial_test = { version = "3.1.1", default_features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
 phf_codegen = "0.11.2"
 phf_shared = "0.11.2"
-rustrict = { version = "0.7.24", default-features = false, features = ["censor"] }
+rustrict = { version = "0.7.25", default-features = false, features = ["censor"] }
 once_cell = "1.19.0"
 
 [target."cfg(windows)".build-dependencies]

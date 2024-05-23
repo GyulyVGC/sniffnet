@@ -6,6 +6,10 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Updated some of the existing translations to v1.3: 
   - French - [#494](https://github.com/GyulyVGC/sniffnet/pull/494)
   - German - [#495](https://github.com/GyulyVGC/sniffnet/pull/495)
+  - Russian - [#496](https://github.com/GyulyVGC/sniffnet/pull/496)
+  - Polish - [#498](https://github.com/GyulyVGC/sniffnet/pull/498)
+  - Romanian - [#499](https://github.com/GyulyVGC/sniffnet/pull/499)
+  - Japanese - [#504](https://github.com/GyulyVGC/sniffnet/pull/504)
 
 ## [1.3.0] - 2024-04-08
 - Introduced thumbnail mode, enabling users to keep an eye on Sniffnet while doing other tasks ([#484](https://github.com/GyulyVGC/sniffnet/pull/484))
