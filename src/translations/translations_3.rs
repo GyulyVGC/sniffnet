@@ -29,7 +29,6 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
         Language::JA => "ズーム",
-        Language::EN | Language::IT | Language::ES | Language::FR | Language::DE => "Zoom",
         Language::UZ => "Kattalashtirish",
         _ => "Zoom",
     }
@@ -99,12 +98,13 @@ pub fn copy_translation(language: Language) -> &'static str {
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO => "Port",
+        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO | Language::UZ => {
+            "Port"
+        }
         Language::ES => "Puerto",
         Language::IT => "Porta",
         Language::RU => "Порт",
         Language::JA => "ポート",
-        Language::UZ => "Port",
         _ => "Port",
     }
 }
@@ -263,11 +263,10 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::IT => "Cartella",
         Language::FR => "Répertoire",
         Language::DE => "Ordner",
-        Language::PL => "Katalog", // Katalog usually refers to Linux based directory while "Folder" is more common between Windows users (e.g. windows explorer refers to directories as "Folders")
+        Language::PL | Language::UZ => "Katalog",
         Language::RU => "Директория",
         Language::RO => "Director",
         Language::JA => "ディレクトリー",
-        Language::UZ => "Katalog",
         _ => "Directory",
     }
 }
@@ -327,7 +326,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::RU => "Хотите узнать больше?",
         Language::RO => "Vrei să înveți mai multe?",
         Language::JA => "もっと知りたいですか？",
-        Language::UZ => "Ko'proq bilishni hohlaysizmi ?",
+        Language::UZ => "Ko'proq bilishni hohlaysizmi?",
         _ => "Do you want to learn more?",
     }
 }
