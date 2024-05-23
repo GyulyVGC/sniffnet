@@ -16,6 +16,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::PL => "Ogólne",
         Language::RU => "Общие",
         Language::JA => "一般",
+        Language::UZ => "Asosiy",
         _ => "General",
     }
 }
@@ -28,6 +29,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
         Language::JA => "ズーム",
+        Language::UZ => "Kattalashtirish",
         _ => "Zoom",
     }
 }
@@ -43,6 +45,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::RU => "Файлы базы данных",
         Language::RO => "Fișiere bază de date",
         Language::JA => "データベース ファイル",
+        Language::UZ => "Ma'lumotlar bazasi fayllari",
         _ => "Database files",
     }
 }
@@ -58,6 +61,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::RU => "Следующие параметры не могут быть изменены во время анализа трафика",
         Language::RO => "Următorii parametri nu sunt modificabili în timpul analizei",
         Language::JA => "以下のパラメーターは分析中は変更できません",
+        Language::UZ => "Tahlil vaqtida quydagi parametrlarni o'zgartirib bo'lmaydi",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -73,6 +77,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::RU => "Свой стиль",
         Language::RO => "Temă personalizată",
         Language::JA => "カスタム スタイル",
+        Language::UZ => "Moslashtirilgan uslub",
         _ => "Custom style",
     }
 }
@@ -86,13 +91,16 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::PL => "Kopiuj",
         Language::RU => "Скопировать",
         Language::JA => "コピー",
+        Language::UZ => "Nusxalash",
         _ => "Copy",
     }
 }
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO => "Port",
+        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO | Language::UZ => {
+            "Port"
+        }
         Language::ES => "Puerto",
         Language::IT => "Porta",
         Language::RU => "Порт",
@@ -112,6 +120,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::RU => "Неверный формат фильтров",
         Language::RO => "Filtre invalide",
         Language::JA => "無効なフィルター",
+        Language::UZ => "Noto'g'ri filterlar",
         _ => "Invalid filters",
     }
 }
@@ -126,6 +135,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::RU => "Сообщения",
         Language::RO => "Mesaje",
         Language::JA => "メッセージ",
+        Language::UZ => "Xabarlar",
         _ => "Messages",
     }
 }
@@ -141,6 +151,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::RU => "Тип соединения",
         Language::RO => "Tipul conexiunii",
         Language::JA => "リンク タイプ",
+        Language::UZ => "Havola turi",
         _ => "Link type",
     }
 }
@@ -159,6 +170,7 @@ pub fn unsupported_link_type_translation(
         Language::RU => "Тип соединения, связанный с этим адаптером, пока не поддерживается Sniffnet...",
         Language::RO => "Tipul conexiunii asociate acestui adaptor de rețea nu este încă suportat de Sniffnet...",
         Language::JA => "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません...",
+        Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }.to_string();
 
@@ -178,6 +190,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::RU => "Выберите тему из файла",
         Language::RO => "Selectează tema dintr-un fișier",
         Language::JA => "ファイルからスタイルを選択してください",
+        Language::UZ => "Fayldan uslubni tanlang",
         _ => "Select style from a file",
     }
 }
@@ -193,6 +206,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::RU => "Выберите файл базы данных",
         Language::RO => "Selectează fișier bază de date",
         Language::JA => "データベース ファイルを選択してください",
+        Language::UZ => "Ma'lumotlar bazasi faylini tanlang",
         _ => "Select database file",
     }
 }
@@ -208,6 +222,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::RU => "Фильтр по сетевому хосту",
         Language::RO => "Filtrează după host-ul de rețea",
         Language::JA => "ネットワーク ホストでフィルター",
+        Language::UZ => "Tarmoq host bo'yicha filterlash",
         _ => "Filter by network host",
     }
 }
@@ -221,6 +236,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::RU => "Сервис",
         Language::RO => "Serviciu",
         Language::JA => "サービス",
+        Language::UZ => "Xizmat",
         _ => "Service",
     }
 }
@@ -235,6 +251,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::RU => "Экспорт файла захвата",
         Language::RO => "Export fișier captură",
         Language::JA => "キャプチャ ファイルをエクスポート",
+        Language::UZ => "Cap faylni export qilish",
         _ => "Export capture file",
     }
 }
@@ -246,7 +263,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::IT => "Cartella",
         Language::FR => "Répertoire",
         Language::DE => "Ordner",
-        Language::PL => "Katalog", // Katalog usually refers to Linux based directory while "Folder" is more common between Windows users (e.g. windows explorer refers to directories as "Folders")
+        Language::PL | Language::UZ => "Katalog",
         Language::RU => "Директория",
         Language::RO => "Director",
         Language::JA => "ディレクトリー",
@@ -264,6 +281,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::RU => "Выберите директорию назначения",
         Language::RO => "Selectează directorul destinație",
         Language::JA => "宛先のディレクトリーを選択する",
+        Language::UZ => "Manzil katalogni tanlang",
         _ => "Select destination directory",
     }
 }
@@ -278,6 +296,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::RU => "Имя файла",
         Language::RO => "Nume fișier",
         Language::JA => "ファイル ネーム",
+        Language::UZ => "Fayl nomi",
         _ => "File name",
     }
 }
@@ -292,6 +311,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::RU => "Режим миниатюры",
         Language::RO => "Mod thumbnail",
         Language::JA => "サムネイル モード",
+        Language::UZ => "Eskiz rejim",
         _ => "Thumbnail mode",
     }
 }
@@ -306,6 +326,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::RU => "Хотите узнать больше?",
         Language::RO => "Vrei să înveți mai multe?",
         Language::JA => "もっと知りたいですか？",
+        Language::UZ => "Ko'proq bilishni hohlaysizmi?",
         _ => "Do you want to learn more?",
     }
 }

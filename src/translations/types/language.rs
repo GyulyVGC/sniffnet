@@ -116,6 +116,7 @@ impl Language {
                 | Language::RU
                 | Language::RO
                 | Language::JA
+                | Language::UZ
         )
     }
 }
