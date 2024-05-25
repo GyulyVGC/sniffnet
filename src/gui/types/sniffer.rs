@@ -268,7 +268,12 @@ impl Sniffer {
                 self.traffic_chart.change_style(style);
             }
             Message::LoadStyle(path) => {
-                self.configs.lock().unwrap().settings.style_path = path.clone();
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .style_path
+                    .clone_from(&path);
                 if let Ok(palette) = Palette::from_file(path) {
                     let style = StyleType::Custom(ExtraStyles::CustomToml(
                         CustomPalette::from_palette(palette),
@@ -382,11 +387,21 @@ impl Sniffer {
                 }
             }
             Message::CustomCountryDb(db) => {
-                self.configs.lock().unwrap().settings.mmdb_country = db.clone();
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .mmdb_country
+                    .clone_from(&db);
                 self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
-                self.configs.lock().unwrap().settings.mmdb_asn = db.clone();
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .mmdb_asn
+                    .clone_from(&db);
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             Message::CloseRequested => {
