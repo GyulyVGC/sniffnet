@@ -11,3 +11,15 @@ pub struct Host {
     /// Country
     pub country: Country,
 }
+
+/// Struct to represent a network host for representation in the thumbnail
+///
+/// This is necessary to remove possible duplicates in the thumbnail host list
+#[allow(clippy::module_name_repetitions)]
+#[derive(PartialEq)]
+pub struct ThumbnailHost {
+    /// Country
+    pub country: Country,
+    /// Text describing the host in the thumbnail
+    pub text: String,
+}
