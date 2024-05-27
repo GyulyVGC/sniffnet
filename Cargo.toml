@@ -39,7 +39,7 @@ strip = true
 
 [dependencies]
 pcap = "2.0.0"
-etherparse = "0.14.3"
+etherparse = "0.15.0"
 chrono = { version = "0.4.38", default_features = false, features = ["clock"] }
 plotters = { version = "0.3.6", default_features = false, features = ["area_series"] }
 iced = { version = "0.12.1", features = ["tokio", "svg", "advanced", "lazy"] }
