@@ -67,7 +67,7 @@ reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 
 [dev-dependencies]
 serde_test = "1.0.176"
-rstest = "0.20.0"
+rstest = "0.21.0"
 serial_test = { version = "3.1.1", default_features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
