@@ -49,7 +49,7 @@ confy = "0.6.1"
 serde = { version = "1.0.203", default_features = false, features = ["derive"] }
 rodio = { version = "0.18.1", default_features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
-toml = "0.8.13"
+toml = "0.8.14"
 once_cell = "1.19.0"
 ctrlc = { version = "3.4.4", features = ["termination"] }
 rfd = "0.14.1"
