@@ -170,7 +170,7 @@ pub fn unsupported_link_type_translation(
     language: Language,
     adapter: &str,
 ) -> Text<'static, StyleType> {
-    let mut string = match language {
+    let translation = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         // Language::FA => "نوع پیوند مرتبط با این مبدل هنوز توسط Sniffnet پشتیبانی نمی شود...",
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
@@ -183,11 +183,12 @@ pub fn unsupported_link_type_translation(
         Language::JA => "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません...",
         Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
-    }.to_string();
+    };
 
-    let network_adapter_translation = network_adapter_translation(language);
-    string.push_str(&format!("\n\n{network_adapter_translation}: {adapter}"));
-    Text::new(string)
+    Text::new(format!(
+        "{translation}\n\n{}: {adapter}",
+        network_adapter_translation(language)
+    ))
 }
 
 pub fn style_from_file_translation(language: Language) -> &'static str {
