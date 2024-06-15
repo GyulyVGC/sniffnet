@@ -10,6 +10,7 @@ use crate::networking::types::my_link_type::MyLinkType;
 #[derive(Clone)]
 pub struct MyDevice {
     pub name: String,
+    #[cfg(target_os = "windows")]
     pub desc: Option<String>,
     pub addresses: Arc<Mutex<Vec<Address>>>,
     pub link_type: MyLinkType,

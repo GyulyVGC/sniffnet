@@ -513,6 +513,7 @@ impl Sniffer {
                 drop(addresses_mutex);
                 self.device = MyDevice {
                     name: dev.name,
+                    #[cfg(target_os = "windows")]
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
                     link_type: MyLinkType::default(),

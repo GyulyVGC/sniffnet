@@ -40,14 +40,14 @@ strip = true
 [dependencies]
 pcap = "2.0.0"
 etherparse = "0.15.0"
-chrono = { version = "0.4.38", default_features = false, features = ["clock"] }
-plotters = { version = "0.3.6", default_features = false, features = ["area_series"] }
+chrono = { version = "0.4.38", default-features = false, features = ["clock"] }
+plotters = { version = "0.3.6", default-features = false, features = ["area_series"] }
 iced = { version = "0.12.1", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.10.0"
 maxminddb = "0.24.0"
 confy = "0.6.1"
-serde = { version = "1.0.203", default_features = false, features = ["derive"] }
-rodio = { version = "0.18.1", default_features = false, features = ["mp3"] }
+serde = { version = "1.0.203", default-features = false, features = ["derive"] }
+rodio = { version = "0.18.1", default-features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
 toml = "0.8.14"
 once_cell = "1.19.0"
@@ -68,7 +68,7 @@ reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 [dev-dependencies]
 serde_test = "1.0.176"
 rstest = "0.21.0"
-serial_test = { version = "3.1.1", default_features = false }
+serial_test = { version = "3.1.1", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
