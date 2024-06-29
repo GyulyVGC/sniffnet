@@ -11,6 +11,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Romanian - [#499](https://github.com/GyulyVGC/sniffnet/pull/499)
   - Japanese - [#504](https://github.com/GyulyVGC/sniffnet/pull/504)
   - Uzbek - [#510](https://github.com/GyulyVGC/sniffnet/pull/510)
+  - Swedish - [#522](https://github.com/GyulyVGC/sniffnet/pull/522)
 - Increased the range of selectable zoom values (fixes [#542](https://github.com/GyulyVGC/sniffnet/issues/542))
 - Reduced `String` allocations in translation code ([#524](https://github.com/GyulyVGC/sniffnet/pull/524))
 

@@ -25,9 +25,13 @@ pub fn general_translation(language: Language) -> &'static str {
 
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::ES | Language::FR | Language::DE | Language::RO | Language::SV => {
-            "Zoom"
-        }
+        Language::EN
+        | Language::IT
+        | Language::ES
+        | Language::FR
+        | Language::DE
+        | Language::RO
+        | Language::SV => "Zoom",
         // Language::FA => "بزرگنمایی",
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
@@ -109,9 +113,13 @@ pub fn copy_translation(language: Language) -> &'static str {
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO | Language::UZ | Language::SV => {
-            "Port"
-        }
+        Language::EN
+        | Language::FR
+        | Language::DE
+        | Language::PL
+        | Language::RO
+        | Language::UZ
+        | Language::SV => "Port",
         // Language::FA => "درگاه",
         Language::ES => "Puerto",
         Language::IT => "Porta",
