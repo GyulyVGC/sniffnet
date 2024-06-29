@@ -18,15 +18,20 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::RU => "Общие",
         Language::JA => "一般",
         Language::UZ => "Asosiy",
+        Language::SV => "Allmänt",
         _ => "General",
     }
 }
 
 pub fn zoom_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::ES | Language::FR | Language::DE | Language::RO => {
-            "Zoom"
-        }
+        Language::EN
+        | Language::IT
+        | Language::ES
+        | Language::FR
+        | Language::DE
+        | Language::RO
+        | Language::SV => "Zoom",
         // Language::FA => "بزرگنمایی",
         Language::PL => "Powiększenie",
         Language::RU => "Масштаб интерфейса",
@@ -49,6 +54,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::RO => "Fișiere bază de date",
         Language::JA => "データベース ファイル",
         Language::UZ => "Ma'lumotlar bazasi fayllari",
+        Language::SV => "Databasfiler",
         _ => "Database files",
     }
 }
@@ -66,6 +72,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::RO => "Următorii parametri nu sunt modificabili în timpul analizei",
         Language::JA => "以下のパラメーターは分析中は変更できません",
         Language::UZ => "Tahlil vaqtida quydagi parametrlarni o'zgartirib bo'lmaydi",
+        Language::SV => "Följande parametrar kan inte ändras under analysen",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -83,6 +90,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::RO => "Temă personalizată",
         Language::JA => "カスタム スタイル",
         Language::UZ => "Moslashtirilgan uslub",
+        Language::SV => "Anpassad stil",
         _ => "Custom style",
     }
 }
@@ -98,15 +106,20 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::RU => "Скопировать",
         Language::JA => "コピー",
         Language::UZ => "Nusxalash",
+        Language::SV => "Kopia",
         _ => "Copy",
     }
 }
 
 pub fn port_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE | Language::PL | Language::RO | Language::UZ => {
-            "Port"
-        }
+        Language::EN
+        | Language::FR
+        | Language::DE
+        | Language::PL
+        | Language::RO
+        | Language::UZ
+        | Language::SV => "Port",
         // Language::FA => "درگاه",
         Language::ES => "Puerto",
         Language::IT => "Porta",
@@ -129,6 +142,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::RO => "Filtre invalide",
         Language::JA => "無効なフィルター",
         Language::UZ => "Noto'g'ri filterlar",
+        Language::SV => "Ogiltiga filter",
         _ => "Invalid filters",
     }
 }
@@ -145,6 +159,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::RO => "Mesaje",
         Language::JA => "メッセージ",
         Language::UZ => "Xabarlar",
+        Language::SV => "Meddelanden",
         _ => "Messages",
     }
 }
@@ -162,6 +177,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::RO => "Tipul conexiunii",
         Language::JA => "リンク タイプ",
         Language::UZ => "Havola turi",
+        Language::SV => "Länktyp",
         _ => "Link type",
     }
 }
@@ -176,12 +192,13 @@ pub fn unsupported_link_type_translation(
         Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
         Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
         Language::FR => "Le type de connexion associé à cet adaptateur n'est pas encore supporté par Sniffnet...",
-        Language::DE => "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt",
+        Language::DE => "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt...",
         Language::PL => "Rodzaj połączenia powiązany z tym adapterem nie jest jeszcze obsługiwany przez Sniffnet...",
         Language::RU => "Тип соединения, связанный с этим адаптером, пока не поддерживается Sniffnet...",
         Language::RO => "Tipul conexiunii asociate acestui adaptor de rețea nu este încă suportat de Sniffnet...",
         Language::JA => "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません...",
-        Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi",
+        Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi...",
+        Language::SV => "Länktypen associerad med denna adapter stöds inte av Sniffnet än...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
@@ -204,6 +221,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::RO => "Selectează tema dintr-un fișier",
         Language::JA => "ファイルからスタイルを選択してください",
         Language::UZ => "Fayldan uslubni tanlang",
+        Language::SV => "Välj stil från en fil",
         _ => "Select style from a file",
     }
 }
@@ -221,6 +239,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::RO => "Selectează fișier bază de date",
         Language::JA => "データベース ファイルを選択してください",
         Language::UZ => "Ma'lumotlar bazasi faylini tanlang",
+        Language::SV => "Välj databasfil",
         _ => "Select database file",
     }
 }
@@ -238,13 +257,14 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::RO => "Filtrează după host-ul de rețea",
         Language::JA => "ネットワーク ホストでフィルター",
         Language::UZ => "Tarmoq host bo'yicha filterlash",
+        Language::SV => "Filtrera efter nätverksvärd",
         _ => "Filter by network host",
     }
 }
 
 pub fn service_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::FR | Language::DE => "Service",
+        Language::EN | Language::FR | Language::DE | Language::SV => "Service",
         // Language::FA => "خدمت",
         Language::ES => "Servicio",
         Language::IT => "Servizio",
@@ -269,6 +289,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::RO => "Export fișier captură",
         Language::JA => "キャプチャ ファイルをエクスポート",
         Language::UZ => "Cap faylni export qilish",
+        Language::SV => "Exportera inspelningsfil",
         _ => "Export capture file",
     }
 }
@@ -281,7 +302,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::IT => "Cartella",
         Language::FR => "Répertoire",
         Language::DE => "Ordner",
-        Language::PL | Language::UZ => "Katalog",
+        Language::PL | Language::UZ | Language::SV => "Katalog",
         Language::RU => "Директория",
         Language::RO => "Director",
         Language::JA => "ディレクトリー",
@@ -301,6 +322,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::RO => "Selectează directorul destinație",
         Language::JA => "宛先のディレクトリーを選択する",
         Language::UZ => "Manzil katalogni tanlang",
+        Language::SV => "Välj målkatalog",
         _ => "Select destination directory",
     }
 }
@@ -317,6 +339,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::RO => "Nume fișier",
         Language::JA => "ファイル ネーム",
         Language::UZ => "Fayl nomi",
+        Language::SV => "Filnamn",
         _ => "File name",
     }
 }
@@ -333,6 +356,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::RO => "Mod thumbnail",
         Language::JA => "サムネイル モード",
         Language::UZ => "Eskiz rejim",
+        Language::SV => "Miniatyrläge",
         _ => "Thumbnail mode",
     }
 }
@@ -349,6 +373,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::RO => "Vrei să înveți mai multe?",
         Language::JA => "もっと知りたいですか？",
         Language::UZ => "Ko'proq bilishni hohlaysizmi?",
+        Language::SV => "Vill du veta mer?",
         _ => "Do you want to learn more?",
     }
 }
