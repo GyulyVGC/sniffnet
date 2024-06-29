@@ -88,7 +88,7 @@ fn get_modal_header(
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-    title: String,
+    title: &'static str,
 ) -> Container<'static, Message, StyleType> {
     Container::new(
         Row::new()

@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{Ethernet2Header, LaxPacketHeaders, NetHeaders, TransportHeader};
+use etherparse::{LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
@@ -77,12 +77,12 @@ pub fn analyze_headers(
 /// passed by reference on the basis of the packet header content.
 /// Returns false if packet has to be skipped.
 fn analyze_link_header(
-    link_header: Option<Ethernet2Header>,
+    link_header: Option<LinkHeader>,
     mac_address1: &mut Option<String>,
     mac_address2: &mut Option<String>,
     exchanged_bytes: &mut u128,
 ) {
-    if let Some(header) = link_header {
+    if let Some(LinkHeader::Ethernet2(header)) = link_header {
         *exchanged_bytes += 14;
         *mac_address1 = Some(mac_from_dec_to_hex(header.source));
         *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
@@ -229,7 +229,7 @@ pub fn modify_or_insert_in_map(
         for dev in Device::list().expect("Error retrieving device list\r\n") {
             if dev.name.eq(&my_device.name) {
                 let mut my_interface_addresses_mutex = my_device.addresses.lock().unwrap();
-                *my_interface_addresses_mutex = dev.addresses.clone();
+                my_interface_addresses_mutex.clone_from(&dev.addresses);
                 drop(my_interface_addresses_mutex);
                 my_interface_addresses = dev.addresses;
                 break;

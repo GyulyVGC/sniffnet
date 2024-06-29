@@ -286,27 +286,21 @@ fn get_flag_from_country(
         Country::ZM => ZM,
         Country::ZW => ZW,
         Country::ZZ => {
-            if is_loopback {
-                tooltip = your_network_adapter_translation(language);
-                svg_style = SvgType::AdaptColor;
-                COMPUTER
+            let (flag, new_tooltip) = if is_loopback {
+                (COMPUTER, your_network_adapter_translation(language))
             } else if traffic_type.eq(&TrafficType::Multicast) {
-                tooltip = "Multicast".to_string();
-                svg_style = SvgType::AdaptColor;
-                MULTICAST
+                (MULTICAST, "Multicast")
             } else if traffic_type.eq(&TrafficType::Broadcast) {
-                tooltip = "Broadcast".to_string();
-                svg_style = SvgType::AdaptColor;
-                BROADCAST
+                (BROADCAST, "Broadcast")
             } else if is_local {
-                tooltip = local_translation(language);
-                svg_style = SvgType::AdaptColor;
-                HOME
+                (HOME, local_translation(language))
             } else {
-                tooltip = unknown_translation(language);
-                svg_style = SvgType::AdaptColor;
-                UNKNOWN
-            }
+                (UNKNOWN, unknown_translation(language))
+            };
+
+            svg_style = SvgType::AdaptColor;
+            tooltip = new_tooltip.to_string();
+            flag
         }
     })))
     .style(svg_style)
@@ -383,11 +377,12 @@ pub fn get_computer_tooltip(
 
     let tooltip = match (is_my_address, is_local, traffic_type) {
         (true, _, _) => your_network_adapter_translation(language),
-        (false, _, TrafficType::Multicast) => "Multicast".to_string(),
-        (false, _, TrafficType::Broadcast) => "Broadcast".to_string(),
+        (false, _, TrafficType::Multicast) => "Multicast",
+        (false, _, TrafficType::Broadcast) => "Broadcast",
         (false, true, _) => local_translation(language),
         (false, false, TrafficType::Unicast) => unknown_translation(language),
-    };
+    }
+    .to_string();
 
     Tooltip::new(
         content,

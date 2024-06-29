@@ -230,7 +230,7 @@ fn bytes_notification_log(
     language: Language,
     font: Font,
 ) -> Container<'static, Message, StyleType> {
-    let mut threshold_str = threshold_translation(language);
+    let mut threshold_str = threshold_translation(language).to_string();
     threshold_str.push_str(": ");
     threshold_str.push_str(&ByteMultiple::formatted_string(
         (logged_notification.threshold).into(),
