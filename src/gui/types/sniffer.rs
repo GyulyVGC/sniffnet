@@ -365,8 +365,10 @@ impl Sniffer {
             Message::GradientsSelection(gradient_type) => {
                 self.configs.lock().unwrap().settings.color_gradient = gradient_type;
             }
-            Message::ChangeScaleFactor(multiplier) => {
-                self.configs.lock().unwrap().settings.scale_factor = multiplier;
+            Message::ChangeScaleFactor(slider_val) => {
+                let scale_factor_str = format!("{:.2}", 3.0_f64.powf(slider_val));
+                self.configs.lock().unwrap().settings.scale_factor =
+                    scale_factor_str.parse().unwrap();
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
@@ -606,6 +608,7 @@ impl Sniffer {
                 drop(addresses_mutex);
                 self.device = MyDevice {
                     name: dev.name,
+                    #[cfg(target_os = "windows")]
                     desc: dev.desc,
                     addresses: self.device.addresses.clone(),
                     link_type: MyLinkType::default(),
@@ -1783,7 +1786,7 @@ mod tests {
         // change some configs by sending messages
         sniffer.update(Message::GradientsSelection(GradientType::Wild));
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        sniffer.update(Message::ChangeScaleFactor(0.65));
+        sniffer.update(Message::ChangeScaleFactor(0.0));
         sniffer.update(Message::CustomCountryDb("countrymmdb".to_string()));
         sniffer.update(Message::CustomAsnDb("asnmmdb".to_string()));
         sniffer.update(Message::LoadStyle(format!(
@@ -1810,7 +1813,7 @@ mod tests {
             ConfigSettings {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
-                scale_factor: 0.65,
+                scale_factor: 1.0,
                 mmdb_country: "countrymmdb".to_string(),
                 mmdb_asn: "asnmmdb".to_string(),
                 style_path: format!(
@@ -1892,14 +1895,14 @@ mod tests {
         sniffer.update(Message::WindowResized(850, 600));
         assert_eq!(sniffer.configs.lock().unwrap().window.size, (850, 600));
 
-        sniffer.update(Message::ChangeScaleFactor(1.5));
+        sniffer.update(Message::ChangeScaleFactor(0.369));
         let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
         assert_eq!(factor, 1.5);
         assert_eq!(ConfigWindow::thumbnail_size(factor), (540, 333));
         sniffer.update(Message::WindowResized(1000, 800));
         assert_eq!(sniffer.configs.lock().unwrap().window.size, (1500, 1200));
 
-        sniffer.update(Message::ChangeScaleFactor(0.5));
+        sniffer.update(Message::ChangeScaleFactor(-0.631));
         let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
         assert_eq!(factor, 0.5);
         assert_eq!(ConfigWindow::thumbnail_size(factor), (180, 111));
@@ -1933,7 +1936,7 @@ mod tests {
             (400, 600)
         );
 
-        sniffer.update(Message::ChangeScaleFactor(1.5));
+        sniffer.update(Message::ChangeScaleFactor(0.369));
         assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.5);
         sniffer.update(Message::WindowMoved(20, 40));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
@@ -1949,7 +1952,7 @@ mod tests {
             (30, 60)
         );
 
-        sniffer.update(Message::ChangeScaleFactor(0.5));
+        sniffer.update(Message::ChangeScaleFactor(-0.631));
         assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 0.5);
         sniffer.update(Message::WindowMoved(500, -100));
         assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));

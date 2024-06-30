@@ -328,27 +328,27 @@ pub fn ask_quit_translation(language: Language) -> Text<'static, StyleType> {
     })
 }
 
-pub fn quit_analysis_translation(language: Language) -> String {
+pub fn quit_analysis_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Quit analysis".to_string(),
-        Language::IT => "Interrompi analisi".to_string(),
-        Language::FR => "Quitter l'analyse".to_string(),
-        Language::ES => "Quitar el análisis".to_string(),
-        Language::PL => "Zakończ analize".to_string(),
-        Language::DE => "Analyse beenden".to_string(),
-        Language::UK => "Закінчити аналіз".to_string(),
-        Language::ZH => "退出监控".to_string(),
-        Language::RO => "Renunță la analiză".to_string(),
-        Language::KO => "분석종료".to_string(),
-        Language::TR => "Analizden çık".to_string(),
-        Language::RU => "Закончить анализ".to_string(),
-        Language::PT => "Sair da análise".to_string(),
-        Language::EL => "Έξοδος ανάλυσης".to_string(),
-        // Language::FA => "خروج از تحلیل".to_string(),
-        Language::SV => "Avsluta analys".to_string(),
-        Language::FI => "Lopeta analyysi".to_string(),
-        Language::JA => "分析の終了".to_string(),
-        Language::UZ => "Tahlildan chiqish".to_string(),
+        Language::EN => "Quit analysis",
+        Language::IT => "Interrompi analisi",
+        Language::FR => "Quitter l'analyse",
+        Language::ES => "Quitar el análisis",
+        Language::PL => "Zakończ analize",
+        Language::DE => "Analyse beenden",
+        Language::UK => "Закінчити аналіз",
+        Language::ZH => "退出监控",
+        Language::RO => "Renunță la analiză",
+        Language::KO => "분석종료",
+        Language::TR => "Analizden çık",
+        Language::RU => "Закончить анализ",
+        Language::PT => "Sair da análise",
+        Language::EL => "Έξοδος ανάλυσης",
+        // Language::FA => "خروج از تحلیل",
+        Language::SV => "Avsluta analys",
+        Language::FI => "Lopeta analyysi",
+        Language::JA => "分析の終了",
+        Language::UZ => "Tahlildan chiqish",
     }
 }
 
@@ -376,27 +376,27 @@ pub fn ask_clear_all_translation(language: Language) -> Text<'static, StyleType>
     })
 }
 
-pub fn clear_all_translation(language: Language) -> String {
+pub fn clear_all_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Clear all".to_string(),
-        Language::IT => "Elimina tutto".to_string(),
-        Language::FR => "Tout effacer".to_string(),
-        Language::ES => "Borrar todo".to_string(),
-        Language::PL => "Wyczyść wszystko".to_string(),
-        Language::DE => "Alle löschen".to_string(),
-        Language::UK => "Видалити все".to_string(),
-        Language::ZH => "清除所有".to_string(),
-        Language::RO => "Ștergeți tot".to_string(),
-        Language::KO => "모두 지우기".to_string(),
-        Language::TR => "Hepsini temizle".to_string(),
-        Language::RU => "Очистить всё".to_string(),
-        Language::PT => "Limpar tudo".to_string(),
-        Language::EL => "Εκκαθάριση όλων".to_string(),
-        // Language::FA => "پاک کردن همه".to_string(),
-        Language::SV => "Radera alla".to_string(),
-        Language::FI => "Tyhjennä kaikki".to_string(),
-        Language::JA => "すべて削除".to_string(),
-        Language::UZ => "Barchasini tozalash".to_string(),
+        Language::EN => "Clear all",
+        Language::IT => "Elimina tutto",
+        Language::FR => "Tout effacer",
+        Language::ES => "Borrar todo",
+        Language::PL => "Wyczyść wszystko",
+        Language::DE => "Alle löschen",
+        Language::UK => "Видалити все",
+        Language::ZH => "清除所有",
+        Language::RO => "Ștergeți tot",
+        Language::KO => "모두 지우기",
+        Language::TR => "Hepsini temizle",
+        Language::RU => "Очистить всё",
+        Language::PT => "Limpar tudo",
+        Language::EL => "Εκκαθάριση όλων",
+        // Language::FA => "پاک کردن همه",
+        Language::SV => "Radera alla",
+        Language::FI => "Tyhjennä kaikki",
+        Language::JA => "すべて削除",
+        Language::UZ => "Barchasini tozalash",
     }
 }
 
@@ -1180,7 +1180,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn none_translation(language: Language) -> String {
+pub fn none_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "none",
         Language::IT => "nessuno",
@@ -1202,7 +1202,6 @@ pub fn none_translation(language: Language) -> String {
         Language::JA => "なし",
         Language::UZ => "hech biri",
     }
-    .to_string()
 }
 
 pub fn yeti_night_translation(language: Language) -> &'static str {
@@ -1557,27 +1556,27 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn threshold_translation(language: Language) -> String {
+pub fn threshold_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Threshold".to_string(),
-        Language::IT => "Soglia".to_string(),
-        Language::FR => "Seuil".to_string(),
-        Language::ES => "Límite".to_string(),
-        Language::PL => "Próg".to_string(),
-        Language::DE => "Schwellenwert".to_string(),
-        Language::UK => "Ліміт".to_string(),
-        Language::ZH => "阈值".to_string(),
-        Language::RO => "Prag".to_string(),
-        Language::KO => "임계값".to_string(),
-        Language::TR => "Eşik".to_string(),
-        Language::RU => "Порог".to_string(),
-        Language::PT => "Limite".to_string(),
-        Language::EL => "όριο".to_string(),
-        // Language::FA => "آستانه".to_string(),
-        Language::SV => "Gräns".to_string(),
-        Language::FI => "Raja".to_string(),
-        Language::JA => "閾値".to_string(),
-        Language::UZ => "Eshik".to_string(),
+        Language::EN => "Threshold",
+        Language::IT => "Soglia",
+        Language::FR => "Seuil",
+        Language::ES => "Límite",
+        Language::PL => "Próg",
+        Language::DE => "Schwellenwert",
+        Language::UK => "Ліміт",
+        Language::ZH => "阈值",
+        Language::RO => "Prag",
+        Language::KO => "임계값",
+        Language::TR => "Eşik",
+        Language::RU => "Порог",
+        Language::PT => "Limite",
+        Language::EL => "όριο",
+        // Language::FA => "آستانه",
+        Language::SV => "Gräns",
+        Language::FI => "Raja",
+        Language::JA => "閾値",
+        Language::UZ => "Eshik",
     }
 }
 

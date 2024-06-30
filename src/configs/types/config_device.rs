@@ -56,6 +56,7 @@ impl ConfigDevice {
             if device.name.eq(&self.device_name) {
                 return MyDevice {
                     name: device.name,
+                    #[cfg(target_os = "windows")]
                     desc: device.desc,
                     addresses: Arc::new(Mutex::new(device.addresses)),
                     link_type: MyLinkType::default(),
@@ -70,6 +71,7 @@ impl ConfigDevice {
         });
         MyDevice {
             name: standard_device.name,
+            #[cfg(target_os = "windows")]
             desc: standard_device.desc,
             addresses: Arc::new(Mutex::new(standard_device.addresses)),
             link_type: MyLinkType::default(),

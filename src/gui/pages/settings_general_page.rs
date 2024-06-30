@@ -183,7 +183,8 @@ fn scale_factor_slider(
     scale_factor: f64,
 ) -> Container<'static, Message, StyleType> {
     #[allow(clippy::cast_possible_truncation)]
-    let slider_width = 150.0 / scale_factor as f32;
+    let slider_width = 130.0 / scale_factor as f32;
+    let slider_val = scale_factor.log(3.0);
     Container::new(
         Column::new()
             .align_items(Alignment::Center)
@@ -197,8 +198,8 @@ fn scale_factor_slider(
             .push(Text::new(format!("x{scale_factor:.2}")).font(font))
             .push(Space::with_height(5))
             .push(
-                Slider::new(0.5..=1.5, scale_factor, Message::ChangeScaleFactor)
-                    .step(0.05)
+                Slider::new(-1.0..=1.0, slider_val, Message::ChangeScaleFactor)
+                    .step(0.005)
                     .width(slider_width),
             )
             .push(vertical_space()),
