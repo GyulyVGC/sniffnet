@@ -13,7 +13,7 @@ use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::gui::types::sniffer::Sniffer;
-use crate::networking::types::host::Host;
+use crate::networking::types::host::{Host, ThumbnailHost};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::sort_type::SortType;
@@ -71,22 +71,35 @@ fn host_col(
         .spacing(3)
         .width(Length::FillPortion(2));
     let hosts = get_host_entries(info_traffic, chart_type, SortType::Neutral);
-    let n_entry = min(hosts.len(), MAX_ENTRIES);
-    for (host, data_info_host) in hosts.get(..n_entry).unwrap_or_default() {
-        let flag = get_flag_tooltip(
-            host.country,
-            data_info_host,
-            Language::default(),
-            font,
-            true,
-        );
+    let mut thumbnail_hosts = Vec::new();
+
+    for (host, data_info_host) in &hosts {
+        let text = host_text(host);
+        let country = host.country;
+        let thumbnail_host = ThumbnailHost {
+            country,
+            text: text.clone(),
+        };
+
+        if thumbnail_hosts.contains(&thumbnail_host) {
+            continue;
+        }
+
+        thumbnail_hosts.push(thumbnail_host);
+
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true);
         let host_row = Row::new()
             .align_items(Alignment::Center)
             .spacing(5)
             .push(flag)
-            .push(Text::new(host_text(host)).font(font).size(FONT_SIZE_FOOTER));
+            .push(Text::new(text).font(font).size(FONT_SIZE_FOOTER));
         host_col = host_col.push(host_row);
+
+        if thumbnail_hosts.len() >= MAX_ENTRIES {
+            break;
+        }
     }
+
     host_col
 }
 

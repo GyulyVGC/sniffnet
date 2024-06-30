@@ -2,15 +2,8 @@
 //!
 //! It also is a wrapper of gui's main two pages: initial and run page.
 
-use std::time::Duration;
-
-use iced::keyboard::key::Named;
-use iced::keyboard::{Event, Key, Modifiers};
-use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
-use iced::window::Id;
-use iced::Event::{Keyboard, Window};
-use iced::{executor, window, Application, Command, Element, Subscription};
+use iced::{executor, Application, Command, Element, Subscription};
 
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -122,66 +115,12 @@ impl Application for Sniffer {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        const NO_MODIFIER: Modifiers = Modifiers::empty();
-
-        // Window subscription
-        let window_sub = iced::event::listen_with(|event, _| match event {
-            Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
-            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
-            Window(Id::MAIN, window::Event::Resized { width, height }) => {
-                Some(Message::WindowResized(width, height))
-            }
-            Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
-            _ => None,
-        });
-
-        // Keyboard subscription
-        let keyboard_sub = iced::event::listen_with(|event, _| match event {
-            Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
-                Modifiers::COMMAND => match key.as_ref() {
-                    Key::Character("q") => Some(Message::CloseRequested),
-                    Key::Character(",") => Some(Message::OpenLastSettings),
-                    Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
-                    Key::Character("d") => Some(Message::CtrlDPressed),
-                    Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
-                    Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
-                    _ => None,
-                },
-                Modifiers::SHIFT => match key {
-                    Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
-                    _ => None,
-                },
-                NO_MODIFIER => match key {
-                    Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
-                    Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
-                    Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
-                    _ => None,
-                },
-                _ => None,
-            },
-            _ => None,
-        });
-
-        // Mouse subscription
-        let mouse_sub = iced::event::listen_with(|event, _| match event {
-            iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
-            _ => None,
-        });
-
-        // Time subscription
-        let time_sub = if self.running_page.eq(&RunningPage::Init) {
-            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
-        } else {
-            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
-        };
-
-        let mut subscriptions = Vec::from([window_sub, time_sub]);
-        if self.thumbnail {
-            subscriptions.push(mouse_sub);
-        } else {
-            subscriptions.push(keyboard_sub);
-        }
-        Subscription::batch(subscriptions)
+        Subscription::batch([
+            self.keyboard_subscription(),
+            self.mouse_subscription(),
+            self.time_subscription(),
+            Sniffer::window_subscription(),
+        ])
     }
 
     fn theme(&self) -> Self::Theme {
