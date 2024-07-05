@@ -483,6 +483,7 @@ impl Sniffer {
                 if self.running_page.ne(&RunningPage::Init)
                     && self.settings_page.is_none()
                     && self.modal.is_none()
+                    && !self.timing_events.was_just_thumbnail_enter()
                 {
                     return self.update(Message::ToggleThumbnail(false));
                 }
@@ -798,10 +799,8 @@ mod tests {
 
     use std::collections::{HashSet, VecDeque};
     use std::fs::remove_file;
-    use std::ops::Sub;
     use std::path::Path;
     use std::sync::{Arc, Mutex};
-    use std::time::Duration;
 
     use serial_test::{parallel, serial};
 
@@ -1695,7 +1694,6 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_switch_running_and_settings_pages() {
         let mut sniffer = new_sniffer();
-        sniffer.timing_events.focus = std::time::Instant::now().sub(Duration::from_millis(400));
 
         // initial status
         assert_eq!(sniffer.settings_page, None);

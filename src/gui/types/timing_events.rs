@@ -1,8 +1,9 @@
+use std::ops::Sub;
 use std::time::Duration;
 
 pub struct TimingEvents {
     /// Instant of the last window focus
-    pub(crate) focus: std::time::Instant,
+    focus: std::time::Instant,
     /// Instant of the last press on Copy IP button, with the related IP address
     copy_ip: (std::time::Instant, String),
     /// Instant of the last thumbnail mode enter
@@ -56,7 +57,7 @@ impl TimingEvents {
 impl Default for TimingEvents {
     fn default() -> Self {
         Self {
-            focus: std::time::Instant::now(),
+            focus: std::time::Instant::now().sub(Duration::from_millis(400)),
             copy_ip: (std::time::Instant::now(), String::new()),
             thumbnail_enter: std::time::Instant::now(),
             thumbnail_click: std::time::Instant::now(),
