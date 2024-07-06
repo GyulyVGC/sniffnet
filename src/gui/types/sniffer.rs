@@ -175,6 +175,8 @@ impl Sniffer {
                         Key::Character("d") => Some(Message::CtrlDPressed),
                         Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
                         Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
+                        Key::Character("-") => Some(Message::ScaleFactorShortcut(false)),
+                        Key::Character("+") => Some(Message::ScaleFactorShortcut(true)),
                         _ => None,
                     },
                     Modifiers::SHIFT => match key {
@@ -366,7 +368,7 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.color_gradient = gradient_type;
             }
             Message::ChangeScaleFactor(slider_val) => {
-                let scale_factor_str = format!("{:.2}", 3.0_f64.powf(slider_val));
+                let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
                 self.configs.lock().unwrap().settings.scale_factor =
                     scale_factor_str.parse().unwrap();
             }
@@ -486,6 +488,13 @@ impl Sniffer {
                     && !self.timing_events.was_just_thumbnail_enter()
                 {
                     return self.update(Message::ToggleThumbnail(false));
+                }
+            }
+            Message::ScaleFactorShortcut(increase) => {
+                let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
+                if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
+                    let delta = if increase { 0.1 } else { -0.1 };
+                    self.configs.lock().unwrap().settings.scale_factor += delta;
                 }
             }
             Message::TickInit => {}
@@ -1992,5 +2001,41 @@ mod tests {
         assert_eq!(sniffer.unread_notifications, 8);
         sniffer.update(Message::ToggleThumbnail(false));
         assert_eq!(sniffer.unread_notifications, 0);
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_scale_factor_shortcut() {
+        let mut sniffer = new_sniffer();
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.0);
+
+        sniffer.update(Message::ScaleFactorShortcut(true));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.1);
+        sniffer.update(Message::ScaleFactorShortcut(false));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.0);
+        sniffer.update(Message::ScaleFactorShortcut(false));
+        assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 0.9);
+
+        for _ in 0..100 {
+            sniffer.update(Message::ScaleFactorShortcut(true));
+        }
+        assert_eq!(
+            format!(
+                "{:.2}",
+                sniffer.configs.lock().unwrap().settings.scale_factor
+            ),
+            "3.00".to_string()
+        );
+
+        for _ in 0..100 {
+            sniffer.update(Message::ScaleFactorShortcut(false));
+        }
+        assert_eq!(
+            format!(
+                "{:.2}",
+                sniffer.configs.lock().unwrap().settings.scale_factor
+            ),
+            "0.30".to_string()
+        );
     }
 }

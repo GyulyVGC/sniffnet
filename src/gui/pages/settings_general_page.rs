@@ -195,11 +195,11 @@ fn scale_factor_slider(
                     .font(font),
             )
             .push(vertical_space())
-            .push(Text::new(format!("x{scale_factor:.2}")).font(font))
+            .push(Text::new(format!("{:.0}%", scale_factor * 100.0)).font(font))
             .push(Space::with_height(5))
             .push(
                 Slider::new(-1.0..=1.0, slider_val, Message::ChangeScaleFactor)
-                    .step(0.005)
+                    .step(0.01)
                     .width(slider_width),
             )
             .push(vertical_space()),

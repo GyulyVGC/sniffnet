@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
+- Added keyboard shortcuts to change zoom level (fixes [#554](https://github.com/GyulyVGC/sniffnet/issues/554))
 - Increased the range of selectable zoom values (fixes [#542](https://github.com/GyulyVGC/sniffnet/issues/542))
 - Reduced `String` allocations in translation code ([#524](https://github.com/GyulyVGC/sniffnet/pull/524))
 - Updated some of the existing translations to v1.3: 

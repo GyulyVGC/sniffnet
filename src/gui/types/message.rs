@@ -117,4 +117,6 @@ pub enum Message {
     Drag,
     /// Ctrl+T keys have been pressed
     CtrlTPressed,
+    /// Edit scale factor via keyboard shortcut
+    ScaleFactorShortcut(bool),
 }
