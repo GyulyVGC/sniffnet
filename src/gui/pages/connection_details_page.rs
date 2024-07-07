@@ -270,7 +270,8 @@ fn get_host_info_col(
     language: Language,
 ) -> Column<'static, Message, StyleType> {
     let mut host_info_col = Column::new().spacing(4);
-    if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && host.asn.number > 0) {
+    if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && !host.asn.code.is_empty())
+    {
         host_info_col = host_info_col.push(Rule::horizontal(10.0));
     }
     if r_dns.parse::<IpAddr>().is_err() {
@@ -280,10 +281,10 @@ fn get_host_info_col(
             font,
         ));
     }
-    if !host.asn.name.is_empty() && host.asn.number > 0 {
+    if !host.asn.name.is_empty() && !host.asn.code.is_empty() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
             administrative_entity_translation(language),
-            &format!("{} (ASN {})", host.asn.name, host.asn.number),
+            &format!("{} (ASN {})", host.asn.name, host.asn.code),
             font,
         ));
     }
