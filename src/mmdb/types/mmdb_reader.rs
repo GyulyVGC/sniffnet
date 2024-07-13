@@ -1,4 +1,6 @@
-use maxminddb::Reader;
+use maxminddb::{MaxMindDBError, Reader};
+use serde::Deserialize;
+use std::net::IpAddr;
 
 pub enum MmdbReader {
     Default(Reader<&'static [u8]>),
@@ -16,6 +18,13 @@ impl MmdbReader {
                 return MmdbReader::Custom(custom_reader);
             }
             MmdbReader::Default(default_reader)
+        }
+    }
+
+    pub fn lookup<'a, T: Deserialize<'a>>(&'a self, ip: IpAddr) -> Result<T, MaxMindDBError> {
+        match self {
+            MmdbReader::Default(reader) => reader.lookup(ip),
+            MmdbReader::Custom(reader) => reader.lookup(ip),
         }
     }
 }
