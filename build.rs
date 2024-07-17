@@ -188,6 +188,7 @@ pub static SAFE_WORDS_FOR_SERVICE_NAME: Lazy<Trie> = Lazy::new(|| {
         "BackOrifice",
         "dhanalakshmi",
         "3gpp-w1ap",
+        "pmsm-webrctl",
     ] {
         safe_words.set(word, Type::SAFE);
     }
