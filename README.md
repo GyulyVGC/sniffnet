@@ -76,7 +76,7 @@ Follow this method only if you have [Rust installed](https://www.rust-lang.org/t
 In this case, the application binary can be built and installed with:
 
 ```sh
-cargo install sniffnet
+cargo install sniffnet --locked
 ```
 
 </details>
