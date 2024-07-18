@@ -166,7 +166,7 @@ mod tests {
             domain: domain.to_string(),
             asn: Asn {
                 name: asn.to_string(),
-                number: 512,
+                code: "512".to_string(),
             },
             country: Default::default(),
         }
