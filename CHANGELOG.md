@@ -4,9 +4,9 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
+- Support IPinfo ASN and Country databases ([#558](https://github.com/GyulyVGC/sniffnet/pull/558) — fixes [#533](https://github.com/GyulyVGC/sniffnet/issues/533))
 - Added keyboard shortcuts to change zoom level (fixes [#554](https://github.com/GyulyVGC/sniffnet/issues/554))
 - Increased the range of selectable zoom values (fixes [#542](https://github.com/GyulyVGC/sniffnet/issues/542))
-- Reduced `String` allocations in translation code ([#524](https://github.com/GyulyVGC/sniffnet/pull/524))
 - Updated some of the existing translations to v1.3: 
   - French - [#494](https://github.com/GyulyVGC/sniffnet/pull/494)
   - German - [#495](https://github.com/GyulyVGC/sniffnet/pull/495)
@@ -16,7 +16,8 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Japanese - [#504](https://github.com/GyulyVGC/sniffnet/pull/504)
   - Uzbek - [#510](https://github.com/GyulyVGC/sniffnet/pull/510)
   - Swedish - [#522](https://github.com/GyulyVGC/sniffnet/pull/522)
-- Fixed bug causing impossibility to exit thumbnail mode on Ubuntu (fixes [#505](https://github.com/GyulyVGC/sniffnet/pull/505))
+- Reduced `String` allocations in translation code ([#524](https://github.com/GyulyVGC/sniffnet/pull/524))
+- Fixed impossibility to exit thumbnail mode in some Linux distributions (fixes [#505](https://github.com/GyulyVGC/sniffnet/pull/505))
 
 ## [1.3.0] - 2024-04-08
 - Introduced thumbnail mode, enabling users to keep an eye on Sniffnet while doing other tasks ([#484](https://github.com/GyulyVGC/sniffnet/pull/484))
