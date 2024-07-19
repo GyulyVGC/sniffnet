@@ -30,7 +30,7 @@ impl MmdbAsnCode<'_> {
     fn get_code(&self) -> String {
         match self {
             Self::Int(Some(code)) => code.to_string(),
-            Self::Str(Some(code)) => code.to_string(),
+            Self::Str(Some(code)) => (*code).to_string(),
             _ => String::new(),
         }
     }
