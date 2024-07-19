@@ -1384,6 +1384,8 @@ apex-mesh	912/tcp
 apex-mesh	912/udp
 apex-edge	913/tcp
 apex-edge	913/udp
+rift-lies	914/tcp
+rift-ties	915/tcp
 oftep-rpc	950/tcp
 rndc	953/tcp
 securenetpro-sensor	975/tcp
@@ -4093,6 +4095,7 @@ service-ctrl	2367/tcp
 service-ctrl	2367/udp
 opentable	2368/tcp
 opentable	2368/udp
+bif-p2p	2369/tcp
 l3-hbmon	2370/tcp
 l3-hbmon	2370/udp
 worldwire	2371/tcp
@@ -8941,6 +8944,7 @@ sdlog	5520/tcp
 sdserv	5530/tcp
 sdreport	5540/tcp
 sdxauthd	5540/udp
+qftest-licserve	5543/tcp
 sdadmind	5550/tcp
 sgi-eventmond	5553/tcp
 sgi-eventmond	5553/udp
@@ -10358,6 +10362,7 @@ senomix07	8058/udp
 senomix08	8059/tcp
 senomix08	8059/udp
 aero	8060/tcp
+nikatron-dev	8061/tcp
 toad-bi-appsrvr	8066/tcp
 infi-async	8067/tcp
 ucs-isc	8070/tcp
@@ -10516,6 +10521,7 @@ espeech-rtp	8417/tcp
 espeech-rtp	8417/udp
 aritts	8423/tcp
 pgbackrest	8432/tcp
+aws-as2	8433/tcp
 cybro-a-bus	8442/tcp
 cybro-a-bus	8442/udp
 https-alt	8443/tcp
@@ -10523,6 +10529,7 @@ pcsync-https	8443/udp
 pcsync-http	8444/tcp
 pcsync-http	8444/udp
 copy	8445/tcp
+matrix-fed	8448/tcp
 npmp	8450/tcp
 npmp	8450/udp
 nexentamv	8457/tcp
@@ -10562,6 +10569,7 @@ canon-bjnp4	8614/udp
 imink	8615/tcp
 monetra	8665/tcp
 monetra-admin	8666/tcp
+spartan	8668/tcp
 msi-cps-rm	8675/tcp
 sun-as-jmxrmi	8686/tcp
 sun-as-jmxrmi	8686/udp
@@ -11209,6 +11217,7 @@ warehouse	12322/udp
 netbus	12345/tcp
 italk	12345/udp
 netbus	12346/tcp
+carb-repl-ctrl	12546/tcp
 tsaf	12753/tcp
 tsaf	12753/udp
 netperf	12865/tcp
@@ -11267,6 +11276,7 @@ dsmcc-download	13821/udp
 dsmcc-ccp	13822/tcp
 dsmcc-ccp	13822/udp
 bmdss	13823/tcp
+a-trust-rpc	13832/tcp
 ucontrol	13894/tcp
 dta-systems	13929/tcp
 dta-systems	13929/udp
@@ -11666,6 +11676,7 @@ icl-twobase9	25008/tcp
 icl-twobase9	25008/udp
 icl-twobase10	25009/tcp
 icl-twobase10	25009/udp
+db2c-tls	25100/tcp
 rna	25471/tcp
 minecraft	25565/tcp
 sauterdongle	25576/tcp
@@ -11962,6 +11973,7 @@ candrp	42509/tcp
 candrp	42509/udp
 caerpc	42510/tcp
 caerpc	42510/udp
+curiosity	42999/tcp
 recvr-rc	43000/tcp
 reachout	43188/tcp
 reachout	43188/udp
