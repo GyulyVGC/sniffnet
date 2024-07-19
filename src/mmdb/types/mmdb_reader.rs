@@ -1,6 +1,7 @@
+use std::net::IpAddr;
+
 use maxminddb::{MaxMindDBError, Reader};
 use serde::Deserialize;
-use std::net::IpAddr;
 
 pub enum MmdbReader {
     Default(Reader<&'static [u8]>),

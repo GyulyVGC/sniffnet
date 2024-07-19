@@ -1,5 +1,6 @@
-use crate::countries::types::country::Country;
 use serde::Deserialize;
+
+use crate::countries::types::country::Country;
 
 #[derive(Deserialize)]
 #[serde(transparent)]

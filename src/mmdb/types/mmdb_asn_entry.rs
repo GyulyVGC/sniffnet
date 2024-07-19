@@ -1,5 +1,6 @@
-use crate::networking::types::asn::Asn;
 use serde::Deserialize;
+
+use crate::networking::types::asn::Asn;
 
 #[derive(Deserialize)]
 pub struct MmdbAsnEntry<'a> {
