@@ -2,20 +2,20 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
 - Support IPinfo ASN and Country databases ([#558](https://github.com/GyulyVGC/sniffnet/pull/558) — fixes [#533](https://github.com/GyulyVGC/sniffnet/issues/533))
 - Added keyboard shortcuts to change zoom level (fixes [#554](https://github.com/GyulyVGC/sniffnet/issues/554))
 - Increased the range of selectable zoom values (fixes [#542](https://github.com/GyulyVGC/sniffnet/issues/542))
 - Updated some of the existing translations to v1.3: 
-  - French - [#494](https://github.com/GyulyVGC/sniffnet/pull/494)
-  - German - [#495](https://github.com/GyulyVGC/sniffnet/pull/495)
-  - Russian - [#496](https://github.com/GyulyVGC/sniffnet/pull/496)
-  - Polish - [#498](https://github.com/GyulyVGC/sniffnet/pull/498)
-  - Romanian - [#499](https://github.com/GyulyVGC/sniffnet/pull/499)
-  - Japanese - [#504](https://github.com/GyulyVGC/sniffnet/pull/504)
-  - Uzbek - [#510](https://github.com/GyulyVGC/sniffnet/pull/510)
-  - Swedish - [#522](https://github.com/GyulyVGC/sniffnet/pull/522)
+  - French ([#494](https://github.com/GyulyVGC/sniffnet/pull/494))
+  - German ([#495](https://github.com/GyulyVGC/sniffnet/pull/495))
+  - Russian ([#496](https://github.com/GyulyVGC/sniffnet/pull/496))
+  - Polish ([#498](https://github.com/GyulyVGC/sniffnet/pull/498))
+  - Romanian ([#499](https://github.com/GyulyVGC/sniffnet/pull/499))
+  - Japanese ([#504](https://github.com/GyulyVGC/sniffnet/pull/504))
+  - Uzbek ([#510](https://github.com/GyulyVGC/sniffnet/pull/510))
+  - Swedish ([#522](https://github.com/GyulyVGC/sniffnet/pull/522))
 - Reduced `String` allocations in translation code ([#524](https://github.com/GyulyVGC/sniffnet/pull/524))
 - Fixed impossibility to exit thumbnail mode in some Linux distributions (fixes [#505](https://github.com/GyulyVGC/sniffnet/pull/505))
 
@@ -81,16 +81,16 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added button to clear all the current search filters quickly in inspect page
 - Added Swedish translation 🇸🇪 ([#213](https://github.com/GyulyVGC/sniffnet/pull/213))
 - Updated most of the existing translations to v1.2: 
-  - German - [#191](https://github.com/GyulyVGC/sniffnet/pull/191)
-  - Spanish - [#203](https://github.com/GyulyVGC/sniffnet/pull/203)
-  - Persian - [#193](https://github.com/GyulyVGC/sniffnet/pull/193)
-  - Korean - [#205](https://github.com/GyulyVGC/sniffnet/pull/205)
-  - Polish - [#244](https://github.com/GyulyVGC/sniffnet/pull/244)
-  - Romanian - [#241](https://github.com/GyulyVGC/sniffnet/pull/241)
-  - Russian - [#187](https://github.com/GyulyVGC/sniffnet/pull/187)
-  - Turkish - [#192](https://github.com/GyulyVGC/sniffnet/pull/192)
-  - Ukrainian - [#216](https://github.com/GyulyVGC/sniffnet/pull/216)
-  - Chinese - [#214](https://github.com/GyulyVGC/sniffnet/pull/214)
+  - German ([#191](https://github.com/GyulyVGC/sniffnet/pull/191))
+  - Spanish ([#203](https://github.com/GyulyVGC/sniffnet/pull/203))
+  - Persian ([#193](https://github.com/GyulyVGC/sniffnet/pull/193))
+  - Korean ([#205](https://github.com/GyulyVGC/sniffnet/pull/205))
+  - Polish ([#244](https://github.com/GyulyVGC/sniffnet/pull/244))
+  - Romanian ([#241](https://github.com/GyulyVGC/sniffnet/pull/241))
+  - Russian ([#187](https://github.com/GyulyVGC/sniffnet/pull/187))
+  - Turkish ([#192](https://github.com/GyulyVGC/sniffnet/pull/192))
+  - Ukrainian ([#216](https://github.com/GyulyVGC/sniffnet/pull/216))
+  - Chinese ([#214](https://github.com/GyulyVGC/sniffnet/pull/214))
 - Renamed "Administrative entity" to "Autonomous System name" to avoid confusion
 - Improved filter columns relative width to avoid the "Application protocol" label being cut when displayed in Swedish
 - Footer URLs have been updated to include links to Sniffnet's official website and GitHub Sponsor page

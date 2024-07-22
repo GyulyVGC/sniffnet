@@ -1,5 +1,6 @@
-use crate::countries::types::country::Country;
 use serde::Deserialize;
+
+use crate::countries::types::country::Country;
 
 #[derive(Deserialize)]
 #[serde(transparent)]
@@ -28,8 +29,8 @@ impl MmdbCountryEntryInner<'_> {
         match self {
             Self::Standard(StandardCountryEntry {
                 country: Some(StandardCountryEntryInner { iso_code: Some(c) }),
-            }) => Country::from_str(c),
-            Self::Ipinfo(IpinfoCountryEntry { country: Some(c) }) => Country::from_str(c),
+            })
+            | Self::Ipinfo(IpinfoCountryEntry { country: Some(c) }) => Country::from_str(c),
             _ => Country::ZZ,
         }
     }
