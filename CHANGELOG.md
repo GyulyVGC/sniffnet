@@ -2,6 +2,9 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Updated Chinese translation to v1.3 ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
+
 ## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
 - Support IPinfo ASN and Country databases ([#558](https://github.com/GyulyVGC/sniffnet/pull/558) — fixes [#533](https://github.com/GyulyVGC/sniffnet/issues/533))

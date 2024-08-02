@@ -123,6 +123,7 @@ impl Language {
                 | Language::UZ
                 | Language::SV
                 | Language::VN
+                | Language::ZH
         )
     }
 }
