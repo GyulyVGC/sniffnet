@@ -19,6 +19,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::JA => "一般",
         Language::UZ => "Asosiy",
         Language::SV => "Allmänt",
+        Language::VN => "Tổng quan",
         _ => "General",
     }
 }
@@ -37,6 +38,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::RU => "Масштаб интерфейса",
         Language::JA => "ズーム",
         Language::UZ => "Kattalashtirish",
+        Language::VN => "Phóng to",
         _ => "Zoom",
     }
 }
@@ -55,6 +57,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::JA => "データベース ファイル",
         Language::UZ => "Ma'lumotlar bazasi fayllari",
         Language::SV => "Databasfiler",
+        Language::VN => "Tập tin cơ sở dữ liệu",
         _ => "Database files",
     }
 }
@@ -73,6 +76,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::JA => "以下のパラメーターは分析中は変更できません",
         Language::UZ => "Tahlil vaqtida quydagi parametrlarni o'zgartirib bo'lmaydi",
         Language::SV => "Följande parametrar kan inte ändras under analysen",
+        Language::VN => "Các tham số sau không thể bị thay đổi khi đang phân tích",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -91,6 +95,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::JA => "カスタム スタイル",
         Language::UZ => "Moslashtirilgan uslub",
         Language::SV => "Anpassad stil",
+        Language::VN => "Tùy chỉnh chủ đề",
         _ => "Custom style",
     }
 }
@@ -107,6 +112,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::JA => "コピー",
         Language::UZ => "Nusxalash",
         Language::SV => "Kopia",
+        Language::VN => "Sao chép",
         _ => "Copy",
     }
 }
@@ -125,6 +131,7 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::IT => "Porta",
         Language::RU => "Порт",
         Language::JA => "ポート",
+        Language::VN => "Cổng",
         _ => "Port",
     }
 }
@@ -143,6 +150,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::JA => "無効なフィルター",
         Language::UZ => "Noto'g'ri filterlar",
         Language::SV => "Ogiltiga filter",
+        Language::VN => "Bộ lọc không khả dụng",
         _ => "Invalid filters",
     }
 }
@@ -160,6 +168,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::JA => "メッセージ",
         Language::UZ => "Xabarlar",
         Language::SV => "Meddelanden",
+        Language::VN => "Tin nhắn",
         _ => "Messages",
     }
 }
@@ -178,6 +187,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::JA => "リンク タイプ",
         Language::UZ => "Havola turi",
         Language::SV => "Länktyp",
+        Language::VN => "Loại liên kết",
         _ => "Link type",
     }
 }
@@ -199,6 +209,7 @@ pub fn unsupported_link_type_translation(
         Language::JA => "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません...",
         Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi...",
         Language::SV => "Länktypen associerad med denna adapter stöds inte av Sniffnet än...",
+        Language::VN => "Loại liên kết được gắn với adapter này chưa được Sniffnet hỗ trợ...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
@@ -222,6 +233,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::JA => "ファイルからスタイルを選択してください",
         Language::UZ => "Fayldan uslubni tanlang",
         Language::SV => "Välj stil från en fil",
+        Language::VN => "Chọn chủ đề từ file của bạn",
         _ => "Select style from a file",
     }
 }
@@ -240,6 +252,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::JA => "データベース ファイルを選択してください",
         Language::UZ => "Ma'lumotlar bazasi faylini tanlang",
         Language::SV => "Välj databasfil",
+        Language::VN => "Chọn tập tin cơ sở dữ liệu",
         _ => "Select database file",
     }
 }
@@ -258,6 +271,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::JA => "ネットワーク ホストでフィルター",
         Language::UZ => "Tarmoq host bo'yicha filterlash",
         Language::SV => "Filtrera efter nätverksvärd",
+        Language::VN => "Lọc bởi máy chủ mạng",
         _ => "Filter by network host",
     }
 }
@@ -273,6 +287,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::RO => "Serviciu",
         Language::JA => "サービス",
         Language::UZ => "Xizmat",
+        Language::VN => "Dịch vụ",
         _ => "Service",
     }
 }
@@ -290,6 +305,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::JA => "キャプチャ ファイルをエクスポート",
         Language::UZ => "Cap faylni export qilish",
         Language::SV => "Exportera inspelningsfil",
+        Language::VN => "Xuất tập tin đã bắt",
         _ => "Export capture file",
     }
 }
@@ -306,6 +322,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::RU => "Директория",
         Language::RO => "Director",
         Language::JA => "ディレクトリー",
+        Language::VN => "Thư mục",
         _ => "Directory",
     }
 }
@@ -323,6 +340,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::JA => "宛先のディレクトリーを選択する",
         Language::UZ => "Manzil katalogni tanlang",
         Language::SV => "Välj målkatalog",
+        Language::VN => "Chọn thư mục đích đến",
         _ => "Select destination directory",
     }
 }
@@ -340,6 +358,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::JA => "ファイル ネーム",
         Language::UZ => "Fayl nomi",
         Language::SV => "Filnamn",
+        Language::VN => "Tên file",
         _ => "File name",
     }
 }
@@ -357,6 +376,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::JA => "サムネイル モード",
         Language::UZ => "Eskiz rejim",
         Language::SV => "Miniatyrläge",
+        Language::VN => "Chế độ thu nhỏ",
         _ => "Thumbnail mode",
     }
 }
@@ -374,6 +394,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::JA => "もっと知りたいですか？",
         Language::UZ => "Ko'proq bilishni hohlaysizmi?",
         Language::SV => "Vill du veta mer?",
+        Language::VN => "Bạn có muốn tìm hiểu thêm?",
         _ => "Do you want to learn more?",
     }
 }

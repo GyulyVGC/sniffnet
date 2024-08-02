@@ -50,6 +50,8 @@ pub enum Language {
     JA,
     /// Uzbek
     UZ,
+    /// Vietnam
+    VN,
 }
 
 impl Default for Language {
@@ -78,6 +80,7 @@ impl Language {
         Language::UK,
         Language::UZ,
         Language::ZH,
+        Language::VN,
     ];
 
     pub fn get_flag(self) -> Svg<StyleType> {
@@ -101,6 +104,7 @@ impl Language {
             Language::FI => FI,
             Language::JA => JP,
             Language::UZ => UZ,
+            Language::VN => VN,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
@@ -118,6 +122,7 @@ impl Language {
                 | Language::JA
                 | Language::UZ
                 | Language::SV
+                | Language::VN
         )
     }
 }
@@ -144,6 +149,7 @@ impl fmt::Display for Language {
             Language::FI => "Suomi",
             Language::JA => "日本語",
             Language::UZ => "O'zbekcha",
+            Language::VN => "Tiếng Việt",
         };
         write!(f, "{self:?} - {lang_str}")
     }
