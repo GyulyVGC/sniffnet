@@ -1,7 +1,5 @@
 //! Module containing the entry point of application execution.
 
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
