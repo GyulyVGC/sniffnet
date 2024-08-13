@@ -50,8 +50,8 @@ pub enum Language {
     JA,
     /// Uzbek
     UZ,
-    /// Vietnam
-    VN,
+    /// Vietnamese
+    VI,
 }
 
 impl Default for Language {
@@ -79,7 +79,7 @@ impl Language {
         Language::TR,
         Language::UK,
         Language::UZ,
-        Language::VN,
+        Language::VI,
         Language::ZH,
     ];
 
@@ -104,7 +104,7 @@ impl Language {
             Language::FI => FI,
             Language::JA => JP,
             Language::UZ => UZ,
-            Language::VN => VN,
+            Language::VI => VN,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
@@ -122,7 +122,7 @@ impl Language {
                 | Language::JA
                 | Language::UZ
                 | Language::SV
-                | Language::VN
+                | Language::VI
                 | Language::ZH
         )
     }
@@ -150,7 +150,7 @@ impl fmt::Display for Language {
             Language::FI => "Suomi",
             Language::JA => "日本語",
             Language::UZ => "O'zbekcha",
-            Language::VN => "Tiếng Việt",
+            Language::VI => "Tiếng Việt",
         };
         write!(f, "{self:?} - {lang_str}")
     }
