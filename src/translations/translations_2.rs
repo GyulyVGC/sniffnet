@@ -23,6 +23,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::JA => "新しいバージョンが利用可能になりました!",
         Language::UZ => "Yangi versiya mavjud!",
         Language::PT => "Uma nova versão está disponível!",
+        Language::VI => "Phiên bản mới đã sẵn sàng!",
     }
 }
 
@@ -46,6 +47,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::JA => "検査",
         Language::UZ => "Tekshirish",
         Language::PT => "Inspecionar",
+        Language::VI => "Quan sát",
         _ => "Inspect",
     }
 }
@@ -70,6 +72,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::JA => "接続の詳細",
         Language::UZ => "Ulanish tafsilotlari",
         Language::PT => "Detalhes da conexão",
+        Language::VI => "Thông tin kết nối",
         _ => "Connection details",
     }
 }
@@ -94,6 +97,7 @@ pub fn dropped_packets_translation(language: Language) -> &'static str {
         Language::JA => "ドロップしたパケット",
         Language::UZ => "Yig'ilgan paketlar",
         Language::PT => "Pacotes perdidos",
+        Language::VI => "Gói tin đã bị mất",
         _ => "Dropped packets",
     }
 }
@@ -118,6 +122,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::JA => "データ表示",
         Language::UZ => "Ma'lumotlarni taqdim etish",
         Language::PT => "Representação dos dados",
+        Language::VI => "Miêu tả dữ liệu",
         _ => "Data representation",
     }
 }
@@ -142,6 +147,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::JA => "ネットワーク ホスト",
         Language::UZ => "Tarmoq serveri",
         Language::PT => "Host da rede",
+        Language::VI => "Máy chủ",
         _ => "Network host",
     }
 }
@@ -166,6 +172,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::JA => "上位 30 件のアイテムのみが表示されます",
         Language::UZ => "Bu erda faqat dastlabki 30 ta buyumlar ko'rsatiladi",
         Language::PT => "Apenas os 30 melhores unid são expostos aqui",
+        Language::VI => "Chỉ có 30 mục gần nhất được hiển thị ở đây",
         _ => "Only the top 30 items are displayed here",
     }
 }
@@ -213,6 +220,7 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::JA => "ローカル ネットワーク",
         Language::UZ => "Mahalliy tarmoq",
         Language::PT => "Rede local",
+        Language::VI => "Mạng nội bộ",
         _ => "Local network",
     }
 }
@@ -237,6 +245,7 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::JA => "不明なロケーション",
         Language::UZ => "Noma'lum joylashuv",
         Language::PT => "Localização desconhecida",
+        Language::VI => "Không rõ địa điểm",
         _ => "Unknown location",
     }
 }
@@ -261,6 +270,7 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::JA => "自身のネットワーク アダプター",
         Language::UZ => "Sizning tarmoq adapteringiz",
         Language::PT => "Seu adaptador de rede",
+        Language::VI => "Network adapter của bạn",
         _ => "Your network adapter",
     }
 }
@@ -285,6 +295,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::JA => "ソケット アドレス",
         Language::UZ => "Soket manzili",
         Language::PT => "Endereço da socket",
+        Language::VI => "Địa chỉ socket",
         _ => "Socket address",
     }
 }
@@ -309,6 +320,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::JA => "MAC アドレス",
         Language::UZ => "MAC manzili",
         Language::PT => "Endereço MAC",
+        Language::VI => "Địa chỉ MAC",
         _ => "MAC address",
     }
 }
@@ -333,6 +345,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::JA => "送信元",
         Language::UZ => "Manba",
         Language::PT => "Fonte",
+        Language::VI => "Nguồn",
         _ => "Source",
     }
 }
@@ -355,6 +368,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::FR => "Destination",
         Language::JA => "送信先",
         Language::UZ => "Qabul qiluvchi",
+        Language::VI => "Đích",
         _ => "Destination",
     }
 }
@@ -378,6 +392,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::FR => "Nom de domaine complètement qualifié",
         Language::UZ => "To'liq domen nomi",
         Language::PT => "Nome de domínio completo",
+        Language::VI => "Tên miền đầy đủ",
         _ => "Fully qualified domain name",
     }
 }
@@ -402,6 +417,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::JA => "AS 名",
         Language::UZ => "Avtonom tizim nomi",
         Language::PT => "Entidade administrativa",
+        Language::VI => "Tên Autonomous System",
         _ => "Autonomous System name",
     }
 }
@@ -426,6 +442,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::JA => "転送データ",
         Language::UZ => "Uzatilgan ma'lumotlar",
         Language::PT => "Dados transmitidos",
+        Language::VI => "Dữ liệu được truyền",
         _ => "Transmitted data",
     }
 }
@@ -449,6 +466,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::FR => "Pays",
         Language::JA => "国",
         Language::UZ => "Davlat",
+        Language::VI => "Quốc gia",
         _ => "Country",
     }
 }
@@ -473,6 +491,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::JA => "ドメイン名",
         Language::UZ => "Domen nomi",
         Language::PT => "Nome do domínio",
+        Language::VI => "Tên miền",
         _ => "Domain name",
     }
 }
@@ -497,6 +516,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::JA => "お気に入りのみを表示する",
         Language::UZ => "Faqat sevimlilarni ko'rsatish",
         Language::PT => "Apenas mostrar os favoritos",
+        Language::VI => "Chỉ hiển thị mục ưa thích",
         _ => "Only show favorites",
     }
 }
@@ -545,6 +565,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::JA => "指定されたフィルター条件で表示できる結果はありません",
         Language::UZ => "Belgilangan qidiruv filtrlari bo'yicha hech qanday natija mavjud emas",
         Language::PT => "Nenhum resultado disponível de acordo com os filtros selecionados",
+        Language::VI => "Không có kết quả nào theo các bộ lọc được chỉ định",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -574,6 +595,7 @@ pub fn showing_results_translation(
         Language::JA => format!("{total} 件中の {start}-{end} 件を表示"),
         Language::UZ => format!("Jami {total} natijadan {start}-{end} ko'rsatilyapti"),
         Language::PT => format!("Mostrando {start}-{end} de {total} resultados totais"),
+        Language::VI => format!("Đang hiển thị {start}-{end} của {total} tổng số kết quả"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -599,6 +621,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::JA => "グラデーションを適用する",
         Language::UZ => "Rang gradientlarini qo'llang",
         Language::PT => "Aplicar gradientes de cor",
+        Language::VI => "Áp dụng color gradients",
         _ => "Apply color gradients",
     }
 }

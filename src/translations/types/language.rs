@@ -5,7 +5,7 @@ use iced::widget::Svg;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ,
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, VN,
 };
 use crate::StyleType;
 
@@ -50,6 +50,8 @@ pub enum Language {
     JA,
     /// Uzbek
     UZ,
+    /// Vietnamese
+    VI,
 }
 
 impl Default for Language {
@@ -59,7 +61,7 @@ impl Default for Language {
 }
 
 impl Language {
-    pub const ALL: [Language; 18] = [
+    pub const ALL: [Language; 19] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -77,6 +79,7 @@ impl Language {
         Language::TR,
         Language::UK,
         Language::UZ,
+        Language::VI,
         Language::ZH,
     ];
 
@@ -101,6 +104,7 @@ impl Language {
             Language::FI => FI,
             Language::JA => JP,
             Language::UZ => UZ,
+            Language::VI => VN,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
@@ -118,6 +122,7 @@ impl Language {
                 | Language::JA
                 | Language::UZ
                 | Language::SV
+                | Language::VI
                 | Language::ZH
         )
     }
@@ -145,6 +150,7 @@ impl fmt::Display for Language {
             Language::FI => "Suomi",
             Language::JA => "日本語",
             Language::UZ => "O'zbekcha",
+            Language::VI => "Tiếng Việt",
         };
         write!(f, "{self:?} - {lang_str}")
     }
