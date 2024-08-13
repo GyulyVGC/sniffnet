@@ -441,7 +441,7 @@ pub fn hide_translation(language: Language) -> &'static str {
 
 pub fn network_adapter_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Network adapter",
+        Language::EN | Language::VI => "Network adapter",
         Language::IT => "Adattatore di rete",
         Language::FR => "Carte réseau",
         Language::ES => "Adaptador de red",
@@ -460,7 +460,6 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::FI => "Verkkosovitin",
         Language::JA => "ネットワーク アダプター",
         Language::UZ => "Tarmoq adapteri",
-        Language::VI => "Network adapter",
     }
 }
 
