@@ -1009,7 +1009,9 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
 
 pub fn bytes_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV | Language::VN => "bytes",
+        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV | Language::VN => {
+            "bytes"
+        }
         Language::DE => "Bytes",
         Language::IT => "byte",
         Language::FR => "octets",
@@ -1800,7 +1802,6 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         Language::JA => format!("{value} パケットの送受信が発生しました"),
         Language::UZ => format!("{value} paket uzatildi"),
         Language::VN => format!("{value} gói tin đã được trao đổi"),
-        
     }
 }
 

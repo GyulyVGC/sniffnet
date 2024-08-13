@@ -5,7 +5,7 @@ use iced::widget::Svg;
 use serde::{Deserialize, Serialize};
 
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ,
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, VN,
 };
 use crate::StyleType;
 
@@ -61,7 +61,7 @@ impl Default for Language {
 }
 
 impl Language {
-    pub const ALL: [Language; 18] = [
+    pub const ALL: [Language; 19] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -79,8 +79,8 @@ impl Language {
         Language::TR,
         Language::UK,
         Language::UZ,
-        Language::ZH,
         Language::VN,
+        Language::ZH,
     ];
 
     pub fn get_flag(self) -> Svg<StyleType> {
