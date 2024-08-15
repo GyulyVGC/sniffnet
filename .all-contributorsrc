@@ -511,6 +511,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "3kh0",
+      "name": "Echo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58097612?v=4",
+      "profile": "https://3kh0.net",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
