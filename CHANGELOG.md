@@ -5,6 +5,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 ## [UNRELEASED]
 - Added Vietnamese translation 🇻🇳 ([#577](https://github.com/GyulyVGC/sniffnet/pull/577))
 - Updated Chinese translation to v1.3 ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
+- Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
 
 ## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
