@@ -38,7 +38,7 @@ strip = true
 pcap = "2.2.0"
 etherparse = "0.15.0"
 chrono = { version = "0.4.38", default-features = false, features = ["clock"] }
-plotters = { version = "0.3.6", default-features = false, features = ["area_series"] }
+plotters = { version = "0.3.7", default-features = false, features = ["area_series"] }
 iced = { version = "0.12.1", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.10.0"
 maxminddb = "0.24.0"
