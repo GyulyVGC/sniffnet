@@ -520,6 +520,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "rkdud007",
+      "name": "pia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76558220?v=4",
+      "profile": "http://piapark.me",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
