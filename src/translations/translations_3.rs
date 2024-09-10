@@ -84,7 +84,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::SV => "Följande parametrar kan inte ändras under analysen",
         Language::VI => "Các tham số sau không thể bị thay đổi khi đang phân tích",
         Language::ZH => "以下参数在分析过程中不能修改",
-        Language::KO => "분석 중 다음의 매개변수들은 수정할 수 없습니다.",
+        Language::KO => "분석 중 다음의 매개변수들은 수정할 수 없습니다",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
