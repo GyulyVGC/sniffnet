@@ -242,7 +242,7 @@ pub fn unsupported_link_type_translation(
         Language::VI => "Loại liên kết được gắn với adapter này chưa được Sniffnet hỗ trợ...",
         Language::ZH => "Sniffnet 尚不支持与此适配器关联的链接类型...",
         Language::KO => "이 어댑터와 연결된 링크 유형은 Sniffnet에서 아직 지원되지 않습니다...",
-        Language::TR => "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor",
+        Language::TR => "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
@@ -457,7 +457,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::VI => "Bạn có muốn tìm hiểu thêm?",
         Language::ZH => "想知道更多吗？",
         Language::KO => "더 자세히 알고 싶으십니까?",
-        Language::TR => "Daha fazlasını öğrenmek ister misin ?",
+        Language::TR => "Daha fazlasını öğrenmek ister misin?",
         _ => "Do you want to learn more?",
     }
 }
