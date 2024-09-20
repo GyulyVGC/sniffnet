@@ -50,7 +50,7 @@ impl ScrollbarType {
 
     fn hovered(&self, style: &StyleType, is_mouse_over_scrollbar: bool) -> Style {
         let colors = style.get_palette();
-        let ext = self.get_extension();
+        let ext = style.get_extension();
 
         let rail = Rail {
             background: Some(Background::Color(Color {

@@ -101,3 +101,10 @@ impl Catalog for StyleType {
         class.appearance(self)
     }
 }
+
+// used to make stack widget compile
+impl From<Box<dyn for<'a> Fn(&'a StyleType) -> Style>> for ContainerType {
+    fn from(_: Box<dyn for<'a> Fn(&'a StyleType) -> Style>) -> Self {
+        ContainerType::Standard
+    }
+}

@@ -76,7 +76,7 @@ impl Catalog for StyleType {
         match status {
             Status::Active { is_toggled } => class.active(self, is_toggled),
             Status::Hovered { is_toggled } => class.hovered(self, is_toggled),
-            Status::Disabled => class.disabled(self),
+            Status::Disabled => class.active(self, false),
         }
     }
 }

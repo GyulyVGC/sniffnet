@@ -12,7 +12,7 @@ use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::Event::{Keyboard, Window};
-use iced::{window, Element, Subscription, Task};
+use iced::{window, Element, Point, Size, Subscription, Task};
 use pcap::Device;
 use rfd::FileHandle;
 
@@ -175,7 +175,7 @@ impl Sniffer {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
 
         if self.thumbnail {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 Keyboard(Event::KeyPressed {
                     key,
                     modifiers: Modifiers::COMMAND,
@@ -188,7 +188,7 @@ impl Sniffer {
                 _ => None,
             })
         } else {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
                     Modifiers::COMMAND => match key.as_ref() {
                         Key::Character("q") => Some(Message::CloseRequested),
@@ -221,7 +221,7 @@ impl Sniffer {
 
     fn mouse_subscription(&self) -> Subscription<Message> {
         if self.thumbnail {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
                 _ => None,
             })
@@ -239,13 +239,13 @@ impl Sniffer {
     }
 
     fn window_subscription() -> Subscription<Message> {
-        iced::event::listen_with(|event, _| match event {
-            Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
-            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
-            Window(Id::MAIN, window::Event::Resized { width, height }) => {
+        iced::event::listen_with(|event, _, _| match event {
+            Window(window::Event::Focused) => Some(Message::WindowFocused),
+            Window(window::Event::Moved(Point { x, y })) => Some(Message::WindowMoved(x, y)),
+            Window(window::Event::Resized(Size { width, height })) => {
                 Some(Message::WindowResized(width, height))
             }
-            Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
+            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,
         })
     }
@@ -433,7 +433,7 @@ impl Sniffer {
             }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(Id::MAIN);
+                return window::close(window::get_oldest());
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());

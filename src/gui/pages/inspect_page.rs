@@ -355,20 +355,18 @@ fn host_filters_col(
         .spacing(5)
         .push(
             Container::new(
-                Toggler::new(
-                    only_show_favorites_translation(language).to_owned(),
-                    search_params.only_favorites,
-                    move |toggled| {
+                Toggler::new(search_params.only_favorites)
+                    .label(only_show_favorites_translation(language).to_owned())
+                    .on_toggle(move |toggled| {
                         Message::Search(SearchParameters {
                             only_favorites: toggled,
                             ..search_params2.clone()
                         })
-                    },
-                )
-                .width(Length::Shrink)
-                .spacing(5)
-                .size(23)
-                .font(font),
+                    })
+                    .width(Length::Shrink)
+                    .spacing(5)
+                    .size(23)
+                    .font(font),
             )
             .padding([5, 0]),
         )

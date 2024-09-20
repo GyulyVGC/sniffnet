@@ -73,7 +73,7 @@ impl iced::overlay::menu::Catalog for StyleType {
     type Class<'a> = PicklistType;
 
     fn default<'a>() -> <Self as iced::overlay::menu::Catalog>::Class<'a> {
-        Self::Class::default()
+        <Self as iced::overlay::menu::Catalog>::Class::default()
     }
 
     fn style(
@@ -88,7 +88,7 @@ impl Catalog for StyleType {
     type Class<'a> = PicklistType;
 
     fn default<'a>() -> <Self as Catalog>::Class<'a> {
-        Self::Class::default()
+        <Self as Catalog>::Class::default()
     }
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {

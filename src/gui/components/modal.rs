@@ -134,14 +134,11 @@ fn confirm_button_row(
         )
 }
 
-pub fn new_modal<'a, Message, Theme, Renderer>(
-    base: impl Into<Element<'a, Message, Theme, Renderer>>,
-    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+pub fn new_modal<'a, Message: Clone + 'a>(
+    base: impl Into<Element<'a, Message, StyleType>>,
+    content: impl Into<Element<'a, Message, StyleType>>,
     on_blur: Message,
-) -> Element<'a, Message, Theme, Renderer>
-where
-    Message: Clone + 'a,
-{
+) -> Element<'a, Message, StyleType> {
     stack![
         base.into(),
         opaque(

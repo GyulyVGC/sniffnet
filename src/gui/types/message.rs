@@ -92,9 +92,9 @@ pub enum Message {
     /// Set UI scale factor
     ChangeScaleFactor(f64),
     /// The app window position has been changed
-    WindowMoved(i32, i32),
+    WindowMoved(f32, f32),
     /// The app window size has been changed
-    WindowResized(u32, u32),
+    WindowResized(f32, f32),
     /// The country MMDB custom path has been updated
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated

@@ -194,7 +194,7 @@ impl ButtonType {
         let ext = style.get_extension();
         match self {
             ButtonType::Gradient(_) => Style {
-                background: Some(match style {
+                background: Some(match self {
                     ButtonType::Gradient(GradientType::None) => Background::Color(Color {
                         a: ext.alpha_chart_badge,
                         ..colors.secondary
@@ -242,7 +242,7 @@ impl ButtonType {
                 },
                 shadow: Shadow::default(),
             },
-            _ => button::Style::active(self, style),
+            _ => self.active(style),
         }
     }
 }
