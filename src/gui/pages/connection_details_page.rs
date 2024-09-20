@@ -53,10 +53,7 @@ pub fn connection_details_page(
     ))
 }
 
-fn page_content(
-    sniffer: &Sniffer,
-    key: &AddressPortPair,
-) -> Container<'static, Message, StyleType> {
+fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -151,12 +148,12 @@ fn page_content(
         .class(ContainerType::Modal)
 }
 
-fn page_header(
+fn page_header<'a>(
     font: Font,
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .push(horizontal_space())
@@ -180,12 +177,12 @@ fn page_header(
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn col_info(
+fn col_info<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
 
     let mut ret_val = Column::new()
@@ -262,12 +259,12 @@ fn col_info(
     ret_val
 }
 
-fn get_host_info_col(
+fn get_host_info_col<'a>(
     r_dns: &str,
     host: &Host,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && !host.asn.code.is_empty())
     {
@@ -290,11 +287,11 @@ fn get_host_info_col(
     host_info_col
 }
 
-fn get_local_tooltip(
+fn get_local_tooltip<'a>(
     sniffer: &Sniffer,
     address_to_lookup: &str,
     key: &AddressPortPair,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -322,15 +319,15 @@ fn get_local_tooltip(
     )
 }
 
-fn get_src_or_dest_col(
-    caption: Row<'static, Message, StyleType>,
+fn get_src_or_dest_col<'a>(
+    caption: Row<'a, Message, StyleType>,
     ip: &String,
     port: Option<u16>,
     mac: &Option<String>,
     font: Font,
     language: Language,
     timing_events: &TimingEvents,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let address_caption = if port.is_some() {
         socket_address_translation(language)
     } else {
@@ -365,11 +362,11 @@ fn get_src_or_dest_col(
         ))
 }
 
-fn assemble_widgets(
-    col_info: Column<'static, Message, StyleType>,
-    source_col: Column<'static, Message, StyleType>,
-    dest_col: Column<'static, Message, StyleType>,
-) -> Row<'static, Message, StyleType> {
+fn assemble_widgets<'a>(
+    col_info: Column<'a, Message, StyleType>,
+    source_col: Column<'a, Message, StyleType>,
+    dest_col: Column<'a, Message, StyleType>,
+) -> Row<'a, Message, StyleType> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)
             .padding(7)
@@ -396,12 +393,12 @@ fn assemble_widgets(
         )
 }
 
-fn get_button_copy(
+fn get_button_copy<'a>(
     language: Language,
     font: Font,
     string: &String,
     timing_events: &TimingEvents,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let icon = if timing_events.was_just_copy_ip(string) {
         Text::new("✔").font(font).size(14)
     } else {

@@ -556,7 +556,7 @@ impl Sniffer {
             color_gradient,
             font,
             font_headers,
-            &self.newer_release_available.clone(),
+            self.newer_release_available.clone(),
         );
 
         let content = Column::new().push(header).push(body).push(footer);

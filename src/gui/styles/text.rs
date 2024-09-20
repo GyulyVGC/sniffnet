@@ -24,11 +24,11 @@ pub enum TextType {
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
 impl TextType {
-    pub fn highlighted_subtitle_with_desc(
+    pub fn highlighted_subtitle_with_desc<'a>(
         subtitle: &str,
         desc: &str,
         font: Font,
-    ) -> Column<'static, Message, StyleType> {
+    ) -> Column<'a, Message, StyleType> {
         Column::new()
             .push(
                 Text::new(format!("{subtitle}:"))

@@ -12,11 +12,11 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 
-pub fn get_settings_tabs(
+pub fn get_settings_tabs<'a>(
     active: SettingsPage,
     font: Font,
     language: Language,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_y(Alignment::Start)
@@ -30,13 +30,13 @@ pub fn get_settings_tabs(
     tabs
 }
 
-pub fn get_pages_tabs(
+pub fn get_pages_tabs<'a>(
     active: RunningPage,
     font: Font,
     font_headers: Font,
     language: Language,
     unread_notifications: usize,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
         .align_y(Alignment::Start)
@@ -62,14 +62,14 @@ pub fn get_pages_tabs(
     tabs
 }
 
-fn new_page_tab(
+fn new_page_tab<'a>(
     page: RunningPage,
     active: bool,
     language: Language,
     font: Font,
     font_headers: Font,
     unread: Option<usize>,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let mut content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
@@ -121,12 +121,12 @@ fn new_page_tab(
         .on_press(page.action())
 }
 
-fn new_settings_tab(
+fn new_settings_tab<'a>(
     page: SettingsPage,
     active: bool,
     language: Language,
     font: Font,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
@@ -169,10 +169,10 @@ fn new_settings_tab(
         .on_press(page.action())
 }
 
-pub fn notifications_badge(
+pub fn notifications_badge<'a>(
     font_headers: Font,
     num: usize,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Text::new(num.to_string())
             .font(font_headers)

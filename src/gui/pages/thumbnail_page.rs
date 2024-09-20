@@ -23,7 +23,7 @@ const MAX_CHARS_HOST: usize = 26;
 const MAX_CHARS_SERVICE: usize = 13;
 
 /// Computes the body of the thumbnail view
-pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn thumbnail_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings { style, .. } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
@@ -60,11 +60,11 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(content)
 }
 
-fn host_col(
+fn host_col<'a>(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
         .spacing(3)
@@ -102,11 +102,11 @@ fn host_col(
     host_col
 }
 
-fn service_col(
+fn service_col<'a>(
     info_traffic: &Arc<Mutex<InfoTraffic>>,
     chart_type: ChartType,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
     let services = get_service_entries(info_traffic, chart_type, SortType::Neutral);
     let n_entry = min(services.len(), MAX_ENTRIES);

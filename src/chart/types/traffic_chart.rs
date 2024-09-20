@@ -118,7 +118,7 @@ impl TrafficChart {
         min - gap..max + gap
     }
 
-    fn font(&self, size: f64) -> TextStyle<'static> {
+    fn font<'a>(&self, size: f64) -> TextStyle<'a> {
         (FONT_FAMILY_NAME, size)
             .into_font()
             .style(self.style.get_font_weight())

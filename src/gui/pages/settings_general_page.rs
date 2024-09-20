@@ -29,7 +29,7 @@ use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
-pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn settings_general_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -58,10 +58,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         .class(ContainerType::Modal)
 }
 
-fn column_all_general_setting(
-    sniffer: &Sniffer,
-    font: Font,
-) -> Column<'static, Message, StyleType> {
+fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
     let ConfigSettings {
         language,
         scale_factor,
@@ -101,11 +98,11 @@ fn column_all_general_setting(
     column
 }
 
-fn row_language_scale_factor(
+fn row_language_scale_factor<'a>(
     language: Language,
     font: Font,
     scale_factor: f64,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
         .height(100)
@@ -116,7 +113,7 @@ fn row_language_scale_factor(
         .push(need_help(language, font))
 }
 
-fn language_picklist(language: Language, font: Font) -> Container<'static, Message, StyleType> {
+fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
     let mut flag_row = Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
@@ -176,11 +173,11 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
         .align_y(Alignment::Center)
 }
 
-fn scale_factor_slider(
+fn scale_factor_slider<'a>(
     language: Language,
     font: Font,
     scale_factor: f64,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     #[allow(clippy::cast_possible_truncation)]
     let slider_width = 130.0 / scale_factor as f32;
     let slider_val = scale_factor.log(3.0);
@@ -208,7 +205,7 @@ fn scale_factor_slider(
     .align_y(Alignment::Center)
 }
 
-fn need_help(language: Language, font: Font) -> Container<'static, Message, StyleType> {
+fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
     let content = Column::new()
         .align_x(Alignment::Center)
         .push(
@@ -246,7 +243,7 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
         .align_y(Alignment::Center)
 }
 
-fn mmdb_settings(
+fn mmdb_settings<'a>(
     is_editable: bool,
     language: Language,
     font: Font,
@@ -254,7 +251,7 @@ fn mmdb_settings(
     asn_path: &str,
     country_reader: &Arc<MmdbReader>,
     asn_reader: &Arc<MmdbReader>,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     Column::new()
         .spacing(5)
         .align_x(Alignment::Center)
@@ -284,7 +281,7 @@ fn mmdb_settings(
         ))
 }
 
-fn mmdb_selection_row(
+fn mmdb_selection_row<'a>(
     is_editable: bool,
     font: Font,
     message: fn(String) -> Message,
@@ -292,7 +289,7 @@ fn mmdb_selection_row(
     mmdb_reader: &Arc<MmdbReader>,
     caption: &str,
     language: Language,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let is_error = if custom_path.is_empty() {
         false
     } else {
@@ -328,11 +325,11 @@ fn mmdb_selection_row(
         })
 }
 
-fn button_clear_mmdb(
+fn button_clear_mmdb<'a>(
     message: fn(String) -> Message,
     font: Font,
     is_editable: bool,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let mut button = button(
         Text::new("×")
             .font(font)

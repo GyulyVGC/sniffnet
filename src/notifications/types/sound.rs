@@ -42,7 +42,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, StyleType> {
+    pub fn get_text<'a>(self, font: Font) -> iced::widget::Text<'a, StyleType> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),

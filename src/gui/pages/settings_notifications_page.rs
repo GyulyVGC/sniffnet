@@ -26,7 +26,7 @@ use crate::translations::translations::{
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -97,11 +97,11 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Styl
         .class(ContainerType::Modal)
 }
 
-fn get_packets_notify(
+fn get_packets_notify<'a>(
     packets_notification: PacketsNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         packets_threshold_translation(language),
         packets_notification.threshold.is_some(),
@@ -150,11 +150,11 @@ fn get_packets_notify(
     }
 }
 
-fn get_bytes_notify(
+fn get_bytes_notify<'a>(
     bytes_notification: BytesNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         bytes_threshold_translation(language),
         bytes_notification.threshold.is_some(),
@@ -203,11 +203,11 @@ fn get_bytes_notify(
     }
 }
 
-fn get_favorite_notify(
+fn get_favorite_notify<'a>(
     favorite_notification: FavoriteNotification,
     language: Language,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         favorite_notification_translation(language),
         favorite_notification.notify_on_favorite,
@@ -250,11 +250,11 @@ fn get_favorite_notify(
     }
 }
 
-fn input_group_packets(
+fn input_group_packets<'a>(
     packets_notification: PacketsNotification,
     font: Font,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
         .align_y(Alignment::Center)
@@ -293,11 +293,11 @@ fn input_group_packets(
         .align_y(Alignment::Center)
 }
 
-fn input_group_bytes(
+fn input_group_bytes<'a>(
     bytes_notification: BytesNotification,
     font: Font,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let info_str = format!(
         "{}; {}",
         per_second_translation(language),
@@ -340,11 +340,11 @@ fn input_group_bytes(
         .align_y(Alignment::Center)
 }
 
-fn volume_slider(
+fn volume_slider<'a>(
     language: Language,
     font: Font,
     volume: u8,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Column::new()
             .spacing(5)
@@ -380,11 +380,11 @@ fn volume_slider(
     .align_y(Alignment::Center)
 }
 
-fn sound_buttons(
+fn sound_buttons<'a>(
     notification: Notification,
     font: Font,
     language: Language,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let current_sound = match notification {
         Notification::Packets(n) => n.sound,
         Notification::Bytes(n) => n.sound,
@@ -427,12 +427,12 @@ fn sound_buttons(
     ret_val
 }
 
-pub fn settings_header(
+pub fn settings_header<'a>(
     font: Font,
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .push(horizontal_space())

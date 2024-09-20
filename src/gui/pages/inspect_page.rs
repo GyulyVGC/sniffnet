@@ -34,7 +34,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn inspect_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -103,7 +103,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn lazy_report(sniffer: &Sniffer) -> Column<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -169,7 +169,7 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
-) -> Row<'static, Message, StyleType> {
+) -> Row<Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
@@ -210,7 +210,7 @@ fn report_header_row(
                 .align_y(Alignment::Center),
             );
         } else {
-            col_header = col_header.push(sort_arrows(sort_type, &report_col));
+            col_header = col_header.push(sort_arrows(sort_type, report_col));
         }
         ret_val = ret_val.push(col_header);
     }
@@ -252,10 +252,10 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows(
+fn sort_arrows<'a>(
     active_sort_type: ReportSortType,
-    report_col: &ReportCol,
-) -> Container<'static, Message, StyleType> {
+    report_col: ReportCol,
+) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
@@ -263,20 +263,20 @@ fn sort_arrows(
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
-        .class(active_sort_type.button_type(report_col))
+        .class(active_sort_type.button_type(&report_col))
         .on_press(Message::ReportSortSelection(
-            active_sort_type.next_sort(report_col),
+            active_sort_type.next_sort(&report_col),
         )),
     )
     .align_y(Alignment::Center)
     .height(Length::Fill)
 }
 
-fn row_report_entry(
+fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
     } else {
@@ -309,7 +309,7 @@ fn host_filters_col(
     search_params: &SearchParameters,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_y(Alignment::Center).push(
@@ -391,11 +391,11 @@ fn host_filters_col(
         )
 }
 
-fn filter_input(
+fn filter_input<'a>(
     filter_input_type: FilterInputType,
     search_params: SearchParameters,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params);
     let is_filter_active = !filter_value.is_empty();
 
@@ -444,7 +444,7 @@ fn filter_input(
         })
 }
 
-fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType> {
+fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType> {
     button(
         if increment {
             Icon::ArrowRight
@@ -462,14 +462,14 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType
     .on_press(Message::UpdatePageNumber(increment))
 }
 
-fn get_change_page_row(
+fn get_change_page_row<'a>(
     font: Font,
     language: Language,
     page_number: usize,
     start_entry_num: usize,
     end_entry_num: usize,
     results_number: usize,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     Row::new()
         .height(40)
         .align_y(Alignment::Center)
@@ -497,10 +497,10 @@ fn get_change_page_row(
         .push(horizontal_space())
 }
 
-fn button_clear_filter(
+fn button_clear_filter<'a>(
     new_search_parameters: SearchParameters,
     font: Font,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     button(
         Text::new("×")
             .font(font)

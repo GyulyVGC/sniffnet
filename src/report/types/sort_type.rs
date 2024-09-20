@@ -21,7 +21,7 @@ impl SortType {
         }
     }
 
-    pub fn icon(self) -> Text<'static, StyleType> {
+    pub fn icon<'a>(self) -> Text<'a, StyleType> {
         let mut size = 14;
         match self {
             SortType::Ascending => Icon::SortAscending,

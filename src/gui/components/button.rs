@@ -13,11 +13,11 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
-pub fn button_hide(
+pub fn button_hide<'a>(
     message: Message,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         button(
             Text::new("×")
@@ -38,14 +38,14 @@ pub fn button_hide(
     .class(ContainerType::Tooltip)
 }
 
-pub fn button_open_file(
+pub fn button_open_file<'a>(
     old_file: String,
     file_info: FileInfo,
     language: Language,
     font: Font,
     is_editable: bool,
     action: fn(String) -> Message,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let mut tooltip_str = "";
     let mut tooltip_style = ContainerType::Standard;
 
@@ -71,7 +71,7 @@ pub fn button_open_file(
         .class(tooltip_style)
 }
 
-pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Message, StyleType> {
+pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<Message, StyleType> {
     Row::new()
         .align_y(Alignment::Center)
         .spacing(10)

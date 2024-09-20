@@ -48,7 +48,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn overview_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -141,12 +141,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn body_no_packets(
+fn body_no_packets<'a>(
     device: &MyDevice,
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let link_type = device.link_type;
     let mut adapter_info = device.name.clone();
     adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
@@ -186,14 +186,14 @@ fn body_no_packets(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn body_no_observed(
-    filters: &Filters,
+fn body_no_observed<'a>(
+    filters: &'a Filters,
     observed: u128,
     font: Font,
     font_headers: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
         .align_x(Alignment::Center)
         .font(font);
@@ -218,12 +218,12 @@ fn body_no_observed(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn body_pcap_error(
-    pcap_error: &str,
+fn body_pcap_error<'a>(
+    pcap_error: &'a str,
     waiting: &str,
     language: Language,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .align_x(Alignment::Center)
@@ -242,7 +242,7 @@ fn body_pcap_error(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
+fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
@@ -257,7 +257,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, StyleType> 
         .class(ContainerType::BorderedRound)
 }
 
-fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn col_host(width: f32, sniffer: &Sniffer) -> Column<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -362,7 +362,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
         )
 }
 
-fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn col_service(width: f32, sniffer: &Sniffer) -> Column<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -442,12 +442,12 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
         )
 }
 
-fn lazy_col_info(
+fn lazy_col_info<'a>(
     total: u128,
     filtered: u128,
     dropped: u32,
     sniffer: &Sniffer,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -539,11 +539,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
     .class(ContainerType::BorderedRound)
 }
 
-fn col_device(
-    language: Language,
-    font: Font,
-    device: &MyDevice,
-) -> Column<'static, Message, StyleType> {
+fn col_device(language: Language, font: Font, device: &MyDevice) -> Column<Message, StyleType> {
     let link_type = device.link_type;
     #[cfg(not(target_os = "windows"))]
     let adapter_info = &device.name;
@@ -561,11 +557,11 @@ fn col_device(
         .push(link_type.link_type_col(language, font))
 }
 
-fn col_data_representation(
+fn col_data_representation<'a>(
     language: Language,
     font: Font,
     chart_type: ChartType,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
             .class(TextType::Subtitle)
@@ -603,7 +599,7 @@ fn col_bytes_packets(
     font: Font,
     font_headers: Font,
     sniffer: &Sniffer,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
     let filters = &sniffer.filters;
@@ -728,7 +724,7 @@ fn get_bars_length(
     (in_len, out_len)
 }
 
-fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, StyleType> {
+fn get_bars<'a>(in_len: f32, out_len: f32) -> Row<'a, Message, StyleType> {
     Row::new()
         .push(if in_len > 0.0 {
             Row::new()
@@ -746,7 +742,7 @@ fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, StyleType> {
         })
 }
 
-fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, StyleType> {
+fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, StyleType> {
     button(
         Icon::Star
             .to_text()
@@ -771,7 +767,7 @@ fn get_active_filters_col(
     font: Font,
     font_headers: Font,
     show: bool,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
@@ -808,10 +804,10 @@ fn get_active_filters_col(
     ret_val
 }
 
-fn sort_arrows(
+fn sort_arrows<'a>(
     active_sort_type: SortType,
     message: fn(SortType) -> Message,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type

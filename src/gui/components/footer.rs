@@ -22,14 +22,14 @@ use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, SNIFFNET_TITLECASE};
 
-pub fn footer(
+pub fn footer<'a>(
     thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Option<bool>>>,
-) -> Container<'static, Message, StyleType> {
+    newer_release_available: Arc<Mutex<Option<bool>>>,
+) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
     }
@@ -59,7 +59,7 @@ pub fn footer(
         .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
+fn get_button_website<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Globe
             .to_text()
@@ -80,7 +80,7 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
     .class(ContainerType::Tooltip)
 }
 
-fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
+fn get_button_github<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::GitHub
             .to_text()
@@ -101,7 +101,7 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
     .class(ContainerType::Tooltip)
 }
 
-fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
+fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Text::new('❤'.to_string())
             .font(font)
@@ -124,12 +124,12 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
     .class(ContainerType::Tooltip)
 }
 
-fn get_release_details(
+fn get_release_details<'a>(
     language: Language,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Option<bool>>>,
-) -> Row<'static, Message, StyleType> {
+    newer_release_available: Arc<Mutex<Option<bool>>>,
+) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
         .height(Length::Fill)
@@ -170,6 +170,6 @@ fn get_release_details(
     ret_val
 }
 
-fn thumbnail_footer() -> Container<'static, Message, StyleType> {
+fn thumbnail_footer<'a>() -> Container<'a, Message, StyleType> {
     Container::new(horizontal_space()).height(0)
 }

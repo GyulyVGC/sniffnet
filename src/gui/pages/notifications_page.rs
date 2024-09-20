@@ -30,7 +30,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
-pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn notifications_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -105,10 +105,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(Column::new().push(tab_and_body)).height(Length::Fill)
 }
 
-fn body_no_notifications_set(
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, StyleType> {
+fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)
@@ -132,7 +129,7 @@ fn body_no_notifications_received(
     font: Font,
     language: Language,
     waiting: &str,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)
@@ -148,11 +145,11 @@ fn body_no_notifications_received(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn packets_notification_log(
+fn packets_notification_log<'a>(
     logged_notification: PacketsThresholdExceeded,
     language: Language,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let threshold_str = format!(
         "{}: {} {}",
         threshold_translation(language),
@@ -224,11 +221,11 @@ fn packets_notification_log(
         .class(ContainerType::BorderedRound)
 }
 
-fn bytes_notification_log(
+fn bytes_notification_log<'a>(
     logged_notification: BytesThresholdExceeded,
     language: Language,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let mut threshold_str = threshold_translation(language).to_string();
     threshold_str.push_str(": ");
     threshold_str.push_str(&ByteMultiple::formatted_string(
@@ -307,11 +304,11 @@ fn bytes_notification_log(
         .class(ContainerType::BorderedRound)
 }
 
-fn favorite_notification_log(
+fn favorite_notification_log<'a>(
     logged_notification: FavoriteTransmitted,
     language: Language,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let country = logged_notification.host.country;
     let asn = &logged_notification.host.asn;
 
@@ -377,7 +374,7 @@ fn favorite_notification_log(
         .class(ContainerType::BorderedRound)
 }
 
-fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
+fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
             .to_text()
@@ -399,7 +396,7 @@ fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Mess
     .class(ContainerType::Tooltip)
 }
 
-fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn lazy_logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;

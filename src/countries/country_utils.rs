@@ -28,14 +28,14 @@ use crate::translations::translations_2::{
 };
 use crate::{Language, StyleType};
 
-fn get_flag_from_country(
+fn get_flag_from_country<'a>(
     country: Country,
     width: f32,
     is_local: bool,
     is_loopback: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<'static, StyleType>, String) {
+) -> (Svg<'a, StyleType>, String) {
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;
@@ -310,13 +310,13 @@ fn get_flag_from_country(
     (svg, tooltip)
 }
 
-pub fn get_flag_tooltip(
+pub fn get_flag_tooltip<'a>(
     country: Country,
     host_info: &DataInfoHost,
     language: Language,
     font: Font,
     thumbnail: bool,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let width = if thumbnail {
         FLAGS_WIDTH_SMALL
     } else {
@@ -355,13 +355,13 @@ pub fn get_flag_tooltip(
     tooltip
 }
 
-pub fn get_computer_tooltip(
+pub fn get_computer_tooltip<'a>(
     is_my_address: bool,
     is_local: bool,
     traffic_type: TrafficType,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, is_local, traffic_type) {
             (true, _, _) => COMPUTER,

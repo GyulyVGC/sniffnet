@@ -17,12 +17,12 @@ use crate::translations::translations::{
 };
 use crate::{Language, StyleType};
 
-pub fn get_exit_overlay(
+pub fn get_exit_overlay<'a>(
     color_gradient: GradientType,
     font: Font,
     font_headers: Font,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let row_buttons = confirm_button_row(language, font, Message::Reset);
 
     let content = Column::new()
@@ -49,12 +49,12 @@ pub fn get_exit_overlay(
         .class(ContainerType::Modal)
 }
 
-pub fn get_clear_all_overlay(
+pub fn get_clear_all_overlay<'a>(
     color_gradient: GradientType,
     font: Font,
     font_headers: Font,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
 
     let content = Column::new()
@@ -87,7 +87,7 @@ fn get_modal_header(
     color_gradient: GradientType,
     language: Language,
     title: &'static str,
-) -> Container<'static, Message, StyleType> {
+) -> Container<Message, StyleType> {
     Container::new(
         Row::new()
             .push(horizontal_space())
@@ -111,11 +111,11 @@ fn get_modal_header(
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn confirm_button_row(
+fn confirm_button_row<'a>(
     language: Language,
     font: Font,
     message: Message,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)

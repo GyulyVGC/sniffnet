@@ -222,10 +222,10 @@ pub fn link_type_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn unsupported_link_type_translation(
+pub fn unsupported_link_type_translation<'a>(
     language: Language,
     adapter: &str,
-) -> Text<'static, StyleType> {
+) -> Text<'a, StyleType> {
     let translation = match language {
         Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
         // Language::FA => "نوع پیوند مرتبط با این مبدل هنوز توسط Sniffnet پشتیبانی نمی شود...",

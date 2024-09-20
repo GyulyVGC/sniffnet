@@ -19,7 +19,7 @@ use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType, SNIFFNET_TITLECASE};
 
-pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
+pub fn header<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
     let ConfigSettings {
         style,
@@ -78,7 +78,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
+fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::ArrowBack
             .to_text()
@@ -101,11 +101,11 @@ fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message,
     .class(ContainerType::Tooltip)
 }
 
-pub fn get_button_settings(
+pub fn get_button_settings<'a>(
     font: Font,
     language: Language,
     open_overlay: SettingsPage,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Settings
             .to_text()
@@ -127,11 +127,11 @@ pub fn get_button_settings(
     .class(ContainerType::Tooltip)
 }
 
-pub fn get_button_minimize(
+pub fn get_button_minimize<'a>(
     font: Font,
     language: Language,
     thumbnail: bool,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let size = if thumbnail { 20 } else { 24 };
     let button_size = if thumbnail { 30 } else { 40 };
     let icon = if thumbnail {
@@ -167,13 +167,13 @@ pub fn get_button_minimize(
         .class(tooltip_style)
 }
 
-fn thumbnail_header(
+fn thumbnail_header<'a>(
     font: Font,
     font_headers: Font,
     language: Language,
     color_gradient: GradientType,
     unread_notifications: usize,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .align_y(Alignment::Center)

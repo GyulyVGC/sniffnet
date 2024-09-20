@@ -41,7 +41,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn initial_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -119,7 +119,7 @@ fn col_ip_buttons(
     active_ip_filters: &HashSet<IpVersion>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
@@ -158,7 +158,7 @@ fn col_protocol_buttons(
     active_protocol_filters: &HashSet<Protocol>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
     for option in Protocol::ALL {
         let is_active = active_protocol_filters.contains(&option);
@@ -193,11 +193,7 @@ fn col_protocol_buttons(
         .push(buttons_row)
 }
 
-fn col_address_input(
-    value: &str,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, StyleType> {
+fn col_address_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -228,11 +224,7 @@ fn col_address_input(
         .push(input_row)
 }
 
-fn col_port_input(
-    value: &str,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, StyleType> {
+fn col_port_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -268,7 +260,7 @@ fn button_start(
     language: Language,
     color_gradient: GradientType,
     filters: &Filters,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<Message, StyleType> {
     let mut content = button(
         Icon::Rocket
             .to_text()
@@ -370,7 +362,7 @@ fn get_export_pcap_group(
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<Message, StyleType> {
     let enabled = export_pcap.enabled();
     let file_name = export_pcap.file_name();
     let directory = export_pcap.directory();

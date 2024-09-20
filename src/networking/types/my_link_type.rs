@@ -58,11 +58,11 @@ impl MyLinkType {
         }
     }
 
-    pub fn link_type_col(
+    pub fn link_type_col<'a>(
         self,
         language: Language,
         font: Font,
-    ) -> Column<'static, Message, StyleType> {
+    ) -> Column<'a, Message, StyleType> {
         match self {
             Self::Null(l)
             | Self::Ethernet(l)
