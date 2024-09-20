@@ -1,6 +1,5 @@
 use std::net::IpAddr;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
@@ -90,13 +89,13 @@ fn page_content(
         language,
     ));
 
-    let mut source_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
+    let mut source_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(source_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
             .class(TextType::Title),
     );
-    let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
+    let mut dest_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
@@ -166,16 +165,16 @@ fn page_header(
                     .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
-                    .horizontal_alignment(Horizontal::Center),
+                    .align_x(Alignment::Center),
             )
             .push(
                 Container::new(button_hide(Message::HideModal, language, font))
                     .width(Length::Fill)
-                    .align_x(Horizontal::Center),
+                    .align_x(Alignment::Center),
             ),
     )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .height(40.0)
     .width(Length::Fill)
     .class(ContainerType::Gradient(color_gradient))
@@ -345,13 +344,13 @@ fn get_src_or_dest_col(
         .push(
             Container::new(caption)
                 .width(Length::Fill)
-                .align_x(Horizontal::Center),
+                .align_x(Alignment::Center),
         )
         .push(Rule::horizontal(10.0))
         .push(
             Row::new()
                 .spacing(10)
-                .align_items(Alignment::End)
+                .align_y(Alignment::End)
                 .push(TextType::highlighted_subtitle_with_desc(
                     address_caption,
                     &get_socket_address(ip, port),
@@ -380,14 +379,14 @@ fn assemble_widgets(
     Row::new()
         .padding([0, 10])
         .spacing(10)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .width(Length::Fill)
         .height(Length::Fill)
         .push(col_info)
         .push(
             Column::new()
                 .width(Length::FillPortion(3))
-                .align_items(Alignment::Center)
+                .align_x(Alignment::Center)
                 .spacing(5)
                 .push(vertical_space())
                 .push(source_container)
@@ -409,14 +408,11 @@ fn get_button_copy(
         Icon::Copy.to_text().size(12)
     };
 
-    let content = button(
-        icon.horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
-    )
-    .padding(0)
-    .height(25)
-    .width(25)
-    .on_press(Message::CopyIp(string.clone()));
+    let content = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+        .padding(0)
+        .height(25)
+        .width(25)
+        .on_press(Message::CopyIp(string.clone()));
 
     Tooltip::new(
         content,

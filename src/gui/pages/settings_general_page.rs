@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
@@ -41,7 +40,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
     let font_headers = style.get_extension().font_headers;
 
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
             font,
@@ -74,7 +73,7 @@ fn column_all_general_setting(
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
     let mut column = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(language, font, scale_factor))
         .push(Rule::horizontal(25));
@@ -108,7 +107,7 @@ fn row_language_scale_factor(
     scale_factor: f64,
 ) -> Row<'static, Message, StyleType> {
     Row::new()
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .height(100)
         .push(language_picklist(language, font))
         .push(Rule::vertical(25))
@@ -119,7 +118,7 @@ fn row_language_scale_factor(
 
 fn language_picklist(language: Language, font: Font) -> Container<'static, Message, StyleType> {
     let mut flag_row = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(language.get_flag());
     if !language.is_up_to_date() {
@@ -129,8 +128,8 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
                     Text::new("!")
                         .class(TextType::Danger)
                         .font(font)
-                        .vertical_alignment(Vertical::Center)
-                        .horizontal_alignment(Horizontal::Center)
+                        .align_y(Alignment::Center)
+                        .align_x(Alignment::Center)
                         .size(15)
                         .line_height(LineHeight::Relative(1.0)),
                 )
@@ -150,7 +149,7 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
     }
 
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(
             Text::new(language_translation(language))
                 .class(TextType::Subtitle)
@@ -173,8 +172,8 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
 
     Container::new(content)
         .width(Length::Fill)
-        .align_x(Horizontal::Center)
-        .align_y(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }
 
 fn scale_factor_slider(
@@ -187,7 +186,7 @@ fn scale_factor_slider(
     let slider_val = scale_factor.log(3.0);
     Container::new(
         Column::new()
-            .align_items(Alignment::Center)
+            .align_x(Alignment::Center)
             .push(
                 Text::new(zoom_translation(language))
                     .class(TextType::Subtitle)
@@ -205,13 +204,13 @@ fn scale_factor_slider(
             .push(vertical_space()),
     )
     .width(Length::Fill)
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
 }
 
 fn need_help(language: Language, font: Font) -> Container<'static, Message, StyleType> {
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(
             Text::new(learn_more_translation(language))
                 .class(TextType::Subtitle)
@@ -224,8 +223,8 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
                 button(
                     Icon::Book
                         .to_text()
-                        .vertical_alignment(Vertical::Center)
-                        .horizontal_alignment(Horizontal::Center)
+                        .align_y(Alignment::Center)
+                        .align_x(Alignment::Center)
                         .size(22)
                         .line_height(LineHeight::Relative(1.0)),
                 )
@@ -243,8 +242,8 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
 
     Container::new(content)
         .width(Length::Fill)
-        .align_x(Horizontal::Center)
-        .align_y(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }
 
 fn mmdb_settings(
@@ -258,7 +257,7 @@ fn mmdb_settings(
 ) -> Column<'static, Message, StyleType> {
     Column::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(
             Text::new(mmdb_files_translation(language))
                 .font(font)
@@ -304,7 +303,7 @@ fn mmdb_selection_row(
     };
 
     Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{caption}: ")).font(font))
         .push(
             Text::new(get_path_termination_string(custom_path, 25))
@@ -337,8 +336,8 @@ fn button_clear_mmdb(
     let mut button = button(
         Text::new("×")
             .font(font)
-            .vertical_alignment(Vertical::Center)
-            .horizontal_alignment(Horizontal::Center)
+            .align_y(Alignment::Center)
+            .align_x(Alignment::Center)
             .size(15)
             .line_height(LineHeight::Relative(1.0)),
     )

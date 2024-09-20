@@ -2,7 +2,6 @@
 
 use std::sync::{Arc, Mutex};
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
@@ -41,7 +40,7 @@ pub fn footer(
     let footer_row = Row::new()
         .spacing(10)
         .padding([0, 20])
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(release_details_row)
         .push(get_button_website(font))
         .push(get_button_github(font))
@@ -49,14 +48,14 @@ pub fn footer(
         .push(
             Text::new("Made with ❤ by Giuliano Bellini")
                 .width(Length::Fill)
-                .horizontal_alignment(Horizontal::Right)
+                .align_x(Alignment::End)
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );
 
     Container::new(footer_row)
         .height(45)
-        .align_y(Vertical::Center)
+        .align_y(Alignment::Center)
         .class(ContainerType::Gradient(color_gradient))
 }
 
@@ -65,8 +64,8 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
         Icon::Globe
             .to_text()
             .size(17)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
     .height(30)
@@ -86,8 +85,8 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
         Icon::GitHub
             .to_text()
             .size(26)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
     .height(40)
@@ -108,8 +107,8 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
             .font(font)
             .size(23)
             .class(TextType::Sponsor)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding([2, 0, 0, 0])
@@ -132,7 +131,7 @@ fn get_release_details(
     newer_release_available: &Arc<Mutex<Option<bool>>>,
 ) -> Row<'static, Message, StyleType> {
     let mut ret_val = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .height(Length::Fill)
         .width(Length::Fill)
         .push(
@@ -147,8 +146,8 @@ fn get_release_details(
                 Text::new('!'.to_string())
                     .class(TextType::Danger)
                     .size(28)
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .line_height(LineHeight::Relative(0.8)),
             )
             .padding(0)

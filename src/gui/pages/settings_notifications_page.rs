@@ -1,4 +1,3 @@
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::{horizontal_space, Button, Slider};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
@@ -58,13 +57,13 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Styl
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
-                .horizontal_alignment(Horizontal::Center),
+                .align_x(Alignment::Center),
         )
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
         .padding([0, 0, 5, 0])
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(
@@ -258,7 +257,7 @@ fn input_group_packets(
 ) -> Container<'static, Message, StyleType> {
     let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
     let input_row = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(5)
         .push(Space::with_width(45))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
@@ -286,12 +285,12 @@ fn input_group_packets(
         .push(
             Text::new(per_second_translation(language))
                 .font(font)
-                .vertical_alignment(Vertical::Center)
+                .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
         );
     Container::new(input_row)
-        .align_x(Horizontal::Center)
-        .align_y(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }
 
 fn input_group_bytes(
@@ -310,7 +309,7 @@ fn input_group_bytes(
     curr_threshold_str.push_str(&bytes_notification.byte_multiple.get_char());
     let input_row = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Space::with_width(45))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
@@ -333,12 +332,12 @@ fn input_group_bytes(
         .push(
             Text::new(info_str)
                 .font(font)
-                .vertical_alignment(Vertical::Center)
+                .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
         );
     Container::new(input_row)
-        .align_x(Horizontal::Center)
-        .align_y(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }
 
 fn volume_slider(
@@ -349,7 +348,7 @@ fn volume_slider(
     Container::new(
         Column::new()
             .spacing(5)
-            .align_items(Alignment::Center)
+            .align_x(Alignment::Center)
             .push(Text::new(format!("{}: {volume:^3}%", volume_translation(language))).font(font))
             .push(
                 Row::new()
@@ -357,7 +356,7 @@ fn volume_slider(
                         Icon::AudioMute
                             .to_text()
                             .width(30)
-                            .vertical_alignment(Vertical::Center)
+                            .align_y(Alignment::Center)
                             .size(20),
                     )
                     .push(
@@ -369,7 +368,7 @@ fn volume_slider(
                     .push(
                         Icon::AudioHigh
                             .to_text()
-                            .vertical_alignment(Vertical::Center)
+                            .align_y(Alignment::Center)
                             .size(20),
                     ),
             ),
@@ -377,8 +376,8 @@ fn volume_slider(
     .padding(5)
     .width(Length::Fill)
     .height(60)
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
 }
 
 fn sound_buttons(
@@ -393,7 +392,7 @@ fn sound_buttons(
     };
 
     let mut ret_val = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(5)
         .push(Space::with_width(45))
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
@@ -442,16 +441,16 @@ pub fn settings_header(
                     .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
-                    .horizontal_alignment(Horizontal::Center),
+                    .align_x(Alignment::Center),
             )
             .push(
                 Container::new(button_hide(Message::CloseSettings, language, font))
                     .width(Length::Fill)
-                    .align_x(Horizontal::Center),
+                    .align_x(Alignment::Center),
             ),
     )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .height(40)
     .width(Length::Fill)
     .class(ContainerType::Gradient(color_gradient))

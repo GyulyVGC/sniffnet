@@ -1,4 +1,4 @@
-use iced::alignment::{Alignment, Horizontal, Vertical};
+use iced::alignment::Alignment;
 use iced::widget::{
     button, center, container, horizontal_space, mouse_area, opaque, stack, Column, Container, Row,
     Space, Text,
@@ -26,7 +26,7 @@ pub fn get_exit_overlay(
     let row_buttons = confirm_button_row(language, font, Message::Reset);
 
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
             font,
@@ -38,7 +38,7 @@ pub fn get_exit_overlay(
         .push(Space::with_height(20))
         .push(
             ask_quit_translation(language)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
         .push(row_buttons);
@@ -58,7 +58,7 @@ pub fn get_clear_all_overlay(
     let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
 
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
             font,
@@ -70,7 +70,7 @@ pub fn get_clear_all_overlay(
         .push(Space::with_height(20))
         .push(
             ask_clear_all_translation(language)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
         .push(row_buttons);
@@ -96,16 +96,16 @@ fn get_modal_header(
                     .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
-                    .horizontal_alignment(Horizontal::Center),
+                    .align_x(Alignment::Center),
             )
             .push(
                 Container::new(button_hide(Message::HideModal, language, font))
                     .width(Length::Fill)
-                    .align_x(Horizontal::Center),
+                    .align_x(Alignment::Center),
             ),
     )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .height(40)
     .width(Length::Fill)
     .class(ContainerType::Gradient(color_gradient))
@@ -118,13 +118,13 @@ fn confirm_button_row(
 ) -> Row<'static, Message, StyleType> {
     Row::new()
         .height(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(
             button(
                 yes_translation(language)
                     .font(font)
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center),
+                    .align_y(Alignment::Center)
+                    .align_x(Alignment::Center),
             )
             .padding(5)
             .height(40)

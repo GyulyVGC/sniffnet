@@ -1,6 +1,5 @@
 //! Tab buttons to be used in the various pages just under the header
 
-use iced::alignment::Vertical;
 use iced::widget::text::LineHeight;
 use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
 use iced::{alignment, Alignment, Font, Length};
@@ -20,7 +19,7 @@ pub fn get_settings_tabs(
 ) -> Row<'static, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .spacing(2)
         .padding([0, 3]);
 
@@ -40,7 +39,7 @@ pub fn get_pages_tabs(
 ) -> Row<'static, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .spacing(2)
         .padding([0, 3]);
 
@@ -73,7 +72,7 @@ fn new_page_tab(
 ) -> Button<'static, Message, StyleType> {
     let mut content = Row::new()
         .height(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(horizontal_space())
         .push(
             page.icon()
@@ -83,8 +82,8 @@ fn new_page_tab(
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(Space::with_width(10))
         .push(
@@ -96,8 +95,8 @@ fn new_page_tab(
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         );
 
     if let Some(num) = unread {
@@ -130,7 +129,7 @@ fn new_settings_tab(
 ) -> Button<'static, Message, StyleType> {
     let content = Row::new()
         .height(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(horizontal_space())
         .push(
             page.icon()
@@ -140,8 +139,8 @@ fn new_settings_tab(
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(Space::with_width(10))
         .push(
@@ -153,8 +152,8 @@ fn new_settings_tab(
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(horizontal_space());
 
@@ -180,7 +179,7 @@ pub fn notifications_badge(
             .size(14)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .align_y(Vertical::Center)
+    .align_y(Alignment::Center)
     .padding([2, 4])
     .height(20)
     .class(ContainerType::Highlighted)

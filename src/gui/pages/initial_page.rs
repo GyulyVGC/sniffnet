@@ -4,7 +4,6 @@
 
 use std::collections::HashSet;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
@@ -91,7 +90,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             Container::new(get_export_pcap_group(&sniffer.export_pcap, language, font))
                 .height(Length::Fill)
-                .align_y(Vertical::Top),
+                .align_y(Alignment::Start),
         )
         .push(
             Container::new(button_start(
@@ -102,8 +101,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             ))
             .width(Length::Fill)
             .height(Length::Fill)
-            .align_y(Vertical::Top)
-            .align_x(Horizontal::Center),
+            .align_y(Alignment::Start)
+            .align_x(Alignment::Center),
         );
 
     let body = Column::new().push(Space::with_height(5)).push(
@@ -128,8 +127,8 @@ fn col_ip_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .font(font),
             )
             .width(90)
@@ -167,8 +166,8 @@ fn col_protocol_buttons(
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .font(font),
             )
             .width(90)
@@ -274,8 +273,8 @@ fn button_start(
         Icon::Rocket
             .to_text()
             .size(25)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+            .align_x(alignment::Alignment::Center)
+            .align_y(alignment::Alignment::Center),
     )
     .padding(10)
     .height(80)
@@ -390,7 +389,7 @@ fn get_export_pcap_group(
             .padding([0, 0, 0, 45])
             .push(
                 Row::new()
-                    .align_items(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .spacing(5)
                     .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
                     .push(
@@ -403,7 +402,7 @@ fn get_export_pcap_group(
             )
             .push(
                 Row::new()
-                    .align_items(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .spacing(5)
                     .push(Text::new(format!("{}:", directory_translation(language))).font(font))
                     .push(Text::new(get_path_termination_string(directory, 25)).font(font))

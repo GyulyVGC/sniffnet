@@ -2,7 +2,6 @@ use std::cmp::min;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 
-use iced::alignment::Horizontal;
 use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
 use iced::{Alignment, Font, Length};
 
@@ -38,7 +37,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .push(Space::with_height(Length::FillPortion(2))),
         )
         .width(Length::Fill)
-        .align_x(Horizontal::Center);
+        .align_x(Alignment::Center);
     }
 
     let info_traffic = sniffer.info_traffic.clone();
@@ -48,7 +47,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         Row::new()
             .padding([5, 0])
             .height(Length::Fill)
-            .align_items(Alignment::Start)
+            .align_y(Alignment::Start)
             .push(host_col(&info_traffic, chart_type, font))
             .push(Rule::vertical(10))
             .push(service_col(&info_traffic, chart_type, font))
@@ -89,7 +88,7 @@ fn host_col(
 
         let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true);
         let host_row = Row::new()
-            .align_items(Alignment::Center)
+            .align_y(Alignment::Center)
             .spacing(5)
             .push(flag)
             .push(Text::new(text).font(font).size(FONT_SIZE_FOOTER));

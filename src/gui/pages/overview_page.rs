@@ -3,7 +3,6 @@
 //! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
@@ -118,7 +117,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .width(Length::Fill)
                     .padding(10)
                     .spacing(10)
-                    .align_items(Alignment::Center)
+                    .align_x(Alignment::Center)
                     .push(
                         Row::new()
                             .spacing(10)
@@ -155,21 +154,21 @@ fn body_no_packets(
         (
             Icon::Warning.to_text().size(60),
             unsupported_link_type_translation(language, &adapter_info)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
     } else if device.addresses.lock().unwrap().is_empty() {
         (
             Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &adapter_info)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
     } else {
         (
             Icon::get_hourglass(waiting.len()).size(60),
             waiting_translation(language, &adapter_info)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
     };
@@ -178,7 +177,7 @@ fn body_no_packets(
         .width(Length::Fill)
         .padding(10)
         .spacing(10)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(vertical_space())
         .push(icon_text)
         .push(Space::with_height(15))
@@ -196,14 +195,14 @@ fn body_no_observed(
     waiting: &str,
 ) -> Column<'static, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
-        .horizontal_alignment(Horizontal::Center)
+        .align_x(Alignment::Center)
         .font(font);
 
     Column::new()
         .width(Length::Fill)
         .padding(10)
         .spacing(10)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
         .push(get_active_filters_col(
@@ -227,14 +226,14 @@ fn body_pcap_error(
 ) -> Column<'static, Message, StyleType> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
-        .horizontal_alignment(Horizontal::Center)
+        .align_x(Alignment::Center)
         .font(font);
 
     Column::new()
         .width(Length::Fill)
         .padding(10)
         .spacing(10)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .push(vertical_space())
         .push(Icon::Error.to_text().size(60))
         .push(Space::with_height(15))
@@ -265,7 +264,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_host = Column::new().width(width).align_items(Alignment::Center);
+    let mut scroll_host = Column::new().width(width).align_x(Alignment::Center);
     let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -310,7 +309,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
             .push(get_bars(incoming_bar_len, outgoing_bar_len));
 
         let content = Row::new()
-            .align_items(Alignment::Center)
+            .align_y(Alignment::Center)
             .spacing(5)
             .push(star_button)
             .push(get_flag_tooltip(
@@ -334,7 +333,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
         scroll_host = scroll_host.push(Space::with_height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
-                .horizontal_alignment(Horizontal::Center),
+                .align_x(Alignment::Center),
         );
     }
 
@@ -343,7 +342,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
         .push(
             Row::new()
                 .height(45)
-                .align_items(Alignment::Center)
+                .align_y(Alignment::Center)
                 .push(
                     Text::new(host_translation(language))
                         .font(font)
@@ -370,7 +369,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let mut scroll_service = Column::new().width(width).align_items(Alignment::Center);
+    let mut scroll_service = Column::new().width(width).align_x(Alignment::Center);
     let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
@@ -414,7 +413,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
         scroll_service = scroll_service.push(Space::with_height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
-                .horizontal_alignment(Horizontal::Center),
+                .align_x(Alignment::Center),
         );
     }
 
@@ -423,7 +422,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
         .push(
             Row::new()
                 .height(45)
-                .align_items(Alignment::Center)
+                .align_y(Alignment::Center)
                 .push(
                     Text::new(service_translation(language))
                         .font(font)
@@ -472,7 +471,7 @@ fn lazy_col_info(
     );
 
     let content = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .padding([5, 10])
         .push(
             Row::new()
@@ -496,7 +495,7 @@ fn lazy_col_info(
     Container::new(content)
         .width(400)
         .padding([10, 5, 5, 5])
-        .align_x(Horizontal::Center)
+        .align_x(Alignment::Center)
         .class(ContainerType::BorderedRound)
 }
 
@@ -514,12 +513,12 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
 
     Container::new(
         Column::new()
-            .align_items(Alignment::Center)
+            .align_x(Alignment::Center)
             .push(
                 Row::new()
                     .padding([10, 0])
                     .spacing(10)
-                    .align_items(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .push(
                         traffic_rate_translation(language)
                             .font(font)
@@ -535,8 +534,8 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
             .push(traffic_chart.view()),
     )
     .width(Fill)
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .class(ContainerType::BorderedRound)
 }
 
@@ -579,8 +578,8 @@ fn col_data_representation(
             Button::new(
                 Text::new(option.get_label(language).to_owned())
                     .width(Length::Fill)
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .font(font),
             )
             .width(Length::Fill)
@@ -752,8 +751,8 @@ fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, St
         Icon::Star
             .to_text()
             .size(20)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
     )
     .padding(0)
     .height(FLAGS_WIDTH_BIG * 0.75)
@@ -794,8 +793,8 @@ fn get_active_filters_col(
                             .size(15)
                             .line_height(LineHeight::Relative(1.0)),
                     )
-                    .align_x(Horizontal::Center)
-                    .align_y(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .height(20)
                     .width(20)
                     .class(ContainerType::Highlighted),
@@ -817,14 +816,14 @@ fn sort_arrows(
         button(
             active_sort_type
                 .icon()
-                .horizontal_alignment(Horizontal::Center)
-                .vertical_alignment(Vertical::Center),
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
         )
         .class(active_sort_type.button_type())
         .on_press(message(active_sort_type.next_sort())),
     )
     .width(60.0)
-    .align_x(Horizontal::Center)
+    .align_x(Alignment::Center)
 }
 
 #[cfg(test)]

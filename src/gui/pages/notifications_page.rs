@@ -1,4 +1,3 @@
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
@@ -42,7 +41,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let font_headers = style.get_extension().font_headers;
 
     let mut tab_and_body = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .height(Length::Fill);
 
     let tabs = get_pages_tabs(
@@ -86,8 +85,8 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .padding(10)
                 .width(Length::Fill)
                 .height(Length::Fill)
-                .align_x(Horizontal::Center)
-                .align_y(Vertical::Center),
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
             )
             .push(
                 Scrollable::new(logged_notifications)
@@ -97,8 +96,8 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 Container::new(get_button_clear_all(font, language))
                     .width(Length::Fill)
                     .height(Length::Fill)
-                    .align_x(Horizontal::Center)
-                    .align_y(Vertical::Center),
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center),
             );
         tab_and_body = tab_and_body.push(body_row);
     }
@@ -113,12 +112,12 @@ fn body_no_notifications_set(
     Column::new()
         .padding(5)
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(vertical_space())
         .push(
             no_notifications_set_translation(language)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
         .push(get_button_settings(
@@ -137,12 +136,12 @@ fn body_no_notifications_received(
     Column::new()
         .padding(5)
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(vertical_space())
         .push(
             no_notifications_received_translation(language)
-                .horizontal_alignment(Horizontal::Center)
+                .align_x(Alignment::Center)
                 .font(font),
         )
         .push(Text::new(waiting.to_owned()).font(font).size(50))
@@ -169,7 +168,7 @@ fn packets_notification_log(
     outgoing_str.push_str(": ");
     outgoing_str.push_str(&logged_notification.outgoing.to_string());
     let content = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .height(Length::Fill)
         .spacing(30)
         .push(
@@ -251,7 +250,7 @@ fn bytes_notification_log(
     )));
     let content = Row::new()
         .spacing(30)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .height(Length::Fill)
         .push(
             Tooltip::new(
@@ -322,7 +321,7 @@ fn favorite_notification_log(
     }
 
     let row_flag_details = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(5)
         .push(get_flag_tooltip(
             country,
@@ -335,7 +334,7 @@ fn favorite_notification_log(
 
     let content = Row::new()
         .spacing(30)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .height(Length::Fill)
         .push(
             Tooltip::new(
@@ -383,8 +382,8 @@ fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Mess
         Icon::Bin
             .to_text()
             .size(20)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
     )
     .padding(10)
     .height(50)
@@ -409,7 +408,7 @@ fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, Styl
         .width(830)
         .padding(5)
         .spacing(10)
-        .align_items(Alignment::Center);
+        .align_x(Alignment::Center);
 
     for logged_notification in &sniffer.runtime_data.logged_notifications {
         ret_val = ret_val.push(match logged_notification {

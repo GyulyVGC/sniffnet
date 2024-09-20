@@ -1,6 +1,5 @@
 use std::cmp::min;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
@@ -46,7 +45,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .width(Length::Fill)
         .padding(10)
         .spacing(10)
-        .align_items(Alignment::Center);
+        .align_x(Alignment::Center);
 
     let mut tab_and_body = Column::new().height(Length::Fill);
 
@@ -75,7 +74,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let col_report = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .push(report_header_row(
             language,
             &sniffer.search,
@@ -94,8 +93,8 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         )
         .push(
             Container::new(col_report)
-                .align_y(Vertical::Center)
-                .align_x(Horizontal::Center)
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center)
                 .padding([10, 7, 3, 7])
                 .width(1042)
                 .class(ContainerType::BorderedRound),
@@ -115,9 +114,9 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let mut ret_val = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Start);
+        .align_x(Alignment::Start);
 
-    let mut scroll_report = Column::new().align_items(Alignment::Start);
+    let mut scroll_report = Column::new().align_x(Alignment::Start);
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
@@ -153,7 +152,7 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
                 .width(Length::Fill)
                 .height(Length::Fill)
                 .padding(20)
-                .align_items(Alignment::Center)
+                .align_x(Alignment::Center)
                 .push(vertical_space())
                 .push(Icon::Funnel.to_text().size(60))
                 .push(Space::with_height(15))
@@ -171,12 +170,12 @@ fn report_header_row(
     font: Font,
     sort_type: ReportSortType,
 ) -> Row<'static, Message, StyleType> {
-    let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
+    let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
             title_report_col_display(&report_col, language);
         let title_row = Row::new()
-            .align_items(Alignment::End)
+            .align_y(Alignment::End)
             .push(Text::new(title_display).font(font))
             .push(
                 Text::new(title_small_display)
@@ -196,7 +195,7 @@ fn report_header_row(
         .class(tooltip_style);
 
         let mut col_header = Column::new()
-            .align_items(Alignment::Center)
+            .align_x(Alignment::Center)
             .width(report_col.get_width())
             .height(56)
             .push(title_tooltip);
@@ -208,7 +207,7 @@ fn report_header_row(
                     font,
                 ))
                 .height(Length::Fill)
-                .align_y(Vertical::Center),
+                .align_y(Alignment::Center),
             );
         } else {
             col_header = col_header.push(sort_arrows(sort_type, &report_col));
@@ -261,15 +260,15 @@ fn sort_arrows(
         button(
             active_sort_type
                 .icon(report_col)
-                .horizontal_alignment(Horizontal::Center)
-                .vertical_alignment(Vertical::Center),
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
         )
         .class(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
             active_sort_type.next_sort(report_col),
         )),
     )
-    .align_y(Vertical::Center)
+    .align_y(Alignment::Center)
     .height(Length::Fill)
 }
 
@@ -284,7 +283,7 @@ fn row_report_entry(
         TextType::Incoming
     };
 
-    let mut ret_val = Row::new().align_items(Alignment::Center);
+    let mut ret_val = Row::new().align_y(Alignment::Center);
 
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars(None);
@@ -299,7 +298,7 @@ fn row_report_entry(
                 .font(font)
                 .class(text_type),
             )
-            .align_x(Horizontal::Center)
+            .align_x(Alignment::Center)
             .width(report_col.get_width()),
         );
     }
@@ -313,7 +312,7 @@ fn host_filters_col(
 ) -> Column<'static, Message, StyleType> {
     let search_params2 = search_params.clone();
 
-    let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
+    let mut title_row = Row::new().spacing(10).align_y(Alignment::Center).push(
         Text::new(filter_by_host_translation(language))
             .font(font)
             .class(TextType::Subtitle)
@@ -335,24 +334,24 @@ fn host_filters_col(
 
     let container_country = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", country_translation(language))).font(font))
         .push(input_country);
 
     let container_domain = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", domain_name_translation(language))).font(font))
         .push(input_domain);
 
     let container_as_name = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", administrative_entity_translation(language))).font(font))
         .push(input_as_name);
 
     let col1 = Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .spacing(5)
         .push(
             Container::new(
@@ -376,18 +375,18 @@ fn host_filters_col(
         .push(container_domain);
 
     let col2 = Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .spacing(5)
         .push(container_country)
         .push(container_as_name);
 
     Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .push(title_row)
         .push(Space::with_height(10))
         .push(
             Row::new()
-                .align_items(Alignment::Center)
+                .align_y(Alignment::Center)
                 .spacing(30)
                 .push(col1)
                 .push(col2),
@@ -428,10 +427,7 @@ fn filter_input(
         });
     }
 
-    let mut content = Row::new()
-        .spacing(5)
-        .align_items(Alignment::Center)
-        .push(input);
+    let mut content = Row::new().spacing(5).align_y(Alignment::Center).push(input);
 
     if is_filter_active {
         content = content.push(button_clear);
@@ -459,8 +455,8 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType
         }
         .to_text()
         .size(8.0)
-        .horizontal_alignment(alignment::Horizontal::Center)
-        .vertical_alignment(alignment::Vertical::Center),
+        .align_x(alignment::Alignment::Center)
+        .align_y(alignment::Alignment::Center),
     )
     .padding(2)
     .height(20)
@@ -478,7 +474,7 @@ fn get_change_page_row(
 ) -> Row<'static, Message, StyleType> {
     Row::new()
         .height(40)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(horizontal_space())
         .push(if page_number > 1 {
@@ -510,8 +506,8 @@ fn button_clear_filter(
     button(
         Text::new("×")
             .font(font)
-            .vertical_alignment(Vertical::Center)
-            .horizontal_alignment(Horizontal::Center)
+            .align_y(Alignment::Center)
+            .align_x(Alignment::Center)
             .size(15)
             .line_height(LineHeight::Relative(1.0)),
     )

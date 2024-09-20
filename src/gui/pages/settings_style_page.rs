@@ -1,4 +1,3 @@
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
@@ -43,7 +42,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     let mut content = Column::new()
         .padding([0, 0, 5, 0])
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
             font,
@@ -64,7 +63,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(Space::with_height(15));
 
     let mut styles_col = Column::new()
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(
             Row::new()
@@ -126,15 +125,15 @@ fn gradients_row(
     language: Language,
 ) -> Row<'static, Message, StyleType> {
     Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(Text::new(format!("{}:", color_gradients_translation(language))).font(font))
         .push(
             button(
                 Icon::Forbidden
                     .to_text()
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
+                    .align_y(Alignment::Center)
+                    .align_x(Alignment::Center)
                     .size(12),
             )
             .padding(0)
@@ -150,8 +149,8 @@ fn gradients_row(
             button(
                 Icon::Waves
                     .to_text()
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
+                    .align_y(Alignment::Center)
+                    .align_x(Alignment::Center)
                     .size(13),
             )
             .padding(0)
@@ -167,8 +166,8 @@ fn gradients_row(
             button(
                 Icon::Lightning
                     .to_text()
-                    .vertical_alignment(Vertical::Center)
-                    .horizontal_alignment(Horizontal::Center)
+                    .align_y(Alignment::Center)
+                    .align_x(Alignment::Center)
                     .size(13),
             )
             .padding(0)
@@ -194,7 +193,7 @@ fn get_palette_container(
 
     let mut content = Column::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .spacing(5)
         .push(Text::new(name).font(font))
         .push(get_palette_rule(
@@ -241,8 +240,8 @@ fn get_palette_rule(
                 Rule::horizontal(height).class(RuleType::PaletteColor(buttons_color, height)),
             )),
     )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
     .height(f32::from(height) + 1.7 * BORDER_WIDTH)
     .class(ContainerType::Palette)
@@ -305,7 +304,7 @@ fn lazy_custom_style_input(
     };
 
     let button_row = Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(
             Text::new(get_path_termination_string(custom_path, 17))
                 .font(font)
@@ -326,7 +325,7 @@ fn lazy_custom_style_input(
 
     let mut content = Column::new()
         .width(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_x(Alignment::Center)
         .spacing(5)
         .push(Text::new(custom_style_translation(language)).font(font))
         .push(button_row);

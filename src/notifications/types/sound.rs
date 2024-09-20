@@ -1,9 +1,8 @@
 use std::fmt;
 use std::thread;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
-use iced::{Font, Length};
+use iced::{Alignment, Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
@@ -52,8 +51,8 @@ impl Sound {
         }
         .size(FONT_SIZE_FOOTER)
         .width(Length::Fill)
-        .horizontal_alignment(Horizontal::Center)
-        .vertical_alignment(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
     }
 }
 

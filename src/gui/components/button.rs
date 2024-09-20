@@ -1,6 +1,5 @@
 #![allow(clippy::module_name_repetitions)]
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Row, Text, Tooltip};
@@ -23,8 +22,8 @@ pub fn button_hide(
         button(
             Text::new("×")
                 .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center)
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center)
                 .size(15)
                 .line_height(LineHeight::Relative(1.0)),
         )
@@ -53,8 +52,8 @@ pub fn button_open_file(
     let mut button = button(
         Icon::File
             .to_text()
-            .vertical_alignment(Vertical::Center)
-            .horizontal_alignment(Horizontal::Center)
+            .align_y(Alignment::Center)
+            .align_x(Alignment::Center)
             .size(16.0),
     )
     .padding(0)
@@ -74,7 +73,7 @@ pub fn button_open_file(
 
 pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Message, StyleType> {
     Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(Text::new(text).font(font))
         .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
