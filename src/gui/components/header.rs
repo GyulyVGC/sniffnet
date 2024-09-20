@@ -10,11 +10,11 @@ use crate::configs::types::config_settings::ConfigSettings;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
@@ -76,7 +76,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
     )
     .height(80)
     .align_y(Vertical::Center)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }
 
 fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
@@ -99,7 +99,7 @@ fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message,
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 pub fn get_button_settings(
@@ -125,7 +125,7 @@ pub fn get_button_settings(
         Position::Left,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 pub fn get_button_minimize(
@@ -160,12 +160,12 @@ pub fn get_button_minimize(
     .padding(0)
     .height(button_size)
     .width(button_size)
-    .style(ButtonType::Thumbnail)
+    .class(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail(false));
 
     Tooltip::new(content, Text::new(tooltip).font(font), Position::Right)
         .gap(0)
-        .style(tooltip_style)
+        .class(tooltip_style)
 }
 
 fn thumbnail_header(
@@ -187,7 +187,7 @@ fn thumbnail_header(
             .push(if unread_notifications > 0 {
                 Container::new(
                     notifications_badge(font, unread_notifications)
-                        .style(ContainerType::HighlightedOnHeader),
+                        .class(ContainerType::HighlightedOnHeader),
                 )
                 .width(40)
                 .align_x(Horizontal::Center)
@@ -197,5 +197,5 @@ fn thumbnail_header(
     )
     .height(30)
     .align_y(Vertical::Center)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }

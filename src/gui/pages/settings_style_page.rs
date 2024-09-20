@@ -55,7 +55,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(Space::with_height(15))
         .push(
             appearance_title_translation(language)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
@@ -117,7 +117,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(content)
         .height(400)
         .width(800)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 fn gradients_row(
@@ -211,7 +211,7 @@ fn get_palette_container(
         .height(if is_custom { 75 } else { 110 })
         .width(380)
         .padding(5)
-        .style(if on_press.eq(&style) {
+        .class(if on_press.eq(&style) {
             ButtonType::BorderedRoundSelected
         } else {
             ButtonType::BorderedRound
@@ -229,23 +229,23 @@ fn get_palette_rule(
     Container::new(
         Row::new()
             .push(Row::new().width(120).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(palette.primary, height)),
+                Rule::horizontal(height).class(RuleType::PaletteColor(palette.primary, height)),
             ))
             .push(Row::new().width(80).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(palette.secondary, height)),
+                Rule::horizontal(height).class(RuleType::PaletteColor(palette.secondary, height)),
             ))
             .push(Row::new().width(60).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(palette.outgoing, height)),
+                Rule::horizontal(height).class(RuleType::PaletteColor(palette.outgoing, height)),
             ))
             .push(Row::new().width(40).push(
-                Rule::horizontal(height).style(RuleType::PaletteColor(buttons_color, height)),
+                Rule::horizontal(height).class(RuleType::PaletteColor(buttons_color, height)),
             )),
     )
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
     .height(f32::from(height) + 1.7 * BORDER_WIDTH)
-    .style(ContainerType::Palette)
+    .class(ContainerType::Palette)
 }
 
 // Buttons for each extra style arranged in rows of two
@@ -309,7 +309,7 @@ fn lazy_custom_style_input(
         .push(
             Text::new(get_path_termination_string(custom_path, 17))
                 .font(font)
-                .style(if is_error {
+                .class(if is_error {
                     TextType::Danger
                 } else {
                     TextType::Standard
@@ -353,7 +353,7 @@ fn lazy_custom_style_input(
         })
         .width(380)
         .padding([10, 0, 5, 0])
-        .style(if is_custom_toml_style_set {
+        .class(if is_custom_toml_style_set {
             ButtonType::BorderedRoundSelected
         } else {
             ButtonType::BorderedRound

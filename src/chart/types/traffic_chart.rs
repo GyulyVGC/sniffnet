@@ -9,7 +9,7 @@ use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
 
-use crate::gui::app::FONT_FAMILY_NAME;
+use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;

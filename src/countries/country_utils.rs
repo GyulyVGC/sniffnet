@@ -35,7 +35,7 @@ fn get_flag_from_country(
     is_loopback: bool,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<StyleType>, String) {
+) -> (Svg<'static, StyleType>, String) {
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;

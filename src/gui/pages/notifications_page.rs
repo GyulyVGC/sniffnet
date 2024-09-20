@@ -181,7 +181,7 @@ fn packets_notification_log(
                 Text::new(packets_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .style(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -195,12 +195,12 @@ fn packets_notification_log(
                 )
                 .push(
                     Text::new(packets_exceeded_translation(language))
-                        .style(TextType::Title)
+                        .class(TextType::Title)
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
-                        .style(TextType::Subtitle)
+                        .class(TextType::Subtitle)
                         .size(FONT_SIZE_FOOTER)
                         .font(font),
                 ),
@@ -222,7 +222,7 @@ fn packets_notification_log(
         .height(120)
         .width(800)
         .padding(10)
-        .style(ContainerType::BorderedRound)
+        .class(ContainerType::BorderedRound)
 }
 
 fn bytes_notification_log(
@@ -262,7 +262,7 @@ fn bytes_notification_log(
                 Text::new(bytes_exceeded_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .style(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -276,13 +276,13 @@ fn bytes_notification_log(
                 )
                 .push(
                     Text::new(bytes_exceeded_translation(language))
-                        .style(TextType::Title)
+                        .class(TextType::Title)
                         .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
                         .size(FONT_SIZE_FOOTER)
-                        .style(TextType::Subtitle)
+                        .class(TextType::Subtitle)
                         .font(font),
                 ),
         )
@@ -305,7 +305,7 @@ fn bytes_notification_log(
         .height(120)
         .width(800)
         .padding(10)
-        .style(ContainerType::BorderedRound)
+        .class(ContainerType::BorderedRound)
 }
 
 fn favorite_notification_log(
@@ -342,12 +342,12 @@ fn favorite_notification_log(
                 Icon::Star
                     .to_text()
                     .size(80)
-                    .style(TextType::Starred)
+                    .class(TextType::Starred)
                     .line_height(LineHeight::Relative(1.0)),
                 Text::new(favorite_transmitted_translation(language)).font(font),
                 Position::FollowCursor,
             )
-            .style(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip),
         )
         .push(
             Column::new()
@@ -361,7 +361,7 @@ fn favorite_notification_log(
                 )
                 .push(
                     Text::new(favorite_transmitted_translation(language))
-                        .style(TextType::Title)
+                        .class(TextType::Title)
                         .font(font),
                 ),
         )
@@ -375,7 +375,7 @@ fn favorite_notification_log(
         .height(120)
         .width(800)
         .padding(10)
-        .style(ContainerType::BorderedRound)
+        .class(ContainerType::BorderedRound)
 }
 
 fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
@@ -397,7 +397,7 @@ fn get_button_clear_all(font: Font, language: Language) -> Tooltip<'static, Mess
         Position::Top,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 fn lazy_logged_notifications(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {

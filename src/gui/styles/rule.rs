@@ -2,11 +2,9 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use iced::widget::rule;
-use iced::widget::rule::FillMode;
-use iced::Color;
-
 use crate::StyleType;
+use iced::widget::rule::{Catalog, FillMode, Style};
+use iced::Color;
 
 #[derive(Clone, Copy, Default)]
 pub enum RuleType {
@@ -17,14 +15,12 @@ pub enum RuleType {
     Outgoing,
 }
 
-impl rule::StyleSheet for StyleType {
-    type Style = RuleType;
-
-    fn appearance(&self, style: &Self::Style) -> iced::widget::rule::Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
-        iced::widget::rule::Appearance {
-            color: match style {
+impl RuleType {
+    fn appearance(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
+        Style {
+            color: match self {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
@@ -33,7 +29,7 @@ impl rule::StyleSheet for StyleType {
                     ..ext.buttons_color
                 },
             },
-            width: match style {
+            width: match self {
                 RuleType::Incoming | RuleType::Outgoing => 5,
                 RuleType::PaletteColor(_, width) => *width,
                 RuleType::Standard => 3,
@@ -41,5 +37,17 @@ impl rule::StyleSheet for StyleType {
             radius: 0.0.into(),
             fill_mode: FillMode::Full,
         }
+    }
+}
+
+impl Catalog for StyleType {
+    type Class<'a> = RuleType;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Self::Class::default()
+    }
+
+    fn style(&self, class: &Self::Class<'_>) -> Style {
+        class.appearance(self)
     }
 }

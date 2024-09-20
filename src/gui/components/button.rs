@@ -36,7 +36,7 @@ pub fn button_hide(
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 pub fn button_open_file(
@@ -69,7 +69,7 @@ pub fn button_open_file(
 
     Tooltip::new(button, Text::new(tooltip_str).font(font), Position::Right)
         .gap(5)
-        .style(tooltip_style)
+        .class(tooltip_style)
 }
 
 pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Message, StyleType> {
@@ -77,5 +77,5 @@ pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Mes
         .align_items(Alignment::Center)
         .spacing(10)
         .push(Text::new(text).font(font))
-        .push(Icon::OpenLink.to_text().size(16).style(TextType::Title))
+        .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
 }

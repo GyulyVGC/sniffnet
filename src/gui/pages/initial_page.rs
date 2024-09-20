@@ -16,6 +16,7 @@ use iced::{alignment, Alignment, Font, Length};
 use pcap::Device;
 
 use crate::gui::components::button::button_open_file;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -25,7 +26,6 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::port_collection::PortCollection;
@@ -72,7 +72,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             select_filters_translation(language)
                 .font(font)
-                .style(TextType::Title)
+                .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(
@@ -134,7 +134,7 @@ fn col_ip_buttons(
             )
             .width(90)
             .height(35)
-            .style(if is_active {
+            .class(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
                 ButtonType::BorderedRound
@@ -149,7 +149,7 @@ fn col_ip_buttons(
         .push(
             Text::new(ip_version_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(buttons_row)
@@ -173,7 +173,7 @@ fn col_protocol_buttons(
             )
             .width(90)
             .height(35)
-            .style(if is_active {
+            .class(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
                 ButtonType::BorderedRound
@@ -188,7 +188,7 @@ fn col_protocol_buttons(
         .push(
             Text::new(protocol_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(buttons_row)
@@ -210,7 +210,7 @@ fn col_address_input(
             .on_input(Message::AddressFilter)
             .font(font)
             .width(310)
-            .style(if is_error {
+            .class(if is_error {
                 TextInputType::Error
             } else {
                 TextInputType::Standard
@@ -223,7 +223,7 @@ fn col_address_input(
         .push(
             Text::new(address_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(input_row)
@@ -245,7 +245,7 @@ fn col_port_input(
             .on_input(Message::PortFilter)
             .font(font)
             .width(180)
-            .style(if is_error {
+            .class(if is_error {
                 TextInputType::Error
             } else {
                 TextInputType::Standard
@@ -258,7 +258,7 @@ fn col_port_input(
         .push(
             Text::new(port_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(input_row)
@@ -280,7 +280,7 @@ fn button_start(
     .padding(10)
     .height(80)
     .width(160)
-    .style(ButtonType::Gradient(color_gradient));
+    .class(ButtonType::Gradient(color_gradient));
 
     let mut tooltip = start_translation(language).to_string();
     //tooltip.push_str(" [⏎]");
@@ -295,7 +295,7 @@ fn button_start(
 
     Tooltip::new(content, Text::new(tooltip).font(font), position)
         .gap(5)
-        .style(ContainerType::Tooltip)
+        .class(ContainerType::Tooltip)
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
@@ -341,7 +341,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         .push(
             choose_adapters_translation(language)
                 .font(font)
-                .style(TextType::Title)
+                .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(
@@ -354,7 +354,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                         Button::new(Text::new(description).font(font))
                             .padding([20, 30])
                             .width(Length::Fill)
-                            .style(if name == sniffer.device.name {
+                            .class(if name == sniffer.device.name {
                                 ButtonType::BorderedRoundSelected
                             } else {
                                 ButtonType::BorderedRound
@@ -420,11 +420,11 @@ fn get_export_pcap_group(
         Container::new(ret_val)
             .padding(10)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     } else {
         Container::new(ret_val)
             .padding(10)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     }
 }

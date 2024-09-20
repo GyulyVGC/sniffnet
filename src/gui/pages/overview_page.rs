@@ -17,6 +17,7 @@ use iced::{Alignment, Font, Length};
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -25,7 +26,6 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -255,7 +255,7 @@ fn lazy_row_report(sniffer: &Sniffer) -> Container<'static, Message, StyleType> 
 
     Container::new(row_report)
         .height(FillPortion(4))
-        .style(ContainerType::BorderedRound)
+        .class(ContainerType::BorderedRound)
 }
 
 fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
@@ -326,7 +326,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
             button(content)
                 .padding([5, 15, 5, 10])
                 .on_press(Message::Search(SearchParameters::new_host_search(host)))
-                .style(ButtonType::Neutral),
+                .class(ButtonType::Neutral),
         );
     }
 
@@ -347,7 +347,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
                 .push(
                     Text::new(host_translation(language))
                         .font(font)
-                        .style(TextType::Title)
+                        .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
                 .push(horizontal_space())
@@ -406,7 +406,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
                 .on_press(Message::Search(SearchParameters::new_service_search(
                     service,
                 )))
-                .style(ButtonType::Neutral),
+                .class(ButtonType::Neutral),
         );
     }
 
@@ -427,7 +427,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
                 .push(
                     Text::new(service_translation(language))
                         .font(font)
-                        .style(TextType::Title)
+                        .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
                 .push(horizontal_space())
@@ -497,7 +497,7 @@ fn lazy_col_info(
         .width(400)
         .padding([10, 5, 5, 5])
         .align_x(Horizontal::Center)
-        .style(ContainerType::BorderedRound)
+        .class(ContainerType::BorderedRound)
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
@@ -523,12 +523,12 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
                     .push(
                         traffic_rate_translation(language)
                             .font(font)
-                            .style(TextType::Title)
+                            .class(TextType::Title)
                             .size(FONT_SIZE_TITLE),
                     )
                     .push(
                         Text::new(chart_info_string)
-                            .style(TextType::Subtitle)
+                            .class(TextType::Subtitle)
                             .font(font),
                     ),
             )
@@ -537,7 +537,7 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
     .width(Fill)
     .align_x(Horizontal::Center)
     .align_y(Vertical::Center)
-    .style(ContainerType::BorderedRound)
+    .class(ContainerType::BorderedRound)
 }
 
 fn col_device(
@@ -569,7 +569,7 @@ fn col_data_representation(
 ) -> Column<'static, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
-            .style(TextType::Subtitle)
+            .class(TextType::Subtitle)
             .font(font),
     );
 
@@ -585,7 +585,7 @@ fn col_data_representation(
             )
             .width(Length::Fill)
             .height(33)
-            .style(if is_active {
+            .class(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
                 ButtonType::BorderedRound
@@ -734,14 +734,14 @@ fn get_bars(in_len: f32, out_len: f32) -> Row<'static, Message, StyleType> {
         .push(if in_len > 0.0 {
             Row::new()
                 .width(in_len)
-                .push(Rule::horizontal(1).style(RuleType::Incoming))
+                .push(Rule::horizontal(1).class(RuleType::Incoming))
         } else {
             Row::new()
         })
         .push(if out_len > 0.0 {
             Row::new()
                 .width(out_len)
-                .push(Rule::horizontal(1).style(RuleType::Outgoing))
+                .push(Rule::horizontal(1).class(RuleType::Outgoing))
         } else {
             Row::new()
         })
@@ -758,7 +758,7 @@ fn get_star_button(is_favorite: bool, host: Host) -> Button<'static, Message, St
     .padding(0)
     .height(FLAGS_WIDTH_BIG * 0.75)
     .width(FLAGS_WIDTH_BIG)
-    .style(if is_favorite {
+    .class(if is_favorite {
         ButtonType::Starred
     } else {
         ButtonType::NotStarred
@@ -776,7 +776,7 @@ fn get_active_filters_col(
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
             .font(font)
-            .style(TextType::Subtitle),
+            .class(TextType::Subtitle),
     );
 
     if filters.none_active() {
@@ -798,11 +798,11 @@ fn get_active_filters_col(
                     .align_y(Vertical::Center)
                     .height(20)
                     .width(20)
-                    .style(ContainerType::Highlighted),
+                    .class(ContainerType::Highlighted),
                     Text::new(filters_string).font(font),
                     Position::FollowCursor,
                 )
-                .style(ContainerType::Tooltip),
+                .class(ContainerType::Tooltip),
             )
         });
     }
@@ -820,7 +820,7 @@ fn sort_arrows(
                 .horizontal_alignment(Horizontal::Center)
                 .vertical_alignment(Vertical::Center),
         )
-        .style(active_sort_type.button_type())
+        .class(active_sort_type.button_type())
         .on_press(message(active_sort_type.next_sort())),
     )
     .width(60.0)

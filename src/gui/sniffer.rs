@@ -1,5 +1,4 @@
-//! Module defining the `Sniffer` struct, which trace gui's component statuses and permits
-//! to share data among the different threads.
+//! Module defining the application structure: messages, updates, subscriptions.
 
 use std::collections::{HashSet, VecDeque};
 use std::path::PathBuf;
@@ -10,16 +9,28 @@ use std::time::Duration;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
+use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::Event::{Keyboard, Window};
-use iced::{window, Command, Subscription};
+use iced::{window, Element, Subscription, Task};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
-use crate::gui::app::PERIOD_TICK;
+use crate::gui::components::footer::footer;
+use crate::gui::components::header::header;
+use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::connection_details_page::connection_details_page;
+use crate::gui::pages::initial_page::initial_page;
+use crate::gui::pages::inspect_page::inspect_page;
+use crate::gui::pages::notifications_page::notifications_page;
+use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::settings_general_page::settings_general_page;
+use crate::gui::pages::settings_notifications_page::settings_notifications_page;
+use crate::gui::pages::settings_style_page::settings_style_page;
+use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
@@ -48,7 +59,15 @@ use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{
+    ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart, SNIFFNET_TITLECASE,
+};
+
+/// Update period (milliseconds)
+pub const PERIOD_TICK: u64 = 1000;
+
+pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
+pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
 /// Struct on which the gui is based
 ///
@@ -107,6 +126,10 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
+    pub fn title(&self) -> String {
+        String::from(SNIFFNET_TITLECASE)
+    }
+
     pub fn new(
         configs: &Arc<Mutex<Configs>>,
         newer_release_available: Arc<Mutex<Option<bool>>>,
@@ -148,7 +171,7 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn keyboard_subscription(&self) -> Subscription<Message> {
+    fn keyboard_subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
 
         if self.thumbnail {
@@ -196,7 +219,7 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn mouse_subscription(&self) -> Subscription<Message> {
+    fn mouse_subscription(&self) -> Subscription<Message> {
         if self.thumbnail {
             iced::event::listen_with(|event, _| match event {
                 iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
@@ -207,7 +230,7 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn time_subscription(&self) -> Subscription<Message> {
+    fn time_subscription(&self) -> Subscription<Message> {
         if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
         } else {
@@ -215,7 +238,7 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn window_subscription() -> Subscription<Message> {
+    fn window_subscription() -> Subscription<Message> {
         iced::event::listen_with(|event, _| match event {
             Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
             Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
@@ -227,7 +250,7 @@ impl Sniffer {
         })
     }
 
-    pub fn update(&mut self, message: Message) -> Command<Message> {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
@@ -417,7 +440,7 @@ impl Sniffer {
                 return iced::clipboard::write(string);
             }
             Message::OpenFile(old_file, file_info, consumer_message) => {
-                return Command::perform(
+                return Task::perform(
                     Self::open_file(
                         old_file,
                         file_info,
@@ -450,7 +473,7 @@ impl Sniffer {
                     let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
                     let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
-                    Command::batch([
+                    Task::batch([
                         window::maximize(Id::MAIN, false),
                         window::toggle_decorations(Id::MAIN),
                         window::resize(Id::MAIN, size),
@@ -471,7 +494,7 @@ impl Sniffer {
                         commands.push(window::move_to(Id::MAIN, position));
                         commands.push(window::resize(Id::MAIN, size));
                     }
-                    Command::batch(commands)
+                    Task::batch(commands)
                 };
             }
             Message::Drag => {
@@ -499,10 +522,93 @@ impl Sniffer {
             }
             Message::TickInit => {}
         }
-        Command::none()
+        Task::none()
     }
 
-    fn refresh_data(&mut self) -> Command<Message> {
+    pub fn view(&self) -> Element<Message, StyleType> {
+        let ConfigSettings {
+            style,
+            language,
+            color_gradient,
+            ..
+        } = self.configs.lock().unwrap().settings;
+        let font = style.get_extension().font;
+        let font_headers = style.get_extension().font_headers;
+
+        let header = header(self);
+
+        let body = if self.thumbnail {
+            thumbnail_page(self)
+        } else {
+            match self.running_page {
+                RunningPage::Init => initial_page(self),
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            }
+        };
+
+        let footer = footer(
+            self.thumbnail,
+            language,
+            color_gradient,
+            font,
+            font_headers,
+            &self.newer_release_available.clone(),
+        );
+
+        let content = Column::new().push(header).push(body).push(footer);
+
+        match self.modal.clone() {
+            None => {
+                if let Some(settings_page) = self.settings_page {
+                    let overlay = match settings_page {
+                        SettingsPage::Notifications => settings_notifications_page(self),
+                        SettingsPage::Appearance => settings_style_page(self),
+                        SettingsPage::General => settings_general_page(self),
+                    };
+
+                    Modal::new(content, overlay)
+                        .on_blur(Message::CloseSettings)
+                        .into()
+                } else {
+                    content.into()
+                }
+            }
+            Some(modal) => {
+                let overlay = match modal {
+                    MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(color_gradient, font, font_headers, language)
+                    }
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
+                };
+
+                Modal::new(content, overlay)
+                    .on_blur(Message::HideModal)
+                    .into()
+            }
+        }
+    }
+
+    pub fn subscription(&self) -> Subscription<Message> {
+        Subscription::batch([
+            self.keyboard_subscription(),
+            self.mouse_subscription(),
+            self.time_subscription(),
+            Sniffer::window_subscription(),
+        ])
+    }
+
+    pub fn theme(&self) -> Self::Theme {
+        self.configs.lock().unwrap().settings.style
+    }
+
+    pub fn scale_factor(&self) -> f64 {
+        self.configs.lock().unwrap().settings.scale_factor
+    }
+
+    fn refresh_data(&mut self) -> Task<Message> {
         let info_traffic_lock = self.info_traffic.lock().unwrap();
         self.runtime_data.all_packets = info_traffic_lock.all_packets;
         if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
@@ -540,7 +646,7 @@ impl Sniffer {
         {
             return self.update(Message::Waiting);
         }
-        Command::none()
+        Task::none()
     }
 
     fn open_web(web_page: &WebPage) {
@@ -599,7 +705,7 @@ impl Sniffer {
         }
     }
 
-    fn reset(&mut self) -> Command<Message> {
+    fn reset(&mut self) -> Task<Message> {
         self.running_page = RunningPage::Init;
         *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous captures
         self.pcap_error = None;
@@ -725,7 +831,7 @@ impl Sniffer {
         }
     }
 
-    fn shortcut_return(&mut self) -> Command<Message> {
+    fn shortcut_return(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Init)
             && self.settings_page.is_none()
             && self.modal.is_none()
@@ -738,20 +844,20 @@ impl Sniffer {
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
             return self.update(Message::ClearAllNotifications);
         }
-        Command::none()
+        Task::none()
     }
 
-    fn shortcut_esc(&mut self) -> Command<Message> {
+    fn shortcut_esc(&mut self) -> Task<Message> {
         if self.modal.is_some() {
             return self.update(Message::HideModal);
         } else if self.settings_page.is_some() {
             return self.update(Message::CloseSettings);
         }
-        Command::none()
+        Task::none()
     }
 
     // also called when backspace key is pressed on a running state
-    fn reset_button_pressed(&mut self) -> Command<Message> {
+    fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
             return if self.info_traffic.lock().unwrap().all_packets == 0
                 && self.settings_page.is_none()
@@ -761,16 +867,16 @@ impl Sniffer {
                 self.update(Message::ShowModal(MyModal::Quit))
             };
         }
-        Command::none()
+        Task::none()
     }
 
-    fn shortcut_ctrl_d(&mut self) -> Command<Message> {
+    fn shortcut_ctrl_d(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Notifications)
             && !self.runtime_data.logged_notifications.is_empty()
         {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }
-        Command::none()
+        Task::none()
     }
 
     async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {

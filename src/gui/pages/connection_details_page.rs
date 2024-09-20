@@ -94,13 +94,13 @@ fn page_content(
         Text::new(source_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextType::Title),
+            .class(TextType::Title),
     );
     let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextType::Title),
+            .class(TextType::Title),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
@@ -149,7 +149,7 @@ fn page_content(
     Container::new(header_and_content.push(content))
         .width(1000)
         .height(500)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 fn page_header(
@@ -178,7 +178,7 @@ fn page_header(
     .align_y(Vertical::Center)
     .height(40.0)
     .width(Length::Fill)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }
 
 fn col_info(
@@ -243,7 +243,7 @@ fn col_info(
                 Column::new()
                     .push(
                         Text::new(format!("{}:", messages_translation(language)))
-                            .style(TextType::Subtitle)
+                            .class(TextType::Subtitle)
                             .font(font),
                     )
                     .push(
@@ -375,7 +375,7 @@ fn assemble_widgets(
         Container::new(col)
             .padding(7)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     });
     Row::new()
         .padding([0, 10])
@@ -424,5 +424,5 @@ fn get_button_copy(
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }

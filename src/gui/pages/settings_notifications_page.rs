@@ -55,7 +55,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Styl
         .push(
             notifications_title_translation(language)
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
                 .horizontal_alignment(Horizontal::Center),
@@ -95,7 +95,7 @@ pub fn settings_notifications_page(sniffer: &Sniffer) -> Container<Message, Styl
     Container::new(content)
         .height(400)
         .width(800)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 fn get_packets_notify(
@@ -136,7 +136,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     } else {
         let input_row = input_group_packets(packets_notification, font, language);
@@ -146,7 +146,7 @@ fn get_packets_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     }
 }
@@ -189,7 +189,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     } else {
         let input_row = input_group_bytes(bytes_notification, font, language);
@@ -199,7 +199,7 @@ fn get_bytes_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     }
 }
@@ -239,14 +239,14 @@ fn get_favorite_notify(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     } else {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
                 .width(700)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
     }
 }
@@ -414,7 +414,7 @@ fn sound_buttons(
                 .padding(0)
                 .width(80)
                 .height(25)
-                .style(if is_active {
+                .class(if is_active {
                     ButtonType::BorderedRoundSelected
                 } else {
                     ButtonType::BorderedRound
@@ -454,5 +454,5 @@ pub fn settings_header(
     .align_y(Vertical::Center)
     .height(40)
     .width(Length::Fill)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }

@@ -90,7 +90,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             Container::new(host_filters_col(&sniffer.search, font, language))
                 .padding(10)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         )
         .push(
             Container::new(col_report)
@@ -98,7 +98,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .align_x(Horizontal::Center)
                 .padding([10, 7, 3, 7])
                 .width(1042)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         );
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
@@ -127,7 +127,7 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
                     report_entry.0,
                 )))
-                .style(ButtonType::Neutral),
+                .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -193,7 +193,7 @@ fn report_header_row(
             Text::new(tooltip_val).font(font),
             Position::FollowCursor,
         )
-        .style(tooltip_style);
+        .class(tooltip_style);
 
         let mut col_header = Column::new()
             .align_items(Alignment::Center)
@@ -264,7 +264,7 @@ fn sort_arrows(
                 .horizontal_alignment(Horizontal::Center)
                 .vertical_alignment(Vertical::Center),
         )
-        .style(active_sort_type.button_type(report_col))
+        .class(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
             active_sort_type.next_sort(report_col),
         )),
@@ -297,7 +297,7 @@ fn row_report_entry(
                     [&col_value[..max_chars - 2], "…"].concat()
                 })
                 .font(font)
-                .style(text_type),
+                .class(text_type),
             )
             .align_x(Horizontal::Center)
             .width(report_col.get_width()),
@@ -316,7 +316,7 @@ fn host_filters_col(
     let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
         Text::new(filter_by_host_translation(language))
             .font(font)
-            .style(TextType::Subtitle)
+            .class(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     if search_params.is_some_host_filter_active() {
@@ -412,7 +412,7 @@ fn filter_input(
         .size(FONT_SIZE_FOOTER)
         .font(font)
         .width(Length::Fill)
-        .style(if is_filter_active {
+        .class(if is_filter_active {
             TextInputType::Badge
         } else {
             TextInputType::Standard
@@ -443,7 +443,7 @@ fn filter_input(
         } else {
             [5, 3, 5, 3]
         })
-        .style(if is_filter_active {
+        .class(if is_filter_active {
             ContainerType::Badge
         } else {
             ContainerType::Standard

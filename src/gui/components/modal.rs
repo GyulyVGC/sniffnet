@@ -48,7 +48,7 @@ pub fn get_exit_overlay(
     Container::new(content)
         .height(160)
         .width(450)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 pub fn get_clear_all_overlay(
@@ -80,7 +80,7 @@ pub fn get_clear_all_overlay(
     Container::new(content)
         .height(160)
         .width(450)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 fn get_modal_header(
@@ -110,7 +110,7 @@ fn get_modal_header(
     .align_y(Vertical::Center)
     .height(40)
     .width(Length::Fill)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }
 
 fn confirm_button_row(
@@ -131,7 +131,7 @@ fn confirm_button_row(
             .padding(5)
             .height(40)
             .width(80)
-            .style(ButtonType::Alert)
+            .class(ButtonType::Alert)
             .on_press(message),
         )
 }

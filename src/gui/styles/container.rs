@@ -2,7 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use iced::widget::container::Appearance;
+use iced::widget::container::{Catalog, Style};
 use iced::{Background, Border, Color, Shadow};
 
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
@@ -23,18 +23,16 @@ pub enum ContainerType {
     HighlightedOnHeader,
 }
 
-impl iced::widget::container::StyleSheet for StyleType {
-    type Style = ContainerType;
-
-    fn appearance(&self, style: &Self::Style) -> Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
-        Appearance {
-            text_color: Some(match style {
+impl ContainerType {
+    fn appearance(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
+        Style {
+            text_color: Some(match self {
                 ContainerType::Gradient(_) | ContainerType::Highlighted => colors.text_headers,
                 _ => colors.text_body,
             }),
-            background: Some(match style {
+            background: Some(match self {
                 ContainerType::Gradient(GradientType::None) | ContainerType::Highlighted => {
                     Background::Color(colors.secondary)
                 }
@@ -58,7 +56,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                 }
             }),
             border: Border {
-                radius: match style {
+                radius: match self {
                     ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
                     ContainerType::Modal => {
                         [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
@@ -69,7 +67,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                     | ContainerType::HighlightedOnHeader => 100.0.into(),
                     _ => 0.0.into(),
                 },
-                width: match style {
+                width: match self {
                     ContainerType::Standard
                     | ContainerType::Modal
                     | ContainerType::Gradient(_)
@@ -79,7 +77,7 @@ impl iced::widget::container::StyleSheet for StyleType {
                     ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
                     _ => BORDER_WIDTH,
                 },
-                color: match style {
+                color: match self {
                     ContainerType::Palette => Color::BLACK,
                     _ => Color {
                         a: ext.alpha_round_borders,
@@ -89,5 +87,17 @@ impl iced::widget::container::StyleSheet for StyleType {
             },
             shadow: Shadow::default(),
         }
+    }
+}
+
+impl Catalog for StyleType {
+    type Class<'a> = ContainerType;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Self::Class::default()
+    }
+
+    fn style(&self, class: &Self::Class<'_>) -> Style {
+        class.appearance(self)
     }
 }

@@ -2,7 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use iced::widget::svg::Appearance;
+use iced::widget::svg::{Catalog, Status, Style};
 
 use crate::StyleType;
 
@@ -13,15 +13,27 @@ pub enum SvgType {
     Standard,
 }
 
-impl iced::widget::svg::StyleSheet for StyleType {
-    type Style = SvgType;
-
-    fn appearance(&self, style: &Self::Style) -> Appearance {
-        Appearance {
-            color: match style {
-                SvgType::AdaptColor => Some(self.get_palette().text_body),
+impl SvgType {
+    fn appearance(&self, style: &StyleType) -> Style {
+        Style {
+            color: match self {
+                SvgType::AdaptColor => Some(style.get_palette().text_body),
                 SvgType::Standard => None,
             },
+        }
+    }
+}
+
+impl Catalog for StyleType {
+    type Class<'a> = SvgType;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Self::Class::default()
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
+        match status {
+            Status::Idle | Status::Hovered => class.appearance(self),
         }
     }
 }

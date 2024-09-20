@@ -57,7 +57,7 @@ pub fn footer(
     Container::new(footer_row)
         .height(45)
         .align_y(Vertical::Center)
-        .style(ContainerType::Gradient(color_gradient))
+        .class(ContainerType::Gradient(color_gradient))
 }
 
 fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
@@ -78,7 +78,7 @@ fn get_button_website(font: Font) -> Tooltip<'static, Message, StyleType> {
         row_open_link_tooltip("Website", font),
         Position::Top,
     )
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
@@ -99,7 +99,7 @@ fn get_button_github(font: Font) -> Tooltip<'static, Message, StyleType> {
         row_open_link_tooltip("GitHub", font),
         Position::Top,
     )
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
@@ -107,7 +107,7 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
         Text::new('❤'.to_string())
             .font(font)
             .size(23)
-            .style(TextType::Sponsor)
+            .class(TextType::Sponsor)
             .horizontal_alignment(Horizontal::Center)
             .vertical_alignment(Vertical::Center)
             .line_height(LineHeight::Relative(1.0)),
@@ -122,7 +122,7 @@ fn get_button_sponsor(font: Font) -> Tooltip<'static, Message, StyleType> {
         row_open_link_tooltip("Sponsor", font),
         Position::Top,
     )
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
 fn get_release_details(
@@ -145,7 +145,7 @@ fn get_release_details(
             // a newer release is available on GitHub
             let button = button(
                 Text::new('!'.to_string())
-                    .style(TextType::Danger)
+                    .class(TextType::Danger)
                     .size(28)
                     .horizontal_alignment(Horizontal::Center)
                     .vertical_alignment(Vertical::Center)
@@ -154,14 +154,14 @@ fn get_release_details(
             .padding(0)
             .height(35)
             .width(35)
-            .style(ButtonType::Alert)
+            .class(ButtonType::Alert)
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
             let tooltip = Tooltip::new(
                 button,
                 row_open_link_tooltip(new_version_available_translation(language), font),
                 Position::Top,
             )
-            .style(ContainerType::Tooltip);
+            .class(ContainerType::Tooltip);
             ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
         } else {
             // this is the latest release

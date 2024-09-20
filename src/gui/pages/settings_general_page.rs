@@ -56,7 +56,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
     Container::new(content)
         .height(400)
         .width(800)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
 fn column_all_general_setting(
@@ -84,7 +84,7 @@ fn column_all_general_setting(
             .push(
                 Container::new(Text::new(params_not_editable_translation(language)).font(font))
                     .padding(10.0)
-                    .style(ContainerType::Badge),
+                    .class(ContainerType::Badge),
             )
             .push(Space::with_height(10));
     }
@@ -127,7 +127,7 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
             Tooltip::new(
                 button(
                     Text::new("!")
-                        .style(TextType::Danger)
+                        .class(TextType::Danger)
                         .font(font)
                         .vertical_alignment(Vertical::Center)
                         .horizontal_alignment(Horizontal::Center)
@@ -138,14 +138,14 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
                 .padding(2)
                 .height(20)
                 .width(20)
-                .style(ButtonType::Alert),
+                .class(ButtonType::Alert),
                 row_open_link_tooltip(
                     "The selected language is not\nfully updated to version 1.3",
                     font,
                 ),
                 Position::FollowCursor,
             )
-            .style(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip),
         );
     }
 
@@ -153,7 +153,7 @@ fn language_picklist(language: Language, font: Font) -> Container<'static, Messa
         .align_items(Alignment::Center)
         .push(
             Text::new(language_translation(language))
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),
         )
@@ -190,7 +190,7 @@ fn scale_factor_slider(
             .align_items(Alignment::Center)
             .push(
                 Text::new(zoom_translation(language))
-                    .style(TextType::Subtitle)
+                    .class(TextType::Subtitle)
                     .size(FONT_SIZE_SUBTITLE)
                     .font(font),
             )
@@ -214,7 +214,7 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
         .align_items(Alignment::Center)
         .push(
             Text::new(learn_more_translation(language))
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),
         )
@@ -237,7 +237,7 @@ fn need_help(language: Language, font: Font) -> Container<'static, Message, Styl
                 Position::Right,
             )
             .gap(5)
-            .style(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip),
         )
         .push(vertical_space());
 
@@ -262,7 +262,7 @@ fn mmdb_settings(
         .push(
             Text::new(mmdb_files_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(mmdb_selection_row(
@@ -309,7 +309,7 @@ fn mmdb_selection_row(
         .push(
             Text::new(get_path_termination_string(custom_path, 25))
                 .font(font)
-                .style(if is_error {
+                .class(if is_error {
                     TextType::Danger
                 } else {
                     TextType::Standard

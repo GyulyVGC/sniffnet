@@ -78,7 +78,7 @@ fn new_page_tab(
         .push(
             page.icon()
                 .size(15)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
@@ -91,7 +91,7 @@ fn new_page_tab(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
@@ -114,7 +114,7 @@ fn new_page_tab(
         .height(if active { 35 } else { 30 })
         .padding(0)
         .width(Length::Fill)
-        .style(if active {
+        .class(if active {
             ButtonType::TabActive
         } else {
             ButtonType::TabInactive
@@ -135,7 +135,7 @@ fn new_settings_tab(
         .push(
             page.icon()
                 .size(15)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
@@ -148,7 +148,7 @@ fn new_settings_tab(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
@@ -162,7 +162,7 @@ fn new_settings_tab(
         .height(if active { 35 } else { 30 })
         .padding(0)
         .width(Length::Fill)
-        .style(if active {
+        .class(if active {
             ButtonType::TabActive
         } else {
             ButtonType::TabInactive
@@ -183,5 +183,5 @@ pub fn notifications_badge(
     .align_y(Vertical::Center)
     .padding([2, 4])
     .height(20)
-    .style(ContainerType::Highlighted)
+    .class(ContainerType::Highlighted)
 }
