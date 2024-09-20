@@ -4,7 +4,7 @@
 
 use iced::widget::slider::Style;
 use iced::widget::slider::{Catalog, Handle, HandleShape, Rail, Status};
-use iced::Background;
+use iced::{Background, Border};
 
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::palette::mix_colors;
@@ -27,7 +27,10 @@ impl SliderType {
                     Background::Color(ext.buttons_color),
                 ),
                 width: 3.0,
-                border: BORDER_ROUNDED_RADIUS.into(),
+                border: Border {
+                    radius: BORDER_ROUNDED_RADIUS.into(),
+                    ..Default::default()
+                },
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 5.5 },
@@ -48,7 +51,10 @@ impl SliderType {
                     Background::Color(ext.buttons_color),
                 ),
                 width: 3.0,
-                border: BORDER_ROUNDED_RADIUS.into(),
+                border: Border {
+                    radius: BORDER_ROUNDED_RADIUS.into(),
+                    ..Default::default()
+                },
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },
@@ -69,7 +75,10 @@ impl SliderType {
                     Background::Color(ext.buttons_color),
                 ),
                 width: 3.0,
-                border: BORDER_ROUNDED_RADIUS.into(),
+                border: Border {
+                    radius: BORDER_ROUNDED_RADIUS.into(),
+                    ..Default::default()
+                },
             },
             handle: Handle {
                 shape: HandleShape::Circle { radius: 8.0 },

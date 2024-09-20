@@ -122,7 +122,7 @@ pub fn main() -> iced::Result {
         .subscription(Sniffer::subscription)
         .theme(Sniffer::theme)
         .scale_factor(Sniffer::scale_factor)
-        .run_with(|| {
+        .run_with(move || {
             (
                 Sniffer::new(&configs1, newer_release_available1),
                 Task::none(),
