@@ -87,11 +87,11 @@ impl iced::overlay::menu::Catalog for StyleType {
 impl Catalog for StyleType {
     type Class<'a> = PicklistType;
 
-    fn default<'a>() -> Self::Class<'a> {
+    fn default<'a>() -> <Self as Catalog>::Class<'a> {
         Self::Class::default()
     }
 
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
+    fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {
         match status {
             Status::Active => class.active(self),
             Status::Hovered => class.hovered(self),

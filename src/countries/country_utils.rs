@@ -303,7 +303,7 @@ fn get_flag_from_country(
             flag
         }
     })))
-    .style(svg_style)
+    .class(svg_style)
     .width(width)
     .height(width * 0.75);
 
@@ -346,7 +346,7 @@ pub fn get_flag_tooltip(
         Position::FollowCursor,
     )
     .snap_within_viewport(true)
-    .style(tooltip_style);
+    .class(tooltip_style);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -371,7 +371,7 @@ pub fn get_computer_tooltip(
             (false, false, TrafficType::Unicast) => UNKNOWN,
         },
     )))
-    .style(SvgType::AdaptColor)
+    .class(SvgType::AdaptColor)
     .width(FLAGS_WIDTH_BIG)
     .height(FLAGS_WIDTH_BIG * 0.75);
 
@@ -390,5 +390,5 @@ pub fn get_computer_tooltip(
         Position::FollowCursor,
     )
     .snap_within_viewport(true)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }

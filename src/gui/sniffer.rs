@@ -20,7 +20,7 @@ use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
-use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, Modal};
+use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, new_modal};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
@@ -568,9 +568,7 @@ impl Sniffer {
                         SettingsPage::General => settings_general_page(self),
                     };
 
-                    Modal::new(content, overlay)
-                        .on_blur(Message::CloseSettings)
-                        .into()
+                    new_modal(content, overlay, Message::CloseSettings)
                 } else {
                     content.into()
                 }
@@ -584,9 +582,7 @@ impl Sniffer {
                     MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 };
 
-                Modal::new(content, overlay)
-                    .on_blur(Message::HideModal)
-                    .into()
+                new_modal(content, overlay, Message::HideModal)
             }
         }
     }
@@ -600,7 +596,7 @@ impl Sniffer {
         ])
     }
 
-    pub fn theme(&self) -> Self::Theme {
+    pub fn theme(&self) -> StyleType {
         self.configs.lock().unwrap().settings.style
     }
 
