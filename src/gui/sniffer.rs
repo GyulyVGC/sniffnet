@@ -17,7 +17,9 @@ use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
-use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
+use crate::configs::types::config_window::{
+    ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
+};
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, new_modal};
@@ -397,7 +399,7 @@ impl Sniffer {
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled = (x, y).scale_and_check(scale_factor);
+                let scaled = PositionTuple(x, y).scale_and_check(scale_factor);
                 if self.thumbnail {
                     self.configs.lock().unwrap().window.thumbnail_position = scaled;
                 } else {
@@ -408,7 +410,7 @@ impl Sniffer {
                 if !self.thumbnail {
                     let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
                     self.configs.lock().unwrap().window.size =
-                        (width, height).scale_and_check(scale_factor);
+                        SizeTuple(width, height).scale_and_check(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
                     return self.update(Message::ToggleThumbnail(true));
                 }

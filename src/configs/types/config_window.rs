@@ -6,15 +6,20 @@ use serde::{Deserialize, Serialize};
 use crate::SNIFFNET_LOWERCASE;
 
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
+pub struct PositionTuple(pub f32, pub f32);
+#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
+pub struct SizeTuple(pub f32, pub f32);
+
+#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
 pub struct ConfigWindow {
-    pub position: (f32, f32),
-    pub size: (f32, f32),
-    pub thumbnail_position: (f32, f32),
+    pub position: PositionTuple,
+    pub size: SizeTuple,
+    pub thumbnail_position: PositionTuple,
 }
 
 impl ConfigWindow {
-    pub const DEFAULT_SIZE: (f32, f32) = (1190.0, 670.0);
-    const THUMBNAIL_SIZE: (f32, f32) = (360.0, 222.0);
+    pub const DEFAULT_SIZE: SizeTuple = SizeTuple(1190.0, 670.0);
+    const THUMBNAIL_SIZE: SizeTuple = SizeTuple(360.0, 222.0);
 
     const MIN_POS_X: f32 = -50.0;
     const MIN_POS_Y: f32 = -50.0;
@@ -41,7 +46,7 @@ impl ConfigWindow {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
     }
 
-    pub fn thumbnail_size(factor: f64) -> (f32, f32) {
+    pub fn thumbnail_size(factor: f64) -> SizeTuple {
         Self::THUMBNAIL_SIZE.scale_and_check(factor)
     }
 }
@@ -49,9 +54,9 @@ impl ConfigWindow {
 impl Default for ConfigWindow {
     fn default() -> Self {
         Self {
-            position: (0.0, 0.0),
+            position: PositionTuple(0.0, 0.0),
             size: ConfigWindow::DEFAULT_SIZE,
-            thumbnail_position: (0.0, 0.0),
+            thumbnail_position: PositionTuple(0.0, 0.0),
         }
     }
 }
@@ -60,7 +65,7 @@ pub trait ToPosition {
     fn to_position(self) -> Position;
 }
 
-impl ToPosition for (f32, f32) {
+impl ToPosition for PositionTuple {
     fn to_position(self) -> Position {
         Position::Specific(Point {
             x: self.0,
@@ -73,7 +78,7 @@ pub trait ToPoint {
     fn to_point(self) -> Point;
 }
 
-impl ToPoint for (f32, f32) {
+impl ToPoint for PositionTuple {
     fn to_point(self) -> Point {
         Point {
             x: self.0,
@@ -86,7 +91,7 @@ pub trait ToSize {
     fn to_size(self) -> Size;
 }
 
-impl ToSize for (f32, f32) {
+impl ToSize for SizeTuple {
     fn to_size(self) -> Size {
         Size {
             width: self.0,
@@ -99,8 +104,8 @@ pub trait ScaleAndCheck {
     fn scale_and_check(self, factor: f64) -> Self;
 }
 
-impl ScaleAndCheck for (f32, f32) {
-    fn scale_and_check(self, factor: f64) -> (f32, f32) {
+impl ScaleAndCheck for SizeTuple {
+    fn scale_and_check(self, factor: f64) -> SizeTuple {
         let factor = factor as f32;
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;
@@ -110,12 +115,12 @@ impl ScaleAndCheck for (f32, f32) {
         if y < ConfigWindow::MIN_SIZE_Y {
             y = ConfigWindow::MIN_SIZE_Y;
         }
-        (x, y)
+        SizeTuple(x, y)
     }
 }
 
-impl ScaleAndCheck for (f32, f32) {
-    fn scale_and_check(self, factor: f64) -> (f32, f32) {
+impl ScaleAndCheck for PositionTuple {
+    fn scale_and_check(self, factor: f64) -> PositionTuple {
         let factor = factor as f32;
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;
@@ -131,7 +136,7 @@ impl ScaleAndCheck for (f32, f32) {
         if y > ConfigWindow::MAX_POS_Y {
             y = ConfigWindow::MAX_POS_Y;
         }
-        (x, y)
+        PositionTuple(x, y)
     }
 }
 
