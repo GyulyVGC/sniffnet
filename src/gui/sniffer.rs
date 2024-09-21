@@ -559,30 +559,33 @@ impl Sniffer {
             self.newer_release_available.clone(),
         );
 
-        let content = Column::new().push(header).push(body).push(footer);
+        let content: Element<Message, StyleType> =
+            Column::new().push(header).push(body).push(footer).into();
 
         match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
-                    let overlay = match settings_page {
+                    let overlay: Element<Message, StyleType> = match settings_page {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
                         SettingsPage::General => settings_general_page(self),
-                    };
+                    }
+                    .into();
 
                     new_modal(content, overlay, Message::CloseSettings)
                 } else {
-                    content.into()
+                    content
                 }
             }
             Some(modal) => {
-                let overlay = match modal {
+                let overlay: Element<Message, StyleType> = match modal {
                     MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
                     MyModal::ClearAll => {
                         get_clear_all_overlay(color_gradient, font, font_headers, language)
                     }
                     MyModal::ConnectionDetails(key) => connection_details_page(self, key),
-                };
+                }
+                .into();
 
                 new_modal(content, overlay, Message::HideModal)
             }

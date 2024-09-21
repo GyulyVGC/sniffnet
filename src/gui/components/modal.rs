@@ -134,26 +134,28 @@ fn confirm_button_row<'a>(
         )
 }
 
-pub fn new_modal<'a, Message: Clone + 'a>(
-    base: impl Into<Element<'a, Message, StyleType>>,
-    content: impl Into<Element<'a, Message, StyleType>>,
+pub fn new_modal<'a>(
+    base: Element<'a, Message, StyleType>,
+    content: Element<'a, Message, StyleType>,
     on_blur: Message,
 ) -> Element<'a, Message, StyleType> {
     stack![
-        base.into(),
+        base,
         opaque(
-            mouse_area(center(opaque(content)).style(|_theme| {
-                container::Style {
-                    background: Some(
-                        Color {
-                            a: 0.8,
-                            ..Color::BLACK
-                        }
-                        .into(),
-                    ),
-                    ..container::Style::default()
-                }
-            }))
+            mouse_area(
+                center(opaque(content)) //     .style(|_theme| {
+                                        //     container::Style {
+                                        //         background: Some(
+                                        //             Color {
+                                        //                 a: 0.8,
+                                        //                 ..Color::BLACK
+                                        //             }
+                                        //             .into(),
+                                        //         ),
+                                        //         ..container::Style::default()
+                                        //     }
+                                        // })
+            )
             .on_press(on_blur)
         )
     ]
