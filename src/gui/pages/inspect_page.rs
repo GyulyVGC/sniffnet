@@ -34,7 +34,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -103,7 +103,7 @@ pub fn inspect_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<Message, StyleType> {
+fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
