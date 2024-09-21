@@ -9,7 +9,7 @@ use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::gui::styles::types::palette::mix_colors;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum PicklistType {
     #[default]
     Standard,
@@ -18,6 +18,7 @@ pub enum PicklistType {
 const PICKLIST_BORDER_RADIUS: f32 = 8.0;
 
 impl PicklistType {
+    #[allow(clippy::unused_self)]
     fn appearance(&self, style: &StyleType) -> iced::overlay::menu::Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -36,6 +37,7 @@ impl PicklistType {
 }
 
 impl PicklistType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -52,6 +54,7 @@ impl PicklistType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn hovered(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -93,9 +96,8 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active => class.active(self),
+            Status::Active | Status::Opened => class.active(self),
             Status::Hovered => class.hovered(self),
-            Status::Opened => class.active(self),
         }
     }
 }

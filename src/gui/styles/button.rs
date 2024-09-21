@@ -14,7 +14,7 @@ use crate::gui::styles::types::gradient_type::{
 use crate::gui::styles::types::palette::mix_colors;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum ButtonType {
     #[default]
     Standard,

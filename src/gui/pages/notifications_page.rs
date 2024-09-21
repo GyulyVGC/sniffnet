@@ -30,7 +30,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui notifications page
-pub fn notifications_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
+pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,

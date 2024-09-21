@@ -29,7 +29,7 @@ use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
-pub fn settings_general_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
+pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,

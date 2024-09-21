@@ -6,7 +6,7 @@ use crate::StyleType;
 use iced::widget::rule::{Catalog, FillMode, Style};
 use iced::Color;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum RuleType {
     #[default]
     Standard,

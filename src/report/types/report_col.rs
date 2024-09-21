@@ -17,7 +17,7 @@ const SMALL_COL_WIDTH: f32 = 95.0;
 const LARGE_COL_MAX_CHARS: usize = 25;
 const SMALL_COL_MAX_CHARS: usize = 10;
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Eq, PartialEq)]
 pub enum ReportCol {
     SrcIp,
     SrcPort,

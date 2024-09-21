@@ -7,7 +7,7 @@
 // use crate::gui::styles::style_constants::BORDER_WIDTH;
 // use crate::StyleType;
 //
-// #[derive(Clone, Copy, Default)]
+// #[derive(Default)]
 // pub enum RadioType {
 //     #[default]
 //     Standard,

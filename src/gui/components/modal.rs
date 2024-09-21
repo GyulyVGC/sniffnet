@@ -134,7 +134,7 @@ fn confirm_button_row<'a>(
         )
 }
 
-pub fn new_modal<'a>(
+pub fn modal<'a>(
     base: Element<'a, Message, StyleType>,
     content: Element<'a, Message, StyleType>,
     on_blur: Message,

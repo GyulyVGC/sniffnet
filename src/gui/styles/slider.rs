@@ -10,13 +10,14 @@ use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::palette::mix_colors;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum SliderType {
     #[default]
     Standard,
 }
 
 impl SliderType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -41,6 +42,7 @@ impl SliderType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn hovered(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -65,6 +67,7 @@ impl SliderType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn dragging(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();

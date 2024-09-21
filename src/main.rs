@@ -90,7 +90,7 @@ pub fn main() -> iced::Result {
 
     let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
 
-    application(Sniffer::title, Sniffer::update, Sniffer::view)
+    application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
         .settings(Settings {
             // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
             id: Some(String::from(SNIFFNET_LOWERCASE)),

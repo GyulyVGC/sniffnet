@@ -8,7 +8,7 @@ use iced::{Background, Border, Color};
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum TextInputType {
     #[default]
     Standard,
@@ -72,6 +72,7 @@ impl TextInputType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn placeholder_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
         let is_nightly = style.get_extension().is_nightly;
@@ -81,10 +82,12 @@ impl TextInputType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn value_color(&self, style: &StyleType) -> Color {
         style.get_palette().text_body
     }
 
+    #[allow(clippy::unused_self)]
     fn disabled_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
         let is_nightly = style.get_extension().is_nightly;
@@ -94,6 +97,7 @@ impl TextInputType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn selection_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
         let is_nightly = style.get_extension().is_nightly;

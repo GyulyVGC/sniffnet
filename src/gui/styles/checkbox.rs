@@ -8,7 +8,7 @@ use iced::{Background, Border};
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum CheckboxType {
     #[default]
     Standard,
@@ -17,6 +17,7 @@ pub enum CheckboxType {
 const CHECKBOX_BORDER_RADIUS: f32 = 5.0;
 
 impl CheckboxType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType, is_checked: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -32,6 +33,7 @@ impl CheckboxType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn hovered(&self, style: &StyleType, _is_checked: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();

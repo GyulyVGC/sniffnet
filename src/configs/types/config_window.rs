@@ -106,6 +106,7 @@ pub trait ScaleAndCheck {
 
 impl ScaleAndCheck for SizeTuple {
     fn scale_and_check(self, factor: f64) -> SizeTuple {
+        #[allow(clippy::cast_possible_truncation)]
         let factor = factor as f32;
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;
@@ -121,6 +122,7 @@ impl ScaleAndCheck for SizeTuple {
 
 impl ScaleAndCheck for PositionTuple {
     fn scale_and_check(self, factor: f64) -> PositionTuple {
+        #[allow(clippy::cast_possible_truncation)]
         let factor = factor as f32;
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;

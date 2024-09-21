@@ -22,7 +22,7 @@ use crate::configs::types::config_window::{
 };
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
-use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, new_modal};
+use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
@@ -61,9 +61,7 @@ use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{
-    ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart, SNIFFNET_TITLECASE,
-};
+use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -130,10 +128,6 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub fn title(&self) -> String {
-        String::from(SNIFFNET_TITLECASE)
-    }
-
     pub fn new(
         configs: &Arc<Mutex<Configs>>,
         newer_release_available: Arc<Mutex<Option<bool>>>,
@@ -560,7 +554,7 @@ impl Sniffer {
             color_gradient,
             font,
             font_headers,
-            self.newer_release_available.clone(),
+            &self.newer_release_available,
         );
 
         let content: Element<Message, StyleType> =
@@ -576,13 +570,13 @@ impl Sniffer {
                     }
                     .into();
 
-                    new_modal(content, overlay, Message::CloseSettings)
+                    modal(content, overlay, Message::CloseSettings)
                 } else {
                     content
                 }
             }
-            Some(modal) => {
-                let overlay: Element<Message, StyleType> = match modal {
+            Some(m) => {
+                let overlay: Element<Message, StyleType> = match m {
                     MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
                     MyModal::ClearAll => {
                         get_clear_all_overlay(color_gradient, font, font_headers, language)
@@ -591,7 +585,7 @@ impl Sniffer {
                 }
                 .into();
 
-                new_modal(content, overlay, Message::HideModal)
+                modal(content, overlay, Message::HideModal)
             }
         }
     }

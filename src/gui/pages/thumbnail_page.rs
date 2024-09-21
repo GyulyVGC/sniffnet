@@ -23,7 +23,7 @@ const MAX_CHARS_HOST: usize = 26;
 const MAX_CHARS_SERVICE: usize = 13;
 
 /// Computes the body of the thumbnail view
-pub fn thumbnail_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
+pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings { style, .. } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 

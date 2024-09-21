@@ -212,7 +212,7 @@ fn report_header_row(
                 .align_y(Alignment::Center),
             );
         } else {
-            col_header = col_header.push(sort_arrows(sort_type, report_col));
+            col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
         ret_val = ret_val.push(col_header);
     }
@@ -256,7 +256,7 @@ fn title_report_col_display(
 
 fn sort_arrows<'a>(
     active_sort_type: ReportSortType,
-    report_col: ReportCol,
+    report_col: &ReportCol,
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
@@ -265,9 +265,9 @@ fn sort_arrows<'a>(
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
-        .class(active_sort_type.button_type(&report_col))
+        .class(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
-            active_sort_type.next_sort(&report_col),
+            active_sort_type.next_sort(report_col),
         )),
     )
     .align_y(Alignment::Center)
@@ -530,7 +530,7 @@ mod tests {
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =
-                    title_report_col_display(&report_col, language);
+                    title_report_col_display(report_col, language);
                 let title_chars = title.chars().collect::<Vec<char>>();
                 let title_small_chars = title_small.chars().collect::<Vec<char>>();
                 let max_chars = report_col.get_max_chars(Some(language));

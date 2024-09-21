@@ -7,13 +7,14 @@ use crate::StyleType;
 use iced::widget::toggler::{Catalog, Status, Style};
 use iced::Color;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum TogglerType {
     #[default]
     Standard,
 }
 
 impl TogglerType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType, is_active: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
@@ -39,6 +40,7 @@ impl TogglerType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn hovered(&self, style: &StyleType, is_active: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();

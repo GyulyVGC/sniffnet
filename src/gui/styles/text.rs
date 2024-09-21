@@ -9,7 +9,7 @@ use iced::{Color, Font};
 use crate::gui::types::message::Message;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default, PartialEq)]
+#[derive(Copy, Clone, Default, PartialEq)]
 pub enum TextType {
     #[default]
     Standard,
@@ -38,9 +38,9 @@ impl TextType {
             .push(Text::new(format!("   {desc}")).font(font))
     }
 
-    fn appearance(&self, style: &StyleType) -> Style {
+    fn appearance(self, style: &StyleType) -> Style {
         Style {
-            color: if self == &TextType::Standard {
+            color: if self == TextType::Standard {
                 None
             } else {
                 Some(highlight(style, self))
@@ -49,7 +49,7 @@ impl TextType {
     }
 }
 
-pub fn highlight(style: &StyleType, element: &TextType) -> Color {
+pub fn highlight(style: &StyleType, element: TextType) -> Color {
     let colors = style.get_palette();
     let secondary = colors.secondary;
     let is_nightly = style.get_extension().is_nightly;

@@ -41,7 +41,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
-pub fn initial_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, StyleType> {
+pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,

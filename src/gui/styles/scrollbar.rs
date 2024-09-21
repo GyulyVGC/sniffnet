@@ -10,13 +10,14 @@ use iced::widget::scrollable::{Catalog, Rail, Status, Style};
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Border, Color};
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum ScrollbarType {
     #[default]
     Standard,
 }
 
 impl ScrollbarType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType) -> Style {
         let ext = style.get_extension();
 
@@ -48,6 +49,7 @@ impl ScrollbarType {
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn hovered(&self, style: &StyleType, is_mouse_over_scrollbar: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
