@@ -530,7 +530,7 @@ mod tests {
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =
-                    title_report_col_display(report_col, language);
+                    title_report_col_display(&report_col, language);
                 let title_chars = title.chars().collect::<Vec<char>>();
                 let title_small_chars = title_small.chars().collect::<Vec<char>>();
                 let max_chars = report_col.get_max_chars(Some(language));
