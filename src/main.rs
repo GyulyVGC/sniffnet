@@ -33,6 +33,7 @@ use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::Configs;
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::types::message::Message;
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
@@ -125,7 +126,7 @@ pub fn main() -> iced::Result {
         .run_with(move || {
             (
                 Sniffer::new(&configs1, newer_release_available1),
-                Task::none(),
+                Task::none().chain(window::get_latest().map(Message::WindowId)),
             )
         })
 }

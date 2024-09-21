@@ -125,6 +125,8 @@ pub struct Sniffer {
     pub export_pcap: ExportPcap,
     /// Whether thumbnail mode is currently active
     pub thumbnail: bool,
+    /// Window id
+    pub id: Option<Id>,
 }
 
 impl Sniffer {
@@ -170,6 +172,7 @@ impl Sniffer {
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
             thumbnail: false,
+            id: None,
         }
     }
 
@@ -435,7 +438,7 @@ impl Sniffer {
             }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(window::get_oldest());
+                return window::close(self.id.unwrap());
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());
@@ -476,25 +479,25 @@ impl Sniffer {
                     let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
                     Task::batch([
-                        window::maximize(Id::MAIN, false),
-                        window::toggle_decorations(Id::MAIN),
-                        window::resize(Id::MAIN, size),
-                        window::move_to(Id::MAIN, position.to_point()),
-                        window::change_level(Id::MAIN, Level::AlwaysOnTop),
+                        window::maximize(self.id.unwrap(), false),
+                        window::toggle_decorations(self.id.unwrap()),
+                        window::resize(self.id.unwrap(), size),
+                        window::move_to(self.id.unwrap(), position.to_point()),
+                        window::change_level(self.id.unwrap(), Level::AlwaysOnTop),
                     ])
                 } else {
                     if self.running_page.eq(&RunningPage::Notifications) {
                         self.unread_notifications = 0;
                     }
                     let mut commands = vec![
-                        window::toggle_decorations(Id::MAIN),
-                        window::change_level(Id::MAIN, Level::Normal),
+                        window::toggle_decorations(self.id.unwrap()),
+                        window::change_level(self.id.unwrap(), Level::Normal),
                     ];
                     if !triggered_by_resize {
                         let size = self.configs.lock().unwrap().window.size.to_size();
                         let position = self.configs.lock().unwrap().window.position.to_point();
-                        commands.push(window::move_to(Id::MAIN, position));
-                        commands.push(window::resize(Id::MAIN, size));
+                        commands.push(window::move_to(self.id.unwrap(), position));
+                        commands.push(window::resize(self.id.unwrap(), size));
                     }
                     Task::batch(commands)
                 };
@@ -503,7 +506,7 @@ impl Sniffer {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
-                    return window::drag(Id::MAIN);
+                    return window::drag(self.id.unwrap());
                 }
             }
             Message::CtrlTPressed => {
@@ -522,6 +525,7 @@ impl Sniffer {
                     self.configs.lock().unwrap().settings.scale_factor += delta;
                 }
             }
+            Message::WindowId(id) => self.id = id,
             Message::TickInit => {}
         }
         Task::none()

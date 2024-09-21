@@ -9,6 +9,7 @@ use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
+use iced::window;
 
 #[derive(Debug, Clone)]
 /// Messages types that permit to react to application interactions/subscriptions
@@ -119,4 +120,6 @@ pub enum Message {
     CtrlTPressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
+    /// Set the window ID
+    WindowId(Option<window::Id>),
 }
