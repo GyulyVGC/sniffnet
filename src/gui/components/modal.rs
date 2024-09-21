@@ -1,9 +1,9 @@
 use iced::alignment::Alignment;
 use iced::widget::{
-    button, center, container, horizontal_space, mouse_area, opaque, stack, Column, Container, Row,
-    Space, Text,
+    button, center, horizontal_space, mouse_area, opaque, stack, Column, Container, Row, Space,
+    Text,
 };
-use iced::{Color, Element, Font, Length};
+use iced::{Element, Font, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::button::ButtonType;
@@ -142,21 +142,8 @@ pub fn new_modal<'a>(
     stack![
         base,
         opaque(
-            mouse_area(
-                center(opaque(content)) //     .style(|_theme| {
-                                        //     container::Style {
-                                        //         background: Some(
-                                        //             Color {
-                                        //                 a: 0.8,
-                                        //                 ..Color::BLACK
-                                        //             }
-                                        //             .into(),
-                                        //         ),
-                                        //         ..container::Style::default()
-                                        //     }
-                                        // })
-            )
-            .on_press(on_blur)
+            mouse_area(center(opaque(content)).class(ContainerType::ModalBackground))
+                .on_press(on_blur)
         )
     ]
     .into()

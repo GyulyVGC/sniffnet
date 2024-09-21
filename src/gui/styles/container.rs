@@ -22,6 +22,7 @@ pub enum ContainerType {
     Modal,
     Highlighted,
     HighlightedOnHeader,
+    ModalBackground,
 }
 
 impl ContainerType {
@@ -55,6 +56,10 @@ impl ContainerType {
                 ContainerType::Standard | ContainerType::Palette => {
                     Background::Color(Color::TRANSPARENT)
                 }
+                ContainerType::ModalBackground => Background::Color(Color {
+                    a: 0.8,
+                    ..Color::BLACK
+                }),
             }),
             border: Border {
                 radius: match self {
