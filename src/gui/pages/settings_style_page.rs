@@ -251,7 +251,7 @@ fn get_palette_rule(
 fn get_extra_palettes(
     styles: &[ExtraStyles],
     current_style: StyleType,
-) -> Vec<Element<Message, StyleType>> {
+) -> Vec<Element<'static, Message, StyleType>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
@@ -293,7 +293,7 @@ fn lazy_custom_style_input(
     font: Font,
     custom_path: &str,
     style: StyleType,
-) -> Button<Message, StyleType> {
+) -> Button<'static, Message, StyleType> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
     let custom_palette = Palette::from_file(custom_path);
