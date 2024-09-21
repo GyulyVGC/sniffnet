@@ -2,6 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use iced::border::Radius;
 use iced::widget::container::{Catalog, Style};
 use iced::{Background, Border, Color, Shadow};
 
@@ -58,9 +59,7 @@ impl ContainerType {
             border: Border {
                 radius: match self {
                     ContainerType::BorderedRound => BORDER_ROUNDED_RADIUS.into(),
-                    ContainerType::Modal => {
-                        [0.0, 0.0, BORDER_ROUNDED_RADIUS, BORDER_ROUNDED_RADIUS].into()
-                    }
+                    ContainerType::Modal => Radius::new(0).bottom(BORDER_ROUNDED_RADIUS),
                     ContainerType::Tooltip => 7.0.into(),
                     ContainerType::Badge
                     | ContainerType::Highlighted

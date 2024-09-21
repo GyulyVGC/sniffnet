@@ -2,6 +2,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use iced::border::Radius;
 use iced::widget::button;
 use iced::widget::button::{Catalog, Status, Style};
 use iced::{Background, Border, Color, Shadow, Vector};
@@ -62,9 +63,7 @@ impl ButtonType {
             border: Border {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
-                    ButtonType::TabActive | ButtonType::TabInactive => {
-                        [0.0, 0.0, 30.0, 30.0].into()
-                    }
+                    ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
@@ -153,9 +152,7 @@ impl ButtonType {
             border: Border {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
-                    ButtonType::TabActive | ButtonType::TabInactive => {
-                        [0.0, 0.0, 30.0, 30.0].into()
-                    }
+                    ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
