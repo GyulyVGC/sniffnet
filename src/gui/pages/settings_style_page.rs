@@ -1,7 +1,7 @@
 use iced::widget::scrollable::Direction;
 use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
-use iced::{Alignment, Color, Element, Font, Length};
+use iced::{Alignment, Color, Element, Font, Length, Padding};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
@@ -41,7 +41,7 @@ pub fn settings_style_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, Styl
     let font_headers = style.get_extension().font_headers;
 
     let mut content = Column::new()
-        .padding([0, 0, 5, 0])
+        .padding(Padding::ZERO.bottom(5))
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
@@ -351,7 +351,7 @@ fn lazy_custom_style_input(
             75
         })
         .width(380)
-        .padding([10, 0, 5, 0])
+        .padding(Padding::ZERO.top(10).bottom(5))
         .class(if is_custom_toml_style_set {
             ButtonType::BorderedRoundSelected
         } else {

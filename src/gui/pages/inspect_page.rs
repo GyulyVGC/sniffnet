@@ -8,7 +8,7 @@ use iced::widget::{
     button, horizontal_space, text_input, vertical_space, Rule, Space, Toggler, Tooltip,
 };
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Pixels};
+use iced::{alignment, Alignment, Font, Length, Padding, Pixels};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -95,7 +95,7 @@ pub fn inspect_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> 
             Container::new(col_report)
                 .align_y(Alignment::Center)
                 .align_x(Alignment::Center)
-                .padding([10, 7, 3, 7])
+                .padding(Padding::new(7.0).top(10).bottom(3))
                 .width(1042)
                 .class(ContainerType::BorderedRound),
         );
@@ -433,9 +433,9 @@ fn filter_input<'a>(
 
     Container::new(content)
         .padding(if is_filter_active {
-            [5, 5, 5, 10]
+            Padding::new(5.0).left(10)
         } else {
-            [5, 3, 5, 3]
+            Padding::new(5.0).right(3).left(3)
         })
         .class(if is_filter_active {
             ContainerType::Badge

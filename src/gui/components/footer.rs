@@ -6,7 +6,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, Container, Row, Text, Tooltip};
 use iced::widget::{horizontal_space, Space};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::styles::button::ButtonType;
@@ -111,7 +111,7 @@ fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
             .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .padding([2, 0, 0, 0])
+    .padding(Padding::ZERO.top(2))
     .height(30)
     .width(30)
     .on_press(Message::OpenWebPage(WebPage::Sponsor));

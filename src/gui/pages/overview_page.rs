@@ -11,7 +11,7 @@ use iced::widget::{
     Scrollable, Space, Text, Tooltip,
 };
 use iced::Length::{Fill, FillPortion};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -247,7 +247,7 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_service = col_service(250.0, sniffer);
 
     let row_report = Row::new()
-        .padding([0, 10, 5, 10])
+        .padding(Padding::new(10.0).top(0).bottom(5))
         .push(col_host)
         .push(Rule::vertical(40))
         .push(col_service);
@@ -323,7 +323,7 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<Message, StyleType> {
 
         scroll_host = scroll_host.push(
             button(content)
-                .padding([5, 15, 5, 10])
+                .padding(Padding::new(5.0).right(15).left(10))
                 .on_press(Message::Search(SearchParameters::new_host_search(host)))
                 .class(ButtonType::Neutral),
         );
@@ -401,7 +401,7 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<Message, StyleType> {
 
         scroll_service = scroll_service.push(
             button(content)
-                .padding([5, 15, 8, 10])
+                .padding(Padding::new(5.0).right(15).bottom(8).left(10))
                 .on_press(Message::Search(SearchParameters::new_service_search(
                     service,
                 )))
@@ -494,7 +494,7 @@ fn lazy_col_info<'a>(
 
     Container::new(content)
         .width(400)
-        .padding([10, 5, 5, 5])
+        .padding(Padding::new(5.0).top(10))
         .align_x(Alignment::Center)
         .class(ContainerType::BorderedRound)
 }
@@ -781,7 +781,7 @@ fn get_active_filters_col(
         ret_val = ret_val.push(if show {
             Row::new().push(Text::new(filters_string).font(font))
         } else {
-            Row::new().padding([0, 0, 0, 20]).push(
+            Row::new().padding(Padding::ZERO.left(20)).push(
                 Tooltip::new(
                     Container::new(
                         Text::new("i")

@@ -11,7 +11,7 @@ use iced::widget::{
     Tooltip,
 };
 use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Font, Length};
+use iced::{alignment, Alignment, Font, Length, Padding};
 use pcap::Device;
 
 use crate::gui::components::button::button_open_file;
@@ -120,7 +120,7 @@ fn col_ip_buttons(
     font: Font,
     language: Language,
 ) -> Column<Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
         let check_symbol = if is_active { "✔" } else { "✘" };
@@ -159,7 +159,7 @@ fn col_protocol_buttons(
     font: Font,
     language: Language,
 ) -> Column<Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in Protocol::ALL {
         let is_active = active_protocol_filters.contains(&option);
         let check_symbol = if is_active { "✔" } else { "✘" };
@@ -199,7 +199,7 @@ fn col_address_input(value: &str, font: Font, language: Language) -> Column<Mess
     } else {
         AddressCollection::new(value).is_none()
     };
-    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
         TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
             .padding([3, 5])
             .on_input(Message::AddressFilter)
@@ -230,7 +230,7 @@ fn col_port_input(value: &str, font: Font, language: Language) -> Column<Message
     } else {
         PortCollection::new(value).is_none()
     };
-    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
         TextInput::new(PortCollection::PLACEHOLDER_STR, value)
             .padding([3, 5])
             .on_input(Message::PortFilter)
@@ -378,7 +378,7 @@ fn get_export_pcap_group(
     if enabled {
         let inner_col = Column::new()
             .spacing(10)
-            .padding([0, 0, 0, 45])
+            .padding(Padding::ZERO.left(45))
             .push(
                 Row::new()
                     .align_y(Alignment::Center)

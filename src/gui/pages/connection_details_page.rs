@@ -4,7 +4,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
@@ -187,7 +187,7 @@ fn col_info<'a>(
 
     let mut ret_val = Column::new()
         .spacing(10)
-        .padding([20, 10, 20, 40])
+        .padding(Padding::new(20.0).right(10).left(40))
         .width(Length::FillPortion(2))
         .push(vertical_space())
         .push(
@@ -234,24 +234,27 @@ fn col_info<'a>(
     ));
 
     if is_icmp {
-        ret_val =
-            ret_val.push(
-                Column::new()
-                    .push(
-                        Text::new(format!("{}:", messages_translation(language)))
-                            .class(TextType::Subtitle)
-                            .font(font),
+        ret_val = ret_val.push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", messages_translation(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Scrollable::new(
+                        Column::new()
+                            .padding(Padding::ZERO.right(10).bottom(10))
+                            .push(
+                                Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font),
+                            ),
                     )
-                    .push(
-                        Scrollable::new(Column::new().padding([0, 10, 10, 0]).push(
-                            Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font),
-                        ))
-                        .direction(Direction::Both {
-                            vertical: ScrollbarType::properties(),
-                            horizontal: ScrollbarType::properties(),
-                        }),
-                    ),
-            );
+                    .direction(Direction::Both {
+                        vertical: ScrollbarType::properties(),
+                        horizontal: ScrollbarType::properties(),
+                    }),
+                ),
+        );
     }
 
     ret_val = ret_val.push(vertical_space());
