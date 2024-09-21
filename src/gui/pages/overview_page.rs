@@ -356,9 +356,11 @@ fn col_host(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleType
                 )),
         )
         .push(
-            Scrollable::new(scroll_host)
-                .width(Length::Fill)
-                .direction(Direction::Vertical(ScrollbarType::properties())),
+            Scrollable::with_direction(
+                scroll_host,
+                Direction::Vertical(ScrollbarType::properties()),
+            )
+            .width(Length::Fill),
         )
 }
 
@@ -436,9 +438,11 @@ fn col_service(width: f32, sniffer: &Sniffer) -> Column<'static, Message, StyleT
                 )),
         )
         .push(
-            Scrollable::new(scroll_service)
-                .width(Length::Fill)
-                .direction(Direction::Vertical(ScrollbarType::properties())),
+            Scrollable::with_direction(
+                scroll_service,
+                Direction::Vertical(ScrollbarType::properties()),
+            )
+            .width(Length::Fill),
         )
 }
 
@@ -477,19 +481,23 @@ fn lazy_col_info(
             Row::new()
                 .height(120)
                 .push(
-                    Scrollable::new(col_device)
-                        .width(Length::Fill)
-                        .direction(Direction::Horizontal(ScrollbarType::properties())),
+                    Scrollable::with_direction(
+                        col_device,
+                        Direction::Horizontal(ScrollbarType::properties()),
+                    )
+                    .width(Length::Fill),
                 )
                 .push(Container::new(Rule::vertical(25)).height(Length::Shrink))
                 .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
         .push(
-            Scrollable::new(col_bytes_packets)
-                .height(Length::Fill)
-                .width(Length::Fill)
-                .direction(Direction::Vertical(ScrollbarType::properties())),
+            Scrollable::with_direction(
+                col_bytes_packets,
+                Direction::Vertical(ScrollbarType::properties()),
+            )
+            .height(Length::Fill)
+            .width(Length::Fill),
         );
 
     Container::new(content)

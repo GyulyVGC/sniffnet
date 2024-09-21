@@ -241,19 +241,15 @@ fn col_info<'a>(
                         .class(TextType::Subtitle)
                         .font(font),
                 )
-                .push(
-                    Scrollable::new(
-                        Column::new()
-                            .padding(Padding::ZERO.right(10).bottom(10))
-                            .push(
-                                Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font),
-                            ),
-                    )
-                    .direction(Direction::Both {
+                .push(Scrollable::with_direction(
+                    Column::new()
+                        .padding(Padding::ZERO.right(10).bottom(10))
+                        .push(Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font)),
+                    Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
-                    }),
-                ),
+                    },
+                )),
         );
     }
 

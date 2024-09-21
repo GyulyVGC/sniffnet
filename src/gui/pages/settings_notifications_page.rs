@@ -66,28 +66,26 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
-        .push(
-            Scrollable::new(
-                Column::new()
-                    .width(720)
-                    .push(get_packets_notify(
-                        notifications.packets_notification,
-                        language,
-                        font,
-                    ))
-                    .push(get_bytes_notify(
-                        notifications.bytes_notification,
-                        language,
-                        font,
-                    ))
-                    .push(get_favorite_notify(
-                        notifications.favorite_notification,
-                        language,
-                        font,
-                    )),
-            )
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-        );
+        .push(Scrollable::with_direction(
+            Column::new()
+                .width(720)
+                .push(get_packets_notify(
+                    notifications.packets_notification,
+                    language,
+                    font,
+                ))
+                .push(get_bytes_notify(
+                    notifications.bytes_notification,
+                    language,
+                    font,
+                ))
+                .push(get_favorite_notify(
+                    notifications.favorite_notification,
+                    language,
+                    font,
+                )),
+            Direction::Vertical(ScrollbarType::properties()),
+        ));
 
     content = content.push(volume_notification_col);
 

@@ -109,7 +109,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(Space::with_height(10));
 
     let styles_scroll =
-        Scrollable::new(styles_col).direction(Direction::Vertical(ScrollbarType::properties()));
+        Scrollable::with_direction(styles_col, Direction::Vertical(ScrollbarType::properties()));
 
     content = content.push(styles_scroll);
 

@@ -132,10 +132,12 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
     if results_number > 0 {
         ret_val = ret_val
             .push(
-                Scrollable::new(scroll_report)
-                    .height(Length::Fill)
-                    .width(Length::Fill)
-                    .direction(Direction::Vertical(ScrollbarType::properties())),
+                Scrollable::with_direction(
+                    scroll_report,
+                    Direction::Vertical(ScrollbarType::properties()),
+                )
+                .height(Length::Fill)
+                .width(Length::Fill),
             )
             .push(Rule::horizontal(5))
             .push(get_change_page_row(

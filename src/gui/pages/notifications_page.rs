@@ -88,10 +88,10 @@ pub fn notifications_page<'a>(sniffer: &'a Sniffer) -> Container<'a, Message, St
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
             )
-            .push(
-                Scrollable::new(logged_notifications)
-                    .direction(Direction::Vertical(ScrollbarType::properties())),
-            )
+            .push(Scrollable::with_direction(
+                logged_notifications,
+                Direction::Vertical(ScrollbarType::properties()),
+            ))
             .push(
                 Container::new(get_button_clear_all(font, language))
                     .width(Length::Fill)

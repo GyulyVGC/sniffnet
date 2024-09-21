@@ -19,7 +19,7 @@ use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType, SNIFFNET_TITLECASE};
 
-pub fn header<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
     let ConfigSettings {
         style,
@@ -48,7 +48,7 @@ pub fn header<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .to_text()
         .align_y(Alignment::Center)
         .height(Length::Fill)
-        .line_height(LineHeight::Relative(0.8))
+        .line_height(LineHeight::Relative(0.7))
         .size(90);
 
     Container::new(

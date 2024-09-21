@@ -335,8 +335,8 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                 .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(
-            Scrollable::new(dev_str_list.iter().fold(
+        .push(Scrollable::with_direction(
+            dev_str_list.iter().fold(
                 Column::new().padding(13).spacing(5),
                 |scroll_adapters, adapter| {
                     let name = adapter.0.clone();
@@ -353,9 +353,9 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                             .on_press(Message::AdapterSelection(name)),
                     )
                 },
-            ))
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-        )
+            ),
+            Direction::Vertical(ScrollbarType::properties()),
+        ))
 }
 
 fn get_export_pcap_group(
