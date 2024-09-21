@@ -29,7 +29,7 @@ use crate::utils::types::icon::Icon;
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_style_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -119,11 +119,11 @@ pub fn settings_style_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, Styl
         .class(ContainerType::Modal)
 }
 
-fn gradients_row<'a>(
+fn gradients_row(
     font: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Row<'a, Message, StyleType> {
+) -> Row<'static, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
@@ -181,12 +181,12 @@ fn gradients_row<'a>(
         )
 }
 
-fn get_palette_container<'a>(
+fn get_palette_container(
     style: StyleType,
     name: String,
     description: String,
     on_press: StyleType,
-) -> Button<'a, Message, StyleType> {
+) -> Button<'static, Message, StyleType> {
     let font = style.get_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
@@ -218,11 +218,11 @@ fn get_palette_container<'a>(
         .on_press(Message::Style(on_press))
 }
 
-fn get_palette_rule<'a>(
+fn get_palette_rule(
     palette: Palette,
     buttons_color: Color,
     is_custom: bool,
-) -> Container<'a, Message, StyleType> {
+) -> Container<'static, Message, StyleType> {
     let height = if is_custom { 25 } else { 40 };
 
     Container::new(

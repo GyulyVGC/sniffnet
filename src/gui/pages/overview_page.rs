@@ -218,12 +218,12 @@ fn body_no_observed(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn body_pcap_error(
-    pcap_error: &str,
-    waiting: &str,
+fn body_pcap_error<'a>(
+    pcap_error: &'a str,
+    waiting: &'a str,
     language: Language,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .align_x(Alignment::Center)
