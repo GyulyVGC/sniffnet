@@ -119,11 +119,11 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .class(ContainerType::Modal)
 }
 
-fn gradients_row(
+fn gradients_row<'a>(
     font: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
@@ -181,12 +181,12 @@ fn gradients_row(
         )
 }
 
-fn get_palette_container(
+fn get_palette_container<'a>(
     style: StyleType,
     name: String,
     description: String,
     on_press: StyleType,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let font = style.get_extension().font;
 
     let is_custom = matches!(on_press, StyleType::Custom(_));
@@ -218,11 +218,11 @@ fn get_palette_container(
         .on_press(Message::Style(on_press))
 }
 
-fn get_palette_rule(
+fn get_palette_rule<'a>(
     palette: Palette,
     buttons_color: Color,
     is_custom: bool,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let height = if is_custom { 25 } else { 40 };
 
     Container::new(
@@ -248,10 +248,10 @@ fn get_palette_rule(
 }
 
 // Buttons for each extra style arranged in rows of two
-fn get_extra_palettes(
+fn get_extra_palettes<'a>(
     styles: &[ExtraStyles],
     current_style: StyleType,
-) -> Vec<Element<'static, Message, StyleType>> {
+) -> Vec<Element<'a, Message, StyleType>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
@@ -288,12 +288,12 @@ fn get_extra_palettes(
     children
 }
 
-fn lazy_custom_style_input(
+fn lazy_custom_style_input<'a>(
     language: Language,
     font: Font,
     custom_path: &str,
     style: StyleType,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
 
     let custom_palette = Palette::from_file(custom_path);

@@ -103,7 +103,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn lazy_report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;

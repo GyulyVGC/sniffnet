@@ -750,7 +750,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
     }
 }
 
-// pub fn filtered_application_translation(language: Language) -> Text<'static,StyleType> {
+// pub fn filtered_application_translation(language: Language) -> Text<StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
 //         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
