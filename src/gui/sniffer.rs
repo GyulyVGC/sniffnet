@@ -432,7 +432,7 @@ impl Sniffer {
             }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(self.id.unwrap());
+                return window::close(self.id.unwrap_or(Id::unique()));
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());
@@ -464,7 +464,7 @@ impl Sniffer {
                 self.export_pcap.set_file_name(name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
-                let window_id = self.id.unwrap();
+                let window_id = self.id.unwrap_or(Id::unique());
 
                 self.thumbnail = !self.thumbnail;
                 self.traffic_chart.thumbnail = self.thumbnail;
@@ -502,7 +502,7 @@ impl Sniffer {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
-                    return window::drag(self.id.unwrap());
+                    return window::drag(self.id.unwrap_or(Id::unique()));
                 }
             }
             Message::CtrlTPressed => {
