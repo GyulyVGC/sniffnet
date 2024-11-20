@@ -116,6 +116,7 @@ pub fn main() -> iced::Result {
             #[cfg(target_os = "linux")]
             platform_specific: PlatformSpecific {
                 application_id: String::from(SNIFFNET_LOWERCASE),
+                ..PlatformSpecific::default()
             },
             exit_on_close_request: false,
             ..Default::default()
