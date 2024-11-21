@@ -13,6 +13,8 @@ pub enum WebPage {
     IssueLanguages,
     /// Sniffnet Wiki
     Wiki,
+    /// My GitHub profile
+    MyGitHub,
 }
 
 impl WebPage {
@@ -21,9 +23,10 @@ impl WebPage {
             WebPage::Repo => "https://github.com/GyulyVGC/sniffnet",
             WebPage::Website => "https://www.sniffnet.net",
             WebPage::Sponsor => "https://github.com/sponsors/GyulyVGC",
-            WebPage::WebsiteDownload => "https://www.sniffnet.net/download/",
+            WebPage::WebsiteDownload => "https://www.sniffnet.net/download",
             WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",
             WebPage::Wiki => "https://github.com/GyulyVGC/sniffnet/wiki",
+            WebPage::MyGitHub => "https://github.com/GyulyVGC",
         }
     }
 }

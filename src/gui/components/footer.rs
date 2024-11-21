@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Container, Row, Text, Tooltip};
+use iced::widget::{button, rich_text, span, Column, Container, Row, Text, Tooltip};
 use iced::widget::{horizontal_space, Space};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -46,11 +46,19 @@ pub fn footer<'a>(
         .push(get_button_github(font))
         .push(get_button_sponsor(font))
         .push(
-            Text::new("Made with ❤ by Giuliano Bellini")
+            Column::new()
+                .push(
+                    rich_text![
+                        "Made with ❤ by ",
+                        span("Giuliano Bellini")
+                            .underline(true)
+                            .link(Message::OpenWebPage(WebPage::MyGitHub)),
+                    ]
+                    .size(FONT_SIZE_FOOTER)
+                    .font(font_footer),
+                )
                 .width(Length::Fill)
-                .align_x(Alignment::End)
-                .size(FONT_SIZE_FOOTER)
-                .font(font_footer),
+                .align_x(Alignment::End),
         );
 
     Container::new(footer_row)
