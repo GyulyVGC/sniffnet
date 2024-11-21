@@ -8,6 +8,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Chinese ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
   - Korean ([#604](https://github.com/GyulyVGC/sniffnet/pull/604))
   - Turkish ([#608](https://github.com/GyulyVGC/sniffnet/pull/608))
+- Migrate to Iced 0.13 ([#618](https://github.com/GyulyVGC/sniffnet/pull/618))
 - Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
 
 ## [1.3.1] - 2024-07-22
