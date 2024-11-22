@@ -50,38 +50,44 @@ impl ScrollbarType {
     }
 
     #[allow(clippy::unused_self)]
-    fn hovered(&self, style: &StyleType, is_mouse_over_scrollbar: bool) -> Style {
+    fn hovered(
+        &self,
+        style: &StyleType,
+        is_mouse_over_x_scrollbar: bool,
+        is_mouse_over_y_scrollbar: bool,
+    ) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
 
-        let rail = Rail {
-            background: Some(Background::Color(Color {
-                a: ext.alpha_round_borders,
-                ..ext.buttons_color
-            })),
-            scroller: Scroller {
-                color: if is_mouse_over_scrollbar {
-                    colors.secondary
-                } else {
-                    mix_colors(colors.secondary, ext.buttons_color)
+        let [horizontal_rail, vertical_rail] =
+            [is_mouse_over_x_scrollbar, is_mouse_over_y_scrollbar].map(|is_over| Rail {
+                background: Some(Background::Color(Color {
+                    a: ext.alpha_round_borders,
+                    ..ext.buttons_color
+                })),
+                scroller: Scroller {
+                    color: if is_over {
+                        colors.secondary
+                    } else {
+                        mix_colors(colors.secondary, ext.buttons_color)
+                    },
+                    border: Border {
+                        radius: BORDER_ROUNDED_RADIUS.into(),
+                        width: 0.0,
+                        color: Color::TRANSPARENT,
+                    },
                 },
                 border: Border {
                     radius: BORDER_ROUNDED_RADIUS.into(),
                     width: 0.0,
                     color: Color::TRANSPARENT,
                 },
-            },
-            border: Border {
-                radius: BORDER_ROUNDED_RADIUS.into(),
-                width: 0.0,
-                color: Color::TRANSPARENT,
-            },
-        };
+            });
 
         Style {
             container: container::Style::default(),
-            vertical_rail: rail,
-            horizontal_rail: rail,
+            vertical_rail,
+            horizontal_rail,
             gap: None,
         }
     }
@@ -106,9 +112,17 @@ impl Catalog for StyleType {
                 is_vertical_scrollbar_hovered,
             } => class.hovered(
                 self,
-                is_horizontal_scrollbar_hovered || is_vertical_scrollbar_hovered,
+                is_horizontal_scrollbar_hovered,
+                is_vertical_scrollbar_hovered,
             ),
-            Status::Dragged { .. } => class.hovered(self, true),
+            Status::Dragged {
+                is_horizontal_scrollbar_dragged,
+                is_vertical_scrollbar_dragged,
+            } => class.hovered(
+                self,
+                is_horizontal_scrollbar_dragged,
+                is_vertical_scrollbar_dragged,
+            ),
         }
     }
 }
