@@ -1,5 +1,4 @@
-use iced::application;
-use iced::application::Appearance;
+use iced::application::{Appearance, DefaultStyle};
 use plotters::prelude::FontStyle;
 use serde::{Deserialize, Serialize};
 
@@ -29,10 +28,8 @@ impl Default for StyleType {
     }
 }
 
-impl application::StyleSheet for StyleType {
-    type Style = ();
-
-    fn appearance(&self, (): &Self::Style) -> Appearance {
+impl DefaultStyle for StyleType {
+    fn default_style(&self) -> Appearance {
         let colors = self.get_palette();
         Appearance {
             background_color: colors.primary,

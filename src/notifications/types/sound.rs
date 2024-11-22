@@ -1,9 +1,8 @@
 use std::fmt;
 use std::thread;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
-use iced::{Font, Length};
+use iced::{Alignment, Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
@@ -43,7 +42,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, StyleType> {
+    pub fn get_text<'a>(self, font: Font) -> iced::widget::Text<'a, StyleType> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),
@@ -52,8 +51,8 @@ impl Sound {
         }
         .size(FONT_SIZE_FOOTER)
         .width(Length::Fill)
-        .horizontal_alignment(Horizontal::Center)
-        .vertical_alignment(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
     }
 }
 

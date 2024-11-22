@@ -8,7 +8,7 @@ use std::{panic, process, thread};
 
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
-use iced::{window, Application, Font, Pixels, Settings};
+use iced::{application, window, Font, Pixels, Settings, Task};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -16,10 +16,10 @@ use cli::parse_cli_args;
 use configs::types::config_device::ConfigDevice;
 use configs::types::config_settings::ConfigSettings;
 use gui::pages::types::running_page::RunningPage;
+use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
 use gui::types::runtime_data::RunTimeData;
-use gui::types::sniffer::Sniffer;
 use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
@@ -31,8 +31,9 @@ use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::Configs;
-use crate::gui::app::FONT_FAMILY_NAME;
+use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::types::message::Message;
 use crate::secondary_threads::check_updates::set_newer_release_status;
 
 mod chart;
@@ -89,10 +90,20 @@ pub fn main() -> iced::Result {
 
     let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
 
-    Sniffer::run(Settings {
-        // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
-        id: Some(String::from(SNIFFNET_LOWERCASE)),
-        window: window::Settings {
+    application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
+        .settings(Settings {
+            // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
+            id: Some(String::from(SNIFFNET_LOWERCASE)),
+            fonts: vec![
+                Cow::Borrowed(SARASA_MONO_BYTES),
+                Cow::Borrowed(SARASA_MONO_BOLD_BYTES),
+                Cow::Borrowed(ICONS_BYTES),
+            ],
+            default_font: Font::with_name(FONT_FAMILY_NAME),
+            default_text_size: Pixels(FONT_SIZE_BODY),
+            antialiasing: false,
+        })
+        .window(window::Settings {
             size: size.to_size(), // start size
             position: position.to_position(),
             min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
@@ -105,18 +116,18 @@ pub fn main() -> iced::Result {
             #[cfg(target_os = "linux")]
             platform_specific: PlatformSpecific {
                 application_id: String::from(SNIFFNET_LOWERCASE),
+                ..PlatformSpecific::default()
             },
             exit_on_close_request: false,
             ..Default::default()
-        },
-        flags: Sniffer::new(&configs1, newer_release_available1),
-        fonts: vec![
-            Cow::Borrowed(SARASA_MONO_BYTES),
-            Cow::Borrowed(SARASA_MONO_BOLD_BYTES),
-            Cow::Borrowed(ICONS_BYTES),
-        ],
-        default_font: Font::with_name(FONT_FAMILY_NAME),
-        default_text_size: Pixels(FONT_SIZE_BODY),
-        antialiasing: false,
-    })
+        })
+        .subscription(Sniffer::subscription)
+        .theme(Sniffer::theme)
+        .scale_factor(Sniffer::scale_factor)
+        .run_with(move || {
+            (
+                Sniffer::new(&configs1, newer_release_available1),
+                Task::none().chain(window::get_latest().map(Message::WindowId)),
+            )
+        })
 }

@@ -92,11 +92,11 @@ impl Icon {
         }
     }
 
-    pub fn to_text(&self) -> iced::widget::Text<'static, StyleType> {
+    pub fn to_text<'a>(&self) -> Text<'a, StyleType> {
         Text::new(self.codepoint().to_string()).font(ICONS)
     }
 
-    pub fn get_hourglass(num: usize) -> iced::widget::Text<'static, StyleType> {
+    pub fn get_hourglass<'a>(num: usize) -> Text<'a, StyleType> {
         match num {
             1 => Icon::Hourglass1.to_text(),
             2 => Icon::Hourglass2.to_text(),

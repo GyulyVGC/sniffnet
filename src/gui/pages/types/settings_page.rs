@@ -46,7 +46,7 @@ impl SettingsPage {
         }
     }
 
-    pub fn icon(self) -> iced::widget::Text<'static, StyleType> {
+    pub fn icon<'a>(self) -> iced::widget::Text<'a, StyleType> {
         match self {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,

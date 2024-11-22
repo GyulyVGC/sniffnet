@@ -53,6 +53,7 @@ mod tests {
 
     use serial_test::serial;
 
+    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::notifications::types::notifications::Notifications;
@@ -88,9 +89,9 @@ mod tests {
                 device_name: "hey-hey".to_string(),
             },
             window: ConfigWindow {
-                position: (440, 99),
-                size: (452, 870),
-                thumbnail_position: (20, 20),
+                position: PositionTuple(440.0, 99.0),
+                size: SizeTuple(452.0, 870.0),
+                thumbnail_position: PositionTuple(20.0, 20.0),
             },
         };
         // we want to be sure that modified config is different from defaults

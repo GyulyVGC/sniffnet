@@ -1,5 +1,4 @@
-//! Module defining the `Sniffer` struct, which trace gui's component statuses and permits
-//! to share data among the different threads.
+//! Module defining the application structure: messages, updates, subscriptions.
 
 use std::collections::{HashSet, VecDeque};
 use std::path::PathBuf;
@@ -10,16 +9,30 @@ use std::time::Duration;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
+use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::Event::{Keyboard, Window};
-use iced::{window, Command, Subscription};
+use iced::{window, Element, Point, Size, Subscription, Task};
 use pcap::Device;
 use rfd::FileHandle;
 
 use crate::chart::manage_chart_data::update_charts_data;
-use crate::configs::types::config_window::{ConfigWindow, ScaleAndCheck, ToPoint, ToSize};
-use crate::gui::app::PERIOD_TICK;
+use crate::configs::types::config_window::{
+    ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
+};
+use crate::gui::components::footer::footer;
+use crate::gui::components::header::header;
+use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::connection_details_page::connection_details_page;
+use crate::gui::pages::initial_page::initial_page;
+use crate::gui::pages::inspect_page::inspect_page;
+use crate::gui::pages::notifications_page::notifications_page;
+use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::settings_general_page::settings_general_page;
+use crate::gui::pages::settings_notifications_page::settings_notifications_page;
+use crate::gui::pages::settings_style_page::settings_style_page;
+use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
@@ -49,6 +62,12 @@ use crate::translations::types::language::Language;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+
+/// Update period (milliseconds)
+pub const PERIOD_TICK: u64 = 1000;
+
+pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
+pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
 /// Struct on which the gui is based
 ///
@@ -104,6 +123,8 @@ pub struct Sniffer {
     pub export_pcap: ExportPcap,
     /// Whether thumbnail mode is currently active
     pub thumbnail: bool,
+    /// Window id
+    pub id: Option<Id>,
 }
 
 impl Sniffer {
@@ -145,14 +166,15 @@ impl Sniffer {
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
             thumbnail: false,
+            id: None,
         }
     }
 
-    pub(crate) fn keyboard_subscription(&self) -> Subscription<Message> {
+    fn keyboard_subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
 
         if self.thumbnail {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 Keyboard(Event::KeyPressed {
                     key,
                     modifiers: Modifiers::COMMAND,
@@ -165,7 +187,7 @@ impl Sniffer {
                 _ => None,
             })
         } else {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
                     Modifiers::COMMAND => match key.as_ref() {
                         Key::Character("q") => Some(Message::CloseRequested),
@@ -196,9 +218,9 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn mouse_subscription(&self) -> Subscription<Message> {
+    fn mouse_subscription(&self) -> Subscription<Message> {
         if self.thumbnail {
-            iced::event::listen_with(|event, _| match event {
+            iced::event::listen_with(|event, _, _| match event {
                 iced::event::Event::Mouse(ButtonPressed(_)) => Some(Message::Drag),
                 _ => None,
             })
@@ -207,7 +229,7 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn time_subscription(&self) -> Subscription<Message> {
+    fn time_subscription(&self) -> Subscription<Message> {
         if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
         } else {
@@ -215,19 +237,19 @@ impl Sniffer {
         }
     }
 
-    pub(crate) fn window_subscription() -> Subscription<Message> {
-        iced::event::listen_with(|event, _| match event {
-            Window(Id::MAIN, window::Event::Focused) => Some(Message::WindowFocused),
-            Window(Id::MAIN, window::Event::Moved { x, y }) => Some(Message::WindowMoved(x, y)),
-            Window(Id::MAIN, window::Event::Resized { width, height }) => {
+    fn window_subscription() -> Subscription<Message> {
+        iced::event::listen_with(|event, _, _| match event {
+            Window(window::Event::Focused) => Some(Message::WindowFocused),
+            Window(window::Event::Moved(Point { x, y })) => Some(Message::WindowMoved(x, y)),
+            Window(window::Event::Resized(Size { width, height })) => {
                 Some(Message::WindowResized(width, height))
             }
-            Window(Id::MAIN, window::Event::CloseRequested) => Some(Message::CloseRequested),
+            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
             _ => None,
         })
     }
 
-    pub fn update(&mut self, message: Message) -> Command<Message> {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
@@ -374,7 +396,7 @@ impl Sniffer {
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
-                let scaled = (x, y).scale_and_check(scale_factor);
+                let scaled = PositionTuple(x, y).scale_and_check(scale_factor);
                 if self.thumbnail {
                     self.configs.lock().unwrap().window.thumbnail_position = scaled;
                 } else {
@@ -385,7 +407,7 @@ impl Sniffer {
                 if !self.thumbnail {
                     let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
                     self.configs.lock().unwrap().window.size =
-                        (width, height).scale_and_check(scale_factor);
+                        SizeTuple(width, height).scale_and_check(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
                     return self.update(Message::ToggleThumbnail(true));
                 }
@@ -410,14 +432,14 @@ impl Sniffer {
             }
             Message::CloseRequested => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(Id::MAIN);
+                return window::close(self.id.unwrap_or(Id::unique()));
             }
             Message::CopyIp(string) => {
                 self.timing_events.copy_ip_now(string.clone());
                 return iced::clipboard::write(string);
             }
             Message::OpenFile(old_file, file_info, consumer_message) => {
-                return Command::perform(
+                return Task::perform(
                     Self::open_file(
                         old_file,
                         file_info,
@@ -442,6 +464,8 @@ impl Sniffer {
                 self.export_pcap.set_file_name(name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
+                let window_id = self.id.unwrap_or(Id::unique());
+
                 self.thumbnail = !self.thumbnail;
                 self.traffic_chart.thumbnail = self.thumbnail;
 
@@ -450,35 +474,35 @@ impl Sniffer {
                     let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
                     let position = self.configs.lock().unwrap().window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
-                    Command::batch([
-                        window::maximize(Id::MAIN, false),
-                        window::toggle_decorations(Id::MAIN),
-                        window::resize(Id::MAIN, size),
-                        window::move_to(Id::MAIN, position.to_point()),
-                        window::change_level(Id::MAIN, Level::AlwaysOnTop),
+                    Task::batch([
+                        window::maximize(window_id, false),
+                        window::toggle_decorations(window_id),
+                        window::resize(window_id, size),
+                        window::move_to(window_id, position.to_point()),
+                        window::change_level(window_id, Level::AlwaysOnTop),
                     ])
                 } else {
                     if self.running_page.eq(&RunningPage::Notifications) {
                         self.unread_notifications = 0;
                     }
                     let mut commands = vec![
-                        window::toggle_decorations(Id::MAIN),
-                        window::change_level(Id::MAIN, Level::Normal),
+                        window::toggle_decorations(window_id),
+                        window::change_level(window_id, Level::Normal),
                     ];
                     if !triggered_by_resize {
                         let size = self.configs.lock().unwrap().window.size.to_size();
                         let position = self.configs.lock().unwrap().window.position.to_point();
-                        commands.push(window::move_to(Id::MAIN, position));
-                        commands.push(window::resize(Id::MAIN, size));
+                        commands.push(window::move_to(window_id, position));
+                        commands.push(window::resize(window_id, size));
                     }
-                    Command::batch(commands)
+                    Task::batch(commands)
                 };
             }
             Message::Drag => {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
-                    return window::drag(Id::MAIN);
+                    return window::drag(self.id.unwrap_or(Id::unique()));
                 }
             }
             Message::CtrlTPressed => {
@@ -497,12 +521,95 @@ impl Sniffer {
                     self.configs.lock().unwrap().settings.scale_factor += delta;
                 }
             }
+            Message::WindowId(id) => self.id = id,
             Message::TickInit => {}
         }
-        Command::none()
+        Task::none()
     }
 
-    fn refresh_data(&mut self) -> Command<Message> {
+    pub fn view(&self) -> Element<Message, StyleType> {
+        let ConfigSettings {
+            style,
+            language,
+            color_gradient,
+            ..
+        } = self.configs.lock().unwrap().settings;
+        let font = style.get_extension().font;
+        let font_headers = style.get_extension().font_headers;
+
+        let header = header(self);
+
+        let body = if self.thumbnail {
+            thumbnail_page(self)
+        } else {
+            match self.running_page {
+                RunningPage::Init => initial_page(self),
+                RunningPage::Overview => overview_page(self),
+                RunningPage::Inspect => inspect_page(self),
+                RunningPage::Notifications => notifications_page(self),
+            }
+        };
+
+        let footer = footer(
+            self.thumbnail,
+            language,
+            color_gradient,
+            font,
+            font_headers,
+            &self.newer_release_available,
+        );
+
+        let content: Element<Message, StyleType> =
+            Column::new().push(header).push(body).push(footer).into();
+
+        match self.modal.clone() {
+            None => {
+                if let Some(settings_page) = self.settings_page {
+                    let overlay: Element<Message, StyleType> = match settings_page {
+                        SettingsPage::Notifications => settings_notifications_page(self),
+                        SettingsPage::Appearance => settings_style_page(self),
+                        SettingsPage::General => settings_general_page(self),
+                    }
+                    .into();
+
+                    modal(content, overlay, Message::CloseSettings)
+                } else {
+                    content
+                }
+            }
+            Some(m) => {
+                let overlay: Element<Message, StyleType> = match m {
+                    MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
+                    MyModal::ClearAll => {
+                        get_clear_all_overlay(color_gradient, font, font_headers, language)
+                    }
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
+                }
+                .into();
+
+                modal(content, overlay, Message::HideModal)
+            }
+        }
+    }
+
+    pub fn subscription(&self) -> Subscription<Message> {
+        Subscription::batch([
+            self.keyboard_subscription(),
+            self.mouse_subscription(),
+            self.time_subscription(),
+            Sniffer::window_subscription(),
+        ])
+    }
+
+    pub fn theme(&self) -> StyleType {
+        self.configs.lock().unwrap().settings.style
+    }
+
+    pub fn scale_factor(&self) -> f64 {
+        self.configs.lock().unwrap().settings.scale_factor
+    }
+
+    fn refresh_data(&mut self) -> Task<Message> {
         let info_traffic_lock = self.info_traffic.lock().unwrap();
         self.runtime_data.all_packets = info_traffic_lock.all_packets;
         if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
@@ -540,7 +647,7 @@ impl Sniffer {
         {
             return self.update(Message::Waiting);
         }
-        Command::none()
+        Task::none()
     }
 
     fn open_web(web_page: &WebPage) {
@@ -599,7 +706,7 @@ impl Sniffer {
         }
     }
 
-    fn reset(&mut self) -> Command<Message> {
+    fn reset(&mut self) -> Task<Message> {
         self.running_page = RunningPage::Init;
         *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous captures
         self.pcap_error = None;
@@ -725,7 +832,7 @@ impl Sniffer {
         }
     }
 
-    fn shortcut_return(&mut self) -> Command<Message> {
+    fn shortcut_return(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Init)
             && self.settings_page.is_none()
             && self.modal.is_none()
@@ -738,20 +845,20 @@ impl Sniffer {
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
             return self.update(Message::ClearAllNotifications);
         }
-        Command::none()
+        Task::none()
     }
 
-    fn shortcut_esc(&mut self) -> Command<Message> {
+    fn shortcut_esc(&mut self) -> Task<Message> {
         if self.modal.is_some() {
             return self.update(Message::HideModal);
         } else if self.settings_page.is_some() {
             return self.update(Message::CloseSettings);
         }
-        Command::none()
+        Task::none()
     }
 
     // also called when backspace key is pressed on a running state
-    fn reset_button_pressed(&mut self) -> Command<Message> {
+    fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
             return if self.info_traffic.lock().unwrap().all_packets == 0
                 && self.settings_page.is_none()
@@ -761,16 +868,16 @@ impl Sniffer {
                 self.update(Message::ShowModal(MyModal::Quit))
             };
         }
-        Command::none()
+        Task::none()
     }
 
-    fn shortcut_ctrl_d(&mut self) -> Command<Message> {
+    fn shortcut_ctrl_d(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Notifications)
             && !self.runtime_data.logged_notifications.is_empty()
         {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }
-        Command::none()
+        Task::none()
     }
 
     async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
@@ -813,6 +920,7 @@ mod tests {
 
     use serial_test::{parallel, serial};
 
+    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
@@ -1855,17 +1963,17 @@ mod tests {
         assert_eq!(
             window_start,
             ConfigWindow {
-                position: (0, 0),
-                size: (1190, 670),
-                thumbnail_position: (0, 0),
+                position: PositionTuple(0.0, 0.0),
+                size: SizeTuple(1190.0, 670.0),
+                thumbnail_position: PositionTuple(0.0, 0.0),
             }
         );
 
         // change window properties by sending messages
-        sniffer.update(Message::WindowMoved(-10, 555));
-        sniffer.update(Message::WindowResized(1000, 999));
+        sniffer.update(Message::WindowMoved(-10.0, 555.0));
+        sniffer.update(Message::WindowResized(1000.0, 999.0));
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(40, 40));
+        sniffer.update(Message::WindowMoved(40.0, 40.0));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::CloseRequested);
@@ -1882,9 +1990,9 @@ mod tests {
         assert_eq!(
             window_end,
             ConfigWindow {
-                position: (-10, 555),
-                size: (1000, 999),
-                thumbnail_position: (40, 40),
+                position: PositionTuple(-10.0, 555.0),
+                size: SizeTuple(1000.0, 999.0),
+                thumbnail_position: PositionTuple(40.0, 40.0),
             }
         );
     }
@@ -1896,25 +2004,46 @@ mod tests {
         assert!(!sniffer.thumbnail);
         let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
         assert_eq!(factor, 1.0);
-        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1190, 670));
-        assert_eq!(ConfigWindow::thumbnail_size(factor), (360, 222));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.size,
+            SizeTuple(1190.0, 670.0)
+        );
+        assert_eq!(
+            ConfigWindow::thumbnail_size(factor),
+            SizeTuple(360.0, 222.0)
+        );
 
-        sniffer.update(Message::WindowResized(850, 600));
-        assert_eq!(sniffer.configs.lock().unwrap().window.size, (850, 600));
+        sniffer.update(Message::WindowResized(850.0, 600.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.size,
+            SizeTuple(850.0, 600.0)
+        );
 
         sniffer.update(Message::ChangeScaleFactor(0.369));
         let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
         assert_eq!(factor, 1.5);
-        assert_eq!(ConfigWindow::thumbnail_size(factor), (540, 333));
-        sniffer.update(Message::WindowResized(1000, 800));
-        assert_eq!(sniffer.configs.lock().unwrap().window.size, (1500, 1200));
+        assert_eq!(
+            ConfigWindow::thumbnail_size(factor),
+            SizeTuple(540.0, 333.0)
+        );
+        sniffer.update(Message::WindowResized(1000.0, 800.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.size,
+            SizeTuple(1500.0, 1200.0)
+        );
 
         sniffer.update(Message::ChangeScaleFactor(-0.631));
         let factor = sniffer.configs.lock().unwrap().settings.scale_factor;
         assert_eq!(factor, 0.5);
-        assert_eq!(ConfigWindow::thumbnail_size(factor), (180, 111));
-        sniffer.update(Message::WindowResized(1000, 800));
-        assert_eq!(sniffer.configs.lock().unwrap().window.size, (500, 400));
+        assert_eq!(
+            ConfigWindow::thumbnail_size(factor),
+            SizeTuple(180.0, 111.0)
+        );
+        sniffer.update(Message::WindowResized(1000.0, 800.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.size,
+            SizeTuple(500.0, 400.0)
+        );
     }
 
     #[test]
@@ -1923,56 +2052,77 @@ mod tests {
         let mut sniffer = new_sniffer();
         assert!(!sniffer.thumbnail);
         assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.0);
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (0, 0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(0.0, 0.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (0, 0)
+            PositionTuple(0.0, 0.0)
         );
 
-        sniffer.update(Message::WindowMoved(850, 600));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        sniffer.update(Message::WindowMoved(850.0, 600.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(850.0, 600.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (0, 0)
+            PositionTuple(0.0, 0.0)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(400, 600));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        sniffer.update(Message::WindowMoved(400.0, 600.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(850.0, 600.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (400, 600)
+            PositionTuple(400.0, 600.0)
         );
 
         sniffer.update(Message::ChangeScaleFactor(0.369));
         assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 1.5);
-        sniffer.update(Message::WindowMoved(20, 40));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (850, 600));
+        sniffer.update(Message::WindowMoved(20.0, 40.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(850.0, 600.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (30, 60)
+            PositionTuple(30.0, 60.0)
         );
         sniffer.thumbnail = false;
-        sniffer.update(Message::WindowMoved(-20, 300));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (-30, 450));
+        sniffer.update(Message::WindowMoved(-20.0, 300.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(-30.0, 450.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (30, 60)
+            PositionTuple(30.0, 60.0)
         );
 
         sniffer.update(Message::ChangeScaleFactor(-0.631));
         assert_eq!(sniffer.configs.lock().unwrap().settings.scale_factor, 0.5);
-        sniffer.update(Message::WindowMoved(500, -100));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        sniffer.update(Message::WindowMoved(500.0, -100.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(250.0, -50.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (30, 60)
+            PositionTuple(30.0, 60.0)
         );
         sniffer.thumbnail = true;
-        sniffer.update(Message::WindowMoved(-2, -34));
-        assert_eq!(sniffer.configs.lock().unwrap().window.position, (250, -50));
+        sniffer.update(Message::WindowMoved(-2.0, -34.0));
+        assert_eq!(
+            sniffer.configs.lock().unwrap().window.position,
+            PositionTuple(250.0, -50.0)
+        );
         assert_eq!(
             sniffer.configs.lock().unwrap().window.thumbnail_position,
-            (-1, -17)
+            PositionTuple(-1.0, -17.0)
         );
     }
 

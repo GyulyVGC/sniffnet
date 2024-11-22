@@ -3,7 +3,7 @@
 use iced::font::{Family, Stretch, Style, Weight};
 use iced::{Color, Font};
 
-use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
+use crate::gui::sniffer::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
