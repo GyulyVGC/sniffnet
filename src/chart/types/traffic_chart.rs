@@ -15,6 +15,7 @@ use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
+use crate::utils::formatted_strings::get_formatted_num_seconds;
 use crate::{ByteMultiple, ChartType, Language, StyleType};
 
 /// Struct defining the chart to be displayed in gui run page
@@ -217,7 +218,10 @@ impl Chart<Message> for TrafficChart {
                 &|bytes| ByteMultiple::formatted_string(bytes.abs() as u128)
             })
             .x_labels(min(6, x_labels))
-            .x_label_formatter(&std::string::ToString::to_string)
+            .x_label_formatter(
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                &|seconds| get_formatted_num_seconds(seconds.abs() as u128),
+            )
             .draw()
             .unwrap();
 

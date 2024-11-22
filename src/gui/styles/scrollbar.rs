@@ -50,17 +50,12 @@ impl ScrollbarType {
     }
 
     #[allow(clippy::unused_self)]
-    fn hovered(
-        &self,
-        style: &StyleType,
-        is_mouse_over_x_scrollbar: bool,
-        is_mouse_over_y_scrollbar: bool,
-    ) -> Style {
+    fn hovered(&self, style: &StyleType, is_mouse_over_x: bool, is_mouse_over_y: bool) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
 
         let [horizontal_rail, vertical_rail] =
-            [is_mouse_over_x_scrollbar, is_mouse_over_y_scrollbar].map(|is_over| Rail {
+            [is_mouse_over_x, is_mouse_over_y].map(|is_over| Rail {
                 background: Some(Background::Color(Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
