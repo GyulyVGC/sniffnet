@@ -1,4 +1,7 @@
 use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
+use once_cell::sync::Lazy;
+
+pub static CONFIGS: Lazy<Configs> = Lazy::new(|| Configs::load());
 
 #[derive(Default, Clone, PartialEq, Debug)]
 pub struct Configs {
@@ -8,7 +11,8 @@ pub struct Configs {
 }
 
 impl Configs {
-    pub fn load() -> Self {
+    /// This shouldn't be used directly, use `CONFIGS` instead
+    fn load() -> Self {
         Configs {
             settings: ConfigSettings::load(),
             device: ConfigDevice::load(),

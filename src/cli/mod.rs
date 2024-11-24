@@ -1,6 +1,7 @@
 use crate::gui::types::message::Message;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::Configs;
+use crate::CONFIGS;
 use crate::SNIFFNET_LOWERCASE;
 use clap::Parser;
 use iced::{window, Task};
@@ -14,7 +15,7 @@ use iced::{window, Task};
 )]
 struct Args {
     /// Start sniffing packets from the supplied network adapter
-    #[arg(short, long, value_name = "NAME", default_missing_value = "", num_args = 0..=1)]
+    #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
     /// Restore default settings
     #[arg(short, long)]

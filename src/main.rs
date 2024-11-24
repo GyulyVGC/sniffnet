@@ -30,7 +30,7 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
-use crate::configs::types::configs::Configs;
+use crate::configs::types::configs::{Configs, CONFIGS};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::secondary_threads::check_updates::set_newer_release_status;
@@ -57,7 +57,7 @@ pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 pub fn main() -> iced::Result {
     let boot_task_chain = parse_cli_args();
 
-    let configs1 = Arc::new(Mutex::new(Configs::load()));
+    let configs1 = Arc::new(Mutex::new(CONFIGS.clone()));
     let configs2 = configs1.clone();
 
     let newer_release_available1 = Arc::new(Mutex::new(None));
