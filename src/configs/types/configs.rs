@@ -11,8 +11,8 @@ pub struct Configs {
 }
 
 impl Configs {
-    /// This shouldn't be used directly, use `CONFIGS` instead
-    fn load() -> Self {
+    /// This shouldn't be used directly outside tests, use `CONFIGS` instead
+    pub fn load() -> Self {
         Configs {
             settings: ConfigSettings::load(),
             device: ConfigDevice::load(),
