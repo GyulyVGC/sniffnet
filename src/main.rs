@@ -55,9 +55,11 @@ pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 ///
 /// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
+    let configs = CONFIGS.clone();
+
     let boot_task_chain = parse_cli_args();
 
-    let configs1 = Arc::new(Mutex::new(CONFIGS.clone()));
+    let configs1 = Arc::new(Mutex::new(configs));
     let configs2 = configs1.clone();
 
     let newer_release_available1 = Arc::new(Mutex::new(None));
