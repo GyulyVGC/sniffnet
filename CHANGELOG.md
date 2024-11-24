@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Added Vietnamese translation 🇻🇳 ([#577](https://github.com/GyulyVGC/sniffnet/pull/577))
+- Added CLI argument `--adapter [<NAME>]` to allow immediately starting the capture from a given network interface ([#643](https://github.com/GyulyVGC/sniffnet/pull/643) — fixes [#636](https://github.com/GyulyVGC/sniffnet/issues/636))
 - Updated some of the existing translations to v1.3: 
   - Chinese ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
   - Korean ([#604](https://github.com/GyulyVGC/sniffnet/pull/604))
