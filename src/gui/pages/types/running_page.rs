@@ -51,7 +51,7 @@ impl RunningPage {
         }
     }
 
-    pub fn icon(self) -> iced::widget::Text<'static, StyleType> {
+    pub fn icon<'a>(self) -> iced::widget::Text<'a, StyleType> {
         match self {
             RunningPage::Overview => Icon::Overview,
             RunningPage::Inspect => Icon::Inspect,

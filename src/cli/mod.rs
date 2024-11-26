@@ -1,50 +1,43 @@
+use crate::gui::types::message::Message;
 use crate::utils::formatted_strings::APP_VERSION;
-use crate::{Configs, SNIFFNET_LOWERCASE};
+use crate::Configs;
+use crate::CONFIGS;
+use crate::SNIFFNET_LOWERCASE;
+use clap::Parser;
+use iced::{window, Task};
 
-/// Parse CLI arguments, and exit if `--help`, `--version`, or an
-/// unknown argument was supplied
-pub fn parse_cli_args() {
-    let mut args = std::env::args().skip(1);
-    if let Some(arg) = args.next() {
-        match arg.as_str() {
-            "--help" | "-h" => print_help(),
-            "--version" | "-v" => print_version(),
-            "--restore-default" => restore_default(),
-            _ => {
-                unknown_argument(&arg);
-                std::process::exit(1);
-            }
-        }
-        std::process::exit(0);
+#[derive(Parser, Debug)]
+#[command(
+    name = SNIFFNET_LOWERCASE,
+    bin_name = SNIFFNET_LOWERCASE,
+    version = APP_VERSION,
+    about = "Application to comfortably monitor your network traffic"
+)]
+struct Args {
+    /// Start sniffing packets from the supplied network adapter
+    #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
+    adapter: Option<String>,
+    /// Restore default settings
+    #[arg(short, long)]
+    restore_default: bool,
+}
+
+pub fn parse_cli_args() -> Task<Message> {
+    let mut boot_task_chain = window::get_latest().map(Message::WindowId);
+
+    let args = Args::parse();
+
+    if args.restore_default {
+        Configs::default().store();
     }
-}
 
-fn print_help() {
-    println!(
-        "Application to comfortably monitor your Internet traffic\n\
-        Usage: {SNIFFNET_LOWERCASE} [OPTIONS]\n\
-        Options:\n\
-        \t-h, --help            Print help\n\
-        \t--restore-default     Restore default settings\n\
-        \t-v, --version         Print version info\n\
-        (Run without options to start the app)"
-    );
-}
+    if let Some(adapter) = args.adapter {
+        boot_task_chain = boot_task_chain
+            .chain(Task::done(Message::AdapterSelection(adapter)))
+            .chain(Task::done(Message::Start));
+    }
 
-fn print_version() {
-    println!("{SNIFFNET_LOWERCASE} {APP_VERSION}");
-}
-
-fn restore_default() {
-    Configs::default().store();
-    println!("Default settings have been restored");
-}
-
-fn unknown_argument(arg: &str) {
-    eprintln!(
-        "{SNIFFNET_LOWERCASE}: unknown option '{arg}'\n\
-        For more information, try '{SNIFFNET_LOWERCASE} --help'"
-    );
+    boot_task_chain
 }
 
 #[cfg(test)]
@@ -53,6 +46,7 @@ mod tests {
 
     use serial_test::serial;
 
+    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::notifications::types::notifications::Notifications;
@@ -88,9 +82,9 @@ mod tests {
                 device_name: "hey-hey".to_string(),
             },
             window: ConfigWindow {
-                position: (440, 99),
-                size: (452, 870),
-                thumbnail_position: (20, 20),
+                position: PositionTuple(440.0, 99.0),
+                size: SizeTuple(452.0, 870.0),
+                thumbnail_position: PositionTuple(20.0, 20.0),
             },
         };
         // we want to be sure that modified config is different from defaults
@@ -100,7 +94,7 @@ mod tests {
         // assert they've been stored
         assert_eq!(Configs::load(), modified_configs);
         // restore defaults
-        restore_default();
+        Configs::default().store();
         // assert that defaults are stored
         assert_eq!(Configs::load(), Configs::default());
 

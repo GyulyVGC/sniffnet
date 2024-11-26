@@ -83,7 +83,7 @@ impl Language {
         Language::ZH,
     ];
 
-    pub fn get_flag(self) -> Svg<StyleType> {
+    pub fn get_flag<'a>(self) -> Svg<'a, StyleType> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
             Language::DE => DE,
@@ -124,6 +124,8 @@ impl Language {
                 | Language::SV
                 | Language::VI
                 | Language::ZH
+                | Language::KO
+                | Language::TR
         )
     }
 }

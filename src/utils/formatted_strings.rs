@@ -152,3 +152,52 @@ pub fn get_path_termination_string(full_path: &str, i: usize) -> String {
     ]
     .concat()
 }
+
+pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
+    match num_seconds {
+        0..3600 => format!("{:02}:{:02}", num_seconds / 60, num_seconds % 60),
+        _ => format!(
+            "{:02}:{:02}:{:02}",
+            num_seconds / 3600,
+            (num_seconds % 3600) / 60,
+            num_seconds % 60
+        ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_formatted_num_seconds() {
+        assert_eq!(get_formatted_num_seconds(0), "00:00");
+        assert_eq!(get_formatted_num_seconds(1), "00:01");
+        assert_eq!(get_formatted_num_seconds(28), "00:28");
+        assert_eq!(get_formatted_num_seconds(59), "00:59");
+        assert_eq!(get_formatted_num_seconds(60), "01:00");
+        assert_eq!(get_formatted_num_seconds(61), "01:01");
+        assert_eq!(get_formatted_num_seconds(119), "01:59");
+        assert_eq!(get_formatted_num_seconds(120), "02:00");
+        assert_eq!(get_formatted_num_seconds(121), "02:01");
+        assert_eq!(get_formatted_num_seconds(3500), "58:20");
+        assert_eq!(get_formatted_num_seconds(3599), "59:59");
+        assert_eq!(get_formatted_num_seconds(3600), "01:00:00");
+        assert_eq!(get_formatted_num_seconds(3601), "01:00:01");
+        assert_eq!(get_formatted_num_seconds(3661), "01:01:01");
+        assert_eq!(get_formatted_num_seconds(7139), "01:58:59");
+        assert_eq!(get_formatted_num_seconds(7147), "01:59:07");
+        assert_eq!(get_formatted_num_seconds(7199), "01:59:59");
+        assert_eq!(get_formatted_num_seconds(7200), "02:00:00");
+        assert_eq!(get_formatted_num_seconds(9999), "02:46:39");
+        assert_eq!(get_formatted_num_seconds(36000), "10:00:00");
+        assert_eq!(get_formatted_num_seconds(36001), "10:00:01");
+        assert_eq!(get_formatted_num_seconds(36061), "10:01:01");
+        assert_eq!(get_formatted_num_seconds(86400), "24:00:00");
+        assert_eq!(get_formatted_num_seconds(123456789), "34293:33:09");
+        assert_eq!(
+            get_formatted_num_seconds(u128::MAX),
+            "94522879700260684295381835397713392:04:15"
+        );
+    }
+}

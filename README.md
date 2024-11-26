@@ -1,5 +1,7 @@
 <div align="center">
-<a href="https://sniffnet.net"><img alt="" title="Sniffnet" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/header_repository.png" width="95%"/></a>
+<picture>
+<img alt="" title="Sniffnet" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/header_repository.png" width="95%"/>
+</picture>
 
 <a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
@@ -14,9 +16,9 @@ Translated in:<br>
 </div>
 
 <p>
-<a href="#x">
+<picture>
 <img alt="" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/hr.png" width="100%"/>
-</a>
+</picture>
 </p>
 
 <div align="center">
@@ -28,9 +30,9 @@ Translated in:<br>
 </div>
 
 <p>
-<a href="#x">
+<picture>
 <img alt="" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/hr.png" width="100%"/>
-</a>
+</picture>
 </p>
 
 

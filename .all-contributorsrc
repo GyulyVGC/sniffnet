@@ -511,6 +511,33 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "3kh0",
+      "name": "Echo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58097612?v=4",
+      "profile": "https://3kh0.net",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "rkdud007",
+      "name": "pia",
+      "avatar_url": "https://avatars.githubusercontent.com/u/76558220?v=4",
+      "profile": "http://piapark.me",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Tahinli",
+      "name": "Ahmet Kaan GÜMÜŞ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/96421894?v=4",
+      "profile": "http://tahinli.com",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,

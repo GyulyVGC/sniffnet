@@ -4,7 +4,14 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Added Vietnamese translation 🇻🇳 ([#577](https://github.com/GyulyVGC/sniffnet/pull/577))
-- Updated Chinese translation to v1.3 ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
+- Added CLI argument `--adapter [<NAME>]` to allow immediately starting the capture from a given network interface ([#643](https://github.com/GyulyVGC/sniffnet/pull/643) — fixes [#636](https://github.com/GyulyVGC/sniffnet/issues/636))
+- Updated some of the existing translations to v1.3: 
+  - Chinese ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
+  - Korean ([#604](https://github.com/GyulyVGC/sniffnet/pull/604))
+  - Turkish ([#608](https://github.com/GyulyVGC/sniffnet/pull/608))
+- Improve time values on the horizontal axis of the chart ([#641](https://github.com/GyulyVGC/sniffnet/pull/641) — fixes [#619](https://github.com/GyulyVGC/sniffnet/issues/619))
+- Migrate to Iced 0.13 ([#618](https://github.com/GyulyVGC/sniffnet/pull/618))
+- Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
 
 ## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))

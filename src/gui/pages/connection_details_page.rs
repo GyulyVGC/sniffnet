@@ -1,11 +1,10 @@
 use std::net::IpAddr;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
@@ -54,10 +53,7 @@ pub fn connection_details_page(
     ))
 }
 
-fn page_content(
-    sniffer: &Sniffer,
-    key: &AddressPortPair,
-) -> Container<'static, Message, StyleType> {
+fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -90,17 +86,17 @@ fn page_content(
         language,
     ));
 
-    let mut source_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
+    let mut source_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(source_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextType::Title),
+            .class(TextType::Title),
     );
-    let mut dest_caption = Row::new().align_items(Alignment::Center).spacing(10).push(
+    let mut dest_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(language))
             .font(font)
             .size(FONT_SIZE_TITLE)
-            .style(TextType::Title),
+            .class(TextType::Title),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
@@ -149,15 +145,15 @@ fn page_content(
     Container::new(header_and_content.push(content))
         .width(1000)
         .height(500)
-        .style(ContainerType::Modal)
+        .class(ContainerType::Modal)
 }
 
-fn page_header(
+fn page_header<'a>(
     font: Font,
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .push(horizontal_space())
@@ -166,32 +162,32 @@ fn page_header(
                     .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
-                    .horizontal_alignment(Horizontal::Center),
+                    .align_x(Alignment::Center),
             )
             .push(
                 Container::new(button_hide(Message::HideModal, language, font))
                     .width(Length::Fill)
-                    .align_x(Horizontal::Center),
+                    .align_x(Alignment::Center),
             ),
     )
-    .align_x(Horizontal::Center)
-    .align_y(Vertical::Center)
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
     .height(40.0)
     .width(Length::Fill)
-    .style(ContainerType::Gradient(color_gradient))
+    .class(ContainerType::Gradient(color_gradient))
 }
 
-fn col_info(
+fn col_info<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
 
     let mut ret_val = Column::new()
         .spacing(10)
-        .padding([20, 10, 20, 40])
+        .padding(Padding::new(20.0).right(10).left(40))
         .width(Length::FillPortion(2))
         .push(vertical_space())
         .push(
@@ -238,24 +234,23 @@ fn col_info(
     ));
 
     if is_icmp {
-        ret_val =
-            ret_val.push(
-                Column::new()
-                    .push(
-                        Text::new(format!("{}:", messages_translation(language)))
-                            .style(TextType::Subtitle)
-                            .font(font),
-                    )
-                    .push(
-                        Scrollable::new(Column::new().padding([0, 10, 10, 0]).push(
-                            Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font),
-                        ))
-                        .direction(Direction::Both {
-                            vertical: ScrollbarType::properties(),
-                            horizontal: ScrollbarType::properties(),
-                        }),
-                    ),
-            );
+        ret_val = ret_val.push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", messages_translation(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(Scrollable::with_direction(
+                    Column::new()
+                        .padding(Padding::ZERO.right(10).bottom(10))
+                        .push(Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font)),
+                    Direction::Both {
+                        vertical: ScrollbarType::properties(),
+                        horizontal: ScrollbarType::properties(),
+                    },
+                )),
+        );
     }
 
     ret_val = ret_val.push(vertical_space());
@@ -263,12 +258,12 @@ fn col_info(
     ret_val
 }
 
-fn get_host_info_col(
+fn get_host_info_col<'a>(
     r_dns: &str,
     host: &Host,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && !host.asn.code.is_empty())
     {
@@ -291,11 +286,11 @@ fn get_host_info_col(
     host_info_col
 }
 
-fn get_local_tooltip(
+fn get_local_tooltip<'a>(
     sniffer: &Sniffer,
     address_to_lookup: &str,
     key: &AddressPortPair,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -323,15 +318,15 @@ fn get_local_tooltip(
     )
 }
 
-fn get_src_or_dest_col(
-    caption: Row<'static, Message, StyleType>,
+fn get_src_or_dest_col<'a>(
+    caption: Row<'a, Message, StyleType>,
     ip: &String,
     port: Option<u16>,
     mac: &Option<String>,
     font: Font,
     language: Language,
     timing_events: &TimingEvents,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let address_caption = if port.is_some() {
         socket_address_translation(language)
     } else {
@@ -345,13 +340,13 @@ fn get_src_or_dest_col(
         .push(
             Container::new(caption)
                 .width(Length::Fill)
-                .align_x(Horizontal::Center),
+                .align_x(Alignment::Center),
         )
         .push(Rule::horizontal(10.0))
         .push(
             Row::new()
                 .spacing(10)
-                .align_items(Alignment::End)
+                .align_y(Alignment::End)
                 .push(TextType::highlighted_subtitle_with_desc(
                     address_caption,
                     &get_socket_address(ip, port),
@@ -366,28 +361,28 @@ fn get_src_or_dest_col(
         ))
 }
 
-fn assemble_widgets(
-    col_info: Column<'static, Message, StyleType>,
-    source_col: Column<'static, Message, StyleType>,
-    dest_col: Column<'static, Message, StyleType>,
-) -> Row<'static, Message, StyleType> {
+fn assemble_widgets<'a>(
+    col_info: Column<'a, Message, StyleType>,
+    source_col: Column<'a, Message, StyleType>,
+    dest_col: Column<'a, Message, StyleType>,
+) -> Row<'a, Message, StyleType> {
     let [source_container, dest_container] = [source_col, dest_col].map(|col| {
         Container::new(col)
             .padding(7)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     });
     Row::new()
         .padding([0, 10])
         .spacing(10)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .width(Length::Fill)
         .height(Length::Fill)
         .push(col_info)
         .push(
             Column::new()
                 .width(Length::FillPortion(3))
-                .align_items(Alignment::Center)
+                .align_x(Alignment::Center)
                 .spacing(5)
                 .push(vertical_space())
                 .push(source_container)
@@ -397,26 +392,23 @@ fn assemble_widgets(
         )
 }
 
-fn get_button_copy(
+fn get_button_copy<'a>(
     language: Language,
     font: Font,
     string: &String,
     timing_events: &TimingEvents,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let icon = if timing_events.was_just_copy_ip(string) {
         Text::new("✔").font(font).size(14)
     } else {
         Icon::Copy.to_text().size(12)
     };
 
-    let content = button(
-        icon.horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
-    )
-    .padding(0)
-    .height(25)
-    .width(25)
-    .on_press(Message::CopyIp(string.clone()));
+    let content = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+        .padding(0)
+        .height(25)
+        .width(25)
+        .on_press(Message::CopyIp(string.clone()));
 
     Tooltip::new(
         content,
@@ -424,5 +416,5 @@ fn get_button_copy(
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }

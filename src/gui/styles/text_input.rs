@@ -2,13 +2,13 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use iced::widget::text_input::Appearance;
+use iced::widget::text_input::{Catalog, Status, Style};
 use iced::{Background, Border, Color};
 
 use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum TextInputType {
     #[default]
     Standard,
@@ -18,14 +18,12 @@ pub enum TextInputType {
 
 const TEXT_INPUT_BORDER_RADIUS: f32 = 5.0;
 
-impl iced::widget::text_input::StyleSheet for StyleType {
-    type Style = TextInputType;
-
-    fn active(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
-        Appearance {
-            background: Background::Color(match style {
+impl TextInputType {
+    fn active(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
+        Style {
+            background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => Color {
                     a: ext.alpha_round_borders,
@@ -35,98 +33,111 @@ impl iced::widget::text_input::StyleSheet for StyleType {
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match style {
+                color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => ext.buttons_color,
                     TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                 },
             },
-            icon_color: Color {
+            icon: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
                 ..colors.text_body
             },
+            placeholder: self.placeholder_color(style),
+            value: self.value_color(style),
+            selection: self.selection_color(style),
         }
     }
 
-    fn focused(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = self.get_palette();
-        let is_nightly = self.get_extension().is_nightly;
-        Appearance {
+    fn focused(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let is_nightly = style.get_extension().is_nightly;
+        Style {
             background: Background::Color(colors.primary),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match style {
+                color: match self {
                     TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                     _ => colors.secondary,
                 },
             },
-            icon_color: Color {
+            icon: Color {
                 a: if is_nightly { 0.2 } else { 0.7 },
                 ..colors.text_body
             },
+            placeholder: self.placeholder_color(style),
+            value: self.value_color(style),
+            selection: self.selection_color(style),
         }
     }
 
-    fn placeholder_color(&self, _: &Self::Style) -> Color {
-        let color = self.get_palette().text_body;
-        let is_nightly = self.get_extension().is_nightly;
+    #[allow(clippy::unused_self)]
+    fn placeholder_color(&self, style: &StyleType) -> Color {
+        let color = style.get_palette().text_body;
+        let is_nightly = style.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
 
-    fn value_color(&self, _: &Self::Style) -> Color {
-        self.get_palette().text_body
+    #[allow(clippy::unused_self)]
+    fn value_color(&self, style: &StyleType) -> Color {
+        style.get_palette().text_body
     }
 
-    fn disabled_color(&self, _style: &Self::Style) -> Color {
-        let color = self.get_palette().text_body;
-        let is_nightly = self.get_extension().is_nightly;
+    #[allow(clippy::unused_self)]
+    fn disabled_color(&self, style: &StyleType) -> Color {
+        let color = style.get_palette().text_body;
+        let is_nightly = style.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.2 } else { 0.7 },
             ..color
         }
     }
 
-    fn selection_color(&self, _: &Self::Style) -> Color {
-        let color = self.get_palette().text_body;
-        let is_nightly = self.get_extension().is_nightly;
+    #[allow(clippy::unused_self)]
+    fn selection_color(&self, style: &StyleType) -> Color {
+        let color = style.get_palette().text_body;
+        let is_nightly = style.get_extension().is_nightly;
         Color {
             a: if is_nightly { 0.05 } else { 0.4 },
             ..color
         }
     }
 
-    fn hovered(&self, style: &Self::Style) -> iced::widget::text_input::Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
-        Appearance {
-            background: Background::Color(match style {
+    fn hovered(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
+        Style {
+            background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => ext.buttons_color,
             }),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match style {
+                color: match self {
                     TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
                     _ => colors.secondary,
                 },
             },
-            icon_color: Color {
+            icon: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
                 ..colors.text_body
             },
+            placeholder: self.placeholder_color(style),
+            value: self.value_color(style),
+            selection: self.selection_color(style),
         }
     }
 
-    fn disabled(&self, style: &Self::Style) -> Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
-        Appearance {
-            background: Background::Color(match style {
+    fn disabled(&self, style: &StyleType) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
+        Style {
+            background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
                 _ => Color {
                     a: ext.alpha_round_containers,
@@ -136,7 +147,7 @@ impl iced::widget::text_input::StyleSheet for StyleType {
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match style {
+                color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => Color {
                         a: ext.alpha_round_borders,
@@ -145,10 +156,30 @@ impl iced::widget::text_input::StyleSheet for StyleType {
                     TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
                 },
             },
-            icon_color: Color {
+            icon: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
                 ..colors.text_body
             },
+            placeholder: self.disabled_color(style),
+            value: self.disabled_color(style),
+            selection: self.disabled_color(style),
+        }
+    }
+}
+
+impl Catalog for StyleType {
+    type Class<'a> = TextInputType;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Self::Class::default()
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
+        match status {
+            Status::Active => class.active(self),
+            Status::Hovered => class.hovered(self),
+            Status::Disabled => class.disabled(self),
+            Status::Focused => class.focused(self),
         }
     }
 }
