@@ -1,5 +1,7 @@
 //! Module containing the entry point of application execution.
 
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
@@ -53,6 +55,15 @@ pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 ///
 /// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
+    let _gag1: gag::Redirect<std::fs::File>;
+    let _gag2: gag::Redirect<std::fs::File>;
+    if let Ok(debug_file) =
+        std::fs::File::create(utils::formatted_strings::get_windows_debug_file_path()?)
+    {
+        _gag1 = gag::Redirect::stdout(debug_file.try_clone().unwrap()).unwrap();
+        _gag2 = gag::Redirect::stderr(debug_file).unwrap();
+    }
+
     let configs = CONFIGS.clone();
 
     let boot_task_chain = parse_cli_args();

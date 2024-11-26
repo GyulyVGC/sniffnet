@@ -6,7 +6,7 @@ use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
 };
 use crate::translations::translations_3::{invalid_filters_translation, port_translation};
-use crate::Language;
+use crate::{Language, SNIFFNET_LOWERCASE};
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -163,6 +163,13 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
             num_seconds % 60
         ),
     }
+}
+
+// #[cfg(target_os = "windows")]
+pub fn get_windows_debug_file_path() -> Option<String> {
+    let mut conf = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "debug").ok()?;
+    conf.set_extension("txt");
+    Some(conf.to_str()?.to_string())
 }
 
 #[cfg(test)]
