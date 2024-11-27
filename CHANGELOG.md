@@ -12,6 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Improve time values on the horizontal axis of the chart ([#641](https://github.com/GyulyVGC/sniffnet/pull/641) — fixes [#619](https://github.com/GyulyVGC/sniffnet/issues/619))
 - Migrate to Iced 0.13 ([#618](https://github.com/GyulyVGC/sniffnet/pull/618))
 - Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
+- Fix uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
 
 ## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))
