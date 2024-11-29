@@ -491,7 +491,7 @@ fn get_change_page_row<'a>(
             ))
             .font(font),
         )
-        .push(if page_number < (results_number + 20 - 1) / 20 {
+        .push(if page_number < results_number.div_ceil(20) {
             Container::new(get_button_change_page(true).width(25))
         } else {
             Container::new(Space::with_width(25))

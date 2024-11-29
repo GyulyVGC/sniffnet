@@ -10,7 +10,7 @@ pub enum CaptureContext {
 }
 
 impl CaptureContext {
-    pub fn new(device: &MyDevice, pcap_path: &Option<String>) -> Self {
+    pub fn new(device: &MyDevice, pcap_path: Option<&String>) -> Self {
         let cap_res = Capture::from_device(device.to_pcap_device())
             .expect("Capture initialization error\n\r")
             .promisc(true)
