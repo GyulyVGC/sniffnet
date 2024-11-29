@@ -55,13 +55,14 @@ pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 ///
 /// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
+    #[cfg(all(windows, not(debug_assertions)))]
     let _gag1: gag::Redirect<std::fs::File>;
+    #[cfg(all(windows, not(debug_assertions)))]
     let _gag2: gag::Redirect<std::fs::File>;
-    if let Ok(debug_file) =
-        std::fs::File::create(utils::formatted_strings::get_windows_debug_file_path()?)
-    {
-        _gag1 = gag::Redirect::stdout(debug_file.try_clone().unwrap()).unwrap();
-        _gag2 = gag::Redirect::stderr(debug_file).unwrap();
+    #[cfg(all(windows, not(debug_assertions)))]
+    if let Some((gag1, gag2)) = utils::formatted_strings::redirect_stdout_stderr_to_file() {
+        _gag1 = gag1;
+        _gag2 = gag2;
     }
 
     let configs = CONFIGS.clone();

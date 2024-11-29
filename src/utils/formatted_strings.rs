@@ -165,11 +165,25 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
     }
 }
 
-// #[cfg(target_os = "windows")]
-pub fn get_windows_debug_file_path() -> Option<String> {
-    let mut conf = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "debug").ok()?;
+#[allow(dead_code)]
+#[cfg(windows)]
+fn get_windows_logs_file_path() -> Option<String> {
+    let mut conf = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "logs").ok()?;
     conf.set_extension("txt");
     Some(conf.to_str()?.to_string())
+}
+
+#[allow(dead_code)]
+#[cfg(windows)]
+pub fn redirect_stdout_stderr_to_file(
+) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
+    if let Ok(logs_file) = std::fs::File::create(get_windows_logs_file_path()?) {
+        return Some((
+            gag::Redirect::stdout(logs_file.try_clone().ok()?).ok()?,
+            gag::Redirect::stderr(logs_file).ok()?,
+        ));
+    }
+    None
 }
 
 #[cfg(test)]
@@ -206,5 +220,11 @@ mod tests {
             get_formatted_num_seconds(u128::MAX),
             "94522879700260684295381835397713392:04:15"
         );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_redirect_stdout_stderr_to_file() {
+        assert!(redirect_stdout_stderr_to_file().is_some());
     }
 }
