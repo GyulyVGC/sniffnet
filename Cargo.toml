@@ -55,7 +55,7 @@ phf_shared = "0.11.2"
 splines = "4.4.0"
 clap = { version = "4.5.21", features = ["derive"] }
 
-#[target.'cfg(windows)'.dependencies]
+[target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]

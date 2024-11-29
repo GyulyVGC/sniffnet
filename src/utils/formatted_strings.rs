@@ -6,7 +6,7 @@ use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
 };
 use crate::translations::translations_3::{invalid_filters_translation, port_translation};
-use crate::{Language, SNIFFNET_LOWERCASE};
+use crate::Language;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -168,7 +168,7 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
 #[allow(dead_code)]
 #[cfg(windows)]
 fn get_windows_logs_file_path() -> Option<String> {
-    let mut conf = confy::get_configuration_file_path(SNIFFNET_LOWERCASE, "logs").ok()?;
+    let mut conf = confy::get_configuration_file_path(crate::SNIFFNET_LOWERCASE, "logs").ok()?;
     conf.set_extension("txt");
     Some(conf.to_str()?.to_string())
 }
