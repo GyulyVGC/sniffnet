@@ -377,7 +377,7 @@ impl Sniffer {
                     && self.modal.is_none()
                 {
                     if increment {
-                        if self.page_number < (get_searched_entries(self).1 + 20 - 1) / 20 {
+                        if self.page_number < get_searched_entries(self).1.div_ceil(20) {
                             return self.update(Message::UpdatePageNumber(increment));
                         }
                     } else if self.page_number > 1 {
@@ -652,18 +652,20 @@ impl Sniffer {
 
     fn open_web(web_page: &WebPage) {
         let url = web_page.get_url();
+
         #[cfg(target_os = "windows")]
-        std::process::Command::new("explorer")
-            .arg(url)
-            .spawn()
-            .unwrap();
+        let cmd = "explorer";
         #[cfg(target_os = "macos")]
-        std::process::Command::new("open").arg(url).spawn().unwrap();
+        let cmd = "open";
         #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
-        std::process::Command::new("xdg-open")
+        let cmd = "xdg-open";
+
+        std::process::Command::new(cmd)
             .arg(url)
             .spawn()
-            .unwrap();
+            .unwrap()
+            .wait()
+            .unwrap_or_default();
     }
 
     fn start(&mut self) {
@@ -671,7 +673,7 @@ impl Sniffer {
         self.set_adapter(current_device_name);
         let device = self.device.clone();
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&device, &pcap_path);
+        let capture_context = CaptureContext::new(&device, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();

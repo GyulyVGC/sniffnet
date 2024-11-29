@@ -81,13 +81,13 @@ pub fn get_clear_all_overlay<'a>(
         .class(ContainerType::Modal)
 }
 
-fn get_modal_header(
+fn get_modal_header<'a>(
     font: Font,
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
     title: &'static str,
-) -> Container<Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .push(horizontal_space())
