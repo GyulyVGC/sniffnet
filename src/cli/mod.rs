@@ -32,7 +32,7 @@ pub fn parse_cli_args() -> Task<Message> {
     #[cfg(windows)]
     if args.logs {
         std::process::Command::new("explorer")
-            .arg(crate::utils::formatted_strings::get_windows_logs_file_path().unwrap())
+            .arg(crate::utils::formatted_strings::get_logs_file_path().unwrap())
             .spawn()
             .unwrap()
             .wait()

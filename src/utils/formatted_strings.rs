@@ -167,7 +167,7 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
 
 #[allow(dead_code)]
 #[cfg(windows)]
-pub fn get_windows_logs_file_path() -> Option<String> {
+pub fn get_logs_file_path() -> Option<String> {
     let mut conf = confy::get_configuration_file_path(crate::SNIFFNET_LOWERCASE, "logs").ok()?;
     conf.set_extension("txt");
     Some(conf.to_str()?.to_string())
@@ -177,7 +177,7 @@ pub fn get_windows_logs_file_path() -> Option<String> {
 #[cfg(windows)]
 pub fn redirect_stdout_stderr_to_file(
 ) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
-    if let Ok(logs_file) = std::fs::File::create(get_windows_logs_file_path()?) {
+    if let Ok(logs_file) = std::fs::File::create(get_logs_file_path()?) {
         return Some((
             gag::Redirect::stdout(logs_file.try_clone().ok()?).ok()?,
             gag::Redirect::stderr(logs_file).ok()?,
@@ -224,7 +224,10 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn test_redirect_stdout_stderr_to_file() {
-        assert!(redirect_stdout_stderr_to_file().is_some());
+    fn test_logs_file_path() {
+        let file_path = std::path::PathBuf::from(get_logs_file_path().unwrap());
+        assert!(file_path.is_absolute());
+        assert_eq!(file_path.file_name().unwrap(), "logs.txt");
+        assert!(file_path.parent().unwrap().is_dir());
     }
 }
