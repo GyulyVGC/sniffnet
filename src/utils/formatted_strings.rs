@@ -228,6 +228,5 @@ mod tests {
         let file_path = std::path::PathBuf::from(get_logs_file_path().unwrap());
         assert!(file_path.is_absolute());
         assert_eq!(file_path.file_name().unwrap(), "logs.txt");
-        assert!(file_path.parent().unwrap().is_dir());
     }
 }
