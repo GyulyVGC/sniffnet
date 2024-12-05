@@ -22,7 +22,7 @@ pub struct Args {
     #[arg(short, long, exclusive = true)]
     pub logs: bool,
     /// Restore default settings
-    #[arg(short, long)]
+    #[arg(short, long, exclusive = true)]
     restore_default: bool,
 }
 
@@ -40,6 +40,7 @@ pub fn handle_cli_args(args: Args) -> Task<Message> {
 
     if args.restore_default {
         Configs::default().store();
+        std::process::exit(0);
     }
 
     let mut boot_task_chain = window::get_latest().map(Message::WindowId);
