@@ -13,7 +13,7 @@ use iced::{window, Task};
     version = APP_VERSION,
     about = "Application to comfortably monitor your network traffic"
 )]
-struct Args {
+pub struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
@@ -26,9 +26,7 @@ struct Args {
     restore_default: bool,
 }
 
-pub fn parse_cli_args() -> Task<Message> {
-    let args = Args::parse();
-
+pub fn handle_cli_args(args: Args) -> Task<Message> {
     #[cfg(windows)]
     if args.logs {
         std::process::Command::new("explorer")

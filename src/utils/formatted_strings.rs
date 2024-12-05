@@ -176,12 +176,16 @@ pub fn get_logs_file_path() -> Option<String> {
 #[allow(dead_code)]
 #[cfg(windows)]
 pub fn redirect_stdout_stderr_to_file(
+    logs: bool,
 ) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
-    if let Ok(logs_file) = std::fs::File::create(get_logs_file_path()?) {
-        return Some((
-            gag::Redirect::stdout(logs_file.try_clone().ok()?).ok()?,
-            gag::Redirect::stderr(logs_file).ok()?,
-        ));
+    // only truncate the log file if the --logs argument isn't passed
+    if !logs {
+        if let Ok(logs_file) = std::fs::File::create(get_logs_file_path()?) {
+            return Some((
+                gag::Redirect::stdout(logs_file.try_clone().ok()?).ok()?,
+                gag::Redirect::stderr(logs_file).ok()?,
+            ));
+        }
     }
     None
 }
