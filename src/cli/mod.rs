@@ -20,7 +20,7 @@ pub struct Args {
     #[cfg(windows)]
     /// Show the logs (stdout and stderr) of the most recent application run
     #[arg(short, long, exclusive = true)]
-    logs: bool,
+    pub logs: bool,
     /// Restore default settings
     #[arg(short, long)]
     restore_default: bool,
