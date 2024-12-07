@@ -41,13 +41,10 @@ pub fn handle_cli_args() -> Task<Message> {
             std::process::exit(0);
         } else {
             // truncate logs file
-            unsafe {
-                std::fs::OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open(logs_file)
-                    .unwrap_unchecked();
-            }
+            let _ = std::fs::OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(logs_file);
         }
     }
 
