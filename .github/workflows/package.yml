@@ -72,6 +72,9 @@ jobs:
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
 
+      - name: Clippy (release mode)
+        run: cargo clippy --release -- -D warnings
+
       - name: Build binary
         if: matrix.os == 'ubuntu'
         run: cross build --release --target ${{ matrix.target }}
