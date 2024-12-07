@@ -13,29 +13,42 @@ use iced::{window, Task};
     version = APP_VERSION,
     about = "Application to comfortably monitor your network traffic"
 )]
-pub struct Args {
+struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
-    #[cfg(windows)]
+    #[cfg(all(windows, not(debug_assertions)))]
     /// Show the logs (stdout and stderr) of the most recent application run
     #[arg(short, long, exclusive = true)]
-    pub logs: bool,
+    logs: bool,
     /// Restore default settings
     #[arg(short, long, exclusive = true)]
     restore_default: bool,
 }
 
-pub fn handle_cli_args(args: Args) -> Task<Message> {
-    #[cfg(windows)]
-    if args.logs {
-        std::process::Command::new("explorer")
-            .arg(crate::utils::formatted_strings::get_logs_file_path().unwrap())
-            .spawn()
-            .unwrap()
-            .wait()
-            .unwrap_or_default();
-        std::process::exit(0);
+pub fn handle_cli_args() -> Task<Message> {
+    let args = Args::parse();
+
+    #[cfg(all(windows, not(debug_assertions)))]
+    if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+        if args.logs {
+            std::process::Command::new("explorer")
+                .arg(logs_file)
+                .spawn()
+                .unwrap()
+                .wait()
+                .unwrap_or_default();
+            std::process::exit(0);
+        } else {
+            // truncate logs file
+            unsafe {
+                std::fs::OpenOptions::new()
+                    .write(true)
+                    .truncate(true)
+                    .open(logs_file)
+                    .unwrap_unchecked();
+            }
+        }
     }
 
     if args.restore_default {

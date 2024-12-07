@@ -6,12 +6,10 @@ use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
 
-use clap::Parser;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
 use iced::{application, window, Font, Pixels, Settings};
 
-use crate::cli::Args;
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
@@ -57,22 +55,18 @@ pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 ///
 /// It initializes shared variables and loads configuration parameters
 pub fn main() -> iced::Result {
-    let configs = CONFIGS.clone();
-
-    let args = Args::parse();
-
     #[cfg(all(windows, not(debug_assertions)))]
     let _gag1: gag::Redirect<std::fs::File>;
     #[cfg(all(windows, not(debug_assertions)))]
     let _gag2: gag::Redirect<std::fs::File>;
     #[cfg(all(windows, not(debug_assertions)))]
-    if let Some((gag1, gag2)) = utils::formatted_strings::redirect_stdout_stderr_to_file(args.logs)
-    {
+    if let Some((gag1, gag2)) = utils::formatted_strings::redirect_stdout_stderr_to_file() {
         _gag1 = gag1;
         _gag2 = gag2;
     }
 
-    let boot_task_chain = handle_cli_args(args);
+    let configs = CONFIGS.clone();
+    let boot_task_chain = handle_cli_args();
 
     let configs1 = Arc::new(Mutex::new(configs));
     let configs2 = configs1.clone();
