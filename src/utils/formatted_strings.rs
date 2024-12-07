@@ -165,6 +165,31 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
     }
 }
 
+#[allow(dead_code)]
+#[cfg(windows)]
+pub fn get_logs_file_path() -> Option<String> {
+    let mut conf = confy::get_configuration_file_path(crate::SNIFFNET_LOWERCASE, "logs").ok()?;
+    conf.set_extension("txt");
+    Some(conf.to_str()?.to_string())
+}
+
+#[cfg(all(windows, not(debug_assertions)))]
+pub fn redirect_stdout_stderr_to_file(
+) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
+    if let Ok(logs_file) = std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(get_logs_file_path()?)
+    {
+        return Some((
+            gag::Redirect::stdout(logs_file.try_clone().ok()?).ok()?,
+            gag::Redirect::stderr(logs_file).ok()?,
+        ));
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -199,5 +224,13 @@ mod tests {
             get_formatted_num_seconds(u128::MAX),
             "94522879700260684295381835397713392:04:15"
         );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_logs_file_path() {
+        let file_path = std::path::PathBuf::from(get_logs_file_path().unwrap());
+        assert!(file_path.is_absolute());
+        assert_eq!(file_path.file_name().unwrap(), "logs.txt");
     }
 }

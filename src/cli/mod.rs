@@ -17,20 +17,43 @@ struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    #[cfg(all(windows, not(debug_assertions)))]
+    /// Show the logs (stdout and stderr) of the most recent application run
+    #[arg(short, long, exclusive = true)]
+    logs: bool,
     /// Restore default settings
-    #[arg(short, long)]
+    #[arg(short, long, exclusive = true)]
     restore_default: bool,
 }
 
-pub fn parse_cli_args() -> Task<Message> {
-    let mut boot_task_chain = window::get_latest().map(Message::WindowId);
-
+pub fn handle_cli_args() -> Task<Message> {
     let args = Args::parse();
+
+    #[cfg(all(windows, not(debug_assertions)))]
+    if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+        if args.logs {
+            std::process::Command::new("explorer")
+                .arg(logs_file)
+                .spawn()
+                .unwrap()
+                .wait()
+                .unwrap_or_default();
+            std::process::exit(0);
+        } else {
+            // truncate logs file
+            let _ = std::fs::OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(logs_file);
+        }
+    }
 
     if args.restore_default {
         Configs::default().store();
+        std::process::exit(0);
     }
 
+    let mut boot_task_chain = window::get_latest().map(Message::WindowId);
     if let Some(adapter) = args.adapter {
         boot_task_chain = boot_task_chain
             .chain(Task::done(Message::AdapterSelection(adapter)))
