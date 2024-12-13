@@ -23,7 +23,7 @@ use crate::configs::types::config_window::{
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
-use crate::gui::components::types::my_modal::{MyModal, ResetOrQuit};
+use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
@@ -355,9 +355,7 @@ impl Sniffer {
             }
             Message::ReturnKeyPressed => return self.shortcut_return(),
             Message::EscKeyPressed => return self.shortcut_esc(),
-            Message::ResetButtonPressed => {
-                return self.reset_or_quit(MyModal::ResetOrQuit(ResetOrQuit::Reset))
-            }
+            Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
             Message::Search(parameters) => {
                 self.page_number = 1;
@@ -432,9 +430,7 @@ impl Sniffer {
                     .clone_from(&db);
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            Message::QuitWrapper => {
-                return self.reset_or_quit(MyModal::ResetOrQuit(ResetOrQuit::Quit))
-            }
+            Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
                 self.configs.lock().unwrap().clone().store();
                 return window::close(self.id.unwrap_or(Id::unique()));
@@ -584,8 +580,15 @@ impl Sniffer {
             }
             Some(m) => {
                 let overlay: Element<Message, StyleType> = match m {
-                    MyModal::ResetOrQuit(roq) => get_exit_overlay(
-                        roq.get_message(),
+                    MyModal::Reset => get_exit_overlay(
+                        Message::Reset,
+                        color_gradient,
+                        font,
+                        font_headers,
+                        language,
+                    ),
+                    MyModal::Quit => get_exit_overlay(
+                        Message::Quit,
                         color_gradient,
                         font,
                         font_headers,
@@ -853,8 +856,10 @@ impl Sniffer {
             if self.filters.are_valid() {
                 return self.update(Message::Start);
             }
-        } else if let Some(MyModal::ResetOrQuit(roq)) = &self.modal {
-            return self.update(roq.get_message());
+        } else if self.modal.eq(&Some(MyModal::Reset)) {
+            return self.update(Message::Reset);
+        } else if self.modal.eq(&Some(MyModal::Quit)) {
+            return self.update(Message::Quit);
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
             return self.update(Message::ClearAllNotifications);
         }
@@ -870,20 +875,33 @@ impl Sniffer {
         Task::none()
     }
 
-    // also called when the backspace shortcut is pressed and when a close is requested
-    fn reset_or_quit(&mut self, modal: MyModal) -> Task<Message> {
+    // also called when the backspace shortcut is pressed
+    fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
-            if let MyModal::ResetOrQuit(roq) = &modal {
-                return if self.info_traffic.lock().unwrap().all_packets == 0
-                    && self.settings_page.is_none()
-                {
-                    self.update(roq.get_message())
-                } else {
-                    self.update(Message::ShowModal(modal))
-                };
-            }
+            return if self.info_traffic.lock().unwrap().all_packets == 0
+                && self.settings_page.is_none()
+            {
+                self.update(Message::Reset)
+            } else {
+                self.update(Message::ShowModal(MyModal::Reset))
+            };
         }
         Task::none()
+    }
+
+    fn quit_wrapper(&mut self) -> Task<Message> {
+        if self.running_page.eq(&RunningPage::Init)
+            || self.info_traffic.lock().unwrap().all_packets == 0
+        {
+            self.update(Message::Quit)
+        } else if self.thumbnail {
+            self.update(Message::ToggleThumbnail(false))
+                .chain(self.update(Message::ShowModal(MyModal::Quit)))
+        } else {
+            self.update(Message::HideModal)
+                .chain(self.update(Message::CloseSettings))
+                .chain(self.update(Message::ShowModal(MyModal::Quit)))
+        }
     }
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
