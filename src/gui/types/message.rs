@@ -12,7 +12,7 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 use iced::window;
 
 #[derive(Debug, Clone)]
-/// Messages types that permit to react to application interactions/subscriptions
+/// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
     /// Every 5 seconds
     TickInit,
@@ -100,8 +100,10 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
+    /// Wrapper around the Quit message
+    QuitWrapper,
     /// Save the configurations of the app and quit
-    CloseRequested,
+    Quit,
     /// Copies the given string to clipboard
     CopyIp(String),
     /// Launch a new file dialog

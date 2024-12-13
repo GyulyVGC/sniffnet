@@ -18,12 +18,13 @@ use crate::translations::translations::{
 use crate::{Language, StyleType};
 
 pub fn get_exit_overlay<'a>(
+    message: Message,
     color_gradient: GradientType,
     font: Font,
     font_headers: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let row_buttons = confirm_button_row(language, font, Message::Reset);
+    let row_buttons = confirm_button_row(language, font, message);
 
     let content = Column::new()
         .align_x(Alignment::Center)

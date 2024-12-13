@@ -180,7 +180,7 @@ impl Sniffer {
                     modifiers: Modifiers::COMMAND,
                     ..
                 }) => match key.as_ref() {
-                    Key::Character("q") => Some(Message::CloseRequested),
+                    Key::Character("q") => Some(Message::QuitWrapper),
                     Key::Character("t") => Some(Message::CtrlTPressed),
                     _ => None,
                 },
@@ -190,7 +190,7 @@ impl Sniffer {
             iced::event::listen_with(|event, _, _| match event {
                 Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
                     Modifiers::COMMAND => match key.as_ref() {
-                        Key::Character("q") => Some(Message::CloseRequested),
+                        Key::Character("q") => Some(Message::QuitWrapper),
                         Key::Character("t") => Some(Message::CtrlTPressed),
                         Key::Character(",") => Some(Message::OpenLastSettings),
                         Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
@@ -244,7 +244,7 @@ impl Sniffer {
             Window(window::Event::Resized(Size { width, height })) => {
                 Some(Message::WindowResized(width, height))
             }
-            Window(window::Event::CloseRequested) => Some(Message::CloseRequested),
+            Window(window::Event::CloseRequested) => Some(Message::QuitWrapper),
             _ => None,
         })
     }
@@ -430,7 +430,8 @@ impl Sniffer {
                     .clone_from(&db);
                 self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
-            Message::CloseRequested => {
+            Message::QuitWrapper => return self.quit_wrapper(),
+            Message::Quit => {
                 self.configs.lock().unwrap().clone().store();
                 return window::close(self.id.unwrap_or(Id::unique()));
             }
@@ -579,7 +580,20 @@ impl Sniffer {
             }
             Some(m) => {
                 let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Quit => get_exit_overlay(color_gradient, font, font_headers, language),
+                    MyModal::Reset => get_exit_overlay(
+                        Message::Reset,
+                        color_gradient,
+                        font,
+                        font_headers,
+                        language,
+                    ),
+                    MyModal::Quit => get_exit_overlay(
+                        Message::Quit,
+                        color_gradient,
+                        font,
+                        font_headers,
+                        language,
+                    ),
                     MyModal::ClearAll => {
                         get_clear_all_overlay(color_gradient, font, font_headers, language)
                     }
@@ -842,8 +856,10 @@ impl Sniffer {
             if self.filters.are_valid() {
                 return self.update(Message::Start);
             }
-        } else if self.modal.eq(&Some(MyModal::Quit)) {
+        } else if self.modal.eq(&Some(MyModal::Reset)) {
             return self.update(Message::Reset);
+        } else if self.modal.eq(&Some(MyModal::Quit)) {
+            return self.update(Message::Quit);
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
             return self.update(Message::ClearAllNotifications);
         }
@@ -859,7 +875,7 @@ impl Sniffer {
         Task::none()
     }
 
-    // also called when backspace key is pressed on a running state
+    // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
             return if self.info_traffic.lock().unwrap().all_packets == 0
@@ -867,10 +883,27 @@ impl Sniffer {
             {
                 self.update(Message::Reset)
             } else {
-                self.update(Message::ShowModal(MyModal::Quit))
+                self.update(Message::ShowModal(MyModal::Reset))
             };
         }
         Task::none()
+    }
+
+    fn quit_wrapper(&mut self) -> Task<Message> {
+        if self.running_page.eq(&RunningPage::Init)
+            || self.info_traffic.lock().unwrap().all_packets == 0
+        {
+            self.update(Message::Quit)
+        } else if self.thumbnail {
+            // TODO: uncomment once issue #653 is fixed
+            // self.update(Message::ToggleThumbnail(false))
+            //     .chain(self.update(Message::ShowModal(MyModal::Quit)))
+            self.update(Message::Quit)
+        } else {
+            self.update(Message::HideModal)
+                .chain(self.update(Message::CloseSettings))
+                .chain(self.update(Message::ShowModal(MyModal::Quit)))
+        }
     }
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
@@ -1914,7 +1947,7 @@ mod tests {
         sniffer.update(Message::ChangeVolume(100));
 
         // quit the app by sending a CloseRequested message
-        sniffer.update(Message::CloseRequested);
+        sniffer.update(Message::Quit);
 
         assert!(path.exists());
 
@@ -1978,7 +2011,7 @@ mod tests {
         sniffer.update(Message::WindowMoved(40.0, 40.0));
 
         // quit the app by sending a CloseRequested message
-        sniffer.update(Message::CloseRequested);
+        sniffer.update(Message::Quit);
 
         assert!(path.exists());
 
