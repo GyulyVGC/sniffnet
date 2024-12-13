@@ -895,8 +895,10 @@ impl Sniffer {
         {
             self.update(Message::Quit)
         } else if self.thumbnail {
-            self.update(Message::ToggleThumbnail(false))
-                .chain(self.update(Message::ShowModal(MyModal::Quit)))
+            // TODO: uncomment once issue #653 is fixed
+            // self.update(Message::ToggleThumbnail(false))
+            //     .chain(self.update(Message::ShowModal(MyModal::Quit)))
+            self.update(Message::Quit)
         } else {
             self.update(Message::HideModal)
                 .chain(self.update(Message::CloseSettings))
