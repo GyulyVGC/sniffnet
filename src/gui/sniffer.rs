@@ -9,7 +9,7 @@ use std::time::Duration;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
-use iced::widget::Column;
+use iced::widget::{combo_box, Column};
 use iced::window::{Id, Level};
 use iced::Event::{Keyboard, Window};
 use iced::{window, Element, Point, Size, Subscription, Task};
@@ -125,6 +125,8 @@ pub struct Sniffer {
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
+    /// Combobox states for host filter dropdowns
+    pub combobox_states: combo_box::State<String>,
 }
 
 impl Sniffer {
@@ -167,6 +169,7 @@ impl Sniffer {
             export_pcap: ExportPcap::default(),
             thumbnail: false,
             id: None,
+            combobox_states: combo_box::State::new(vec!["IT".to_string(), "US".to_string()]),
         }
     }
 

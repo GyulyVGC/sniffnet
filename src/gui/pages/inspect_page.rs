@@ -5,7 +5,8 @@ use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, text_input, vertical_space, Rule, Space, Toggler, Tooltip,
+    button, combo_box, horizontal_space, text_input, vertical_space, ComboBox, Rule, Space,
+    Toggler, Tooltip,
 };
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Padding, Pixels};
@@ -87,9 +88,14 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     body = body
         .push(
-            Container::new(host_filters_col(&sniffer.search, font, language))
-                .padding(10)
-                .class(ContainerType::BorderedRound),
+            Container::new(host_filters_col(
+                &sniffer.search,
+                &sniffer.combobox_states,
+                font,
+                language,
+            ))
+            .padding(10)
+            .class(ContainerType::BorderedRound),
         )
         .push(
             Container::new(col_report)
@@ -307,11 +313,12 @@ fn row_report_entry<'a>(
     ret_val
 }
 
-fn host_filters_col(
-    search_params: &SearchParameters,
+fn host_filters_col<'a>(
+    search_params: &'a SearchParameters,
+    combobox_states: &'a combo_box::State<String>,
     font: Font,
     language: Language,
-) -> Column<Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let search_params2 = search_params.clone();
 
     let mut title_row = Row::new().spacing(10).align_y(Alignment::Center).push(
@@ -327,30 +334,35 @@ fn host_filters_col(
         ));
     }
 
-    let input_country =
-        filter_input(FilterInputType::Country, search_params.clone(), font).width(95);
-    let input_domain =
+    let combobox_country = filter_combobox(
+        FilterInputType::Country,
+        combobox_states,
+        search_params.clone(),
+        font,
+    )
+    .width(95);
+    let combobox_domain =
         filter_input(FilterInputType::Domain, search_params.clone(), font).width(190);
-    let input_as_name =
+    let combobox_as_name =
         filter_input(FilterInputType::AsName, search_params.clone(), font).width(190);
 
     let container_country = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", country_translation(language))).font(font))
-        .push(input_country);
+        .push(combobox_country);
 
     let container_domain = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", domain_name_translation(language))).font(font))
-        .push(input_domain);
+        .push(combobox_domain);
 
     let container_as_name = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", administrative_entity_translation(language))).font(font))
-        .push(input_as_name);
+        .push(combobox_as_name);
 
     let col1 = Column::new()
         .align_x(Alignment::Start)
@@ -428,6 +440,64 @@ fn filter_input<'a>(
     }
 
     let mut content = Row::new().spacing(5).align_y(Alignment::Center).push(input);
+
+    if is_filter_active {
+        content = content.push(button_clear);
+    }
+
+    Container::new(content)
+        .padding(if is_filter_active {
+            Padding::new(5.0).left(10)
+        } else {
+            Padding::new(5.0).right(3).left(3)
+        })
+        .class(if is_filter_active {
+            ContainerType::Badge
+        } else {
+            ContainerType::Standard
+        })
+}
+
+fn filter_combobox(
+    filter_input_type: FilterInputType,
+    combo_box_state: &combo_box::State<String>,
+    search_params: SearchParameters,
+    font: Font,
+) -> Container<Message, StyleType> {
+    let filter_value = filter_input_type.current_value(&search_params).to_string();
+    let is_filter_active = !filter_value.is_empty();
+
+    let button_clear = button_clear_filter(filter_input_type.clear_search(&search_params), font);
+
+    let update_fn =
+        move |new_value| Message::Search(filter_input_type.new_search(&search_params, new_value));
+
+    let mut combobox = ComboBox::new(combo_box_state, "", Some(&filter_value), update_fn.clone())
+        .on_input(update_fn.clone())
+        .padding([2, 5])
+        .size(FONT_SIZE_FOOTER)
+        .font(font)
+        .width(Length::Fill)
+        .input_class(if is_filter_active {
+            TextInputType::Badge
+        } else {
+            TextInputType::Standard
+        });
+
+    if !is_filter_active {
+        combobox = combobox.icon(text_input::Icon {
+            font: ICONS,
+            code_point: Icon::Funnel.codepoint(),
+            size: Some(Pixels(12.0)),
+            spacing: 2.0,
+            side: Side::Left,
+        });
+    }
+
+    let mut content = Row::new()
+        .spacing(5)
+        .align_y(Alignment::Center)
+        .push(combobox);
 
     if is_filter_active {
         content = content.push(button_clear);
