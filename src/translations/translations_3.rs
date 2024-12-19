@@ -78,7 +78,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
         Language::FR => "Les paramètres suivants ne peuvent pas être modifiés durant l'analyse",
-        Language::DE => "Die folgenden Paramter können während der Analyse nicht verändert werden",
+        Language::DE => "Die folgenden Parameter können während der Analyse nicht verändert werden",
         Language::PL => "Następujące parametry nie mogą być modyfikowane podczas analizy",
         Language::RU => "Следующие параметры не могут быть изменены во время анализа трафика",
         Language::RO => "Următorii parametri nu sunt modificabili în timpul analizei",
@@ -384,7 +384,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         // Language::FA => "انتخاب پوشه مقصد",
         Language::IT => "Seleziona cartella di destinazione",
         Language::FR => "Sélectionner le répertoire de destination",
-        Language::DE => "Zielorder wählen",
+        Language::DE => "Zielordner wählen",
         Language::PL => "Wybierz katalog docelowy", // "Wybierz folder docelowy"?
         Language::RU => "Выберите директорию назначения",
         Language::RO => "Selectează directorul destinație",
