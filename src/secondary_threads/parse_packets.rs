@@ -16,6 +16,7 @@ use crate::networking::manage_packets::{
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
@@ -33,6 +34,7 @@ pub fn parse_packets(
     country_mmdb_reader: &Arc<MmdbReader>,
     asn_mmdb_reader: &Arc<MmdbReader>,
     capture_context: CaptureContext,
+    host_data: &Arc<Mutex<HostData>>,
 ) {
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
@@ -135,6 +137,7 @@ pub fn parse_packets(
                                 let device2 = device.clone();
                                 let country_db_reader_2 = country_mmdb_reader.clone();
                                 let asn_db_reader_2 = asn_mmdb_reader.clone();
+                                let host_data2 = host_data.clone();
                                 thread::Builder::new()
                                     .name("thread_reverse_dns_lookup".to_string())
                                     .spawn(move || {
@@ -145,6 +148,7 @@ pub fn parse_packets(
                                             &device2,
                                             &country_db_reader_2,
                                             &asn_db_reader_2,
+                                            &host_data2,
                                         );
                                     })
                                     .unwrap();

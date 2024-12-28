@@ -9,7 +9,7 @@ use std::time::Duration;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
-use iced::widget::{combo_box, Column};
+use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::Event::{Keyboard, Window};
 use iced::{window, Element, Point, Size, Subscription, Task};
@@ -46,6 +46,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
+use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -125,8 +126,8 @@ pub struct Sniffer {
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
-    /// Combobox states for host filter dropdowns
-    pub combobox_states: combo_box::State<String>,
+    /// Host data for filter dropdowns (comboboxes)
+    pub host_data_states: HostDataStates,
 }
 
 impl Sniffer {
@@ -169,7 +170,7 @@ impl Sniffer {
             export_pcap: ExportPcap::default(),
             thumbnail: false,
             id: None,
-            combobox_states: combo_box::State::new(vec!["IT".to_string(), "US".to_string()]),
+            host_data_states: HostDataStates::default(),
         }
     }
 
@@ -664,6 +665,8 @@ impl Sniffer {
         {
             return self.update(Message::Waiting);
         }
+        // update host dropdowns
+        self.host_data_states.update_states(&self.search);
         Task::none()
     }
 
@@ -707,6 +710,7 @@ impl Sniffer {
             let filters = self.filters.clone();
             let country_mmdb_reader = self.country_mmdb_reader.clone();
             let asn_mmdb_reader = self.asn_mmdb_reader.clone();
+            let host_data = self.host_data_states.data.clone();
             self.device.link_type = capture_context.my_link_type();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -719,6 +723,7 @@ impl Sniffer {
                         &country_mmdb_reader,
                         &asn_mmdb_reader,
                         capture_context,
+                        &host_data,
                     );
                 })
                 .unwrap();
@@ -733,6 +738,7 @@ impl Sniffer {
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
+        self.host_data_states = HostDataStates::default();
         self.update(Message::HideModal)
     }
 

@@ -14,6 +14,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
+use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
@@ -304,6 +305,7 @@ pub fn reverse_dns_lookup(
     my_device: &MyDevice,
     country_db_reader: &Arc<MmdbReader>,
     asn_db_reader: &Arc<MmdbReader>,
+    host_data: &Arc<Mutex<HostData>>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
@@ -359,6 +361,10 @@ pub fn reverse_dns_lookup(
             is_local,
             traffic_type,
         });
+
+    // update host data states including the new host
+    host_data.lock().unwrap().update(&new_host);
+
     // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
     if info_traffic_lock.favorite_hosts.contains(&new_host) {
         info_traffic_lock.favorites_last_interval.insert(new_host);

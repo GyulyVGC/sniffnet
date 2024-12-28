@@ -21,6 +21,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
@@ -90,7 +91,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             Container::new(host_filters_col(
                 &sniffer.search,
-                &sniffer.combobox_states,
+                &sniffer.host_data_states.states,
                 font,
                 language,
             ))
@@ -315,7 +316,7 @@ fn row_report_entry<'a>(
 
 fn host_filters_col<'a>(
     search_params: &'a SearchParameters,
-    combobox_states: &'a combo_box::State<String>,
+    host_states: &'a HostStates,
     font: Font,
     language: Language,
 ) -> Column<'a, Message, StyleType> {
@@ -336,15 +337,27 @@ fn host_filters_col<'a>(
 
     let combobox_country = filter_combobox(
         FilterInputType::Country,
-        combobox_states,
+        &host_states.countries,
         search_params.clone(),
         font,
     )
     .width(95);
-    let combobox_domain =
-        filter_input(FilterInputType::Domain, search_params.clone(), font).width(190);
-    let combobox_as_name =
-        filter_input(FilterInputType::AsName, search_params.clone(), font).width(190);
+
+    let combobox_domain = filter_combobox(
+        FilterInputType::Domain,
+        &host_states.domains,
+        search_params.clone(),
+        font,
+    )
+    .width(190);
+
+    let combobox_as_name = filter_combobox(
+        FilterInputType::AsName,
+        &host_states.asns,
+        search_params.clone(),
+        font,
+    )
+    .width(190);
 
     let container_country = Row::new()
         .spacing(5)

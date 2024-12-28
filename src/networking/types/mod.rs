@@ -6,6 +6,7 @@ pub mod data_info;
 pub mod data_info_host;
 pub mod filters;
 pub mod host;
+pub mod host_data_states;
 pub mod icmp_type;
 pub mod info_address_port_pair;
 pub mod info_traffic;
