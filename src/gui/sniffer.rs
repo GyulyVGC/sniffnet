@@ -362,6 +362,14 @@ impl Sniffer {
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
             Message::Search(parameters) => {
+                // update comboboxes
+                let mut host_data = self.host_data_states.data.lock().unwrap();
+                host_data.countries.1 = self.search.country != parameters.country;
+                host_data.asns.1 = self.search.as_name != parameters.as_name;
+                host_data.domains.1 = self.search.domain != parameters.domain;
+                drop(host_data);
+                self.host_data_states.update_states(&parameters);
+
                 self.page_number = 1;
                 self.running_page = RunningPage::Inspect;
                 self.search = parameters;

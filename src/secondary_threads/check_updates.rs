@@ -1,4 +1,4 @@
-use std::sync::{ Mutex};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
