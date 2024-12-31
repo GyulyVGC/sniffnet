@@ -1,6 +1,6 @@
 use std::cmp::min;
 use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
 use iced::{Alignment, Font, Length};
@@ -61,7 +61,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 }
 
 fn host_col<'a>(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -103,7 +103,7 @@ fn host_col<'a>(
 }
 
 fn service_col<'a>(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {

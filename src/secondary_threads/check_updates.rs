@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{ Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -14,7 +14,7 @@ struct AppVersion {
 
 /// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
-pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Option<bool>>>) {
+pub fn set_newer_release_status(newer_release_available: &Mutex<Option<bool>>) {
     let result = is_newer_release_available(6, 30);
     *newer_release_available.lock().unwrap() = result;
 }

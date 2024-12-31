@@ -486,7 +486,7 @@ fn filter_combobox(
         move |new_value| Message::Search(filter_input_type.new_search(&search_params, new_value));
 
     let mut combobox = ComboBox::new(combo_box_state, "", Some(&filter_value), update_fn.clone())
-        .on_input(update_fn.clone())
+        .on_input(update_fn)
         .padding([2, 5])
         .size(FONT_SIZE_FOOTER)
         .font(font)

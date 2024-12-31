@@ -1,5 +1,5 @@
 use std::cmp::min;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -66,7 +66,7 @@ pub fn get_searched_entries(
 }
 
 pub fn get_host_entries(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
@@ -83,7 +83,7 @@ pub fn get_host_entries(
 }
 
 pub fn get_service_entries(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {

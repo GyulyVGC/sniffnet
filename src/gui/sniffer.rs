@@ -42,7 +42,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
-use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
@@ -114,10 +114,8 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// MMDB reader for countries
-    pub country_mmdb_reader: Arc<MmdbReader>,
-    /// MMDB reader for ASN
-    pub asn_mmdb_reader: Arc<MmdbReader>,
+    /// MMDB readers for country and ASN
+    pub mmdb_readers: MmdbReaders,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Information about PCAP file export
@@ -164,8 +162,10 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            country_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
-            asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
+            mmdb_readers: MmdbReaders {
+                country: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
+                asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
+            },
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
             thumbnail: false,
@@ -423,7 +423,7 @@ impl Sniffer {
                     .settings
                     .mmdb_country
                     .clone_from(&db);
-                self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
+                self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
                 self.configs
@@ -432,7 +432,7 @@ impl Sniffer {
                     .settings
                     .mmdb_asn
                     .clone_from(&db);
-                self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
+                self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
@@ -708,8 +708,7 @@ impl Sniffer {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
-            let country_mmdb_reader = self.country_mmdb_reader.clone();
-            let asn_mmdb_reader = self.asn_mmdb_reader.clone();
+            let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
             self.device.link_type = capture_context.my_link_type();
             thread::Builder::new()
@@ -720,8 +719,7 @@ impl Sniffer {
                         &device,
                         &filters,
                         &info_traffic_mutex,
-                        &country_mmdb_reader,
-                        &asn_mmdb_reader,
+                        &mmdb_readers,
                         capture_context,
                         &host_data,
                     );
