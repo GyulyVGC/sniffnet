@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
@@ -10,10 +10,11 @@ use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
-use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
+use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
@@ -210,7 +211,7 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
-    info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
+    info_traffic_mutex: &Mutex<InfoTraffic>,
     key: &AddressPortPair,
     my_device: &MyDevice,
     mac_addresses: (Option<String>, Option<String>),
@@ -298,12 +299,12 @@ pub fn modify_or_insert_in_map(
 }
 
 pub fn reverse_dns_lookup(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     key: &AddressPortPair,
     traffic_direction: TrafficDirection,
     my_device: &MyDevice,
-    country_db_reader: &Arc<MmdbReader>,
-    asn_db_reader: &Arc<MmdbReader>,
+    mmdb_readers: &MmdbReaders,
+    host_data: &Mutex<HostData>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
@@ -319,8 +320,8 @@ pub fn reverse_dns_lookup(
     );
     let is_loopback = is_loopback(&address_to_lookup);
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
-    let country = get_country(&address_to_lookup, country_db_reader);
-    let asn = get_asn(&address_to_lookup, asn_db_reader);
+    let country = get_country(&address_to_lookup, &mmdb_readers.country);
+    let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
     let r_dns = if let Ok(result) = lookup_result {
         if result.is_empty() {
             address_to_lookup.clone()
@@ -359,6 +360,10 @@ pub fn reverse_dns_lookup(
             is_local,
             traffic_type,
         });
+
+    // update host data states including the new host
+    host_data.lock().unwrap().update(&new_host);
+
     // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
     if info_traffic_lock.favorite_hosts.contains(&new_host) {
         info_traffic_lock.favorites_last_interval.insert(new_host);

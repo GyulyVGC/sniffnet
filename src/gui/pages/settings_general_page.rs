@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
@@ -16,7 +14,7 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
-use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
@@ -91,8 +89,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
         font,
         &mmdb_country,
         &mmdb_asn,
-        &sniffer.country_mmdb_reader,
-        &sniffer.asn_mmdb_reader,
+        &sniffer.mmdb_readers,
     ));
 
     column
@@ -249,8 +246,7 @@ fn mmdb_settings<'a>(
     font: Font,
     country_path: &str,
     asn_path: &str,
-    country_reader: &Arc<MmdbReader>,
-    asn_reader: &Arc<MmdbReader>,
+    mmdb_readers: &MmdbReaders,
 ) -> Column<'a, Message, StyleType> {
     Column::new()
         .spacing(5)
@@ -266,7 +262,7 @@ fn mmdb_settings<'a>(
             font,
             Message::CustomCountryDb,
             country_path,
-            country_reader,
+            &mmdb_readers.country,
             country_translation(language),
             language,
         ))
@@ -275,7 +271,7 @@ fn mmdb_settings<'a>(
             font,
             Message::CustomAsnDb,
             asn_path,
-            asn_reader,
+            &mmdb_readers.asn,
             "ASN",
             language,
         ))
@@ -286,14 +282,14 @@ fn mmdb_selection_row<'a>(
     font: Font,
     message: fn(String) -> Message,
     custom_path: &str,
-    mmdb_reader: &Arc<MmdbReader>,
+    mmdb_reader: &MmdbReader,
     caption: &str,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let is_error = if custom_path.is_empty() {
         false
     } else {
-        match **mmdb_reader {
+        match *mmdb_reader {
             MmdbReader::Default(_) => true,
             MmdbReader::Custom(_) => false,
         }

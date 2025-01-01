@@ -42,10 +42,11 @@ use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
-use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
+use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -113,10 +114,8 @@ pub struct Sniffer {
     pub search: SearchParameters,
     /// Current page number of inspect search results
     pub page_number: usize,
-    /// MMDB reader for countries
-    pub country_mmdb_reader: Arc<MmdbReader>,
-    /// MMDB reader for ASN
-    pub asn_mmdb_reader: Arc<MmdbReader>,
+    /// MMDB readers for country and ASN
+    pub mmdb_readers: MmdbReaders,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Information about PCAP file export
@@ -125,6 +124,8 @@ pub struct Sniffer {
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
+    /// Host data for filter dropdowns (comboboxes)
+    pub host_data_states: HostDataStates,
 }
 
 impl Sniffer {
@@ -161,12 +162,15 @@ impl Sniffer {
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
-            country_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
-            asn_mmdb_reader: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
+            mmdb_readers: MmdbReaders {
+                country: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
+                asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
+            },
             timing_events: TimingEvents::default(),
             export_pcap: ExportPcap::default(),
             thumbnail: false,
             id: None,
+            host_data_states: HostDataStates::default(),
         }
     }
 
@@ -358,6 +362,14 @@ impl Sniffer {
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
             Message::Search(parameters) => {
+                // update comboboxes
+                let mut host_data = self.host_data_states.data.lock().unwrap();
+                host_data.countries.1 = self.search.country != parameters.country;
+                host_data.asns.1 = self.search.as_name != parameters.as_name;
+                host_data.domains.1 = self.search.domain != parameters.domain;
+                drop(host_data);
+                self.host_data_states.update_states(&parameters);
+
                 self.page_number = 1;
                 self.running_page = RunningPage::Inspect;
                 self.search = parameters;
@@ -419,7 +431,7 @@ impl Sniffer {
                     .settings
                     .mmdb_country
                     .clone_from(&db);
-                self.country_mmdb_reader = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
+                self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
                 self.configs
@@ -428,7 +440,7 @@ impl Sniffer {
                     .settings
                     .mmdb_asn
                     .clone_from(&db);
-                self.asn_mmdb_reader = Arc::new(MmdbReader::from(&db, ASN_MMDB));
+                self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
@@ -661,6 +673,8 @@ impl Sniffer {
         {
             return self.update(Message::Waiting);
         }
+        // update host dropdowns
+        self.host_data_states.update_states(&self.search);
         Task::none()
     }
 
@@ -702,8 +716,8 @@ impl Sniffer {
             // no pcap error
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
-            let country_mmdb_reader = self.country_mmdb_reader.clone();
-            let asn_mmdb_reader = self.asn_mmdb_reader.clone();
+            let mmdb_readers = self.mmdb_readers.clone();
+            let host_data = self.host_data_states.data.clone();
             self.device.link_type = capture_context.my_link_type();
             thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -713,9 +727,9 @@ impl Sniffer {
                         &device,
                         &filters,
                         &info_traffic_mutex,
-                        &country_mmdb_reader,
-                        &asn_mmdb_reader,
+                        &mmdb_readers,
                         capture_context,
+                        &host_data,
                     );
                 })
                 .unwrap();
@@ -730,6 +744,7 @@ impl Sniffer {
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
+        self.host_data_states = HostDataStates::default();
         self.update(Message::HideModal)
     }
 

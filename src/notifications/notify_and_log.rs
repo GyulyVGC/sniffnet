@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use chrono::Local;
 
@@ -15,7 +15,7 @@ use crate::{InfoTraffic, RunTimeData};
 pub fn notify_and_log(
     runtime_data: &mut RunTimeData,
     notifications: Notifications,
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
 ) -> usize {
     let mut already_emitted_sound = false;
     let mut emitted_notifications = 0;

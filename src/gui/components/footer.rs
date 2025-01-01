@@ -1,6 +1,6 @@
 //! GUI bottom footer
 
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
@@ -28,7 +28,7 @@ pub fn footer<'a>(
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Option<bool>>>,
+    newer_release_available: &Mutex<Option<bool>>,
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
@@ -136,7 +136,7 @@ fn get_release_details<'a>(
     language: Language,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Arc<Mutex<Option<bool>>>,
+    newer_release_available: &Mutex<Option<bool>>,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)

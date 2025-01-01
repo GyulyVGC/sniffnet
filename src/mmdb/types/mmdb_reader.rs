@@ -1,7 +1,14 @@
 use std::net::IpAddr;
+use std::sync::Arc;
 
 use maxminddb::{MaxMindDBError, Reader};
 use serde::Deserialize;
+
+#[derive(Clone)]
+pub struct MmdbReaders {
+    pub country: Arc<MmdbReader>,
+    pub asn: Arc<MmdbReader>,
+}
 
 pub enum MmdbReader {
     Default(Reader<&'static [u8]>),
