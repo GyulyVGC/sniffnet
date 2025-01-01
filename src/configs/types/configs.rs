@@ -1,5 +1,6 @@
-use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
 use once_cell::sync::Lazy;
+
+use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
 
 pub static CONFIGS: Lazy<Configs> = Lazy::new(Configs::load);
 

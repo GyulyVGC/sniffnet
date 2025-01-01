@@ -1,10 +1,12 @@
-use crate::countries::types::country::Country;
-use crate::networking::types::host::Host;
-use crate::report::types::search_parameters::SearchParameters;
-use iced::widget::combo_box;
 use std::collections::BTreeSet;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
+
+use iced::widget::combo_box;
+
+use crate::countries::types::country::Country;
+use crate::networking::types::host::Host;
+use crate::report::types::search_parameters::SearchParameters;
 
 /// Struct to contain all the sets of data related to network hosts
 ///
