@@ -56,15 +56,16 @@ pub struct HostData {
 impl HostData {
     pub fn update(&mut self, host: &Host) {
         if !host.domain.is_empty() && host.domain.parse::<IpAddr>().is_err() {
-            self.domains.1 = self.domains.0.insert(host.domain.clone());
+            self.domains.1 = self.domains.0.insert(host.domain.clone()) || self.domains.1;
         }
 
         if !host.asn.name.is_empty() {
-            self.asns.1 = self.asns.0.insert(host.asn.name.clone());
+            self.asns.1 = self.asns.0.insert(host.asn.name.clone()) || self.asns.1;
         }
 
         if host.country != Country::ZZ {
-            self.countries.1 = self.countries.0.insert(host.country.to_string());
+            self.countries.1 =
+                self.countries.0.insert(host.country.to_string()) || self.countries.1;
         }
     }
 }
