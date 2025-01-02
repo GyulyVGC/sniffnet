@@ -72,19 +72,19 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install Cross
-        if: matrix.os == 'ubuntu'
-        run: cargo install cross --git https://github.com/cross-rs/cross
-
       - name: Clippy (release mode)
         run: cargo clippy --release -- -D warnings
 
-      - name: Build binary
-        if: matrix.os == 'ubuntu'
-        run: cross build --release --target ${{ matrix.target }}
+      #      - name: Install Cross
+      #        if: matrix.os == 'ubuntu'
+      #        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      #      - name: Build binary
+      #        if: matrix.os == 'ubuntu'
+      #        run: cross build --release --target ${{ matrix.target }}
 
       - name: Build binary
-        if: matrix.os == 'macos' || matrix.os == 'windows'
+        #        if: matrix.os == 'macos' || matrix.os == 'windows'
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Upload build artifacts
