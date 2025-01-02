@@ -1,3 +1,5 @@
+use iced::window;
+
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -9,7 +11,6 @@ use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
-use iced::window;
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions

@@ -177,7 +177,6 @@ pub fn get_logs_file_path() -> Option<String> {
 pub fn redirect_stdout_stderr_to_file(
 ) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
     if let Ok(logs_file) = std::fs::OpenOptions::new()
-        .write(true)
         .create(true)
         .append(true)
         .open(get_logs_file_path()?)

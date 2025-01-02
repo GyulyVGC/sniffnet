@@ -40,6 +40,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu'
+        run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev libgtk-3-dev
+
       - name: Install Windows dependencies
         if: matrix.os == 'windows'
         env:
@@ -68,12 +72,14 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Clippy (release mode)
+        run: |
+          cargo clippy --release -- -D warnings
+          cargo clean
+
       - name: Install Cross
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
-
-      - name: Clippy (release mode)
-        run: cargo clippy --release -- -D warnings
 
       - name: Build binary
         if: matrix.os == 'ubuntu'
