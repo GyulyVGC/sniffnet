@@ -2,9 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::StyleType;
 use iced::widget::rule::{Catalog, FillMode, Style};
 use iced::Color;
+
+use crate::StyleType;
 
 #[derive(Default)]
 pub enum RuleType {

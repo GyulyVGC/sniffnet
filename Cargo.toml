@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.3.1"
+version = "1.3.2"
 authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
 edition = "2021"
 description = "Application to comfortably monitor your network traffic"
@@ -43,7 +43,7 @@ iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy"] }
 plotters-iced = "0.11.0"
 maxminddb = "0.24.0"
 confy = "0.6.1"
-serde = { version = "1.0.216", default-features = false, features = ["derive"] }
+serde = { version = "1.0.217", default-features = false, features = ["derive"] }
 rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
 toml = "0.8.19"
@@ -59,16 +59,16 @@ clap = { version = "4.5.23", features = ["derive"] }
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.9", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+reqwest = { version = "0.12.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.9", features = ["json", "blocking"] }
+reqwest = { version = "0.12.12", features = ["json", "blocking"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
 serde_test = "1.0.177"
-rstest = "0.23.0"
+rstest = "0.24.0"
 serial_test = { version = "3.2.0", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────

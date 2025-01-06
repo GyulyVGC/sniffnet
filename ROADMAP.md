@@ -43,6 +43,6 @@ Elements inside a section are sorted by expected release date.
 | Proper table structure for connections list        | ✅ (v1.3.0) |
 | Extended documentation (Wiki)                      | ✅ (v1.3.0) |
 | Support more link types                            | ✅ (v1.3.0) |
-| Filter inputs autocompletion                       | ❓(TBD)     |
+| Filter inputs autocompletion                       | ✅ (v1.3.2) |
 | Details about unassigned IPs                       | ❓(TBD)     |
 | Additional details about each notification event   | ❓(TBD)     |
