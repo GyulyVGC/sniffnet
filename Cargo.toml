@@ -50,7 +50,7 @@ toml = "0.8.19"
 once_cell = "1.20.2"
 ctrlc = { version = "3.4.5", features = ["termination"] }
 rfd = "0.15.2"
-phf = "0.11.2"
+phf = "0.11.3"
 phf_shared = "0.11.2"
 splines = "4.4.1"
 clap = { version = "4.5.23", features = ["derive"] }
