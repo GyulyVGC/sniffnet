@@ -74,8 +74,8 @@ jobs:
 
       - name: Clippy (release mode) & check crate
         run: |
-          cargo clippy --release -- -D warnings
-          cargo publish --dry-run
+          cargo clippy --release -- -D warnings &&
+          cargo publish --dry-run &&
           cargo clean
 
       - name: Install Cross
