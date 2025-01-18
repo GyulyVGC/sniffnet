@@ -19,6 +19,7 @@ use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
@@ -304,6 +305,7 @@ fn get_local_tooltip<'a>(
     get_computer_tooltip(
         is_my_address(local_address, my_interface_addresses),
         is_local_connection(local_address, my_interface_addresses),
+        is_bogon(local_address),
         get_traffic_type(
             if address_to_lookup.eq(&key.address1) {
                 &key.address2
