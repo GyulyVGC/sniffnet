@@ -20,7 +20,7 @@ static PRIVATE_USE: Lazy<Bogon> = Lazy::new(|| Bogon {
         "10.0.0.0-10.255.255.255, 172.16.0.0-172.31.255.255, 192.168.0.0-192.168.255.255",
     )
     .unwrap(),
-    description: "private-use networks",
+    description: "private-use",
 });
 
 static CARRIER_GRADE: Lazy<Bogon> = Lazy::new(|| Bogon {
@@ -65,7 +65,7 @@ static TEST_NET_3: Lazy<Bogon> = Lazy::new(|| Bogon {
 
 static FUTURE_USE: Lazy<Bogon> = Lazy::new(|| Bogon {
     range: AddressCollection::new("240.0.0.0-255.255.255.255").unwrap(),
-    description: "reserved for future use",
+    description: "future use",
 });
 
 // IPv6 bogons
@@ -173,5 +173,60 @@ mod tests {
     #[test]
     fn test_is_bogon_this_network() {
         assert_eq!(is_bogon("0.1.2.3"), Some("\"this\" network"));
+    }
+
+    #[test]
+    fn test_is_bogon_private_use_networks() {
+        assert_eq!(is_bogon("10.1.2.3"), Some("private-use"));
+        assert_eq!(is_bogon("172.22.2.3"), Some("private-use"));
+        assert_eq!(is_bogon("192.168.255.3"), Some("private-use"));
+    }
+
+    #[test]
+    fn test_is_bogon_carrier_grade() {
+        assert_eq!(is_bogon("100.99.2.1"), Some("carrier-grade NAT"));
+    }
+
+    #[test]
+    fn test_is_bogon_loopback() {
+        assert_eq!(is_bogon("127.99.2.1"), Some("loopback"));
+    }
+
+    #[test]
+    fn test_is_bogon_link_local() {
+        assert_eq!(is_bogon("169.254.0.0"), Some("link local"));
+    }
+
+    #[test]
+    fn test_is_bogon_ietf() {
+        assert_eq!(is_bogon("192.0.0.255"), Some("IETF protocol assignments"));
+    }
+
+    #[test]
+    fn test_is_bogon_test_net_1() {
+        assert_eq!(is_bogon("192.0.2.128"), Some("TEST-NET-1"));
+    }
+
+    #[test]
+    fn test_is_bogon_network_interconnect() {
+        assert_eq!(
+            is_bogon("198.18.2.128"),
+            Some("network interconnect device benchmark testing")
+        );
+    }
+
+    #[test]
+    fn test_is_bogon_test_net_2() {
+        assert_eq!(is_bogon("198.51.100.128"), Some("TEST-NET-2"));
+    }
+
+    #[test]
+    fn test_is_bogon_test_net_3() {
+        assert_eq!(is_bogon("203.0.113.128"), Some("TEST-NET-3"));
+    }
+
+    #[test]
+    fn test_is_bogon_future_use() {
+        assert_eq!(is_bogon("240.0.0.0"), Some("future use"));
     }
 }
