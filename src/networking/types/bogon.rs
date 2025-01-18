@@ -168,6 +168,7 @@ mod tests {
     #[test]
     fn test_is_bogon_no() {
         assert_eq!(is_bogon("8.8.8.8"), None);
+        assert_eq!(is_bogon("2001:4860:4860::8888"), None);
     }
 
     #[test]
@@ -228,5 +229,56 @@ mod tests {
     #[test]
     fn test_is_bogon_future_use() {
         assert_eq!(is_bogon("240.0.0.0"), Some("future use"));
+    }
+
+    #[test]
+    fn test_node_scope_unspecified() {
+        assert_eq!(is_bogon("::"), Some("node-scope unicast unspecified"));
+    }
+
+    #[test]
+    fn test_node_scope_loopback() {
+        assert_eq!(is_bogon("::1"), Some("node-scope unicast loopback"));
+    }
+
+    #[test]
+    fn test_ipv4_mapped() {
+        assert_eq!(is_bogon("::ffff:8.8.8.8"), Some("IPv4-mapped"));
+    }
+
+    #[test]
+    fn test_ipv4_compatible() {
+        assert_eq!(is_bogon("::8.8.8.8"), Some("IPv4-compatible"));
+    }
+
+    #[test]
+    fn test_remotely_triggered() {
+        assert_eq!(is_bogon("100::beef"), Some("remotely triggered black hole"));
+    }
+
+    #[test]
+    fn test_orchid() {
+        assert_eq!(is_bogon("2001:10::feed"), Some("ORCHID"));
+    }
+
+    #[test]
+    fn test_documentation_prefix() {
+        assert_eq!(is_bogon("2001:db8::fe90"), Some("documentation prefix"));
+        assert_eq!(is_bogon("3fff::"), Some("documentation prefix"));
+    }
+
+    #[test]
+    fn test_ula() {
+        assert_eq!(is_bogon("fdff::"), Some("ULA"));
+    }
+
+    #[test]
+    fn test_link_local_unicast() {
+        assert_eq!(is_bogon("feaf::"), Some("link-local unicast"));
+    }
+
+    #[test]
+    fn test_site_local_unicast() {
+        assert_eq!(is_bogon("feea::1"), Some("site-local unicast"));
     }
 }
