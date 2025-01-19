@@ -34,6 +34,7 @@ fn get_flag_from_country<'a>(
     width: f32,
     is_local: bool,
     is_loopback: bool,
+    is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
 ) -> (Svg<'a, StyleType>, String) {
@@ -288,19 +289,24 @@ fn get_flag_from_country<'a>(
         Country::ZW => ZW,
         Country::ZZ => {
             let (flag, new_tooltip) = if is_loopback {
-                (COMPUTER, your_network_adapter_translation(language))
+                (
+                    COMPUTER,
+                    your_network_adapter_translation(language).to_string(),
+                )
             } else if traffic_type.eq(&TrafficType::Multicast) {
-                (MULTICAST, "Multicast")
+                (MULTICAST, "Multicast".to_string())
             } else if traffic_type.eq(&TrafficType::Broadcast) {
-                (BROADCAST, "Broadcast")
+                (BROADCAST, "Broadcast".to_string())
             } else if is_local {
-                (HOME, local_translation(language))
+                (HOME, local_translation(language).to_string())
+            } else if let Some(bogon) = is_bogon {
+                (BOGON, reserved_address_translation(language, bogon))
             } else {
-                (UNKNOWN, unknown_translation(language))
+                (UNKNOWN, unknown_translation(language).to_string())
             };
 
             svg_style = SvgType::AdaptColor;
-            tooltip = new_tooltip.to_string();
+            tooltip = new_tooltip;
             flag
         }
     })))
@@ -325,12 +331,14 @@ pub fn get_flag_tooltip<'a>(
     };
     let is_local = host_info.is_local;
     let is_loopback = host_info.is_loopback;
+    let is_bogon = host_info.is_bogon;
     let traffic_type = host_info.traffic_type;
     let (content, tooltip) = get_flag_from_country(
         country,
         width,
         is_local,
         is_loopback,
+        is_bogon,
         traffic_type,
         language,
     );

@@ -12,6 +12,7 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostData;
@@ -320,6 +321,7 @@ pub fn reverse_dns_lookup(
     );
     let is_loopback = is_loopback(&address_to_lookup);
     let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
+    let is_bogon = is_bogon(&address_to_lookup);
     let country = get_country(&address_to_lookup, &mmdb_readers.country);
     let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
     let r_dns = if let Ok(result) = lookup_result {
@@ -358,6 +360,7 @@ pub fn reverse_dns_lookup(
             is_favorite: false,
             is_loopback,
             is_local,
+            is_bogon,
             traffic_type,
         });
 
