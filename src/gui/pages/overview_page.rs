@@ -736,7 +736,7 @@ fn get_bars_length(
     (in_len, out_len)
 }
 
-fn get_bars<'a>(in_len: f32, out_len: f32) -> Row<'a, Message, StyleType> {
+pub fn get_bars<'a>(in_len: f32, out_len: f32) -> Row<'a, Message, StyleType> {
     Row::new()
         .push(if in_len > 0.0 {
             Row::new()

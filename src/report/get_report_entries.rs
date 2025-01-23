@@ -7,14 +7,25 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::{ChartType, InfoTraffic, ReportSortType, Service, Sniffer};
 
-/// Returns the elements which satisfy the search constraints and belong to the given page,
-/// and the total number of elements which satisfy the search constraints
+/// Return the elements that satisfy the search constraints and belong to the given page,
+/// and the total number of elements which satisfy the search constraints,
+/// with their packets, in-bytes, and out-bytes count
 pub fn get_searched_entries(
     sniffer: &Sniffer,
-) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize) {
+) -> (
+    Vec<(AddressPortPair, InfoAddressPortPair)>,
+    usize,
+    u128,
+    u128,
+    u128,
+) {
+    let mut tot_packets = 0;
+    let mut tot_in_bytes = 0;
+    let mut tot_out_bytes = 0;
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
@@ -31,7 +42,17 @@ pub fn get_searched_entries(
                 .search
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
+        .map(|(key, val)| {
+            tot_packets += val.transmitted_packets;
+            if val.traffic_direction == TrafficDirection::Outgoing {
+                tot_out_bytes += val.transmitted_bytes;
+            } else {
+                tot_in_bytes += val.transmitted_bytes;
+            }
+            (key, val)
+        })
         .collect();
+
     all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
         ReportSortType {
             byte_sort,
@@ -62,6 +83,9 @@ pub fn get_searched_entries(
             .map(|&(key, val)| (key.to_owned(), val.to_owned()))
             .collect(),
         all_results.len(),
+        tot_packets,
+        tot_in_bytes,
+        tot_out_bytes,
     )
 }
 
