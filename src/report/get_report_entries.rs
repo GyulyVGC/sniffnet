@@ -23,6 +23,9 @@ pub fn get_searched_entries(
     u128,
     u128,
 ) {
+    let mut tot_packets = 0;
+    let mut tot_in_bytes = 0;
+    let mut tot_out_bytes = 0;
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
@@ -39,19 +42,16 @@ pub fn get_searched_entries(
                 .search
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
+        .map(|(key, val)| {
+            tot_packets += val.transmitted_packets;
+            if val.traffic_direction == TrafficDirection::Outgoing {
+                tot_out_bytes += val.transmitted_bytes;
+            } else {
+                tot_in_bytes += val.transmitted_bytes;
+            }
+            (key, val)
+        })
         .collect();
-
-    let mut tot_packets = 0;
-    let mut tot_in_bytes = 0;
-    let mut tot_out_bytes = 0;
-    all_results.iter().for_each(|(_, val)| {
-        tot_packets += val.transmitted_packets;
-        if val.traffic_direction == TrafficDirection::Outgoing {
-            tot_out_bytes += val.transmitted_bytes;
-        } else {
-            tot_in_bytes += val.transmitted_bytes;
-        }
-    });
 
     all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
         ReportSortType {

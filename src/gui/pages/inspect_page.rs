@@ -563,6 +563,7 @@ fn get_agglomerates_row<'a>(
         .iter()
         .filter(|x| *x != &ReportCol::Bytes && *x != &ReportCol::Packets)
         .fold(0.0, |acc, x| acc + x.get_width());
+    #[allow(clippy::cast_precision_loss)]
     let in_length = width * (tot_in_bytes as f32 / tot_bytes as f32);
     let out_length = width - in_length;
     let bars = get_bars(in_length, out_length);
