@@ -559,10 +559,7 @@ fn get_agglomerates_row<'a>(
     tot_out_bytes: u128,
 ) -> Row<'a, Message, StyleType> {
     let tot_bytes = tot_in_bytes + tot_out_bytes;
-    let width = ReportCol::ALL
-        .iter()
-        .filter(|x| *x != &ReportCol::Bytes && *x != &ReportCol::Packets)
-        .fold(0.0, |acc, x| acc + x.get_width());
+    let width = ReportCol::FILTER_COLUMNS_WIDTH;
     #[allow(clippy::cast_precision_loss)]
     let in_length = width * (tot_in_bytes as f32 / tot_bytes as f32);
     let out_length = width - in_length;
