@@ -52,7 +52,7 @@ ctrlc = { version = "3.4.5", features = ["termination"] }
 rfd = "0.15.2"
 phf = "0.11.3"
 phf_shared = "0.11.3"
-splines = "4.4.1"
+splines = "4.4.2"
 clap = { version = "4.5.27", features = ["derive"] }
 
 [target.'cfg(windows)'.dependencies]
