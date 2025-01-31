@@ -1,7 +1,7 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, vertical_space, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip,
+    button, vertical_space, Checkbox, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip,
 };
 use iced::{Alignment, Font, Length};
 
@@ -62,6 +62,9 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
         scale_factor,
         mmdb_country,
         mmdb_asn,
+        encryption_enabled,
+        authentication_enabled,
+        authorization_enabled,
         ..
     } = sniffer.configs.lock().unwrap().settings.clone();
 
@@ -90,6 +93,15 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
         &mmdb_country,
         &mmdb_asn,
         &sniffer.mmdb_readers,
+    ));
+
+    column = column.push(security_settings(
+        is_editable,
+        language,
+        font,
+        encryption_enabled,
+        authentication_enabled,
+        authorization_enabled,
     ));
 
     column
@@ -343,4 +355,59 @@ fn button_clear_mmdb<'a>(
     }
 
     Tooltip::new(button, "", Position::Right)
+}
+
+fn security_settings<'a>(
+    is_editable: bool,
+    language: Language,
+    font: Font,
+    encryption_enabled: bool,
+    authentication_enabled: bool,
+    authorization_enabled: bool,
+) -> Column<'a, Message, StyleType> {
+    Column::new()
+        .spacing(5)
+        .align_x(Alignment::Center)
+        .push(
+            Text::new("Security Settings")
+                .font(font)
+                .class(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(
+            Checkbox::new("Enable Encryption", encryption_enabled)
+                .on_toggle(move |toggled| {
+                    Message::UpdateSecuritySettings {
+                        encryption_enabled: toggled,
+                        authentication_enabled,
+                        authorization_enabled,
+                    }
+                })
+                .font(font)
+                .size(18),
+        )
+        .push(
+            Checkbox::new("Enable Authentication", authentication_enabled)
+                .on_toggle(move |toggled| {
+                    Message::UpdateSecuritySettings {
+                        encryption_enabled,
+                        authentication_enabled: toggled,
+                        authorization_enabled,
+                    }
+                })
+                .font(font)
+                .size(18),
+        )
+        .push(
+            Checkbox::new("Enable Authorization", authorization_enabled)
+                .on_toggle(move |toggled| {
+                    Message::UpdateSecuritySettings {
+                        encryption_enabled,
+                        authentication_enabled,
+                        authorization_enabled: toggled,
+                    }
+                })
+                .font(font)
+                .size(18),
+        )
 }

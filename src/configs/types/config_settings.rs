@@ -1,6 +1,3 @@
-//! Module defining the `ConfigSettings` struct, which allows to save and reload
-//! the application default configuration.
-
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -18,6 +15,9 @@ pub struct ConfigSettings {
     pub mmdb_asn: String,
     pub style_path: String,
     pub notifications: Notifications,
+    pub encryption_enabled: bool,
+    pub authentication_enabled: bool,
+    pub authorization_enabled: bool,
     // StyleType should be last in order to deserialize as a table properly
     pub style: StyleType,
 }
@@ -56,6 +56,9 @@ impl Default for ConfigSettings {
             mmdb_asn: String::new(),
             style_path: String::new(),
             notifications: Notifications::default(),
+            encryption_enabled: false,
+            authentication_enabled: false,
+            authorization_enabled: false,
             style: StyleType::default(),
         }
     }

@@ -22,3 +22,18 @@ pub mod service;
 pub mod service_query;
 pub mod traffic_direction;
 pub mod traffic_type;
+
+use openssl::ssl::{SslConnector, SslMethod};
+use std::net::TcpStream;
+use std::io::{Read, Write};
+
+pub fn encrypt_data(data: &[u8]) -> Vec<u8> {
+    let connector = SslConnector::builder(SslMethod::tls()).unwrap().build();
+    let stream = TcpStream::connect("example.com:443").unwrap();
+    let mut stream = connector.connect("example.com", stream).unwrap();
+
+    stream.write_all(data).unwrap();
+    let mut encrypted_data = Vec::new();
+    stream.read_to_end(&mut encrypted_data).unwrap();
+    encrypted_data
+}

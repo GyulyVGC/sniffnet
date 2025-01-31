@@ -114,3 +114,25 @@ pub fn notify_and_log(
 
     emitted_notifications
 }
+
+pub struct SecurityEventLogger {
+    events: Mutex<Vec<String>>,
+}
+
+impl SecurityEventLogger {
+    pub fn new() -> Self {
+        SecurityEventLogger {
+            events: Mutex::new(Vec::new()),
+        }
+    }
+
+    pub fn log_event(&self, event: &str) {
+        let mut events = self.events.lock().unwrap();
+        events.push(event.to_string());
+    }
+
+    pub fn get_events(&self) -> Vec<String> {
+        let events = self.events.lock().unwrap();
+        events.clone()
+    }
+}

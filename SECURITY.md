@@ -35,3 +35,16 @@ What we promise:
 - We will keep you informed of the progress towards resolving the problem,
 - In the public information concerning the problem reported, we will give your name as the discoverer of the problem (unless you desire otherwise), and
 - We strive to resolve all problems as quickly as possible, and we would like to play an active role in the ultimate publication on the problem after it is resolved.
+
+## Security Features and Guidelines
+
+To enhance the security of Sniffnet, we have implemented the following features and guidelines:
+
+- **Input Validation and Sanitization**: All user inputs are validated and sanitized to prevent injection attacks.
+- **Encryption**: Sensitive data transmission is encrypted using TLS/SSL to ensure secure communication.
+- **Authentication and Authorization**: Mechanisms are in place to authenticate and authorize users, restricting access to sensitive features.
+- **Logging and Monitoring**: Security events are logged and monitored to detect and respond to potential threats.
+- **Secure Coding Practices**: We follow secure coding practices and guidelines to minimize vulnerabilities.
+- **Security Testing**: Regular security testing and vulnerability assessments are conducted to identify and address potential issues.
+
+By following these guidelines and implementing these features, we aim to provide a secure and reliable application for our users.

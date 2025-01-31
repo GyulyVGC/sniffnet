@@ -1,5 +1,3 @@
-//! Module defining the `Filters` struct, which represents the possible filters applicable on network traffic.
-
 use std::collections::HashSet;
 
 use crate::networking::types::ip_collection::AddressCollection;
@@ -22,6 +20,8 @@ pub struct Filters {
     pub port_str: String,
     /// Port collection to match against traffic
     pub port_collection: PortCollection,
+    /// Authentication manager
+    pub auth_manager: AuthManager,
 }
 
 impl Default for Filters {
@@ -33,6 +33,7 @@ impl Default for Filters {
             address_collection: AddressCollection::default(),
             port_str: String::new(),
             port_collection: PortCollection::default(),
+            auth_manager: AuthManager::new(),
         }
     }
 }
@@ -108,5 +109,9 @@ impl Filters {
         format!("{:?}", self.protocols)
             .replace('{', "")
             .replace('}', "")
+    }
+
+    pub fn authenticate_user(&self, username: &str, password: &str) -> bool {
+        self.auth_manager.authenticate(username, password)
     }
 }
