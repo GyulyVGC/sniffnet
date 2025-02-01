@@ -7,6 +7,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::EN => format!("Reserved address ({info})"),
         Language::IT => format!("Indirizzo riservato ({info})"),
         Language::PT => format!("Endereço reservado ({info})"),
+        Language::UK => format!("Зарезервована адреса ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }

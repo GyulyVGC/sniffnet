@@ -24,6 +24,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::KO => "일반",
         Language::TR => "Genel",
         Language::PT => "Geral",
+        Language::UK => "Загальні",
         _ => "General",
     }
 }
@@ -47,6 +48,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::ZH => "缩放",
         Language::KO => "확대",
         Language::TR => "Yakınlaştırma",
+        Language::UK => "Масштабування",
         _ => "Zoom",
     }
 }
@@ -70,6 +72,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::KO => "데이터베이스 파일",
         Language::TR => "Veri tabanı dosyaları",
         Language::PT => "Arquivos da base de dados",
+        Language::UK => "Файли бази даних",
         _ => "Database files",
     }
 }
@@ -93,6 +96,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::KO => "분석 중 다음의 매개변수들은 수정할 수 없습니다",
         Language::TR => "Analiz sırasında bu parametrelere müdahale edilemez",
         Language::PT => "Os seguintes parâmetros não podem ser modificados durante a análise",
+        Language::UK => "Наступні параметри не можна змінювати під час аналізу трафіку",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -115,6 +119,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::ZH => "自定义样式",
         Language::KO => "사용자 지정 스타일",
         Language::TR => "Kişisel görünüm",
+        Language::UK => "Власний стиль",
         _ => "Custom style",
     }
 }
@@ -136,6 +141,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::KO => "복사",
         Language::TR => "Kopyala",
         Language::PT => "Copiar",
+        Language::UK => "Копіювати",
         _ => "Copy",
     }
 }
@@ -158,6 +164,7 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::VI => "Cổng",
         Language::ZH => "端口",
         Language::KO => "포트",
+        Language::UK => "Порт",
         _ => "Port",
     }
 }
@@ -180,6 +187,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::ZH => "无效的过滤器",
         Language::KO => "잘못된 필터",
         Language::TR => "Geçersiz filtreler",
+        Language::UK => "Неправильний формат фільтрів",
         _ => "Invalid filters",
     }
 }
@@ -202,6 +210,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::KO => "메시지",
         Language::TR => "Mesajlar",
         Language::PT => "Mensagens",
+        Language::UK => "Повідомлення",
         _ => "Messages",
     }
 }
@@ -225,6 +234,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::KO => "링크 유형",
         Language::TR => "Link türü",
         Language::PT => "Tipo de conexão",
+        Language::UK => "Різновид зʼєднання",
         _ => "Link type",
     }
 }
@@ -251,6 +261,7 @@ pub fn unsupported_link_type_translation<'a>(
         Language::KO => "이 어댑터와 연결된 링크 유형은 Sniffnet에서 아직 지원되지 않습니다...",
         Language::TR => "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor...",
         Language::PT => "O tipo de conexão associado com este adaptador não é suportado pelo Sniffnet ainda...",
+        Language::UK => "Різновид зʼєднання, повʼязаний з даним адаптером, ще не підтримується Sniffnet-ом...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
@@ -279,6 +290,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::KO => "파일에서 스타일을 선택하세요",
         Language::TR => "Dosyadan bir görünüm seç",
         Language::PT => "Selecionar estilo a partir de um arquivo",
+        Language::UK => "Виберіть стиль з файлу",
         _ => "Select style from a file",
     }
 }
@@ -302,6 +314,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::KO => "데이터베이스 파일 선택",
         Language::TR => "Veri tabanı dosyası seç",
         Language::PT => "Selecione um arquivo de base de dados",
+        Language::UK => "Виберіть файл бази даних",
         _ => "Select database file",
     }
 }
@@ -325,6 +338,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::KO => "네트워크 호스트로 필터링",
         Language::TR => "Ağ sunucusuna göre filtrele",
         Language::PT => "Filtrar por host de rede",
+        Language::UK => "Фільтр за хостом мережі",
         _ => "Filter by network host",
     }
 }
@@ -345,6 +359,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::KO => "서비스",
         Language::TR => "Servis",
         Language::PT => "Serviço",
+        Language::UK => "Сервіс",
         _ => "Service",
     }
 }
@@ -367,6 +382,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::KO => "캡처 파일 내보내기",
         Language::TR => "Yakalanan dosyayı dışa aktar",
         Language::PT => "Exportar arquivo capturado",
+        Language::UK => "Експорт файлу захоплення",
         _ => "Export capture file",
     }
 }
@@ -388,6 +404,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::KO => "디렉토리",
         Language::TR => "Klasör",
         Language::PT => "Diretório",
+        Language::UK => "Тека",
         _ => "Directory",
     }
 }
@@ -410,6 +427,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::KO => "대상 디렉토리 선택",
         Language::TR => "Hedef klasörü seç",
         Language::PT => "Selecionar diretório de destino",
+        Language::UK => "Виберіть теку призначення",
         _ => "Select destination directory",
     }
 }
@@ -432,6 +450,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::KO => "파일 이름",
         Language::TR => "Dosya adı",
         Language::PT => "Nome do arquivo",
+        Language::UK => "Назва файлу",
         _ => "File name",
     }
 }
@@ -454,6 +473,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::KO => "썸네일 모드",
         Language::TR => "Küçük resim modu",
         Language::PT => "Modo miniatura",
+        Language::UK => "Режим мініатюри",
         _ => "Thumbnail mode",
     }
 }
@@ -476,6 +496,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::KO => "더 자세히 알고 싶으십니까?",
         Language::TR => "Daha fazlasını öğrenmek ister misin?",
         Language::PT => "Quer aprender mais?",
+        Language::UK => "Бажаєте дізнатись більше?",
         _ => "Do you want to learn more?",
     }
 }
