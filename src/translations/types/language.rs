@@ -126,6 +126,7 @@ impl Language {
                 | Language::ZH
                 | Language::KO
                 | Language::TR
+                | Language::PT
         )
     }
 }
