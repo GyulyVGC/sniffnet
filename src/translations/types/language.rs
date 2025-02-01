@@ -127,6 +127,7 @@ impl Language {
                 | Language::KO
                 | Language::TR
                 | Language::PT
+                | Language::UK
         )
     }
 }
