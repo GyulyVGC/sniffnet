@@ -101,7 +101,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Custom style",
         // Language::FA => "شیوه سفارشی",
-        Language::ES => "Estilo personalizado",
+        Language::ES | Language::PT => "Estilo personalizado",
         Language::IT => "Stile personalizzato",
         Language::FR => "Style personnalisé",
         Language::DE => "Benutzerdefinierter Stil",
@@ -115,7 +115,6 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::ZH => "自定义样式",
         Language::KO => "사용자 지정 스타일",
         Language::TR => "Kişisel görünüm",
-        Language::PT => "Estilo personalizado",
         _ => "Custom style",
     }
 }
@@ -153,13 +152,12 @@ pub fn port_translation(language: Language) -> &'static str {
         | Language::TR => "Port",
         // Language::FA => "درگاه",
         Language::ES => "Puerto",
-        Language::IT => "Porta",
+        Language::IT | Language::PT => "Porta",
         Language::RU => "Порт",
         Language::JA => "ポート",
         Language::VI => "Cổng",
         Language::ZH => "端口",
         Language::KO => "포트",
-        Language::PT => "Porta",
         _ => "Port",
     }
 }
@@ -168,7 +166,7 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Invalid filters",
         // Language::FA => "صافی نامعتبر",
-        Language::ES => "Filtros inválidos",
+        Language::ES | Language::PT => "Filtros inválidos",
         Language::IT => "Filtri non validi",
         Language::FR => "Filtres invalides",
         Language::DE => "Ungültige Filter",
@@ -182,7 +180,6 @@ pub fn invalid_filters_translation(language: Language) -> &'static str {
         Language::ZH => "无效的过滤器",
         Language::KO => "잘못된 필터",
         Language::TR => "Geçersiz filtreler",
-        Language::PT => "Filtros inválidos",
         _ => "Invalid filters",
     }
 }
