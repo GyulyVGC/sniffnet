@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info::{DataInfo, DataInfoWithoutTimestamp};
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
@@ -19,13 +19,9 @@ pub fn get_searched_entries(
 ) -> (
     Vec<(AddressPortPair, InfoAddressPortPair)>,
     usize,
-    u128,
-    u128,
-    u128,
+    DataInfoWithoutTimestamp,
 ) {
-    let mut tot_packets = 0;
-    let mut tot_in_bytes = 0;
-    let mut tot_out_bytes = 0;
+    let mut agglomerate = DataInfoWithoutTimestamp::default();
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
@@ -43,11 +39,12 @@ pub fn get_searched_entries(
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
         .map(|(key, val)| {
-            tot_packets += val.transmitted_packets;
             if val.traffic_direction == TrafficDirection::Outgoing {
-                tot_out_bytes += val.transmitted_bytes;
+                agglomerate.outgoing_packets += val.transmitted_packets;
+                agglomerate.outgoing_bytes += val.transmitted_bytes;
             } else {
-                tot_in_bytes += val.transmitted_bytes;
+                agglomerate.incoming_packets += val.transmitted_packets;
+                agglomerate.incoming_bytes += val.transmitted_bytes;
             }
             (key, val)
         })
@@ -83,9 +80,7 @@ pub fn get_searched_entries(
             .map(|&(key, val)| (key.to_owned(), val.to_owned()))
             .collect(),
         all_results.len(),
-        tot_packets,
-        tot_in_bytes,
-        tot_out_bytes,
+        agglomerate,
     )
 }
 

@@ -11,6 +11,7 @@ use iced::widget::{
 use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::{alignment, Alignment, Font, Length, Padding, Pixels};
 
+use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::get_bars;
@@ -23,6 +24,7 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::byte_multiple::ByteMultiple;
+use crate::networking::types::data_info::DataInfoWithoutTimestamp;
 use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -118,8 +120,7 @@ fn lazy_report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
-    let (search_results, results_number, packets, in_bytes, out_bytes) =
-        get_searched_entries(sniffer);
+    let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
 
     let mut ret_val = Column::new()
         .height(Length::Fill)
@@ -150,7 +151,11 @@ fn lazy_report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .width(Length::Fill),
             )
             .push(Rule::horizontal(5))
-            .push(get_agglomerates_row(font, packets, in_bytes, out_bytes))
+            .push(get_agglomerates_row(
+                font,
+                agglomerate,
+                sniffer.traffic_chart.chart_type,
+            ))
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
                 font,
@@ -554,14 +559,19 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 
 fn get_agglomerates_row<'a>(
     font: Font,
-    tot_packets: u128,
-    tot_in_bytes: u128,
-    tot_out_bytes: u128,
+    tot: DataInfoWithoutTimestamp,
+    chart_type: ChartType,
 ) -> Row<'a, Message, StyleType> {
-    let tot_bytes = tot_in_bytes + tot_out_bytes;
+    let tot_packets = tot.incoming_packets + tot.outgoing_packets;
+    let tot_bytes = tot.incoming_bytes + tot.outgoing_bytes;
     let width = ReportCol::FILTER_COLUMNS_WIDTH;
+
     #[allow(clippy::cast_precision_loss)]
-    let in_length = width * (tot_in_bytes as f32 / tot_bytes as f32);
+    let in_length = if chart_type == ChartType::Packets {
+        width * (tot.incoming_packets as f32 / tot_packets as f32)
+    } else {
+        width * (tot.incoming_bytes as f32 / tot_bytes as f32)
+    };
     let out_length = width - in_length;
     let bars = get_bars(in_length, out_length);
 
