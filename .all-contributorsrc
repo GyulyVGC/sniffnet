@@ -565,6 +565,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "shawnyeager",
+      "name": "Shawn Yeager",
+      "avatar_url": "https://avatars.githubusercontent.com/u/980297?v=4",
+      "profile": "http://shawnyeager.com",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
