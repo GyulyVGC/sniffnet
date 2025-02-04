@@ -5,6 +5,9 @@ All Sniffnet releases with the relative changes are documented in this file.
 ## [UNRELEASED]
 - Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
 - Show data agglomerates in _Inspect_ page table ([#684](https://github.com/GyulyVGC/sniffnet/pull/684) — fixes [#601](https://github.com/GyulyVGC/sniffnet/issues/601))
+- Updated some of the existing translations to v1.3: 
+  - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
+  - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
 
 ## [1.3.2] - 2025-01-06
 - Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
