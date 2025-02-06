@@ -239,7 +239,7 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
         let h = &packet[..4];
         let b = [h[0], h[1], h[2], h[3]];
         // check both big endian and little endian representations
-        // as some OS'es use native endianess and others use big endian
+        // as some OS'es use native endianness and others use big endian
         matches(u32::from_le_bytes(b)) || matches(u32::from_be_bytes(b))
     };
 
