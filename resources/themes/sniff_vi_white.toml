@@ -1,0 +1,9 @@
+# Inverted OLED-optimized color scheme (v2.1N)
+# Designed for bright backgrounds & high visibility
+
+primary = "#FFFFFF"          # Pure white (original: OLED blackout)
+secondary = "#6CB6FF"        # Light azure (-53% red from copper orange)
+outgoing = "#0F0F0F"         # Charcoal black (92.9% brightness increase)
+text_body = "#03050F"        # Deep navy (RGB 3,5,15 - max contrast on white)
+text_headers = "#1F1F1F"     # Graphite gray (mirrors original brightness ratio)
+starred = "#0000FF"          # Cobalt blue (yellow spectrum complement)
