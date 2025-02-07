@@ -1,0 +1,9 @@
+# OLED-optimized color scheme (v2.1)
+# Designed for deep blacks & high contrast
+
+primary = "#000000"          # Pure black (turns off OLED pixels)
+secondary = "#934900"        # Muted copper orange (+53% red component vs original)
+outgoing = "#F0F0F0"         # Soft white (7% brightness reduction for night use)
+text_body = "#fcfaf0"        # Warm paper white (RGB 252,250,240 - reduces eye strain)
+text_headers = "#E0E0E0"     # Ice gray (15% brighter than standard UI gray)
+starred = "#FFFF00"          # Pure signal yellow (alpha removed for cleaner rendering)
