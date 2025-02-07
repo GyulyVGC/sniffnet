@@ -574,6 +574,16 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "ZeroDot1",
+      "name": "ZeroDot1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28985171?v=4",
+      "profile": "http://bit.ly/cBWeb",
+      "contributions": [
+        "design",
+        "a11y"
+      ]
     }
   ],
   "contributorsPerLine": 7,
