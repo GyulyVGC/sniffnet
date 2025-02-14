@@ -7,12 +7,13 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
+    button, horizontal_space, lazy, vertical_space, Button, Canvas, Column, Container, Row, Rule,
     Scrollable, Space, Text, Tooltip,
 };
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Padding};
 
+use crate::chart::types::donut_chart::{donut_chart, DonutChart};
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
@@ -34,9 +35,10 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
-    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
-    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    filtered_bytes_translation, filtered_packets_translation, ip_version_translation,
+    network_adapter_translation, no_addresses_translation, none_translation, of_total_translation,
+    packets_chart_translation, protocol_translation, some_observed_translation,
+    traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_packets_translation, host_translation,
@@ -464,7 +466,7 @@ fn lazy_col_info<'a>(
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let col_bytes_packets = col_bytes_packets(
+    let donut_charts = donut_charts(
         language,
         dropped,
         total,
@@ -493,7 +495,7 @@ fn lazy_col_info<'a>(
         .push(Rule::horizontal(15))
         .push(
             Scrollable::with_direction(
-                col_bytes_packets,
+                donut_charts,
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .height(Length::Fill)
@@ -603,7 +605,7 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn col_bytes_packets<'a>(
+fn donut_charts<'a>(
     language: Language,
     dropped: u32,
     total: u128,
@@ -612,57 +614,75 @@ fn col_bytes_packets<'a>(
     font_headers: Font,
     sniffer: &Sniffer,
 ) -> Column<'a, Message, StyleType> {
-    let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
+    // let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
     let all_bytes = sniffer.runtime_data.all_bytes;
-    let filters = &sniffer.filters;
+    // let filters = &sniffer.filters;
+    //
+    // let dropped_val = if dropped > 0 {
+    //     format!(
+    //         "{} {}",
+    //         dropped,
+    //         of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
+    //     )
+    // } else {
+    //     none_translation(language).to_string()
+    // };
+    // let bytes_value = if dropped > 0 {
+    //     ByteMultiple::formatted_string(filtered_bytes)
+    // } else {
+    //     format!(
+    //         "{} {}",
+    //         &ByteMultiple::formatted_string(filtered_bytes),
+    //         of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
+    //     )
+    // };
+    //
+    // Column::new()
+    //     .spacing(10)
+    //     .push(get_active_filters_col(
+    //         filters,
+    //         language,
+    //         font,
+    //         font_headers,
+    //         false,
+    //     ))
+    //     .push(TextType::highlighted_subtitle_with_desc(
+    //         filtered_bytes_translation(language),
+    //         &bytes_value,
+    //         font,
+    //     ))
+    //     .push(TextType::highlighted_subtitle_with_desc(
+    //         filtered_packets_translation(language),
+    //         &format!(
+    //             "{} {}",
+    //             filtered,
+    //             of_total_translation(language, &get_percentage_string(total, filtered))
+    //         ),
+    //         font,
+    //     ))
+    //     .push(TextType::highlighted_subtitle_with_desc(
+    //         dropped_packets_translation(language),
+    //         &dropped_val,
+    //         font,
+    //     ))
 
-    let dropped_val = if dropped > 0 {
-        format!(
-            "{} {}",
-            dropped,
-            of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
-        )
-    } else {
-        none_translation(language).to_string()
-    };
-    let bytes_value = if dropped > 0 {
-        ByteMultiple::formatted_string(filtered_bytes)
-    } else {
-        format!(
-            "{} {}",
-            &ByteMultiple::formatted_string(filtered_bytes),
-            of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
-        )
-    };
+    let radius = 100;
+    let donuts_row = Row::new()
+        .padding(Padding::ZERO.top(10))
+        .spacing(20)
+        .push(donut_chart(
+            37.0,
+            ByteMultiple::formatted_string(all_bytes),
+            font,
+        ))
+        .push(donut_chart(37.0, "IPv", font))
+        .push(donut_chart(37.0, "proto", font));
 
     Column::new()
+        .width(Length::Fill)
         .spacing(10)
-        .push(get_active_filters_col(
-            filters,
-            language,
-            font,
-            font_headers,
-            false,
-        ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            filtered_bytes_translation(language),
-            &bytes_value,
-            font,
-        ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            filtered_packets_translation(language),
-            &format!(
-                "{} {}",
-                filtered,
-                of_total_translation(language, &get_percentage_string(total, filtered))
-            ),
-            font,
-        ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            dropped_packets_translation(language),
-            &dropped_val,
-            font,
-        ))
+        .align_x(Alignment::Center)
+        .push(donuts_row)
 }
 
 const MIN_BARS_LENGTH: f32 = 10.0;
