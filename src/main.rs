@@ -51,6 +51,9 @@ mod utils;
 pub const SNIFFNET_LOWERCASE: &str = "sniffnet";
 pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
 
+// Load the icon file as raw bytes
+const APP_ICON_BYTES: &[u8] = include_bytes!("app_icon.png");
+
 /// Entry point of application execution
 ///
 /// It initializes shared variables and loads configuration parameters
@@ -74,15 +77,15 @@ pub fn main() -> iced::Result {
     let newer_release_available1 = Arc::new(Mutex::new(None));
     let newer_release_available2 = newer_release_available1.clone();
 
-    // kill the main thread as soon as a secondary thread panics
+    // Kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
-        // invoke the default handler and exit the process
+        // Invoke the default handler and exit the process
         orig_hook(panic_info);
         process::exit(1);
     }));
 
-    // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
+    // Gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
     ctrlc::set_handler(move || {
         configs2.lock().unwrap().clone().store();
         process::exit(130);
@@ -100,9 +103,12 @@ pub fn main() -> iced::Result {
 
     let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
 
+    // Load the application icon
+    let app_icon = window::icon::from_file_data(APP_ICON_BYTES, None).expect("Failed to load app icon");
+
     application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
         .settings(Settings {
-            // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
+            // ID needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
             id: Some(String::from(SNIFFNET_LOWERCASE)),
             fonts: vec![
                 Cow::Borrowed(SARASA_MONO_BYTES),
@@ -114,15 +120,15 @@ pub fn main() -> iced::Result {
             antialiasing: false,
         })
         .window(window::Settings {
-            size: size.to_size(), // start size
+            size: size.to_size(), // Start size
             position: position.to_position(),
-            min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
+            min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // Min size allowed
             max_size: None,
             visible: true,
             resizable: true,
             decorations: true,
             transparent: false,
-            icon: None,
+            icon: Some(app_icon), // Set the application icon here
             #[cfg(target_os = "linux")]
             platform_specific: PlatformSpecific {
                 application_id: String::from(SNIFFNET_LOWERCASE),
