@@ -42,6 +42,14 @@ fn get_flag_from_country<'a>(
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;
     let svg = Svg::new(Handle::from_memory(Vec::from(match country {
+        // Grouped country mappings
+        Country::FR | Country::BL | Country::GF | Country::GP | Country::MF | Country::MQ | Country::PM | Country::RE | Country::WF | Country::YT => FR,
+        Country::NL | Country::BQ => NL,
+        Country::NO | Country::SJ => NO,
+        Country::US | Country::UM => US,
+        Country::AU | Country::HM => AU,
+
+        // Individual country mappings
         Country::AD => AD,
         Country::AE => AE,
         Country::AF => AF,
@@ -54,7 +62,6 @@ fn get_flag_from_country<'a>(
         Country::AR => AR,
         Country::AS => AS,
         Country::AT => AT,
-        Country::AU | Country::HM => AU,
         Country::AW => AW,
         Country::AX => AX,
         Country::AZ => AZ,
@@ -114,16 +121,6 @@ fn get_flag_from_country<'a>(
         Country::FK => FK,
         Country::FM => FM,
         Country::FO => FO,
-        Country::FR
-        | Country::BL
-        | Country::GF
-        | Country::GP
-        | Country::MF
-        | Country::MQ
-        | Country::PM
-        | Country::RE
-        | Country::WF
-        | Country::YT => FR,
         Country::GA => GA,
         Country::GB => GB,
         Country::GD => GD,
@@ -209,8 +206,6 @@ fn get_flag_from_country<'a>(
         Country::NF => NF,
         Country::NG => NG,
         Country::NI => NI,
-        Country::NL | Country::BQ => NL,
-        Country::NO | Country::SJ => NO,
         Country::NP => NP,
         Country::NR => NR,
         Country::NU => NU,
@@ -272,7 +267,6 @@ fn get_flag_from_country<'a>(
         Country::TZ => TZ,
         Country::UA => UA,
         Country::UG => UG,
-        Country::US | Country::UM => US,
         Country::UY => UY,
         Country::UZ => UZ,
         Country::VA => VA,
