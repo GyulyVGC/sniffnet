@@ -107,16 +107,19 @@ pub fn get_domain_from_r_dns(r_dns: String) -> String {
         r_dns
     } else {
         let parts: Vec<&str> = r_dns.split('.').collect();
-        if parts.len() >= 2 {
-            parts
-                .get(parts.len() - 2..)
-                .unwrap_or(&parts)
-                .iter()
-                .fold(Vec::new(), |mut vec, part| {
-                    vec.push((*part).to_string());
-                    vec
-                })
-                .join(".")
+        let len = parts.len();
+        if len >= 2 {
+            let last = parts.get(len - 1).unwrap_or(&"");
+            let second_last = parts.get(len - 2).unwrap_or(&"");
+            if last.len() > 3 || second_last.len() > 3 {
+                format!("{second_last}.{last}")
+            } else {
+                let third_last_opt = parts.get(len - 3);
+                match third_last_opt {
+                    Some(third_last) => format!("{third_last}.{second_last}.{last}"),
+                    None => format!("{second_last}.{last}"),
+                }
+            }
         } else {
             r_dns
         }
