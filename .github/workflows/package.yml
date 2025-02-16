@@ -81,14 +81,8 @@ jobs:
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
 
-      - name: Check crate (Linux)
-        if: matrix.os == 'ubuntu'
-        run: |
-          cross publish --dry-run --target ${{ matrix.target }} &&
-          cargo clean
-
-      - name: Check crate (macOS/Windows)
-        if: matrix.os == 'macos' || matrix.os == 'windows'
+      - name: Check crate
+        if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
         run: |
           cargo publish --dry-run --target ${{ matrix.target }} &&
           cargo clean
