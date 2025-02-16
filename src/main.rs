@@ -6,6 +6,7 @@ use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use std::{panic, process, thread};
 
+use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
 use iced::{application, window, Font, Pixels, Settings};
@@ -50,6 +51,8 @@ mod utils;
 
 pub const SNIFFNET_LOWERCASE: &str = "sniffnet";
 pub const SNIFFNET_TITLECASE: &str = "Sniffnet";
+
+const WINDOW_ICON: &[u8] = include_bytes!("../resources/logos/raw/icon.png");
 
 /// Entry point of application execution
 ///
@@ -122,7 +125,7 @@ pub fn main() -> iced::Result {
             resizable: true,
             decorations: true,
             transparent: false,
-            icon: None,
+            icon: window::icon::from_file_data(WINDOW_ICON, Some(ImageFormat::Png)).ok(),
             #[cfg(target_os = "linux")]
             platform_specific: PlatformSpecific {
                 application_id: String::from(SNIFFNET_LOWERCASE),

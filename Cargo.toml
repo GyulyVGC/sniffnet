@@ -20,6 +20,8 @@ include = [
     "/resources/countries_flags/**/*.svg",
     "/resources/DB/*.mmdb",
     "/resources/fonts/subset/*.ttf",
+    "/resources/logos/raw/icon.png",
+    "/resources/packaging/windows/graphics/sniffnet.ico",
     "/resources/sounds/*.mp3",
     "/services.txt",
     "/build.rs",
@@ -39,7 +41,7 @@ pcap = "2.2.0"
 etherparse = "0.17.0"
 chrono = { version = "0.4.39", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series"] }
-iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy"] }
+iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
 maxminddb = "0.24.0"
 confy = "0.6.1"
@@ -78,6 +80,9 @@ phf_codegen = "0.11.3"
 phf_shared = "0.11.3"
 rustrict = { version = "0.7.33", default-features = false, features = ["censor"] }
 once_cell = "1.20.3"
+
+[target."cfg(windows)".build-dependencies]
+winres = "0.1.12"
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
