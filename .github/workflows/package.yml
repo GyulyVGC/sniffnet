@@ -77,20 +77,27 @@ jobs:
           cargo clippy --release -- -D warnings &&
           cargo clean
 
-      - name: Check crate
-        run: |
-          cargo publish --dry-run --target ${{ matrix.target }} &&
-          cargo clean
-
       - name: Install Cross
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
 
-      - name: Build binary
+      - name: Check crate (Linux)
+        if: matrix.os == 'ubuntu'
+        run: |
+          cross publish --dry-run --target ${{ matrix.target }} &&
+          cargo clean
+
+      - name: Check crate (macOS/Windows)
+        if: matrix.os == 'macos' || matrix.os == 'windows'
+        run: |
+          cargo publish --dry-run --target ${{ matrix.target }} &&
+          cargo clean
+
+      - name: Build binary (Linux)
         if: matrix.os == 'ubuntu'
         run: cross build --release --target ${{ matrix.target }}
 
-      - name: Build binary
+      - name: Build binary (macOS/Windows)
         if: matrix.os == 'macos' || matrix.os == 'windows'
         run: cargo build --release --target ${{ matrix.target }}
 
