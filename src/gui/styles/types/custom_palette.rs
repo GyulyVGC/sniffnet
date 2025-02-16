@@ -1,6 +1,10 @@
 use std::fmt;
 use std::hash::Hash;
 
+use crate::gui::styles::custom_themes::a11y::{
+    A11Y_DARK_PALETTE, A11Y_DARK_PALETTE_EXTENSION, A11Y_LIGHT_PALETTE,
+    A11Y_LIGHT_PALETTE_EXTENSION,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::custom_themes::dracula::{
@@ -14,10 +18,6 @@ use crate::gui::styles::custom_themes::gruvbox::{
 use crate::gui::styles::custom_themes::nord::{
     NORD_DARK_PALETTE, NORD_DARK_PALETTE_EXTENSION, NORD_LIGHT_PALETTE,
     NORD_LIGHT_PALETTE_EXTENSION,
-};
-use crate::gui::styles::custom_themes::oled::{
-    OLED_DARK_PALETTE, OLED_DARK_PALETTE_EXTENSION, OLED_LIGHT_PALETTE,
-    OLED_LIGHT_PALETTE_EXTENSION,
 };
 use crate::gui::styles::custom_themes::solarized::{
     SOLARIZED_DARK_PALETTE, SOLARIZED_DARK_PALETTE_EXTENSION, SOLARIZED_LIGHT_PALETTE,
@@ -55,8 +55,8 @@ pub enum ExtraStyles {
     NordLight,
     SolarizedDark,
     SolarizedLight,
-    OledDark,
-    OledLight,
+    A11yDark,
+    A11yLight,
     CustomToml(CustomPalette),
 }
 
@@ -72,8 +72,8 @@ impl ExtraStyles {
             ExtraStyles::NordLight => *NORD_LIGHT_PALETTE,
             ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE,
             ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE,
-            ExtraStyles::OledDark => *OLED_DARK_PALETTE,
-            ExtraStyles::OledLight => *OLED_LIGHT_PALETTE,
+            ExtraStyles::A11yDark => *A11Y_DARK_PALETTE,
+            ExtraStyles::A11yLight => *A11Y_LIGHT_PALETTE,
             ExtraStyles::CustomToml(custom_palette) => custom_palette.palette,
         }
     }
@@ -89,8 +89,8 @@ impl ExtraStyles {
             ExtraStyles::NordLight => *NORD_LIGHT_PALETTE_EXTENSION,
             ExtraStyles::SolarizedDark => *SOLARIZED_DARK_PALETTE_EXTENSION,
             ExtraStyles::SolarizedLight => *SOLARIZED_LIGHT_PALETTE_EXTENSION,
-            ExtraStyles::OledDark => *OLED_DARK_PALETTE_EXTENSION,
-            ExtraStyles::OledLight => *OLED_LIGHT_PALETTE_EXTENSION,
+            ExtraStyles::A11yDark => *A11Y_DARK_PALETTE_EXTENSION,
+            ExtraStyles::A11yLight => *A11Y_LIGHT_PALETTE_EXTENSION,
             ExtraStyles::CustomToml(custom_palette) => custom_palette.extension,
         }
     }
@@ -106,8 +106,8 @@ impl ExtraStyles {
             ExtraStyles::NordLight,
             ExtraStyles::SolarizedDark,
             ExtraStyles::SolarizedLight,
-            ExtraStyles::OledDark,
-            ExtraStyles::OledLight,
+            ExtraStyles::A11yDark,
+            ExtraStyles::A11yLight,
         ]
     }
 }
@@ -123,8 +123,8 @@ impl fmt::Display for ExtraStyles {
             ExtraStyles::NordDark => write!(f, "Nord (Night)"),
             ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
             ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
-            ExtraStyles::OledLight => write!(f, "OLED (Day)"),
-            ExtraStyles::OledDark => write!(f, "OLED (Night)"),
+            ExtraStyles::A11yLight => write!(f, "A11y (Day)"),
+            ExtraStyles::A11yDark => write!(f, "A11y (Night)"),
             // Custom style names aren't used anywhere so this shouldn't be reached
             ExtraStyles::CustomToml(_) => unreachable!(),
         }

@@ -9,7 +9,7 @@ use once_cell::sync::Lazy;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
-pub static OLED_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static A11Y_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0x000000),
     secondary: color!(0x934900),
     outgoing: color!(0xF0F0F0),
@@ -18,10 +18,10 @@ pub static OLED_DARK_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     text_body: color!(0xfcfaf0),
 });
 
-pub static OLED_DARK_PALETTE_EXTENSION: Lazy<PaletteExtension> =
-    Lazy::new(|| OLED_DARK_PALETTE.generate_palette_extension());
+pub static A11Y_DARK_PALETTE_EXTENSION: Lazy<PaletteExtension> =
+    Lazy::new(|| A11Y_DARK_PALETTE.generate_palette_extension());
 
-pub static OLED_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
+pub static A11Y_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     primary: color!(0xFFFFFF),
     secondary: color!(0x6CB6FF),
     outgoing: color!(0x0F0F0F),
@@ -30,5 +30,5 @@ pub static OLED_LIGHT_PALETTE: Lazy<Palette> = Lazy::new(|| Palette {
     text_body: color!(0x03050F),
 });
 
-pub static OLED_LIGHT_PALETTE_EXTENSION: Lazy<PaletteExtension> =
-    Lazy::new(|| OLED_LIGHT_PALETTE.generate_palette_extension());
+pub static A11Y_LIGHT_PALETTE_EXTENSION: Lazy<PaletteExtension> =
+    Lazy::new(|| A11Y_LIGHT_PALETTE.generate_palette_extension());
