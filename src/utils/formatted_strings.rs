@@ -248,9 +248,20 @@ mod tests {
         assert_eq!(f("hola.ciao.bye.xyz"), "ciao.bye.xyz");
         assert_eq!(f(".bye.xyz"), ".bye.xyz");
         assert_eq!(f("bye.xyz"), "bye.xyz");
+        assert_eq!(f("hola.ciao.b"), "ciao.b");
+        assert_eq!(f("hola.b.ciao"), "b.ciao");
+        assert_eq!(f("ciao."), "ciao.");
         assert_eq!(f("ciao.."), "ciao..");
+        assert_eq!(f(".ciao."), "ciao.");
+        assert_eq!(f("ciao.bye."), "ciao.bye.");
         assert_eq!(f("ciao..."), "..");
-        assert_eq!(f("ciao..xyz"), "ciao..xyz");
+        assert_eq!(f("..bye"), "..bye");
+        assert_eq!(f("ciao..bye"), "ciao..bye");
+        assert_eq!(f("..ciao"), ".ciao");
+        assert_eq!(f("bye..ciao"), ".ciao");
+        assert_eq!(f("."), ".");
+        assert_eq!(f(".."), "..");
+        assert_eq!(f("..."), "..");
         assert_eq!(f("no_dots_in_this"), "no_dots_in_this");
     }
 }
