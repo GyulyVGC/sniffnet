@@ -72,10 +72,14 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Clippy (release mode) & check crate
+      - name: Clippy (release mode)
         run: |
           cargo clippy --release -- -D warnings &&
-          cargo publish --dry-run &&
+          cargo clean
+
+      - name: Check crate
+        run: |
+          cargo publish --dry-run --target ${{ matrix.target }} &&
           cargo clean
 
       - name: Install Cross
