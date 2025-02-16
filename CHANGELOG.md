@@ -9,6 +9,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
   - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
 - Added new themes _OLED (Night)_ and _OLED (Day)_ based on palettes optimized for OLED displays and users with visual impairments ([#708](https://github.com/GyulyVGC/sniffnet/pull/708))
+- Fix _crates.io_ package for Windows ([#718](https://github.com/GyulyVGC/sniffnet/pull/718) — fixes [#681](https://github.com/GyulyVGC/sniffnet/issues/681))
 
 ## [1.3.2] - 2025-01-06
 - Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
