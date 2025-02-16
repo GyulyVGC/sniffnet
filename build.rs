@@ -1,3 +1,6 @@
+#[cfg(windows)]
+extern crate winres;
+
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
@@ -16,7 +19,17 @@ fn main() {
     println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
     println!("cargo:rerun-if-changed={SERVICES_LIST_PATH}");
 
+    set_icon();
     build_services_phf();
+}
+
+fn set_icon() {
+    #[cfg(windows)]
+    {
+        let mut res = winres::WindowsResource::new();
+        res.set_icon(WINDOWS_ICON_PATH);
+        res.compile().unwrap();
+    }
 }
 
 fn build_services_phf() {
