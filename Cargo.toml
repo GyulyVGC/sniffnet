@@ -20,6 +20,7 @@ include = [
     "/resources/countries_flags/**/*.svg",
     "/resources/DB/*.mmdb",
     "/resources/fonts/subset/*.ttf",
+    "/resources/logos/raw/icon.png",
     "/resources/sounds/*.mp3",
     "/services.txt",
     "/build.rs",
