@@ -122,3 +122,15 @@ impl AddAssign for DataInfo {
         self.final_timestamp = Local::now();
     }
 }
+
+#[derive(Clone, Default, Copy)]
+pub struct DataInfoWithoutTimestamp {
+    /// Incoming packets
+    pub incoming_packets: u128,
+    /// Outgoing packets
+    pub outgoing_packets: u128,
+    /// Incoming bytes
+    pub incoming_bytes: u128,
+    /// Outgoing bytes
+    pub outgoing_bytes: u128,
+}

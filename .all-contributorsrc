@@ -547,6 +547,43 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "guilherme-demarchi",
+      "name": "guilherme-demarchi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/196574579?v=4",
+      "profile": "https://github.com/guilherme-demarchi",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Kapelianovych",
+      "name": "Yevhen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28602579?v=4",
+      "profile": "https://github.com/Kapelianovych",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "shawnyeager",
+      "name": "Shawn Yeager",
+      "avatar_url": "https://avatars.githubusercontent.com/u/980297?v=4",
+      "profile": "http://shawnyeager.com",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "ZeroDot1",
+      "name": "ZeroDot1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28985171?v=4",
+      "profile": "http://bit.ly/cBWeb",
+      "contributions": [
+        "design",
+        "a11y"
+      ]
     }
   ],
   "contributorsPerLine": 7,

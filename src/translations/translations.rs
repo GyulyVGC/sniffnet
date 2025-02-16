@@ -13,7 +13,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
         Language::PL => "Wybierz adapter sieciowy do inspekcji",
         Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
-        Language::UK => "Вибрати мережевий адаптер для інспекції",
+        Language::UK => "Виберіть мережевий адаптер для перевірки",
         Language::ZH => "选择需要监控的网络适配器",
         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
         Language::KO => "검사할 네트워크 어댑터 선택",
@@ -38,7 +38,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
 //         Language::ES => "Protocolo de aplicación",
 //         Language::PL => "Protokół aplikacji",
 //         Language::DE => "Anwendungs-Protokoll",
-//         Language::UK => "Протокол аплікації",
+//         Language::UK => "Протокол застосування",
 //         Language::ZH => "目标应用层协议",
 //         Language::RO => "Protocol aplicație",
 //         Language::KO => "어플리케이션 프로토콜",
@@ -62,7 +62,7 @@ pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType>
         Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
         Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
-        Language::UK => "Вибрати фільтри, які мають бути застосовані до мережевого трафіку",
+        Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
         Language::ZH => "选择需要监控的目标",
         Language::RO => "Selectați filtre pentru traficul de rețea",
         Language::KO => "네트워크 트레픽에 적용할 필터 선택",
@@ -322,7 +322,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ES => "¿Estás seguro de que quieres dejar este análisis?",
         Language::PL => "Jesteś pewien, że chcesz zakończyć analizę?",
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
-        Language::UK => "Чи справді хочеш закінчити аналіз?",
+        Language::UK => "Чи справді хочете закінчити аналіз?",
         Language::ZH => "您确定退出当前监控吗?",
         Language::RO => "Sunteți sigur că doriți să renunțați la această analiză?",
         Language::KO => "정말로 분석을 종료하겠습니까?",
@@ -372,7 +372,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::ES => "¿Seguro que quieres borrar las notificaciones?",
         Language::PL => "Czy na pewno chcesz wyczyścić powiadomienia?",
         Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst?",
-        Language::UK => "Чи справді хочеш видалити всі повідомлення?",
+        Language::UK => "Чи справді хочете видалити всі повідомлення?",
         Language::ZH => "确定清除所有通知?",
         Language::RO => "Sigur doriți să ștergeți notificările?",
         Language::KO => "알림을 삭제하시겠습니까?",
@@ -447,7 +447,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::ES => "Adaptador de red",
         Language::PL => "Adapter sieciowy",
         Language::DE => "Netzwerkadapter",
-        Language::UK => "Мережквий адаптер",
+        Language::UK => "Мережевий адаптер",
         Language::ZH => "网络适配器",
         Language::RO => "Adaptor de rețea",
         Language::KO => "네트워크 어뎁터",
@@ -484,9 +484,9 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
         Language::DE => format!("Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."),
-        Language::UK => format!("Не зафіксовано жодного мережевого трафіку тому що вибраний адаптер немає активних адрес... \n\n\
+        Language::UK => format!("Не зафіксовано жодного мережевого руху, тому що вибраний адаптер не має активних адрес... \n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Якщо Ти впевнений, що підключений до інтернету, спробуй вибрати інший адаптер."),
+                                 Якщо ви впевнені, що підключені до інтернету, спробуйте вибрати інший адаптер."),
         Language::ZH => format!("您选择的网络适配器当前无活动网络...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
                                 如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."),
@@ -550,9 +550,9 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
         Language::DE => format!("Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Bist du sicher, dass du mit dem Internet verbunden bist und den richtigen Adapter ausgewählt hast?"),
-        Language::UK => format!("Не зафіксовано жодного мережевого трафіку. Очікування на пакети...\n\n\
+        Language::UK => format!("Не зафіксовано жодного мережевого руху. Очікування пакетів...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Чи Ти дійсно підключений до інтернету і вибрав відповідний мережевий адаптер?"),
+                                 Чи ви дійсно підключені до інтернету і вибрали відповідний мережевий адаптер?"),
         Language::ZH => format!("暂无流量数据. 等待网络活动中......\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"),
@@ -617,7 +617,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
                                  Gefilterte Pakete: 0\n\n\
                                  Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."),
         Language::UK => format!("Сума перехоплених пакетів: {observed}\n\n\
-                                 Відфільтровані пакеті: 0\n\n\
+                                 Відфільтровані пакети: 0\n\n\
                                  Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."),
         Language::ZH => format!("监测到的数据包总数: {observed}\n\n\
                                  目标数据包总数: 0\n\n\
@@ -758,7 +758,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //         Language::ES => "Paquetes filtrados por protocolo de aplicación:",
 //         Language::PL => "Przefiltrowane pakiety według protokołu aplikacji:",
 //         Language::DE => "Gefilterte Pakete je Anwendungs-Protokoll:",
-//         Language::UK => "Відфільтровані пакети протоколу аплікації/програми:",
+//         Language::UK => "Кількість відфільтрованих пакетів на протокол програми:",
 //         Language::ZH => "按应用层协议分类的目标数据包计数:",
 //         Language::RO => "Pachete filtrate pe protocol de aplicație:",
 //         Language::KO => "애플리케이션 프로토콜당 필터링된 패킷 수:",
@@ -787,7 +787,7 @@ pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //         Language::DE => "Im Moment nichts zu zeigen.\n\
 //                          Um eine Verbindung zu deinen Favoriten hinzuzufügen, klick das auf das Stern-Symbol neben der Verbindung.",
 //         Language::UK => "Немає, що показати в цей момент.\n\
-//                          Щоб додати підключення до улюблених, натисни на іконку 'зірочки' біля підключення.",
+//                          Щоб додати підключення до улюблених, натисніть на іконку 'зірочки' біля підключення.",
 //         Language::ZH => "收藏夹还是空的.\n\
 //                          小贴士: 点击连接右侧的小星星即可收藏到这里哦.",
 //         Language::RO => "Nimic de arătat în acest moment.\n\
@@ -838,7 +838,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
                                 {error}"
         ),
         Language::UK => format!(
-            "Виступила помилка! \n\n\
+            "Зʼявилась помилка! \n\n\
                                 {error}"
         ),
         Language::ZH => format!(
@@ -931,6 +931,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::FA => "همهٔ پیوندنامه ها",
 //         Language::SE => "Alla protokoll",
 //         Language::UZ => "Barcha protokollar"
+//         Language::UK => "Усі протоколи"
 //     }
 // }
 
@@ -1152,7 +1153,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::ES => "Personaliza tus notificaciones",
         Language::PL => "Dostosuj powiadomienia",
         Language::DE => "Stell deine Benachrichtigungen ein",
-        Language::UK => "Достосуй повідомлення",
+        Language::UK => "Налаштування повідомлень",
         Language::ZH => "自定义通知",
         Language::RO => "Personalizați-vă notificările",
         Language::KO => "사용자 지정 알림",
@@ -1177,7 +1178,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::ES => "Elige tu tema favorito",
         Language::PL => "Wybierz swój ulubiony motyw",
         Language::DE => "Wähl dein Lieblingsdesign",
-        Language::UK => "Вибери улюблену тему",
+        Language::UK => "Виберіть улюблену тему",
         Language::ZH => "选择您喜欢的主题",
         Language::RO => "Selectați tema preferată",
         Language::KO => "태마를 선택하세요",
@@ -1252,7 +1253,7 @@ pub fn yeti_night_translation(language: Language) -> &'static str {
         Language::ES => "Tema oscuro original de Sniffnet",
         Language::PL => "Oryginalny, ciemny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, dunkles Design",
-        Language::UK => "Оригінальний, темний мотив Sniffnet",
+        Language::UK => "Оригінальний, темний стиль Sniffnet-у",
         Language::ZH => "Sniffnet暗黑",
         Language::RO => "Tema întunecată originală Sniffnet",
         Language::KO => "Sniffnet의 기본 다크테마",
@@ -1277,7 +1278,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::ES | Language::PT => "Tema claro original de Sniffnet",
         Language::PL => "Oryginalny, jasny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, helles Design",
-        Language::UK => "Оригінальний, світлий мотив Sniffnet",
+        Language::UK => "Оригінальний, світлий стиль Sniffnet-у",
         Language::ZH => "Sniffnet浅色",
         Language::RO => "Tema deschisă originală Sniffnet",
         Language::KO => "Sniffnet의 기본 라이트테마",
@@ -1494,7 +1495,7 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
         Language::ES => "Notificarme cuando se supere un límite de paquetes",
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg pakietów",
         Language::DE => "Benachrichtige mich, wenn die Pakete eine Schwelle überschreiten",
-        Language::UK => "Повідом мене про переліміт пакетів",
+        Language::UK => "Повідом мене про перевищення ліміту пакетів",
         Language::ZH => "超过设定的数据包数量阈值时通知我",
         Language::RO => "Anunță-mă când este depășit un prag de pachete",
         Language::KO => "패킷 임계값을 초과하면 알림",
@@ -1519,7 +1520,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::ES => "Notificarme cuando se exceda un límite de bytes",
         Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg bajtów",
         Language::DE => "Benachrichtige mich, wenn die Bytes eine Schwelle überschreiten",
-        Language::UK => "Повідом мене про переліміт байтів",
+        Language::UK => "Повідом мене про перевищення ліміту байтів",
         Language::ZH => "超过设定的网络流量阈值时通知我",
         Language::RO => "Anunță-mă când este depășit un prag de octeți",
         Language::KO => "바이트 임계값을 초과하면 알림",
@@ -1567,7 +1568,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::ES => "también puede especificar 'K', 'M' y 'G'",
         Language::PL => "możesz również określić 'K', 'M' i 'G'",
         Language::DE => "du kannst auch 'K', 'M' und 'G' verwenden",
-        Language::UK => "можеш також вибрати 'K', 'M' i 'G'",
+        Language::UK => "можете також вибрати 'K', 'M' i 'G'",
         Language::ZH => "您可指定 'K', 'M', 'G'",
         Language::RO => "puteți specifica 'K', 'M', 'G'",
         Language::KO => "지정 가능합니다 'K', 'M', 'G'",
@@ -1850,8 +1851,8 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                          Nachdem du sie aktiviert hast, wird diese Seite eine Liste deiner Benachrichtigungen anzeigen\n\n\
                          Du kannst die Benachrichtigungen in den Einstellungen aktivieren:",
         Language::UK => "Повідомлення не активовані!\n\n\
-                                 Після їх активації, на цій сторінці побачиш список своїх повідомлень\n\n\
-                                 Можеш вимкнути повідомлення в налаштуваннях:",
+                                 Після їх активації на цій сторінці побачите список своїх повідомлень\n\n\
+                                 Можете вимкнути повідомлення в налаштуваннях:",
         Language::ZH => "您还没有设定任何通知!\n\n\
                                  启用它们后，此页面将显示您的通知日志\n\n\
                                  您可以从设置中设定:",
@@ -1921,8 +1922,8 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
                                  Wenn du eine Benachrichtigung erhälst, wird sie hier angezeigt"
         }
         Language::UK => {
-            "Немає що показати в даний момент...\n\n\
-                                 Коли отримаєш повідомлення, побачиш його тут"
+            "Немає що показати у цей момент...\n\n\
+                                 Коли отримаєте повідомлення, побачите його тут"
         }
         Language::ZH => {
             "还没有任何通知...\n\n\
@@ -1987,7 +1988,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::ES => "Sólo se muestran las últimas 30 notificaciones",
         Language::PL => "Wyświetlane jest tylko 30 ostatnich powiadomień",
         Language::DE => "Nur die letzten 30 Benachrichtigungen werden angezeigt",
-        Language::UK => "Можеш побачити лише 30 останніх повідомлень",
+        Language::UK => "Можете побачити лише 30 останніх повідомлень",
         Language::ZH => "仅显示最近 30 条通知",
         Language::RO => "Sunt afișate doar ultimele 30 de notificări",
         Language::KO => "최근 30개의 알림만 표시됩니다",

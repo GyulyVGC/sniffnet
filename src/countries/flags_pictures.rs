@@ -255,3 +255,4 @@ pub const MULTICAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3
 pub const BROADCAST: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-broadcast.svg");
 pub const UNKNOWN: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-unknown.svg");
 pub const COMPUTER: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-computer.svg");
+pub const BOGON: &[u8] = include_bytes!("../../resources/countries_flags/4x3/zz-bogon.svg");

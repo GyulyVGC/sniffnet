@@ -2,6 +2,14 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
+- Show data agglomerates in _Inspect_ page table ([#684](https://github.com/GyulyVGC/sniffnet/pull/684) — fixes [#601](https://github.com/GyulyVGC/sniffnet/issues/601))
+- Updated some of the existing translations to v1.3: 
+  - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
+  - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
+- Added new themes _OLED (Night)_ and _OLED (Day)_ based on palettes optimized for OLED displays and users with visual impairments ([#708](https://github.com/GyulyVGC/sniffnet/pull/708))
+
 ## [1.3.2] - 2025-01-06
 - Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
 - Added CLI argument `--adapter [<NAME>]` to allow immediately starting the capture from a given network interface ([#643](https://github.com/GyulyVGC/sniffnet/pull/643) — fixes [#636](https://github.com/GyulyVGC/sniffnet/issues/636))

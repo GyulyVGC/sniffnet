@@ -4,8 +4,8 @@ use std::str::FromStr;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub(crate) struct AddressCollection {
-    pub(crate) ips: Vec<IpAddr>,
-    pub(crate) ranges: Vec<RangeInclusive<IpAddr>>,
+    ips: Vec<IpAddr>,
+    ranges: Vec<RangeInclusive<IpAddr>>,
 }
 
 impl AddressCollection {
