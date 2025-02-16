@@ -11,6 +11,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added new themes _OLED (Night)_ and _OLED (Day)_ based on palettes optimized for OLED displays and users with visual impairments ([#708](https://github.com/GyulyVGC/sniffnet/pull/708))
 - Fix _crates.io_ package for Windows ([#718](https://github.com/GyulyVGC/sniffnet/pull/718) — fixes [#681](https://github.com/GyulyVGC/sniffnet/issues/681))
 - Add icon to window title bar ([#719](https://github.com/GyulyVGC/sniffnet/pull/719) — fixes [#715](https://github.com/GyulyVGC/sniffnet/issues/715))
+- Remove pre-uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
 
 ## [1.3.2] - 2025-01-06
 - Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
@@ -26,7 +27,6 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Improve time values on the horizontal axis of the chart ([#641](https://github.com/GyulyVGC/sniffnet/pull/641) — fixes [#619](https://github.com/GyulyVGC/sniffnet/issues/619))
 - Migrate to Iced 0.13 ([#618](https://github.com/GyulyVGC/sniffnet/pull/618))
 - Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
-- Fix uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
 - Fix typos in German translation ([#660](https://github.com/GyulyVGC/sniffnet/pull/660))
 
 ## [1.3.1] - 2024-07-22
