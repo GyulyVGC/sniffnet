@@ -41,8 +41,8 @@ Translated in:<br>
 <i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
 
 <i>If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
-your support will allow me to dedicate more time to this project,
-constantly expanding it including [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).</i>
+your support will enable a constant growth with [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).<br>
+Do you want to help the project in an alternative way? You can also head to the [official store](https://grindhouse.dev/collections/sniffnet) and put your hands on some cool merchandise!</i>
 
 <i>A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
