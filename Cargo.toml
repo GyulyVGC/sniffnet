@@ -43,7 +43,7 @@ chrono = { version = "0.4.39", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series"] }
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
-maxminddb = "0.24.0"
+maxminddb = "0.25.0"
 confy = "0.6.1"
 serde = { version = "1.0.217", default-features = false, features = ["derive"] }
 rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
