@@ -207,6 +207,10 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 Join the new [**Sniffnet Telegram Channel**](https://t.me/sniffnet)
 to get updates about the latest releases and all the project news.
 
+<p align="center">
+<a href="https://t.me/sniffnet"><img alt="" title="Telegram Channel" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>
+</p>
+
 ## Troubleshooting
 
 <details>
