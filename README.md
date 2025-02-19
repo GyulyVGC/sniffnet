@@ -202,6 +202,11 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 </a>
 </p>
 
+## Stay in the loop
+
+Join the new [**Sniffnet Telegram Channel**](https://t.me/sniffnet)
+to get updates about the latest releases and all the project news.
+
 ## Troubleshooting
 
 <details>
