@@ -175,6 +175,23 @@ fn get_release_details<'a>(
             ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE).font(font_footer));
         }
     }
+
+    ret_val = ret_val
+        .push(Space::with_width(10))
+        .push(Column::new()
+            .push(
+                rich_text![
+                    span("wiki")
+                        .underline(true)
+                        .link(Message::OpenWebPage(WebPage::Wiki)),
+                ]
+                .size(FONT_SIZE_FOOTER)
+                .font(font_footer),
+            )
+            .width(Length::Fill)
+            .align_x(Alignment::Start),
+        );
+
     ret_val
 }
 
