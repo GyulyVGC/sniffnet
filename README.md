@@ -245,8 +245,8 @@ ICED_BACKEND=tiny-skia
 Follow the new Sniffnet socials to get updates about the latest releases and other project news.
 
 <p align="center">
-<a href="https://x.com/sniffnet_app"><img alt="" title="X" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/x.svg"/></a>&nbsp;
-<a href="https://t.me/sniffnet"><img alt="" title="Telegram" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>&nbsp;
-<a href="https://www.reddit.com/r/sniffnet"><img alt="" title="Reddit" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/reddit.svg"/></a>&nbsp;
-<a href="https://www.linkedin.com/company/sniffnet"><img alt="" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>
+<a href="https://x.com/sniffnet_app"><img alt="Twitter / X" title="Twitter / X" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/x.svg"/></a>&nbsp;
+<a href="https://t.me/sniffnet"><img alt="Telegram" title="Telegram" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>&nbsp;
+<a href="https://www.reddit.com/r/sniffnet"><img alt="Reddit" title="Reddit" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/reddit.svg"/></a>&nbsp;
+<a href="https://www.linkedin.com/company/sniffnet"><img alt="LinkedIn" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>
 </p>
