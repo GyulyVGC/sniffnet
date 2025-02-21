@@ -202,15 +202,6 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 </a>
 </p>
 
-## Stay in the loop
-
-Join the new [**Sniffnet Telegram Channel**](https://t.me/sniffnet)
-to get updates about the latest releases and all the project news.
-
-<p align="center">
-<a href="https://t.me/sniffnet"><img alt="" title="Telegram Channel" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>
-</p>
-
 ## Troubleshooting
 
 <details>
@@ -247,3 +238,15 @@ ICED_BACKEND=tiny-skia
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+
+
+## Stay in the loop
+
+Follow the new Sniffnet socials to get updates about the latest releases and other project news.
+
+<p align="center">
+<a href="https://x.com/sniffnet_app"><img alt="" title="X" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/x.svg"/></a>&nbsp;
+<a href="https://t.me/sniffnet"><img alt="" title="Telegram" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>&nbsp;
+<a href="https://www.reddit.com/r/sniffnet"><img alt="" title="Reddit" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/reddit.svg"/></a>&nbsp;
+<a href="https://www.linkedin.com/company/sniffnet"><img alt="" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>
+</p>
