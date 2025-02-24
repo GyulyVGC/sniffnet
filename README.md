@@ -242,7 +242,8 @@ ICED_BACKEND=tiny-skia
 
 ## Stay in the loop
 
-Follow the new Sniffnet socials to get updates about the latest releases and other project news.
+Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br><br>
+Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <div align="center">
     <a href="https://bsky.app/profile/sniffnet.bsky.social"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>&nbsp;
