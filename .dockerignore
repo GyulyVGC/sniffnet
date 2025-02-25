@@ -1,0 +1,12 @@
+/target
+.git
+.gitignore
+.github
+*.md
+Dockerfile
+.dockerignore
+LICENSE-APACHE
+LICENSE-MIT
+*.sh
+.editorconfig
+.gitattributes
