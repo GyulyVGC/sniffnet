@@ -95,10 +95,10 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
             font: self.font,
             ..Default::default()
         });
-        frame.fill(&circle, style.background);
+
         frame.fill(&incoming, style.incoming);
         frame.fill(&outgoing, style.outgoing);
-        frame.fill(&inner_circle, style.rail);
+        frame.fill(&inner_circle, style.background);
 
         vec![frame.into_geometry()]
     }

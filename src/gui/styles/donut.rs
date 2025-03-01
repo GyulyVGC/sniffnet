@@ -13,11 +13,18 @@ impl DonutType {
     fn active(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
+        let primary = colors.primary;
+        let buttons = ext.buttons_color;
+        let background = Color {
+            r: primary.r + (buttons.r - primary.r) * ext.alpha_round_containers,
+            g: primary.g + (buttons.g - primary.g) * ext.alpha_round_containers,
+            b: primary.b + (buttons.b - primary.b) * ext.alpha_round_containers,
+            a: 1.0,
+        };
         Style {
-            background: Color::TRANSPARENT,
+            background,
             incoming: colors.secondary,
             outgoing: colors.outgoing,
-            rail: colors.primary,
             text_color: colors.text_body,
         }
     }
@@ -39,7 +46,6 @@ pub struct Style {
     pub(crate) background: Color,
     pub(crate) incoming: Color,
     pub(crate) outgoing: Color,
-    pub(crate) rail: Color,
     pub(crate) text_color: Color,
 }
 
