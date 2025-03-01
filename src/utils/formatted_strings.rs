@@ -107,16 +107,19 @@ pub fn get_domain_from_r_dns(r_dns: String) -> String {
         r_dns
     } else {
         let parts: Vec<&str> = r_dns.split('.').collect();
-        if parts.len() >= 2 {
-            parts
-                .get(parts.len() - 2..)
-                .unwrap_or(&parts)
-                .iter()
-                .fold(Vec::new(), |mut vec, part| {
-                    vec.push((*part).to_string());
-                    vec
-                })
-                .join(".")
+        let len = parts.len();
+        if len >= 2 {
+            let last = parts.get(len - 1).unwrap_or(&"");
+            let second_last = parts.get(len - 2).unwrap_or(&"");
+            if last.len() > 3 || second_last.len() > 3 {
+                format!("{second_last}.{last}")
+            } else {
+                let third_last_opt = len.checked_sub(3).and_then(|i| parts.get(i));
+                match third_last_opt {
+                    Some(third_last) => format!("{third_last}.{second_last}.{last}"),
+                    None => format!("{second_last}.{last}"),
+                }
+            }
         } else {
             r_dns
         }
@@ -231,5 +234,34 @@ mod tests {
         let file_path = std::path::PathBuf::from(get_logs_file_path().unwrap());
         assert!(file_path.is_absolute());
         assert_eq!(file_path.file_name().unwrap(), "logs.txt");
+    }
+
+    #[test]
+    fn test_get_domain_from_r_dns() {
+        let f = |s: &str| get_domain_from_r_dns(s.to_string());
+        assert_eq!(f(""), "");
+        assert_eq!(f("8.8.8.8"), "8.8.8.8");
+        assert_eq!(f("a.b.c.d"), "b.c.d");
+        assert_eq!(f("ciao.xyz"), "ciao.xyz");
+        assert_eq!(f("bye.ciao.xyz"), "ciao.xyz");
+        assert_eq!(f("ciao.bye.xyz"), "ciao.bye.xyz");
+        assert_eq!(f("hola.ciao.bye.xyz"), "ciao.bye.xyz");
+        assert_eq!(f(".bye.xyz"), ".bye.xyz");
+        assert_eq!(f("bye.xyz"), "bye.xyz");
+        assert_eq!(f("hola.ciao.b"), "ciao.b");
+        assert_eq!(f("hola.b.ciao"), "b.ciao");
+        assert_eq!(f("ciao."), "ciao.");
+        assert_eq!(f("ciao.."), "ciao..");
+        assert_eq!(f(".ciao."), "ciao.");
+        assert_eq!(f("ciao.bye."), "ciao.bye.");
+        assert_eq!(f("ciao..."), "..");
+        assert_eq!(f("..bye"), "..bye");
+        assert_eq!(f("ciao..bye"), "ciao..bye");
+        assert_eq!(f("..ciao"), ".ciao");
+        assert_eq!(f("bye..ciao"), ".ciao");
+        assert_eq!(f("."), ".");
+        assert_eq!(f(".."), "..");
+        assert_eq!(f("..."), "..");
+        assert_eq!(f("no_dots_in_this"), "no_dots_in_this");
     }
 }
