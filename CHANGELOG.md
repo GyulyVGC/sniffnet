@@ -12,6 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added new themes _A11y (Night)_ and _A11y (Day)_ based on palettes optimized for OLED displays and users with visual impairments ([#708](https://github.com/GyulyVGC/sniffnet/pull/708))
 - Add icon to window title bar ([#719](https://github.com/GyulyVGC/sniffnet/pull/719) — fixes [#715](https://github.com/GyulyVGC/sniffnet/issues/715))
 - Fix _crates.io_ package for Windows ([#718](https://github.com/GyulyVGC/sniffnet/pull/718) — fixes [#681](https://github.com/GyulyVGC/sniffnet/issues/681))
+- Fix crash when inserting characters longer than one byte in the text input for byte threshold notification setting ([#747](https://github.com/GyulyVGC/sniffnet/pull/747) — fixes [#744](https://github.com/GyulyVGC/sniffnet/issues/744))
 - Remove pre-uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
 
 ## [1.3.2] - 2025-01-06

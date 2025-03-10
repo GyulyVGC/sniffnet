@@ -584,6 +584,15 @@
         "design",
         "a11y"
       ]
+    },
+    {
+      "login": "TyseEX",
+      "name": "TyseEX",
+      "avatar_url": "https://avatars.githubusercontent.com/u/102823177?v=4",
+      "profile": "https://github.com/TyseEX",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
