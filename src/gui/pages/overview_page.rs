@@ -121,7 +121,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .push(
                         Row::new()
                             .spacing(10)
-                            .height(FillPortion(5))
+                            .height(Fill)
                             .push(container_info)
                             .push(container_chart),
                     )
@@ -253,7 +253,7 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .push(col_service);
 
     Container::new(row_report)
-        .height(FillPortion(4))
+        .height(Fill)
         .class(ContainerType::BorderedRound)
 }
 
