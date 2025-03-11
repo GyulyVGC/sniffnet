@@ -49,7 +49,7 @@ pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .line_height(LineHeight::Relative(0.7))
-        .size(90);
+        .size(80);
 
     Container::new(
         Row::new()
@@ -73,7 +73,7 @@ pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
             .push(horizontal_space())
             .push(get_button_settings(font, language, last_opened_setting)),
     )
-    .height(80)
+    .height(70)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
 }

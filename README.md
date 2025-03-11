@@ -8,8 +8,8 @@
 <a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
-Application to comfortably monitor your Internet traffic <br>
-Cross-platform, Intuitive, Reliable
+Application to comfortably monitor your Internet traffic.<br>
+Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
 🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;12&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
