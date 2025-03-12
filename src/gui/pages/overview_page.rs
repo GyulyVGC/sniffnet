@@ -666,7 +666,6 @@ fn donut_charts<'a>(
     //         font,
     //     ))
 
-    let radius = 100;
     let donuts_row = Row::new()
         .padding(Padding::ZERO.top(10))
         .spacing(20)
