@@ -11,3 +11,11 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         _ => format!("Reserved address ({info})"),
     }
 }
+
+pub fn share_feedback_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Share your feedback",
+        Language::IT => "Condividi il tuo feedback",
+        _ => "Share your feedback",
+    }
+}
