@@ -17,6 +17,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
+use crate::translations::translations_4::share_feedback_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
@@ -42,8 +43,10 @@ pub fn footer<'a>(
         .padding([0, 20])
         .align_y(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_website(font))
+        .push(get_button_feedback(font, language))
+        .push(get_button_wiki(font))
         .push(get_button_github(font))
+        .push(get_button_news(font))
         .push(get_button_sponsor(font))
         .push(
             Column::new()
@@ -67,24 +70,49 @@ pub fn footer<'a>(
         .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_website<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_feedback<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
-        Icon::Globe
+        Icon::Feedback
             .to_text()
-            .size(17)
+            .size(15)
             .align_x(Alignment::Center)
             .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
+    .padding(Padding::ZERO.top(2))
     .height(30)
     .width(30)
-    .on_press(Message::OpenWebPage(WebPage::Website));
+    .on_press(Message::OpenWebPage(WebPage::Issues));
 
     Tooltip::new(
         content,
-        row_open_link_tooltip("Website", font),
+        row_open_link_tooltip(share_feedback_translation(language), font),
         Position::Top,
     )
+    .gap(10)
+    .class(ContainerType::Tooltip)
+}
+
+fn get_button_wiki<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+    let content = button(
+        Icon::Book
+            .to_text()
+            .size(19)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
+            .line_height(LineHeight::Relative(1.0)),
+    )
+    .padding(Padding::ZERO.top(1))
+    .height(35)
+    .width(35)
+    .on_press(Message::OpenWebPage(WebPage::Wiki));
+
+    Tooltip::new(
+        content,
+        row_open_link_tooltip("Sniffnet Wiki", font),
+        Position::Top,
+    )
+    .gap(7.5)
     .class(ContainerType::Tooltip)
 }
 
@@ -106,6 +134,29 @@ fn get_button_github<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
         row_open_link_tooltip("GitHub", font),
         Position::Top,
     )
+    .gap(5)
+    .class(ContainerType::Tooltip)
+}
+
+fn get_button_news<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+    let content = button(
+        Icon::News
+            .to_text()
+            .size(16)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
+            .line_height(LineHeight::Relative(1.0)),
+    )
+    .height(35)
+    .width(35)
+    .on_press(Message::OpenWebPage(WebPage::WebsiteNews));
+
+    Tooltip::new(
+        content,
+        row_open_link_tooltip("Sniffnet News", font),
+        Position::Top,
+    )
+    .gap(7.5)
     .class(ContainerType::Tooltip)
 }
 
@@ -122,13 +173,14 @@ fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .padding(Padding::ZERO.top(2))
     .height(30)
     .width(30)
-    .on_press(Message::OpenWebPage(WebPage::Sponsor));
+    .on_press(Message::OpenWebPage(WebPage::WebsiteSponsor));
 
     Tooltip::new(
         content,
         row_open_link_tooltip("Sponsor", font),
         Position::Top,
     )
+    .gap(10)
     .class(ContainerType::Tooltip)
 }
 
@@ -151,9 +203,10 @@ fn get_release_details<'a>(
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(
-                Text::new('!'.to_string())
+                Icon::Update
+                    .to_text()
                     .class(TextType::Danger)
-                    .size(28)
+                    .size(18)
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center)
                     .line_height(LineHeight::Relative(0.8)),
@@ -168,6 +221,7 @@ fn get_release_details<'a>(
                 row_open_link_tooltip(new_version_available_translation(language), font),
                 Position::Top,
             )
+            .gap(7.5)
             .class(ContainerType::Tooltip);
             ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
         } else {
