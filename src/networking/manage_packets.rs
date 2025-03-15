@@ -127,7 +127,6 @@ fn analyze_network_header(
             true
         }
         Some(NetHeaders::Arp(arppacket)) => {
-            println!("Arp");
             *network_protocol = match arppacket.proto_addr_type {
                 EtherType::IPV4 => IpVersion::IPv4,
                 EtherType::IPV6 => IpVersion::IPv6,

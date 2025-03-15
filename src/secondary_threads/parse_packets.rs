@@ -65,7 +65,7 @@ pub fn parse_packets(
                         &mut icmp_type,
                         &mut packet_filters_fields,
                     );
-                    println!("{:?}", key_option);
+
                     if key_option.is_none() {
                         continue;
                     }
