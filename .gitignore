@@ -55,6 +55,5 @@ $RECYCLE.BIN/
 *.lnk
 
 ### Custom... ###
-Dockerfile
 lcov.info
 *.pcap
