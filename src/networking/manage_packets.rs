@@ -153,7 +153,6 @@ fn analyze_transport_header(
     protocol: &mut Protocol,
     icmp_type: &mut IcmpType,
 ) -> bool {
-    println!("{:?}", transport_header);
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
             *port1 = Some(udp_header.source_port);
