@@ -5,7 +5,7 @@ use std::sync::Mutex;
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
+use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
@@ -46,6 +46,11 @@ pub fn analyze_headers(
         exchanged_bytes,
     );
 
+    let is_arp: bool = match &headers.net {
+        Some(NetHeaders::Arp(_)) => true,
+        _ => false,
+    };
+
     if !analyze_network_header(
         headers.net,
         exchanged_bytes,
@@ -56,14 +61,16 @@ pub fn analyze_headers(
         return None;
     }
 
-    if !analyze_transport_header(
-        headers.transport,
-        &mut packet_filters_fields.sport,
-        &mut packet_filters_fields.dport,
-        &mut packet_filters_fields.protocol,
-        icmp_type,
-    ) {
-        return None;
+    if !is_arp {
+        if !analyze_transport_header(
+            headers.transport,
+            &mut packet_filters_fields.sport,
+            &mut packet_filters_fields.dport,
+            &mut packet_filters_fields.protocol,
+            icmp_type,
+        ) {
+            return None;
+        }
     }
 
     Some(AddressPortPair::new(
@@ -119,6 +126,20 @@ fn analyze_network_header(
             *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
             true
         }
+        Some(NetHeaders::Arp(arppacket)) => {
+            println!("Arp");
+            *network_protocol = match arppacket.proto_addr_type {
+                EtherType::IPV4 => IpVersion::IPv4,
+                EtherType::IPV6 => IpVersion::IPv6,
+                _ => return false,
+            };
+            let src: [u8; 4] = arppacket.sender_protocol_addr().try_into().unwrap();
+            let dst: [u8; 4] = arppacket.target_protocol_addr().try_into().unwrap();
+            *address1 = IpAddr::from(src);
+            *address2 = IpAddr::from(dst);
+            *exchanged_bytes += arppacket.packet_len() as u128;
+            true
+        }
         _ => false,
     }
 }
@@ -133,6 +154,7 @@ fn analyze_transport_header(
     protocol: &mut Protocol,
     icmp_type: &mut IcmpType,
 ) -> bool {
+    println!("{:?}", transport_header);
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
             *port1 = Some(udp_header.source_port);
@@ -1240,6 +1262,7 @@ mod tests {
                         Protocol::TCP => "mdns",
                         Protocol::UDP => "zeroconf",
                         Protocol::ICMP => panic!(),
+                        Protocol::ARP => panic!(),
                     })
                 );
 
@@ -1250,7 +1273,7 @@ mod tests {
                         Protocol::TCP => Service::Name("netstat"),
                         Protocol::UDP => Service::Unknown,
                         Protocol::ICMP => panic!(),
-                    }
+                        Protocol::ARP => panic!(),                    }
                 );
 
                 let key =
@@ -1261,7 +1284,7 @@ mod tests {
                         Protocol::TCP => Service::Unknown,
                         Protocol::UDP => Service::Name("murmur"),
                         Protocol::ICMP => panic!(),
-                    }
+                        Protocol::ARP => panic!(),                    }
                 );
 
                 for (p1, p2) in [(Some(5353), Some(53)), (Some(53), Some(5353))] {
