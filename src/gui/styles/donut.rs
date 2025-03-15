@@ -26,6 +26,11 @@ impl DonutType {
             incoming: colors.secondary,
             outgoing: colors.outgoing,
             text_color: colors.text_body,
+            filtered_out: Color {
+                a: ext.alpha_round_borders,
+                ..ext.buttons_color
+            },
+            dropped: Color::new(0.8, 0.15, 0.15, 1.0),
         }
     }
 }
@@ -44,9 +49,11 @@ impl Catalog for StyleType {
 
 pub struct Style {
     pub(crate) background: Color,
+    pub(crate) text_color: Color,
     pub(crate) incoming: Color,
     pub(crate) outgoing: Color,
-    pub(crate) text_color: Color,
+    pub(crate) filtered_out: Color,
+    pub(crate) dropped: Color,
 }
 
 /// The theme catalog of a [`ProgressBar`].

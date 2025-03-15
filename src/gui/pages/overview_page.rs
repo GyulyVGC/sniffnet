@@ -14,6 +14,7 @@ use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::chart::types::donut_chart::{donut_chart, DonutChart};
+use crate::chart::types::donut_kind::DonutKind;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
@@ -614,8 +615,29 @@ fn donut_charts<'a>(
     font_headers: Font,
     sniffer: &Sniffer,
 ) -> Column<'a, Message, StyleType> {
-    // let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
-    let all_bytes = sniffer.runtime_data.all_bytes;
+    let chart_type = sniffer.traffic_chart.chart_type;
+
+    let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
+        (
+            sniffer.runtime_data.tot_in_bytes,
+            sniffer.runtime_data.tot_out_bytes,
+            sniffer.runtime_data.all_bytes
+                - sniffer.runtime_data.tot_out_bytes
+                - sniffer.runtime_data.tot_in_bytes,
+            // assume that the dropped packets have the same size as the average packet
+            u128::from(sniffer.runtime_data.dropped_packets) * sniffer.runtime_data.all_bytes
+                / sniffer.runtime_data.all_packets,
+        )
+    } else {
+        (
+            sniffer.runtime_data.tot_in_packets,
+            sniffer.runtime_data.tot_out_packets,
+            sniffer.runtime_data.all_packets
+                - sniffer.runtime_data.tot_out_packets
+                - sniffer.runtime_data.tot_in_packets,
+            u128::from(sniffer.runtime_data.dropped_packets),
+        )
+    };
     // let filters = &sniffer.filters;
     //
     // let dropped_val = if dropped > 0 {
@@ -666,16 +688,14 @@ fn donut_charts<'a>(
     //         font,
     //     ))
 
+    let donut_tot = DonutKind::Total(chart_type, in_data, out_data, filtered_out, dropped);
+
     let donuts_row = Row::new()
         .padding(Padding::ZERO.top(10))
         .spacing(20)
-        .push(donut_chart(
-            37.0,
-            ByteMultiple::formatted_string(all_bytes),
-            font,
-        ))
-        .push(donut_chart(37.0, "IPv", font))
-        .push(donut_chart(37.0, "proto", font));
+        .push(donut_chart(donut_tot, font, language));
+    // .push(donut_chart(donut_tot.clone(), font, language))
+    // .push(donut_chart(donut_tot, font, language));
 
     Column::new()
         .width(Length::Fill)

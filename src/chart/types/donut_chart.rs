@@ -1,5 +1,7 @@
+use crate::chart::types::donut_kind::DonutKind;
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::FONT_SIZE_BODY;
+use crate::translations::types::language::Language;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
@@ -9,18 +11,17 @@ use iced::{mouse, Font, Point, Radians, Renderer};
 use std::f32::consts;
 
 pub struct DonutChart {
-    percentage: f32,
-    label: String,
+    kind: DonutKind,
     font: Font,
+    language: Language,
 }
 
 impl DonutChart {
-    pub fn new(percentage: f32, label: impl Into<String>, font: Font) -> Self {
-        let label = label.into();
+    pub fn new(kind: DonutKind, font: Font, language: Language) -> Self {
         Self {
-            percentage,
-            label,
+            kind,
             font,
+            language,
         }
     }
 }
@@ -40,53 +41,43 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
         let center = frame.center();
         let radius = frame.width().min(frame.height()) / 2.0;
 
-        let start_angle1 = Radians(-consts::FRAC_PI_2);
-        let end_angle1 = Radians(consts::TAU) * self.percentage / 100.0 + start_angle1;
-
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
+        let colors = match self.kind {
+            DonutKind::Total(..) => {
+                vec![
+                    style.incoming,
+                    style.outgoing,
+                    style.filtered_out,
+                    style.dropped,
+                ]
+            }
+            DonutKind::Ip => {
+                vec![]
+            }
+            DonutKind::Proto => {
+                vec![]
+            }
+        };
 
-        // let circle_at_angle = |angle: Radians| {
-        //     canvas::Path::circle(
-        //         Point::new(
-        //             center.x + fixed_radius * angle.0.cos(),
-        //             center.y + fixed_radius * angle.0.sin(),
-        //         ),
-        //         inner_ball_radius,
-        //     )
-        // };
-
-        let circle = canvas::Path::circle(center, radius);
-
-        let incoming = canvas::Path::new(|builder| {
-            builder.arc(Arc {
-                center,
-                radius,
-                start_angle: start_angle1,
-                end_angle: end_angle1,
+        for (i, angles) in self.kind.get_angles().iter().enumerate() {
+            let path = canvas::Path::new(|builder| {
+                builder.arc(Arc {
+                    center,
+                    radius,
+                    start_angle: angles.0,
+                    end_angle: angles.1,
+                });
+                builder.line_to(center);
+                builder.close();
             });
-            builder.line_to(center);
-            builder.close();
-        });
 
-        let outgoing = canvas::Path::new(|builder| {
-            builder.arc(Arc {
-                center,
-                radius,
-                start_angle: end_angle1,
-                end_angle: start_angle1 + Radians(consts::PI * 2.0),
-            });
-            builder.line_to(center);
-            builder.close();
-        });
+            frame.fill(&path, colors[i]);
+        }
 
         let inner_circle = canvas::Path::circle(center, radius - 6.0);
-
+        frame.fill(&inner_circle, style.background);
         frame.fill_text(Text {
-            content: if self.label.is_empty() {
-                format!("{:.2}%", self.percentage)
-            } else {
-                self.label.clone()
-            },
+            content: self.kind.get_title().clone(),
             position: center,
             vertical_alignment: Vertical::Center,
             horizontal_alignment: Horizontal::Center,
@@ -95,10 +86,6 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
             font: self.font,
             ..Default::default()
         });
-
-        frame.fill(&incoming, style.incoming);
-        frame.fill(&outgoing, style.outgoing);
-        frame.fill(&inner_circle, style.background);
 
         vec![frame.into_geometry()]
     }
@@ -119,12 +106,12 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
 /// let default_progress = radial_progress_bar(0.75, "");
 /// ```
 pub fn donut_chart<Message, Theme: Catalog>(
-    percentage: f32,
-    label: impl Into<String>,
+    kind: DonutKind,
     font: Font,
+    language: Language,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
     let radius = 95.0;
-    iced::widget::canvas(DonutChart::new(percentage, label, font))
+    iced::widget::canvas(DonutChart::new(kind, font, language))
         .width(radius)
         .height(radius)
 }
