@@ -12,6 +12,7 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
@@ -37,6 +38,7 @@ pub fn analyze_headers(
     mac_addresses: &mut (Option<String>, Option<String>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
+    arp_type: &mut ArpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
     analyze_link_header(
@@ -57,6 +59,7 @@ pub fn analyze_headers(
         &mut packet_filters_fields.ip_version,
         &mut packet_filters_fields.source,
         &mut packet_filters_fields.dest,
+        arp_type,
     ) {
         return None;
     }
@@ -110,6 +113,7 @@ fn analyze_network_header(
     network_protocol: &mut IpVersion,
     address1: &mut IpAddr,
     address2: &mut IpAddr,
+    arp_type: &mut ArpType
 ) -> bool {
     match network_header {
         Some(NetHeaders::Ipv4(ipv4header, _)) => {
@@ -126,17 +130,18 @@ fn analyze_network_header(
             *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
             true
         }
-        Some(NetHeaders::Arp(arppacket)) => {
-            *network_protocol = match arppacket.proto_addr_type {
+        Some(NetHeaders::Arp(arp_packet)) => {
+            *network_protocol = match arp_packet.proto_addr_type {
                 EtherType::IPV4 => IpVersion::IPv4,
                 EtherType::IPV6 => IpVersion::IPv6,
                 _ => return false,
             };
-            let src: [u8; 4] = arppacket.sender_protocol_addr().try_into().unwrap();
-            let dst: [u8; 4] = arppacket.target_protocol_addr().try_into().unwrap();
+            let src: [u8; 4] = arp_packet.sender_protocol_addr().try_into().unwrap();
+            let dst: [u8; 4] = arp_packet.target_protocol_addr().try_into().unwrap();
             *address1 = IpAddr::from(src);
             *address2 = IpAddr::from(dst);
-            *exchanged_bytes += arppacket.packet_len() as u128;
+            *exchanged_bytes += arp_packet.packet_len() as u128;
+            *arp_type = ArpType::from_etherparse(&arp_packet.operation);
             true
         }
         _ => false,
@@ -237,6 +242,7 @@ pub fn modify_or_insert_in_map(
     my_device: &MyDevice,
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
+    arp_type: ArpType,
     exchanged_bytes: u128,
 ) -> InfoAddressPortPair {
     let now = Local::now();
@@ -288,6 +294,12 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
+            if key.protocol.eq(&Protocol::ARP) {
+                info.arp_types
+                    .entry(arp_type)
+                    .and_modify(|n| *n += 1)
+                    .or_insert(1);
+            }
         })
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
@@ -300,6 +312,11 @@ pub fn modify_or_insert_in_map(
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
                 HashMap::from([(icmp_type, 1)])
+            } else {
+                HashMap::new()
+            },
+            arp_types: if key.protocol.eq(&Protocol::ARP) {
+                HashMap::from([(arp_type, 1)])
             } else {
                 HashMap::new()
             },

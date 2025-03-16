@@ -13,6 +13,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
@@ -56,6 +57,7 @@ pub fn parse_packets(
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
+                    let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
 
                     let key_option = analyze_headers(
@@ -63,6 +65,7 @@ pub fn parse_packets(
                         &mut mac_addresses,
                         &mut exchanged_bytes,
                         &mut icmp_type,
+                        &mut arp_type,
                         &mut packet_filters_fields,
                     );
 
@@ -86,6 +89,7 @@ pub fn parse_packets(
                             device,
                             mac_addresses,
                             icmp_type,
+                            arp_type,
                             exchanged_bytes,
                         );
                     }

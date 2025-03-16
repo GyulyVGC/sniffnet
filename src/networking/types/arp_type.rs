@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 use etherparse::ArpOperation;
@@ -18,6 +19,18 @@ impl ArpType {
             ArpOperation(2) => Self::Reply,
             ArpOperation(_) => Self::Unknown,
         }
+    }
+
+    pub fn pretty_print_types(map: &HashMap<ArpType, usize>) -> String {
+            let mut ret_val = String::new();
+    
+            let mut vec: Vec<(&ArpType, &usize)> = map.iter().collect();
+            vec.sort_by(|(_, a), (_, b)| b.cmp(a));
+    
+            for (arp_type, n) in vec {
+                ret_val.push_str(&format!("   {arp_type} ({n})\n"));
+            }
+            ret_val
     }
 }
 
