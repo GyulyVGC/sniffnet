@@ -42,7 +42,7 @@ mod tests {
 
     #[test]
     fn test_all_protocols_collection() {
-        assert_eq!(Protocol::ALL.len(), 3);
+        assert_eq!(Protocol::ALL.len(), 4);
         assert_eq!(Protocol::ALL.get(0).unwrap(), &Protocol::TCP);
         assert_eq!(Protocol::ALL.get(1).unwrap(), &Protocol::UDP);
         assert_eq!(Protocol::ALL.get(2).unwrap(), &Protocol::ICMP);
