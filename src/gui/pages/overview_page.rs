@@ -706,7 +706,7 @@ fn donut_charts<'a>(
 
 const MIN_BARS_LENGTH: f32 = 10.0;
 
-fn get_bars_length(
+pub fn get_bars_length(
     tot_width: f32,
     chart_type: ChartType,
     first_entry: &DataInfo,

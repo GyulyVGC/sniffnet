@@ -61,6 +61,17 @@ impl DataInfo {
         self.final_timestamp = Local::now();
     }
 
+    pub fn add_packets(&mut self, packets: u128, bytes: u128, traffic_direction: TrafficDirection) {
+        if traffic_direction.eq(&TrafficDirection::Outgoing) {
+            self.outgoing_packets += packets;
+            self.outgoing_bytes += bytes;
+        } else {
+            self.incoming_packets += packets;
+            self.incoming_bytes += bytes;
+        }
+        self.final_timestamp = Local::now();
+    }
+
     pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
         if traffic_direction.eq(&TrafficDirection::Outgoing) {
             Self {
@@ -121,16 +132,4 @@ impl AddAssign for DataInfo {
         self.outgoing_bytes += rhs.outgoing_bytes;
         self.final_timestamp = Local::now();
     }
-}
-
-#[derive(Clone, Default, Copy)]
-pub struct DataInfoWithoutTimestamp {
-    /// Incoming packets
-    pub incoming_packets: u128,
-    /// Outgoing packets
-    pub outgoing_packets: u128,
-    /// Incoming bytes
-    pub incoming_bytes: u128,
-    /// Outgoing bytes
-    pub outgoing_bytes: u128,
 }

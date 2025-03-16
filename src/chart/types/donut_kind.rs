@@ -36,7 +36,6 @@ impl DonutKind {
     pub fn get_values(&self) -> Vec<u128> {
         match self {
             Self::Total(_, inc, out, filtered_out, dropped) => {
-                println!("{}", dropped);
                 vec![*inc, *out, *filtered_out, *dropped]
             }
             Self::Ip => vec![50, 250],
