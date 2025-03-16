@@ -1288,7 +1288,8 @@ mod tests {
                         Protocol::TCP => Service::Name("netstat"),
                         Protocol::UDP => Service::Unknown,
                         Protocol::ICMP => panic!(),
-                        Protocol::ARP => panic!(),                    }
+                        Protocol::ARP => panic!(),
+                    }
                 );
 
                 let key =
@@ -1299,7 +1300,8 @@ mod tests {
                         Protocol::TCP => Service::Unknown,
                         Protocol::UDP => Service::Name("murmur"),
                         Protocol::ICMP => panic!(),
-                        Protocol::ARP => panic!(),                    }
+                        Protocol::ARP => panic!(),
+                    }
                 );
 
                 for (p1, p2) in [(Some(5353), Some(53)), (Some(53), Some(5353))] {
