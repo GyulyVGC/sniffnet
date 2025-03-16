@@ -131,15 +131,31 @@ fn analyze_network_header(
             true
         }
         Some(NetHeaders::Arp(arp_packet)) => {
-            *network_protocol = match arp_packet.proto_addr_type {
-                EtherType::IPV4 => IpVersion::IPv4,
-                EtherType::IPV6 => IpVersion::IPv6,
-                _ => return false,
-            };
-            let src: [u8; 4] = arp_packet.sender_protocol_addr().try_into().unwrap();
-            let dst: [u8; 4] = arp_packet.target_protocol_addr().try_into().unwrap();
-            *address1 = IpAddr::from(src);
-            *address2 = IpAddr::from(dst);
+            match arp_packet.proto_addr_type {
+                EtherType::IPV4 => {
+                    *network_protocol = IpVersion::IPv4;
+                    *address1 = match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
+                        Ok(source) => IpAddr::from(source),
+                        Err(_) => return false
+                    };
+                    *address2 = match TryInto::<[u8; 4]>::try_into(arp_packet.target_protocol_addr()) {
+                        Ok(destination) => IpAddr::from(destination),
+                        Err(_) => return false
+                    };
+                }
+                EtherType::IPV6 => {
+                    *network_protocol = IpVersion::IPv6;
+                    *address1 = match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
+                        Ok(source) => IpAddr::from(source),
+                        Err(_) => return false
+                    };
+                    *address2 = match TryInto::<[u8; 16]>::try_into(arp_packet.target_protocol_addr()) {
+                        Ok(destination) => IpAddr::from(destination),
+                        Err(_) => return false
+                    };
+                }
+                _ => return false
+            }
             *exchanged_bytes += arp_packet.packet_len() as u128;
             *arp_type = ArpType::from_etherparse(&arp_packet.operation);
             true
