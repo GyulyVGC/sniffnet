@@ -114,7 +114,7 @@ pub fn main() -> iced::Result {
             ],
             default_font: Font::with_name(FONT_FAMILY_NAME),
             default_text_size: Pixels(FONT_SIZE_BODY),
-            antialiasing: false,
+            antialiasing: true,
         })
         .window(window::Settings {
             size: size.to_size(), // start size

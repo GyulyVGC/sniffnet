@@ -3,6 +3,7 @@ pub mod checkbox;
 pub mod combobox;
 pub mod container;
 pub mod custom_themes;
+pub mod donut;
 pub mod picklist;
 pub mod radio;
 pub mod rule;
