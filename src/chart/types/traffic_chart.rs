@@ -6,6 +6,7 @@ use std::ops::Range;
 use iced::widget::Container;
 use iced::Element;
 use plotters::prelude::*;
+use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
 
@@ -182,6 +183,8 @@ impl Chart<Message> for TrafficChart {
         self.set_margins_and_label_areas(&mut chart_builder);
 
         let x_axis_range = self.x_axis_range();
+        let x_axis_start = x_axis_range.start;
+        let x_axis_end = x_axis_range.end;
         let y_axis_range = self.y_axis_range();
 
         let x_labels = if self.ticks == 1 || self.thumbnail {
@@ -236,6 +239,13 @@ impl Chart<Message> for TrafficChart {
                 .label(label)
                 .legend(move |(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], legend_style));
         }
+        // draw x axis to hide zeroed values
+        chart
+            .draw_series(LineSeries::new(
+                [(x_axis_start, 0.0), (x_axis_end, 0.0)],
+                ShapeStyle::from(&buttons_color).stroke_width(CHARTS_LINE_BORDER),
+            ))
+            .expect("Error drawing graph");
 
         // chart legend
         if !self.thumbnail {
