@@ -24,7 +24,7 @@ impl Default for PacketFiltersFields {
     fn default() -> Self {
         Self {
             ip_version: IpVersion::IPv4,
-            protocol: Protocol::TCP,
+            protocol: Protocol::ARP,
             source: IpAddr::from_str("::").unwrap(),
             dest: IpAddr::from_str("::").unwrap(),
             sport: None,
