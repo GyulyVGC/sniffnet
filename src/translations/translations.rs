@@ -1943,7 +1943,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
         }
         Language::RU => {
             "Нечего показывать в текущий момент...\n\n\
-                                Когда прийдут уведомления, они будут показаны тут"
+                                Когда придут уведомления, они будут показаны тут"
         }
         Language::PT => {
             "Nada para ver neste momento...\n\n\
