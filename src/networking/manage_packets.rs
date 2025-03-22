@@ -206,7 +206,7 @@ fn analyze_transport_header(
 }
 
 pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
-    if key.port1.is_none() || key.port2.is_none() || key.protocol == Protocol::ICMP {
+    if key.port1.is_none() || key.port2.is_none() || key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
         return Service::NotApplicable;
     }
 
@@ -1292,8 +1292,7 @@ mod tests {
                     Service::Name(match p {
                         Protocol::TCP => "mdns",
                         Protocol::UDP => "zeroconf",
-                        Protocol::ICMP => panic!(),
-                        Protocol::ARP => panic!(),
+                        _ => panic!(),
                     })
                 );
 
@@ -1303,8 +1302,7 @@ mod tests {
                     match p {
                         Protocol::TCP => Service::Name("netstat"),
                         Protocol::UDP => Service::Unknown,
-                        Protocol::ICMP => panic!(),
-                        Protocol::ARP => panic!(),
+                        _ => panic!(),
                     }
                 );
 
@@ -1315,8 +1313,7 @@ mod tests {
                     match p {
                         Protocol::TCP => Service::Unknown,
                         Protocol::UDP => Service::Name("murmur"),
-                        Protocol::ICMP => panic!(),
-                        Protocol::ARP => panic!(),
+                        _ => panic!(),
                     }
                 );
 

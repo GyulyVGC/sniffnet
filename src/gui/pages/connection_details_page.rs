@@ -209,7 +209,7 @@ fn col_info<'a>(
             font,
         ));
 
-    if !is_icmp || !is_arp {
+    if !is_icmp && !is_arp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),
