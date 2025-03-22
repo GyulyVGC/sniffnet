@@ -131,7 +131,7 @@ fn col_ip_buttons(
                     .align_y(Alignment::Center)
                     .font(font),
             )
-            .width(90)
+            .width(80)
             .height(35)
             .class(if is_active {
                 ButtonType::BorderedRoundSelected
@@ -170,7 +170,7 @@ fn col_protocol_buttons(
                     .align_y(Alignment::Center)
                     .font(font),
             )
-            .width(90)
+            .width(80)
             .height(35)
             .class(if is_active {
                 ButtonType::BorderedRoundSelected

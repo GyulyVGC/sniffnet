@@ -5,13 +5,14 @@ use std::sync::Mutex;
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
-use etherparse::{LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
+use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
 
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
@@ -37,6 +38,7 @@ pub fn analyze_headers(
     mac_addresses: &mut (Option<String>, Option<String>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
+    arp_type: &mut ArpType,
     packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
     analyze_link_header(
@@ -46,23 +48,28 @@ pub fn analyze_headers(
         exchanged_bytes,
     );
 
+    let is_arp = matches!(&headers.net, Some(NetHeaders::Arp(_)));
+
     if !analyze_network_header(
         headers.net,
         exchanged_bytes,
         &mut packet_filters_fields.ip_version,
         &mut packet_filters_fields.source,
         &mut packet_filters_fields.dest,
+        arp_type,
     ) {
         return None;
     }
 
-    if !analyze_transport_header(
-        headers.transport,
-        &mut packet_filters_fields.sport,
-        &mut packet_filters_fields.dport,
-        &mut packet_filters_fields.protocol,
-        icmp_type,
-    ) {
+    if !is_arp
+        && !analyze_transport_header(
+            headers.transport,
+            &mut packet_filters_fields.sport,
+            &mut packet_filters_fields.dport,
+            &mut packet_filters_fields.protocol,
+            icmp_type,
+        )
+    {
         return None;
     }
 
@@ -103,6 +110,7 @@ fn analyze_network_header(
     network_protocol: &mut IpVersion,
     address1: &mut IpAddr,
     address2: &mut IpAddr,
+    arp_type: &mut ArpType,
 ) -> bool {
     match network_header {
         Some(NetHeaders::Ipv4(ipv4header, _)) => {
@@ -117,6 +125,40 @@ fn analyze_network_header(
             *address1 = IpAddr::from(ipv6header.source);
             *address2 = IpAddr::from(ipv6header.destination);
             *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
+            true
+        }
+        Some(NetHeaders::Arp(arp_packet)) => {
+            match arp_packet.proto_addr_type {
+                EtherType::IPV4 => {
+                    *network_protocol = IpVersion::IPv4;
+                    *address1 =
+                        match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
+                            Ok(source) => IpAddr::from(source),
+                            Err(_) => return false,
+                        };
+                    *address2 =
+                        match TryInto::<[u8; 4]>::try_into(arp_packet.target_protocol_addr()) {
+                            Ok(destination) => IpAddr::from(destination),
+                            Err(_) => return false,
+                        };
+                }
+                EtherType::IPV6 => {
+                    *network_protocol = IpVersion::IPv6;
+                    *address1 =
+                        match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
+                            Ok(source) => IpAddr::from(source),
+                            Err(_) => return false,
+                        };
+                    *address2 =
+                        match TryInto::<[u8; 16]>::try_into(arp_packet.target_protocol_addr()) {
+                            Ok(destination) => IpAddr::from(destination),
+                            Err(_) => return false,
+                        };
+                }
+                _ => return false,
+            }
+            *exchanged_bytes += arp_packet.packet_len() as u128;
+            *arp_type = ArpType::from_etherparse(arp_packet.operation);
             true
         }
         _ => false,
@@ -165,7 +207,11 @@ fn analyze_transport_header(
 }
 
 pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
-    if key.port1.is_none() || key.port2.is_none() || key.protocol == Protocol::ICMP {
+    if key.port1.is_none()
+        || key.port2.is_none()
+        || key.protocol == Protocol::ICMP
+        || key.protocol == Protocol::ARP
+    {
         return Service::NotApplicable;
     }
 
@@ -217,6 +263,7 @@ pub fn modify_or_insert_in_map(
     my_device: &MyDevice,
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
+    arp_type: ArpType,
     exchanged_bytes: u128,
 ) -> InfoAddressPortPair {
     let now = Local::now();
@@ -268,6 +315,12 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
+            if key.protocol.eq(&Protocol::ARP) {
+                info.arp_types
+                    .entry(arp_type)
+                    .and_modify(|n| *n += 1)
+                    .or_insert(1);
+            }
         })
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
@@ -280,6 +333,11 @@ pub fn modify_or_insert_in_map(
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
                 HashMap::from([(icmp_type, 1)])
+            } else {
+                HashMap::new()
+            },
+            arp_types: if key.protocol.eq(&Protocol::ARP) {
+                HashMap::from([(arp_type, 1)])
             } else {
                 HashMap::new()
             },
@@ -1239,7 +1297,7 @@ mod tests {
                     Service::Name(match p {
                         Protocol::TCP => "mdns",
                         Protocol::UDP => "zeroconf",
-                        Protocol::ICMP => panic!(),
+                        _ => panic!(),
                     })
                 );
 
@@ -1249,7 +1307,7 @@ mod tests {
                     match p {
                         Protocol::TCP => Service::Name("netstat"),
                         Protocol::UDP => Service::Unknown,
-                        Protocol::ICMP => panic!(),
+                        _ => panic!(),
                     }
                 );
 
@@ -1260,7 +1318,7 @@ mod tests {
                     match p {
                         Protocol::TCP => Service::Unknown,
                         Protocol::UDP => Service::Name("murmur"),
-                        Protocol::ICMP => panic!(),
+                        _ => panic!(),
                     }
                 );
 
