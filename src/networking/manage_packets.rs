@@ -113,7 +113,7 @@ fn analyze_network_header(
     network_protocol: &mut IpVersion,
     address1: &mut IpAddr,
     address2: &mut IpAddr,
-    arp_type: &mut ArpType
+    arp_type: &mut ArpType,
 ) -> bool {
     match network_header {
         Some(NetHeaders::Ipv4(ipv4header, _)) => {
@@ -134,27 +134,31 @@ fn analyze_network_header(
             match arp_packet.proto_addr_type {
                 EtherType::IPV4 => {
                     *network_protocol = IpVersion::IPv4;
-                    *address1 = match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
-                        Ok(source) => IpAddr::from(source),
-                        Err(_) => return false
-                    };
-                    *address2 = match TryInto::<[u8; 4]>::try_into(arp_packet.target_protocol_addr()) {
-                        Ok(destination) => IpAddr::from(destination),
-                        Err(_) => return false
-                    };
+                    *address1 =
+                        match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
+                            Ok(source) => IpAddr::from(source),
+                            Err(_) => return false,
+                        };
+                    *address2 =
+                        match TryInto::<[u8; 4]>::try_into(arp_packet.target_protocol_addr()) {
+                            Ok(destination) => IpAddr::from(destination),
+                            Err(_) => return false,
+                        };
                 }
                 EtherType::IPV6 => {
                     *network_protocol = IpVersion::IPv6;
-                    *address1 = match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
-                        Ok(source) => IpAddr::from(source),
-                        Err(_) => return false
-                    };
-                    *address2 = match TryInto::<[u8; 16]>::try_into(arp_packet.target_protocol_addr()) {
-                        Ok(destination) => IpAddr::from(destination),
-                        Err(_) => return false
-                    };
+                    *address1 =
+                        match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
+                            Ok(source) => IpAddr::from(source),
+                            Err(_) => return false,
+                        };
+                    *address2 =
+                        match TryInto::<[u8; 16]>::try_into(arp_packet.target_protocol_addr()) {
+                            Ok(destination) => IpAddr::from(destination),
+                            Err(_) => return false,
+                        };
                 }
-                _ => return false
+                _ => return false,
             }
             *exchanged_bytes += arp_packet.packet_len() as u128;
             *arp_type = ArpType::from_etherparse(&arp_packet.operation);
@@ -206,7 +210,11 @@ fn analyze_transport_header(
 }
 
 pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
-    if key.port1.is_none() || key.port2.is_none() || key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
+    if key.port1.is_none()
+        || key.port2.is_none()
+        || key.protocol == Protocol::ICMP
+        || key.protocol == Protocol::ARP
+    {
         return Service::NotApplicable;
     }
 

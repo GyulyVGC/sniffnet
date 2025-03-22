@@ -22,22 +22,24 @@ impl ArpType {
     }
 
     pub fn pretty_print_types(map: &HashMap<ArpType, usize>) -> String {
-            let mut ret_val = String::new();
-    
-            let mut vec: Vec<(&ArpType, &usize)> = map.iter().collect();
-            vec.sort_by(|(_, a), (_, b)| b.cmp(a));
-    
-            for (arp_type, n) in vec {
-                ret_val.push_str(&format!("   {arp_type} ({n})\n"));
-            }
-            ret_val
+        let mut ret_val = String::new();
+
+        let mut vec: Vec<(&ArpType, &usize)> = map.iter().collect();
+        vec.sort_by(|(_, a), (_, b)| b.cmp(a));
+
+        for (arp_type, n) in vec {
+            ret_val.push_str(&format!("   {arp_type} ({n})\n"));
+        }
+        ret_val
     }
 }
 
 impl Display for ArpType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
-            f, "{}", match self {
+            f,
+            "{}",
+            match self {
                 ArpType::Request => "Request",
                 ArpType::Reply => "Reply",
                 ArpType::Unknown => "?",

@@ -5,8 +5,8 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Local};
 
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::Service;
 
@@ -34,5 +34,5 @@ pub struct InfoAddressPortPair {
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
-    pub arp_types: HashMap<ArpType, usize>
+    pub arp_types: HashMap<ArpType, usize>,
 }

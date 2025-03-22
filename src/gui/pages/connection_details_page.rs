@@ -247,12 +247,14 @@ fn col_info<'a>(
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(Text::new(if is_icmp {
-                            IcmpType::pretty_print_types(&val.icmp_types)
-                        } else {
-                            ArpType::pretty_print_types(&val.arp_types)
-                        }
-                    ).font(font)),
+                        .push(
+                            Text::new(if is_icmp {
+                                IcmpType::pretty_print_types(&val.icmp_types)
+                            } else {
+                                ArpType::pretty_print_types(&val.arp_types)
+                            })
+                            .font(font),
+                        ),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),

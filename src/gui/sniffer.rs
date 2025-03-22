@@ -1059,7 +1059,10 @@ mod tests {
             HashSet::from([Protocol::TCP, Protocol::ICMP, Protocol::ARP])
         );
         sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ICMP, Protocol::ARP]));
+        assert_eq!(
+            sniffer.filters.protocols,
+            HashSet::from([Protocol::ICMP, Protocol::ARP])
+        );
         sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
         assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ARP]));
         sniffer.update(Message::ProtocolSelection(Protocol::ARP, false));
