@@ -4,7 +4,6 @@ use std::fmt::{Display, Formatter};
 use etherparse::ArpOperation;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Default)]
-#[allow(clippy::module_name_repetitions)]
 pub enum ArpType {
     Request,
     Reply,
@@ -13,7 +12,7 @@ pub enum ArpType {
 }
 
 impl ArpType {
-    pub fn from_etherparse(arp_operation: &ArpOperation) -> ArpType {
+    pub fn from_etherparse(arp_operation: ArpOperation) -> ArpType {
         match arp_operation {
             ArpOperation(1) => Self::Request,
             ArpOperation(2) => Self::Reply,

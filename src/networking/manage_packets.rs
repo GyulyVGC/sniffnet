@@ -48,10 +48,7 @@ pub fn analyze_headers(
         exchanged_bytes,
     );
 
-    let is_arp: bool = match &headers.net {
-        Some(NetHeaders::Arp(_)) => true,
-        _ => false,
-    };
+    let is_arp = matches!(&headers.net, Some(NetHeaders::Arp(_)));
 
     if !analyze_network_header(
         headers.net,
@@ -64,16 +61,16 @@ pub fn analyze_headers(
         return None;
     }
 
-    if !is_arp {
-        if !analyze_transport_header(
+    if !is_arp
+        && !analyze_transport_header(
             headers.transport,
             &mut packet_filters_fields.sport,
             &mut packet_filters_fields.dport,
             &mut packet_filters_fields.protocol,
             icmp_type,
-        ) {
-            return None;
-        }
+        )
+    {
+        return None;
     }
 
     Some(AddressPortPair::new(
@@ -161,7 +158,7 @@ fn analyze_network_header(
                 _ => return false,
             }
             *exchanged_bytes += arp_packet.packet_len() as u128;
-            *arp_type = ArpType::from_etherparse(&arp_packet.operation);
+            *arp_type = ArpType::from_etherparse(arp_packet.operation);
             true
         }
         _ => false,
