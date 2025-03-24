@@ -3,16 +3,6 @@
 //! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
-use iced::widget::scrollable::Direction;
-use iced::widget::text::LineHeight;
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
-    Scrollable, Space, Text, Tooltip,
-};
-use iced::Length::{Fill, FillPortion};
-use iced::{Alignment, Font, Length, Padding};
-
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
@@ -22,7 +12,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
@@ -35,17 +25,30 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
-    network_adapter_translation, no_addresses_translation, none_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    filtered_packets_translation, incoming_translation, network_adapter_translation,
+    no_addresses_translation, none_translation, outgoing_translation, packets_chart_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
-    data_representation_translation, host_translation, only_top_30_items_translation,
+    data_representation_translation, dropped_translation, host_translation,
+    only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
+use crate::translations::translations_4::excluded_translation;
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use iced::advanced::graphics::text::cosmic_text::Align;
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
+use iced::widget::{
+    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
+    Scrollable, Space, Text, Tooltip,
+};
+use iced::Length::{Fill, FillPortion};
+use iced::{Alignment, Font, Length, Padding, Shrink};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -92,7 +95,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let container_chart = container_chart(sniffer, font);
+                let container_chart = container_chart(sniffer, font).height(280);
 
                 let container_info = lazy(
                     (total, style, language, sniffer.traffic_chart.chart_type),
@@ -121,7 +124,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .push(
                         Row::new()
                             .spacing(10)
-                            .height(Fill)
                             .push(container_info)
                             .push(container_chart),
                     )
@@ -253,7 +255,7 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .push(col_service);
 
     Container::new(row_report)
-        .height(Fill)
+        .height(Shrink)
         .class(ContainerType::BorderedRound)
 }
 
@@ -464,7 +466,7 @@ fn lazy_col_info<'a>(
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let donut_charts = donut_charts(
+    let donut_row = donut_row(
         language,
         dropped,
         total,
@@ -491,14 +493,7 @@ fn lazy_col_info<'a>(
                 .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
-        .push(
-            Scrollable::with_direction(
-                donut_charts,
-                Direction::Vertical(ScrollbarType::properties()),
-            )
-            .height(Length::Fill)
-            .width(Length::Fill),
-        );
+        .push(donut_row.height(120));
 
     Container::new(content)
         .width(400)
@@ -603,7 +598,7 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn donut_charts<'a>(
+fn donut_row<'a>(
     language: Language,
     dropped: u32,
     total: u128,
@@ -611,7 +606,7 @@ fn donut_charts<'a>(
     font: Font,
     font_headers: Font,
     sniffer: &Sniffer,
-) -> Row<'a, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
@@ -685,8 +680,40 @@ fn donut_charts<'a>(
     //         font,
     //     ))
 
-    Row::new()
-        .padding(Padding::ZERO.top(10))
+    let legend_col = Column::new()
+        .spacing(5)
+        .push(donut_legend_entry(
+            incoming_translation(language),
+            in_data,
+            chart_type,
+            RuleType::Incoming,
+            font,
+        ))
+        .push(donut_legend_entry(
+            outgoing_translation(language),
+            out_data,
+            chart_type,
+            RuleType::Outgoing,
+            font,
+        ))
+        .push(donut_legend_entry(
+            excluded_translation(language),
+            filtered_out,
+            chart_type,
+            RuleType::FilteredOut,
+            font,
+        ))
+        .push(donut_legend_entry(
+            dropped_translation(language),
+            dropped,
+            chart_type,
+            RuleType::Dropped,
+            font,
+        ));
+
+    let donut_row = Row::new()
+        .align_y(Vertical::Center)
+        .padding(Padding::ZERO.top(7))
         .spacing(20)
         .push(donut_chart(
             chart_type,
@@ -697,6 +724,35 @@ fn donut_charts<'a>(
             font,
             language,
         ))
+        .push(legend_col);
+
+    Container::new(donut_row)
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+}
+
+fn donut_legend_entry<'a>(
+    label: &str,
+    value: u128,
+    chart_type: ChartType,
+    rule_type: RuleType,
+    font: Font,
+) -> Row<'a, Message, StyleType> {
+    let value_text = if chart_type.eq(&ChartType::Bytes) {
+        ByteMultiple::formatted_string(value)
+    } else {
+        format!("{}", value)
+    };
+
+    Row::new()
+        .spacing(5)
+        .align_y(Alignment::Center)
+        .push(
+            Row::new()
+                .width(10)
+                .push(Rule::horizontal(1).class(rule_type)),
+        )
+        .push(Text::new(format!("{label}: {value_text}")).font(font))
 }
 
 const MIN_BARS_LENGTH: f32 = 10.0;

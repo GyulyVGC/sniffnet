@@ -77,10 +77,10 @@ pub fn connection_details_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn dropped_packets_translation(language: Language) -> &'static str {
+pub fn dropped_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Dropped packets",
-        Language::IT => "Pacchetti mancati",
+        Language::EN => "Dropped",
+        Language::IT => "Mancati",
         Language::RU => "Потеряно пакетов",
         Language::SV => "Tappade paket",
         Language::FI => "Pudotetut paketit",

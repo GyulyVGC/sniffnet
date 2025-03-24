@@ -1,6 +1,6 @@
 use crate::chart::types::chart_type::ChartType;
 use crate::gui::styles::donut::Catalog;
-use crate::gui::styles::style_constants::FONT_SIZE_BODY;
+use crate::gui::styles::style_constants::{FONT_SIZE_BODY, FONT_SIZE_SUBTITLE};
 use crate::networking::types::byte_multiple::ByteMultiple;
 use crate::translations::types::language::Language;
 use iced::alignment::{Horizontal, Vertical};
@@ -61,7 +61,7 @@ impl DonutChart {
     fn angles(&self) -> [(Radians, Radians); 4] {
         let mut values = self.values();
         let total: u128 = values.iter().sum();
-        let min_val = 5 * total / 100;
+        let min_val = 2 * total / 100;
         let mut diff = 0;
 
         for value in values.iter_mut() {
@@ -131,7 +131,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
             vertical_alignment: Vertical::Center,
             horizontal_alignment: Horizontal::Center,
             color: style.text_color,
-            size: FONT_SIZE_BODY.into(),
+            size: FONT_SIZE_SUBTITLE.into(),
             font: self.font,
             ..Default::default()
         });
@@ -140,20 +140,6 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
     }
 }
 
-/// Creates a radial progress bar widget.
-///
-/// This function returns a `Canvas` widget that displays a radial progress bar
-/// with a specified percentage and content. If the content is empty, the
-/// percentage will be displayed by default.
-///
-/// # Example
-///
-/// ```rust
-/// use atoms::widgets::radial_progress_bar;
-///
-/// let progress = radial_progress_bar(0.75, "75% Complete");
-/// let default_progress = radial_progress_bar(0.75, "");
-/// ```
 pub fn donut_chart<Message, Theme: Catalog>(
     chart_type: ChartType,
     incoming: u128,
@@ -163,7 +149,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
     font: Font,
     language: Language,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
-    let radius = 95.0;
+    let radius = 110.0;
     iced::widget::canvas(DonutChart::new(
         chart_type,
         incoming,

@@ -14,6 +14,8 @@ pub enum RuleType {
     PaletteColor(Color, u16),
     Incoming,
     Outgoing,
+    FilteredOut,
+    Dropped,
 }
 
 impl RuleType {
@@ -25,15 +27,17 @@ impl RuleType {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
+                RuleType::Dropped => Color::new(0.8, 0.15, 0.15, 1.0),
+                RuleType::FilteredOut => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 },
             },
             width: match self {
-                RuleType::Incoming | RuleType::Outgoing => 5,
                 RuleType::PaletteColor(_, width) => *width,
                 RuleType::Standard => 3,
+                _ => 5,
             },
             radius: 0.0.into(),
             fill_mode: FillMode::Full,
