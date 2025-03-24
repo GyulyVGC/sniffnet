@@ -7,14 +7,13 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Canvas, Column, Container, Row, Rule,
+    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
     Scrollable, Space, Text, Tooltip,
 };
 use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Padding};
 
-use crate::chart::types::donut_chart::{donut_chart, DonutChart};
-use crate::chart::types::donut_kind::DonutKind;
+use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
@@ -36,17 +35,15 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, bytes_chart_translation, error_translation,
-    filtered_bytes_translation, filtered_packets_translation, ip_version_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, of_total_translation,
-    packets_chart_translation, protocol_translation, some_observed_translation,
-    traffic_rate_translation, waiting_translation,
+    network_adapter_translation, no_addresses_translation, none_translation,
+    packets_chart_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
-    data_representation_translation, dropped_packets_translation, host_translation,
-    only_top_30_items_translation,
+    data_representation_translation, host_translation, only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::utils::formatted_strings::{get_active_filters_string, get_percentage_string};
+use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
 
@@ -614,7 +611,7 @@ fn donut_charts<'a>(
     font: Font,
     font_headers: Font,
     sniffer: &Sniffer,
-) -> Column<'a, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
@@ -688,20 +685,18 @@ fn donut_charts<'a>(
     //         font,
     //     ))
 
-    let donut_tot = DonutKind::Total(chart_type, in_data, out_data, filtered_out, dropped);
-
-    let donuts_row = Row::new()
+    Row::new()
         .padding(Padding::ZERO.top(10))
         .spacing(20)
-        .push(donut_chart(donut_tot, font, language));
-    // .push(donut_chart(donut_tot.clone(), font, language))
-    // .push(donut_chart(donut_tot, font, language));
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(10)
-        .align_x(Alignment::Center)
-        .push(donuts_row)
+        .push(donut_chart(
+            chart_type,
+            in_data,
+            out_data,
+            filtered_out,
+            dropped,
+            font,
+            language,
+        ))
 }
 
 const MIN_BARS_LENGTH: f32 = 10.0;
