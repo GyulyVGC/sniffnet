@@ -1,8 +1,7 @@
 use crate::chart::types::chart_type::ChartType;
 use crate::gui::styles::donut::Catalog;
-use crate::gui::styles::style_constants::{FONT_SIZE_BODY, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::networking::types::byte_multiple::ByteMultiple;
-use crate::translations::types::language::Language;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
@@ -17,7 +16,6 @@ pub struct DonutChart {
     filtered_out: u128,
     dropped: u128,
     font: Font,
-    language: Language,
 }
 
 impl DonutChart {
@@ -28,7 +26,6 @@ impl DonutChart {
         filtered_out: u128,
         dropped: u128,
         font: Font,
-        language: Language,
     ) -> Self {
         Self {
             chart_type,
@@ -37,7 +34,6 @@ impl DonutChart {
             filtered_out,
             dropped,
             font,
-            language,
         }
     }
 
@@ -54,7 +50,7 @@ impl DonutChart {
         if self.chart_type.eq(&ChartType::Bytes) {
             ByteMultiple::formatted_string(total)
         } else {
-            format!("{}", total)
+            total.to_string()
         }
     }
 
@@ -64,7 +60,7 @@ impl DonutChart {
         let min_val = 2 * total / 100;
         let mut diff = 0;
 
-        for value in values.iter_mut() {
+        for value in &mut values {
             if *value != 0 && *value < min_val {
                 diff += min_val - *value;
                 *value = min_val;
@@ -78,6 +74,7 @@ impl DonutChart {
         let mut start_angle = Radians(-consts::FRAC_PI_2);
         values.map(|value| {
             let start = start_angle;
+            #[allow(clippy::cast_precision_loss)]
             let end = start + Radians(consts::TAU) * (value as f32) / (total as f32);
             start_angle = end;
             (start, end)
@@ -90,7 +87,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
 
     fn draw(
         &self,
-        _: &Self::State,
+        (): &Self::State,
         renderer: &Renderer,
         theme: &Theme,
         bounds: iced::Rectangle,
@@ -147,7 +144,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
     filtered_out: u128,
     dropped: u128,
     font: Font,
-    language: Language,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
     iced::widget::canvas(DonutChart::new(
         chart_type,
@@ -156,7 +152,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
         filtered_out,
         dropped,
         font,
-        language,
     ))
     .width(110)
     .height(110)

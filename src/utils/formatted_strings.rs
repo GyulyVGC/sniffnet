@@ -11,18 +11,18 @@ use crate::Language;
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Computes the String representing the percentage of filtered bytes/packets
-pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
-    #[allow(clippy::cast_precision_loss)]
-    let filtered_float = filtered as f32;
-    #[allow(clippy::cast_precision_loss)]
-    let observed_float = observed as f32;
-    if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
-        "<0.1%".to_string()
-    } else {
-        format!("{:.1}%", 100.0 * filtered_float / observed_float)
-    }
-}
+// /// Computes the String representing the percentage of filtered bytes/packets
+// pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
+//     #[allow(clippy::cast_precision_loss)]
+//     let filtered_float = filtered as f32;
+//     #[allow(clippy::cast_precision_loss)]
+//     let observed_float = observed as f32;
+//     if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
+//         "<0.1%".to_string()
+//     } else {
+//         format!("{:.1}%", 100.0 * filtered_float / observed_float)
+//     }
+// }
 
 pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
     let mut ret_val = format!("{}:", invalid_filters_translation(language));

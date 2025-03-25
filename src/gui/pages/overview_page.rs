@@ -12,7 +12,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
@@ -24,10 +24,10 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, bytes_chart_translation, error_translation,
-    filtered_packets_translation, incoming_translation, network_adapter_translation,
-    no_addresses_translation, none_translation, outgoing_translation, packets_chart_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, bytes_chart_translation, error_translation, incoming_translation,
+    network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
+    packets_chart_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -38,7 +38,6 @@ use crate::translations::translations_4::excluded_translation;
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
-use iced::advanced::graphics::text::cosmic_text::Align;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
@@ -75,14 +74,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body = body_no_observed(
-                    &sniffer.filters,
-                    observed,
-                    font,
-                    font_headers,
-                    language,
-                    &sniffer.waiting,
-                );
+                body =
+                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -99,7 +92,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
                 let container_info = lazy(
                     (total, style, language, sniffer.traffic_chart.chart_type),
-                    move |_| lazy_col_info(total, filtered, dropped, sniffer),
+                    move |_| lazy_col_info(sniffer),
                 );
 
                 let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
@@ -193,7 +186,6 @@ fn body_no_observed<'a>(
     filters: &Filters,
     observed: u128,
     font: Font,
-    font_headers: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'a, Message, StyleType> {
@@ -208,12 +200,7 @@ fn body_no_observed<'a>(
         .align_x(Alignment::Center)
         .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(
-            filters,
-            language,
-            font,
-            font_headers,
-        ))
+        .push(get_active_filters_col(filters, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
@@ -448,25 +435,18 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
         )
 }
 
-fn lazy_col_info<'a>(
-    total: u128,
-    filtered: u128,
-    dropped: u32,
-    sniffer: &Sniffer,
-) -> Container<'a, Message, StyleType> {
+fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
-    let PaletteExtension {
-        font, font_headers, ..
-    } = style.get_extension();
+    let PaletteExtension { font, .. } = style.get_extension();
 
     let col_device = col_device(language, font, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let donut_row = donut_row(language, dropped, total, filtered, font, sniffer);
+    let donut_row = donut_row(language, font, sniffer);
 
     let content = Column::new()
         .align_x(Alignment::Center)
@@ -592,9 +572,6 @@ fn col_data_representation<'a>(
 
 fn donut_row<'a>(
     language: Language,
-    dropped: u32,
-    total: u128,
-    filtered: u128,
     font: Font,
     sniffer: &Sniffer,
 ) -> Container<'a, Message, StyleType> {
@@ -724,7 +701,6 @@ fn donut_row<'a>(
             filtered_out,
             dropped,
             font,
-            language,
         ))
         .push(legend_col);
 
@@ -744,7 +720,7 @@ fn donut_legend_entry<'a>(
     let value_text = if chart_type.eq(&ChartType::Bytes) {
         ByteMultiple::formatted_string(value)
     } else {
-        format!("{}", value)
+        value.to_string()
     };
 
     let label = match rule_type {
@@ -756,7 +732,7 @@ fn donut_legend_entry<'a>(
     };
 
     let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
-        Some(get_active_filters_tooltip(&filters, language, font))
+        Some(get_active_filters_tooltip(filters, language, font))
     } else {
         None
     };
@@ -885,7 +861,6 @@ fn get_active_filters_col<'a>(
     filters: &Filters,
     language: Language,
     font: Font,
-    font_headers: Font,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(active_filters_translation(language))

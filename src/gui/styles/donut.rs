@@ -8,6 +8,7 @@ pub enum DonutType {
 }
 
 impl DonutType {
+    #[allow(clippy::unused_self)]
     fn active(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
