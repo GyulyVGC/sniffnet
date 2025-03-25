@@ -149,7 +149,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
     font: Font,
     language: Language,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
-    let radius = 110.0;
+    let radius = 100.0;
     iced::widget::canvas(DonutChart::new(
         chart_type,
         incoming,

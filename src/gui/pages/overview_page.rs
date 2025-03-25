@@ -212,7 +212,6 @@ fn body_no_observed<'a>(
             language,
             font,
             font_headers,
-            true,
         ))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
@@ -466,22 +465,14 @@ fn lazy_col_info<'a>(
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let donut_row = donut_row(
-        language,
-        dropped,
-        total,
-        filtered,
-        font,
-        font_headers,
-        sniffer,
-    );
+    let donut_row = donut_row(language, dropped, total, filtered, font, sniffer);
 
     let content = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(
             Row::new()
-                .height(120)
+                .height(Length::Fill)
                 .push(
                     Scrollable::with_direction(
                         col_device,
@@ -493,10 +484,11 @@ fn lazy_col_info<'a>(
                 .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
-        .push(donut_row.height(120));
+        .push(donut_row.height(Length::Fill));
 
     Container::new(content)
         .width(400)
+        .height(280)
         .padding(Padding::new(5.0).top(10))
         .align_x(Alignment::Center)
         .class(ContainerType::BorderedRound)
@@ -604,10 +596,10 @@ fn donut_row<'a>(
     total: u128,
     filtered: u128,
     font: Font,
-    font_headers: Font,
     sniffer: &Sniffer,
 ) -> Container<'a, Message, StyleType> {
     let chart_type = sniffer.traffic_chart.chart_type;
+    let filters = &sniffer.filters;
 
     let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
         (
@@ -680,35 +672,45 @@ fn donut_row<'a>(
     //         font,
     //     ))
 
-    let legend_col = Column::new()
-        .spacing(5)
-        .push(donut_legend_entry(
-            incoming_translation(language),
-            in_data,
-            chart_type,
-            RuleType::Incoming,
-            font,
-        ))
-        .push(donut_legend_entry(
-            outgoing_translation(language),
-            out_data,
-            chart_type,
-            RuleType::Outgoing,
-            font,
-        ))
-        .push(donut_legend_entry(
-            excluded_translation(language),
+    let legend_entry_filtered = if filters.none_active() {
+        None
+    } else {
+        Some(donut_legend_entry(
             filtered_out,
             chart_type,
             RuleType::FilteredOut,
+            filters,
             font,
+            language,
+        ))
+    };
+
+    let legend_col = Column::new()
+        .spacing(5)
+        .push(donut_legend_entry(
+            in_data,
+            chart_type,
+            RuleType::Incoming,
+            filters,
+            font,
+            language,
         ))
         .push(donut_legend_entry(
-            dropped_translation(language),
+            out_data,
+            chart_type,
+            RuleType::Outgoing,
+            filters,
+            font,
+            language,
+        ))
+        .push_maybe(legend_entry_filtered)
+        .push(donut_legend_entry(
             dropped,
             chart_type,
             RuleType::Dropped,
+            filters,
             font,
+            language,
         ));
 
     let donut_row = Row::new()
@@ -732,11 +734,12 @@ fn donut_row<'a>(
 }
 
 fn donut_legend_entry<'a>(
-    label: &str,
     value: u128,
     chart_type: ChartType,
     rule_type: RuleType,
+    filters: &Filters,
     font: Font,
+    language: Language,
 ) -> Row<'a, Message, StyleType> {
     let value_text = if chart_type.eq(&ChartType::Bytes) {
         ByteMultiple::formatted_string(value)
@@ -744,8 +747,22 @@ fn donut_legend_entry<'a>(
         format!("{}", value)
     };
 
+    let label = match rule_type {
+        RuleType::Incoming => incoming_translation(language),
+        RuleType::Outgoing => outgoing_translation(language),
+        RuleType::FilteredOut => excluded_translation(language),
+        RuleType::Dropped => dropped_translation(language),
+        _ => "",
+    };
+
+    let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
+        Some(get_active_filters_tooltip(&filters, language, font))
+    } else {
+        None
+    };
+
     Row::new()
-        .spacing(5)
+        .spacing(10)
         .align_y(Alignment::Center)
         .push(
             Row::new()
@@ -753,6 +770,7 @@ fn donut_legend_entry<'a>(
                 .push(Rule::horizontal(1).class(rule_type)),
         )
         .push(Text::new(format!("{label}: {value_text}")).font(font))
+        .push_maybe(tooltip)
 }
 
 const MIN_BARS_LENGTH: f32 = 10.0;
@@ -868,7 +886,6 @@ fn get_active_filters_col<'a>(
     language: Language,
     font: Font,
     font_headers: Font,
-    show: bool,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(format!("{}:", active_filters_translation(language),))
@@ -880,30 +897,48 @@ fn get_active_filters_col<'a>(
         ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
     } else {
         let filters_string = get_active_filters_string(filters, language);
-        ret_val = ret_val.push(if show {
-            Row::new().push(Text::new(filters_string).font(font))
-        } else {
-            Row::new().padding(Padding::ZERO.left(20)).push(
-                Tooltip::new(
-                    Container::new(
-                        Text::new("i")
-                            .font(font_headers)
-                            .size(15)
-                            .line_height(LineHeight::Relative(1.0)),
-                    )
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .height(20)
-                    .width(20)
-                    .class(ContainerType::Highlighted),
-                    Text::new(filters_string).font(font),
-                    Position::FollowCursor,
-                )
-                .class(ContainerType::Tooltip),
-            )
-        });
+        ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
     }
     ret_val
+}
+
+fn get_active_filters_tooltip<'a>(
+    filters: &Filters,
+    language: Language,
+    font: Font,
+) -> Tooltip<'a, Message, StyleType> {
+    let filters_string = get_active_filters_string(filters, language);
+
+    let mut ret_val = Column::new().push(
+        Text::new(format!("{}:", active_filters_translation(language),))
+            .font(font)
+            .class(TextType::Subtitle),
+    );
+
+    ret_val = ret_val.push(
+        Row::new()
+            .padding(Padding::ZERO.left(20))
+            .push(Text::new(filters_string).font(font)),
+    );
+
+    let tooltip = Tooltip::new(
+        Container::new(
+            Text::new("i")
+                .font(font)
+                .size(15)
+                .line_height(LineHeight::Relative(1.0)),
+        )
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
+        .height(20)
+        .width(20)
+        .class(ContainerType::BadgeInfo),
+        ret_val,
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip);
+
+    tooltip
 }
 
 fn sort_arrows<'a>(
