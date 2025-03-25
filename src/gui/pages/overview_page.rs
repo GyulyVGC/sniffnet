@@ -95,7 +95,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 );
                 tab_and_body = tab_and_body.push(tabs);
 
-                let container_chart = container_chart(sniffer, font).height(280);
+                let container_chart = container_chart(sniffer, font);
 
                 let container_info = lazy(
                     (total, style, language, sniffer.traffic_chart.chart_type),
@@ -123,6 +123,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .align_x(Alignment::Center)
                     .push(
                         Row::new()
+                            .height(280)
                             .spacing(10)
                             .push(container_info)
                             .push(container_chart),
@@ -488,7 +489,6 @@ fn lazy_col_info<'a>(
 
     Container::new(content)
         .width(400)
-        .height(280)
         .padding(Padding::new(5.0).top(10))
         .align_x(Alignment::Center)
         .class(ContainerType::BorderedRound)
@@ -888,7 +888,7 @@ fn get_active_filters_col<'a>(
     font_headers: Font,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().push(
-        Text::new(format!("{}:", active_filters_translation(language),))
+        Text::new(active_filters_translation(language))
             .font(font)
             .class(TextType::Subtitle),
     );
@@ -910,7 +910,7 @@ fn get_active_filters_tooltip<'a>(
     let filters_string = get_active_filters_string(filters, language);
 
     let mut ret_val = Column::new().push(
-        Text::new(format!("{}:", active_filters_translation(language),))
+        Text::new(active_filters_translation(language))
             .font(font)
             .class(TextType::Subtitle),
     );

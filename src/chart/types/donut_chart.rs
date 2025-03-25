@@ -98,7 +98,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
     ) -> Vec<canvas::Geometry> {
         let mut frame = Frame::new(renderer, bounds.size());
         let center = frame.center();
-        let radius = frame.width().min(frame.height()) / 2.0;
+        let radius = (frame.width().min(frame.height()) / 2.0) * 0.9;
 
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
         let colors = [
@@ -149,7 +149,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
     font: Font,
     language: Language,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
-    let radius = 100.0;
     iced::widget::canvas(DonutChart::new(
         chart_type,
         incoming,
@@ -159,6 +158,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
         font,
         language,
     ))
-    .width(radius)
-    .height(radius)
+    .width(110)
+    .height(110)
 }

@@ -77,28 +77,28 @@ pub fn connection_details_translation(language: Language) -> &'static str {
     }
 }
 
+// refers to bytes or packets dropped because they weren't processed fast enough
 pub fn dropped_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Dropped",
-        Language::IT => "Mancati",
-        Language::RU => "Потеряно пакетов",
-        Language::SV => "Tappade paket",
-        Language::FI => "Pudotetut paketit",
-        Language::DE => "Verlorene Pakete",
-        Language::TR => "Düşen paketler",
+        Language::IT => "Persi",
+        Language::RU => "Потеряно",
+        Language::SV => "Tappade",
+        Language::FI => "Pudotetut",
+        Language::DE => "Verlorene",
+        Language::TR => "Düşen",
         // Language::FA => "بسته های رها شده",
-        Language::ES => "Paquetes perdidos",
-        Language::KO => "손실 패킷",
-        Language::ZH => "丢包计数",
-        Language::UK => "Пропущені пакети",
-        Language::RO => "Pachete pierdute",
-        Language::PL => "Utracone pakiety",
-        Language::FR => "Packets perdus",
-        Language::JA => "ドロップしたパケット",
-        Language::UZ => "Yig'ilgan paketlar",
-        Language::PT => "Pacotes perdidos",
-        Language::VI => "Gói tin đã bị mất",
-        _ => "Dropped packets",
+        Language::ES | Language::PT => "Perdidos",
+        Language::KO => "손실",
+        Language::ZH => "丢计",
+        Language::UK => "Пропущені",
+        Language::RO => "Pierdute",
+        Language::PL => "Utracone",
+        Language::FR => "Perdus",
+        Language::JA => "ドロップした",
+        Language::UZ => "Yig'ilgan",
+        Language::VI => "Mất",
+        _ => "Dropped",
     }
 }
 
