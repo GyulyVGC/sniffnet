@@ -37,16 +37,12 @@ impl DonutChart {
         }
     }
 
-    fn values(&self) -> [u128; 4] {
-        let inc = self.incoming;
-        let out = self.outgoing;
-        let filtered_out = self.filtered_out;
-        let dropped = self.dropped;
-        [inc, out, filtered_out, dropped]
+    fn total(&self) -> u128 {
+        self.incoming + self.outgoing + self.filtered_out + self.dropped
     }
 
     fn title(&self) -> String {
-        let total = self.values().iter().sum();
+        let total = self.total();
         if self.chart_type.eq(&ChartType::Bytes) {
             ByteMultiple::formatted_string(total)
         } else {
@@ -55,27 +51,35 @@ impl DonutChart {
     }
 
     fn angles(&self) -> [(Radians, Radians); 4] {
-        let mut values = self.values();
-        let total: u128 = values.iter().sum();
-        let min_val = 2 * total / 100;
-        let mut diff = 0;
+        #[allow(clippy::cast_precision_loss)]
+        let mut values = [
+            self.incoming as f32,
+            self.outgoing as f32,
+            self.filtered_out as f32,
+            self.dropped as f32,
+        ];
+        let total: f32 = values.iter().sum();
+        let min_val = 2.0 * total / 100.0;
+        let mut diff = 0.0;
 
         for value in &mut values {
-            if *value != 0 && *value < min_val {
+            if *value > 0.0 && *value < min_val {
                 diff += min_val - *value;
                 *value = min_val;
             }
         }
         // remove the diff from the max value
-        if diff > 0 {
-            let _ = values.iter_mut().max().map(|max| *max -= diff);
+        if diff > 0.0 {
+            let _ = values
+                .iter_mut()
+                .max_by(|a, b| a.total_cmp(b))
+                .map(|max| *max -= diff);
         }
 
         let mut start_angle = Radians(-consts::FRAC_PI_2);
         values.map(|value| {
             let start = start_angle;
-            #[allow(clippy::cast_precision_loss)]
-            let end = start + Radians(consts::TAU) * (value as f32) / (total as f32);
+            let end = start + Radians(consts::TAU) * value / total;
             start_angle = end;
             (start, end)
         })

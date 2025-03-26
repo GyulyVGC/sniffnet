@@ -53,14 +53,10 @@ pub struct Style {
     pub(crate) dropped: Color,
 }
 
-/// The theme catalog of a [`ProgressBar`].
 pub trait Catalog: Sized {
-    /// The item class of the [`Catalog`].
     type Class<'a>;
 
-    /// The default class produced by the [`Catalog`].
     fn default<'a>() -> Self::Class<'a>;
 
-    /// The [`Style`] of a class with the given status.
     fn style(&self, class: &Self::Class<'_>) -> Style;
 }
