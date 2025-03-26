@@ -2,10 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::gui::styles::style_constants::ALERT_RED_COLOR;
+use crate::StyleType;
 use iced::widget::rule::{Catalog, FillMode, Style};
 use iced::Color;
-
-use crate::StyleType;
 
 #[derive(Default)]
 pub enum RuleType {
@@ -27,7 +27,7 @@ impl RuleType {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
-                RuleType::Dropped => Color::new(0.8, 0.15, 0.15, 1.0),
+                RuleType::Dropped => ALERT_RED_COLOR,
                 RuleType::FilteredOut => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,

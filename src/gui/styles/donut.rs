@@ -1,3 +1,4 @@
+use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use crate::gui::styles::types::style_type::StyleType;
 use iced::Color;
 
@@ -26,7 +27,7 @@ impl DonutType {
             outgoing: colors.outgoing,
             text_color: colors.text_body,
             filtered_out: ext.buttons_color,
-            dropped: Color::new(0.8, 0.15, 0.15, 1.0),
+            dropped: ALERT_RED_COLOR,
         }
     }
 }
