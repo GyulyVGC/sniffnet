@@ -599,55 +599,6 @@ fn donut_row<'a>(
             u128::from(sniffer.runtime_data.dropped_packets),
         )
     };
-    // let filters = &sniffer.filters;
-    //
-    // let dropped_val = if dropped > 0 {
-    //     format!(
-    //         "{} {}",
-    //         dropped,
-    //         of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
-    //     )
-    // } else {
-    //     none_translation(language).to_string()
-    // };
-    // let bytes_value = if dropped > 0 {
-    //     ByteMultiple::formatted_string(filtered_bytes)
-    // } else {
-    //     format!(
-    //         "{} {}",
-    //         &ByteMultiple::formatted_string(filtered_bytes),
-    //         of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
-    //     )
-    // };
-    //
-    // Column::new()
-    //     .spacing(10)
-    //     .push(get_active_filters_col(
-    //         filters,
-    //         language,
-    //         font,
-    //         font_headers,
-    //         false,
-    //     ))
-    //     .push(TextType::highlighted_subtitle_with_desc(
-    //         filtered_bytes_translation(language),
-    //         &bytes_value,
-    //         font,
-    //     ))
-    //     .push(TextType::highlighted_subtitle_with_desc(
-    //         filtered_packets_translation(language),
-    //         &format!(
-    //             "{} {}",
-    //             filtered,
-    //             of_total_translation(language, &get_percentage_string(total, filtered))
-    //         ),
-    //         font,
-    //     ))
-    //     .push(TextType::highlighted_subtitle_with_desc(
-    //         dropped_packets_translation(language),
-    //         &dropped_val,
-    //         font,
-    //     ))
 
     let legend_entry_filtered = if filters.none_active() {
         None
@@ -692,7 +643,6 @@ fn donut_row<'a>(
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)
-        .padding(Padding::ZERO.top(7))
         .spacing(20)
         .push(donut_chart(
             chart_type,
@@ -705,8 +655,10 @@ fn donut_row<'a>(
         .push(legend_col);
 
     Container::new(donut_row)
+        .height(Length::Fill)
         .width(Length::Fill)
         .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
 }
 
 fn donut_legend_entry<'a>(
@@ -890,11 +842,7 @@ fn get_active_filters_tooltip<'a>(
             .class(TextType::Subtitle),
     );
 
-    ret_val = ret_val.push(
-        Row::new()
-            .padding(Padding::ZERO.left(20))
-            .push(Text::new(filters_string).font(font)),
-    );
+    ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
 
     let tooltip = Tooltip::new(
         Container::new(

@@ -185,7 +185,7 @@ mod tests {
         previous_threshold: 500_000, threshold: Some(500_000),byte_multiple: ByteMultiple::KB, ..BytesNotification::default() })]
     #[case("420m", BytesNotification {
         previous_threshold: 420_000_000, threshold: Some(420_000_000),byte_multiple: ByteMultiple::MB, ..BytesNotification::default() })]
-    #[case("744Ь", BytesNotification {
+    #[case("744ь", BytesNotification {
     previous_threshold: 744, threshold: Some(744),byte_multiple: ByteMultiple::B, ..BytesNotification::default() })]
     #[case("888g", BytesNotification {
         previous_threshold: 888_000_000_000, threshold: Some(888_000_000_000),byte_multiple: ByteMultiple::GB, ..BytesNotification::default() })]
