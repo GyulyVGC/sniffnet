@@ -19,3 +19,12 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         _ => "Share your feedback",
     }
 }
+
+// refers to bytes or packets excluded because of the filters
+pub fn excluded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Excluded",
+        Language::IT => "Esclusi",
+        _ => "Excluded",
+    }
+}

@@ -17,6 +17,7 @@ pub enum ContainerType {
     BorderedRound,
     Tooltip,
     Badge,
+    BadgeInfo,
     Palette,
     Gradient(GradientType),
     Modal,
@@ -43,7 +44,7 @@ impl ContainerType {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 }),
-                ContainerType::Badge => Background::Color(Color {
+                ContainerType::Badge | ContainerType::BadgeInfo => Background::Color(Color {
                     a: ext.alpha_chart_badge,
                     ..colors.secondary
                 }),
@@ -67,6 +68,7 @@ impl ContainerType {
                     ContainerType::Modal => Radius::new(0).bottom(BORDER_ROUNDED_RADIUS),
                     ContainerType::Tooltip => 7.0.into(),
                     ContainerType::Badge
+                    | ContainerType::BadgeInfo
                     | ContainerType::Highlighted
                     | ContainerType::HighlightedOnHeader => 100.0.into(),
                     _ => 0.0.into(),
@@ -83,6 +85,7 @@ impl ContainerType {
                 },
                 color: match self {
                     ContainerType::Palette => Color::BLACK,
+                    ContainerType::BadgeInfo => colors.secondary,
                     _ => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color

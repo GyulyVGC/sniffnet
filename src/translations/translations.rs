@@ -662,93 +662,93 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
     })
 }
 
-pub fn filtered_packets_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Filtered packets",
-        Language::IT => "Pacchetti filtrati",
-        Language::FR => "Paquets filtrés",
-        Language::ES => "Paquetes filtrados",
-        Language::PL => "Przefiltrowane pakiety",
-        Language::DE => "Gefilterte Pakete",
-        Language::UK => "Відфільтровані пакети",
-        Language::ZH => "目标数据包计数",
-        Language::RO => "Pachete filtrate",
-        Language::KO => "필터링된 패킷",
-        Language::TR => "Filtrelenen paketler",
-        Language::RU => "Отфильтровано пакетов",
-        Language::PT => "Pacotes filtrados",
-        Language::EL => "Φιλτραρισμένα πακέτα",
-        // Language::FA => "بسته های صاف شده",
-        Language::SV => "Filtrerade paket",
-        Language::FI => "Suodatettuja paketteja",
-        Language::JA => "フィルタリングされたパケット",
-        Language::UZ => "Filtrlangan paketlar",
-        Language::VI => "Các gói tin đã được lọc",
-    }
-}
+// pub fn filtered_packets_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Filtered packets",
+//         Language::IT => "Pacchetti filtrati",
+//         Language::FR => "Paquets filtrés",
+//         Language::ES => "Paquetes filtrados",
+//         Language::PL => "Przefiltrowane pakiety",
+//         Language::DE => "Gefilterte Pakete",
+//         Language::UK => "Відфільтровані пакети",
+//         Language::ZH => "目标数据包计数",
+//         Language::RO => "Pachete filtrate",
+//         Language::KO => "필터링된 패킷",
+//         Language::TR => "Filtrelenen paketler",
+//         Language::RU => "Отфильтровано пакетов",
+//         Language::PT => "Pacotes filtrados",
+//         Language::EL => "Φιλτραρισμένα πακέτα",
+//         // Language::FA => "بسته های صاف شده",
+//         Language::SV => "Filtrerade paket",
+//         Language::FI => "Suodatettuja paketteja",
+//         Language::JA => "フィルタリングされたパケット",
+//         Language::UZ => "Filtrlangan paketlar",
+//         Language::VI => "Các gói tin đã được lọc",
+//     }
+// }
 
-pub fn filtered_bytes_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Filtered bytes",
-        Language::IT => "Byte filtrati",
-        Language::FR => "Octets filtrés",
-        Language::ES | Language::PT => "Bytes filtrados",
-        Language::PL => "Przechwycone bajty",
-        Language::DE => "Gefilterte Bytes",
-        Language::UK => "Відфільтровані байти",
-        Language::ZH => "目标网络流量计数",
-        Language::RO => "Octeți filtrați",
-        Language::KO => "필터링된 바이트",
-        Language::TR => "Filtrelenen bayt",
-        Language::RU => "Отфильтровано байт",
-        Language::EL => "Φιλτραρισμένα bytes",
-        // Language::FA => "بایت های صاف شده",
-        Language::SV => "Filtrerade bytes",
-        Language::FI => "Suodatettuja tavuja",
-        Language::JA => "フィルタリングされたバイト",
-        Language::UZ => "Filtrlangan baytlar",
-        Language::VI => "Các bytes đã được lọc",
-    }
-}
+// pub fn filtered_bytes_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Filtered bytes",
+//         Language::IT => "Byte filtrati",
+//         Language::FR => "Octets filtrés",
+//         Language::ES | Language::PT => "Bytes filtrados",
+//         Language::PL => "Przechwycone bajty",
+//         Language::DE => "Gefilterte Bytes",
+//         Language::UK => "Відфільтровані байти",
+//         Language::ZH => "目标网络流量计数",
+//         Language::RO => "Octeți filtrați",
+//         Language::KO => "필터링된 바이트",
+//         Language::TR => "Filtrelenen bayt",
+//         Language::RU => "Отфильтровано байт",
+//         Language::EL => "Φιλτραρισμένα bytes",
+//         // Language::FA => "بایت های صاف شده",
+//         Language::SV => "Filtrerade bytes",
+//         Language::FI => "Suodatettuja tavuja",
+//         Language::JA => "フィルタリングされたバイト",
+//         Language::UZ => "Filtrlangan baytlar",
+//         Language::VI => "Các bytes đã được lọc",
+//     }
+// }
 
-pub fn of_total_translation(language: Language, percentage: &str) -> String {
-    match language {
-        Language::EN => format!("({percentage} of the total)"),
-        Language::IT => format!("({percentage} del totale)"),
-        Language::FR => format!("({percentage} du total)"),
-        Language::ES => format!("({percentage} del total)"),
-        Language::PL => format!("({percentage} z całości)"),
-        Language::DE => format!("({percentage} der Gesamtzahl)"),
-        Language::UK => {
-            format!("({percentage} від загальної суми)")
-        }
-        Language::ZH => {
-            format!("(占所有数据包的 {percentage})")
-        }
-        Language::RO => {
-            format!("({percentage} din total)")
-        }
-        Language::KO => {
-            format!("({percentage} 의 일부)")
-        }
-        Language::TR => format!("toplamın ({percentage})"),
-        Language::RU => {
-            format!("({percentage} от общего числа)")
-        }
-        Language::PT => {
-            format!("({percentage} do total)")
-        }
-        Language::EL => {
-            format!("({percentage} από τα συνολικά)")
-        }
-        // Language::FA => format!("({percentage} از مجموع)"),
-        Language::SV => format!("({percentage} av totalen)"),
-        Language::FI => format!("({percentage} kokonaismäärästä)"),
-        Language::JA => format!("(トータル: {percentage} )"),
-        Language::UZ => format!("(Jami: {percentage} )"),
-        Language::VI => format!("({percentage} trên tổng cộng)"),
-    }
-}
+// pub fn of_total_translation(language: Language, percentage: &str) -> String {
+//     match language {
+//         Language::EN => format!("({percentage} of the total)"),
+//         Language::IT => format!("({percentage} del totale)"),
+//         Language::FR => format!("({percentage} du total)"),
+//         Language::ES => format!("({percentage} del total)"),
+//         Language::PL => format!("({percentage} z całości)"),
+//         Language::DE => format!("({percentage} der Gesamtzahl)"),
+//         Language::UK => {
+//             format!("({percentage} від загальної суми)")
+//         }
+//         Language::ZH => {
+//             format!("(占所有数据包的 {percentage})")
+//         }
+//         Language::RO => {
+//             format!("({percentage} din total)")
+//         }
+//         Language::KO => {
+//             format!("({percentage} 의 일부)")
+//         }
+//         Language::TR => format!("toplamın ({percentage})"),
+//         Language::RU => {
+//             format!("({percentage} от общего числа)")
+//         }
+//         Language::PT => {
+//             format!("({percentage} do total)")
+//         }
+//         Language::EL => {
+//             format!("({percentage} από τα συνολικά)")
+//         }
+//         // Language::FA => format!("({percentage} از مجموع)"),
+//         Language::SV => format!("({percentage} av totalen)"),
+//         Language::FI => format!("({percentage} kokonaismäärästä)"),
+//         Language::JA => format!("(トータル: {percentage} )"),
+//         Language::UZ => format!("(Jami: {percentage} )"),
+//         Language::VI => format!("({percentage} trên tổng cộng)"),
+//     }
+// }
 
 // pub fn filtered_application_translation(language: Language) -> Text<StyleType> {
 //     Text::new(match language {
@@ -1354,7 +1354,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::DE => "Eingehend",
         Language::UK => "Вхідні",
         Language::ZH => "入站",
-        Language::RO => "de intrare",
+        Language::RO => "De intrare",
         Language::KO => "수신중",
         Language::TR => "Gelen",
         Language::RU => "Входящий",
@@ -1379,7 +1379,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::DE => "Ausgehend",
         Language::UK => "Вихідні",
         Language::ZH => "出站",
-        Language::RO => "de ieșire",
+        Language::RO => "De ieșire",
         Language::KO => "발신중",
         Language::TR => "Giden",
         Language::RU => "Исходящий",

@@ -3,16 +3,7 @@
 //! It contains elements to display traffic statistics: chart, detailed connections data
 //! and overall statistics about the filtered traffic.
 
-use iced::widget::scrollable::Direction;
-use iced::widget::text::LineHeight;
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
-    Scrollable, Space, Text, Tooltip,
-};
-use iced::Length::{Fill, FillPortion};
-use iced::{Alignment, Font, Length, Padding};
-
+use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::tab::get_pages_tabs;
@@ -33,19 +24,30 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, bytes_chart_translation, error_translation,
-    filtered_bytes_translation, filtered_packets_translation, network_adapter_translation,
-    no_addresses_translation, none_translation, of_total_translation, packets_chart_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, bytes_chart_translation, error_translation, incoming_translation,
+    network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
+    packets_chart_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
-    data_representation_translation, dropped_packets_translation, host_translation,
+    data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::utils::formatted_strings::{get_active_filters_string, get_percentage_string};
+use crate::translations::translations_4::excluded_translation;
+use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use iced::alignment::{Horizontal, Vertical};
+use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
+use iced::widget::{
+    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
+    Scrollable, Space, Text, Tooltip,
+};
+use iced::Length::{Fill, FillPortion};
+use iced::{Alignment, Font, Length, Padding, Shrink};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -72,14 +74,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body = body_no_observed(
-                    &sniffer.filters,
-                    observed,
-                    font,
-                    font_headers,
-                    language,
-                    &sniffer.waiting,
-                );
+                body =
+                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
             }
             (_observed, filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -96,7 +92,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
                 let container_info = lazy(
                     (total, style, language, sniffer.traffic_chart.chart_type),
-                    move |_| lazy_col_info(total, filtered, dropped, sniffer),
+                    move |_| lazy_col_info(sniffer),
                 );
 
                 let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
@@ -120,8 +116,8 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .align_x(Alignment::Center)
                     .push(
                         Row::new()
+                            .height(280)
                             .spacing(10)
-                            .height(Fill)
                             .push(container_info)
                             .push(container_chart),
                     )
@@ -190,7 +186,6 @@ fn body_no_observed<'a>(
     filters: &Filters,
     observed: u128,
     font: Font,
-    font_headers: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'a, Message, StyleType> {
@@ -205,13 +200,7 @@ fn body_no_observed<'a>(
         .align_x(Alignment::Center)
         .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(
-            filters,
-            language,
-            font,
-            font_headers,
-            true,
-        ))
+        .push(get_active_filters_col(filters, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
         .push(Text::new(waiting.to_owned()).font(font).size(50))
@@ -253,7 +242,7 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .push(col_service);
 
     Container::new(row_report)
-        .height(Fill)
+        .height(Shrink)
         .class(ContainerType::BorderedRound)
 }
 
@@ -446,40 +435,25 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
         )
 }
 
-fn lazy_col_info<'a>(
-    total: u128,
-    filtered: u128,
-    dropped: u32,
-    sniffer: &Sniffer,
-) -> Container<'a, Message, StyleType> {
+fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
-    let PaletteExtension {
-        font, font_headers, ..
-    } = style.get_extension();
+    let PaletteExtension { font, .. } = style.get_extension();
 
     let col_device = col_device(language, font, &sniffer.device);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
 
-    let col_bytes_packets = col_bytes_packets(
-        language,
-        dropped,
-        total,
-        filtered,
-        font,
-        font_headers,
-        sniffer,
-    );
+    let donut_row = donut_row(language, font, sniffer);
 
     let content = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(
             Row::new()
-                .height(120)
+                .height(Length::Fill)
                 .push(
                     Scrollable::with_direction(
                         col_device,
@@ -491,14 +465,7 @@ fn lazy_col_info<'a>(
                 .push(col_data_representation.width(Length::Fill)),
         )
         .push(Rule::horizontal(15))
-        .push(
-            Scrollable::with_direction(
-                col_bytes_packets,
-                Direction::Vertical(ScrollbarType::properties()),
-            )
-            .height(Length::Fill)
-            .width(Length::Fill),
-        );
+        .push(donut_row.height(Length::Fill));
 
     Container::new(content)
         .width(400)
@@ -603,71 +570,140 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn col_bytes_packets<'a>(
+fn donut_row<'a>(
     language: Language,
-    dropped: u32,
-    total: u128,
-    filtered: u128,
     font: Font,
-    font_headers: Font,
     sniffer: &Sniffer,
-) -> Column<'a, Message, StyleType> {
-    let filtered_bytes = sniffer.runtime_data.tot_out_bytes + sniffer.runtime_data.tot_in_bytes;
-    let all_bytes = sniffer.runtime_data.all_bytes;
+) -> Container<'a, Message, StyleType> {
+    let chart_type = sniffer.traffic_chart.chart_type;
     let filters = &sniffer.filters;
 
-    let dropped_val = if dropped > 0 {
-        format!(
-            "{} {}",
-            dropped,
-            of_total_translation(language, &get_percentage_string(total, u128::from(dropped)))
+    let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
+        (
+            sniffer.runtime_data.tot_in_bytes,
+            sniffer.runtime_data.tot_out_bytes,
+            sniffer.runtime_data.all_bytes
+                - sniffer.runtime_data.tot_out_bytes
+                - sniffer.runtime_data.tot_in_bytes,
+            // assume that the dropped packets have the same size as the average packet
+            u128::from(sniffer.runtime_data.dropped_packets) * sniffer.runtime_data.all_bytes
+                / sniffer.runtime_data.all_packets,
         )
     } else {
-        none_translation(language).to_string()
-    };
-    let bytes_value = if dropped > 0 {
-        ByteMultiple::formatted_string(filtered_bytes)
-    } else {
-        format!(
-            "{} {}",
-            &ByteMultiple::formatted_string(filtered_bytes),
-            of_total_translation(language, &get_percentage_string(all_bytes, filtered_bytes))
+        (
+            sniffer.runtime_data.tot_in_packets,
+            sniffer.runtime_data.tot_out_packets,
+            sniffer.runtime_data.all_packets
+                - sniffer.runtime_data.tot_out_packets
+                - sniffer.runtime_data.tot_in_packets,
+            u128::from(sniffer.runtime_data.dropped_packets),
         )
     };
 
-    Column::new()
-        .spacing(10)
-        .push(get_active_filters_col(
+    let legend_entry_filtered = if filters.none_active() {
+        None
+    } else {
+        Some(donut_legend_entry(
+            filtered_out,
+            chart_type,
+            RuleType::FilteredOut,
             filters,
+            font,
             language,
-            font,
-            font_headers,
-            false,
         ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            filtered_bytes_translation(language),
-            &bytes_value,
+    };
+
+    let legend_col = Column::new()
+        .spacing(5)
+        .push(donut_legend_entry(
+            in_data,
+            chart_type,
+            RuleType::Incoming,
+            filters,
+            font,
+            language,
+        ))
+        .push(donut_legend_entry(
+            out_data,
+            chart_type,
+            RuleType::Outgoing,
+            filters,
+            font,
+            language,
+        ))
+        .push_maybe(legend_entry_filtered)
+        .push(donut_legend_entry(
+            dropped,
+            chart_type,
+            RuleType::Dropped,
+            filters,
+            font,
+            language,
+        ));
+
+    let donut_row = Row::new()
+        .align_y(Vertical::Center)
+        .spacing(20)
+        .push(donut_chart(
+            chart_type,
+            in_data,
+            out_data,
+            filtered_out,
+            dropped,
             font,
         ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            filtered_packets_translation(language),
-            &format!(
-                "{} {}",
-                filtered,
-                of_total_translation(language, &get_percentage_string(total, filtered))
-            ),
-            font,
-        ))
-        .push(TextType::highlighted_subtitle_with_desc(
-            dropped_packets_translation(language),
-            &dropped_val,
-            font,
-        ))
+        .push(legend_col);
+
+    Container::new(donut_row)
+        .height(Length::Fill)
+        .width(Length::Fill)
+        .align_x(Horizontal::Center)
+        .align_y(Vertical::Center)
+}
+
+fn donut_legend_entry<'a>(
+    value: u128,
+    chart_type: ChartType,
+    rule_type: RuleType,
+    filters: &Filters,
+    font: Font,
+    language: Language,
+) -> Row<'a, Message, StyleType> {
+    let value_text = if chart_type.eq(&ChartType::Bytes) {
+        ByteMultiple::formatted_string(value)
+    } else {
+        value.to_string()
+    };
+
+    let label = match rule_type {
+        RuleType::Incoming => incoming_translation(language),
+        RuleType::Outgoing => outgoing_translation(language),
+        RuleType::FilteredOut => excluded_translation(language),
+        RuleType::Dropped => dropped_translation(language),
+        _ => "",
+    };
+
+    let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
+        Some(get_active_filters_tooltip(filters, language, font))
+    } else {
+        None
+    };
+
+    Row::new()
+        .spacing(10)
+        .align_y(Alignment::Center)
+        .push(
+            Row::new()
+                .width(10)
+                .push(Rule::horizontal(1).class(rule_type)),
+        )
+        .push(Text::new(format!("{label}: {value_text}")).font(font))
+        .push_maybe(tooltip)
 }
 
 const MIN_BARS_LENGTH: f32 = 10.0;
 
-fn get_bars_length(
+pub fn get_bars_length(
     tot_width: f32,
     chart_type: ChartType,
     first_entry: &DataInfo,
@@ -777,11 +813,9 @@ fn get_active_filters_col<'a>(
     filters: &Filters,
     language: Language,
     font: Font,
-    font_headers: Font,
-    show: bool,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().push(
-        Text::new(format!("{}:", active_filters_translation(language),))
+        Text::new(active_filters_translation(language))
             .font(font)
             .class(TextType::Subtitle),
     );
@@ -790,30 +824,44 @@ fn get_active_filters_col<'a>(
         ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
     } else {
         let filters_string = get_active_filters_string(filters, language);
-        ret_val = ret_val.push(if show {
-            Row::new().push(Text::new(filters_string).font(font))
-        } else {
-            Row::new().padding(Padding::ZERO.left(20)).push(
-                Tooltip::new(
-                    Container::new(
-                        Text::new("i")
-                            .font(font_headers)
-                            .size(15)
-                            .line_height(LineHeight::Relative(1.0)),
-                    )
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .height(20)
-                    .width(20)
-                    .class(ContainerType::Highlighted),
-                    Text::new(filters_string).font(font),
-                    Position::FollowCursor,
-                )
-                .class(ContainerType::Tooltip),
-            )
-        });
+        ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
     }
     ret_val
+}
+
+fn get_active_filters_tooltip<'a>(
+    filters: &Filters,
+    language: Language,
+    font: Font,
+) -> Tooltip<'a, Message, StyleType> {
+    let filters_string = get_active_filters_string(filters, language);
+
+    let mut ret_val = Column::new().push(
+        Text::new(active_filters_translation(language))
+            .font(font)
+            .class(TextType::Subtitle),
+    );
+
+    ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
+
+    let tooltip = Tooltip::new(
+        Container::new(
+            Text::new("i")
+                .font(font)
+                .size(15)
+                .line_height(LineHeight::Relative(1.0)),
+        )
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
+        .height(20)
+        .width(20)
+        .class(ContainerType::BadgeInfo),
+        ret_val,
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip);
+
+    tooltip
 }
 
 fn sort_arrows<'a>(
