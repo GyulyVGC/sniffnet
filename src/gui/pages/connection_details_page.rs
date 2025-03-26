@@ -19,6 +19,7 @@ use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
@@ -185,6 +186,7 @@ fn col_info<'a>(
     language: Language,
 ) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
+    let is_arp = key.protocol.eq(&Protocol::ARP);
 
     let mut ret_val = Column::new()
         .spacing(10)
@@ -207,7 +209,7 @@ fn col_info<'a>(
             font,
         ));
 
-    if !is_icmp {
+    if !is_icmp && !is_arp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),
@@ -234,7 +236,7 @@ fn col_info<'a>(
         font,
     ));
 
-    if is_icmp {
+    if is_icmp || is_arp {
         ret_val = ret_val.push(
             Column::new()
                 .push(
@@ -245,7 +247,14 @@ fn col_info<'a>(
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(Text::new(IcmpType::pretty_print_types(&val.icmp_types)).font(font)),
+                        .push(
+                            Text::new(if is_icmp {
+                                IcmpType::pretty_print_types(&val.icmp_types)
+                            } else {
+                                ArpType::pretty_print_types(&val.arp_types)
+                            })
+                            .font(font),
+                        ),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
