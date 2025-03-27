@@ -55,7 +55,7 @@ rfd = "0.15.3"
 phf = "0.11.3"
 phf_shared = "0.11.3"
 splines = "4.4.2"
-clap = { version = "4.5.32", features = ["derive"] }
+clap = { version = "4.5.34", features = ["derive"] }
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
