@@ -602,6 +602,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "pcwizz",
+      "name": "Morgan Hill",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1645637?v=4",
+      "profile": "http://pcwizz.net",
+      "contributions": [
+        "security"
+      ]
     }
   ],
   "contributorsPerLine": 7,
