@@ -15,6 +15,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
         Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
         Language::UK => "Виберіть мережевий адаптер для перевірки",
         Language::ZH => "选择需要监控的网络适配器",
+        Language::ZH_TW => "選取要檢視的網路介面卡",
         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
         Language::KO => "검사할 네트워크 어댑터 선택",
         Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
@@ -40,6 +41,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
 //         Language::DE => "Anwendungs-Protokoll",
 //         Language::UK => "Протокол застосування",
 //         Language::ZH => "目标应用层协议",
+//         Language::ZH_TW => "應用程式通訊協定",
 //         Language::RO => "Protocol aplicație",
 //         Language::KO => "어플리케이션 프로토콜",
 //         Language::TR => "Uygulama protokolü",
@@ -64,6 +66,7 @@ pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType>
         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
         Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
         Language::ZH => "选择需要监控的目标",
+        Language::ZH_TW => "選取要套用於網路流量的篩選器",
         Language::RO => "Selectați filtre pentru traficul de rețea",
         Language::KO => "네트워크 트레픽에 적용할 필터 선택",
         Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
@@ -88,6 +91,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::PL => "Rozpocznij!",
         Language::UK => "Почати!",
         Language::ZH => "开始!",
+        Language::ZH_TW => "開始！",
         Language::TR => "Başla!",
         Language::RU => "Начать!",
         Language::PT => "Começar!",
@@ -110,6 +114,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::PL | Language::TR => "Adres",
         Language::UK => "Адреса",
         Language::ZH => "网络地址",
+        Language::ZH_TW => "網路位址",
         Language::RO => "Adresă",
         Language::KO => "주소",
         Language::RU => "Адрес",
@@ -134,6 +139,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::DE => "Adressen",
         Language::UK => "Адреси",
         Language::ZH => "网络地址",
+        Language::ZH_TW => "網路位址",
         Language::RO => "Adrese",
         Language::KO => "주소",
         Language::TR => "Adresler",
@@ -159,6 +165,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
         Language::DE => "IP Version",
         Language::UK => "Версія IP",
         Language::ZH => "目标IP协议版本",
+        Language::ZH_TW => "IP 版本",
         Language::RO => "Versiune IP",
         Language::KO => "IP 버전",
         Language::TR => "IP versiyonu",
@@ -184,6 +191,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
 //         Language::DE => "Netzwerkprotokoll",
 //         Language::UK => "Транспортний протокол",
 //         Language::ZH => "目标传输协议",
+//         Language::ZH_TW => "傳輸通訊協定",
 //         Language::RO => "Protocol de transport",
 //         Language::KO => "전송 프로토콜",
 //         Language::TR => "İletişim protokolü",
@@ -207,6 +215,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::DE | Language::SV => "Protokoll",
         Language::UK | Language::RU => "Протокол",
         Language::ZH => "协议",
+        Language::ZH_TW => "通訊協定",
         Language::KO => "프로토콜",
         Language::TR => "Protokolü",
         Language::EL => "Πρωτόκολλο",
@@ -228,6 +237,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::DE => "Daten Frequenz",
         Language::UK => "Швидкість руху",
         Language::ZH => "网络速率图",
+        Language::ZH_TW => "流量速率",
         Language::RO => "Rata de trafic",
         Language::KO => "트레픽 속도",
         Language::TR => "Trafik oranı",
@@ -253,6 +263,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //         Language::DE => "Relevante Verbindungen:",
 //         Language::UK => "Важливі підключення:",
 //         Language::ZH => "连接详情:",
+//         Language::ZH_TW => "相關連線：",
 //         Language::RO => "Conexiuni relevante:",
 //         Language::KO => "관련 연결:",
 //         Language::TR => "İlgili bağlantılar:",
@@ -275,6 +286,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::DE => "Einstellungen",
         Language::UK => "Налаштування",
         Language::ZH => "设置",
+        Language::ZH_TW => "設定",
         Language::RO => "Setări",
         Language::KO => "설정",
         Language::TR => "Ayarlar",
@@ -300,6 +312,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::DE | Language::SV => "Ja",
         Language::UK => "Так",
         Language::ZH => "是",
+        Language::ZH_TW => "是",
         Language::RO => "Da",
         Language::KO => "네",
         Language::TR => "Evet",
@@ -324,6 +337,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
         Language::UK => "Чи справді хочете закінчити аналіз?",
         Language::ZH => "您确定退出当前监控吗?",
+        Language::ZH_TW => "您確定要結束目前的分析嗎？",
         Language::RO => "Sunteți sigur că doriți să renunțați la această analiză?",
         Language::KO => "정말로 분석을 종료하겠습니까?",
         Language::TR => "Bu analizden çıkmak istediğine emin misin?",
@@ -349,6 +363,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::DE => "Analyse beenden",
         Language::UK => "Закінчити аналіз",
         Language::ZH => "退出监控",
+        Language::ZH_TW => "結束分析",
         Language::RO => "Renunță la analiză",
         Language::KO => "분석종료",
         Language::TR => "Analizden çık",
@@ -374,6 +389,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::DE => "Bist du sicher, dass du alle Benachrichtigungen löschen willst?",
         Language::UK => "Чи справді хочете видалити всі повідомлення?",
         Language::ZH => "确定清除所有通知?",
+        Language::ZH_TW => "您確定要清除所有通知嗎？",
         Language::RO => "Sigur doriți să ștergeți notificările?",
         Language::KO => "알림을 삭제하시겠습니까?",
         Language::TR => "Bildirimleri temizlemek istediğine emin misin?",
@@ -399,6 +415,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::DE => "Alle löschen",
         Language::UK => "Видалити все",
         Language::ZH => "清除所有",
+        Language::ZH_TW => "清除所有",
         Language::RO => "Ștergeți tot",
         Language::KO => "모두 지우기",
         Language::TR => "Hepsini temizle",
@@ -424,6 +441,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::DE => "Verstecken",
         Language::UK => "Заховати",
         Language::ZH => "隐藏",
+        Language::ZH_TW => "隱藏",
         Language::RO => "Ascundeți",
         Language::KO => "숨기기",
         Language::TR => "Gizle",
@@ -449,6 +467,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::DE => "Netzwerkadapter",
         Language::UK => "Мережевий адаптер",
         Language::ZH => "网络适配器",
+        Language::ZH_TW => "網路介面卡",
         Language::RO => "Adaptor de rețea",
         Language::KO => "네트워크 어뎁터",
         Language::TR => "Ağ adaptörü",
@@ -505,6 +524,11 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
             "您选择的网络适配器当前无活动网络...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
                                 如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."
+        ),
+        Language::ZH_TW => format!(
+            "無法觀察到任何流量，因為您選取的網路介面卡沒有有效的位址...\n\n\
+                                {network_adapter_translation}: {adapter}\n\n\
+                                如果您確定已連線至網際網路，請嘗試選取其他網路介面卡。"
         ),
         Language::RO => format!(
             "Niciun trafic nu poate fi observat deoarece adaptorul selectat nu are adrese active...\n\n\
@@ -610,6 +634,11 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
                                  {network_adapter_translation}: {adapter}\n\n\
                                  您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"
         ),
+        Language::ZH_TW => format!(
+            "尚未觀察到任何流量。正在等待網路封包...\n\n\
+                                 {network_adapter_translation}: {adapter}\n\n\
+                                 您確定已連線至網際網路，並已選取正確的網路介面卡嗎？"
+        ),
         Language::RO => format!(
             "Nu a fost observat încă trafic. Se așteaptă pachetele de rețea...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
@@ -713,6 +742,11 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
                                  目标数据包总数: 0\n\n\
                                  当前已监测到一些数据包, 但其中并未包含您的目标数据包......"
         ),
+        Language::ZH_TW => format!(
+            "攔截到的封包總數： {observed}\n\n\
+                                 已篩選封包： 0\n\n\
+                                 已攔截到部分封包，但尚未有任何封包符合您指定的篩選條件..."
+        ),
         Language::RO => format!(
             "Total pachete interceptate: {observed}\n\n\
                                 Pachete filtrate: 0\n\n\
@@ -784,6 +818,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::DE => "Gefilterte Pakete",
 //         Language::UK => "Відфільтровані пакети",
 //         Language::ZH => "目标数据包计数",
+//         Language::ZH_TW => "已篩選封包",
 //         Language::RO => "Pachete filtrate",
 //         Language::KO => "필터링된 패킷",
 //         Language::TR => "Filtrelenen paketler",
@@ -809,6 +844,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::DE => "Gefilterte Bytes",
 //         Language::UK => "Відфільтровані байти",
 //         Language::ZH => "目标网络流量计数",
+//         Language::ZH_TW => "已篩選位元組",
 //         Language::RO => "Octeți filtrați",
 //         Language::KO => "필터링된 바이트",
 //         Language::TR => "Filtrelenen bayt",
@@ -836,6 +872,9 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         }
 //         Language::ZH => {
 //             format!("(占所有数据包的 {percentage})")
+//         }
+//         Language::ZH_TW => {
+//             format!("(佔總數的 {percentage})")
 //         }
 //         Language::RO => {
 //             format!("({percentage} din total)")
@@ -872,6 +911,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::DE => "Gefilterte Pakete je Anwendungs-Protokoll:",
 //         Language::UK => "Кількість відфільтрованих пакетів на протокол програми:",
 //         Language::ZH => "按应用层协议分类的目标数据包计数:",
+//         Language::ZH_TW => "依應用程式通訊協定篩選的封包：",
 //         Language::RO => "Pachete filtrate pe protocol de aplicație:",
 //         Language::KO => "애플리케이션 프로토콜당 필터링된 패킷 수:",
 //         Language::TR => "Uygulama protokolü bazında filtrelenen paketler:",
@@ -902,6 +942,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //                          Щоб додати підключення до улюблених, натисніть на іконку 'зірочки' біля підключення.",
 //         Language::ZH => "收藏夹还是空的.\n\
 //                          小贴士: 点击连接右侧的小星星即可收藏到这里哦.",
+//         Language::ZH_TW => "目前沒有任何內容。\n若要將連線新增至我的最愛，請按一下連線旁的星號圖示。",
 //         Language::RO => "Nimic de arătat în acest moment.\n\
 //                         Pentru a adăuga o conexiune la favorite, faceți clic pe simbolul stea din apropierea conexiunii.",
 //         Language::KO => "현재는 보여줄게 없습니다.\n\
@@ -955,6 +996,10 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
         ),
         Language::ZH => format!(
             "发生了一些错误! \n\n\
+                                {error}"
+        ),
+        Language::ZH_TW => format!(
+            "發生錯誤！\n\n\
                                 {error}"
         ),
         Language::RO => format!(
@@ -1018,6 +1063,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::DE => "beide",
 //         Language::UK => "обидва",
 //         Language::ZH => "皆需",
+//         Language::ZH_TW => "兩者皆是",
 //         Language::RO => "ambele",
 //         Language::KO => "둘다",
 //         Language::TR => "ikiside",
@@ -1040,6 +1086,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::PL => "Wszystkie protokoły",
 //         Language::DE => "Alle Protokolle",
 //         Language::RU => "Все протоколы",
+//         Language::ZH_TW => "所有通訊協定",
 //         Language::FA => "همهٔ پیوندنامه ها",
 //         Language::SE => "Alla protokoll",
 //         Language::UZ => "Barcha protokollar"
@@ -1057,6 +1104,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::DE => "Alle",
 //         Language::UK => "Усі",
 //         Language::ZH => "所有",
+//         Language::ZH_TW => "全部",
 //         Language::RO => "Toate",
 //         Language::KO => "모두",
 //         Language::TR => "Hepsi",
@@ -1080,6 +1128,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::DE => "Pakete",
         Language::UK => "пакети",
         Language::ZH => "数据包",
+        Language::ZH_TW => "封包",
         Language::RO => "pachete",
         Language::KO => "패킷",
         Language::TR | Language::SV => "paket",
@@ -1104,6 +1153,7 @@ pub fn packets_chart_translation(language: Language) -> &'static str {
         Language::DE => "Pakete pro Sekunde",
         Language::UK => "пакети на секунду",
         Language::ZH => "数据包",
+        Language::ZH_TW => "每秒封包數",
         Language::RO => "pachete pe secundă",
         Language::KO => "초당 패킷",
         Language::TR => "saniye başı paket",
@@ -1130,6 +1180,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::PL => "bajty",
         Language::UK => "байти",
         Language::ZH => "网络流量",
+        Language::ZH_TW => "位元組",
         Language::RO => "octeți",
         Language::KO => "바이트",
         Language::TR | Language::UZ => "bayt",
@@ -1148,6 +1199,8 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::ES | Language::PT => "bytes por segundo",
         Language::PL => "bajty na sekundę",
         Language::DE => "Bytes pro Sekunde",
+        Language::ZH_TW => "每秒位元組",
+
         Language::UK => "байти на секунду",
         Language::ZH => "网络流量",
         Language::RO => "octeți pe secundă",
@@ -1174,6 +1227,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //         Language::DE => "zuletzt",
 //         Language::UK => "найновіші",
 //         Language::ZH => "按时间",
+//         Language::ZH_TW => "最新",
 //         Language::RO => "cea mai recentă",
 //         Language::KO => "가장 최근",
 //         Language::TR => "en son",
@@ -1198,6 +1252,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //         Language::DE => "meiste Pakete",
 //         Language::UK => "найбільше пакетів",
 //         Language::ZH => "按数据包",
+//         Language::ZH_TW => "最多封包",
 //         Language::RO => "cele mai multe pachete",
 //         Language::KO => "대부분의 패킷",
 //         Language::TR => "en çok paket",
@@ -1222,6 +1277,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //         Language::DE => "meiste Bytes",
 //         Language::UK => "найбільше байтів",
 //         Language::ZH => "按流量",
+//         Language::ZH_TW => "最多位元組",
 //         Language::RO => "cei mai mulți octeți",
 //         Language::KO => "대부분의 바이트",
 //         Language::TR => "en çok bayt",
@@ -1246,6 +1302,7 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
 //         Language::DE => "Favoriten",
 //         Language::UK => "улюблені",
 //         Language::ZH => "收藏夹",
+//         Language::ZH_TW => "我的最愛",
 //         Language::RO => "favorite",
 //         Language::KO => "즐겨찾기",
 //         Language::TR => "favoriler",
@@ -1267,6 +1324,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::DE => "Stell deine Benachrichtigungen ein",
         Language::UK => "Налаштування повідомлень",
         Language::ZH => "自定义通知",
+        Language::ZH_TW => "自訂通知",
         Language::RO => "Personalizați-vă notificările",
         Language::KO => "사용자 지정 알림",
         Language::TR => "Bildirimlerinizi özelleştirin",
@@ -1291,6 +1349,8 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::PL => "Wybierz swój ulubiony motyw",
         Language::DE => "Wähl dein Lieblingsdesign",
         Language::UK => "Виберіть улюблену тему",
+        Language::ZH_TW => "選擇您偏好的主題",
+
         Language::ZH => "选择您喜欢的主题",
         Language::RO => "Selectați tema preferată",
         Language::KO => "태마를 선택하세요",
@@ -1317,6 +1377,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::DE => "Aktive Filter",
         Language::UK => "Активні фільтри",
         Language::ZH => "活动的过滤器",
+        Language::ZH_TW => "啟用的篩選器",
         Language::RO => "Filtre active",
         Language::KO => "활성화된 필터",
         Language::TR => "Aktif filtreler",
@@ -1341,6 +1402,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::PL => "brak",
         Language::DE => "Keine",
         Language::UK => "бракує",
+        Language::ZH_TW => "無",
         Language::ZH => "无",
         Language::RO => "niciunul",
         Language::KO => "없음",
@@ -1366,6 +1428,7 @@ pub fn yeti_night_translation(language: Language) -> &'static str {
         Language::PL => "Oryginalny, ciemny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, dunkles Design",
         Language::UK => "Оригінальний, темний стиль Sniffnet-у",
+        Language::ZH_TW => "Sniffnet 原始深色主題",
         Language::ZH => "Sniffnet暗黑",
         Language::RO => "Tema întunecată originală Sniffnet",
         Language::KO => "Sniffnet의 기본 다크테마",
@@ -1391,6 +1454,7 @@ pub fn yeti_day_translation(language: Language) -> &'static str {
         Language::PL => "Oryginalny, jasny motyw Sniffnet",
         Language::DE => "Sniffnets urspüngliches, helles Design",
         Language::UK => "Оригінальний, світлий стиль Sniffnet-у",
+        Language::ZH_TW => "Sniffnet 原始淺色主題",
         Language::ZH => "Sniffnet浅色",
         Language::RO => "Tema deschisă originală Sniffnet",
         Language::KO => "Sniffnet의 기본 라이트테마",
@@ -1415,6 +1479,7 @@ pub fn deep_sea_translation(language: Language) -> &'static str {
         Language::PL => "Aby zanurzyć się w ruchu sieciowym",
         Language::DE => "Um in den Netzwerkverkehr einzutauchen",
         Language::UK => "Проаналізувати мережевий рух",
+        Language::ZH_TW => "深入探索網路流量",
         Language::ZH => "潜入网络活动的海洋",
         Language::RO => "Pentru a vă scufunda în traficul de rețea",
         Language::KO => "네트워크 트레픽으로 바로가기",
@@ -1440,6 +1505,7 @@ pub fn mon_amour_translation(language: Language) -> &'static str {
         Language::PL => "Uroczy motyw stworzony dla marzycieli",
         Language::DE => "Schönes Design für Träumer",
         Language::UK => "Прекрасна тема для мрійників",
+        Language::ZH_TW => "為夢想家打造的可愛主題",
         Language::ZH => "梦想家的主题",
         Language::RO => "O temă minunată creată pentru visători",
         Language::KO => "사랑스러운 몽환가들을 위한 테마",
@@ -1465,6 +1531,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::PL => "Przychodzące",
         Language::DE => "Eingehend",
         Language::UK => "Вхідні",
+        Language::ZH_TW => "入站",
         Language::ZH => "入站",
         Language::RO => "De intrare",
         Language::KO => "수신중",
@@ -1490,6 +1557,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::PL => "Wychodzące",
         Language::DE => "Ausgehend",
         Language::UK => "Вихідні",
+        Language::ZH_TW => "出站",
         Language::ZH => "出站",
         Language::RO => "De ieșire",
         Language::KO => "발신중",
@@ -1515,6 +1583,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::DE => "Benachrichtigungen",
         Language::UK => "Повідомлення",
         Language::ZH | Language::JA => "通知",
+        Language::ZH_TW => "通知",
         Language::RO => "Notificări",
         Language::KO => "알림",
         Language::TR => "Bildirimler",
@@ -1539,6 +1608,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::DE => "Design",
         Language::UK | Language::RU => "Стиль",
         Language::ZH => "主题",
+        Language::ZH_TW => "樣式",
         Language::KO => "스타일",
         Language::EL => "Στυλ",
         // Language::FA => "شیوه",
@@ -1559,6 +1629,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::DE => "Sprache",
         Language::UK => "Мова",
         Language::ZH => "语言",
+        Language::ZH_TW => "語言",
         Language::RO => "Limbă",
         Language::KO => "언어",
         Language::TR => "Dil",
@@ -1584,6 +1655,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::DE => "Übersicht",
         Language::UK => "Огляд",
         Language::ZH => "概览",
+        Language::ZH_TW => "概覽",
         Language::RO => "Prezentare generală",
         Language::KO => "개요",
         Language::TR => "Ön izleme",
@@ -1609,6 +1681,7 @@ pub fn packets_threshold_translation(language: Language) -> &'static str {
         Language::DE => "Benachrichtige mich, wenn die Pakete eine Schwelle überschreiten",
         Language::UK => "Повідом мене про перевищення ліміту пакетів",
         Language::ZH => "超过设定的数据包数量阈值时通知我",
+        Language::ZH_TW => "當封包數量超過閾值時通知我",
         Language::RO => "Anunță-mă când este depășit un prag de pachete",
         Language::KO => "패킷 임계값을 초과하면 알림",
         Language::TR => "Paket eşiği aşıldığında beni bilgilendir",
@@ -1634,6 +1707,7 @@ pub fn bytes_threshold_translation(language: Language) -> &'static str {
         Language::DE => "Benachrichtige mich, wenn die Bytes eine Schwelle überschreiten",
         Language::UK => "Повідом мене про перевищення ліміту байтів",
         Language::ZH => "超过设定的网络流量阈值时通知我",
+        Language::ZH_TW => "當位元組數超過閾值時通知我",
         Language::RO => "Anunță-mă când este depășit un prag de octeți",
         Language::KO => "바이트 임계값을 초과하면 알림",
         Language::TR => "Bayt eşiği aşıldığında beni bilgilendir",
@@ -1659,6 +1733,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::DE => "(pro Sekunde)",
         Language::UK => "(на секунду)",
         Language::ZH | Language::JA => "(每秒) ",
+        Language::ZH_TW => "(每秒)",
         Language::RO => "(pe secundă)",
         Language::KO => "(초당)",
         Language::TR => "(her saniye)",
@@ -1682,6 +1757,7 @@ pub fn specify_multiples_translation(language: Language) -> &'static str {
         Language::DE => "du kannst auch 'K', 'M' und 'G' verwenden",
         Language::UK => "можете також вибрати 'K', 'M' i 'G'",
         Language::ZH => "您可指定 'K', 'M', 'G'",
+        Language::ZH_TW => "您也可指定 'K'、'M' 和 'G' 等單位",
         Language::RO => "puteți specifica 'K', 'M', 'G'",
         Language::KO => "지정 가능합니다 'K', 'M', 'G'",
         Language::TR => "şunları da kullanabilirsin 'K', 'M' ve 'G'",
@@ -1709,6 +1785,7 @@ pub fn favorite_notification_translation(language: Language) -> &'static str {
         }
         Language::UK => "Повідом мене, коли буде обмін даними з моїх улюблених",
         Language::ZH => "收藏夹内的连接有新活动时通知我",
+        Language::ZH_TW => "當我的最愛中的連線有新的資料交換時通知我",
         Language::RO => "Anunță-mă când sunt transferate date noi de la favoritele mele",
         Language::KO => "즐겨찾기에서 새 데이터가 교환될 때 알림",
         Language::TR => "Favorilerimde veri akışı olduğunda beni uyar",
@@ -1734,6 +1811,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::DE => "Schwellenwert",
         Language::UK => "Ліміт",
         Language::ZH => "阈值",
+        Language::ZH_TW => "閾值",
         Language::RO => "Prag",
         Language::KO => "임계값",
         Language::TR => "Eşik",
@@ -1757,6 +1835,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::DE => "Lautstärke",
         Language::UK => "Гучність",
         Language::ZH | Language::JA => "通知音量",
+        Language::ZH_TW => "音量",
         Language::RO => "Volum",
         Language::KO => "볼륨",
         Language::TR => "Ses",
@@ -1780,6 +1859,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::DE => "Ton",
         Language::UK | Language::RU => "Звук",
         Language::ZH | Language::JA => "通知音",
+        Language::ZH_TW => "音效",
         Language::RO => "Sunet",
         Language::KO => "사운드",
         Language::TR => "Ses",
@@ -1803,6 +1883,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::DE => "Byte-Schwellenwert überschritten!",
         Language::UK => "Ліміт байтів перевищено!",
         Language::ZH => "达到设定的网络流量阈值!",
+        Language::ZH_TW => "已超過位元組閾值！",
         Language::RO => "Prag de octeți depășit!",
         Language::KO => "바이트 임계값 초과!",
         Language::TR => "Bayt eşik değeri aşıldı!",
@@ -1828,6 +1909,7 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
         Language::DE => format!("{value} wurden ausgetauscht"),
         Language::UK => format!("{value} було обміняно"),
         Language::ZH => format!("已交换字节 {value}"),
+        Language::ZH_TW => format!("已交換 {value} 位元組"),
         Language::RO => format!("au fost transferați {value}"),
         Language::KO => format!("바이트 {value} 가 교환되었습니다"),
         Language::TR => format!("{value} aktarıldı"),
@@ -1853,6 +1935,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::DE => "Paket-Schwellenwert überschritten!",
         Language::UK => "Ліміт пакетів перевищено!",
         Language::ZH => "达到设定的数据包数量阈值!",
+        Language::ZH_TW => "已超過封包閾值！",
         Language::RO => "Prag de pachete depășit!",
         Language::KO => "패킷 임계값 초과!",
         Language::TR => "Paket eşik değeri aşıldı!",
@@ -1890,6 +1973,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         },
         Language::UK => format!("Обміняно {value} пакетів"),
         Language::ZH => format!("已交换数据包 {value}"),
+        Language::ZH_TW => format!("已交換 {value} 個封包"),
         Language::RO => format!("au fost transferate {value} pachete"),
         Language::KO => format!("패킷 {value} 가 교환되었습니다"),
         Language::TR => format!("{value} paket aktarıldı"),
@@ -1927,6 +2011,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::DE => "Neue Daten mit deinen Favoriten ausgetauscht!",
         Language::UK => "Нові дані обміняно з улюблених!",
         Language::ZH => "收藏夹内的连接有新活动!",
+        Language::ZH_TW => "我的最愛中有新的資料交換！",
         Language::RO => "Date noi transferate de la favorite!",
         Language::KO => "즐겨찾기에서 새 데이터 교환",
         Language::TR => "Favorilerden yeni veri aktarıldı!",
@@ -1983,6 +2068,11 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
             "您还没有设定任何通知!\n\n\
                                  启用它们后，此页面将显示您的通知日志\n\n\
                                  您可以从设置中设定:"
+        }
+        Language::ZH_TW => {
+            "您尚未啟用任何通知！\n\n
+                                啟用通知後，此頁面將會顯示您的通知紀錄。\n\n
+                                您可以從「設定」中啟用通知："
         }
         Language::RO => {
             "Încă nu ați activat notificările!\n\n\
@@ -2079,6 +2169,9 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "还没有任何通知...\n\n\
                                  当您收到通知时，它会显示在这里"
         }
+        Language::ZH_TW => {
+            "目前沒有任何通知...\n\n當您收到通知時，將會顯示在這裡。"
+        }
         Language::RO => {
             "Nimic de văzut momentan...\n\n\
                                  Când veți primi o notificare, aceasta va fi afișată aici"
@@ -2140,6 +2233,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::DE => "Nur die letzten 30 Benachrichtigungen werden angezeigt",
         Language::UK => "Можете побачити лише 30 останніх повідомлень",
         Language::ZH => "仅显示最近 30 条通知",
+        Language::ZH_TW => "僅顯示最近 30 則通知",
         Language::RO => "Sunt afișate doar ultimele 30 de notificări",
         Language::KO => "최근 30개의 알림만 표시됩니다",
         Language::TR => "Sadece son 30 bildirim gösterilmektedir",

@@ -28,6 +28,8 @@ pub enum Language {
     UK,
     /// Simplified Chinese
     ZH,
+    /// Traditional Chinese
+    ZH_TW,
     /// Romanian
     RO,
     /// Korean
@@ -61,7 +63,7 @@ impl Default for Language {
 }
 
 impl Language {
-    pub const ALL: [Language; 19] = [
+    pub const ALL: [Language; 20] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -81,11 +83,13 @@ impl Language {
         Language::UZ,
         Language::VI,
         Language::ZH,
+        Language::ZH_TW,
     ];
 
     pub fn get_flag<'a>(self) -> Svg<'a, StyleType> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
+            Language::ZH_TW => TW,
             Language::DE => DE,
             Language::ES => ES,
             Language::FR => FR,
@@ -124,6 +128,7 @@ impl Language {
                 | Language::SV
                 | Language::VI
                 | Language::ZH
+                | Language::ZH_TW
                 | Language::KO
                 | Language::TR
                 | Language::PT
@@ -143,6 +148,7 @@ impl fmt::Display for Language {
             Language::DE => "Deutsch",
             Language::UK => "Українська",
             Language::ZH => "简体中文",
+            Language::ZH_TW => "繁體中文",
             Language::RO => "Română",
             Language::KO => "한국어",
             Language::TR => "Türkçe",
