@@ -37,6 +37,13 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
+    // Use temp_notifications if available, otherwise use the actual notifications
+    let notifications = if let Some(temp) = &sniffer.temp_notifications {
+        temp
+    } else {
+        &notifications
+    };
+
     let mut content = Column::new()
         .width(Length::Fill)
         .push(settings_header(
