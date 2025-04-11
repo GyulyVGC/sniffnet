@@ -7,12 +7,12 @@ use iced::widget::button;
 use iced::widget::button::{Catalog, Status, Style};
 use iced::{Background, Border, Color, Shadow, Vector};
 
+use crate::StyleType;
 use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{
-    get_gradient_buttons, get_gradient_hovered_buttons, GradientType,
+    GradientType, get_gradient_buttons, get_gradient_hovered_buttons,
 };
 use crate::gui::styles::types::palette::mix_colors;
-use crate::StyleType;
 
 #[derive(Default)]
 pub enum ButtonType {

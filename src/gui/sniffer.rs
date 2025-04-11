@@ -6,13 +6,13 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
-use iced::Event::{Keyboard, Window};
-use iced::{window, Element, Point, Size, Subscription, Task};
+use iced::{Element, Point, Size, Subscription, Task, window};
 use pcap::Device;
 use rfd::FileHandle;
 
@@ -53,7 +53,7 @@ use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::Notification;
-use crate::notifications::types::sound::{play, Sound};
+use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;

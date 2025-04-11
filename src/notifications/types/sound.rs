@@ -6,10 +6,10 @@ use iced::{Alignment, Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
+use crate::StyleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::notifications::types::sound::Sound::{Gulp, Pop, Swhoosh};
 use crate::utils::types::icon::Icon;
-use crate::StyleType;
 
 /// Enum representing the possible notification sounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

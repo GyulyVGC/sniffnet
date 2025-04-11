@@ -2,8 +2,8 @@ use std::net::IpAddr;
 
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, lazy, vertical_space, Rule, Scrollable};
 use iced::widget::{Column, Container, Row, Text, Tooltip};
+use iced::widget::{Rule, Scrollable, button, horizontal_space, lazy, vertical_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};

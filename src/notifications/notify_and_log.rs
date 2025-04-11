@@ -6,7 +6,7 @@ use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
 use crate::notifications::types::notifications::Notifications;
-use crate::notifications::types::sound::{play, Sound};
+use crate::notifications::types::sound::{Sound, play};
 use crate::{InfoTraffic, RunTimeData};
 
 /// Checks if one or more notifications have to be emitted and logs them.

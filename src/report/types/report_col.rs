@@ -1,3 +1,4 @@
+use crate::ByteMultiple;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::search_parameters::FilterInputType;
@@ -7,7 +8,6 @@ use crate::translations::translations::{
 use crate::translations::translations_2::{destination_translation, source_translation};
 use crate::translations::translations_3::{port_translation, service_translation};
 use crate::translations::types::language::Language;
-use crate::ByteMultiple;
 
 // total width: 1012.0
 

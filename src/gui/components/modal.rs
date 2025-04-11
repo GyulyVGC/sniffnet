@@ -1,7 +1,7 @@
 use iced::alignment::Alignment;
 use iced::widget::{
-    button, center, horizontal_space, mouse_area, opaque, stack, Column, Container, Row, Space,
-    Text,
+    Column, Container, Row, Space, Text, button, center, horizontal_space, mouse_area, opaque,
+    stack,
 };
 use iced::{Element, Font, Length};
 

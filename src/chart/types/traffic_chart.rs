@@ -3,8 +3,8 @@
 use std::cmp::min;
 use std::ops::Range;
 
-use iced::widget::Container;
 use iced::Element;
+use iced::widget::Container;
 use plotters::prelude::*;
 use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
@@ -282,7 +282,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::types::traffic_chart::{sample_spline, PTS};
+    use crate::chart::types::traffic_chart::{PTS, sample_spline};
 
     #[test]
     fn test_spline_samples() {

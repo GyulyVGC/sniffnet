@@ -1,13 +1,13 @@
 use std::fmt;
 
-use iced::widget::svg::Handle;
 use iced::widget::Svg;
+use iced::widget::svg::Handle;
 use serde::{Deserialize, Serialize};
 
+use crate::StyleType;
 use crate::countries::flags_pictures::{
     CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, VN,
 };
-use crate::StyleType;
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]

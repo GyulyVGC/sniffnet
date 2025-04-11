@@ -1,7 +1,7 @@
 use iced::widget::Text;
 
-use crate::gui::styles::style_constants::ICONS;
 use crate::StyleType;
+use crate::gui::styles::style_constants::ICONS;
 
 pub enum Icon {
     ArrowBack,

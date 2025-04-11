@@ -8,6 +8,7 @@ use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
 
+use crate::IpVersion::{IPv4, IPv6};
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
@@ -26,8 +27,8 @@ use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
-use crate::IpVersion::{IPv4, IPv6};
 use crate::{InfoTraffic, IpVersion, Protocol};
+use std::fmt::Write;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -296,7 +297,7 @@ pub fn modify_or_insert_in_map(
         );
         // determine upper layer service
         service = get_service(key, traffic_direction);
-    };
+    }
 
     let mut info_traffic = info_traffic_mutex
         .lock()
@@ -633,7 +634,7 @@ pub fn is_my_address(local_address: &String, my_interface_addresses: &Vec<Addres
 fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
     let mut mac_hex = String::new();
     for n in &mac_dec {
-        mac_hex.push_str(&format!("{n:02x}:"));
+        let _ = write!(mac_hex, "{n:02x}:");
     }
     mac_hex.pop();
     mac_hex
@@ -653,6 +654,8 @@ mod tests {
 
     use pcap::Address;
 
+    use crate::Protocol;
+    use crate::Service;
     use crate::networking::manage_packets::{
         get_service, get_traffic_direction, get_traffic_type, is_local_connection,
         mac_from_dec_to_hex,
@@ -661,8 +664,6 @@ mod tests {
     use crate::networking::types::service_query::ServiceQuery;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
-    use crate::Protocol;
-    use crate::Service;
 
     include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -1134,9 +1135,11 @@ mod tests {
     fn test_get_service_simple_only_one_valid() {
         let unknown_port = Some(65000);
         for p in [Protocol::TCP, Protocol::UDP] {
-            assert!(SERVICES
-                .get(&ServiceQuery(unknown_port.unwrap(), p))
-                .is_none());
+            assert!(
+                SERVICES
+                    .get(&ServiceQuery(unknown_port.unwrap(), p))
+                    .is_none()
+            );
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 let key = AddressPortPair::new(
                     String::new(),
@@ -1347,12 +1350,16 @@ mod tests {
         let unknown_port_1 = Some(39332);
         let unknown_port_2 = Some(23679);
         for p in [Protocol::TCP, Protocol::UDP] {
-            assert!(SERVICES
-                .get(&ServiceQuery(unknown_port_1.unwrap(), p))
-                .is_none());
-            assert!(SERVICES
-                .get(&ServiceQuery(unknown_port_2.unwrap(), p))
-                .is_none());
+            assert!(
+                SERVICES
+                    .get(&ServiceQuery(unknown_port_1.unwrap(), p))
+                    .is_none()
+            );
+            assert!(
+                SERVICES
+                    .get(&ServiceQuery(unknown_port_2.unwrap(), p))
+                    .is_none()
+            );
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [
                     (unknown_port_1, unknown_port_2),

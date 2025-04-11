@@ -38,16 +38,17 @@ use crate::translations::translations_4::excluded_translation;
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
-    Scrollable, Space, Text, Tooltip,
+    Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
+    horizontal_space, lazy, vertical_space,
 };
-use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Padding, Shrink};
+use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -145,7 +146,11 @@ fn body_no_packets<'a>(
 ) -> Column<'a, Message, StyleType> {
     let link_type = device.link_type;
     let mut adapter_info = device.name.clone();
-    adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
+    let _ = write!(
+        adapter_info,
+        "\n{}",
+        link_type.full_print_on_one_line(language)
+    );
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
@@ -885,7 +890,7 @@ fn sort_arrows<'a>(
 #[cfg(test)]
 mod tests {
     use crate::chart::types::chart_type::ChartType;
-    use crate::gui::pages::overview_page::{get_bars_length, MIN_BARS_LENGTH};
+    use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
 
     #[test]

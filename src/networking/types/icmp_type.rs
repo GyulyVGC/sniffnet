@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 use etherparse::{Icmpv4Type, Icmpv6Type};
+use std::fmt::Write;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum IcmpType {
@@ -17,7 +18,7 @@ impl IcmpType {
         vec.sort_by(|(_, a), (_, b)| b.cmp(a));
 
         for (icmp_type, n) in vec {
-            ret_val.push_str(&format!("   {icmp_type} ({n})\n"));
+            let _ = writeln!(ret_val, "   {icmp_type} ({n})");
         }
         ret_val
     }

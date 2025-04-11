@@ -70,12 +70,12 @@ impl StyleType {
 
 #[cfg(test)]
 mod tests {
-    use iced::{color, Color};
-    use serde_test::{assert_tokens, Token};
+    use iced::{Color, color};
+    use serde_test::{Token, assert_tokens};
 
+    use crate::StyleType;
     use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
     use crate::gui::styles::types::palette::Palette;
-    use crate::StyleType;
 
     // test if deserializing and serializing a StyleType works n.1
     // simple case: one of the default themes

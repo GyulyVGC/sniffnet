@@ -9,7 +9,7 @@ use std::{panic, process, thread};
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
-use iced::{application, window, Font, Pixels, Settings};
+use iced::{Font, Pixels, Settings, application, window};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -31,7 +31,7 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
-use crate::configs::types::configs::{Configs, CONFIGS};
+use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::secondary_threads::check_updates::set_newer_release_status;

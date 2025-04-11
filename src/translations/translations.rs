@@ -2,8 +2,8 @@
 
 use iced::widget::Text;
 
-use crate::translations::types::language::Language;
 use crate::StyleType;
+use crate::translations::types::language::Language;
 
 pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
@@ -466,199 +466,311 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
 pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
     let network_adapter_translation = network_adapter_translation(language);
     Text::new(match language {
-        Language::EN => format!("No traffic can be observed because the adapter you selected has no active addresses...\n\n\
+        Language::EN => format!(
+            "No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 If you are sure you are connected to the internet, try choosing a different adapter."),
-        Language::IT => format!("Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
+                                 If you are sure you are connected to the internet, try choosing a different adapter."
+        ),
+        Language::IT => format!(
+            "Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Se sei sicuro di essere connesso ad internet, prova a scegliere un adattatore diverso."),
-        Language::FR => format!("Aucun trafic ne peut être observé, car la carte réseau que vous avez saisie n'a pas d'adresse...\n\n\
+                                Se sei sicuro di essere connesso ad internet, prova a scegliere un adattatore diverso."
+        ),
+        Language::FR => format!(
+            "Aucun trafic ne peut être observé, car la carte réseau que vous avez saisie n'a pas d'adresse...\n\n\
                                 {network_adapter_translation} : {adapter}\n\n\
-                                Si vous êtes sûr d'être connecté à internet, essayez une autre carte."),
-        Language::ES => format!("No se puede observar ningún tráfico porque el adaptador seleccionado no tiene direcciones activas...\n\n\
+                                Si vous êtes sûr d'être connecté à internet, essayez une autre carte."
+        ),
+        Language::ES => format!(
+            "No se puede observar ningún tráfico porque el adaptador seleccionado no tiene direcciones activas...\n\n\
                                  {network_adapter_translation} : {adapter}\n\n\
-                                 Si estás seguro de que estás conectado a Internet, prueba a elegir otro adaptador."),
-        Language::PL => format!("Nie można zaobserwować żadnego ruchu, ponieważ wybrany adapter nie ma aktywnych adresów...\n\n\
+                                 Si estás seguro de que estás conectado a Internet, prueba a elegir otro adaptador."
+        ),
+        Language::PL => format!(
+            "Nie można zaobserwować żadnego ruchu, ponieważ wybrany adapter nie ma aktywnych adresów...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Jeśli jesteś pewien, że jesteś podłączony do internetu, spróbuj wybrać inny adapter."),
-        Language::DE => format!("Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
+                                 Jeśli jesteś pewien, że jesteś podłączony do internetu, spróbuj wybrać inny adapter."
+        ),
+        Language::DE => format!(
+            "Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."),
-        Language::UK => format!("Не зафіксовано жодного мережевого руху, тому що вибраний адаптер не має активних адрес... \n\n\
+                                 Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."
+        ),
+        Language::UK => format!(
+            "Не зафіксовано жодного мережевого руху, тому що вибраний адаптер не має активних адрес... \n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Якщо ви впевнені, що підключені до інтернету, спробуйте вибрати інший адаптер."),
-        Language::ZH => format!("您选择的网络适配器当前无活动网络...\n\n\
+                                 Якщо ви впевнені, що підключені до інтернету, спробуйте вибрати інший адаптер."
+        ),
+        Language::ZH => format!(
+            "您选择的网络适配器当前无活动网络...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."),
-        Language::RO => format!("Niciun trafic nu poate fi observat deoarece adaptorul selectat nu are adrese active...\n\n\
+                                如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."
+        ),
+        Language::RO => format!(
+            "Niciun trafic nu poate fi observat deoarece adaptorul selectat nu are adrese active...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Dacă sunteți sigur că sunteți conectat la internet, încercați să alegeți un alt adaptor."),
-        Language::KO => format!("선택한 어댑터에 유효한 주소가 없기 때문에 트래픽을 확인할 수 없습니다...\n\n\
+                                Dacă sunteți sigur că sunteți conectat la internet, încercați să alegeți un alt adaptor."
+        ),
+        Language::KO => format!(
+            "선택한 어댑터에 유효한 주소가 없기 때문에 트래픽을 확인할 수 없습니다...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                인터넷이 연결되어있다면 다른 어댑터로 시도해보세요."),
-        Language::TR => format!("Seçtiğiniz adaptör aktif bir adrese sahip olmadığı için hiç bir trafik izlenemez...\n\n\
+                                인터넷이 연결되어있다면 다른 어댑터로 시도해보세요."
+        ),
+        Language::TR => format!(
+            "Seçtiğiniz adaptör aktif bir adrese sahip olmadığı için hiç bir trafik izlenemez...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Eğer gerçekten internete bağlı olduğunuza eminseniz, başka bir adaptör seçmeyi deneyiniz."),
-        Language::RU => format!("Наблюдение за трафиком не возможно, потому что Вы выбрали интерфейс без активного адреса...\n\n\
+                                 Eğer gerçekten internete bağlı olduğunuza eminseniz, başka bir adaptör seçmeyi deneyiniz."
+        ),
+        Language::RU => format!(
+            "Наблюдение за трафиком не возможно, потому что Вы выбрали интерфейс без активного адреса...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Если Вы уверены, что подключены к Интернету, попробуйте выбрать другой интерфейс."),
-        Language::PT => format!("Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
+                                 Если Вы уверены, что подключены к Интернету, попробуйте выбрать другой интерфейс."
+        ),
+        Language::PT => format!(
+            "Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Se tiver a certeza que está ligado à internet, tente escolher um adaptador diferente."),
-        Language::EL => format!("Δεν μπορεί να ανιχνευθεί κίνηση επειδή ο προσαρμογέας που επέλεξες δεν έχει ενεργές διευθύνσεις...\n\n\
+                                Se tiver a certeza que está ligado à internet, tente escolher um adaptador diferente."
+        ),
+        Language::EL => format!(
+            "Δεν μπορεί να ανιχνευθεί κίνηση επειδή ο προσαρμογέας που επέλεξες δεν έχει ενεργές διευθύνσεις...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Αν είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο, δοκίμασε αν επιλέξεις έναν διαφορετικό προσαρμογέα."),
+                                 Αν είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο, δοκίμασε αν επιλέξεις έναν διαφορετικό προσαρμογέα."
+        ),
         // Language::FA => format!("هیچ آمد و شدی قابل مشاهده نیست چون مبدلی که انتخاب کرده اید هیچ نشانی فعالی ندارد...\n\n\
         //                         مبدل شبکه: {adapter}\n\n\
         //                         اگر مطمئن هستید به اینترنت وصل هستید، سعی کنید مبدل متفاوتی را انتخاب کنید."),
-        Language::SV => format!("Det går inte att observa någon trafik eftersom den valda adaptern inte har några aktiva adresser ...\n\n\
+        Language::SV => format!(
+            "Det går inte att observa någon trafik eftersom den valda adaptern inte har några aktiva adresser ...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Om du är säker att du är ansluten till internet, testa att välja en annan adapter."),
-        Language::FI => format!("Liikennettä ei voitu havainnoida, koska valitulla sovittimella ei ole aktiivista osoitetta...\n\n\
+                                 Om du är säker att du är ansluten till internet, testa att välja en annan adapter."
+        ),
+        Language::FI => format!(
+            "Liikennettä ei voitu havainnoida, koska valitulla sovittimella ei ole aktiivista osoitetta...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Jos olet varma että sinulla on internet-yhteys, kokeile valita toinen verkkosovitin."),
-        Language::JA => format!("選択されたアダプターが有効なアドレスを持っていないため、トラフィックを観測できていません...\n\n\
+                                 Jos olet varma että sinulla on internet-yhteys, kokeile valita toinen verkkosovitin."
+        ),
+        Language::JA => format!(
+            "選択されたアダプターが有効なアドレスを持っていないため、トラフィックを観測できていません...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                インターネットに接続しているか確認し、別のネットワーク アダプターを試してください。"),
-        Language::UZ => format!("Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo'q...\n\n\
+                                インターネットに接続しているか確認し、別のネットワーク アダプターを試してください。"
+        ),
+        Language::UZ => format!(
+            "Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo'q...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Internetga ulanganingizga ishonchingiz komil bo'lsa, boshqa adapterni tanlashga harakat qiling"),
-        Language::VI => format!("Không thể quan sát lưu lượng nào vì adapter mà bạn chọn không địa chỉ hoạt động...\n\n\
+                                Internetga ulanganingizga ishonchingiz komil bo'lsa, boshqa adapterni tanlashga harakat qiling"
+        ),
+        Language::VI => format!(
+            "Không thể quan sát lưu lượng nào vì adapter mà bạn chọn không địa chỉ hoạt động...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Nếu bạn đã chắc chắn kết nối với internet, hãy thử chọn network adapter khác."),
+                                Nếu bạn đã chắc chắn kết nối với internet, hãy thử chọn network adapter khác."
+        ),
     })
 }
 
 pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
     let network_adapter_translation = network_adapter_translation(language);
     Text::new(match language {
-        Language::EN => format!("No traffic has been observed yet. Waiting for network packets...\n\n\
+        Language::EN => format!(
+            "No traffic has been observed yet. Waiting for network packets...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Are you sure you are connected to the internet and you have selected the correct adapter?"),
-        Language::IT => format!("Nessun tipo di traffico è stato osservato finora. Attendo pacchetti di rete...\n\n\
+                                 Are you sure you are connected to the internet and you have selected the correct adapter?"
+        ),
+        Language::IT => format!(
+            "Nessun tipo di traffico è stato osservato finora. Attendo pacchetti di rete...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Sei sicuro di esser connesso ad internet e di aver selezionato l'adattatore corretto?"),
-        Language::FR => format!("Aucun trafic n'a été capturé pour le moment. En attente de paquets...\n\n\
+                                Sei sicuro di esser connesso ad internet e di aver selezionato l'adattatore corretto?"
+        ),
+        Language::FR => format!(
+            "Aucun trafic n'a été capturé pour le moment. En attente de paquets...\n\n\
                                 {network_adapter_translation} : {adapter}\n\n\
-                                Êtes-vous sûr d'être connecté à internet et d'avoir selectionné la bonne carte réseau ?"),
-        Language::ES => format!("Aún no se ha captado tráfico. Esperando paquetes...\n\n\
+                                Êtes-vous sûr d'être connecté à internet et d'avoir selectionné la bonne carte réseau ?"
+        ),
+        Language::ES => format!(
+            "Aún no se ha captado tráfico. Esperando paquetes...\n\n\
                                  {network_adapter_translation} : {adapter}\n\n\
-                                 ¿Está seguro de que está conectado a Internet y ha seleccionado la tarjeta de red correcta?"),
-        Language::PL => format!("Nie zaobserowano żadnego ruchu sieciowego. Oczekiwanie na pakiety...\n\n\
+                                 ¿Está seguro de que está conectado a Internet y ha seleccionado la tarjeta de red correcta?"
+        ),
+        Language::PL => format!(
+            "Nie zaobserowano żadnego ruchu sieciowego. Oczekiwanie na pakiety...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Czy na pewno jesteś podłączony do internetu i wybrałeś właściwy adapter?"),
-        Language::DE => format!("Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
+                                 Czy na pewno jesteś podłączony do internetu i wybrałeś właściwy adapter?"
+        ),
+        Language::DE => format!(
+            "Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Bist du sicher, dass du mit dem Internet verbunden bist und den richtigen Adapter ausgewählt hast?"),
-        Language::UK => format!("Не зафіксовано жодного мережевого руху. Очікування пакетів...\n\n\
+                                 Bist du sicher, dass du mit dem Internet verbunden bist und den richtigen Adapter ausgewählt hast?"
+        ),
+        Language::UK => format!(
+            "Не зафіксовано жодного мережевого руху. Очікування пакетів...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Чи ви дійсно підключені до інтернету і вибрали відповідний мережевий адаптер?"),
-        Language::ZH => format!("暂无流量数据. 等待网络活动中......\n\n\
+                                 Чи ви дійсно підключені до інтернету і вибрали відповідний мережевий адаптер?"
+        ),
+        Language::ZH => format!(
+            "暂无流量数据. 等待网络活动中......\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"),
-        Language::RO => format!("Nu a fost observat încă trafic. Se așteaptă pachetele de rețea...\n\n\
+                                 您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"
+        ),
+        Language::RO => format!(
+            "Nu a fost observat încă trafic. Se așteaptă pachetele de rețea...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Ești sigur că ești conectat la internet și ai selectat adaptorul corect?"),
-        Language::KO => format!("아직 트래픽이 관찰되지 않았습니다. 네트워크 패킷 대기 중...\n\n\
+                                Ești sigur că ești conectat la internet și ai selectat adaptorul corect?"
+        ),
+        Language::KO => format!(
+            "아직 트래픽이 관찰되지 않았습니다. 네트워크 패킷 대기 중...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                인터넷에 연결되어 있고 올바른 어댑터를 선택하셨습니까?"),
-        Language::TR => format!("Henüz bir trafik algılanamadı. Ağ paketleri için bekleniyor...\n\n\
+                                인터넷에 연결되어 있고 올바른 어댑터를 선택하셨습니까?"
+        ),
+        Language::TR => format!(
+            "Henüz bir trafik algılanamadı. Ağ paketleri için bekleniyor...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 İnternete bağlı olduğunuza ve doğru adaptörü seçtiğinize emin misiniz?"),
-        Language::RU => format!("Трафик не обнаружен. Ожидаем сетевые пакеты...\n\n\
+                                 İnternete bağlı olduğunuza ve doğru adaptörü seçtiğinize emin misiniz?"
+        ),
+        Language::RU => format!(
+            "Трафик не обнаружен. Ожидаем сетевые пакеты...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Вы уверены, что подключены к Интернету и выбрали правильный интерфейс?"),
-        Language::PT => format!("Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
+                                 Вы уверены, что подключены к Интернету и выбрали правильный интерфейс?"
+        ),
+        Language::PT => format!(
+            "Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
-                                Tem a certeza de que está ligado à internet e selecionou o adaptador correto?"),
-        Language::EL => format!("Δεν έχει παρατηρηθεί κίνηση μέχρι στιγμής. Ανέμενε για πακέτα δικτύου...\n\n\
+                                Tem a certeza de que está ligado à internet e selecionou o adaptador correto?"
+        ),
+        Language::EL => format!(
+            "Δεν έχει παρατηρηθεί κίνηση μέχρι στιγμής. Ανέμενε για πακέτα δικτύου...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο και ότι έχεις επιλέξει τον σωστό προσαρμογέα;"),
+                                 Είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο και ότι έχεις επιλέξει τον σωστό προσαρμογέα;"
+        ),
         // Language::FA => format!("هنوز هیچ آمد و شدی مشاهده نشده است. در حال انتظار برای بسته های شبکه...\n\n
         //                         مبدل شبکه: {adapter}\n\n
         //                         آیا مطمئن هستید به اینترنت وصل هستید و مبدل درست را انتخاب کرده اید؟"),
-        Language::SV => format!("Ingen trafik har observerats ännu. Väntar på paket ...\n\n\
+        Language::SV => format!(
+            "Ingen trafik har observerats ännu. Väntar på paket ...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Är du säker på att du är ansluten till internet och att du har valt rätt adapter?"),
-        Language::FI => format!("Ei vielä havaittua liikennettä. Odotetaan verkkopaketteja...\n\n\
+                                 Är du säker på att du är ansluten till internet och att du har valt rätt adapter?"
+        ),
+        Language::FI => format!(
+            "Ei vielä havaittua liikennettä. Odotetaan verkkopaketteja...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Onhan sinulla varmasti internet-yhteys ja olet valinnut oikean verkkosovittimen."),
-        Language::JA => format!("トラフィックがまだ観測できていません。ネットワーク パケットを待っています...\n\n\
+                                 Onhan sinulla varmasti internet-yhteys ja olet valinnut oikean verkkosovittimen."
+        ),
+        Language::JA => format!(
+            "トラフィックがまだ観測できていません。ネットワーク パケットを待っています...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 インターネットに接続していて、正しいアダプターを選択していますか?"),
+                                 インターネットに接続していて、正しいアダプターを選択していますか?"
+        ),
         Language::UZ => format!(
             "Hali hech qanday trafik aniqlanmadi. Tarmoq paketlari kutilmoqda...\n\n\
             {network_adapter_translation}: {adapter}\n\n\
-            Internetga ulanganingizga va to'g'ri adapterni tanlaganingizga ishonchingiz komilmi?"),
-        Language::VI => format!("Chưa có lưu lượng để quan sát. Đang đợi các gói tin...\n\n\
+            Internetga ulanganingizga va to'g'ri adapterni tanlaganingizga ishonchingiz komilmi?"
+        ),
+        Language::VI => format!(
+            "Chưa có lưu lượng để quan sát. Đang đợi các gói tin...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Bạn có chắc là đã kết nối với internet và đã chọn đúng network adapter?"),
+                                 Bạn có chắc là đã kết nối với internet và đã chọn đúng network adapter?"
+        ),
     })
 }
 
 pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text<'a, StyleType> {
     Text::new(match language {
-        Language::EN => format!("Total intercepted packets: {observed}\n\n\
+        Language::EN => format!(
+            "Total intercepted packets: {observed}\n\n\
                                  Filtered packets: 0\n\n\
-                                 Some packets have been intercepted, but still none has been selected according to the filters you specified..."),
-        Language::IT => format!("Totale pacchetti intercettati: {observed}\n\n\
+                                 Some packets have been intercepted, but still none has been selected according to the filters you specified..."
+        ),
+        Language::IT => format!(
+            "Totale pacchetti intercettati: {observed}\n\n\
                                  Pacchetti filtrati: 0\n\n\
-                                 Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati..."),
-        Language::FR => format!("Total des paquets interceptés: {observed}\n\n\
+                                 Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati..."
+        ),
+        Language::FR => format!(
+            "Total des paquets interceptés: {observed}\n\n\
                                  Paquets filtrés: 0\n\n\
-                                 Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés..."),
-        Language::ES => format!("Total de paquetes interceptados: {observed}\n\n\
+                                 Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés..."
+        ),
+        Language::ES => format!(
+            "Total de paquetes interceptados: {observed}\n\n\
                                  Paquetes filtrados: 0\n\n\
-                                 Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados..."),
-        Language::PL => format!("Suma przechwyconych pakietów: {observed}\n\n\
+                                 Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados..."
+        ),
+        Language::PL => format!(
+            "Suma przechwyconych pakietów: {observed}\n\n\
                                  Przefiltrowane pakiety: 0\n\n\
-                                 Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."),
-        Language::DE => format!("Anzahl der empfangenen Pakete: {observed}\n\n\
+                                 Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."
+        ),
+        Language::DE => format!(
+            "Anzahl der empfangenen Pakete: {observed}\n\n\
                                  Gefilterte Pakete: 0\n\n\
-                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."),
-        Language::UK => format!("Сума перехоплених пакетів: {observed}\n\n\
+                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."
+        ),
+        Language::UK => format!(
+            "Сума перехоплених пакетів: {observed}\n\n\
                                  Відфільтровані пакети: 0\n\n\
-                                 Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."),
-        Language::ZH => format!("监测到的数据包总数: {observed}\n\n\
+                                 Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."
+        ),
+        Language::ZH => format!(
+            "监测到的数据包总数: {observed}\n\n\
                                  目标数据包总数: 0\n\n\
-                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......"),
-        Language::RO => format!("Total pachete interceptate: {observed}\n\n\
+                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......"
+        ),
+        Language::RO => format!(
+            "Total pachete interceptate: {observed}\n\n\
                                 Pachete filtrate: 0\n\n\
-                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat..."),
-        Language::KO => format!("감지한 총 패킷: {observed}\n\n\
+                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat..."
+        ),
+        Language::KO => format!(
+            "감지한 총 패킷: {observed}\n\n\
                                 필터링된 패킷: 0\n\n\
-                                일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다..."),
-        Language::TR => format!("Toplam yakalanan paketler: {observed}\n\n\
+                                일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다..."
+        ),
+        Language::TR => format!(
+            "Toplam yakalanan paketler: {observed}\n\n\
                                  Filterelenen paketler: 0\n\n\
-                                 Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi..."),
-        Language::RU => format!("Всего пакетов перехвачено: {observed}\n\n\
+                                 Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi..."
+        ),
+        Language::RU => format!(
+            "Всего пакетов перехвачено: {observed}\n\n\
                                  Фильтровано пакетов: 0\n\n\
-                                 Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам..."),
-        Language::PT => format!("Total de pacotes interceptados: {observed}\n\n\
+                                 Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам..."
+        ),
+        Language::PT => format!(
+            "Total de pacotes interceptados: {observed}\n\n\
                                 Pacotes filtrados: 0\n\n\
-                                Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados..."),
-        Language::EL => format!("Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
+                                Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados..."
+        ),
+        Language::EL => format!(
+            "Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
                                  Φιλτραρισμένα πακέτα: 0\n\n\
-                                 Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες..."),
+                                 Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες..."
+        ),
         // Language::FA => format!("مجموع بسته های رهگیری شده: {observed}\n\n\
         //                         بسته های صاف شده: 0\n\n\
         //                         شماری از بسته ها رهگیری شده اند، ولی هنوز هیچ کدام بر اساس صافی تعیین شده شما انتخاب نشده اند..."),
-        Language::SV => format!("Antal fångade paket: {observed}\n\n\
+        Language::SV => format!(
+            "Antal fångade paket: {observed}\n\n\
                                  Filtrerade paket: 0\n\n\
-                                 Några paket har fångats, men än har inget valts enligt de angivna filtren ..."),
-        Language::FI => format!("Siepattuja paketteja yhteensä: {observed}\n\n\
+                                 Några paket har fångats, men än har inget valts enligt de angivna filtren ..."
+        ),
+        Language::FI => format!(
+            "Siepattuja paketteja yhteensä: {observed}\n\n\
                                  Suodatettuja paketteja: 0\n\n\
-                                 Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan..."),
-        Language::JA => format!("取得したパケット数: {observed}\n\n\
+                                 Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan..."
+        ),
+        Language::JA => format!(
+            "取得したパケット数: {observed}\n\n\
                                  フィルター後のパケット数: 0\n\n\
-                                 パケットは取得できていますが、設定されたフィルタリングにより表示されません..."),
+                                 パケットは取得できていますが、設定されたフィルタリングにより表示されません..."
+        ),
         Language::UZ => format!(
             "Jami ushlangan paketlar: {observed}\n\n\
             Filtrlangan paketlar: 0\n\n\
-            Tarmoq paketlari ushlandi, lekin ularning hech biri belgilangan filtrlarga mos kelmadi..."),
-        Language::VI => format!("Tổng số gói tin bị chặn: {observed}\n\n\
+            Tarmoq paketlari ushlandi, lekin ularning hech biri belgilangan filtrlarga mos kelmadi..."
+        ),
+        Language::VI => format!(
+            "Tổng số gói tin bị chặn: {observed}\n\n\
                                  Các gói tin đã lọc: 0\n\n\
-                                 Một số gói đã bị chặn, nhưng vẫn chưa có gói tin nào được bắt theo bộ lọc bạn đã chọn..."),
+                                 Một số gói đã bị chặn, nhưng vẫn chưa có gói tin nào được bắt theo bộ lọc bạn đã chọn..."
+        ),
     })
 }
 
@@ -1832,66 +1944,104 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
 
 pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
-        Language::EN => "You haven't enabled notifications yet!\n\n\
+        Language::EN => {
+            "You haven't enabled notifications yet!\n\n\
                                  After enabling them, this page will display a log of your notifications\n\n\
-                                 You can enable notifications from settings:",
-        Language::IT => "Non hai ancora abilitato le notifiche!\n\n\
+                                 You can enable notifications from settings:"
+        }
+        Language::IT => {
+            "Non hai ancora abilitato le notifiche!\n\n\
                                 Dopo che le avrai abilitate, questa pagina mostrerà una collezione delle tue notifiche\n\n\
-                                Puoi abilitare le notifiche dalle impostazioni:",
-        Language::FR => "Vous n'avez pas activé les notifications!\n\n\
+                                Puoi abilitare le notifiche dalle impostazioni:"
+        }
+        Language::FR => {
+            "Vous n'avez pas activé les notifications!\n\n\
                                     Une fois activées, cette page affichera le journal des notifications\n\n\
-                                    Vous pouvez les activer dans les paramètres:",
-        Language::ES => "¡Aún no has activado las notificaciones!\n\n\
+                                    Vous pouvez les activer dans les paramètres:"
+        }
+        Language::ES => {
+            "¡Aún no has activado las notificaciones!\n\n\
                                  Después de activarlas, esta página mostrará un registro de sus notificaciones\n\n\
-                                 Puedes activar las notificaciones desde los ajustes:",
-        Language::PL => "Nie włączyłeś jeszcze powiadomień!\n\n\
+                                 Puedes activar las notificaciones desde los ajustes:"
+        }
+        Language::PL => {
+            "Nie włączyłeś jeszcze powiadomień!\n\n\
                                  Po ich włączeniu, ta strona wyświetli dziennik twoich powiadomień\n\n\
-                                 Możesz włączyć powiadomienia w ustawieniach:",
-        Language::DE => "Benachrichtigungen wurden noch nicht aktiviert!\n\n\
+                                 Możesz włączyć powiadomienia w ustawieniach:"
+        }
+        Language::DE => {
+            "Benachrichtigungen wurden noch nicht aktiviert!\n\n\
                          Nachdem du sie aktiviert hast, wird diese Seite eine Liste deiner Benachrichtigungen anzeigen\n\n\
-                         Du kannst die Benachrichtigungen in den Einstellungen aktivieren:",
-        Language::UK => "Повідомлення не активовані!\n\n\
+                         Du kannst die Benachrichtigungen in den Einstellungen aktivieren:"
+        }
+        Language::UK => {
+            "Повідомлення не активовані!\n\n\
                                  Після їх активації на цій сторінці побачите список своїх повідомлень\n\n\
-                                 Можете вимкнути повідомлення в налаштуваннях:",
-        Language::ZH => "您还没有设定任何通知!\n\n\
+                                 Можете вимкнути повідомлення в налаштуваннях:"
+        }
+        Language::ZH => {
+            "您还没有设定任何通知!\n\n\
                                  启用它们后，此页面将显示您的通知日志\n\n\
-                                 您可以从设置中设定:",
-        Language::RO => "Încă nu ați activat notificările!\n\n\
+                                 您可以从设置中设定:"
+        }
+        Language::RO => {
+            "Încă nu ați activat notificările!\n\n\
                                  După ce le veți activa, această pagină va afișa un jurnal al notificărilor dvs\n\n\
-                                 Puteți activa notificările din setări:",
-        Language::KO => "아직 알림을 활성화하지 않았습니다!\n\n\
+                                 Puteți activa notificările din setări:"
+        }
+        Language::KO => {
+            "아직 알림을 활성화하지 않았습니다!\n\n\
                                  활성화로 설정하면 이 페이지에 알림 로그가 표시됩니다\n\n\
-                                 설정에서 알림을 활성화할 수 있습니다:",
-        Language::TR => "Henüz bildirimleri etkinleştirmedin!\n\n\
+                                 설정에서 알림을 활성화할 수 있습니다:"
+        }
+        Language::TR => {
+            "Henüz bildirimleri etkinleştirmedin!\n\n\
                          Etkinleştirdikten sonra bu sayfada bildirimlerine ait kütüğü görebilirsin\n\n\
-                         Bildirimleri, ayarlardan etkinleştirebilirsin:",
-        Language::RU => "Уведомления пока не настроены!\n\n\
+                         Bildirimleri, ayarlardan etkinleştirebilirsin:"
+        }
+        Language::RU => {
+            "Уведомления пока не настроены!\n\n\
                          После настройки, эта страница будет показывать журнал уведомлений\n\n\
-                         Вы можете включить уведомления в настройках:",
-        Language::PT => "Ainda não ativou as notificações!\n\n\
+                         Вы можете включить уведомления в настройках:"
+        }
+        Language::PT => {
+            "Ainda não ativou as notificações!\n\n\
                                 Depois de ativá-las, esta página irá mostrar um registo das suas notificações\n\n\
-                                Pode ativar as notificações nas definições:",
-        Language::EL => "Δεν έχεις ενεργοποιήσει τις ειδοποιήσεις ακόμη!\n\n\
+                                Pode ativar as notificações nas definições:"
+        }
+        Language::EL => {
+            "Δεν έχεις ενεργοποιήσει τις ειδοποιήσεις ακόμη!\n\n\
                                  Αφότου τις ενεργοποιήσεις, αυτή η σελίδα θα απεικονίσει μια καταγραφή των ειδοποιήσεών σου\n\n\
-                                 Μπορείς να ενεργοποιήσεις τις ειδοποιήσεις από τις ρυθμίσεις:",
+                                 Μπορείς να ενεργοποιήσεις τις ειδοποιήσεις από τις ρυθμίσεις:"
+        }
         // Language::FA => "شما هنوز اعلان ها را فعال نکرده اید!\n\n\
         //                          پس از آنکه آن ها را فعال کنید، این صفحه یک کارنامه از اعلان های شما را نمایش خواهد داد\n\n
         //                          شما می توانید اعلان ها را از پیکربندی فعال کنید:",
-        Language::SV => "Du har inte aktiverat notifikationer än!\n\n\
+        Language::SV => {
+            "Du har inte aktiverat notifikationer än!\n\n\
                                  Efter att du aktiverat dem så kommer denna sida att visa en logg av dina notifikationer\n\n\
-                                 Du kan aktivera notifikationer i inställingarna",
-        Language::FI => "Et ole vielä ottanut ilmoituksia käyttöön!\n\n\
+                                 Du kan aktivera notifikationer i inställingarna"
+        }
+        Language::FI => {
+            "Et ole vielä ottanut ilmoituksia käyttöön!\n\n\
                                  Kun olet ottanut ne käyttöön, tällä sivulla näkyy loki ilmoituksistasi\n\n\
-                                 Voit ottaa ilmoitukset käyttöön asetuksista:",
-        Language::JA => "まだ通知を有効にしていません!\n\n\
+                                 Voit ottaa ilmoitukset käyttöön asetuksista:"
+        }
+        Language::JA => {
+            "まだ通知を有効にしていません!\n\n\
                                  有効化後、このページ上で通知のログが確認できます。\n\n\
-                                 通知設定は設定画面から変更可能です:",
-        Language::UZ => "Siz hali bildirishnomalarni yoqmagansiz!\n\n\
+                                 通知設定は設定画面から変更可能です:"
+        }
+        Language::UZ => {
+            "Siz hali bildirishnomalarni yoqmagansiz!\n\n\
                         Ularni faollashtirgandan so'ng, bu sahifada bildirishnomalaringiz jurnali ko'rsatiladi\n\n\
-                        Sozlamalardan bildirishnomalarni yoqishingiz mumkin:",
-        Language::VI => "Bạn chưa bật tính năng thông báo!\n\n\
+                        Sozlamalardan bildirishnomalarni yoqishingiz mumkin:"
+        }
+        Language::VI => {
+            "Bạn chưa bật tính năng thông báo!\n\n\
                          au khi bật, trang này sẽ hiển thị thông báo\n\n\
-                         Hãy bật thông báo trong phần cài đặt:",
+                         Hãy bật thông báo trong phần cài đặt:"
+        }
     })
 }
 

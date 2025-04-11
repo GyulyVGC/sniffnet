@@ -1,11 +1,11 @@
 use clap::Parser;
-use iced::{window, Task};
+use iced::{Task, window};
 
+use crate::CONFIGS;
+use crate::Configs;
+use crate::SNIFFNET_LOWERCASE;
 use crate::gui::types::message::Message;
 use crate::utils::formatted_strings::APP_VERSION;
-use crate::Configs;
-use crate::CONFIGS;
-use crate::SNIFFNET_LOWERCASE;
 
 #[derive(Parser, Debug)]
 #[command(

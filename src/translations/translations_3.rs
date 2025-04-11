@@ -244,24 +244,50 @@ pub fn unsupported_link_type_translation<'a>(
     adapter: &str,
 ) -> Text<'a, StyleType> {
     let translation = match language {
-        Language::EN => "The link type associated with this adapter is not supported by Sniffnet yet...",
+        Language::EN => {
+            "The link type associated with this adapter is not supported by Sniffnet yet..."
+        }
         // Language::FA => "نوع پیوند مرتبط با این مبدل هنوز توسط Sniffnet پشتیبانی نمی شود...",
-        Language::ES => "La conexión asociada con este adaptador aún no esta implementada en Sniffnet...",
-        Language::IT => "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet...",
-        Language::FR => "Le type de connexion associé à cet adaptateur n'est pas encore supporté par Sniffnet...",
-        Language::DE => "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt...",
-        Language::PL => "Rodzaj połączenia powiązany z tym adapterem nie jest jeszcze obsługiwany przez Sniffnet...",
-        Language::RU => "Тип соединения, связанный с этим адаптером, пока не поддерживается Sniffnet...",
-        Language::RO => "Tipul conexiunii asociate acestui adaptor de rețea nu este încă suportat de Sniffnet...",
-        Language::JA => "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません...",
-        Language::UZ => "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi...",
+        Language::ES => {
+            "La conexión asociada con este adaptador aún no esta implementada en Sniffnet..."
+        }
+        Language::IT => {
+            "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet..."
+        }
+        Language::FR => {
+            "Le type de connexion associé à cet adaptateur n'est pas encore supporté par Sniffnet..."
+        }
+        Language::DE => {
+            "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt..."
+        }
+        Language::PL => {
+            "Rodzaj połączenia powiązany z tym adapterem nie jest jeszcze obsługiwany przez Sniffnet..."
+        }
+        Language::RU => {
+            "Тип соединения, связанный с этим адаптером, пока не поддерживается Sniffnet..."
+        }
+        Language::RO => {
+            "Tipul conexiunii asociate acestui adaptor de rețea nu este încă suportat de Sniffnet..."
+        }
+        Language::JA => {
+            "このアダプターのリンク タイプは Sniffnet ではまだサポートされていません..."
+        }
+        Language::UZ => {
+            "Ushbu adapter bilan bog'langan havola turi hozircha Sniffnet tomonidan qo'llab quvvatlanmaydi..."
+        }
         Language::SV => "Länktypen associerad med denna adapter stöds inte av Sniffnet än...",
         Language::VI => "Loại liên kết được gắn với adapter này chưa được Sniffnet hỗ trợ...",
         Language::ZH => "Sniffnet 尚不支持与此适配器关联的链接类型...",
         Language::KO => "이 어댑터와 연결된 링크 유형은 Sniffnet에서 아직 지원되지 않습니다...",
-        Language::TR => "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor...",
-        Language::PT => "O tipo de conexão associado com este adaptador não é suportado pelo Sniffnet ainda...",
-        Language::UK => "Різновид зʼєднання, повʼязаний з даним адаптером, ще не підтримується Sniffnet-ом...",
+        Language::TR => {
+            "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor..."
+        }
+        Language::PT => {
+            "O tipo de conexão associado com este adaptador não é suportado pelo Sniffnet ainda..."
+        }
+        Language::UK => {
+            "Різновид зʼєднання, повʼязаний з даним адаптером, ще не підтримується Sniffnet-ом..."
+        }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 

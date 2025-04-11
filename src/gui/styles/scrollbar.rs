@@ -7,9 +7,9 @@ use iced::widget::scrollable::{Catalog, Rail, Status, Style};
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Border, Color};
 
+use crate::StyleType;
 use crate::gui::styles::style_constants::BORDER_ROUNDED_RADIUS;
 use crate::gui::styles::types::palette::mix_colors;
-use crate::StyleType;
 
 #[derive(Default)]
 pub enum ScrollbarType {

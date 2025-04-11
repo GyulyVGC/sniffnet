@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use serde::Deserialize;
 
-use crate::utils::formatted_strings::APP_VERSION;
 use crate::SNIFFNET_LOWERCASE;
+use crate::utils::formatted_strings::APP_VERSION;
 
 #[derive(Deserialize, Debug)]
 struct AppVersion {

@@ -4,8 +4,8 @@ use std::sync::Mutex;
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, rich_text, span, Column, Container, Row, Text, Tooltip};
-use iced::widget::{horizontal_space, Space};
+use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
+use iced::widget::{Space, horizontal_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;

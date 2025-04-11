@@ -1,8 +1,9 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::widget::{Rule, Space, button, lazy};
 use iced::{Alignment, Color, Element, Font, Length, Padding};
 
+use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -26,7 +27,6 @@ use crate::translations::translations_3::custom_style_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {

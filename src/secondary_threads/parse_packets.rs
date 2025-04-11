@@ -9,6 +9,7 @@ use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
 use pcap::Packet;
 
+use crate::InfoTraffic;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
@@ -23,7 +24,6 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::InfoTraffic;
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -47,7 +47,6 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                continue;
             }
             Ok(packet) => {
                 if *current_capture_id.lock().unwrap() != capture_id {

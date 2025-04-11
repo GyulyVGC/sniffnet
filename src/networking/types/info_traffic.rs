@@ -3,13 +3,13 @@
 
 use std::collections::{HashMap, HashSet};
 
+use crate::Service;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::Service;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {

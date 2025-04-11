@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{horizontal_space, Button, Slider};
+use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 

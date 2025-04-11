@@ -3,15 +3,16 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use std::collections::HashSet;
+use std::fmt::Write;
 
+use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput,
-    Tooltip,
+    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
+    button,
 };
-use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Font, Length, Padding};
+use iced::{Alignment, Font, Length, Padding, alignment};
 use pcap::Device;
 
 use crate::gui::components::button::button_open_file;
@@ -302,7 +303,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{name}\n"));
+                let _ = writeln!(dev_str, "{name}");
                 dev_str.push_str(&description);
             }
         }
@@ -310,16 +311,16 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         match num_addresses {
             0 => {}
             1 => {
-                dev_str.push_str(&format!("\n{}:", address_translation(language)));
+                let _ = write!(dev_str, "\n{}:", address_translation(language));
             }
             _ => {
-                dev_str.push_str(&format!("\n{}:", addresses_translation(language)));
+                let _ = write!(dev_str, "\n{}:", addresses_translation(language));
             }
         }
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n   {address_string}"));
+            let _ = write!(dev_str, "\n   {address_string}");
         }
         dev_str_list.push((name, dev_str));
     }

@@ -6,10 +6,10 @@ use std::sync::{Arc, Mutex};
 use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
 
-use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 #[cfg(not(test))]
 use crate::SNIFFNET_LOWERCASE;
+use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::my_link_type::MyLinkType;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigDevice {

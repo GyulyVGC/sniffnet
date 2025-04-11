@@ -1,7 +1,7 @@
 use std::net::IpAddr;
 use std::sync::Arc;
 
-use maxminddb::{MaxMindDBError, Reader};
+use maxminddb::{MaxMindDbError, Reader};
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -24,7 +24,10 @@ impl MmdbReader {
         MmdbReader::Default(default_reader)
     }
 
-    pub fn lookup<'a, T: Deserialize<'a>>(&'a self, ip: IpAddr) -> Result<T, MaxMindDBError> {
+    pub fn lookup<'a, T: Deserialize<'a>>(
+        &'a self,
+        ip: IpAddr,
+    ) -> Result<Option<T>, MaxMindDbError> {
         match self {
             MmdbReader::Default(reader) => reader.lookup(ip),
             MmdbReader::Custom(reader) => reader.lookup(ip),
