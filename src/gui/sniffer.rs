@@ -474,7 +474,7 @@ impl Sniffer {
                 self.export_pcap.set_directory(path);
             }
             Message::OutputPcapFile(name) => {
-                self.export_pcap.set_file_name(name);
+                self.export_pcap.set_file_name(&name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
                 let window_id = self.id.unwrap_or(Id::unique());
