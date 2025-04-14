@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, VN,
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -29,6 +29,7 @@ pub enum Language {
     /// Simplified Chinese
     ZH,
     /// Traditional Chinese
+    #[allow(non_camel_case_types)]
     ZH_TW,
     /// Romanian
     RO,

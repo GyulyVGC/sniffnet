@@ -91,7 +91,6 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::PL => "Rozpocznij!",
         Language::UK => "Почати!",
         Language::ZH => "开始!",
-        Language::ZH_TW => "開始！",
         Language::TR => "Başla!",
         Language::RU => "Начать!",
         Language::PT => "Começar!",
@@ -99,7 +98,7 @@ pub fn start_translation(language: Language) -> &'static str {
         // Language::FA => "شروع!",
         Language::SV => "Starta!",
         Language::FI => "Aloita!",
-        Language::JA => "開始！",
+        Language::JA | Language::ZH_TW => "開始！",
         Language::UZ => "Boshlash!",
         Language::VI => "Bắt đầu!",
     }
@@ -286,7 +285,6 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::DE => "Einstellungen",
         Language::UK => "Налаштування",
         Language::ZH => "设置",
-        Language::ZH_TW => "設定",
         Language::RO => "Setări",
         Language::KO => "설정",
         Language::TR => "Ayarlar",
@@ -296,7 +294,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         // Language::FA => "پیکربندی",
         Language::SV => "Inställningar",
         Language::FI => "Asetukset",
-        Language::JA => "設定",
+        Language::JA | Language::ZH_TW => "設定",
         Language::UZ => "Sozlamalar",
         Language::VI => "Cài đặt",
     }
@@ -311,8 +309,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::PL => "Tak",
         Language::DE | Language::SV => "Ja",
         Language::UK => "Так",
-        Language::ZH => "是",
-        Language::ZH_TW => "是",
+        Language::ZH | Language::ZH_TW => "是",
         Language::RO => "Da",
         Language::KO => "네",
         Language::TR => "Evet",
@@ -414,8 +411,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::PL => "Wyczyść wszystko",
         Language::DE => "Alle löschen",
         Language::UK => "Видалити все",
-        Language::ZH => "清除所有",
-        Language::ZH_TW => "清除所有",
+        Language::ZH | Language::ZH_TW => "清除所有",
         Language::RO => "Ștergeți tot",
         Language::KO => "모두 지우기",
         Language::TR => "Hepsini temizle",
@@ -482,6 +478,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
     let network_adapter_translation = network_adapter_translation(language);
     Text::new(match language {
@@ -591,6 +588,7 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
     })
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
     let network_adapter_translation = network_adapter_translation(language);
     Text::new(match language {
@@ -700,6 +698,7 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
     })
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => format!(
@@ -1200,7 +1199,6 @@ pub fn bytes_chart_translation(language: Language) -> &'static str {
         Language::PL => "bajty na sekundę",
         Language::DE => "Bytes pro Sekunde",
         Language::ZH_TW => "每秒位元組",
-
         Language::UK => "байти на секунду",
         Language::ZH => "网络流量",
         Language::RO => "octeți pe secundă",
@@ -1350,7 +1348,6 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::DE => "Wähl dein Lieblingsdesign",
         Language::UK => "Виберіть улюблену тему",
         Language::ZH_TW => "選擇您偏好的主題",
-
         Language::ZH => "选择您喜欢的主题",
         Language::RO => "Selectați tema preferată",
         Language::KO => "태마를 선택하세요",
@@ -1531,8 +1528,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::PL => "Przychodzące",
         Language::DE => "Eingehend",
         Language::UK => "Вхідні",
-        Language::ZH_TW => "入站",
-        Language::ZH => "入站",
+        Language::ZH | Language::ZH_TW => "入站",
         Language::RO => "De intrare",
         Language::KO => "수신중",
         Language::TR => "Gelen",
@@ -1557,8 +1553,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::PL => "Wychodzące",
         Language::DE => "Ausgehend",
         Language::UK => "Вихідні",
-        Language::ZH_TW => "出站",
-        Language::ZH => "出站",
+        Language::ZH | Language::ZH_TW => "出站",
         Language::RO => "De ieșire",
         Language::KO => "발신중",
         Language::TR => "Giden",
@@ -1582,8 +1577,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::PL => "Powiadomienia",
         Language::DE => "Benachrichtigungen",
         Language::UK => "Повідомлення",
-        Language::ZH | Language::JA => "通知",
-        Language::ZH_TW => "通知",
+        Language::ZH | Language::JA | Language::ZH_TW => "通知",
         Language::RO => "Notificări",
         Language::KO => "알림",
         Language::TR => "Bildirimler",
@@ -1732,8 +1726,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::PL => "(na sekundę)",
         Language::DE => "(pro Sekunde)",
         Language::UK => "(на секунду)",
-        Language::ZH | Language::JA => "(每秒) ",
-        Language::ZH_TW => "(每秒)",
+        Language::ZH | Language::JA | Language::ZH_TW => "(每秒)",
         Language::RO => "(pe secundă)",
         Language::KO => "(초당)",
         Language::TR => "(her saniye)",
@@ -2027,6 +2020,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => {
@@ -2070,8 +2064,8 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  您可以从设置中设定:"
         }
         Language::ZH_TW => {
-            "您尚未啟用任何通知！\n\n
-                                啟用通知後，此頁面將會顯示您的通知紀錄。\n\n
+            "您尚未啟用任何通知！\n\n\
+                                啟用通知後，此頁面將會顯示您的通知紀錄。\n\n\
                                 您可以從「設定」中啟用通知："
         }
         Language::RO => {
@@ -2170,7 +2164,8 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
                                  当您收到通知时，它会显示在这里"
         }
         Language::ZH_TW => {
-            "目前沒有任何通知...\n\n當您收到通知時，將會顯示在這裡。"
+            "目前沒有任何通知...\n\n\
+                                當您收到通知時，將會顯示在這裡。"
         }
         Language::RO => {
             "Nimic de văzut momentan...\n\n\

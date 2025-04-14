@@ -105,7 +105,7 @@ impl ReportCol {
     }
 
     pub(crate) fn get_max_chars(&self, language_opt: Option<Language>) -> usize {
-        let reduction_factor = if [Language::JA, Language::KO, Language::ZH]
+        let reduction_factor = if [Language::JA, Language::KO, Language::ZH, Language::ZH_TW]
             .contains(&language_opt.unwrap_or(Language::EN))
         {
             2

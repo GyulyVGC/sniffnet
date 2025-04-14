@@ -611,7 +611,7 @@ pub fn showing_results_translation(
         Language::ES => format!("Mostrando {start}-{end} de {total} resultados totales"),
         Language::KO => format!("총 {total}개의 결과 중 {start}-{end}을(를) 보여줍니다"),
         Language::ZH => format!("显示累计 {total} 条目中第 {start}-{end} 个"),
-        Language::ZH_TW => format!("顯示總共 {total} 個結果中的第 {start} - {end} 個"),
+        Language::ZH_TW => format!("顯示總共 {total} 個結果中的第 {start}-{end} 個"),
         Language::UK => format!("Показано {start}-{end} з {total} загальних результатів"),
         Language::RO => format!("Se afișează {start}-{end} din {total} rezultate"),
         Language::PL => format!("Wyświetlanie {start}-{end} z {total} wyników"),
