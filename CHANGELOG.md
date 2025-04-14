@@ -7,6 +7,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added support for ARP protocol ([#759](https://github.com/GyulyVGC/sniffnet/pull/759) — fixes [#680](https://github.com/GyulyVGC/sniffnet/issues/680))
 - Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
 - Show data agglomerates in _Inspect_ page table ([#684](https://github.com/GyulyVGC/sniffnet/pull/684) — fixes [#601](https://github.com/GyulyVGC/sniffnet/issues/601))
+- Added Traditional Chinese (Taiwan) translation 🇹🇼 ([#774](https://github.com/GyulyVGC/sniffnet/pull/774))
 - Updated some of the existing translations to v1.3: 
   - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
   - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
