@@ -4,7 +4,7 @@ use crate::Protocol;
 use std::net::IpAddr;
 
 /// Struct representing a network address:port pair.
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct AddressPortPair {
     /// Network layer IPv4 or IPv6 source address.
     pub address1: IpAddr,

@@ -135,7 +135,7 @@ pub fn parse_packets(
                                 );
 
                                 // launch new thread to resolve host name
-                                let key2 = key.clone();
+                                let key2 = key;
                                 let info_traffic2 = info_traffic_mutex.clone();
                                 let device2 = device.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();

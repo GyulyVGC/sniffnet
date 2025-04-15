@@ -303,7 +303,7 @@ pub fn modify_or_insert_in_map(
 
     let new_info: InfoAddressPortPair = info_traffic
         .map
-        .entry(key.clone())
+        .entry(*key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
