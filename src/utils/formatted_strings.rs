@@ -130,9 +130,9 @@ pub fn get_domain_from_r_dns(r_dns: String) -> String {
     }
 }
 
-pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
+pub fn get_socket_address(address: &IpAddr, port: Option<u16>) -> String {
     if let Some(res) = port {
-        if address.contains(':') {
+        if address.is_ipv6() {
             // IPv6
             format!("[{address}]:{res}")
         } else {
@@ -140,7 +140,7 @@ pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
             format!("{address}:{res}")
         }
     } else {
-        address.to_owned()
+        address.to_string()
     }
 }
 

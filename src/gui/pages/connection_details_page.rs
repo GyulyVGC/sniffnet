@@ -298,7 +298,7 @@ fn get_host_info_col<'a>(
 
 fn get_local_tooltip<'a>(
     sniffer: &Sniffer,
-    address_to_lookup: &str,
+    address_to_lookup: &IpAddr,
     key: &AddressPortPair,
 ) -> Tooltip<'a, Message, StyleType> {
     let ConfigSettings {
@@ -331,7 +331,7 @@ fn get_local_tooltip<'a>(
 
 fn get_src_or_dest_col<'a>(
     caption: Row<'a, Message, StyleType>,
-    ip: &String,
+    ip: &IpAddr,
     port: Option<u16>,
     mac: Option<&String>,
     font: Font,
@@ -406,10 +406,10 @@ fn assemble_widgets<'a>(
 fn get_button_copy<'a>(
     language: Language,
     font: Font,
-    string: &String,
+    ip: &IpAddr,
     timing_events: &TimingEvents,
 ) -> Tooltip<'a, Message, StyleType> {
-    let icon = if timing_events.was_just_copy_ip(string) {
+    let icon = if timing_events.was_just_copy_ip(ip) {
         Text::new("✔").font(font).size(14)
     } else {
         Icon::Copy.to_text().size(12)
@@ -419,7 +419,7 @@ fn get_button_copy<'a>(
         .padding(0)
         .height(25)
         .width(25)
-        .on_press(Message::CopyIp(string.clone()));
+        .on_press(Message::CopyIp(*ip));
 
     Tooltip::new(
         content,

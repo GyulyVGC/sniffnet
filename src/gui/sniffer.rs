@@ -447,9 +447,9 @@ impl Sniffer {
                 self.configs.lock().unwrap().clone().store();
                 return window::close(self.id.unwrap_or(Id::unique()));
             }
-            Message::CopyIp(string) => {
-                self.timing_events.copy_ip_now(string.clone());
-                return iced::clipboard::write(string);
+            Message::CopyIp(ip) => {
+                self.timing_events.copy_ip_now(ip);
+                return iced::clipboard::write(ip.to_string());
             }
             Message::OpenFile(old_file, file_info, consumer_message) => {
                 return Task::perform(

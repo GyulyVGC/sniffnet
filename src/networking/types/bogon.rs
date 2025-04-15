@@ -1,6 +1,5 @@
 use crate::networking::types::ip_collection::AddressCollection;
 use std::net::IpAddr;
-use std::str::FromStr;
 
 pub struct Bogon {
     pub range: AddressCollection,
@@ -150,10 +149,9 @@ static BOGONS: std::sync::LazyLock<Vec<&'static Bogon>> = std::sync::LazyLock::n
     ]
 });
 
-pub fn is_bogon(address: &str) -> Option<&'static str> {
-    let ip = IpAddr::from_str(address).ok()?;
+pub fn is_bogon(address: &IpAddr) -> Option<&'static str> {
     for bogon in BOGONS.iter() {
-        if bogon.range.contains(&ip) {
+        if bogon.range.contains(address) {
             return Some(bogon.description);
         }
     }
@@ -163,121 +161,191 @@ pub fn is_bogon(address: &str) -> Option<&'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_is_bogon_no() {
-        assert_eq!(is_bogon("8.8.8.8"), None);
-        assert_eq!(is_bogon("2001:4860:4860::8888"), None);
+        assert_eq!(is_bogon(&IpAddr::from_str("8.8.8.8").unwrap()), None);
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("2001:4860:4860::8888").unwrap()),
+            None
+        );
     }
 
     #[test]
     fn test_is_bogon_this_network() {
-        assert_eq!(is_bogon("0.1.2.3"), Some("\"this\" network"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("0.1.2.3").unwrap()),
+            Some("\"this\" network")
+        );
     }
 
     #[test]
     fn test_is_bogon_private_use_networks() {
-        assert_eq!(is_bogon("10.1.2.3"), Some("private-use"));
-        assert_eq!(is_bogon("172.22.2.3"), Some("private-use"));
-        assert_eq!(is_bogon("192.168.255.3"), Some("private-use"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("10.1.2.3").unwrap()),
+            Some("private-use")
+        );
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("172.22.2.3").unwrap()),
+            Some("private-use")
+        );
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("192.168.255.3").unwrap()),
+            Some("private-use")
+        );
     }
 
     #[test]
     fn test_is_bogon_carrier_grade() {
-        assert_eq!(is_bogon("100.99.2.1"), Some("carrier-grade NAT"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("100.99.2.1").unwrap()),
+            Some("carrier-grade NAT")
+        );
     }
 
     #[test]
     fn test_is_bogon_loopback() {
-        assert_eq!(is_bogon("127.99.2.1"), Some("loopback"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("127.99.2.1").unwrap()),
+            Some("loopback")
+        );
     }
 
     #[test]
     fn test_is_bogon_link_local() {
-        assert_eq!(is_bogon("169.254.0.0"), Some("link local"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("169.254.0.0").unwrap()),
+            Some("link local")
+        );
     }
 
     #[test]
     fn test_is_bogon_ietf() {
-        assert_eq!(is_bogon("192.0.0.255"), Some("IETF protocol assignments"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("192.0.0.255").unwrap()),
+            Some("IETF protocol assignments")
+        );
     }
 
     #[test]
     fn test_is_bogon_test_net_1() {
-        assert_eq!(is_bogon("192.0.2.128"), Some("TEST-NET-1"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("192.0.2.128").unwrap()),
+            Some("TEST-NET-1")
+        );
     }
 
     #[test]
     fn test_is_bogon_network_interconnect() {
         assert_eq!(
-            is_bogon("198.18.2.128"),
+            is_bogon(&IpAddr::from_str("198.18.2.128").unwrap()),
             Some("network interconnect device benchmark testing")
         );
     }
 
     #[test]
     fn test_is_bogon_test_net_2() {
-        assert_eq!(is_bogon("198.51.100.128"), Some("TEST-NET-2"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("198.51.100.128").unwrap()),
+            Some("TEST-NET-2")
+        );
     }
 
     #[test]
     fn test_is_bogon_test_net_3() {
-        assert_eq!(is_bogon("203.0.113.128"), Some("TEST-NET-3"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("203.0.113.128").unwrap()),
+            Some("TEST-NET-3")
+        );
     }
 
     #[test]
     fn test_is_bogon_future_use() {
-        assert_eq!(is_bogon("240.0.0.0"), Some("future use"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("240.0.0.0").unwrap()),
+            Some("future use")
+        );
     }
 
     #[test]
     fn test_node_scope_unspecified() {
-        assert_eq!(is_bogon("::"), Some("node-scope unicast unspecified"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("::").unwrap()),
+            Some("node-scope unicast unspecified")
+        );
     }
 
     #[test]
     fn test_node_scope_loopback() {
-        assert_eq!(is_bogon("::1"), Some("node-scope unicast loopback"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("::1").unwrap()),
+            Some("node-scope unicast loopback")
+        );
     }
 
     #[test]
     fn test_ipv4_mapped() {
-        assert_eq!(is_bogon("::ffff:8.8.8.8"), Some("IPv4-mapped"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("::ffff:8.8.8.8").unwrap()),
+            Some("IPv4-mapped")
+        );
     }
 
     #[test]
     fn test_ipv4_compatible() {
-        assert_eq!(is_bogon("::8.8.8.8"), Some("IPv4-compatible"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("::8.8.8.8").unwrap()),
+            Some("IPv4-compatible")
+        );
     }
 
     #[test]
     fn test_remotely_triggered() {
-        assert_eq!(is_bogon("100::beef"), Some("remotely triggered black hole"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("100::beef").unwrap()),
+            Some("remotely triggered black hole")
+        );
     }
 
     #[test]
     fn test_orchid() {
-        assert_eq!(is_bogon("2001:10::feed"), Some("ORCHID"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("2001:10::feed").unwrap()),
+            Some("ORCHID")
+        );
     }
 
     #[test]
     fn test_documentation_prefix() {
-        assert_eq!(is_bogon("2001:db8::fe90"), Some("documentation prefix"));
-        assert_eq!(is_bogon("3fff::"), Some("documentation prefix"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("2001:db8::fe90").unwrap()),
+            Some("documentation prefix")
+        );
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("3fff::").unwrap()),
+            Some("documentation prefix")
+        );
     }
 
     #[test]
     fn test_ula() {
-        assert_eq!(is_bogon("fdff::"), Some("ULA"));
+        assert_eq!(is_bogon(&IpAddr::from_str("fdff::").unwrap()), Some("ULA"));
     }
 
     #[test]
     fn test_link_local_unicast() {
-        assert_eq!(is_bogon("feaf::"), Some("link-local unicast"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("feaf::").unwrap()),
+            Some("link-local unicast")
+        );
     }
 
     #[test]
     fn test_site_local_unicast() {
-        assert_eq!(is_bogon("feea::1"), Some("site-local unicast"));
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("feea::1").unwrap()),
+            Some("site-local unicast")
+        );
     }
 }

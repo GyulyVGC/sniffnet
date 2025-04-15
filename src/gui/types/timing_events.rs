@@ -1,3 +1,4 @@
+use std::net::{IpAddr, Ipv4Addr};
 use std::ops::Sub;
 use std::time::Duration;
 
@@ -5,7 +6,7 @@ pub struct TimingEvents {
     /// Instant of the last window focus
     focus: std::time::Instant,
     /// Instant of the last press on Copy IP button, with the related IP address
-    copy_ip: (std::time::Instant, String),
+    copy_ip: (std::time::Instant, IpAddr),
     /// Instant of the last thumbnail mode enter
     thumbnail_enter: std::time::Instant,
     /// Instant of the last click on the thumbnail window
@@ -26,11 +27,11 @@ impl TimingEvents {
         self.focus.elapsed() < Duration::from_millis(TimingEvents::TIMEOUT_FOCUS)
     }
 
-    pub fn copy_ip_now(&mut self, ip: String) {
+    pub fn copy_ip_now(&mut self, ip: IpAddr) {
         self.copy_ip = (std::time::Instant::now(), ip);
     }
 
-    pub fn was_just_copy_ip(&self, ip: &String) -> bool {
+    pub fn was_just_copy_ip(&self, ip: &IpAddr) -> bool {
         self.copy_ip.0.elapsed() < Duration::from_millis(TimingEvents::TIMEOUT_COPY_IP)
             && self.copy_ip.1.eq(ip)
     }
@@ -58,7 +59,7 @@ impl Default for TimingEvents {
     fn default() -> Self {
         Self {
             focus: std::time::Instant::now().sub(Duration::from_millis(400)),
-            copy_ip: (std::time::Instant::now(), String::new()),
+            copy_ip: (std::time::Instant::now(), IpAddr::V4(Ipv4Addr::UNSPECIFIED)),
             thumbnail_enter: std::time::Instant::now(),
             thumbnail_click: std::time::Instant::now(),
         }

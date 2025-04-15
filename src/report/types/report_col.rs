@@ -74,7 +74,7 @@ impl ReportCol {
 
     pub(crate) fn get_value(&self, key: &AddressPortPair, val: &InfoAddressPortPair) -> String {
         match self {
-            ReportCol::SrcIp => key.address1.clone(),
+            ReportCol::SrcIp => key.address1.to_string(),
             ReportCol::SrcPort => {
                 if let Some(port) = key.port1 {
                     port.to_string()
@@ -82,7 +82,7 @@ impl ReportCol {
                     "-".to_string()
                 }
             }
-            ReportCol::DstIp => key.address2.clone(),
+            ReportCol::DstIp => key.address2.to_string(),
             ReportCol::DstPort => {
                 if let Some(port) = key.port2 {
                     port.to_string()
