@@ -60,9 +60,10 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart, location};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -445,7 +446,7 @@ impl Sniffer {
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(self.id.unwrap_or(Id::unique()));
+                return window::close(self.id.unwrap_or_else(Id::unique));
             }
             Message::CopyIp(ip) => {
                 self.timing_events.copy_ip_now(ip);
@@ -477,7 +478,7 @@ impl Sniffer {
                 self.export_pcap.set_file_name(&name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
-                let window_id = self.id.unwrap_or(Id::unique());
+                let window_id = self.id.unwrap_or_else(Id::unique);
 
                 self.thumbnail = !self.thumbnail;
                 self.traffic_chart.thumbnail = self.thumbnail;
@@ -515,7 +516,7 @@ impl Sniffer {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
-                    return window::drag(self.id.unwrap_or(Id::unique()));
+                    return window::drag(self.id.unwrap_or_else(Id::unique));
                 }
             }
             Message::CtrlTPressed => {
@@ -749,7 +750,7 @@ impl Sniffer {
     }
 
     fn set_adapter(&mut self, name: &str) {
-        for dev in Device::list().expect("Error retrieving device list\r\n") {
+        for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&name) {
                 let mut addresses_mutex = self.device.addresses.lock().unwrap();
                 *addresses_mutex = dev.addresses;

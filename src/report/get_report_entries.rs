@@ -68,7 +68,7 @@ pub fn get_searched_entries(
     (
         all_results
             .get((sniffer.page_number - 1) * 20..upper_bound)
-            .unwrap_or(&Vec::new())
+            .unwrap_or_default()
             .iter()
             .map(|&(key, val)| (key.to_owned(), val.to_owned()))
             .collect(),

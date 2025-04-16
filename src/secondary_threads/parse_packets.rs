@@ -93,9 +93,7 @@ pub fn parse_packets(
                         );
                     }
 
-                    let mut info_traffic = info_traffic_mutex
-                        .lock()
-                        .expect("Error acquiring mutex\n\r");
+                    let mut info_traffic = info_traffic_mutex.lock().unwrap();
                     //increment number of sniffed packets and bytes
                     info_traffic.all_packets += 1;
                     info_traffic.all_bytes += exchanged_bytes;

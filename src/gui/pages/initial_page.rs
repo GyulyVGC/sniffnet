@@ -36,10 +36,11 @@ use crate::translations::translations::{
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
+use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType, location};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -294,7 +295,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
 
     let mut dev_str_list = vec![];
-    for dev in Device::list().expect("Error retrieving device list\r\n") {
+    for dev in Device::list().log_err(location!()).unwrap_or_default() {
         let mut dev_str = String::new();
         let name = dev.name;
         match dev.desc {

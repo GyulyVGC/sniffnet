@@ -16,8 +16,9 @@ use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_formatted_num_seconds;
-use crate::{ByteMultiple, ChartType, Language, StyleType};
+use crate::{ByteMultiple, ChartType, Language, StyleType, location};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -199,9 +200,12 @@ impl Chart<Message> for TrafficChart {
             1 + (y_axis_range.end - y_axis_range.start) as usize
         };
 
-        let mut chart = chart_builder
+        let Ok(mut chart) = chart_builder
             .build_cartesian_2d(x_axis_range, y_axis_range)
-            .expect("Error drawing chart");
+            .log_err(location!())
+        else {
+            return;
+        };
 
         let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
 
@@ -233,30 +237,31 @@ impl Chart<Message> for TrafficChart {
             let area_series = self.area_series(direction);
             let label = self.series_label(direction);
             let legend_style = self.series_color(direction).filled();
-            chart
-                .draw_series(area_series)
-                .expect("Error drawing graph")
+            let Ok(data_series) = chart.draw_series(area_series).log_err(location!()) else {
+                return;
+            };
+            data_series
                 .label(label)
                 .legend(move |(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], legend_style));
         }
         // draw x axis to hide zeroed values
-        chart
+        let _ = chart
             .draw_series(LineSeries::new(
                 [(x_axis_start, 0.0), (x_axis_end, 0.0)],
                 ShapeStyle::from(&buttons_color).stroke_width(CHARTS_LINE_BORDER),
             ))
-            .expect("Error drawing graph");
+            .log_err(location!());
 
         // chart legend
         if !self.thumbnail {
-            chart
+            let _ = chart
                 .configure_series_labels()
                 .position(SeriesLabelPosition::UpperRight)
                 .background_style(buttons_color.mix(0.6))
                 .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
                 .label_font(self.font(13.5))
                 .draw()
-                .expect("Error drawing graph");
+                .log_err(location!());
         }
     }
 }

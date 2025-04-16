@@ -24,8 +24,9 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
-use crate::{InfoTraffic, IpVersion, Protocol};
+use crate::{InfoTraffic, IpVersion, Protocol, location};
 use std::fmt::Write;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -274,7 +275,7 @@ pub fn modify_or_insert_in_map(
 
         // update device addresses
         let mut my_interface_addresses = Vec::new();
-        for dev in Device::list().expect("Error retrieving device list\r\n") {
+        for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&my_device.name) {
                 let mut my_interface_addresses_mutex = my_device.addresses.lock().unwrap();
                 my_interface_addresses_mutex.clone_from(&dev.addresses);
@@ -297,9 +298,7 @@ pub fn modify_or_insert_in_map(
         service = get_service(key, traffic_direction);
     }
 
-    let mut info_traffic = info_traffic_mutex
-        .lock()
-        .expect("Error acquiring mutex\n\r");
+    let mut info_traffic = info_traffic_mutex.lock().unwrap();
 
     let new_info: InfoAddressPortPair = info_traffic
         .map

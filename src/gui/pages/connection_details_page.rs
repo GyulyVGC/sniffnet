@@ -65,10 +65,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
-    let info_traffic_lock = sniffer
-        .info_traffic
-        .lock()
-        .expect("Error acquiring mutex\n\r");
+    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let val = info_traffic_lock.map.get(key).unwrap().clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = info_traffic_lock
