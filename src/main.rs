@@ -35,6 +35,7 @@ use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::secondary_threads::check_updates::set_newer_release_status;
+use crate::utils::error_logger::{ErrorLogger, Location};
 
 mod chart;
 mod cli;
@@ -86,18 +87,18 @@ pub fn main() -> iced::Result {
     }));
 
     // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
-    ctrlc::set_handler(move || {
+    let _ = ctrlc::set_handler(move || {
         configs2.lock().unwrap().clone().store();
         process::exit(130);
     })
-    .expect("Error setting Ctrl-C handler");
+    .log_err(location!());
 
-    thread::Builder::new()
+    let _ = thread::Builder::new()
         .name("thread_check_updates".to_string())
         .spawn(move || {
             set_newer_release_status(&newer_release_available2);
         })
-        .unwrap();
+        .log_err(location!());
 
     print_cli_welcome_message();
 

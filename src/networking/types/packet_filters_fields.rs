@@ -1,5 +1,4 @@
-use std::net::IpAddr;
-use std::str::FromStr;
+use std::net::{IpAddr, Ipv6Addr};
 
 use crate::{IpVersion, Protocol};
 
@@ -25,8 +24,8 @@ impl Default for PacketFiltersFields {
         Self {
             ip_version: IpVersion::IPv4,
             protocol: Protocol::ARP,
-            source: IpAddr::from_str("::").unwrap(),
-            dest: IpAddr::from_str("::").unwrap(),
+            source: IpAddr::V6(Ipv6Addr::UNSPECIFIED),
+            dest: IpAddr::V6(Ipv6Addr::UNSPECIFIED),
             sport: None,
             dport: None,
         }

@@ -253,7 +253,10 @@ fn input_group_packets<'a>(
     font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
+    let curr_threshold_str = &packets_notification
+        .threshold
+        .unwrap_or_default()
+        .to_string();
     let input_row = Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
@@ -301,7 +304,7 @@ fn input_group_bytes<'a>(
         per_second_translation(language),
         specify_multiples_translation(language)
     );
-    let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
+    let mut curr_threshold_str = (bytes_notification.threshold.unwrap_or_default()
         / bytes_notification.byte_multiple.multiplier())
     .to_string();
     curr_threshold_str.push_str(&bytes_notification.byte_multiple.get_char());

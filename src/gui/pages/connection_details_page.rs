@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::utils::formatted_strings::get_socket_address;
+use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
 
@@ -65,11 +65,12 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
-    let info_traffic_lock = sniffer
-        .info_traffic
-        .lock()
-        .expect("Error acquiring mutex\n\r");
-    let val = info_traffic_lock.map.get(key).unwrap().clone();
+    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
+    let val = info_traffic_lock
+        .map
+        .get(key)
+        .unwrap_or(&InfoAddressPortPair::default())
+        .clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = info_traffic_lock
         .addresses_resolved
@@ -197,8 +198,8 @@ fn col_info<'a>(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
                     "{} - {}",
-                    val.initial_timestamp.to_string().get(11..19).unwrap(),
-                    val.final_timestamp.to_string().get(11..19).unwrap()
+                    get_formatted_timestamp(val.initial_timestamp),
+                    get_formatted_timestamp(val.final_timestamp)
                 ))
                 .font(font),
             ),
