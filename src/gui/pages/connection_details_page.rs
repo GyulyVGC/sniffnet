@@ -37,7 +37,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::utils::formatted_strings::get_socket_address;
+use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
 
@@ -198,14 +198,8 @@ fn col_info<'a>(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
                     "{} - {}",
-                    val.initial_timestamp
-                        .to_string()
-                        .get(11..19)
-                        .unwrap_or_default(),
-                    val.final_timestamp
-                        .to_string()
-                        .get(11..19)
-                        .unwrap_or_default()
+                    get_formatted_timestamp(val.initial_timestamp),
+                    get_formatted_timestamp(val.final_timestamp)
                 ))
                 .font(font),
             ),

@@ -8,6 +8,7 @@ use crate::notifications::types::logged_notification::{
 };
 use crate::notifications::types::notifications::Notifications;
 use crate::notifications::types::sound::{Sound, play};
+use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, RunTimeData};
 
 /// Checks if one or more notifications have to be emitted and logs them.
@@ -42,11 +43,7 @@ pub fn notify_and_log(
                     threshold: notifications.packets_notification.previous_threshold,
                     incoming: received_packets_entry.try_into().unwrap_or_default(),
                     outgoing: sent_packets_entry.try_into().unwrap_or_default(),
-                    timestamp: Local::now()
-                        .to_string()
-                        .get(11..19)
-                        .unwrap_or_default()
-                        .to_string(),
+                    timestamp: get_formatted_timestamp(Local::now()),
                 }),
             );
             if notifications.packets_notification.sound.ne(&Sound::None) {
@@ -81,11 +78,7 @@ pub fn notify_and_log(
                     threshold: notifications.bytes_notification.previous_threshold,
                     incoming: received_bytes_entry.try_into().unwrap_or_default(),
                     outgoing: sent_bytes_entry.try_into().unwrap_or_default(),
-                    timestamp: Local::now()
-                        .to_string()
-                        .get(11..19)
-                        .unwrap_or_default()
-                        .to_string(),
+                    timestamp: get_formatted_timestamp(Local::now()),
                 }),
             );
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
@@ -121,11 +114,7 @@ pub fn notify_and_log(
                     FavoriteTransmitted {
                         host,
                         data_info_host,
-                        timestamp: Local::now()
-                            .to_string()
-                            .get(11..19)
-                            .unwrap_or_default()
-                            .to_string(),
+                        timestamp: get_formatted_timestamp(Local::now()),
                     },
                 ));
         }

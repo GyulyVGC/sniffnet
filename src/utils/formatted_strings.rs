@@ -7,7 +7,9 @@ use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
 };
 use crate::translations::translations_3::{invalid_filters_translation, port_translation};
+use chrono::{DateTime, Local};
 use std::fmt::Write;
+
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -172,6 +174,10 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
     }
 }
 
+pub fn get_formatted_timestamp(t: DateTime<Local>) -> String {
+    t.format("%H:%M:%S").to_string()
+}
+
 #[allow(dead_code)]
 #[cfg(windows)]
 pub fn get_logs_file_path() -> Option<String> {
@@ -230,6 +236,14 @@ mod tests {
             get_formatted_num_seconds(u128::MAX),
             "94522879700260684295381835397713392:04:15"
         );
+    }
+
+    #[test]
+    fn test_formatted_timestamp() {
+        let now = Local::now();
+        let formatted = get_formatted_timestamp(now);
+        let expected = now.to_string().get(11..19).unwrap().to_string();
+        assert_eq!(formatted, expected);
     }
 
     #[cfg(windows)]
