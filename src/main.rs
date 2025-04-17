@@ -90,7 +90,8 @@ pub fn main() -> iced::Result {
     let _ = ctrlc::set_handler(move || {
         configs2.lock().unwrap().clone().store();
         process::exit(130);
-    });
+    })
+    .log_err(location!());
 
     let _ = thread::Builder::new()
         .name("thread_check_updates".to_string())

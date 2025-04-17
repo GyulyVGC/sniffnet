@@ -32,17 +32,17 @@ impl PortCollection {
                     (subparts.next().unwrap_or(""), subparts.next().unwrap_or(""));
                 let lower_port_res = u16::from_str(lower_str);
                 let upper_port_res = u16::from_str(upper_str);
-                if lower_port_res.is_ok() && upper_port_res.is_ok() {
-                    let lower_port = lower_port_res.unwrap_or_default();
-                    let upper_port = upper_port_res.unwrap_or_default();
-                    let range = RangeInclusive::new(lower_port, upper_port);
-                    if range.is_empty() {
-                        return None;
-                    }
-                    ranges.push(range);
-                } else {
+                let Ok(lower_port) = lower_port_res else {
+                    return None;
+                };
+                let Ok(upper_port) = upper_port_res else {
+                    return None;
+                };
+                let range = RangeInclusive::new(lower_port, upper_port);
+                if range.is_empty() {
                     return None;
                 }
+                ranges.push(range);
             } else {
                 // individual port
                 if let Ok(port) = u16::from_str(object) {
