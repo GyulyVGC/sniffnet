@@ -28,7 +28,7 @@ pub fn get_searched_entries(
                 info_traffic_lock
                     .hosts
                     .get(&e.1)
-                    .unwrap_or_default()
+                    .unwrap_or(&DataInfoHost::default())
                     .is_favorite
             } else {
                 false

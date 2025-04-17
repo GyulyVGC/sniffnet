@@ -61,7 +61,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
-    if sniffer.pcap_error.is_none() {
+    if let Some(error) = sniffer.pcap_error.as_ref() {
+        // pcap threw an ERROR!
+        body = body_pcap_error(error, &sniffer.waiting, language, font);
+    } else {
         // NO pcap error detected
         let observed = sniffer.runtime_data.all_packets;
         let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
@@ -125,14 +128,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .push(container_report);
             }
         }
-    } else {
-        // pcap threw an ERROR!
-        body = body_pcap_error(
-            sniffer.pcap_error.as_ref().unwrap_or_default(),
-            &sniffer.waiting,
-            language,
-            font,
-        );
     }
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)

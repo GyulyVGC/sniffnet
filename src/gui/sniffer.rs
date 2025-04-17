@@ -689,12 +689,15 @@ impl Sniffer {
         #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
         let cmd = "xdg-open";
 
-        std::process::Command::new(cmd)
+        let Ok(mut child) = std::process::Command::new(cmd)
             .arg(url)
             .spawn()
-            .unwrap_or_default()
-            .wait()
-            .unwrap_or_default();
+            .log_err(location!())
+        else {
+            return;
+        };
+
+        child.wait().unwrap_or_default();
     }
 
     fn start(&mut self) {
@@ -720,7 +723,7 @@ impl Sniffer {
             let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
             self.device.link_type = capture_context.my_link_type();
-            thread::Builder::new()
+            let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
@@ -733,7 +736,7 @@ impl Sniffer {
                         &host_data,
                     );
                 })
-                .unwrap_or_default();
+                .log_err(location!());
         }
     }
 

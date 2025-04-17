@@ -2,6 +2,7 @@ use std::sync::Mutex;
 
 use chrono::Local;
 
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
@@ -110,7 +111,10 @@ pub fn notify_and_log(
                 runtime_data.logged_notifications.pop_back();
             }
 
-            let data_info_host = *info_traffic_lock.hosts.get(&host).unwrap_or_default();
+            let data_info_host = *info_traffic_lock
+                .hosts
+                .get(&host)
+                .unwrap_or(&DataInfoHost::default());
             runtime_data
                 .logged_notifications
                 .push_front(LoggedNotification::FavoriteTransmitted(
