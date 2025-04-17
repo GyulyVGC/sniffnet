@@ -66,7 +66,8 @@ pub fn play(sound: Sound, volume: u8) {
         .name("thread_play_sound".to_string())
         .spawn(move || {
             // Get an output stream handle to the default physical sound device
-            let Ok((_, stream_handle)) = OutputStream::try_default().log_err(location!()) else {
+            let Ok((_stream, stream_handle)) = OutputStream::try_default().log_err(location!())
+            else {
                 return;
             };
             let Ok(sink) = Sink::try_new(&stream_handle).log_err(location!()) else {
