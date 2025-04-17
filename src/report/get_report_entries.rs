@@ -25,7 +25,11 @@ pub fn get_searched_entries(
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
             let is_favorite = if let Some(e) = r_dns_host {
-                info_traffic_lock.hosts.get(&e.1).unwrap().is_favorite
+                info_traffic_lock
+                    .hosts
+                    .get(&e.1)
+                    .unwrap_or_default()
+                    .is_favorite
             } else {
                 false
             };

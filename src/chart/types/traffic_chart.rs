@@ -8,7 +8,7 @@ use iced::widget::Container;
 use plotters::prelude::*;
 use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::Spline;
+use splines::{Interpolation, Key, Spline};
 
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -210,7 +210,7 @@ impl Chart<Message> for TrafficChart {
         let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
 
         // chart mesh
-        chart
+        let _ = chart
             .configure_mesh()
             .axis_style(buttons_color)
             .bold_line_style(buttons_color.mix(0.3))
@@ -230,7 +230,7 @@ impl Chart<Message> for TrafficChart {
                 &|seconds| get_formatted_num_seconds(seconds.abs() as u128),
             )
             .draw()
-            .unwrap();
+            .log_err(location!());
 
         // draw incoming and outgoing series
         for direction in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
@@ -270,8 +270,14 @@ const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     let mut ret_val = Vec::new();
     let len = spline.len();
-    let first_x = spline.get(0).unwrap().t;
-    let last_x = spline.get(len - 1).unwrap().t;
+    let first_x = spline
+        .get(0)
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
+    let last_x = spline
+        .get(len - 1)
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
     #[allow(clippy::cast_precision_loss)]
     let delta = (last_x - first_x) / (PTS as f32 - 1.0);
     for i in 0..PTS {

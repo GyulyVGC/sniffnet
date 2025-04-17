@@ -72,7 +72,7 @@ pub fn parse_packets(
                         continue;
                     }
 
-                    let key = key_option.unwrap();
+                    let key = key_option.unwrap_or_default();
                     let mut new_info = InfoAddressPortPair::default();
 
                     let passed_filters = filters.matches(&packet_filters_fields);
@@ -150,7 +150,7 @@ pub fn parse_packets(
                                             &host_data2,
                                         );
                                     })
-                                    .unwrap();
+                                    .unwrap_or_default();
                             }
                             (true, false) => {
                                 // waiting for a previously requested rDNS resolution
@@ -171,7 +171,7 @@ pub fn parse_packets(
                                 let host = info_traffic
                                     .addresses_resolved
                                     .get(&address_to_lookup)
-                                    .unwrap()
+                                    .unwrap_or_default()
                                     .1
                                     .clone();
                                 info_traffic.hosts.entry(host).and_modify(|data_info_host| {

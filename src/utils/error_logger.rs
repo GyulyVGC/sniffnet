@@ -9,9 +9,18 @@ pub trait ErrorLogger<T, E> {
 
 impl<T, E: Display> ErrorLogger<T, E> for Result<T, E> {
     fn log_err(self, location: Location) -> Result<T, E> {
-        self.inspect_err(|e| {
-            eprintln!("[{}:{}] {e}", location.file, location.line);
-        })
+        if let Err(e) = &self {
+            let file = location.file;
+            let line = location.line;
+            eprintln!("Sniffnet error at [{file}:{line}]: {e}");
+        }
+
+        // In debug mode, panic on error
+        if cfg!(debug_assertions) {
+            panic!();
+        }
+
+        self
     }
 }
 

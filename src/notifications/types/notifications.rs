@@ -109,17 +109,18 @@ impl BytesNotification {
             value.parse::<u64>().unwrap_or(default.previous_threshold)
         } else {
             // multiple
-            let last_char = chars.last().unwrap();
+            let last_char = chars.last().unwrap_or_default();
             byte_multiple_inserted = ByteMultiple::from_char(*last_char);
             let without_multiple: String = chars[0..chars.len() - 1].iter().collect();
             if without_multiple.parse::<u64>().is_ok()
                 && TryInto::<u64>::try_into(
-                    without_multiple.parse::<u128>().unwrap()
+                    without_multiple.parse::<u128>().unwrap_or_default()
                         * u128::from(byte_multiple_inserted.multiplier()),
                 )
                 .is_ok()
             {
-                without_multiple.parse::<u64>().unwrap() * byte_multiple_inserted.multiplier()
+                without_multiple.parse::<u64>().unwrap_or_default()
+                    * byte_multiple_inserted.multiplier()
             } else if without_multiple.is_empty() {
                 byte_multiple_inserted = ByteMultiple::B;
                 0

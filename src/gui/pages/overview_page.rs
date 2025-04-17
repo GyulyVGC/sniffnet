@@ -128,7 +128,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     } else {
         // pcap threw an ERROR!
         body = body_pcap_error(
-            sniffer.pcap_error.as_ref().unwrap(),
+            sniffer.pcap_error.as_ref().unwrap_or_default(),
             &sniffer.waiting,
             language,
             font,
@@ -218,7 +218,6 @@ fn body_pcap_error<'a>(
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
-    // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .align_x(Alignment::Center)
         .font(font);

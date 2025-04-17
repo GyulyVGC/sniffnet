@@ -290,7 +290,7 @@ fn mmdb_selection_row<'a>(
         false
     } else {
         match *mmdb_reader {
-            MmdbReader::Default(_) => true,
+            MmdbReader::Default(_) | MmdbReader::Empty => true,
             MmdbReader::Custom(_) => false,
         }
     };

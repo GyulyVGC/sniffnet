@@ -381,7 +381,7 @@ impl Sniffer {
                 } else {
                     self.page_number.checked_sub(1)
                 }
-                .unwrap();
+                .unwrap_or_default();
                 self.page_number = new_page;
             }
             Message::ArrowPressed(increment) => {
@@ -405,7 +405,7 @@ impl Sniffer {
             Message::ChangeScaleFactor(slider_val) => {
                 let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
                 self.configs.lock().unwrap().settings.scale_factor =
-                    scale_factor_str.parse().unwrap();
+                    scale_factor_str.parse().unwrap_or_default();
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
@@ -692,7 +692,7 @@ impl Sniffer {
         std::process::Command::new(cmd)
             .arg(url)
             .spawn()
-            .unwrap()
+            .unwrap_or_default()
             .wait()
             .unwrap_or_default();
     }
@@ -733,7 +733,7 @@ impl Sniffer {
                         &host_data,
                     );
                 })
-                .unwrap();
+                .unwrap_or_default();
         }
     }
 

@@ -207,13 +207,16 @@ fn analyze_transport_header(
 }
 
 pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
-    if key.port1.is_none()
-        || key.port2.is_none()
-        || key.protocol == Protocol::ICMP
-        || key.protocol == Protocol::ARP
-    {
+    if key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
         return Service::NotApplicable;
     }
+
+    let Some(port1) = key.port1 else {
+        return Service::NotApplicable;
+    };
+    let Some(port2) = key.port2 else {
+        return Service::NotApplicable;
+    };
 
     // to return the service associated with the highest score:
     // score = service_is_some * (port_is_well_known + bonus_direction)
@@ -226,9 +229,6 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
         let bonus_direction = u8::from(bonus_direction);
         service_is_some * (port_is_well_known + bonus_direction)
     };
-
-    let port1 = key.port1.unwrap();
-    let port2 = key.port2.unwrap();
 
     let unknown = Service::Unknown;
     let service1 = SERVICES

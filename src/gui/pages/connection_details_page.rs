@@ -66,7 +66,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     let font_headers = style.get_extension().font_headers;
 
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    let val = info_traffic_lock.map.get(key).unwrap().clone();
+    let val = info_traffic_lock.map.get(key).unwrap_or_default().clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = info_traffic_lock
         .addresses_resolved
@@ -194,8 +194,14 @@ fn col_info<'a>(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
                     "{} - {}",
-                    val.initial_timestamp.to_string().get(11..19).unwrap(),
-                    val.final_timestamp.to_string().get(11..19).unwrap()
+                    val.initial_timestamp
+                        .to_string()
+                        .get(11..19)
+                        .unwrap_or_default(),
+                    val.final_timestamp
+                        .to_string()
+                        .get(11..19)
+                        .unwrap_or_default()
                 ))
                 .font(font),
             ),

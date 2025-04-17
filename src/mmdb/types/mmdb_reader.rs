@@ -1,6 +1,8 @@
 use std::net::IpAddr;
 use std::sync::Arc;
 
+use crate::location;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use maxminddb::{MaxMindDbError, Reader};
 use serde::Deserialize;
 
@@ -13,6 +15,7 @@ pub struct MmdbReaders {
 pub enum MmdbReader {
     Default(Reader<&'static [u8]>),
     Custom(Reader<Vec<u8>>),
+    Empty,
 }
 
 impl MmdbReader {
@@ -20,8 +23,13 @@ impl MmdbReader {
         if let Ok(custom_reader) = maxminddb::Reader::open_readfile(mmdb_path) {
             return MmdbReader::Custom(custom_reader);
         }
-        let default_reader = maxminddb::Reader::from_source(default_mmdb).unwrap();
-        MmdbReader::Default(default_reader)
+        match maxminddb::Reader::from_source(default_mmdb) {
+            Ok(default_reader) => MmdbReader::Default(default_reader),
+            err_res => {
+                let _ = err_res.log_err(location!());
+                MmdbReader::Empty
+            }
+        }
     }
 
     pub fn lookup<'a, T: Deserialize<'a>>(
@@ -31,6 +39,7 @@ impl MmdbReader {
         match self {
             MmdbReader::Default(reader) => reader.lookup(ip),
             MmdbReader::Custom(reader) => reader.lookup(ip),
+            MmdbReader::Empty => Ok(None),
         }
     }
 }

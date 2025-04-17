@@ -24,7 +24,12 @@ pub fn notify_and_log(
         let sent_packets_entry = runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev;
         let received_packets_entry = runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev;
         if received_packets_entry + sent_packets_entry
-            > u128::from(notifications.packets_notification.threshold.unwrap())
+            > u128::from(
+                notifications
+                    .packets_notification
+                    .threshold
+                    .unwrap_or_default(),
+            )
         {
             // log this notification
             emitted_notifications += 1;
@@ -34,9 +39,13 @@ pub fn notify_and_log(
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::PacketsThresholdExceeded(PacketsThresholdExceeded {
                     threshold: notifications.packets_notification.previous_threshold,
-                    incoming: received_packets_entry.try_into().unwrap(),
-                    outgoing: sent_packets_entry.try_into().unwrap(),
-                    timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                    incoming: received_packets_entry.try_into().unwrap_or_default(),
+                    outgoing: sent_packets_entry.try_into().unwrap_or_default(),
+                    timestamp: Local::now()
+                        .to_string()
+                        .get(11..19)
+                        .unwrap_or_default()
+                        .to_string(),
                 }),
             );
             if notifications.packets_notification.sound.ne(&Sound::None) {
@@ -54,7 +63,12 @@ pub fn notify_and_log(
         let sent_bytes_entry = runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev;
         let received_bytes_entry = runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev;
         if received_bytes_entry + sent_bytes_entry
-            > u128::from(notifications.bytes_notification.threshold.unwrap())
+            > u128::from(
+                notifications
+                    .bytes_notification
+                    .threshold
+                    .unwrap_or_default(),
+            )
         {
             //log this notification
             emitted_notifications += 1;
@@ -64,9 +78,13 @@ pub fn notify_and_log(
             runtime_data.logged_notifications.push_front(
                 LoggedNotification::BytesThresholdExceeded(BytesThresholdExceeded {
                     threshold: notifications.bytes_notification.previous_threshold,
-                    incoming: received_bytes_entry.try_into().unwrap(),
-                    outgoing: sent_bytes_entry.try_into().unwrap(),
-                    timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                    incoming: received_bytes_entry.try_into().unwrap_or_default(),
+                    outgoing: sent_bytes_entry.try_into().unwrap_or_default(),
+                    timestamp: Local::now()
+                        .to_string()
+                        .get(11..19)
+                        .unwrap_or_default()
+                        .to_string(),
                 }),
             );
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
@@ -92,14 +110,18 @@ pub fn notify_and_log(
                 runtime_data.logged_notifications.pop_back();
             }
 
-            let data_info_host = *info_traffic_lock.hosts.get(&host).unwrap();
+            let data_info_host = *info_traffic_lock.hosts.get(&host).unwrap_or_default();
             runtime_data
                 .logged_notifications
                 .push_front(LoggedNotification::FavoriteTransmitted(
                     FavoriteTransmitted {
                         host,
                         data_info_host,
-                        timestamp: Local::now().to_string().get(11..19).unwrap().to_string(),
+                        timestamp: Local::now()
+                            .to_string()
+                            .get(11..19)
+                            .unwrap_or_default()
+                            .to_string(),
                     },
                 ));
         }
