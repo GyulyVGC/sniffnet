@@ -57,17 +57,17 @@ impl PortCollection {
     }
 
     pub(crate) fn contains(&self, port: Option<u16>) -> bool {
-        // ignore port filter in case of ICMP
-        if port.is_none() {
+        // ignore port filter in case of ICMP or ARP
+        let Some(p) = port else {
             return true;
-        }
+        };
 
         for range in &self.ranges {
-            if range.contains(&port.unwrap_or_default()) {
+            if range.contains(&p) {
                 return true;
             }
         }
-        self.ports.contains(&port.unwrap_or_default())
+        self.ports.contains(&p)
     }
 }
 
