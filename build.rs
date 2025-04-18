@@ -6,8 +6,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
-use rustrict::{Censor, Trie, Type};
-
 include!("./src/networking/types/service_query.rs");
 include!("./src/networking/types/protocol.rs");
 
@@ -73,11 +71,12 @@ fn get_valid_service_fmt_const(s: &str) -> String {
         {
             panic!("Invalid service name found: {invalid}")
         }
+        #[cfg(debug_assertions)]
         inappropriate
-            if Censor::from_str(inappropriate)
+            if rustrict::Censor::from_str(inappropriate)
                 .with_trie(&SAFE_WORDS_FOR_SERVICE_NAME)
                 .analyze()
-                .is(Type::INAPPROPRIATE) =>
+                .is(rustrict::Type::INAPPROPRIATE) =>
         {
             panic!("Inappropriate service name found: {inappropriate}")
         }
@@ -98,9 +97,10 @@ fn get_valid_service_query(s: &str) -> ServiceQuery {
     ServiceQuery(port, protocol)
 }
 
-pub static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<Trie> =
+#[cfg(debug_assertions)]
+static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<rustrict::Trie> =
     std::sync::LazyLock::new(|| {
-        let mut safe_words = Trie::default();
+        let mut safe_words = rustrict::Trie::default();
         for word in [
             "npp",
             "emfis-cntl",
@@ -190,8 +190,17 @@ pub static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<Trie> =
             "3gpp-w1ap",
             "pmsm-webrctl",
             "bif-p2p",
+            "as-servermap",
+            "nm-asses-admin",
+            "ias-session",
+            "smar-se-port1",
+            "smar-se-port2",
+            "canon-cpp-disc",
+            "3gpp-monp",
+            "emc-pp-mgmtsvc",
+            "3gpp-cbsp",
         ] {
-            safe_words.set(word, Type::SAFE);
+            safe_words.set(word, rustrict::Type::SAFE);
         }
         safe_words
     });

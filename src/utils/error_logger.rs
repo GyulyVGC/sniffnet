@@ -43,11 +43,19 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(debug_assertions)]
     #[should_panic]
     fn test_error_logger_panics_on_err_in_debug_mode() {
         let err_result: Result<usize, &str> = Err("test_error");
         let _err_handled = err_result.log_err(location!());
-        // assert_eq!(_err_handled, err_result); // true in release mode
+    }
+
+    #[test]
+    #[cfg(not(debug_assertions))]
+    fn test_error_logger_no_panic_on_err_in_release_mode() {
+        let err_result: Result<usize, &str> = Err("test_error");
+        let err_handled = err_result.log_err(location!());
+        assert_eq!(err_handled, err_result);
     }
 
     #[test]

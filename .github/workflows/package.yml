@@ -73,9 +73,10 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Clippy (release mode)
-        run: |
-          cargo clippy --release -- -D warnings &&
-          cargo clean
+        run: cargo clippy --release -- -D warnings
+
+      - name: Test (release mode)
+        run: cargo test --release --verbose -- --nocapture
 
       - name: Check crate
         if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
