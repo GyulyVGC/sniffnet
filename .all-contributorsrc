@@ -620,6 +620,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "mhansma96",
+      "name": "Michel Hansma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84068842?v=4",
+      "profile": "https://github.com/mhansma96",
+      "contributions": [
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7,
