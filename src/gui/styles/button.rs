@@ -147,6 +147,7 @@ impl ButtonType {
                 ButtonType::Gradient(gradient_type) => Background::Gradient(
                     get_gradient_hovered_buttons(&colors, *gradient_type, ext.is_nightly),
                 ),
+                ButtonType::BorderedRoundSelected => Background::Color(ext.buttons_color),
                 _ => Background::Color(mix_colors(colors.primary, ext.buttons_color)),
             }),
             border: Border {
