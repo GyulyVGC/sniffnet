@@ -1953,7 +1953,7 @@ mod tests {
                     bytes_notification: Default::default(),
                     favorite_notification: Default::default()
                 },
-                style: StyleType::Night
+                style: StyleType::Custom(ExtraStyles::A11yDark)
             }
         );
 

@@ -1,9 +1,10 @@
+#[cfg(not(test))]
+use crate::utils::error_logger::{ErrorLogger, Location};
+#[cfg(not(test))]
+use crate::{SNIFFNET_LOWERCASE, location};
 use iced::window::Position;
 use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
-
-#[cfg(not(test))]
-use crate::SNIFFNET_LOWERCASE;
 
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
 pub struct PositionTuple(pub f32, pub f32);
@@ -35,15 +36,15 @@ impl ConfigWindow {
         if let Ok(window) = confy::load::<ConfigWindow>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             window
         } else {
-            confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigWindow::default())
-                .unwrap_or(());
+            let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigWindow::default())
+                .log_err(location!());
             ConfigWindow::default()
         }
     }
 
     #[cfg(not(test))]
     pub fn store(self) {
-        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
+        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
     }
 
     pub fn thumbnail_size(factor: f64) -> SizeTuple {
