@@ -12,7 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
   - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
 - Show more information when domain name is short ([#720](https://github.com/GyulyVGC/sniffnet/pull/720) — fixes [#696](https://github.com/GyulyVGC/sniffnet/issues/696))
-- Added new themes _A11y (Night)_ and _A11y (Day)_ based on palettes optimized for OLED displays and users with visual impairments ([#708](https://github.com/GyulyVGC/sniffnet/pull/708))
+- Added new themes _A11y (Night)_ and _A11y (Day)_ based on palettes optimized for Accessibility ([#785](https://github.com/GyulyVGC/sniffnet/pull/785))
 - Avoid directory traversal when selecting file name for PCAP exports ([#776](https://github.com/GyulyVGC/sniffnet/pull/776) — fixes [#767](https://github.com/GyulyVGC/sniffnet/issues/767))
 - Add icon to window title bar ([#719](https://github.com/GyulyVGC/sniffnet/pull/719) — fixes [#715](https://github.com/GyulyVGC/sniffnet/issues/715))
 - Update footer buttons and links ([#755](https://github.com/GyulyVGC/sniffnet/pull/755) — fixes [#553](https://github.com/GyulyVGC/sniffnet/issues/553))

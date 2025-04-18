@@ -58,7 +58,7 @@ impl ContainerType {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
-                    a: 0.8,
+                    a: 0.9,
                     ..Color::BLACK
                 }),
             }),
@@ -75,7 +75,7 @@ impl ContainerType {
                 },
                 width: match self {
                     ContainerType::Standard
-                    | ContainerType::Modal
+                    | ContainerType::ModalBackground
                     | ContainerType::Gradient(_)
                     | ContainerType::HighlightedOnHeader
                     | ContainerType::Highlighted => 0.0,
@@ -86,6 +86,7 @@ impl ContainerType {
                 color: match self {
                     ContainerType::Palette => Color::BLACK,
                     ContainerType::BadgeInfo => colors.secondary,
+                    ContainerType::Modal => ext.buttons_color,
                     _ => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
