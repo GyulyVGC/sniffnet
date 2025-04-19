@@ -222,7 +222,7 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
     // score = service_is_some * (port_is_well_known + bonus_direction)
     // service_is_some: 1 if some, 0 if unknown
     // port_is_well_known: 3 if well known, 1 if not
-    // bonus_direction: +1 assigned to remote port
+    // bonus_direction: +1 assigned to remote port, or to destination port in case of multicast
     let compute_service_score = |service: &Service, port: u16, bonus_direction: bool| {
         let service_is_some = u8::from(matches!(service, Service::Name(_)));
         let port_is_well_known = if port < 1024 { 3 } else { 1 };
@@ -238,16 +238,10 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
         .get(&ServiceQuery(port2, key.protocol))
         .unwrap_or(&unknown);
 
-    let score1 = compute_service_score(
-        service1,
-        port1,
-        traffic_direction.ne(&TrafficDirection::Outgoing),
-    );
-    let score2 = compute_service_score(
-        service2,
-        port2,
-        traffic_direction.eq(&TrafficDirection::Outgoing),
-    );
+    let bonus_dest =
+        traffic_direction.eq(&TrafficDirection::Outgoing) || key.address2.is_multicast();
+    let score1 = compute_service_score(service1, port1, !bonus_dest);
+    let score2 = compute_service_score(service2, port2, bonus_dest);
 
     if score1 > score2 {
         *service1
@@ -607,7 +601,7 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
 mod tests {
     use pcap::Address;
     use std::collections::HashSet;
-    use std::net::{IpAddr, Ipv4Addr};
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
     use std::str::FromStr;
 
     use crate::Protocol;
@@ -1425,6 +1419,52 @@ mod tests {
                         })
                     );
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_service_multicast_bonus_matters() {
+        let finger = Some(79);
+        let xfer = Some(82);
+        let cvc = Some(1495);
+        let upnp = Some(1900);
+
+        for p in [Protocol::TCP, Protocol::UDP] {
+            for (p1, p2) in [(finger, xfer), (xfer, finger)] {
+                let key = AddressPortPair::new(
+                    IpAddr::V6(Ipv6Addr::UNSPECIFIED),
+                    p1,
+                    IpAddr::from_str("ff00::").unwrap(),
+                    p2,
+                    p,
+                );
+                assert_eq!(
+                    get_service(&key, TrafficDirection::Incoming),
+                    Service::Name(match p1 {
+                        source if source == xfer => "finger",
+                        source if source == finger => "xfer",
+                        _ => panic!(),
+                    })
+                );
+            }
+
+            for (p1, p2) in [(cvc, upnp), (upnp, cvc)] {
+                let key = AddressPortPair::new(
+                    IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                    p1,
+                    IpAddr::V4(Ipv4Addr::from([224, 1, 2, 3])),
+                    p2,
+                    p,
+                );
+                assert_eq!(
+                    get_service(&key, TrafficDirection::Incoming),
+                    Service::Name(match p1 {
+                        source if source == cvc => "upnp",
+                        source if source == upnp => "cvc",
+                        _ => panic!(),
+                    })
+                );
             }
         }
     }
