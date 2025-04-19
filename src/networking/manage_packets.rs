@@ -206,7 +206,11 @@ fn analyze_transport_header(
     }
 }
 
-pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Service {
+pub fn get_service(
+    key: &AddressPortPair,
+    traffic_direction: TrafficDirection,
+    my_interface_addresses: &[Address],
+) -> Service {
     if key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
         return Service::NotApplicable;
     }
@@ -238,8 +242,11 @@ pub fn get_service(key: &AddressPortPair, traffic_direction: TrafficDirection) -
         .get(&ServiceQuery(port2, key.protocol))
         .unwrap_or(&unknown);
 
-    let bonus_dest =
-        traffic_direction.eq(&TrafficDirection::Outgoing) || key.address2.is_multicast();
+    let dest_ip = key.address2;
+    let bonus_dest = traffic_direction.eq(&TrafficDirection::Outgoing)
+        || dest_ip.is_multicast()
+        || is_broadcast_address(&dest_ip, my_interface_addresses);
+
     let score1 = compute_service_score(service1, port1, !bonus_dest);
     let score2 = compute_service_score(service2, port2, bonus_dest);
 
@@ -289,7 +296,7 @@ pub fn modify_or_insert_in_map(
             &my_interface_addresses,
         );
         // determine upper layer service
-        service = get_service(key, traffic_direction);
+        service = get_service(key, traffic_direction, &my_interface_addresses);
     }
 
     let mut info_traffic = info_traffic_mutex.lock().unwrap();
@@ -1222,7 +1229,7 @@ mod tests {
                     unknown_port,
                     p,
                 );
-                assert_eq!(get_service(&key, d), Service::Unknown);
+                assert_eq!(get_service(&key, d, &[]), Service::Unknown);
 
                 for (p1, p2) in [
                     (unknown_port, Some(22)),
@@ -1236,7 +1243,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("ssh"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("ssh"));
                 }
 
                 for (p1, p2) in [
@@ -1251,7 +1258,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("https"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("https"));
                 }
 
                 for (p1, p2) in [
@@ -1266,7 +1273,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("http"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("http"));
                 }
 
                 for (p1, p2) in [
@@ -1281,7 +1288,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("upnp"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("upnp"));
                 }
             }
         }
@@ -1305,7 +1312,7 @@ mod tests {
                     valid_but_not_well_known,
                     p,
                 );
-                assert_eq!(get_service(&key, d), Service::Name("iad1"));
+                assert_eq!(get_service(&key, d, &[]), Service::Name("iad1"));
 
                 for (p1, p2) in [
                     (valid_but_not_well_known, Some(67)),
@@ -1319,7 +1326,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("dhcps"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("dhcps"));
                 }
 
                 for (p1, p2) in [
@@ -1334,7 +1341,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("bgp"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("bgp"));
                 }
 
                 for (p1, p2) in [
@@ -1349,7 +1356,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("domain"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("domain"));
                 }
 
                 for (p1, p2) in [
@@ -1364,7 +1371,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("exp2"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("exp2"));
                 }
             }
         }
@@ -1388,7 +1395,7 @@ mod tests {
                         p,
                     );
                     assert_eq!(
-                        get_service(&key, d),
+                        get_service(&key, d, &[]),
                         Service::Name(match (p1, d) {
                             (source, TrafficDirection::Incoming) if source == tacacs => "tacacs",
                             (source, TrafficDirection::Outgoing) if source == tacacs => "smtp",
@@ -1408,7 +1415,7 @@ mod tests {
                         p,
                     );
                     assert_eq!(
-                        get_service(&key, d),
+                        get_service(&key, d, &[]),
                         Service::Name(match (p1, d) {
                             (source, TrafficDirection::Incoming) if source == netmagic =>
                                 "netmagic",
@@ -1440,7 +1447,7 @@ mod tests {
                     p,
                 );
                 assert_eq!(
-                    get_service(&key, TrafficDirection::Incoming),
+                    get_service(&key, TrafficDirection::Incoming, &[]),
                     Service::Name(match p1 {
                         source if source == xfer => "finger",
                         source if source == finger => "xfer",
@@ -1458,10 +1465,65 @@ mod tests {
                     p,
                 );
                 assert_eq!(
-                    get_service(&key, TrafficDirection::Incoming),
+                    get_service(&key, TrafficDirection::Incoming, &[]),
                     Service::Name(match p1 {
                         source if source == cvc => "upnp",
                         source if source == upnp => "cvc",
+                        _ => panic!(),
+                    })
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_service_broadcast_bonus_matters() {
+        let echo = Some(7);
+        let rje = Some(5);
+        let transact = Some(1869);
+        let radio = Some(1595);
+
+        for p in [Protocol::TCP, Protocol::UDP] {
+            for (p1, p2) in [(echo, rje), (rje, echo)] {
+                let key = AddressPortPair::new(
+                    IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                    p1,
+                    IpAddr::V4(Ipv4Addr::from([255, 255, 255, 255])),
+                    p2,
+                    p,
+                );
+                assert_eq!(
+                    get_service(&key, TrafficDirection::Incoming, &[]),
+                    Service::Name(match p1 {
+                        source if source == rje => "echo",
+                        source if source == echo => "rje",
+                        _ => panic!(),
+                    })
+                );
+            }
+
+            for (p1, p2) in [(transact, radio), (radio, transact)] {
+                let key = AddressPortPair::new(
+                    IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                    p1,
+                    IpAddr::V4(Ipv4Addr::from([192, 168, 1, 255])),
+                    p2,
+                    p,
+                );
+                assert_eq!(
+                    get_service(
+                        &key,
+                        TrafficDirection::Incoming,
+                        &[pcap::Address {
+                            addr: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                            dst_addr: None,
+                            netmask: None,
+                            broadcast_addr: Some(IpAddr::V4(Ipv4Addr::from([192, 168, 1, 255]))),
+                        }]
+                    ),
+                    Service::Name(match p1 {
+                        source if source == transact => "radio",
+                        source if source == radio => "transact",
                         _ => panic!(),
                     })
                 );
@@ -1481,7 +1543,7 @@ mod tests {
                     p,
                 );
                 assert_eq!(
-                    get_service(&key, d),
+                    get_service(&key, d, &[]),
                     Service::Name(match p {
                         Protocol::TCP => "mdns",
                         Protocol::UDP => "zeroconf",
@@ -1497,7 +1559,7 @@ mod tests {
                     p,
                 );
                 assert_eq!(
-                    get_service(&key, d),
+                    get_service(&key, d, &[]),
                     match p {
                         Protocol::TCP => Service::Name("netstat"),
                         Protocol::UDP => Service::Unknown,
@@ -1513,7 +1575,7 @@ mod tests {
                     p,
                 );
                 assert_eq!(
-                    get_service(&key, d),
+                    get_service(&key, d, &[]),
                     match p {
                         Protocol::TCP => Service::Unknown,
                         Protocol::UDP => Service::Name("murmur"),
@@ -1529,7 +1591,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Name("domain"));
+                    assert_eq!(get_service(&key, d, &[]), Service::Name("domain"));
                 }
             }
         }
@@ -1547,7 +1609,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::NotApplicable);
+                    assert_eq!(get_service(&key, d, &[]), Service::NotApplicable);
                 }
             }
         }
@@ -1582,7 +1644,7 @@ mod tests {
                         p2,
                         p,
                     );
-                    assert_eq!(get_service(&key, d), Service::Unknown);
+                    assert_eq!(get_service(&key, d, &[]), Service::Unknown);
                 }
             }
         }
