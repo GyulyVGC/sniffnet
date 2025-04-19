@@ -21,6 +21,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Fix crash when inserting characters longer than one byte in the text input for byte threshold notification setting ([#747](https://github.com/GyulyVGC/sniffnet/pull/747) — fixes [#744](https://github.com/GyulyVGC/sniffnet/issues/744))
 - Remove pre-uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
 - Fix typo in Russian translation (fixes [#730](https://github.com/GyulyVGC/sniffnet/issues/730))
+- Minor fix to service determination algorithm in case of multicast and broadcast traffic
 
 ## [1.3.2] - 2025-01-06
 - Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
