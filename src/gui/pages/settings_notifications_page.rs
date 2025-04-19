@@ -1,7 +1,7 @@
 use iced::widget::scrollable::Direction;
 use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
@@ -62,13 +62,13 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
-        .padding(Padding::ZERO.bottom(5))
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
-                .width(720)
+                .align_x(Alignment::Center)
+                .width(Length::Fill)
                 .push(get_packets_notify(
                     notifications.packets_notification,
                     language,
@@ -84,7 +84,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     language,
                     font,
                 )),
-            Direction::Vertical(ScrollbarType::properties()),
+            Direction::Vertical(ScrollbarType::properties().margin(10)),
         ));
 
     content = content.push(volume_notification_col);

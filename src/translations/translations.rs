@@ -1416,108 +1416,108 @@ pub fn none_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn yeti_night_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Sniffnet's original dark theme",
-        Language::IT => "Il tema scuro originale di Sniffnet",
-        Language::FR => "Thème original sombre de Sniffnet",
-        Language::ES => "Tema oscuro original de Sniffnet",
-        Language::PL => "Oryginalny, ciemny motyw Sniffnet",
-        Language::DE => "Sniffnets urspüngliches, dunkles Design",
-        Language::UK => "Оригінальний, темний стиль Sniffnet-у",
-        Language::ZH_TW => "Sniffnet 原始深色主題",
-        Language::ZH => "Sniffnet暗黑",
-        Language::RO => "Tema întunecată originală Sniffnet",
-        Language::KO => "Sniffnet의 기본 다크테마",
-        Language::TR => "Sniffnet'in orjinal koyu teması",
-        Language::RU => "Оригинальная тёмная тема Sniffnet'а",
-        Language::PT => "Tema escuro original de Sniffnet",
-        Language::EL => "Το αυθεντικό σκούρο θέμα του Sniffnet",
-        // Language::FA => "زمینه تاریک اصلی Sniffnet",
-        Language::SV => "Sniffnets ursprungliga mörka tema",
-        Language::FI => "Sniffnetin alkuperäinen tumma teema",
-        Language::JA => "Sniffnet のオリジナル テーマ",
-        Language::UZ => "Sniffnet-ning asl qora mavzusi",
-        Language::VI => "Chủ đề tối của Sniffnet",
-    }
-}
+// pub fn yeti_night_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Sniffnet's original dark theme",
+//         Language::IT => "Il tema scuro originale di Sniffnet",
+//         Language::FR => "Thème original sombre de Sniffnet",
+//         Language::ES => "Tema oscuro original de Sniffnet",
+//         Language::PL => "Oryginalny, ciemny motyw Sniffnet",
+//         Language::DE => "Sniffnets urspüngliches, dunkles Design",
+//         Language::UK => "Оригінальний, темний стиль Sniffnet-у",
+//         Language::ZH_TW => "Sniffnet 原始深色主題",
+//         Language::ZH => "Sniffnet暗黑",
+//         Language::RO => "Tema întunecată originală Sniffnet",
+//         Language::KO => "Sniffnet의 기본 다크테마",
+//         Language::TR => "Sniffnet'in orjinal koyu teması",
+//         Language::RU => "Оригинальная тёмная тема Sniffnet'а",
+//         Language::PT => "Tema escuro original de Sniffnet",
+//         Language::EL => "Το αυθεντικό σκούρο θέμα του Sniffnet",
+//         // Language::FA => "زمینه تاریک اصلی Sniffnet",
+//         Language::SV => "Sniffnets ursprungliga mörka tema",
+//         Language::FI => "Sniffnetin alkuperäinen tumma teema",
+//         Language::JA => "Sniffnet のオリジナル テーマ",
+//         Language::UZ => "Sniffnet-ning asl qora mavzusi",
+//         Language::VI => "Chủ đề tối của Sniffnet",
+//     }
+// }
 
-pub fn yeti_day_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Sniffnet's original light theme",
-        Language::IT => "Il tema chiaro originale di Sniffnet",
-        Language::FR => "Thème original clair de Sniffnet",
-        Language::ES | Language::PT => "Tema claro original de Sniffnet",
-        Language::PL => "Oryginalny, jasny motyw Sniffnet",
-        Language::DE => "Sniffnets urspüngliches, helles Design",
-        Language::UK => "Оригінальний, світлий стиль Sniffnet-у",
-        Language::ZH_TW => "Sniffnet 原始淺色主題",
-        Language::ZH => "Sniffnet浅色",
-        Language::RO => "Tema deschisă originală Sniffnet",
-        Language::KO => "Sniffnet의 기본 라이트테마",
-        Language::TR => "Sniffnet'in orjinal açık teması",
-        Language::RU => "Оригинальная светая тема Sniffnet'а",
-        Language::EL => "Το αυθεντικό ανοιχτόχρωμο θέμα του Sniffnet",
-        // Language::FA => "زمینه روشن اصلی Sniffnet",
-        Language::SV => "Sniffnets ursprungliga ljusa tema",
-        Language::FI => "Sniffnetin alkuperäinen vaalea teema",
-        Language::JA => "Sniffnet のオリジナル ライト テーマ",
-        Language::UZ => "Sniffnet-ning asl oq mavzusi",
-        Language::VI => "Chủ đề sáng của Sniffnet",
-    }
-}
+// pub fn yeti_day_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Sniffnet's original light theme",
+//         Language::IT => "Il tema chiaro originale di Sniffnet",
+//         Language::FR => "Thème original clair de Sniffnet",
+//         Language::ES | Language::PT => "Tema claro original de Sniffnet",
+//         Language::PL => "Oryginalny, jasny motyw Sniffnet",
+//         Language::DE => "Sniffnets urspüngliches, helles Design",
+//         Language::UK => "Оригінальний, світлий стиль Sniffnet-у",
+//         Language::ZH_TW => "Sniffnet 原始淺色主題",
+//         Language::ZH => "Sniffnet浅色",
+//         Language::RO => "Tema deschisă originală Sniffnet",
+//         Language::KO => "Sniffnet의 기본 라이트테마",
+//         Language::TR => "Sniffnet'in orjinal açık teması",
+//         Language::RU => "Оригинальная светая тема Sniffnet'а",
+//         Language::EL => "Το αυθεντικό ανοιχτόχρωμο θέμα του Sniffnet",
+//         // Language::FA => "زمینه روشن اصلی Sniffnet",
+//         Language::SV => "Sniffnets ursprungliga ljusa tema",
+//         Language::FI => "Sniffnetin alkuperäinen vaalea teema",
+//         Language::JA => "Sniffnet のオリジナル ライト テーマ",
+//         Language::UZ => "Sniffnet-ning asl oq mavzusi",
+//         Language::VI => "Chủ đề sáng của Sniffnet",
+//     }
+// }
 
-pub fn deep_sea_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "To dive into network traffic",
-        Language::IT => "Per immergersi nel traffico di rete",
-        Language::FR => "Pour plonger dans votre trafic réseau",
-        Language::ES => "Para sumergirse en el tráfico de la red",
-        Language::PL => "Aby zanurzyć się w ruchu sieciowym",
-        Language::DE => "Um in den Netzwerkverkehr einzutauchen",
-        Language::UK => "Проаналізувати мережевий рух",
-        Language::ZH_TW => "深入探索網路流量",
-        Language::ZH => "潜入网络活动的海洋",
-        Language::RO => "Pentru a vă scufunda în traficul de rețea",
-        Language::KO => "네트워크 트레픽으로 바로가기",
-        Language::TR => "Ağ trafiğine dalmak",
-        Language::RU => "Для погружения в сетевой трафик",
-        Language::PT => "Para mergulhar no tráfego de rede",
-        Language::EL => "Βουτιά μέσα στην κίνηση του δικτύου",
-        // Language::FA => "شیرجه رفتن در آمد و شد شبکه",
-        Language::SV => "För att dyka ned i nätverkstrafiken",
-        Language::FI => "Sukeltaaksesi verkkoliikenteeseen",
-        Language::JA => "ネットワーク トラフィックにダイブ",
-        Language::UZ => "Tarmoq trafigiga qo'shilish uchun",
-        Language::VI => "Đắm chìm vào lưu lượng mạng",
-    }
-}
+// pub fn deep_sea_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "To dive into network traffic",
+//         Language::IT => "Per immergersi nel traffico di rete",
+//         Language::FR => "Pour plonger dans votre trafic réseau",
+//         Language::ES => "Para sumergirse en el tráfico de la red",
+//         Language::PL => "Aby zanurzyć się w ruchu sieciowym",
+//         Language::DE => "Um in den Netzwerkverkehr einzutauchen",
+//         Language::UK => "Проаналізувати мережевий рух",
+//         Language::ZH_TW => "深入探索網路流量",
+//         Language::ZH => "潜入网络活动的海洋",
+//         Language::RO => "Pentru a vă scufunda în traficul de rețea",
+//         Language::KO => "네트워크 트레픽으로 바로가기",
+//         Language::TR => "Ağ trafiğine dalmak",
+//         Language::RU => "Для погружения в сетевой трафик",
+//         Language::PT => "Para mergulhar no tráfego de rede",
+//         Language::EL => "Βουτιά μέσα στην κίνηση του δικτύου",
+//         // Language::FA => "شیرجه رفتن در آمد و شد شبکه",
+//         Language::SV => "För att dyka ned i nätverkstrafiken",
+//         Language::FI => "Sukeltaaksesi verkkoliikenteeseen",
+//         Language::JA => "ネットワーク トラフィックにダイブ",
+//         Language::UZ => "Tarmoq trafigiga qo'shilish uchun",
+//         Language::VI => "Đắm chìm vào lưu lượng mạng",
+//     }
+// }
 
-pub fn mon_amour_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Lovely theme made for dreamers",
-        Language::IT => "Tema incantevole fatto per i sognatori",
-        Language::FR => "Thème romantique fait pour les rêveurs",
-        Language::ES => "Tema encantador hecho para soñadores",
-        Language::PL => "Uroczy motyw stworzony dla marzycieli",
-        Language::DE => "Schönes Design für Träumer",
-        Language::UK => "Прекрасна тема для мрійників",
-        Language::ZH_TW => "為夢想家打造的可愛主題",
-        Language::ZH => "梦想家的主题",
-        Language::RO => "O temă minunată creată pentru visători",
-        Language::KO => "사랑스러운 몽환가들을 위한 테마",
-        Language::TR => "Hayal perestler için yapılmış güzel tema",
-        Language::RU => "Милая тема для мечтателей",
-        Language::PT => "Tema encantador feito para sonhadores",
-        Language::EL => "Φτιαγμένο για ονειροπόλους",
-        // Language::FA => "زمینه دلپذیر ساخته شده برای رویا پردازان",
-        Language::SV => "Ljuvligt tema gjort för drömmare",
-        Language::FI => "Ihana teema unelmoijille",
-        Language::JA => "ドリーマーのためのテーマ",
-        Language::UZ => "Xayolparastlar uchun chiroyli mavzu",
-        Language::VI => "Chủ đề mộng mơ cho những kẻ mơ mộng",
-    }
-}
+// pub fn mon_amour_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Lovely theme made for dreamers",
+//         Language::IT => "Tema incantevole fatto per i sognatori",
+//         Language::FR => "Thème romantique fait pour les rêveurs",
+//         Language::ES => "Tema encantador hecho para soñadores",
+//         Language::PL => "Uroczy motyw stworzony dla marzycieli",
+//         Language::DE => "Schönes Design für Träumer",
+//         Language::UK => "Прекрасна тема для мрійників",
+//         Language::ZH_TW => "為夢想家打造的可愛主題",
+//         Language::ZH => "梦想家的主题",
+//         Language::RO => "O temă minunată creată pentru visători",
+//         Language::KO => "사랑스러운 몽환가들을 위한 테마",
+//         Language::TR => "Hayal perestler için yapılmış güzel tema",
+//         Language::RU => "Милая тема для мечтателей",
+//         Language::PT => "Tema encantador feito para sonhadores",
+//         Language::EL => "Φτιαγμένο για ονειροπόλους",
+//         // Language::FA => "زمینه دلپذیر ساخته شده برای رویا پردازان",
+//         Language::SV => "Ljuvligt tema gjort för drömmare",
+//         Language::FI => "Ihana teema unelmoijille",
+//         Language::JA => "ドリーマーのためのテーマ",
+//         Language::UZ => "Xayolparastlar uchun chiroyli mavzu",
+//         Language::VI => "Chủ đề mộng mơ cho những kẻ mơ mộng",
+//     }
+// }
 
 pub fn incoming_translation(language: Language) -> &'static str {
     match language {
