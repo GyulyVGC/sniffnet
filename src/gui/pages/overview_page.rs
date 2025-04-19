@@ -236,7 +236,11 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let row_report = Row::new()
         .padding(Padding::new(10.0).top(0).bottom(5))
         .push(col_host)
-        .push(Rule::vertical(40))
+        .push(
+            Column::new()
+                .padding(Padding::ZERO.top(10).bottom(5))
+                .push(Rule::vertical(40)),
+        )
         .push(col_service);
 
     Container::new(row_report)
