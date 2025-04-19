@@ -24,10 +24,9 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, bytes_chart_translation, error_translation, incoming_translation,
+    active_filters_translation, error_translation, incoming_translation,
     network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -477,33 +476,16 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
     let traffic_chart = &sniffer.traffic_chart;
 
-    let mut chart_info_string = String::from("(");
-    chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {
-        packets_chart_translation(language)
-    } else {
-        bytes_chart_translation(language)
-    });
-    chart_info_string.push(')');
-
     Container::new(
         Column::new()
             .align_x(Alignment::Center)
             .push(
-                Row::new()
-                    .padding([10, 0])
-                    .spacing(10)
-                    .align_y(Alignment::Center)
-                    .push(
-                        traffic_rate_translation(language)
-                            .font(font)
-                            .class(TextType::Title)
-                            .size(FONT_SIZE_TITLE),
-                    )
-                    .push(
-                        Text::new(chart_info_string)
-                            .class(TextType::Subtitle)
-                            .font(font),
-                    ),
+                Row::new().padding([10, 0]).align_y(Alignment::Center).push(
+                    traffic_rate_translation(language)
+                        .font(font)
+                        .class(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                ),
             )
             .push(traffic_chart.view()),
     )

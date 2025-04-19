@@ -18,10 +18,9 @@ use crate::notifications::types::notifications::{
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
-    bytes_threshold_translation, favorite_notification_translation,
-    notifications_title_translation, packets_threshold_translation, per_second_translation,
-    settings_translation, sound_translation, specify_multiples_translation, threshold_translation,
-    volume_translation,
+    bytes_exceeded_translation, favorite_transmitted_translation, notifications_title_translation,
+    packets_exceeded_translation, per_second_translation, settings_translation, sound_translation,
+    threshold_translation, volume_translation,
 };
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
@@ -101,7 +100,7 @@ fn get_packets_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        packets_threshold_translation(language),
+        packets_exceeded_translation(language),
         packets_notification.threshold.is_some(),
     )
     .on_toggle(move |toggled| {
@@ -154,7 +153,7 @@ fn get_bytes_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        bytes_threshold_translation(language),
+        bytes_exceeded_translation(language),
         bytes_notification.threshold.is_some(),
     )
     .on_toggle(move |toggled| {
@@ -207,7 +206,7 @@ fn get_favorite_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        favorite_notification_translation(language),
+        favorite_transmitted_translation(language),
         favorite_notification.notify_on_favorite,
     )
     .on_toggle(move |toggled| {
@@ -299,11 +298,6 @@ fn input_group_bytes<'a>(
     font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let info_str = format!(
-        "{}; {}",
-        per_second_translation(language),
-        specify_multiples_translation(language)
-    );
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap_or_default()
         / bytes_notification.byte_multiple.multiplier())
     .to_string();
@@ -331,7 +325,7 @@ fn input_group_bytes<'a>(
             .width(100),
         )
         .push(
-            Text::new(info_str)
+            Text::new(per_second_translation(language))
                 .font(font)
                 .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
@@ -353,6 +347,7 @@ fn volume_slider<'a>(
             .push(Text::new(format!("{}: {volume:^3}%", volume_translation(language))).font(font))
             .push(
                 Row::new()
+                    .align_y(Alignment::Center)
                     .push(
                         Icon::AudioMute
                             .to_text()
