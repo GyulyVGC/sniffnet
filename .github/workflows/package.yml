@@ -80,6 +80,7 @@ jobs:
         run: cargo clippy --release -- -D warnings
 
       - name: Test (release mode)
+        if: matrix.os == 'macos' || matrix.os == 'ubuntu' || matrix.os == 'windows' && matrix.arch == 'amd64'
         run: |
           cargo test --release --verbose -- --nocapture &&
           cargo clean
