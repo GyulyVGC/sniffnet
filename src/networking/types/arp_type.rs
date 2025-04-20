@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 use etherparse::ArpOperation;
+use std::fmt::Write;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Default)]
 pub enum ArpType {
@@ -27,7 +28,7 @@ impl ArpType {
         vec.sort_by(|(_, a), (_, b)| b.cmp(a));
 
         for (arp_type, n) in vec {
-            ret_val.push_str(&format!("   {arp_type} ({n})\n"));
+            let _ = writeln!(ret_val, "   {arp_type} ({n})");
         }
         ret_val
     }

@@ -1,4 +1,5 @@
 use iced::window;
+use std::net::IpAddr;
 
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
@@ -106,7 +107,7 @@ pub enum Message {
     /// Save the configurations of the app and quit
     Quit,
     /// Copies the given string to clipboard
-    CopyIp(String),
+    CopyIp(IpAddr),
     /// Launch a new file dialog
     OpenFile(String, FileInfo, fn(String) -> Message),
     /// Toggle export pcap file

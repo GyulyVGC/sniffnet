@@ -1,5 +1,5 @@
-use crate::translations::translations::{bytes_translation, packets_translation};
 use crate::Language;
+use crate::translations::translations::{bytes_translation, packets_translation};
 
 /// Enum representing the possible kind of chart displayed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

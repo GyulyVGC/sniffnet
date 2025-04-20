@@ -1,12 +1,13 @@
 use crate::mmdb::types::mmdb_asn_entry::MmdbAsnEntry;
 use crate::mmdb::types::mmdb_reader::MmdbReader;
 use crate::networking::types::asn::Asn;
+use std::net::IpAddr;
 
 pub const ASN_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-ASN.mmdb");
 
 #[allow(clippy::module_name_repetitions)]
-pub fn get_asn(address: &str, asn_db_reader: &MmdbReader) -> Asn {
-    if let Ok(res) = asn_db_reader.lookup::<MmdbAsnEntry>(address.parse().unwrap()) {
+pub fn get_asn(address: &IpAddr, asn_db_reader: &MmdbReader) -> Asn {
+    if let Ok(Some(res)) = asn_db_reader.lookup::<MmdbAsnEntry>(*address) {
         return res.get_asn();
     }
     Asn::default()
@@ -14,8 +15,10 @@ pub fn get_asn(address: &str, asn_db_reader: &MmdbReader) -> Asn {
 
 #[cfg(test)]
 mod tests {
-    use crate::mmdb::asn::{get_asn, ASN_MMDB};
+    use crate::mmdb::asn::{ASN_MMDB, get_asn};
     use crate::mmdb::types::mmdb_reader::MmdbReader;
+    use std::net::IpAddr;
+    use std::str::FromStr;
 
     #[test]
     fn test_get_asn_with_default_reader() {
@@ -32,12 +35,12 @@ mod tests {
 
         for reader in vec![reader_1, reader_2, reader_3, reader_4, reader_5] {
             // known IP
-            let res = get_asn("8.8.8.8", &reader);
+            let res = get_asn(&IpAddr::from([8, 8, 8, 8]), &reader);
             assert_eq!(res.code, "15169");
             assert_eq!(res.name, "GOOGLE");
 
             // another known IP
-            let res = get_asn("78.35.248.93", &reader);
+            let res = get_asn(&IpAddr::from([78, 35, 248, 93]), &reader);
             assert_eq!(res.code, "8422");
             assert_eq!(
                 res.name,
@@ -45,17 +48,17 @@ mod tests {
             );
 
             // known IPv6
-            let res = get_asn("2806:230:2057::", &reader);
+            let res = get_asn(&IpAddr::from_str("2806:230:2057::").unwrap(), &reader);
             assert_eq!(res.code, "11888");
             assert_eq!(res.name, "Television Internacional, S.A. de C.V.");
 
             // unknown IP
-            let res = get_asn("127.0.0.1", &reader);
+            let res = get_asn(&IpAddr::from([127, 0, 0, 1]), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
 
             // unknown IPv6
-            let res = get_asn("::1", &reader);
+            let res = get_asn(&IpAddr::from_str("::1").unwrap(), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
         }
@@ -74,27 +77,27 @@ mod tests {
             assert!(matches!(reader, MmdbReader::Custom(_)));
 
             // known IP
-            let res = get_asn("61.8.0.0", &reader);
+            let res = get_asn(&IpAddr::from([61, 8, 0, 0]), &reader);
             assert_eq!(res.code, "AS1221");
             assert_eq!(res.name, "Telstra Limited");
 
             // another known IP
-            let res = get_asn("206.180.34.99", &reader);
+            let res = get_asn(&IpAddr::from([206, 180, 34, 99]), &reader);
             assert_eq!(res.code, "AS63344");
             assert_eq!(res.name, "The Reynolds and Reynolds Company");
 
             // known IPv6
-            let res = get_asn("2806:230:2057::", &reader);
+            let res = get_asn(&IpAddr::from_str("2806:230:2057::").unwrap(), &reader);
             assert_eq!(res.code, "AS11888");
             assert_eq!(res.name, "Television Internacional, S.A. de C.V.");
 
             // unknown IP
-            let res = get_asn("127.0.0.1", &reader);
+            let res = get_asn(&IpAddr::from([127, 0, 0, 1]), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
 
             // unknown IPv6
-            let res = get_asn("::1", &reader);
+            let res = get_asn(&IpAddr::from_str("::1").unwrap(), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
         }
@@ -115,27 +118,27 @@ mod tests {
             assert!(matches!(reader, MmdbReader::Custom(_)));
 
             // known IP
-            let res = get_asn("31.171.144.141", &reader);
+            let res = get_asn(&IpAddr::from([31, 171, 144, 141]), &reader);
             assert_eq!(res.code, "AS197742");
             assert_eq!(res.name, "IBB Energie AG");
 
             // another known IP
-            let res = get_asn("103.112.220.111", &reader);
+            let res = get_asn(&IpAddr::from([103, 112, 220, 111]), &reader);
             assert_eq!(res.code, "AS134077");
             assert_eq!(res.name, "Magik Pivot Company Limited");
 
             // known IPv6
-            let res = get_asn("2a02:6ea0:f001::", &reader);
+            let res = get_asn(&IpAddr::from_str("2a02:6ea0:f001::").unwrap(), &reader);
             assert_eq!(res.code, "AS60068");
             assert_eq!(res.name, "Datacamp Limited");
 
             // unknown IP
-            let res = get_asn("127.0.0.1", &reader);
+            let res = get_asn(&IpAddr::from([127, 0, 0, 1]), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
 
             // unknown IPv6
-            let res = get_asn("::1", &reader);
+            let res = get_asn(&IpAddr::from_str("::1").unwrap(), &reader);
             assert_eq!(res.code, "");
             assert_eq!(res.name, "");
         }

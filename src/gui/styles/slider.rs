@@ -6,9 +6,9 @@ use iced::widget::slider::Style;
 use iced::widget::slider::{Catalog, Handle, HandleShape, Rail, Status};
 use iced::{Background, Border};
 
+use crate::StyleType;
 use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::palette::mix_colors;
-use crate::StyleType;
 
 #[derive(Default)]
 pub enum SliderType {

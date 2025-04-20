@@ -5,10 +5,10 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Local};
 
+use crate::Service;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::Service;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///

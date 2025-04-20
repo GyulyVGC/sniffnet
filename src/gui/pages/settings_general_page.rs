@@ -1,7 +1,7 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, vertical_space, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip,
+    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
 };
 use iced::{Alignment, Font, Length};
 
@@ -290,7 +290,7 @@ fn mmdb_selection_row<'a>(
         false
     } else {
         match *mmdb_reader {
-            MmdbReader::Default(_) => true,
+            MmdbReader::Default(_) | MmdbReader::Empty => true,
             MmdbReader::Custom(_) => false,
         }
     };

@@ -1,7 +1,7 @@
 use iced::widget::Text;
 
-use crate::gui::styles::style_constants::ICONS;
 use crate::StyleType;
+use crate::gui::styles::style_constants::ICONS;
 
 pub enum Icon {
     ArrowBack,
@@ -29,6 +29,7 @@ pub enum Icon {
     Hourglass3,
     Inspect,
     Lightning,
+    Moon,
     News,
     Notification,
     OpenLink,
@@ -42,6 +43,7 @@ pub enum Icon {
     SortDescending,
     SortNeutral,
     Star,
+    Sun,
     ThumbnailOpen,
     ThumbnailClose,
     Update,
@@ -74,6 +76,7 @@ impl Icon {
             Icon::Hourglass3 => '3',
             Icon::Inspect => '5',
             Icon::Lightning => 'z',
+            Icon::Moon => 'G',
             Icon::Notification => '7',
             Icon::Overview => 'd',
             Icon::PacketsThreshold => 'e',
@@ -88,6 +91,7 @@ impl Icon {
             Icon::SortAscending => 'm',
             Icon::SortDescending => 'l',
             Icon::SortNeutral => 'n',
+            Icon::Sun => 'F',
             Icon::OpenLink => 'o',
             Icon::ThumbnailOpen => 's',
             Icon::ThumbnailClose => 'r',

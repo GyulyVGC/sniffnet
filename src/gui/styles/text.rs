@@ -2,9 +2,9 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::StyleType;
 use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use crate::gui::types::message::Message;
-use crate::StyleType;
 use iced::widget::text::{Catalog, Style};
 use iced::widget::{Column, Text};
 use iced::{Color, Font};

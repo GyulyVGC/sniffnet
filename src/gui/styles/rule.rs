@@ -2,10 +2,10 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use crate::StyleType;
-use iced::widget::rule::{Catalog, FillMode, Style};
+use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use iced::Color;
+use iced::widget::rule::{Catalog, FillMode, Style};
 
 #[derive(Default)]
 pub enum RuleType {

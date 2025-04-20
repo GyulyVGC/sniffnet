@@ -17,13 +17,15 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::InfoTraffic;
+use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::{InfoTraffic, location};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -47,7 +49,6 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                continue;
             }
             Ok(packet) => {
                 if *current_capture_id.lock().unwrap() != capture_id {
@@ -69,11 +70,10 @@ pub fn parse_packets(
                         &mut packet_filters_fields,
                     );
 
-                    if key_option.is_none() {
+                    let Some(key) = key_option else {
                         continue;
-                    }
+                    };
 
-                    let key = key_option.unwrap();
                     let mut new_info = InfoAddressPortPair::default();
 
                     let passed_filters = filters.matches(&packet_filters_fields);
@@ -94,9 +94,7 @@ pub fn parse_packets(
                         );
                     }
 
-                    let mut info_traffic = info_traffic_mutex
-                        .lock()
-                        .expect("Error acquiring mutex\n\r");
+                    let mut info_traffic = info_traffic_mutex.lock().unwrap();
                     //increment number of sniffed packets and bytes
                     info_traffic.all_packets += 1;
                     info_traffic.all_bytes += exchanged_bytes;
@@ -136,12 +134,12 @@ pub fn parse_packets(
                                 );
 
                                 // launch new thread to resolve host name
-                                let key2 = key.clone();
+                                let key2 = key;
                                 let info_traffic2 = info_traffic_mutex.clone();
                                 let device2 = device.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
                                 let host_data2 = host_data.clone();
-                                thread::Builder::new()
+                                let _ = thread::Builder::new()
                                     .name("thread_reverse_dns_lookup".to_string())
                                     .spawn(move || {
                                         reverse_dns_lookup(
@@ -153,7 +151,7 @@ pub fn parse_packets(
                                             &host_data2,
                                         );
                                     })
-                                    .unwrap();
+                                    .log_err(location!());
                             }
                             (true, false) => {
                                 // waiting for a previously requested rDNS resolution
@@ -174,7 +172,7 @@ pub fn parse_packets(
                                 let host = info_traffic
                                     .addresses_resolved
                                     .get(&address_to_lookup)
-                                    .unwrap()
+                                    .unwrap_or(&(String::new(), Host::default()))
                                     .1
                                     .clone();
                                 info_traffic.hosts.entry(host).and_modify(|data_info_host| {

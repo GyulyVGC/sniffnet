@@ -2,7 +2,7 @@ use std::cmp::min;
 use std::net::IpAddr;
 use std::sync::Mutex;
 
-use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
+use iced::widget::{Column, Container, Row, Rule, Space, Text, lazy, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::chart_type::ChartType;
@@ -155,7 +155,7 @@ fn clip_text(text: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::thumbnail_page::{
-        clip_text, host_text, MAX_CHARS_HOST, MAX_CHARS_SERVICE,
+        MAX_CHARS_HOST, MAX_CHARS_SERVICE, clip_text, host_text,
     };
     use crate::networking::types::asn::Asn;
     use crate::networking::types::host::Host;

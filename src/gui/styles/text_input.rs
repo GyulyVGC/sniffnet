@@ -5,8 +5,8 @@
 use iced::widget::text_input::{Catalog, Status, Style};
 use iced::{Background, Border, Color};
 
-use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_WIDTH};
 use crate::StyleType;
+use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_WIDTH};
 
 #[derive(Default)]
 pub enum TextInputType {

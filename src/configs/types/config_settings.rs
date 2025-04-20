@@ -6,8 +6,10 @@ use serde::{Deserialize, Serialize};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::notifications::types::notifications::Notifications;
 #[cfg(not(test))]
-use crate::SNIFFNET_LOWERCASE;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::{Language, StyleType};
+#[cfg(not(test))]
+use crate::{SNIFFNET_LOWERCASE, location};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigSettings {
@@ -30,19 +32,19 @@ impl ConfigSettings {
         if let Ok(settings) = confy::load::<ConfigSettings>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             settings
         } else {
-            confy::store(
+            let _ = confy::store(
                 SNIFFNET_LOWERCASE,
                 Self::FILE_NAME,
                 ConfigSettings::default(),
             )
-            .unwrap_or(());
+            .log_err(location!());
             ConfigSettings::default()
         }
     }
 
     #[cfg(not(test))]
     pub fn store(self) {
-        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
+        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
     }
 }
 

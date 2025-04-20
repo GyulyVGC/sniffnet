@@ -6,9 +6,9 @@ use iced::border::Radius;
 use iced::widget::container::{Catalog, Style};
 use iced::{Background, Border, Color, Shadow};
 
-use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
-use crate::gui::styles::types::gradient_type::{get_gradient_headers, GradientType};
 use crate::StyleType;
+use crate::gui::styles::style_constants::{BORDER_ROUNDED_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::types::gradient_type::{GradientType, get_gradient_headers};
 
 #[derive(Default)]
 pub enum ContainerType {
@@ -58,7 +58,7 @@ impl ContainerType {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
-                    a: 0.8,
+                    a: 0.9,
                     ..Color::BLACK
                 }),
             }),
@@ -75,7 +75,7 @@ impl ContainerType {
                 },
                 width: match self {
                     ContainerType::Standard
-                    | ContainerType::Modal
+                    | ContainerType::ModalBackground
                     | ContainerType::Gradient(_)
                     | ContainerType::HighlightedOnHeader
                     | ContainerType::Highlighted => 0.0,
@@ -86,6 +86,7 @@ impl ContainerType {
                 color: match self {
                     ContainerType::Palette => Color::BLACK,
                     ContainerType::BadgeInfo => colors.secondary,
+                    ContainerType::Modal => ext.buttons_color,
                     _ => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color

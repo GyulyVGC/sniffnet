@@ -2,7 +2,7 @@
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
+use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Font, Length};
 
 use crate::configs::types::config_settings::ConfigSettings;
@@ -17,7 +17,7 @@ use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
-use crate::{Language, StyleType, SNIFFNET_TITLECASE};
+use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 
 pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let thumbnail = sniffer.thumbnail;

@@ -4,12 +4,12 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, lazy};
 use iced::widget::{
-    button, combo_box, horizontal_space, text_input, vertical_space, ComboBox, Rule, Space,
-    Toggler, Tooltip,
+    ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
+    vertical_space,
 };
-use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Padding, Pixels};
+use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
 use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
@@ -650,7 +650,7 @@ mod tests {
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
         // check glyph len when adding new language...
-        assert_eq!(Language::ALL.len(), 19);
+        assert_eq!(Language::ALL.len(), 20);
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =

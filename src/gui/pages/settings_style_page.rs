@@ -1,8 +1,9 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{button, lazy, Rule, Space};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::widget::{Rule, Space, button, lazy};
 use iced::{Alignment, Color, Element, Font, Length, Padding};
 
+use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -16,17 +17,14 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
+use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
-use crate::translations::translations::{
-    appearance_title_translation, deep_sea_translation, mon_amour_translation,
-    yeti_day_translation, yeti_night_translation,
-};
+use crate::translations::translations::appearance_title_translation;
 use crate::translations::translations_2::color_gradients_translation;
 use crate::translations::translations_3::custom_style_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -37,11 +35,11 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         style_path,
         ..
     } = sniffer.configs.lock().unwrap().settings.clone();
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
+    let PaletteExtension {
+        font, font_headers, ..
+    } = style.get_extension();
 
     let mut content = Column::new()
-        .padding(Padding::ZERO.bottom(5))
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(
@@ -67,38 +65,26 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .width(Length::Fill)
         .push(
             Row::new()
-                .push(get_palette_container(
-                    style,
-                    "Yeti Night".to_string(),
-                    yeti_night_translation(language).to_string(),
-                    Night,
-                ))
-                .push(Space::with_width(10))
-                .push(get_palette_container(
-                    style,
-                    "Yeti Day".to_string(),
-                    yeti_day_translation(language).to_string(),
-                    Day,
-                )),
+                .push(get_palette_container(style, "Yeti".to_string(), Night))
+                .push(Space::with_width(15))
+                .push(get_palette_container(style, "Yeti".to_string(), Day)),
         )
-        .push(Space::with_height(10))
+        .push(Space::with_height(15))
         .push(
             Row::new()
                 .push(get_palette_container(
                     style,
                     "Deep Sea".to_string(),
-                    deep_sea_translation(language).to_string(),
                     DeepSea,
                 ))
-                .push(Space::with_width(10))
+                .push(Space::with_width(15))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
-                    mon_amour_translation(language).to_string(),
                     MonAmour,
                 )),
         )
-        .push(Space::with_height(10));
+        .push(Space::with_height(15));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
@@ -108,8 +94,10 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         }))
         .push(Space::with_height(10));
 
-    let styles_scroll =
-        Scrollable::with_direction(styles_col, Direction::Vertical(ScrollbarType::properties()));
+    let styles_scroll = Scrollable::with_direction(
+        styles_col,
+        Direction::Vertical(ScrollbarType::properties().margin(10)),
+    );
 
     content = content.push(styles_scroll);
 
@@ -184,32 +172,35 @@ fn gradients_row<'a>(
 fn get_palette_container<'a>(
     style: StyleType,
     name: String,
-    description: String,
     on_press: StyleType,
 ) -> Button<'a, Message, StyleType> {
     let font = style.get_extension().font;
+    let PaletteExtension {
+        buttons_color,
+        is_nightly,
+        ..
+    } = on_press.get_extension();
 
-    let is_custom = matches!(on_press, StyleType::Custom(_));
+    let caption = Row::new()
+        .spacing(7)
+        .push(Text::new(name).font(font))
+        .push(if is_nightly {
+            Icon::Moon.to_text().size(15)
+        } else {
+            Icon::Sun.to_text()
+        });
 
-    let mut content = Column::new()
+    let content = Column::new()
         .width(Length::Fill)
         .align_x(Alignment::Center)
         .spacing(5)
-        .push(Text::new(name).font(font))
-        .push(get_palette_rule(
-            on_press.get_palette(),
-            on_press.get_extension().buttons_color,
-            is_custom,
-        ));
-
-    if !is_custom {
-        content = content.push(Text::new(description).font(font));
-    }
+        .push(caption)
+        .push(get_palette_rule(on_press.get_palette(), buttons_color));
 
     Button::new(content)
-        .height(if is_custom { 75 } else { 110 })
-        .width(380)
-        .padding(5)
+        .height(80)
+        .width(350)
+        .padding(Padding::ZERO.top(10))
         .class(if on_press.eq(&style) {
             ButtonType::BorderedRoundSelected
         } else {
@@ -221,9 +212,8 @@ fn get_palette_container<'a>(
 fn get_palette_rule<'a>(
     palette: Palette,
     buttons_color: Color,
-    is_custom: bool,
 ) -> Container<'a, Message, StyleType> {
-    let height = if is_custom { 25 } else { 40 };
+    let height = 25;
 
     Container::new(
         Row::new()
@@ -255,9 +245,8 @@ fn get_extra_palettes<'a>(
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
-        let description = String::new();
         let style = StyleType::Custom(style);
-        get_palette_container(current_style, name, description, style)
+        get_palette_container(current_style, name, style)
     });
 
     // The best way to do this would be with itertools, but that would introduce another dependency.
@@ -272,15 +261,15 @@ fn get_extra_palettes<'a>(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(Space::with_width(10))
+                    .push(Space::with_width(15))
                     .push(second)
                     .into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(15)),
             ]);
         } else {
             children.extend([
                 Row::new().push(first).into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(10)),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(15)),
             ]);
         }
     }
@@ -334,14 +323,9 @@ fn lazy_custom_style_input<'a>(
         content = content.push(get_palette_rule(
             style.get_palette(),
             style.get_extension().buttons_color,
-            true,
         ));
     } else if let Ok(palette) = custom_palette {
-        content = content.push(get_palette_rule(
-            palette,
-            palette.generate_buttons_color(),
-            true,
-        ));
+        content = content.push(get_palette_rule(palette, palette.generate_buttons_color()));
     }
 
     Button::new(content)

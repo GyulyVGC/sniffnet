@@ -1,8 +1,8 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::widget::text::LineHeight;
-use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
-use iced::{alignment, Alignment, Font, Length};
+use iced::widget::{Button, Container, Row, Space, Text, button, horizontal_space};
+use iced::{Alignment, Font, Length, alignment};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;

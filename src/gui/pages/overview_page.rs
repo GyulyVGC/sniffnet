@@ -24,10 +24,9 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, bytes_chart_translation, error_translation, incoming_translation,
+    active_filters_translation, error_translation, incoming_translation,
     network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
-    packets_chart_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    some_observed_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -38,16 +37,17 @@ use crate::translations::translations_4::excluded_translation;
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, horizontal_space, lazy, vertical_space, Button, Column, Container, Row, Rule,
-    Scrollable, Space, Text, Tooltip,
+    Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
+    horizontal_space, lazy, vertical_space,
 };
-use iced::Length::{Fill, FillPortion};
 use iced::{Alignment, Font, Length, Padding, Shrink};
+use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -60,7 +60,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
-    if sniffer.pcap_error.is_none() {
+    if let Some(error) = sniffer.pcap_error.as_ref() {
+        // pcap threw an ERROR!
+        body = body_pcap_error(error, &sniffer.waiting, language, font);
+    } else {
         // NO pcap error detected
         let observed = sniffer.runtime_data.all_packets;
         let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
@@ -124,14 +127,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     .push(container_report);
             }
         }
-    } else {
-        // pcap threw an ERROR!
-        body = body_pcap_error(
-            sniffer.pcap_error.as_ref().unwrap(),
-            &sniffer.waiting,
-            language,
-            font,
-        );
     }
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
@@ -145,7 +140,11 @@ fn body_no_packets<'a>(
 ) -> Column<'a, Message, StyleType> {
     let link_type = device.link_type;
     let mut adapter_info = device.name.clone();
-    adapter_info.push_str(&format!("\n{}", link_type.full_print_on_one_line(language)));
+    let _ = write!(
+        adapter_info,
+        "\n{}",
+        link_type.full_print_on_one_line(language)
+    );
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
@@ -213,7 +212,6 @@ fn body_pcap_error<'a>(
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
-    // let err_string = pcap_error.clone().unwrap();
     let error_text = error_translation(language, pcap_error)
         .align_x(Alignment::Center)
         .font(font);
@@ -238,7 +236,11 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let row_report = Row::new()
         .padding(Padding::new(10.0).top(0).bottom(5))
         .push(col_host)
-        .push(Rule::vertical(40))
+        .push(
+            Column::new()
+                .padding(Padding::ZERO.top(10).bottom(5))
+                .push(Rule::vertical(40)),
+        )
         .push(col_service);
 
     Container::new(row_report)
@@ -478,33 +480,16 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
     let traffic_chart = &sniffer.traffic_chart;
 
-    let mut chart_info_string = String::from("(");
-    chart_info_string.push_str(if traffic_chart.chart_type.eq(&ChartType::Packets) {
-        packets_chart_translation(language)
-    } else {
-        bytes_chart_translation(language)
-    });
-    chart_info_string.push(')');
-
     Container::new(
         Column::new()
             .align_x(Alignment::Center)
             .push(
-                Row::new()
-                    .padding([10, 0])
-                    .spacing(10)
-                    .align_y(Alignment::Center)
-                    .push(
-                        traffic_rate_translation(language)
-                            .font(font)
-                            .class(TextType::Title)
-                            .size(FONT_SIZE_TITLE),
-                    )
-                    .push(
-                        Text::new(chart_info_string)
-                            .class(TextType::Subtitle)
-                            .font(font),
-                    ),
+                Row::new().padding([10, 0]).align_y(Alignment::Center).push(
+                    traffic_rate_translation(language)
+                        .font(font)
+                        .class(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                ),
             )
             .push(traffic_chart.view()),
     )
@@ -885,7 +870,7 @@ fn sort_arrows<'a>(
 #[cfg(test)]
 mod tests {
     use crate::chart::types::chart_type::ChartType;
-    use crate::gui::pages::overview_page::{get_bars_length, MIN_BARS_LENGTH};
+    use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
 
     #[test]

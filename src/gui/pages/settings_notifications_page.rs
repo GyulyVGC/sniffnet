@@ -1,7 +1,7 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{horizontal_space, Button, Slider};
+use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Font, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
@@ -18,10 +18,9 @@ use crate::notifications::types::notifications::{
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
-    bytes_threshold_translation, favorite_notification_translation,
-    notifications_title_translation, packets_threshold_translation, per_second_translation,
-    settings_translation, sound_translation, specify_multiples_translation, threshold_translation,
-    volume_translation,
+    bytes_exceeded_translation, favorite_transmitted_translation, notifications_title_translation,
+    packets_exceeded_translation, per_second_translation, settings_translation, sound_translation,
+    threshold_translation, volume_translation,
 };
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
@@ -69,13 +68,13 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
-        .padding(Padding::ZERO.bottom(5))
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
-                .width(720)
+                .align_x(Alignment::Center)
+                .width(Length::Fill)
                 .push(get_packets_notify(
                     notifications.packets_notification,
                     language,
@@ -91,7 +90,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     language,
                     font,
                 )),
-            Direction::Vertical(ScrollbarType::properties()),
+            Direction::Vertical(ScrollbarType::properties().margin(10)),
         ));
 
     content = content.push(volume_notification_col);
@@ -108,7 +107,7 @@ fn get_packets_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        packets_threshold_translation(language),
+        packets_exceeded_translation(language),
         packets_notification.threshold.is_some(),
     )
     .on_toggle(move |toggled| {
@@ -161,7 +160,7 @@ fn get_bytes_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        bytes_threshold_translation(language),
+        bytes_exceeded_translation(language),
         bytes_notification.threshold.is_some(),
     )
     .on_toggle(move |toggled| {
@@ -214,7 +213,7 @@ fn get_favorite_notify<'a>(
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        favorite_notification_translation(language),
+        favorite_transmitted_translation(language),
         favorite_notification.notify_on_favorite,
     )
     .on_toggle(move |toggled| {
@@ -260,7 +259,10 @@ fn input_group_packets<'a>(
     font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let curr_threshold_str = &packets_notification.threshold.unwrap().to_string();
+    let curr_threshold_str = &packets_notification
+        .threshold
+        .unwrap_or_default()
+        .to_string();
     let input_row = Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
@@ -303,12 +305,7 @@ fn input_group_bytes<'a>(
     font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let info_str = format!(
-        "{}; {}",
-        per_second_translation(language),
-        specify_multiples_translation(language)
-    );
-    let mut curr_threshold_str = (bytes_notification.threshold.unwrap()
+    let mut curr_threshold_str = (bytes_notification.threshold.unwrap_or_default()
         / bytes_notification.byte_multiple.multiplier())
     .to_string();
     curr_threshold_str.push_str(&bytes_notification.byte_multiple.get_char());
@@ -335,7 +332,7 @@ fn input_group_bytes<'a>(
             .width(100),
         )
         .push(
-            Text::new(info_str)
+            Text::new(per_second_translation(language))
                 .font(font)
                 .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
@@ -357,6 +354,7 @@ fn volume_slider<'a>(
             .push(Text::new(format!("{}: {volume:^3}%", volume_translation(language))).font(font))
             .push(
                 Row::new()
+                    .align_y(Alignment::Center)
                     .push(
                         Icon::AudioMute
                             .to_text()
