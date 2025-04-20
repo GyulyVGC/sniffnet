@@ -259,11 +259,8 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickInit => {
-                self.update_notification_settings();
-            }
+            Message::TickInit => {}
             Message::TickRun => {
-                self.update_notification_settings();
                 return self.refresh_data();
             }
             Message::AdapterSelection(name) => self.set_adapter(&name),
@@ -671,6 +668,7 @@ impl Sniffer {
         self.runtime_data.tot_out_bytes = info_traffic_lock.tot_out_bytes;
         self.runtime_data.dropped_packets = info_traffic_lock.dropped_packets;
         drop(info_traffic_lock);
+        self.update_notification_settings();
         let emitted_notifications = notify_and_log(
             &mut self.runtime_data,
             self.configs.lock().unwrap().settings.notifications,
