@@ -653,7 +653,6 @@ impl Sniffer {
                 // Apply the temporary notifications to the actual config
                 let mut configs = self.configs.lock().unwrap();
                 configs.settings.notifications = temp_notifications;
-                configs.clone().store();
             }
         }
     }
