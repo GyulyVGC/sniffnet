@@ -37,9 +37,9 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
     let font_headers = style.get_extension().font_headers;
 
     // Use thresholds that have not yet been applied, if available
-    if let Some(temp_notifications) = &sniffer.temp_notifications {
-        notifications.packets_notification = temp_notifications.packets_notification;
-        notifications.bytes_notification = temp_notifications.bytes_notification;
+    if let Some((temp_packets_notifications, temp_bytes_notifications)) = sniffer.temp_thresholds {
+        notifications.packets_notification = temp_packets_notifications;
+        notifications.bytes_notification = temp_bytes_notifications;
     }
 
     let mut content = Column::new()
