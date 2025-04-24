@@ -389,7 +389,7 @@ impl Sniffer {
                         play(
                             sound,
                             self.configs.lock().unwrap().settings.notifications.volume,
-                        )
+                        );
                     }
                 }
             }
@@ -904,15 +904,15 @@ impl Sniffer {
         if let Some(ref mut temp_notifications) = self.temp_notifications {
             match value {
                 Notification::Packets(packets_notification) => {
-                    temp_notifications.packets_notification = packets_notification
+                    temp_notifications.packets_notification = packets_notification;
                 }
                 Notification::Bytes(bytes_notification) => {
-                    temp_notifications.bytes_notification = bytes_notification
+                    temp_notifications.bytes_notification = bytes_notification;
                 }
                 Notification::Favorite(favorite_notification) => {
-                    temp_notifications.favorite_notification = favorite_notification
+                    temp_notifications.favorite_notification = favorite_notification;
                 }
-            };
+            }
         }
     }
 

@@ -40,7 +40,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
     if let Some(temp_notifications) = &sniffer.temp_notifications {
         notifications.packets_notification = temp_notifications.packets_notification;
         notifications.bytes_notification = temp_notifications.bytes_notification;
-    };
+    }
 
     let mut content = Column::new()
         .width(Length::Fill)
