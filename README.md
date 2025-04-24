@@ -8,8 +8,8 @@
 <a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
-Application to comfortably monitor your Internet traffic <br>
-Cross-platform, Intuitive, Reliable
+Application to comfortably monitor your Internet traffic.<br>
+Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
 🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;12&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
@@ -242,11 +242,11 @@ ICED_BACKEND=tiny-skia
 
 ## Stay in the loop
 
-Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br><br>
+Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
 Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <div align="center">
-    <a href="https://bsky.app/profile/sniffnet.bsky.social"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>&nbsp;
+    <a href="https://bsky.app/profile/sniffnet.net"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>&nbsp;
     <a href="https://www.linkedin.com/company/sniffnet"><img width="48" height="48" alt="LinkedIn" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>&nbsp;
     <a href="https://mastodon.social/@sniffnet"><img width="48" height="48" alt="Mastodon" title="Mastodon" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/mastodon.svg"/></a>&nbsp;
     <a href="https://t.me/sniffnet"><img width="48" height="48" alt="Telegram" title="Telegram" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>&nbsp;

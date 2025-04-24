@@ -3,13 +3,14 @@
 
 use std::sync::{Arc, Mutex};
 
-use pcap::{Device, DeviceFlags};
-use serde::{Deserialize, Serialize};
-
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 #[cfg(not(test))]
-use crate::SNIFFNET_LOWERCASE;
+use crate::utils::error_logger::{ErrorLogger, Location};
+#[cfg(not(test))]
+use crate::{SNIFFNET_LOWERCASE, location};
+use pcap::{Device, DeviceFlags};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ConfigDevice {
@@ -40,15 +41,15 @@ impl ConfigDevice {
         if let Ok(device) = confy::load::<ConfigDevice>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             device
         } else {
-            confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigDevice::default())
-                .unwrap_or(());
+            let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigDevice::default())
+                .log_err(location!());
             ConfigDevice::default()
         }
     }
 
     #[cfg(not(test))]
     pub fn store(self) {
-        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).unwrap_or(());
+        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
     }
 
     pub fn to_my_device(&self) -> MyDevice {

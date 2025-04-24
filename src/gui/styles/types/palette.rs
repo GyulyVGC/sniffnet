@@ -197,8 +197,8 @@ impl Default for Palette {
 
 #[cfg(test)]
 mod tests {
-    use iced::color;
     use iced::Color;
+    use iced::color;
 
     use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
     use crate::gui::styles::types::palette_extension::PaletteExtension;

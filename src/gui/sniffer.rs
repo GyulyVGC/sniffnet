@@ -6,13 +6,13 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
-use iced::Event::{Keyboard, Window};
-use iced::{window, Element, Point, Size, Subscription, Task};
+use iced::{Element, Point, Size, Subscription, Task, window};
 use pcap::Device;
 use rfd::FileHandle;
 
@@ -53,16 +53,17 @@ use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::notifications::Notification;
-use crate::notifications::types::sound::{play, Sound};
+use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart};
+use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart, location};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -380,7 +381,7 @@ impl Sniffer {
                 } else {
                     self.page_number.checked_sub(1)
                 }
-                .unwrap();
+                .unwrap_or(1);
                 self.page_number = new_page;
             }
             Message::ArrowPressed(increment) => {
@@ -404,7 +405,7 @@ impl Sniffer {
             Message::ChangeScaleFactor(slider_val) => {
                 let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
                 self.configs.lock().unwrap().settings.scale_factor =
-                    scale_factor_str.parse().unwrap();
+                    scale_factor_str.parse().unwrap_or(1.0);
             }
             Message::WindowMoved(x, y) => {
                 let scale_factor = self.configs.lock().unwrap().settings.scale_factor;
@@ -445,11 +446,11 @@ impl Sniffer {
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
                 self.configs.lock().unwrap().clone().store();
-                return window::close(self.id.unwrap_or(Id::unique()));
+                return window::close(self.id.unwrap_or_else(Id::unique));
             }
-            Message::CopyIp(string) => {
-                self.timing_events.copy_ip_now(string.clone());
-                return iced::clipboard::write(string);
+            Message::CopyIp(ip) => {
+                self.timing_events.copy_ip_now(ip);
+                return iced::clipboard::write(ip.to_string());
             }
             Message::OpenFile(old_file, file_info, consumer_message) => {
                 return Task::perform(
@@ -474,10 +475,10 @@ impl Sniffer {
                 self.export_pcap.set_directory(path);
             }
             Message::OutputPcapFile(name) => {
-                self.export_pcap.set_file_name(name);
+                self.export_pcap.set_file_name(&name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
-                let window_id = self.id.unwrap_or(Id::unique());
+                let window_id = self.id.unwrap_or_else(Id::unique);
 
                 self.thumbnail = !self.thumbnail;
                 self.traffic_chart.thumbnail = self.thumbnail;
@@ -515,7 +516,7 @@ impl Sniffer {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
                 self.timing_events.thumbnail_click_now();
                 if was_just_thumbnail_click {
-                    return window::drag(self.id.unwrap_or(Id::unique()));
+                    return window::drag(self.id.unwrap_or_else(Id::unique));
                 }
             }
             Message::CtrlTPressed => {
@@ -688,12 +689,15 @@ impl Sniffer {
         #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
         let cmd = "xdg-open";
 
-        std::process::Command::new(cmd)
+        let Ok(mut child) = std::process::Command::new(cmd)
             .arg(url)
             .spawn()
-            .unwrap()
-            .wait()
-            .unwrap_or_default();
+            .log_err(location!())
+        else {
+            return;
+        };
+
+        child.wait().unwrap_or_default();
     }
 
     fn start(&mut self) {
@@ -719,7 +723,7 @@ impl Sniffer {
             let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
             self.device.link_type = capture_context.my_link_type();
-            thread::Builder::new()
+            let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
@@ -732,7 +736,7 @@ impl Sniffer {
                         &host_data,
                     );
                 })
-                .unwrap();
+                .log_err(location!());
         }
     }
 
@@ -749,7 +753,7 @@ impl Sniffer {
     }
 
     fn set_adapter(&mut self, name: &str) {
-        for dev in Device::list().expect("Error retrieving device list\r\n") {
+        for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&name) {
                 let mut addresses_mutex = self.device.addresses.lock().unwrap();
                 *addresses_mutex = dev.addresses;
@@ -1056,11 +1060,16 @@ mod tests {
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
         assert_eq!(
             sniffer.filters.protocols,
-            HashSet::from([Protocol::TCP, Protocol::ICMP])
+            HashSet::from([Protocol::TCP, Protocol::ICMP, Protocol::ARP])
         );
         sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ICMP]));
+        assert_eq!(
+            sniffer.filters.protocols,
+            HashSet::from([Protocol::ICMP, Protocol::ARP])
+        );
         sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
+        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ARP]));
+        sniffer.update(Message::ProtocolSelection(Protocol::ARP, false));
         assert_eq!(sniffer.filters.protocols, HashSet::new());
         sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
         assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::UDP]));
@@ -1944,7 +1953,7 @@ mod tests {
                     bytes_notification: Default::default(),
                     favorite_notification: Default::default()
                 },
-                style: StyleType::Night
+                style: StyleType::Custom(ExtraStyles::A11yDark)
             }
         );
 

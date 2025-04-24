@@ -13,8 +13,9 @@ impl ExportPcap {
         self.enabled = !self.enabled;
     }
 
-    pub fn set_file_name(&mut self, file_name: String) {
-        self.file_name = file_name;
+    pub fn set_file_name(&mut self, file_name: &str) {
+        // remove forward and backward slashes to avoid directory traversal
+        self.file_name = file_name.replace(['/', '\\'], "");
     }
 
     pub fn set_directory(&mut self, directory: String) {
@@ -91,10 +92,13 @@ mod tests {
         let mut export_pcap = ExportPcap::default();
         assert_eq!(export_pcap.file_name(), "sniffnet.pcap");
 
-        export_pcap.set_file_name("test.pcap".to_string());
+        export_pcap.set_file_name("test.pcap");
         assert_eq!(export_pcap.file_name(), "test.pcap");
 
-        export_pcap.set_file_name("".to_string());
+        export_pcap.set_file_name("./ciao/test\\hello.pcap");
+        assert_eq!(export_pcap.file_name(), ".ciaotesthello.pcap");
+
+        export_pcap.set_file_name("");
         assert_eq!(export_pcap.file_name(), "");
     }
 
@@ -126,7 +130,7 @@ mod tests {
             Some(format!("{dir}sniffnet.pcap",))
         );
 
-        export_pcap.set_file_name("test.pcap".to_string());
+        export_pcap.set_file_name("test.pcap");
         assert_eq!(export_pcap.full_path(), Some(format!("{dir}test.pcap",)));
 
         let mut full_path = PathBuf::from("/tmp");
@@ -150,7 +154,7 @@ mod tests {
         let mut full_path = PathBuf::from("/tmp");
         full_path.push("sniffnet.pcap");
 
-        export_pcap.set_file_name("".to_string());
+        export_pcap.set_file_name("");
         assert_eq!(
             export_pcap.full_path(),
             Some(full_path.to_string_lossy().to_string())

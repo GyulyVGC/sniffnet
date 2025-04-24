@@ -1,15 +1,15 @@
 //! Module defining the `ReportInfo` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use std::collections::{HashMap, HashSet};
-
+use crate::Service;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::Service;
+use std::collections::{HashMap, HashSet};
+use std::net::IpAddr;
 
 /// Struct to be shared between the threads in charge of parsing packets and update reports.
 pub struct InfoTraffic {
@@ -36,9 +36,9 @@ pub struct InfoTraffic {
     /// Map of the upper layer services with their data info
     pub services: HashMap<Service, DataInfo>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
-    pub addresses_waiting_resolution: HashMap<String, DataInfo>,
+    pub addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
-    pub addresses_resolved: HashMap<String, (String, Host)>,
+    pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
 }

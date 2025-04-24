@@ -1,8 +1,6 @@
-use once_cell::sync::Lazy;
-
 use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
 
-pub static CONFIGS: Lazy<Configs> = Lazy::new(Configs::load);
+pub static CONFIGS: std::sync::LazyLock<Configs> = std::sync::LazyLock::new(Configs::load);
 
 #[derive(Default, Clone, PartialEq, Debug)]
 pub struct Configs {

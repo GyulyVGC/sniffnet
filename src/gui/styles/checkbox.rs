@@ -5,8 +5,8 @@
 use iced::widget::checkbox::{Catalog, Status, Style};
 use iced::{Background, Border};
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 
 #[derive(Default)]
 pub enum CheckboxType {

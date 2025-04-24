@@ -2,7 +2,7 @@
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
+use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Font, Length};
 
 use crate::configs::types::config_settings::ConfigSettings;
@@ -17,7 +17,7 @@ use crate::gui::types::message::Message;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
-use crate::{Language, StyleType, SNIFFNET_TITLECASE};
+use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 
 pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
@@ -49,7 +49,7 @@ pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .line_height(LineHeight::Relative(0.7))
-        .size(90);
+        .size(80);
 
     Container::new(
         Row::new()
@@ -73,7 +73,7 @@ pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
             .push(horizontal_space())
             .push(get_button_settings(font, language, last_opened_setting)),
     )
-    .height(80)
+    .height(70)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
 }

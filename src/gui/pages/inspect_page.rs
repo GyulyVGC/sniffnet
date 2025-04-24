@@ -4,17 +4,17 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, lazy};
 use iced::widget::{
-    button, combo_box, horizontal_space, text_input, vertical_space, ComboBox, Rule, Space,
-    Toggler, Tooltip,
+    ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
+    vertical_space,
 };
-use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Padding, Pixels};
+use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
 use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::get_bars;
+use crate::gui::pages::overview_page::{get_bars, get_bars_length};
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -24,7 +24,7 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::byte_multiple::ByteMultiple;
-use crate::networking::types::data_info::DataInfoWithoutTimestamp;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -559,20 +559,14 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 
 fn get_agglomerates_row<'a>(
     font: Font,
-    tot: DataInfoWithoutTimestamp,
+    tot: DataInfo,
     chart_type: ChartType,
 ) -> Row<'a, Message, StyleType> {
-    let tot_packets = tot.incoming_packets + tot.outgoing_packets;
-    let tot_bytes = tot.incoming_bytes + tot.outgoing_bytes;
+    let tot_packets = tot.tot_packets();
+    let tot_bytes = tot.tot_bytes();
     let width = ReportCol::FILTER_COLUMNS_WIDTH;
 
-    #[allow(clippy::cast_precision_loss)]
-    let in_length = if chart_type == ChartType::Packets {
-        width * (tot.incoming_packets as f32 / tot_packets as f32)
-    } else {
-        width * (tot.incoming_bytes as f32 / tot_bytes as f32)
-    };
-    let out_length = width - in_length;
+    let (in_length, out_length) = get_bars_length(width, chart_type, &tot, &tot);
     let bars = get_bars(in_length, out_length);
 
     let bytes_col = Column::new()
@@ -656,7 +650,7 @@ mod tests {
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
         // check glyph len when adding new language...
-        assert_eq!(Language::ALL.len(), 19);
+        assert_eq!(Language::ALL.len(), 20);
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =

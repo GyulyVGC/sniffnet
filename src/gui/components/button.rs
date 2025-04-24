@@ -2,7 +2,7 @@
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Row, Text, Tooltip};
+use iced::widget::{Row, Text, Tooltip, button};
 use iced::{Alignment, Font};
 
 use crate::gui::styles::container::ContainerType;

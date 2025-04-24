@@ -9,7 +9,7 @@ use std::{panic, process, thread};
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
-use iced::{application, window, Font, Pixels, Settings};
+use iced::{Font, Pixels, Settings, application, window};
 
 use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
@@ -31,10 +31,11 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
-use crate::configs::types::configs::{Configs, CONFIGS};
+use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
 use crate::secondary_threads::check_updates::set_newer_release_status;
+use crate::utils::error_logger::{ErrorLogger, Location};
 
 mod chart;
 mod cli;
@@ -86,18 +87,18 @@ pub fn main() -> iced::Result {
     }));
 
     // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
-    ctrlc::set_handler(move || {
+    let _ = ctrlc::set_handler(move || {
         configs2.lock().unwrap().clone().store();
         process::exit(130);
     })
-    .expect("Error setting Ctrl-C handler");
+    .log_err(location!());
 
-    thread::Builder::new()
+    let _ = thread::Builder::new()
         .name("thread_check_updates".to_string())
         .spawn(move || {
             set_newer_release_status(&newer_release_available2);
         })
-        .unwrap();
+        .log_err(location!());
 
     print_cli_welcome_message();
 
@@ -114,7 +115,7 @@ pub fn main() -> iced::Result {
             ],
             default_font: Font::with_name(FONT_FAMILY_NAME),
             default_text_size: Pixels(FONT_SIZE_BODY),
-            antialiasing: false,
+            antialiasing: true,
         })
         .window(window::Settings {
             size: size.to_size(), // start size

@@ -6,9 +6,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
-use once_cell::sync::Lazy;
-use rustrict::{Censor, Trie, Type};
-
 include!("./src/networking/types/service_query.rs");
 include!("./src/networking/types/protocol.rs");
 
@@ -74,11 +71,12 @@ fn get_valid_service_fmt_const(s: &str) -> String {
         {
             panic!("Invalid service name found: {invalid}")
         }
+        #[cfg(debug_assertions)]
         inappropriate
-            if Censor::from_str(inappropriate)
+            if rustrict::Censor::from_str(inappropriate)
                 .with_trie(&SAFE_WORDS_FOR_SERVICE_NAME)
                 .analyze()
-                .is(Type::INAPPROPRIATE) =>
+                .is(rustrict::Type::INAPPROPRIATE) =>
         {
             panic!("Inappropriate service name found: {inappropriate}")
         }
@@ -99,99 +97,110 @@ fn get_valid_service_query(s: &str) -> ServiceQuery {
     ServiceQuery(port, protocol)
 }
 
-pub static SAFE_WORDS_FOR_SERVICE_NAME: Lazy<Trie> = Lazy::new(|| {
-    let mut safe_words = Trie::default();
-    for word in [
-        "npp",
-        "emfis-cntl",
-        "ardus-cntl",
-        "pmip6-cntl",
-        "mpp",
-        "ipp",
-        "vpp",
-        "epp",
-        "kink",
-        "kvm-via-ip",
-        "dpp",
-        "slinkysearch",
-        "alta-ana-lm",
-        "vpps-qua",
-        "vpps-via",
-        "ibm-pps",
-        "ppsms",
-        "ppsuitemsg",
-        "icpps",
-        "rap-listen",
-        "cadabra-lm",
-        "pay-per-view",
-        "sixtrak",
-        "cvmon",
-        "houdini-lm",
-        "dic-aida",
-        "p2pq",
-        "bigbrother",
-        "bintec-admin",
-        "zymed-zpp",
-        "cvmmon",
-        "btpp2sectrans",
-        "conclave-cpp",
-        "btpp2audctr1",
-        "tclprodebugger",
-        "bintec-capi",
-        "bintec-tapi",
-        "dicom-iscl",
-        "dicom-tls",
-        "nmsigport",
-        "ppp",
-        "tl1-telnet",
-        "opcon-xps",
-        "netwatcher-mon",
-        "netwatcher-db",
-        "xnm-ssl",
-        "edm-mgr-cntrl",
-        "isoft-p2p",
-        "must-p2p",
-        "p2pgroup",
-        "quasar-server",
-        "int-rcv-cntrl",
-        "faxstfx-port",
-        "sunlps-http",
-        "fagordnc",
-        "p2pcommunity",
-        "minger",
-        "assuria-slm",
-        "wcpp",
-        "plcy-net-svcs",
-        "assyst-dr",
-        "mobile-p2p",
-        "assuria-ins",
-        "taep-as-svc",
-        "nlg-data",
-        "dj-ice",
-        "x500ms",
-        "X11:7",
-        "p2p-sip",
-        "p4p-portal",
-        "bmc-perf-agent",
-        "ntz-p2p-storage",
-        "citrixupp",
-        "freezexservice",
-        "p2pevolvenet",
-        "papachi-p2p-srv",
-        "espeasy-p2p",
-        "pim-port",
-        "vp2p",
-        "dicom",
-        "icpp",
-        "sauterdongle",
-        "vocaltec-hos",
-        "BackOrifice",
-        "dhanalakshmi",
-        "3gpp-w1ap",
-        "pmsm-webrctl",
-        "bif-p2p",
-    ] {
-        safe_words.set(word, Type::SAFE);
-    }
-    safe_words
-});
+#[cfg(debug_assertions)]
+static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<rustrict::Trie> =
+    std::sync::LazyLock::new(|| {
+        let mut safe_words = rustrict::Trie::default();
+        for word in [
+            "npp",
+            "emfis-cntl",
+            "ardus-cntl",
+            "pmip6-cntl",
+            "mpp",
+            "ipp",
+            "vpp",
+            "epp",
+            "kink",
+            "kvm-via-ip",
+            "dpp",
+            "slinkysearch",
+            "alta-ana-lm",
+            "vpps-qua",
+            "vpps-via",
+            "ibm-pps",
+            "ppsms",
+            "ppsuitemsg",
+            "icpps",
+            "rap-listen",
+            "cadabra-lm",
+            "pay-per-view",
+            "sixtrak",
+            "cvmon",
+            "houdini-lm",
+            "dic-aida",
+            "p2pq",
+            "bigbrother",
+            "bintec-admin",
+            "zymed-zpp",
+            "cvmmon",
+            "btpp2sectrans",
+            "conclave-cpp",
+            "btpp2audctr1",
+            "tclprodebugger",
+            "bintec-capi",
+            "bintec-tapi",
+            "dicom-iscl",
+            "dicom-tls",
+            "nmsigport",
+            "ppp",
+            "tl1-telnet",
+            "opcon-xps",
+            "netwatcher-mon",
+            "netwatcher-db",
+            "xnm-ssl",
+            "edm-mgr-cntrl",
+            "isoft-p2p",
+            "must-p2p",
+            "p2pgroup",
+            "quasar-server",
+            "int-rcv-cntrl",
+            "faxstfx-port",
+            "sunlps-http",
+            "fagordnc",
+            "p2pcommunity",
+            "minger",
+            "assuria-slm",
+            "wcpp",
+            "plcy-net-svcs",
+            "assyst-dr",
+            "mobile-p2p",
+            "assuria-ins",
+            "taep-as-svc",
+            "nlg-data",
+            "dj-ice",
+            "x500ms",
+            "X11:7",
+            "p2p-sip",
+            "p4p-portal",
+            "bmc-perf-agent",
+            "ntz-p2p-storage",
+            "citrixupp",
+            "freezexservice",
+            "p2pevolvenet",
+            "papachi-p2p-srv",
+            "espeasy-p2p",
+            "pim-port",
+            "vp2p",
+            "dicom",
+            "icpp",
+            "sauterdongle",
+            "vocaltec-hos",
+            "BackOrifice",
+            "dhanalakshmi",
+            "3gpp-w1ap",
+            "pmsm-webrctl",
+            "bif-p2p",
+            "as-servermap",
+            "nm-asses-admin",
+            "ias-session",
+            "smar-se-port1",
+            "smar-se-port2",
+            "canon-cpp-disc",
+            "3gpp-monp",
+            "emc-pp-mgmtsvc",
+            "3gpp-cbsp",
+        ] {
+            safe_words.set(word, rustrict::Type::SAFE);
+        }
+        safe_words
+    });

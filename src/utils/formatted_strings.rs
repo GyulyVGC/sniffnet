@@ -1,42 +1,44 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
+use crate::Language;
 use crate::networking::types::filters::Filters;
 use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
 };
 use crate::translations::translations_3::{invalid_filters_translation, port_translation};
-use crate::Language;
+use chrono::{DateTime, Local};
+use std::fmt::Write;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Computes the String representing the percentage of filtered bytes/packets
-pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
-    #[allow(clippy::cast_precision_loss)]
-    let filtered_float = filtered as f32;
-    #[allow(clippy::cast_precision_loss)]
-    let observed_float = observed as f32;
-    if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
-        "<0.1%".to_string()
-    } else {
-        format!("{:.1}%", 100.0 * filtered_float / observed_float)
-    }
-}
+// /// Computes the String representing the percentage of filtered bytes/packets
+// pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
+//     #[allow(clippy::cast_precision_loss)]
+//     let filtered_float = filtered as f32;
+//     #[allow(clippy::cast_precision_loss)]
+//     let observed_float = observed as f32;
+//     if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
+//         "<0.1%".to_string()
+//     } else {
+//         format!("{:.1}%", 100.0 * filtered_float / observed_float)
+//     }
+// }
 
 pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
     let mut ret_val = format!("{}:", invalid_filters_translation(language));
     if !filters.ip_version_valid() {
-        ret_val.push_str(&format!("\n • {}", ip_version_translation(language)));
+        let _ = write!(ret_val, "\n • {}", ip_version_translation(language));
     }
     if !filters.protocol_valid() {
-        ret_val.push_str(&format!("\n • {}", protocol_translation(language)));
+        let _ = write!(ret_val, "\n • {}", protocol_translation(language));
     }
     if !filters.address_valid() {
-        ret_val.push_str(&format!("\n • {}", address_translation(language)));
+        let _ = write!(ret_val, "\n • {}", address_translation(language));
     }
     if !filters.port_valid() {
-        ret_val.push_str(&format!("\n • {}", port_translation(language)));
+        let _ = write!(ret_val, "\n • {}", port_translation(language));
     }
     ret_val
 }
@@ -45,32 +47,36 @@ pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> Stri
 pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
     let mut filters_string = String::new();
     if filters.ip_version_active() {
-        filters_string.push_str(&format!(
-            "• {}: {}\n",
+        let _ = writeln!(
+            filters_string,
+            "• {}: {}",
             ip_version_translation(language),
             filters.pretty_print_ip()
-        ));
+        );
     }
     if filters.protocol_active() {
-        filters_string.push_str(&format!(
-            "• {}: {}\n",
+        let _ = writeln!(
+            filters_string,
+            "• {}: {}",
             protocol_translation(language),
             filters.pretty_print_protocol()
-        ));
+        );
     }
     if filters.address_active() {
-        filters_string.push_str(&format!(
-            "• {}: {}\n",
+        let _ = writeln!(
+            filters_string,
+            "• {}: {}",
             address_translation(language),
             filters.address_str
-        ));
+        );
     }
     if filters.port_active() {
-        filters_string.push_str(&format!(
-            "• {}: {}\n",
+        let _ = writeln!(
+            filters_string,
+            "• {}: {}",
             port_translation(language),
             filters.port_str
-        ));
+        );
     }
     filters_string
 }
@@ -126,9 +132,9 @@ pub fn get_domain_from_r_dns(r_dns: String) -> String {
     }
 }
 
-pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
+pub fn get_socket_address(address: &IpAddr, port: Option<u16>) -> String {
     if let Some(res) = port {
-        if address.contains(':') {
+        if address.is_ipv6() {
             // IPv6
             format!("[{address}]:{res}")
         } else {
@@ -136,7 +142,7 @@ pub fn get_socket_address(address: &String, port: Option<u16>) -> String {
             format!("{address}:{res}")
         }
     } else {
-        address.to_owned()
+        address.to_string()
     }
 }
 
@@ -168,6 +174,10 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
     }
 }
 
+pub fn get_formatted_timestamp(t: DateTime<Local>) -> String {
+    t.format("%H:%M:%S").to_string()
+}
+
 #[allow(dead_code)]
 #[cfg(windows)]
 pub fn get_logs_file_path() -> Option<String> {
@@ -177,8 +187,8 @@ pub fn get_logs_file_path() -> Option<String> {
 }
 
 #[cfg(all(windows, not(debug_assertions)))]
-pub fn redirect_stdout_stderr_to_file(
-) -> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
+pub fn redirect_stdout_stderr_to_file()
+-> Option<(gag::Redirect<std::fs::File>, gag::Redirect<std::fs::File>)> {
     if let Ok(logs_file) = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
@@ -226,6 +236,14 @@ mod tests {
             get_formatted_num_seconds(u128::MAX),
             "94522879700260684295381835397713392:04:15"
         );
+    }
+
+    #[test]
+    fn test_formatted_timestamp() {
+        let now = Local::now();
+        let formatted = get_formatted_timestamp(now);
+        let expected = now.to_string().get(11..19).unwrap().to_string();
+        assert_eq!(formatted, expected);
     }
 
     #[cfg(windows)]

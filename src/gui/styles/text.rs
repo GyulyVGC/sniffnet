@@ -2,12 +2,12 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::StyleType;
+use crate::gui::styles::style_constants::ALERT_RED_COLOR;
+use crate::gui::types::message::Message;
 use iced::widget::text::{Catalog, Style};
 use iced::widget::{Column, Text};
 use iced::{Color, Font};
-
-use crate::gui::types::message::Message;
-use crate::StyleType;
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub enum TextType {
@@ -74,7 +74,7 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
         }
         TextType::Incoming => colors.secondary,
         TextType::Outgoing => colors.outgoing,
-        TextType::Danger => Color::from_rgb(0.8, 0.15, 0.15),
+        TextType::Danger => ALERT_RED_COLOR,
         TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
         TextType::Standard => colors.text_body,
         TextType::Starred => colors.starred,

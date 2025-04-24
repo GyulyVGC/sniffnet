@@ -5,8 +5,8 @@
 use iced::widget::text_input::{Catalog, Status, Style};
 use iced::{Background, Border, Color};
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
+use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_WIDTH};
 
 #[derive(Default)]
 pub enum TextInputType {
@@ -36,7 +36,7 @@ impl TextInputType {
                 color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => ext.buttons_color,
-                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                    TextInputType::Error => ALERT_RED_COLOR,
                 },
             },
             icon: Color {
@@ -58,7 +58,7 @@ impl TextInputType {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match self {
-                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                    TextInputType::Error => ALERT_RED_COLOR,
                     _ => colors.secondary,
                 },
             },
@@ -119,7 +119,7 @@ impl TextInputType {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match self {
-                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, 1.0),
+                    TextInputType::Error => ALERT_RED_COLOR,
                     _ => colors.secondary,
                 },
             },
@@ -153,7 +153,10 @@ impl TextInputType {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
                     },
-                    TextInputType::Error => Color::new(0.8, 0.15, 0.15, ext.alpha_round_borders),
+                    TextInputType::Error => Color {
+                        a: ext.alpha_round_borders,
+                        ..ALERT_RED_COLOR
+                    },
                 },
             },
             icon: Color {

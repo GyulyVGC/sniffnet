@@ -1,10 +1,11 @@
+use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, vertical_space, Space};
-use iced::widget::{lazy, Column, Container, Row, Scrollable, Text, Tooltip};
-use iced::Length::FillPortion;
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, lazy};
+use iced::widget::{Space, button, vertical_space};
 use iced::{Alignment, Font, Length};
+use std::fmt::Write;
 
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::components::header::get_button_settings;
@@ -232,7 +233,7 @@ fn bytes_notification_log<'a>(
         (logged_notification.threshold).into(),
     ));
 
-    threshold_str.push_str(&format!(" {}", per_second_translation(language)));
+    let _ = write!(threshold_str, " {}", per_second_translation(language));
     let mut incoming_str = " - ".to_string();
     incoming_str.push_str(incoming_translation(language));
     incoming_str.push_str(": ");
@@ -314,7 +315,7 @@ fn favorite_notification_log<'a>(
 
     let mut domain_asn_str = logged_notification.host.domain;
     if !asn.name.is_empty() {
-        domain_asn_str.push_str(&format!(" - {}", asn.name));
+        let _ = write!(domain_asn_str, " - {}", asn.name);
     }
 
     let row_flag_details = Row::new()

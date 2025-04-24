@@ -98,6 +98,8 @@ impl ExtraStyles {
     /// Slice of all implemented custom styles
     pub const fn all_styles() -> &'static [Self] {
         &[
+            ExtraStyles::A11yDark,
+            ExtraStyles::A11yLight,
             ExtraStyles::DraculaDark,
             ExtraStyles::DraculaLight,
             ExtraStyles::GruvboxDark,
@@ -106,8 +108,6 @@ impl ExtraStyles {
             ExtraStyles::NordLight,
             ExtraStyles::SolarizedDark,
             ExtraStyles::SolarizedLight,
-            ExtraStyles::A11yDark,
-            ExtraStyles::A11yLight,
         ]
     }
 }
@@ -115,16 +115,11 @@ impl ExtraStyles {
 impl fmt::Display for ExtraStyles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            ExtraStyles::DraculaLight => write!(f, "Dracula (Day)"),
-            ExtraStyles::DraculaDark => write!(f, "Dracula (Night)"),
-            ExtraStyles::GruvboxDark => write!(f, "Gruvbox (Night)"),
-            ExtraStyles::GruvboxLight => write!(f, "Gruvbox (Day)"),
-            ExtraStyles::NordLight => write!(f, "Nord (Day)"),
-            ExtraStyles::NordDark => write!(f, "Nord (Night)"),
-            ExtraStyles::SolarizedLight => write!(f, "Solarized (Day)"),
-            ExtraStyles::SolarizedDark => write!(f, "Solarized (Night)"),
-            ExtraStyles::A11yLight => write!(f, "A11y (Day)"),
-            ExtraStyles::A11yDark => write!(f, "A11y (Night)"),
+            ExtraStyles::DraculaLight | ExtraStyles::DraculaDark => write!(f, "Dracula"),
+            ExtraStyles::GruvboxDark | ExtraStyles::GruvboxLight => write!(f, "Gruvbox"),
+            ExtraStyles::NordLight | ExtraStyles::NordDark => write!(f, "Nord"),
+            ExtraStyles::SolarizedLight | ExtraStyles::SolarizedDark => write!(f, "Solarized"),
+            ExtraStyles::A11yLight | ExtraStyles::A11yDark => write!(f, "A11y"),
             // Custom style names aren't used anywhere so this shouldn't be reached
             ExtraStyles::CustomToml(_) => unreachable!(),
         }

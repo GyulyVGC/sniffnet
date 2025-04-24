@@ -1,13 +1,13 @@
 use std::fmt;
 
-use iced::widget::svg::Handle;
 use iced::widget::Svg;
+use iced::widget::svg::Handle;
 use serde::{Deserialize, Serialize};
 
-use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, UA, UZ, VN,
-};
 use crate::StyleType;
+use crate::countries::flags_pictures::{
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA, UZ, VN,
+};
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]
@@ -28,6 +28,9 @@ pub enum Language {
     UK,
     /// Simplified Chinese
     ZH,
+    /// Traditional Chinese
+    #[allow(non_camel_case_types)]
+    ZH_TW,
     /// Romanian
     RO,
     /// Korean
@@ -61,7 +64,7 @@ impl Default for Language {
 }
 
 impl Language {
-    pub const ALL: [Language; 19] = [
+    pub const ALL: [Language; 20] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -81,11 +84,13 @@ impl Language {
         Language::UZ,
         Language::VI,
         Language::ZH,
+        Language::ZH_TW,
     ];
 
     pub fn get_flag<'a>(self) -> Svg<'a, StyleType> {
         Svg::new(Handle::from_memory(Vec::from(match self {
             Language::ZH => CN,
+            Language::ZH_TW => TW,
             Language::DE => DE,
             Language::ES => ES,
             Language::FR => FR,
@@ -124,6 +129,7 @@ impl Language {
                 | Language::SV
                 | Language::VI
                 | Language::ZH
+                | Language::ZH_TW
                 | Language::KO
                 | Language::TR
                 | Language::PT
@@ -143,6 +149,7 @@ impl fmt::Display for Language {
             Language::DE => "Deutsch",
             Language::UK => "Українська",
             Language::ZH => "简体中文",
+            Language::ZH_TW => "繁體中文",
             Language::RO => "Română",
             Language::KO => "한국어",
             Language::TR => "Türkçe",
