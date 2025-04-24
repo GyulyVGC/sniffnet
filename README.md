@@ -35,7 +35,6 @@ Translated in:<br>
 </picture>
 </p>
 
-
 ## _Support Sniffnet's development_ 💖
 
 <i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
@@ -55,7 +54,6 @@ Do you want to help the project in an alternative way? You can also head to the 
 <a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
 </p>
-
 
 ## Download
 
@@ -83,7 +81,6 @@ cargo install sniffnet --locked
 ```
 
 </details>
-
 
 <details>
 
@@ -118,6 +115,7 @@ brew install sniffnet
 ```
 
   Alternatively, you can try it in a shell with:
+
   ```sh
 nix-shell -p sniffnet
 ```
@@ -171,6 +169,103 @@ tce-load -wi sniffnet
 
 </details>
 
+<details>
+
+  <summary>Using Docker</summary>
+
+## Docker
+
+Sniffnet can be run in a Docker container. This is especially useful for quickly testing the application without installing all dependencies directly on your system.
+
+### Pull from GitHub Container Registry
+
+The easiest way to get started is by pulling the pre-built image from GitHub Container Registry:
+
+```sh
+# Pull the latest version
+docker pull ghcr.io/gyulyvgc/sniffnet:latest
+
+# Or pull a specific version
+docker pull ghcr.io/gyulyvgc/sniffnet:1.2.3  # Replace with actual version
+```
+
+### Running the Docker container
+
+To run Sniffnet in a Docker container on Linux, you need to grant the appropriate network permissions and configure display access:
+
+#### For Wayland
+
+```sh
+docker run -it \
+  --net=host \
+  -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:/tmp/$WAYLAND_DISPLAY \
+  -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY \
+  -e XDG_RUNTIME_DIR=/tmp \
+  -e RUST_BACKTRACE=full \
+  -e ICED_BACKEND=tiny-skia \
+  --cap-add=NET_ADMIN \
+  --cap-add=NET_RAW \
+  ghcr.io/gyulyvgc/sniffnet:latest
+```
+
+#### For X11
+
+```sh
+docker run -it \
+  --net=host \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -e RUST_BACKTRACE=full \
+  -e ICED_BACKEND=tiny-skia \
+  --cap-add=NET_ADMIN \
+  --cap-add=NET_RAW \
+  ghcr.io/gyulyvgc/sniffnet:latest
+```
+
+> [!NOTE]
+>
+> - The `--net=host` flag is required for Sniffnet to access your network interfaces.
+> - `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` are needed for packet capture capabilities.
+> - If you experience rendering issues, the `ICED_BACKEND=tiny-skia` environment variable switches to the software renderer.
+
+### Building your own Docker image
+
+If you prefer to build the Docker image yourself:
+
+```sh
+# Clone the repository
+git clone https://github.com/GyulyVGC/sniffnet.git
+cd sniffnet
+
+# Build the Docker image
+docker build -t sniffnet .
+
+# Run with the same parameters as above, but using your local image
+docker run -it --net=host [...other parameters] sniffnet
+```
+
+### Troubleshooting Docker setup
+
+If you encounter issues:
+
+1. Make sure you have the necessary permissions to run Docker commands (or use `sudo`)
+2. For GUI issues, ensure your host display server allows connections from Docker
+3. If you're using SELinux, you might need to adjust policies or temporarily set it to permissive mode
+
+For X11, you may need to allow Docker to connect to your X server:
+
+```sh
+xhost +local:docker
+```
+
+Remember to revert this change when done:
+
+```sh
+xhost -local:docker
+```
+
+</details>
+
 ## Features
 
 - 💻 choose a **network adapter** of your PC to inspect
@@ -212,7 +307,7 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 
 Most of the errors that may arise are likely due to your system missing dependencies
 required to correctly analyze a network adapter. <br>
-Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) 
+Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies)
 for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems
@@ -227,10 +322,9 @@ a CPU-only software renderer that should work properly on every environment:
 ICED_BACKEND=tiny-skia
 ```
 
-### ***In any case, don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!***
+### _**In any case, don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!**_
 
 </details>
-
 
 ## Acknowledgements
 
@@ -238,7 +332,6 @@ ICED_BACKEND=tiny-skia
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
-
 
 ## Stay in the loop
 
