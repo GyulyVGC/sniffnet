@@ -322,7 +322,7 @@ a CPU-only software renderer that should work properly on every environment:
 ICED_BACKEND=tiny-skia
 ```
 
-### _**In any case, don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!**_
+### ***In any case, don't hesitate to [open an issue](https://github.com/GyulyVGC/sniffnet/issues/new/choose), and I will do my best to help you!***
 
 </details>
 

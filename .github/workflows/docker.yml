@@ -7,10 +7,16 @@ jobs:
   docker:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: build
-  steps:
+    steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Extract version from Cargo.toml
+      id: cargo-version
+      run: |
+        VERSION=$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -33,4 +39,5 @@ jobs:
         push: true
         tags: |
           ghcr.io/${{ github.repository }}:latest
+          ghcr.io/${{ github.repository }}:${{ env.VERSION }}
           ghcr.io/${{ github.repository }}:${{ github.sha }}
