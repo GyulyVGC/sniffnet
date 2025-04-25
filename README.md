@@ -264,6 +264,26 @@ Remember to revert this change when done:
 xhost -local:docker
 ```
 
+#### For ARM64/aarch64 systems (like Apple Silicon Macs or Raspberry Pi)
+
+When running on ARM64 architecture, you may encounter X11 library errors such as:
+
+- `OsError XNotSupported libraryopenerror libX11-xcb.so.1 cannot open shared object file no such file or directory`
+- `libxkbcommon-x11.so could not be loaded`
+
+To resolve these issues, mount the host system's ARM64 libraries into the container:
+
+```sh
+sudo docker run -d \
+  --net=host \
+  --cap-add=NET_ADMIN \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v $HOME/.Xauthority:/root/.Xauthority \
+  -v /lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu \
+  -e DISPLAY=$DISPLAY \
+  --name sniffnet \
+  ghcr.io/gyulyvgc/sniffnet:latest
+
 </details>
 
 ## Features
