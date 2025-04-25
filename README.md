@@ -283,6 +283,7 @@ sudo docker run -d \
   -e DISPLAY=$DISPLAY \
   --name sniffnet \
   ghcr.io/gyulyvgc/sniffnet:latest
+```
 
 </details>
 
