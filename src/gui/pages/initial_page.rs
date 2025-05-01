@@ -26,6 +26,7 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::port_collection::PortCollection;
@@ -347,11 +348,17 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                         Button::new(Text::new(description).font(font))
                             .padding([20, 30])
                             .width(Length::Fill)
-                            .class(if name == sniffer.device.name {
-                                ButtonType::BorderedRoundSelected
-                            } else {
-                                ButtonType::BorderedRound
-                            })
+                            .class(
+                                if let CaptureSource::Device(device) = &sniffer.capture_source {
+                                    if name == device.name {
+                                        ButtonType::BorderedRoundSelected
+                                    } else {
+                                        ButtonType::BorderedRound
+                                    }
+                                } else {
+                                    ButtonType::BorderedRound
+                                },
+                            )
                             .on_press(Message::AdapterSelection(name)),
                     )
                 },
