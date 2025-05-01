@@ -1,4 +1,4 @@
-//! Remote implemention of [`serde::Deserialize`] and [`serde::Serialize`] for [`iced::Color`].
+//! Remote implementation of [`serde::Deserialize`] and [`serde::Serialize`] for [`iced::Color`].
 //!
 //! This implementation deserializes hexadecimal RGB(A) as string to float RGB(A) and back.
 //! NOTE: The alpha channel is optional and defaults to #ff or 1.0.
@@ -9,8 +9,8 @@ use std::hash::{Hash, Hasher};
 
 use iced::Color;
 use serde::{
-    de::{Error as DeErrorTrait, Unexpected},
     Deserialize, Deserializer, Serializer,
+    de::{Error as DeErrorTrait, Unexpected},
 };
 
 // #aabbcc is seven bytes long
@@ -39,7 +39,7 @@ where
             })?
             // Iterating over bytes is safe because hex is ASCII.
             // If the hex is not ASCII or invalid hex, then the iterator will short circuit and fail on `from_str_radix`
-            // TODO: This can be cleaned up when `iter_array_chunks` is stablized (https://github.com/rust-lang/rust/issues/100450)
+            // TODO: This can be cleaned up when `iter_array_chunks` is stabilized (https://github.com/rust-lang/rust/issues/100450)
             .bytes()
             .step_by(2) // Step by every first hex char of the two char sequence
             .zip(hex.bytes().skip(2).step_by(2)) // Step by every second hex char
@@ -109,7 +109,7 @@ where
 mod tests {
     use iced::Color;
     use serde::{Deserialize, Serialize};
-    use serde_test::{assert_de_tokens_error, assert_tokens, Token};
+    use serde_test::{Token, assert_de_tokens_error, assert_tokens};
 
     use super::{deserialize_color, serialize_color};
 

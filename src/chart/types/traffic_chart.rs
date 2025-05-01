@@ -3,19 +3,22 @@
 use std::cmp::min;
 use std::ops::Range;
 
-use iced::widget::Container;
 use iced::Element;
+use iced::widget::Container;
 use plotters::prelude::*;
+use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::Spline;
+use splines::{Interpolation, Key, Spline};
 
-use crate::gui::app::FONT_FAMILY_NAME;
+use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
-use crate::{ByteMultiple, ChartType, Language, StyleType};
+use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::formatted_strings::get_formatted_num_seconds;
+use crate::{ByteMultiple, ChartType, Language, StyleType, location};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -118,7 +121,7 @@ impl TrafficChart {
         min - gap..max + gap
     }
 
-    fn font(&self, size: f64) -> TextStyle<'static> {
+    fn font<'a>(&self, size: f64) -> TextStyle<'a> {
         (FONT_FAMILY_NAME, size)
             .into_font()
             .style(self.style.get_font_weight())
@@ -181,6 +184,8 @@ impl Chart<Message> for TrafficChart {
         self.set_margins_and_label_areas(&mut chart_builder);
 
         let x_axis_range = self.x_axis_range();
+        let x_axis_start = x_axis_range.start;
+        let x_axis_end = x_axis_range.end;
         let y_axis_range = self.y_axis_range();
 
         let x_labels = if self.ticks == 1 || self.thumbnail {
@@ -195,14 +200,17 @@ impl Chart<Message> for TrafficChart {
             1 + (y_axis_range.end - y_axis_range.start) as usize
         };
 
-        let mut chart = chart_builder
+        let Ok(mut chart) = chart_builder
             .build_cartesian_2d(x_axis_range, y_axis_range)
-            .expect("Error drawing chart");
+            .log_err(location!())
+        else {
+            return;
+        };
 
         let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
 
         // chart mesh
-        chart
+        let _ = chart
             .configure_mesh()
             .axis_style(buttons_color)
             .bold_line_style(buttons_color.mix(0.3))
@@ -217,32 +225,43 @@ impl Chart<Message> for TrafficChart {
                 &|bytes| ByteMultiple::formatted_string(bytes.abs() as u128)
             })
             .x_labels(min(6, x_labels))
-            .x_label_formatter(&std::string::ToString::to_string)
+            .x_label_formatter(
+                #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                &|seconds| get_formatted_num_seconds(seconds.abs() as u128),
+            )
             .draw()
-            .unwrap();
+            .log_err(location!());
 
         // draw incoming and outgoing series
         for direction in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
             let area_series = self.area_series(direction);
             let label = self.series_label(direction);
             let legend_style = self.series_color(direction).filled();
-            chart
-                .draw_series(area_series)
-                .expect("Error drawing graph")
+            let Ok(data_series) = chart.draw_series(area_series).log_err(location!()) else {
+                return;
+            };
+            data_series
                 .label(label)
                 .legend(move |(x, y)| Rectangle::new([(x, y - 5), (x + 25, y + 5)], legend_style));
         }
+        // draw x axis to hide zeroed values
+        let _ = chart
+            .draw_series(LineSeries::new(
+                [(x_axis_start, 0.0), (x_axis_end, 0.0)],
+                ShapeStyle::from(&buttons_color).stroke_width(CHARTS_LINE_BORDER),
+            ))
+            .log_err(location!());
 
         // chart legend
         if !self.thumbnail {
-            chart
+            let _ = chart
                 .configure_series_labels()
                 .position(SeriesLabelPosition::UpperRight)
                 .background_style(buttons_color.mix(0.6))
                 .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
                 .label_font(self.font(13.5))
                 .draw()
-                .expect("Error drawing graph");
+                .log_err(location!());
         }
     }
 }
@@ -251,8 +270,14 @@ const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     let mut ret_val = Vec::new();
     let len = spline.len();
-    let first_x = spline.get(0).unwrap().t;
-    let last_x = spline.get(len - 1).unwrap().t;
+    let first_x = spline
+        .get(0)
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
+    let last_x = spline
+        .get(len - 1)
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
     #[allow(clippy::cast_precision_loss)]
     let delta = (last_x - first_x) / (PTS as f32 - 1.0);
     for i in 0..PTS {
@@ -268,7 +293,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::types::traffic_chart::{sample_spline, PTS};
+    use crate::chart::types::traffic_chart::{PTS, sample_spline};
 
     #[test]
     fn test_spline_samples() {

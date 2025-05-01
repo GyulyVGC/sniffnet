@@ -1,18 +1,17 @@
 use std::cmp::min;
 use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
-use iced::alignment::Horizontal;
-use iced::widget::{lazy, vertical_space, Column, Container, Row, Rule, Space, Text};
+use iced::widget::{Column, Container, Row, Rule, Space, Text, lazy, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::chart_type::ChartType;
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::host::{Host, ThumbnailHost};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -38,7 +37,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .push(Space::with_height(Length::FillPortion(2))),
         )
         .width(Length::Fill)
-        .align_x(Horizontal::Center);
+        .align_x(Alignment::Center);
     }
 
     let info_traffic = sniffer.info_traffic.clone();
@@ -48,7 +47,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         Row::new()
             .padding([5, 0])
             .height(Length::Fill)
-            .align_items(Alignment::Start)
+            .align_y(Alignment::Start)
             .push(host_col(&info_traffic, chart_type, font))
             .push(Rule::vertical(10))
             .push(service_col(&info_traffic, chart_type, font))
@@ -61,11 +60,11 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(content)
 }
 
-fn host_col(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+fn host_col<'a>(
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
         .spacing(3)
@@ -89,7 +88,7 @@ fn host_col(
 
         let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true);
         let host_row = Row::new()
-            .align_items(Alignment::Center)
+            .align_y(Alignment::Center)
             .spacing(5)
             .push(flag)
             .push(Text::new(text).font(font).size(FONT_SIZE_FOOTER));
@@ -103,11 +102,11 @@ fn host_col(
     host_col
 }
 
-fn service_col(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+fn service_col<'a>(
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     font: Font,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
     let services = get_service_entries(info_traffic, chart_type, SortType::Neutral);
     let n_entry = min(services.len(), MAX_ENTRIES);
@@ -156,7 +155,7 @@ fn clip_text(text: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::thumbnail_page::{
-        clip_text, host_text, MAX_CHARS_HOST, MAX_CHARS_SERVICE,
+        MAX_CHARS_HOST, MAX_CHARS_SERVICE, clip_text, host_text,
     };
     use crate::networking::types::asn::Asn;
     use crate::networking::types::host::Host;

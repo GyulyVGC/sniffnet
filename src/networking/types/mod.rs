@@ -1,11 +1,14 @@
 pub mod address_port_pair;
+pub mod arp_type;
 pub mod asn;
+pub mod bogon;
 pub mod byte_multiple;
 pub mod capture_context;
 pub mod data_info;
 pub mod data_info_host;
 pub mod filters;
 pub mod host;
+pub mod host_data_states;
 pub mod icmp_type;
 pub mod info_address_port_pair;
 pub mod info_traffic;

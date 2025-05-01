@@ -1,7 +1,7 @@
 use iced::{Color, Degrees, Gradient};
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::types::palette::{mix_colors, Palette};
+use crate::gui::styles::types::palette::{Palette, mix_colors};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Default, Serialize, Deserialize)]
 pub enum GradientType {

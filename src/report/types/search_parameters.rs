@@ -182,9 +182,21 @@ impl FilterInputType {
             }
             FilterInputType::Proto => key.protocol.to_string(),
             FilterInputType::Service => value.service.to_string(),
-            FilterInputType::Country => r_dns_host.unwrap().1.country.to_string(),
-            FilterInputType::Domain => r_dns_host.unwrap().0.to_string(),
-            FilterInputType::AsName => r_dns_host.unwrap().1.asn.name.to_string(),
+            FilterInputType::Country => r_dns_host
+                .unwrap_or(&(String::new(), Host::default()))
+                .1
+                .country
+                .to_string(),
+            FilterInputType::Domain => r_dns_host
+                .unwrap_or(&(String::new(), Host::default()))
+                .0
+                .to_string(),
+            FilterInputType::AsName => r_dns_host
+                .unwrap_or(&(String::new(), Host::default()))
+                .1
+                .asn
+                .name
+                .to_string(),
         }
     }
 

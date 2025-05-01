@@ -1,5 +1,0 @@
-#!/bin/sh
-
-set -e
-
-setcap '' /usr/bin/sniffnet

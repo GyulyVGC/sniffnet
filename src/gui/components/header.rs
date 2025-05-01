@@ -1,26 +1,25 @@
 //! GUI upper header
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, horizontal_space, Container, Row, Space, Text, Tooltip};
+use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Font, Length};
 
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
-use crate::{Language, StyleType, SNIFFNET_TITLECASE};
+use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 
-pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
+pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
     let ConfigSettings {
         style,
@@ -47,15 +46,15 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
 
     let logo = Icon::Sniffnet
         .to_text()
-        .vertical_alignment(Vertical::Center)
+        .align_y(Alignment::Center)
         .height(Length::Fill)
-        .line_height(LineHeight::Relative(0.8))
-        .size(90);
+        .line_height(LineHeight::Relative(0.7))
+        .size(80);
 
     Container::new(
         Row::new()
             .padding([0, 20])
-            .align_items(Alignment::Center)
+            .align_y(Alignment::Center)
             .push(if is_running {
                 Container::new(get_button_reset(font, language))
             } else {
@@ -74,18 +73,18 @@ pub fn header(sniffer: &Sniffer) -> Container<'static, Message, StyleType> {
             .push(horizontal_space())
             .push(get_button_settings(font, language, last_opened_setting)),
     )
-    .height(80)
-    .align_y(Vertical::Center)
-    .style(ContainerType::Gradient(color_gradient))
+    .height(70)
+    .align_y(Alignment::Center)
+    .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message, StyleType> {
+fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::ArrowBack
             .to_text()
             .size(20)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding(10)
@@ -99,20 +98,20 @@ fn get_button_reset(font: Font, language: Language) -> Tooltip<'static, Message,
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
-pub fn get_button_settings(
+pub fn get_button_settings<'a>(
     font: Font,
     language: Language,
     open_overlay: SettingsPage,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Settings
             .to_text()
             .size(20)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
     )
     .padding(0)
     .height(40)
@@ -125,14 +124,14 @@ pub fn get_button_settings(
         Position::Left,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
-pub fn get_button_minimize(
+pub fn get_button_minimize<'a>(
     font: Font,
     language: Language,
     thumbnail: bool,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let size = if thumbnail { 20 } else { 24 };
     let button_size = if thumbnail { 30 } else { 40 };
     let icon = if thumbnail {
@@ -154,30 +153,30 @@ pub fn get_button_minimize(
     let content = button(
         icon.to_text()
             .size(size)
-            .horizontal_alignment(Horizontal::Center)
-            .vertical_alignment(Vertical::Center),
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
     )
     .padding(0)
     .height(button_size)
     .width(button_size)
-    .style(ButtonType::Thumbnail)
+    .class(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail(false));
 
     Tooltip::new(content, Text::new(tooltip).font(font), Position::Right)
         .gap(0)
-        .style(tooltip_style)
+        .class(tooltip_style)
 }
 
-fn thumbnail_header(
+fn thumbnail_header<'a>(
     font: Font,
     font_headers: Font,
     language: Language,
     color_gradient: GradientType,
     unread_notifications: usize,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
-            .align_items(Alignment::Center)
+            .align_y(Alignment::Center)
             .push(horizontal_space())
             .push(Space::with_width(80))
             .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
@@ -187,15 +186,15 @@ fn thumbnail_header(
             .push(if unread_notifications > 0 {
                 Container::new(
                     notifications_badge(font, unread_notifications)
-                        .style(ContainerType::HighlightedOnHeader),
+                        .class(ContainerType::HighlightedOnHeader),
                 )
                 .width(40)
-                .align_x(Horizontal::Center)
+                .align_x(Alignment::Center)
             } else {
                 Container::new(Space::with_width(40))
             }),
     )
     .height(30)
-    .align_y(Vertical::Center)
-    .style(ContainerType::Gradient(color_gradient))
+    .align_y(Alignment::Center)
+    .class(ContainerType::Gradient(color_gradient))
 }

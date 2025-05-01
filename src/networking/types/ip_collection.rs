@@ -1,11 +1,11 @@
-use std::net::IpAddr;
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub(crate) struct AddressCollection {
-    pub(crate) ips: Vec<IpAddr>,
-    pub(crate) ranges: Vec<RangeInclusive<IpAddr>>,
+    ips: Vec<IpAddr>,
+    ranges: Vec<RangeInclusive<IpAddr>>,
 }
 
 impl AddressCollection {
@@ -34,17 +34,17 @@ impl AddressCollection {
                     (subparts.next().unwrap_or(""), subparts.next().unwrap_or(""));
                 let lower_ip_res = IpAddr::from_str(lower_str);
                 let upper_ip_res = IpAddr::from_str(upper_str);
-                if lower_ip_res.is_ok() && upper_ip_res.is_ok() {
-                    let lower_ip = lower_ip_res.unwrap();
-                    let upper_ip = upper_ip_res.unwrap();
-                    let range = RangeInclusive::new(lower_ip, upper_ip);
-                    if range.is_empty() || lower_ip.is_ipv4() != upper_ip.is_ipv4() {
-                        return None;
-                    }
-                    ranges.push(range);
-                } else {
+                let Ok(lower_ip) = lower_ip_res else {
+                    return None;
+                };
+                let Ok(upper_ip) = upper_ip_res else {
+                    return None;
+                };
+                let range = RangeInclusive::new(lower_ip, upper_ip);
+                if range.is_empty() || lower_ip.is_ipv4() != upper_ip.is_ipv4() {
                     return None;
                 }
+                ranges.push(range);
             } else {
                 // individual IP
                 if let Ok(ip) = IpAddr::from_str(object) {
@@ -74,12 +74,15 @@ impl Default for AddressCollection {
             ips: vec![],
             ranges: vec![
                 RangeInclusive::new(
-                    IpAddr::from_str("0.0.0.0").unwrap(),
-                    IpAddr::from_str("255.255.255.255").unwrap(),
+                    IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+                    IpAddr::from([255, 255, 255, 255]),
                 ),
                 RangeInclusive::new(
-                    IpAddr::from_str("::").unwrap(),
-                    IpAddr::from_str("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").unwrap(),
+                    IpAddr::V6(Ipv6Addr::UNSPECIFIED),
+                    IpAddr::from([
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                        255,
+                    ]),
                 ),
             ],
         }
@@ -101,13 +104,19 @@ mod tests {
         assert!(collection.contains(&IpAddr::from_str("0.0.0.0").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("255.255.255.255").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("192.168.1.1").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("0000:0000:0000:0000:0000:0000:0000:0000").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").unwrap()));
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("0000:0000:0000:0000:0000:0000:0000:0000").unwrap())
+        );
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").unwrap())
+        );
         assert!(collection.contains(&IpAddr::from_str("88::02").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:eeee").unwrap()));
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:eeee").unwrap())
+        );
     }
 
     #[test]
@@ -275,22 +284,36 @@ mod tests {
     fn test_ip_collection_contains_ipv6() {
         let collection =
                 AddressCollection::new( "2001:db8:1234:0000:0000:0000:0000:0000-2001:db8:1234:ffff:ffff:ffff:ffff:ffff,daa::aad,caa::aac").unwrap();
-        assert!(collection
-            .contains(&IpAddr::from_str("2001:db8:1234:0000:0000:0000:0000:0000").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:ffff").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:eeee").unwrap()));
-        assert!(collection
-            .contains(&IpAddr::from_str("2001:db8:1234:aaaa:ffff:ffff:ffff:eeee").unwrap()));
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("2001:db8:1234:0000:0000:0000:0000:0000").unwrap())
+        );
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:ffff").unwrap())
+        );
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("2001:db8:1234:ffff:ffff:ffff:ffff:eeee").unwrap())
+        );
+        assert!(
+            collection
+                .contains(&IpAddr::from_str("2001:db8:1234:aaaa:ffff:ffff:ffff:eeee").unwrap())
+        );
         assert!(collection.contains(&IpAddr::from_str("daa::aad").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("caa::aac").unwrap()));
-        assert!(!collection
-            .contains(&IpAddr::from_str("2000:db8:1234:0000:0000:0000:0000:0000").unwrap()));
-        assert!(!collection
-            .contains(&IpAddr::from_str("2001:db8:1235:ffff:ffff:ffff:ffff:ffff").unwrap()));
-        assert!(!collection
-            .contains(&IpAddr::from_str("2001:eb8:1234:ffff:ffff:ffff:ffff:eeee").unwrap()));
+        assert!(
+            !collection
+                .contains(&IpAddr::from_str("2000:db8:1234:0000:0000:0000:0000:0000").unwrap())
+        );
+        assert!(
+            !collection
+                .contains(&IpAddr::from_str("2001:db8:1235:ffff:ffff:ffff:ffff:ffff").unwrap())
+        );
+        assert!(
+            !collection
+                .contains(&IpAddr::from_str("2001:eb8:1234:ffff:ffff:ffff:ffff:eeee").unwrap())
+        );
         assert!(!collection.contains(&IpAddr::from_str("da::aad").unwrap()));
         assert!(!collection.contains(&IpAddr::from_str("caa::aab").unwrap()));
 

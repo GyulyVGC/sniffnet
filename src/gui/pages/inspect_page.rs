@@ -1,18 +1,20 @@
 use std::cmp::min;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, lazy};
 use iced::widget::{
-    button, horizontal_space, text_input, vertical_space, Rule, Space, Toggler, Tooltip,
+    ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
+    vertical_space,
 };
-use iced::widget::{lazy, Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Font, Length, Pixels};
+use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
+use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::overview_page::{get_bars, get_bars_length};
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -21,6 +23,9 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::byte_multiple::ByteMultiple;
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
@@ -46,7 +51,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .width(Length::Fill)
         .padding(10)
         .spacing(10)
-        .align_items(Alignment::Center);
+        .align_x(Alignment::Center);
 
     let mut tab_and_body = Column::new().height(Length::Fill);
 
@@ -75,7 +80,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let col_report = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .push(report_header_row(
             language,
             &sniffer.search,
@@ -88,36 +93,41 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     body = body
         .push(
-            Container::new(host_filters_col(&sniffer.search, font, language))
-                .padding(10)
-                .style(ContainerType::BorderedRound),
+            Container::new(host_filters_col(
+                &sniffer.search,
+                &sniffer.host_data_states.states,
+                font,
+                language,
+            ))
+            .padding(10)
+            .class(ContainerType::BorderedRound),
         )
         .push(
             Container::new(col_report)
-                .align_y(Vertical::Center)
-                .align_x(Horizontal::Center)
-                .padding([10, 7, 3, 7])
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center)
+                .padding(Padding::new(7.0).top(10).bottom(3))
                 .width(1042)
-                .style(ContainerType::BorderedRound),
+                .class(ContainerType::BorderedRound),
         );
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
+fn lazy_report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
-    let (search_results, results_number) = get_searched_entries(sniffer);
+    let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
 
     let mut ret_val = Column::new()
         .height(Length::Fill)
         .width(Length::Fill)
-        .align_items(Alignment::Start);
+        .align_x(Alignment::Start);
 
-    let mut scroll_report = Column::new().align_items(Alignment::Start);
+    let mut scroll_report = Column::new().align_x(Alignment::Start);
     let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
@@ -127,17 +137,25 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(
                     report_entry.0,
                 )))
-                .style(ButtonType::Neutral),
+                .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
         ret_val = ret_val
             .push(
-                Scrollable::new(scroll_report)
-                    .height(Length::Fill)
-                    .width(Length::Fill)
-                    .direction(Direction::Vertical(ScrollbarType::properties())),
+                Scrollable::with_direction(
+                    scroll_report,
+                    Direction::Vertical(ScrollbarType::properties()),
+                )
+                .height(Length::Fill)
+                .width(Length::Fill),
             )
+            .push(Rule::horizontal(5))
+            .push(get_agglomerates_row(
+                font,
+                agglomerate,
+                sniffer.traffic_chart.chart_type,
+            ))
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
                 font,
@@ -153,7 +171,7 @@ fn lazy_report(sniffer: &Sniffer) -> Column<'static, Message, StyleType> {
                 .width(Length::Fill)
                 .height(Length::Fill)
                 .padding(20)
-                .align_items(Alignment::Center)
+                .align_x(Alignment::Center)
                 .push(vertical_space())
                 .push(Icon::Funnel.to_text().size(60))
                 .push(Space::with_height(15))
@@ -170,13 +188,13 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
-) -> Row<'static, Message, StyleType> {
-    let mut ret_val = Row::new().padding([0, 2]).align_items(Alignment::Center);
+) -> Row<Message, StyleType> {
+    let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
             title_report_col_display(&report_col, language);
         let title_row = Row::new()
-            .align_items(Alignment::End)
+            .align_y(Alignment::End)
             .push(Text::new(title_display).font(font))
             .push(
                 Text::new(title_small_display)
@@ -193,10 +211,10 @@ fn report_header_row(
             Text::new(tooltip_val).font(font),
             Position::FollowCursor,
         )
-        .style(tooltip_style);
+        .class(tooltip_style);
 
         let mut col_header = Column::new()
-            .align_items(Alignment::Center)
+            .align_x(Alignment::Center)
             .width(report_col.get_width())
             .height(56)
             .push(title_tooltip);
@@ -208,7 +226,7 @@ fn report_header_row(
                     font,
                 ))
                 .height(Length::Fill)
-                .align_y(Vertical::Center),
+                .align_y(Alignment::Center),
             );
         } else {
             col_header = col_header.push(sort_arrows(sort_type, &report_col));
@@ -253,38 +271,38 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows(
+fn sort_arrows<'a>(
     active_sort_type: ReportSortType,
     report_col: &ReportCol,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
                 .icon(report_col)
-                .horizontal_alignment(Horizontal::Center)
-                .vertical_alignment(Vertical::Center),
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
         )
-        .style(active_sort_type.button_type(report_col))
+        .class(active_sort_type.button_type(report_col))
         .on_press(Message::ReportSortSelection(
             active_sort_type.next_sort(report_col),
         )),
     )
-    .align_y(Vertical::Center)
+    .align_y(Alignment::Center)
     .height(Length::Fill)
 }
 
-fn row_report_entry(
+fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     font: Font,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
     } else {
         TextType::Incoming
     };
 
-    let mut ret_val = Row::new().align_items(Alignment::Center);
+    let mut ret_val = Row::new().align_y(Alignment::Center);
 
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars(None);
@@ -297,26 +315,27 @@ fn row_report_entry(
                     [&col_value[..max_chars - 2], "…"].concat()
                 })
                 .font(font)
-                .style(text_type),
+                .class(text_type),
             )
-            .align_x(Horizontal::Center)
+            .align_x(Alignment::Center)
             .width(report_col.get_width()),
         );
     }
     ret_val
 }
 
-fn host_filters_col(
-    search_params: &SearchParameters,
+fn host_filters_col<'a>(
+    search_params: &'a SearchParameters,
+    host_states: &'a HostStates,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
+) -> Column<'a, Message, StyleType> {
     let search_params2 = search_params.clone();
 
-    let mut title_row = Row::new().spacing(10).align_items(Alignment::Center).push(
+    let mut title_row = Row::new().spacing(10).align_y(Alignment::Center).push(
         Text::new(filter_by_host_translation(language))
             .font(font)
-            .style(TextType::Subtitle)
+            .class(TextType::Subtitle)
             .size(FONT_SIZE_SUBTITLE),
     );
     if search_params.is_some_host_filter_active() {
@@ -326,79 +345,94 @@ fn host_filters_col(
         ));
     }
 
-    let input_country =
-        filter_input(FilterInputType::Country, search_params.clone(), font).width(95);
-    let input_domain =
-        filter_input(FilterInputType::Domain, search_params.clone(), font).width(190);
-    let input_as_name =
-        filter_input(FilterInputType::AsName, search_params.clone(), font).width(190);
+    let combobox_country = filter_combobox(
+        FilterInputType::Country,
+        &host_states.countries,
+        search_params.clone(),
+        font,
+    )
+    .width(95);
+
+    let combobox_domain = filter_combobox(
+        FilterInputType::Domain,
+        &host_states.domains,
+        search_params.clone(),
+        font,
+    )
+    .width(190);
+
+    let combobox_as_name = filter_combobox(
+        FilterInputType::AsName,
+        &host_states.asns,
+        search_params.clone(),
+        font,
+    )
+    .width(190);
 
     let container_country = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", country_translation(language))).font(font))
-        .push(input_country);
+        .push(combobox_country);
 
     let container_domain = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", domain_name_translation(language))).font(font))
-        .push(input_domain);
+        .push(combobox_domain);
 
     let container_as_name = Row::new()
         .spacing(5)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", administrative_entity_translation(language))).font(font))
-        .push(input_as_name);
+        .push(combobox_as_name);
 
     let col1 = Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .spacing(5)
         .push(
             Container::new(
-                Toggler::new(
-                    only_show_favorites_translation(language).to_owned(),
-                    search_params.only_favorites,
-                    move |toggled| {
+                Toggler::new(search_params.only_favorites)
+                    .label(only_show_favorites_translation(language).to_owned())
+                    .on_toggle(move |toggled| {
                         Message::Search(SearchParameters {
                             only_favorites: toggled,
                             ..search_params2.clone()
                         })
-                    },
-                )
-                .width(Length::Shrink)
-                .spacing(5)
-                .size(23)
-                .font(font),
+                    })
+                    .width(Length::Shrink)
+                    .spacing(5)
+                    .size(23)
+                    .font(font),
             )
             .padding([5, 0]),
         )
         .push(container_domain);
 
     let col2 = Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .spacing(5)
         .push(container_country)
         .push(container_as_name);
 
     Column::new()
-        .align_items(Alignment::Start)
+        .align_x(Alignment::Start)
         .push(title_row)
         .push(Space::with_height(10))
         .push(
             Row::new()
-                .align_items(Alignment::Center)
+                .align_y(Alignment::Center)
                 .spacing(30)
                 .push(col1)
                 .push(col2),
         )
 }
 
-fn filter_input(
+fn filter_input<'a>(
     filter_input_type: FilterInputType,
     search_params: SearchParameters,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params);
     let is_filter_active = !filter_value.is_empty();
 
@@ -412,7 +446,7 @@ fn filter_input(
         .size(FONT_SIZE_FOOTER)
         .font(font)
         .width(Length::Fill)
-        .style(if is_filter_active {
+        .class(if is_filter_active {
             TextInputType::Badge
         } else {
             TextInputType::Standard
@@ -428,10 +462,7 @@ fn filter_input(
         });
     }
 
-    let mut content = Row::new()
-        .spacing(5)
-        .align_items(Alignment::Center)
-        .push(input);
+    let mut content = Row::new().spacing(5).align_y(Alignment::Center).push(input);
 
     if is_filter_active {
         content = content.push(button_clear);
@@ -439,18 +470,76 @@ fn filter_input(
 
     Container::new(content)
         .padding(if is_filter_active {
-            [5, 5, 5, 10]
+            Padding::new(5.0).left(10)
         } else {
-            [5, 3, 5, 3]
+            Padding::new(5.0).right(3).left(3)
         })
-        .style(if is_filter_active {
+        .class(if is_filter_active {
             ContainerType::Badge
         } else {
             ContainerType::Standard
         })
 }
 
-fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType> {
+fn filter_combobox(
+    filter_input_type: FilterInputType,
+    combo_box_state: &combo_box::State<String>,
+    search_params: SearchParameters,
+    font: Font,
+) -> Container<Message, StyleType> {
+    let filter_value = filter_input_type.current_value(&search_params).to_string();
+    let is_filter_active = !filter_value.is_empty();
+
+    let button_clear = button_clear_filter(filter_input_type.clear_search(&search_params), font);
+
+    let update_fn =
+        move |new_value| Message::Search(filter_input_type.new_search(&search_params, new_value));
+
+    let mut combobox = ComboBox::new(combo_box_state, "", Some(&filter_value), update_fn.clone())
+        .on_input(update_fn)
+        .padding([2, 5])
+        .size(FONT_SIZE_FOOTER)
+        .font(font)
+        .width(Length::Fill)
+        .input_class(if is_filter_active {
+            TextInputType::Badge
+        } else {
+            TextInputType::Standard
+        });
+
+    if !is_filter_active {
+        combobox = combobox.icon(text_input::Icon {
+            font: ICONS,
+            code_point: Icon::Funnel.codepoint(),
+            size: Some(Pixels(12.0)),
+            spacing: 2.0,
+            side: Side::Left,
+        });
+    }
+
+    let mut content = Row::new()
+        .spacing(5)
+        .align_y(Alignment::Center)
+        .push(combobox);
+
+    if is_filter_active {
+        content = content.push(button_clear);
+    }
+
+    Container::new(content)
+        .padding(if is_filter_active {
+            Padding::new(5.0).left(10)
+        } else {
+            Padding::new(5.0).right(3).left(3)
+        })
+        .class(if is_filter_active {
+            ContainerType::Badge
+        } else {
+            ContainerType::Standard
+        })
+}
+
+fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType> {
     button(
         if increment {
             Icon::ArrowRight
@@ -459,8 +548,8 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType
         }
         .to_text()
         .size(8.0)
-        .horizontal_alignment(alignment::Horizontal::Center)
-        .vertical_alignment(alignment::Vertical::Center),
+        .align_x(alignment::Alignment::Center)
+        .align_y(alignment::Alignment::Center),
     )
     .padding(2)
     .height(20)
@@ -468,17 +557,48 @@ fn get_button_change_page(increment: bool) -> Button<'static, Message, StyleType
     .on_press(Message::UpdatePageNumber(increment))
 }
 
-fn get_change_page_row(
+fn get_agglomerates_row<'a>(
+    font: Font,
+    tot: DataInfo,
+    chart_type: ChartType,
+) -> Row<'a, Message, StyleType> {
+    let tot_packets = tot.tot_packets();
+    let tot_bytes = tot.tot_bytes();
+    let width = ReportCol::FILTER_COLUMNS_WIDTH;
+
+    let (in_length, out_length) = get_bars_length(width, chart_type, &tot, &tot);
+    let bars = get_bars(in_length, out_length);
+
+    let bytes_col = Column::new()
+        .align_x(Alignment::Center)
+        .width(ReportCol::Bytes.get_width())
+        .push(Text::new(ByteMultiple::formatted_string(tot_bytes)).font(font));
+
+    let packets_col = Column::new()
+        .align_x(Alignment::Center)
+        .width(ReportCol::Packets.get_width())
+        .push(Text::new(tot_packets.to_string()).font(font));
+
+    Row::new()
+        .padding([0, 2])
+        .height(40)
+        .align_y(Alignment::Center)
+        .push(bars)
+        .push(bytes_col)
+        .push(packets_col)
+}
+
+fn get_change_page_row<'a>(
     font: Font,
     language: Language,
     page_number: usize,
     start_entry_num: usize,
     end_entry_num: usize,
     results_number: usize,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     Row::new()
         .height(40)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(horizontal_space())
         .push(if page_number > 1 {
@@ -495,7 +615,7 @@ fn get_change_page_row(
             ))
             .font(font),
         )
-        .push(if page_number < (results_number + 20 - 1) / 20 {
+        .push(if page_number < results_number.div_ceil(20) {
             Container::new(get_button_change_page(true).width(25))
         } else {
             Container::new(Space::with_width(25))
@@ -503,15 +623,15 @@ fn get_change_page_row(
         .push(horizontal_space())
 }
 
-fn button_clear_filter(
+fn button_clear_filter<'a>(
     new_search_parameters: SearchParameters,
     font: Font,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     button(
         Text::new("×")
             .font(font)
-            .vertical_alignment(Vertical::Center)
-            .horizontal_alignment(Horizontal::Center)
+            .align_y(Alignment::Center)
+            .align_x(Alignment::Center)
             .size(15)
             .line_height(LineHeight::Relative(1.0)),
     )
@@ -530,7 +650,7 @@ mod tests {
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
         // check glyph len when adding new language...
-        assert_eq!(Language::ALL.len(), 19);
+        assert_eq!(Language::ALL.len(), 20);
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =

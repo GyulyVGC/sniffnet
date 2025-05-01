@@ -61,6 +61,17 @@ impl DataInfo {
         self.final_timestamp = Local::now();
     }
 
+    pub fn add_packets(&mut self, packets: u128, bytes: u128, traffic_direction: TrafficDirection) {
+        if traffic_direction.eq(&TrafficDirection::Outgoing) {
+            self.outgoing_packets += packets;
+            self.outgoing_bytes += bytes;
+        } else {
+            self.incoming_packets += packets;
+            self.incoming_bytes += bytes;
+        }
+        self.final_timestamp = Local::now();
+    }
+
     pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
         if traffic_direction.eq(&TrafficDirection::Outgoing) {
             Self {

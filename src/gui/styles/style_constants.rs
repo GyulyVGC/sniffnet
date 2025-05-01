@@ -3,7 +3,7 @@
 use iced::font::{Family, Stretch, Style, Weight};
 use iced::{Color, Font};
 
-use crate::gui::app::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
+use crate::gui::sniffer::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -223,3 +223,11 @@ pub const BORDER_WIDTH: f32 = 2.0;
 pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
+
+// red color for alerts
+pub const ALERT_RED_COLOR: Color = Color {
+    r: 0.8,
+    g: 0.15,
+    b: 0.15,
+    a: 1.0,
+};

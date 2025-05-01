@@ -9,30 +9,34 @@ use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
 use pcap::Packet;
 
-use crate::mmdb::types::mmdb_reader::MmdbReader;
+use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::CaptureContext;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
+use crate::networking::types::host::Host;
+use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::InfoTraffic;
+use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::{InfoTraffic, location};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
-    current_capture_id: &Arc<Mutex<usize>>,
+    current_capture_id: &Mutex<usize>,
     device: &MyDevice,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
-    country_mmdb_reader: &Arc<MmdbReader>,
-    asn_mmdb_reader: &Arc<MmdbReader>,
+    mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
+    host_data: &Arc<Mutex<HostData>>,
 ) {
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
@@ -45,7 +49,6 @@ pub fn parse_packets(
                 if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
-                continue;
             }
             Ok(packet) => {
                 if *current_capture_id.lock().unwrap() != capture_id {
@@ -55,6 +58,7 @@ pub fn parse_packets(
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
+                    let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
 
                     let key_option = analyze_headers(
@@ -62,13 +66,14 @@ pub fn parse_packets(
                         &mut mac_addresses,
                         &mut exchanged_bytes,
                         &mut icmp_type,
+                        &mut arp_type,
                         &mut packet_filters_fields,
                     );
-                    if key_option.is_none() {
-                        continue;
-                    }
 
-                    let key = key_option.unwrap();
+                    let Some(key) = key_option else {
+                        continue;
+                    };
+
                     let mut new_info = InfoAddressPortPair::default();
 
                     let passed_filters = filters.matches(&packet_filters_fields);
@@ -84,13 +89,12 @@ pub fn parse_packets(
                             device,
                             mac_addresses,
                             icmp_type,
+                            arp_type,
                             exchanged_bytes,
                         );
                     }
 
-                    let mut info_traffic = info_traffic_mutex
-                        .lock()
-                        .expect("Error acquiring mutex\n\r");
+                    let mut info_traffic = info_traffic_mutex.lock().unwrap();
                     //increment number of sniffed packets and bytes
                     info_traffic.all_packets += 1;
                     info_traffic.all_bytes += exchanged_bytes;
@@ -130,12 +134,12 @@ pub fn parse_packets(
                                 );
 
                                 // launch new thread to resolve host name
-                                let key2 = key.clone();
+                                let key2 = key;
                                 let info_traffic2 = info_traffic_mutex.clone();
                                 let device2 = device.clone();
-                                let country_db_reader_2 = country_mmdb_reader.clone();
-                                let asn_db_reader_2 = asn_mmdb_reader.clone();
-                                thread::Builder::new()
+                                let mmdb_readers_2 = mmdb_readers.clone();
+                                let host_data2 = host_data.clone();
+                                let _ = thread::Builder::new()
                                     .name("thread_reverse_dns_lookup".to_string())
                                     .spawn(move || {
                                         reverse_dns_lookup(
@@ -143,11 +147,11 @@ pub fn parse_packets(
                                             &key2,
                                             new_info.traffic_direction,
                                             &device2,
-                                            &country_db_reader_2,
-                                            &asn_db_reader_2,
+                                            &mmdb_readers_2,
+                                            &host_data2,
                                         );
                                     })
-                                    .unwrap();
+                                    .log_err(location!());
                             }
                             (true, false) => {
                                 // waiting for a previously requested rDNS resolution
@@ -168,7 +172,7 @@ pub fn parse_packets(
                                 let host = info_traffic
                                     .addresses_resolved
                                     .get(&address_to_lookup)
-                                    .unwrap()
+                                    .unwrap_or(&(String::new(), Host::default()))
                                     .1
                                     .clone();
                                 info_traffic.hosts.entry(host).and_modify(|data_info_host| {
@@ -238,7 +242,7 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
         let h = &packet[..4];
         let b = [h[0], h[1], h[2], h[3]];
         // check both big endian and little endian representations
-        // as some OS'es use native endianess and others use big endian
+        // as some OS'es use native endianness and others use big endian
         matches(u32::from_le_bytes(b)) || matches(u32::from_be_bytes(b))
     };
 

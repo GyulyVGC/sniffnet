@@ -3,19 +3,20 @@
 //! It contains elements to select network adapter and traffic filters.
 
 use std::collections::HashSet;
+use std::fmt::Write;
 
-use iced::alignment::{Horizontal, Vertical};
+use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    button, Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput,
-    Tooltip,
+    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
+    button,
 };
-use iced::Length::FillPortion;
-use iced::{alignment, Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding, alignment};
 use pcap::Device;
 
 use crate::gui::components::button::button_open_file;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -25,7 +26,6 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::message::Message;
-use crate::gui::types::sniffer::Sniffer;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::port_collection::PortCollection;
@@ -36,10 +36,11 @@ use crate::translations::translations::{
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
+use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType, location};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -72,7 +73,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             select_filters_translation(language)
                 .font(font)
-                .style(TextType::Title)
+                .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
         .push(
@@ -91,7 +92,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(
             Container::new(get_export_pcap_group(&sniffer.export_pcap, language, font))
                 .height(Length::Fill)
-                .align_y(Vertical::Top),
+                .align_y(Alignment::Start),
         )
         .push(
             Container::new(button_start(
@@ -102,8 +103,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             ))
             .width(Length::Fill)
             .height(Length::Fill)
-            .align_y(Vertical::Top)
-            .align_x(Horizontal::Center),
+            .align_y(Alignment::Start)
+            .align_x(Alignment::Center),
         );
 
     let body = Column::new().push(Space::with_height(5)).push(
@@ -120,21 +121,21 @@ fn col_ip_buttons(
     active_ip_filters: &HashSet<IpVersion>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+) -> Column<Message, StyleType> {
+    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
         let check_symbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .font(font),
             )
-            .width(90)
+            .width(80)
             .height(35)
-            .style(if is_active {
+            .class(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
                 ButtonType::BorderedRound
@@ -149,7 +150,7 @@ fn col_ip_buttons(
         .push(
             Text::new(ip_version_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(buttons_row)
@@ -159,21 +160,21 @@ fn col_protocol_buttons(
     active_protocol_filters: &HashSet<Protocol>,
     font: Font,
     language: Language,
-) -> Column<'static, Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding([0, 0, 0, 5]);
+) -> Column<Message, StyleType> {
+    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in Protocol::ALL {
         let is_active = active_protocol_filters.contains(&option);
         let check_symbol = if is_active { "✔" } else { "✘" };
         buttons_row = buttons_row.push(
             Button::new(
                 Text::new(format!("{option} {check_symbol}"))
-                    .horizontal_alignment(Horizontal::Center)
-                    .vertical_alignment(Vertical::Center)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .font(font),
             )
-            .width(90)
+            .width(80)
             .height(35)
-            .style(if is_active {
+            .class(if is_active {
                 ButtonType::BorderedRoundSelected
             } else {
                 ButtonType::BorderedRound
@@ -188,29 +189,25 @@ fn col_protocol_buttons(
         .push(
             Text::new(protocol_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(buttons_row)
 }
 
-fn col_address_input(
-    value: &str,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, StyleType> {
+fn col_address_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
         AddressCollection::new(value).is_none()
     };
-    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
         TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
             .padding([3, 5])
             .on_input(Message::AddressFilter)
             .font(font)
             .width(310)
-            .style(if is_error {
+            .class(if is_error {
                 TextInputType::Error
             } else {
                 TextInputType::Standard
@@ -223,29 +220,25 @@ fn col_address_input(
         .push(
             Text::new(address_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(input_row)
 }
 
-fn col_port_input(
-    value: &str,
-    font: Font,
-    language: Language,
-) -> Column<'static, Message, StyleType> {
+fn col_port_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
         PortCollection::new(value).is_none()
     };
-    let input_row = Row::new().padding([0, 0, 0, 5]).push(
+    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
         TextInput::new(PortCollection::PLACEHOLDER_STR, value)
             .padding([3, 5])
             .on_input(Message::PortFilter)
             .font(font)
             .width(180)
-            .style(if is_error {
+            .class(if is_error {
                 TextInputType::Error
             } else {
                 TextInputType::Standard
@@ -258,7 +251,7 @@ fn col_port_input(
         .push(
             Text::new(port_translation(language))
                 .font(font)
-                .style(TextType::Subtitle)
+                .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(input_row)
@@ -269,18 +262,18 @@ fn button_start(
     language: Language,
     color_gradient: GradientType,
     filters: &Filters,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<Message, StyleType> {
     let mut content = button(
         Icon::Rocket
             .to_text()
             .size(25)
-            .horizontal_alignment(alignment::Horizontal::Center)
-            .vertical_alignment(alignment::Vertical::Center),
+            .align_x(alignment::Alignment::Center)
+            .align_y(alignment::Alignment::Center),
     )
     .padding(10)
     .height(80)
     .width(160)
-    .style(ButtonType::Gradient(color_gradient));
+    .class(ButtonType::Gradient(color_gradient));
 
     let mut tooltip = start_translation(language).to_string();
     //tooltip.push_str(" [⏎]");
@@ -295,14 +288,14 @@ fn button_start(
 
     Tooltip::new(content, Text::new(tooltip).font(font), position)
         .gap(5)
-        .style(ContainerType::Tooltip)
+        .class(ContainerType::Tooltip)
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
 
     let mut dev_str_list = vec![];
-    for dev in Device::list().expect("Error retrieving device list\r\n") {
+    for dev in Device::list().log_err(location!()).unwrap_or_default() {
         let mut dev_str = String::new();
         let name = dev.name;
         match dev.desc {
@@ -311,7 +304,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                dev_str.push_str(&format!("{name}\n"));
+                let _ = writeln!(dev_str, "{name}");
                 dev_str.push_str(&description);
             }
         }
@@ -319,16 +312,16 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         match num_addresses {
             0 => {}
             1 => {
-                dev_str.push_str(&format!("\n{}:", address_translation(language)));
+                let _ = write!(dev_str, "\n{}:", address_translation(language));
             }
             _ => {
-                dev_str.push_str(&format!("\n{}:", addresses_translation(language)));
+                let _ = write!(dev_str, "\n{}:", addresses_translation(language));
             }
         }
 
         for addr in dev.addresses {
             let address_string = addr.addr.to_string();
-            dev_str.push_str(&format!("\n   {address_string}"));
+            let _ = write!(dev_str, "\n   {address_string}");
         }
         dev_str_list.push((name, dev_str));
     }
@@ -341,11 +334,11 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         .push(
             choose_adapters_translation(language)
                 .font(font)
-                .style(TextType::Title)
+                .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(
-            Scrollable::new(dev_str_list.iter().fold(
+        .push(Scrollable::with_direction(
+            dev_str_list.iter().fold(
                 Column::new().padding(13).spacing(5),
                 |scroll_adapters, adapter| {
                     let name = adapter.0.clone();
@@ -354,7 +347,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                         Button::new(Text::new(description).font(font))
                             .padding([20, 30])
                             .width(Length::Fill)
-                            .style(if name == sniffer.device.name {
+                            .class(if name == sniffer.device.name {
                                 ButtonType::BorderedRoundSelected
                             } else {
                                 ButtonType::BorderedRound
@@ -362,16 +355,16 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                             .on_press(Message::AdapterSelection(name)),
                     )
                 },
-            ))
-            .direction(Direction::Vertical(ScrollbarType::properties())),
-        )
+            ),
+            Direction::Vertical(ScrollbarType::properties()),
+        ))
 }
 
 fn get_export_pcap_group(
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
-) -> Container<'static, Message, StyleType> {
+) -> Container<Message, StyleType> {
     let enabled = export_pcap.enabled();
     let file_name = export_pcap.file_name();
     let directory = export_pcap.directory();
@@ -387,10 +380,10 @@ fn get_export_pcap_group(
     if enabled {
         let inner_col = Column::new()
             .spacing(10)
-            .padding([0, 0, 0, 45])
+            .padding(Padding::ZERO.left(45))
             .push(
                 Row::new()
-                    .align_items(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .spacing(5)
                     .push(Text::new(format!("{}:", file_name_translation(language))).font(font))
                     .push(
@@ -403,7 +396,7 @@ fn get_export_pcap_group(
             )
             .push(
                 Row::new()
-                    .align_items(Alignment::Center)
+                    .align_y(Alignment::Center)
                     .spacing(5)
                     .push(Text::new(format!("{}:", directory_translation(language))).font(font))
                     .push(Text::new(get_path_termination_string(directory, 25)).font(font))
@@ -420,11 +413,11 @@ fn get_export_pcap_group(
         Container::new(ret_val)
             .padding(10)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     } else {
         Container::new(ret_val)
             .padding(10)
             .width(Length::Fill)
-            .style(ContainerType::BorderedRound)
+            .class(ContainerType::BorderedRound)
     }
 }

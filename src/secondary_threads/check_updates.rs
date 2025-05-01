@@ -1,11 +1,11 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
 use serde::Deserialize;
 
-use crate::utils::formatted_strings::APP_VERSION;
 use crate::SNIFFNET_LOWERCASE;
+use crate::utils::formatted_strings::APP_VERSION;
 
 #[derive(Deserialize, Debug)]
 struct AppVersion {
@@ -14,7 +14,7 @@ struct AppVersion {
 
 /// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
-pub fn set_newer_release_status(newer_release_available: &Arc<Mutex<Option<bool>>>) {
+pub fn set_newer_release_status(newer_release_available: &Mutex<Option<bool>>) {
     let result = is_newer_release_available(6, 30);
     *newer_release_available.lock().unwrap() = result;
 }

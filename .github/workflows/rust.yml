@@ -58,25 +58,25 @@ jobs:
         run: cargo build --verbose
 
       - name: clippy
-        if:  matrix.os != 'windows' || github.event_name != 'pull_request'
+        if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo clippy -- -D warnings
 
       - name: test
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo test --verbose -- --nocapture
 
-      - name: Install cargo-llvm-cov
-        if: matrix.os == 'ubuntu'
-        uses: taiki-e/install-action@cargo-llvm-cov
-
-      - name: Generate code coverage
-        if: matrix.os == 'ubuntu'
-        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info --include-build-script --no-cfg-coverage
-
-      - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu'
-        uses: codecov/codecov-action@v4
-        with:
-          files: lcov.info
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
+#      - name: Install cargo-llvm-cov
+#        if: matrix.os == 'ubuntu'
+#        uses: taiki-e/install-action@cargo-llvm-cov
+#
+#      - name: Generate code coverage
+#        if: matrix.os == 'ubuntu'
+#        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info --include-build-script --no-cfg-coverage
+#
+#      - name: Upload coverage to Codecov
+#        if: matrix.os == 'ubuntu'
+#        uses: codecov/codecov-action@v5
+#        with:
+#          files: lcov.info
+#          fail_ci_if_error: false
+#          token: ${{ secrets.CODECOV_TOKEN }}

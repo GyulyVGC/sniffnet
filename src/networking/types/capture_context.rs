@@ -10,9 +10,13 @@ pub enum CaptureContext {
 }
 
 impl CaptureContext {
-    pub fn new(device: &MyDevice, pcap_path: &Option<String>) -> Self {
-        let cap_res = Capture::from_device(device.to_pcap_device())
-            .expect("Capture initialization error\n\r")
+    pub fn new(device: &MyDevice, pcap_path: Option<&String>) -> Self {
+        let inactive = match Capture::from_device(device.to_pcap_device()) {
+            Ok(c) => c,
+            Err(e) => return Self::Error(e.to_string()),
+        };
+
+        let cap_res = inactive
             .promisc(true)
             .snaplen(if pcap_path.is_some() {
                 i32::from(u16::MAX)
@@ -22,18 +26,16 @@ impl CaptureContext {
             .immediate_mode(true) //parse packets ASAP!
             .open();
 
-        if let Err(e) = &cap_res {
-            return Self::Error(e.to_string());
-        }
-
-        let cap = cap_res.unwrap();
+        let cap = match cap_res {
+            Ok(c) => c,
+            Err(e) => return Self::Error(e.to_string()),
+        };
 
         if let Some(path) = pcap_path {
             let savefile_res = cap.savefile(path);
-            if let Err(e) = savefile_res {
-                Self::Error(e.to_string())
-            } else {
-                Self::new_online_with_savefile(cap, savefile_res.unwrap())
+            match savefile_res {
+                Ok(s) => Self::new_online_with_savefile(cap, s),
+                Err(e) => Self::Error(e.to_string()),
             }
         } else {
             Self::new_online(cap)

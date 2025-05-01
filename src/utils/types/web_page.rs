@@ -3,27 +3,36 @@
 pub enum WebPage {
     /// Sniffnet's GitHub repository.
     Repo,
-    /// Sniffnet's website main page.
-    Website,
+    // /// Sniffnet's website main page.
+    // Website,
     /// Sniffnet's website/download page.
     WebsiteDownload,
-    /// My sponsor page
-    Sponsor,
+    /// Sniffnet's website/news page.
+    WebsiteNews,
+    /// Sniffnet's website/sponsor page.
+    WebsiteSponsor,
+    /// Sniffnet issues
+    Issues,
     /// Sniffnet issue #60 on GitHub
     IssueLanguages,
     /// Sniffnet Wiki
     Wiki,
+    /// My GitHub profile
+    MyGitHub,
 }
 
 impl WebPage {
     pub fn get_url(&self) -> &str {
         match self {
             WebPage::Repo => "https://github.com/GyulyVGC/sniffnet",
-            WebPage::Website => "https://www.sniffnet.net",
-            WebPage::Sponsor => "https://github.com/sponsors/GyulyVGC",
-            WebPage::WebsiteDownload => "https://www.sniffnet.net/download/",
+            // WebPage::Website => "https://www.sniffnet.net",
+            WebPage::WebsiteSponsor => "https://www.sniffnet.net/sponsor",
+            WebPage::WebsiteDownload => "https://www.sniffnet.net/download",
+            WebPage::WebsiteNews => "https://www.sniffnet.net/news",
+            WebPage::Issues => "https://github.com/GyulyVGC/sniffnet/issues",
             WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",
             WebPage::Wiki => "https://github.com/GyulyVGC/sniffnet/wiki",
+            WebPage::MyGitHub => "https://github.com/GyulyVGC",
         }
     }
 }

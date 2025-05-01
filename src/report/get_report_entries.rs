@@ -1,5 +1,5 @@
 use std::cmp::min;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -10,11 +10,13 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::sort_type::SortType;
 use crate::{ChartType, InfoTraffic, ReportSortType, Service, Sniffer};
 
-/// Returns the elements which satisfy the search constraints and belong to the given page,
-/// and the total number of elements which satisfy the search constraints
+/// Return the elements that satisfy the search constraints and belong to the given page,
+/// and the total number of elements which satisfy the search constraints,
+/// with their packets, in-bytes, and out-bytes count
 pub fn get_searched_entries(
     sniffer: &Sniffer,
-) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize) {
+) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize, DataInfo) {
+    let mut agglomerate = DataInfo::default();
     let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
         .map
@@ -23,7 +25,11 @@ pub fn get_searched_entries(
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
             let is_favorite = if let Some(e) = r_dns_host {
-                info_traffic_lock.hosts.get(&e.1).unwrap().is_favorite
+                info_traffic_lock
+                    .hosts
+                    .get(&e.1)
+                    .unwrap_or(&DataInfoHost::default())
+                    .is_favorite
             } else {
                 false
             };
@@ -31,7 +37,16 @@ pub fn get_searched_entries(
                 .search
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
+        .map(|(key, val)| {
+            agglomerate.add_packets(
+                val.transmitted_packets,
+                val.transmitted_bytes,
+                val.traffic_direction,
+            );
+            (key, val)
+        })
         .collect();
+
     all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
         ReportSortType {
             byte_sort,
@@ -57,16 +72,17 @@ pub fn get_searched_entries(
     (
         all_results
             .get((sniffer.page_number - 1) * 20..upper_bound)
-            .unwrap_or(&Vec::new())
+            .unwrap_or_default()
             .iter()
             .map(|&(key, val)| (key.to_owned(), val.to_owned()))
             .collect(),
         all_results.len(),
+        agglomerate,
     )
 }
 
 pub fn get_host_entries(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
@@ -83,7 +99,7 @@ pub fn get_host_entries(
 }
 
 pub fn get_service_entries(
-    info_traffic: &Arc<Mutex<InfoTraffic>>,
+    info_traffic: &Mutex<InfoTraffic>,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {

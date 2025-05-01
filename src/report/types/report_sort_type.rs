@@ -30,7 +30,7 @@ impl ReportSortType {
         }
     }
 
-    pub fn icon(self, report_col: &ReportCol) -> Text<'static, StyleType> {
+    pub fn icon<'a>(self, report_col: &ReportCol) -> Text<'a, StyleType> {
         match report_col {
             ReportCol::Bytes => self.byte_sort.icon(),
             ReportCol::Packets => self.packet_sort.icon(),

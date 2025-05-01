@@ -538,6 +538,98 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "BugsQuanti",
+      "name": "BugsQuanti",
+      "avatar_url": "https://avatars.githubusercontent.com/u/168212217?v=4",
+      "profile": "https://github.com/BugsQuanti",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "guilherme-demarchi",
+      "name": "guilherme-demarchi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/196574579?v=4",
+      "profile": "https://github.com/guilherme-demarchi",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Kapelianovych",
+      "name": "Yevhen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28602579?v=4",
+      "profile": "https://github.com/Kapelianovych",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "shawnyeager",
+      "name": "Shawn Yeager",
+      "avatar_url": "https://avatars.githubusercontent.com/u/980297?v=4",
+      "profile": "http://shawnyeager.com",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "ZeroDot1",
+      "name": "ZeroDot1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28985171?v=4",
+      "profile": "http://bit.ly/cBWeb",
+      "contributions": [
+        "design",
+        "a11y"
+      ]
+    },
+    {
+      "login": "TyseEX",
+      "name": "TyseEX",
+      "avatar_url": "https://avatars.githubusercontent.com/u/102823177?v=4",
+      "profile": "https://github.com/TyseEX",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "shu-kitamura",
+      "name": "shu-kitamura",
+      "avatar_url": "https://avatars.githubusercontent.com/u/171437458?v=4",
+      "profile": "https://github.com/shu-kitamura",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pcwizz",
+      "name": "Morgan Hill",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1645637?v=4",
+      "profile": "http://pcwizz.net",
+      "contributions": [
+        "security"
+      ]
+    },
+    {
+      "login": "PeterDaveHello",
+      "name": "Peter Dave Hello",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3691490?v=4",
+      "profile": "https://www.peterdavehello.org/",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "mhansma96",
+      "name": "Michel Hansma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84068842?v=4",
+      "profile": "https://github.com/mhansma96",
+      "contributions": [
+        "design",
+        "a11y"
+      ]
     }
   ],
   "contributorsPerLine": 7,

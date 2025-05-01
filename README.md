@@ -8,8 +8,8 @@
 <a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
-Application to comfortably monitor your Internet traffic <br>
-Cross-platform, Intuitive, Reliable
+Application to comfortably monitor your Internet traffic.<br>
+Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
 🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;12&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
@@ -41,13 +41,14 @@ Translated in:<br>
 <i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
 
 <i>If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
-your support will allow me to dedicate more time to this project,
-constantly expanding it including [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).</i>
+your support will enable a constant growth with [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).<br>
+Do you want to help the project in an alternative way? You can also head to the [official store](https://grindhouse.dev/collections/sniffnet) and put your hands on some cool merchandise!</i>
 
 <i>A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
 <p align="center">
 <a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/github?v=4" width="60px" alt="GitHub"/></a>&nbsp;&nbsp;
+<a href="https://nlnet.nl" title="NLnet"><img src="https://nlnet.nl/logo/logo.svg" width="60px" alt="NLnet"/></a>&nbsp;&nbsp;
 <a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="60px" alt="IPinfo"/></a>&nbsp;&nbsp;
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="60px" alt="Cthulu201"/></a>&nbsp;&nbsp;
 <a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="60px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
@@ -234,13 +235,20 @@ ICED_BACKEND=tiny-skia
 ## Acknowledgements
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
-
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
-
-<p align="center">
-<a href="https://github.com/iced-rs/iced">
-<img alt="" title="iced" src="https://user-images.githubusercontent.com/100347457/219339409-0a44722b-416d-410b-93a4-8b0e84c0031d.svg" width="350px"/>
-</a>
-</p>
-
+- IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+
+
+## Stay in the loop
+
+Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
+Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet socials to never miss an update.
+
+<div align="center">
+    <a href="https://bsky.app/profile/sniffnet.net"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>&nbsp;
+    <a href="https://www.linkedin.com/company/sniffnet"><img width="48" height="48" alt="LinkedIn" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>&nbsp;
+    <a href="https://mastodon.social/@sniffnet"><img width="48" height="48" alt="Mastodon" title="Mastodon" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/mastodon.svg"/></a>&nbsp;
+    <a href="https://t.me/sniffnet"><img width="48" height="48" alt="Telegram" title="Telegram" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/telegram.svg"/></a>&nbsp;
+    <a href="https://x.com/sniffnet_app"><img width="48" height="48" alt="Twitter / X" title="Twitter / X" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/x.svg"/></a>
+</div>

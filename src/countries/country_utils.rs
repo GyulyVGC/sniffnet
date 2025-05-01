@@ -1,21 +1,21 @@
+use iced::Font;
+use iced::widget::Tooltip;
 use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
-use iced::widget::Tooltip;
 use iced::widget::{Svg, Text};
-use iced::Font;
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
-    BJ, BM, BN, BO, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK, CL, CM,
-    CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH, ER, ES,
-    ET, FI, FJ, FK, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA, GB, GD, GE, GG, GH, GI, GL,
-    GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID, IE, IL, IM, IN, IO, IQ, IR,
-    IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB, LC, LI, LK, LR, LS,
-    LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR, MS, MT, MU, MULTICAST, MV,
-    MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, PA, PE, PF, PG, PH, PK, PL,
-    PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG, SH, SI, SK, SL, SM, SN, SO,
-    SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TR, TT, TV, TW, TZ, UA,
-    UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
+    BJ, BM, BN, BO, BOGON, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK,
+    CL, CM, CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH,
+    ER, ES, ET, FI, FJ, FK, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA, GB, GD, GE, GG, GH,
+    GI, GL, GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID, IE, IL, IM, IN, IO,
+    IQ, IR, IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB, LC, LI, LK,
+    LR, LS, LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR, MS, MT, MU,
+    MULTICAST, MV, MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, PA, PE, PF,
+    PG, PH, PK, PL, PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG, SH, SI, SK,
+    SL, SM, SN, SO, SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TR, TT,
+    TV, TW, TZ, UA, UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
@@ -26,16 +26,18 @@ use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
     local_translation, unknown_translation, your_network_adapter_translation,
 };
+use crate::translations::translations_4::reserved_address_translation;
 use crate::{Language, StyleType};
 
-fn get_flag_from_country(
+fn get_flag_from_country<'a>(
     country: Country,
     width: f32,
     is_local: bool,
     is_loopback: bool,
+    is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
-) -> (Svg<StyleType>, String) {
+) -> (Svg<'a, StyleType>, String) {
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;
@@ -287,36 +289,41 @@ fn get_flag_from_country(
         Country::ZW => ZW,
         Country::ZZ => {
             let (flag, new_tooltip) = if is_loopback {
-                (COMPUTER, your_network_adapter_translation(language))
+                (
+                    COMPUTER,
+                    your_network_adapter_translation(language).to_string(),
+                )
             } else if traffic_type.eq(&TrafficType::Multicast) {
-                (MULTICAST, "Multicast")
+                (MULTICAST, "Multicast".to_string())
             } else if traffic_type.eq(&TrafficType::Broadcast) {
-                (BROADCAST, "Broadcast")
+                (BROADCAST, "Broadcast".to_string())
             } else if is_local {
-                (HOME, local_translation(language))
+                (HOME, local_translation(language).to_string())
+            } else if let Some(bogon) = is_bogon {
+                (BOGON, reserved_address_translation(language, bogon))
             } else {
-                (UNKNOWN, unknown_translation(language))
+                (UNKNOWN, unknown_translation(language).to_string())
             };
 
             svg_style = SvgType::AdaptColor;
-            tooltip = new_tooltip.to_string();
+            tooltip = new_tooltip;
             flag
         }
     })))
-    .style(svg_style)
+    .class(svg_style)
     .width(width)
     .height(width * 0.75);
 
     (svg, tooltip)
 }
 
-pub fn get_flag_tooltip(
+pub fn get_flag_tooltip<'a>(
     country: Country,
     host_info: &DataInfoHost,
     language: Language,
     font: Font,
     thumbnail: bool,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let width = if thumbnail {
         FLAGS_WIDTH_SMALL
     } else {
@@ -324,12 +331,14 @@ pub fn get_flag_tooltip(
     };
     let is_local = host_info.is_local;
     let is_loopback = host_info.is_loopback;
+    let is_bogon = host_info.is_bogon;
     let traffic_type = host_info.traffic_type;
     let (content, tooltip) = get_flag_from_country(
         country,
         width,
         is_local,
         is_loopback,
+        is_bogon,
         traffic_type,
         language,
     );
@@ -346,7 +355,7 @@ pub fn get_flag_tooltip(
         Position::FollowCursor,
     )
     .snap_within_viewport(true)
-    .style(tooltip_style);
+    .class(tooltip_style);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -355,34 +364,36 @@ pub fn get_flag_tooltip(
     tooltip
 }
 
-pub fn get_computer_tooltip(
+pub fn get_computer_tooltip<'a>(
     is_my_address: bool,
     is_local: bool,
+    is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let content = Svg::new(Handle::from_memory(Vec::from(
-        match (is_my_address, is_local, traffic_type) {
-            (true, _, _) => COMPUTER,
-            (false, _, TrafficType::Multicast) => MULTICAST,
-            (false, _, TrafficType::Broadcast) => BROADCAST,
-            (false, true, _) => HOME,
-            (false, false, TrafficType::Unicast) => UNKNOWN,
+        match (is_my_address, is_local, is_bogon, traffic_type) {
+            (true, _, _, _) => COMPUTER,
+            (false, _, _, TrafficType::Multicast) => MULTICAST,
+            (false, _, _, TrafficType::Broadcast) => BROADCAST,
+            (false, true, _, _) => HOME,
+            (false, false, Some(_), _) => BOGON,
+            (false, false, None, TrafficType::Unicast) => UNKNOWN,
         },
     )))
-    .style(SvgType::AdaptColor)
+    .class(SvgType::AdaptColor)
     .width(FLAGS_WIDTH_BIG)
     .height(FLAGS_WIDTH_BIG * 0.75);
 
-    let tooltip = match (is_my_address, is_local, traffic_type) {
-        (true, _, _) => your_network_adapter_translation(language),
-        (false, _, TrafficType::Multicast) => "Multicast",
-        (false, _, TrafficType::Broadcast) => "Broadcast",
-        (false, true, _) => local_translation(language),
-        (false, false, TrafficType::Unicast) => unknown_translation(language),
-    }
-    .to_string();
+    let tooltip = match (is_my_address, is_local, is_bogon, traffic_type) {
+        (true, _, _, _) => your_network_adapter_translation(language).to_string(),
+        (false, _, _, TrafficType::Multicast) => "Multicast".to_string(),
+        (false, _, _, TrafficType::Broadcast) => "Broadcast".to_string(),
+        (false, true, _, _) => local_translation(language).to_string(),
+        (false, false, Some(t), _) => reserved_address_translation(language, t),
+        (false, false, None, TrafficType::Unicast) => unknown_translation(language).to_string(),
+    };
 
     Tooltip::new(
         content,
@@ -390,5 +401,5 @@ pub fn get_computer_tooltip(
         Position::FollowCursor,
     )
     .snap_within_viewport(true)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }

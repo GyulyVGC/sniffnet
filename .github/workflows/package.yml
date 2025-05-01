@@ -40,6 +40,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu'
+        run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev libgtk-3-dev
+
       - name: Install Windows dependencies
         if: matrix.os == 'windows'
         env:
@@ -68,15 +72,28 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Check crate
+        if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
+        run: cargo publish --dry-run --target ${{ matrix.target }}
+
+      - name: Clippy (release mode)
+        run: cargo clippy --release -- -D warnings
+
+      - name: Test (release mode)
+        if: matrix.os == 'macos' || matrix.os == 'ubuntu' || matrix.os == 'windows' && matrix.arch == 'amd64'
+        run: |
+          cargo test --release --verbose -- --nocapture &&
+          cargo clean
+
       - name: Install Cross
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
 
-      - name: Build binary
+      - name: Build binary (Linux)
         if: matrix.os == 'ubuntu'
         run: cross build --release --target ${{ matrix.target }}
 
-      - name: Build binary
+      - name: Build binary (macOS/Windows)
         if: matrix.os == 'macos' || matrix.os == 'windows'
         run: cargo build --release --target ${{ matrix.target }}
 

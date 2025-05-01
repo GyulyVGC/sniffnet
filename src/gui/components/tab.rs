@@ -1,9 +1,8 @@
 //! Tab buttons to be used in the various pages just under the header
 
-use iced::alignment::Vertical;
 use iced::widget::text::LineHeight;
-use iced::widget::{button, horizontal_space, Button, Container, Row, Space, Text};
-use iced::{alignment, Alignment, Font, Length};
+use iced::widget::{Button, Container, Row, Space, Text, button, horizontal_space};
+use iced::{Alignment, Font, Length, alignment};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
@@ -13,14 +12,14 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::{Language, RunningPage, StyleType};
 
-pub fn get_settings_tabs(
+pub fn get_settings_tabs<'a>(
     active: SettingsPage,
     font: Font,
     language: Language,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .spacing(2)
         .padding([0, 3]);
 
@@ -31,16 +30,16 @@ pub fn get_settings_tabs(
     tabs
 }
 
-pub fn get_pages_tabs(
+pub fn get_pages_tabs<'a>(
     active: RunningPage,
     font: Font,
     font_headers: Font,
     language: Language,
     unread_notifications: usize,
-) -> Row<'static, Message, StyleType> {
+) -> Row<'a, Message, StyleType> {
     let mut tabs = Row::new()
         .width(Length::Fill)
-        .align_items(Alignment::Start)
+        .align_y(Alignment::Start)
         .spacing(2)
         .padding([0, 3]);
 
@@ -63,41 +62,41 @@ pub fn get_pages_tabs(
     tabs
 }
 
-fn new_page_tab(
+fn new_page_tab<'a>(
     page: RunningPage,
     active: bool,
     language: Language,
     font: Font,
     font_headers: Font,
     unread: Option<usize>,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let mut content = Row::new()
         .height(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(Space::with_width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         );
 
     if let Some(num) = unread {
@@ -114,7 +113,7 @@ fn new_page_tab(
         .height(if active { 35 } else { 30 })
         .padding(0)
         .width(Length::Fill)
-        .style(if active {
+        .class(if active {
             ButtonType::TabActive
         } else {
             ButtonType::TabInactive
@@ -122,39 +121,39 @@ fn new_page_tab(
         .on_press(page.action())
 }
 
-fn new_settings_tab(
+fn new_settings_tab<'a>(
     page: SettingsPage,
     active: bool,
     language: Language,
     font: Font,
-) -> Button<'static, Message, StyleType> {
+) -> Button<'a, Message, StyleType> {
     let content = Row::new()
         .height(Length::Fill)
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .push(horizontal_space())
         .push(
             page.icon()
                 .size(15)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(Space::with_width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE)
-                .style(if active {
+                .class(if active {
                     TextType::Title
                 } else {
                     TextType::Standard
                 })
-                .horizontal_alignment(alignment::Horizontal::Center)
-                .vertical_alignment(alignment::Vertical::Center),
+                .align_x(alignment::Alignment::Center)
+                .align_y(alignment::Alignment::Center),
         )
         .push(horizontal_space());
 
@@ -162,7 +161,7 @@ fn new_settings_tab(
         .height(if active { 35 } else { 30 })
         .padding(0)
         .width(Length::Fill)
-        .style(if active {
+        .class(if active {
             ButtonType::TabActive
         } else {
             ButtonType::TabInactive
@@ -170,18 +169,18 @@ fn new_settings_tab(
         .on_press(page.action())
 }
 
-pub fn notifications_badge(
+pub fn notifications_badge<'a>(
     font_headers: Font,
     num: usize,
-) -> Container<'static, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     Container::new(
         Text::new(num.to_string())
             .font(font_headers)
             .size(14)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .align_y(Vertical::Center)
+    .align_y(Alignment::Center)
     .padding([2, 4])
     .height(20)
-    .style(ContainerType::Highlighted)
+    .class(ContainerType::Highlighted)
 }

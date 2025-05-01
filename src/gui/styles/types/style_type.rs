@@ -1,5 +1,4 @@
-use iced::application;
-use iced::application::Appearance;
+use iced::application::{Appearance, DefaultStyle};
 use plotters::prelude::FontStyle;
 use serde::{Deserialize, Serialize};
 
@@ -25,14 +24,12 @@ pub enum StyleType {
 
 impl Default for StyleType {
     fn default() -> Self {
-        Self::Night
+        Self::Custom(ExtraStyles::A11yDark)
     }
 }
 
-impl application::StyleSheet for StyleType {
-    type Style = ();
-
-    fn appearance(&self, (): &Self::Style) -> Appearance {
+impl DefaultStyle for StyleType {
+    fn default_style(&self) -> Appearance {
         let colors = self.get_palette();
         Appearance {
             background_color: colors.primary,
@@ -73,12 +70,12 @@ impl StyleType {
 
 #[cfg(test)]
 mod tests {
-    use iced::{color, Color};
-    use serde_test::{assert_tokens, Token};
+    use iced::{Color, color};
+    use serde_test::{Token, assert_tokens};
 
+    use crate::StyleType;
     use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
     use crate::gui::styles::types::palette::Palette;
-    use crate::StyleType;
 
     // test if deserializing and serializing a StyleType works n.1
     // simple case: one of the default themes

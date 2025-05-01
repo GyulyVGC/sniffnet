@@ -1,5 +1,5 @@
-use iced::widget::Column;
 use iced::Font;
+use iced::widget::Column;
 use pcap::Linktype;
 
 use crate::gui::styles::text::TextType;
@@ -51,18 +51,18 @@ impl MyLinkType {
                     "{}: {} ({})",
                     link_type_translation(language),
                     l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                    l.get_description().unwrap_or(String::new())
+                    l.get_description().unwrap_or_else(|_| String::new())
                 )
             }
             Self::NotYetAssigned => String::new(),
         }
     }
 
-    pub fn link_type_col(
+    pub fn link_type_col<'a>(
         self,
         language: Language,
         font: Font,
-    ) -> Column<'static, Message, StyleType> {
+    ) -> Column<'a, Message, StyleType> {
         match self {
             Self::Null(l)
             | Self::Ethernet(l)
@@ -74,7 +74,7 @@ impl MyLinkType {
                 let link_info = format!(
                     "{} ({})",
                     l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                    l.get_description().unwrap_or(String::new())
+                    l.get_description().unwrap_or_else(|_| String::new())
                 );
                 TextType::highlighted_subtitle_with_desc(
                     link_type_translation(language),

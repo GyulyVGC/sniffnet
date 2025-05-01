@@ -1,16 +1,16 @@
 use std::fmt;
 use std::thread;
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::Text;
-use iced::{Font, Length};
+use iced::{Alignment, Font, Length};
 use rodio::{Decoder, OutputStream, Sink};
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::notifications::types::sound::Sound::{Gulp, Pop, Swhoosh};
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::icon::Icon;
-use crate::StyleType;
+use crate::{StyleType, location};
 
 /// Enum representing the possible notification sounds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -43,7 +43,7 @@ impl Sound {
         }
     }
 
-    pub fn get_text(self, font: Font) -> iced::widget::Text<'static, StyleType> {
+    pub fn get_text<'a>(self, font: Font) -> iced::widget::Text<'a, StyleType> {
         match self {
             Sound::Gulp => Text::new("Gulp").font(font),
             Sound::Pop => Text::new("Pop").font(font),
@@ -52,8 +52,8 @@ impl Sound {
         }
         .size(FONT_SIZE_FOOTER)
         .width(Length::Fill)
-        .horizontal_alignment(Horizontal::Center)
-        .vertical_alignment(Vertical::Center)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
     }
 }
 
@@ -62,16 +62,23 @@ pub fn play(sound: Sound, volume: u8) {
         return;
     }
     let mp3_sound = sound.mp3_sound();
-    thread::Builder::new()
+    let _ = thread::Builder::new()
         .name("thread_play_sound".to_string())
         .spawn(move || {
-            // Get a output stream handle to the default physical sound device
-            let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-            let sink = Sink::try_new(&stream_handle).unwrap();
+            // Get an output stream handle to the default physical sound device
+            let Ok((_stream, stream_handle)) = OutputStream::try_default().log_err(location!())
+            else {
+                return;
+            };
+            let Ok(sink) = Sink::try_new(&stream_handle).log_err(location!()) else {
+                return;
+            };
             //load data
             let data = std::io::Cursor::new(mp3_sound);
             // Decode that sound file into a source
-            let source = Decoder::new(data).unwrap();
+            let Ok(source) = Decoder::new(data).log_err(location!()) else {
+                return;
+            };
             // Play the sound directly on the device
             sink.set_volume(f32::from(volume) / 200.0); // set the desired volume
             sink.append(source);
@@ -79,5 +86,5 @@ pub fn play(sound: Sound, volume: u8) {
             // has finished playing all its queued sounds.
             sink.sleep_until_end();
         })
-        .unwrap();
+        .log_err(location!());
 }

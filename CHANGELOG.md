@@ -3,12 +3,41 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Donut chart reporting overall traffic statistics ([#756](https://github.com/GyulyVGC/sniffnet/pull/756) — fixes [#687](https://github.com/GyulyVGC/sniffnet/issues/687))
+- Added support for ARP protocol ([#759](https://github.com/GyulyVGC/sniffnet/pull/759) — fixes [#680](https://github.com/GyulyVGC/sniffnet/issues/680))
+- Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
+- Show data agglomerates in _Inspect_ page table ([#684](https://github.com/GyulyVGC/sniffnet/pull/684) — fixes [#601](https://github.com/GyulyVGC/sniffnet/issues/601))
+- Added Traditional Chinese (Taiwan) translation 🇹🇼 ([#774](https://github.com/GyulyVGC/sniffnet/pull/774))
+- Updated some of the existing translations to v1.3: 
+  - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
+  - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
+- Show more information when domain name is short ([#720](https://github.com/GyulyVGC/sniffnet/pull/720) — fixes [#696](https://github.com/GyulyVGC/sniffnet/issues/696))
+- Added new themes _A11y (Night)_ and _A11y (Day)_ based on palettes optimized for Accessibility ([#785](https://github.com/GyulyVGC/sniffnet/pull/785) — fixes [#786](https://github.com/GyulyVGC/sniffnet/issues/786))
+- Avoid directory traversal when selecting file name for PCAP exports ([#776](https://github.com/GyulyVGC/sniffnet/pull/776) — fixes [#767](https://github.com/GyulyVGC/sniffnet/issues/767))
+- Add icon to window title bar ([#719](https://github.com/GyulyVGC/sniffnet/pull/719) — fixes [#715](https://github.com/GyulyVGC/sniffnet/issues/715))
+- Update footer buttons and links ([#755](https://github.com/GyulyVGC/sniffnet/pull/755) — fixes [#553](https://github.com/GyulyVGC/sniffnet/issues/553))
+- Handle errors to reduce the number of possible crash occurrences ([#784](https://github.com/GyulyVGC/sniffnet/pull/784))
+- Fix _crates.io_ package for Windows ([#718](https://github.com/GyulyVGC/sniffnet/pull/718) — fixes [#681](https://github.com/GyulyVGC/sniffnet/issues/681))
+- Fix crash when inserting characters longer than one byte in the text input for byte threshold notification setting ([#747](https://github.com/GyulyVGC/sniffnet/pull/747) — fixes [#744](https://github.com/GyulyVGC/sniffnet/issues/744))
+- Remove pre-uninstall script on Linux (fixes [#644](https://github.com/GyulyVGC/sniffnet/issues/644))
+- Fix typo in Russian translation (fixes [#730](https://github.com/GyulyVGC/sniffnet/issues/730))
+- Minor fix to service determination algorithm in case of multicast and broadcast traffic
+
+## [1.3.2] - 2025-01-06
+- Dropdown menus for network host filters ([#659](https://github.com/GyulyVGC/sniffnet/pull/659) — fixes [#354](https://github.com/GyulyVGC/sniffnet/issues/354))
+- Added CLI argument `--adapter [<NAME>]` to allow immediately starting the capture from a given network interface ([#643](https://github.com/GyulyVGC/sniffnet/pull/643) — fixes [#636](https://github.com/GyulyVGC/sniffnet/issues/636))
 - Added Vietnamese translation 🇻🇳 ([#577](https://github.com/GyulyVGC/sniffnet/pull/577))
+- Ask for quit confirmation before stopping an ongoing analysis ([#652](https://github.com/GyulyVGC/sniffnet/pull/652) — fixes [#570](https://github.com/GyulyVGC/sniffnet/issues/570))
+- Redirect `stderr` and `stdout` to file on Windows release builds ([#645](https://github.com/GyulyVGC/sniffnet/pull/645) — fixes [#578](https://github.com/GyulyVGC/sniffnet/issues/578))
+- Added Wiki page describing [command line arguments](https://github.com/GyulyVGC/sniffnet/wiki/Command-line-arguments) (fixes [#642](https://github.com/GyulyVGC/sniffnet/issues/642))
 - Updated some of the existing translations to v1.3: 
   - Chinese ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
   - Korean ([#604](https://github.com/GyulyVGC/sniffnet/pull/604))
   - Turkish ([#608](https://github.com/GyulyVGC/sniffnet/pull/608))
+- Improve time values on the horizontal axis of the chart ([#641](https://github.com/GyulyVGC/sniffnet/pull/641) — fixes [#619](https://github.com/GyulyVGC/sniffnet/issues/619))
+- Migrate to Iced 0.13 ([#618](https://github.com/GyulyVGC/sniffnet/pull/618))
 - Added support for Linux `loongarch64` (fixes [#592](https://github.com/GyulyVGC/sniffnet/issues/592))
+- Fix typos in German translation ([#660](https://github.com/GyulyVGC/sniffnet/pull/660))
 
 ## [1.3.1] - 2024-07-22
 - Thumbnail mode improvements ([#512](https://github.com/GyulyVGC/sniffnet/pull/512))

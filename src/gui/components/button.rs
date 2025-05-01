@@ -1,9 +1,8 @@
 #![allow(clippy::module_name_repetitions)]
 
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, Row, Text, Tooltip};
+use iced::widget::{Row, Text, Tooltip, button};
 use iced::{Alignment, Font};
 
 use crate::gui::styles::container::ContainerType;
@@ -14,17 +13,17 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 
-pub fn button_hide(
+pub fn button_hide<'a>(
     message: Message,
     language: Language,
     font: Font,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         button(
             Text::new("×")
                 .font(font)
-                .vertical_alignment(Vertical::Center)
-                .horizontal_alignment(Horizontal::Center)
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center)
                 .size(15)
                 .line_height(LineHeight::Relative(1.0)),
         )
@@ -36,25 +35,25 @@ pub fn button_hide(
         Position::Right,
     )
     .gap(5)
-    .style(ContainerType::Tooltip)
+    .class(ContainerType::Tooltip)
 }
 
-pub fn button_open_file(
+pub fn button_open_file<'a>(
     old_file: String,
     file_info: FileInfo,
     language: Language,
     font: Font,
     is_editable: bool,
     action: fn(String) -> Message,
-) -> Tooltip<'static, Message, StyleType> {
+) -> Tooltip<'a, Message, StyleType> {
     let mut tooltip_str = "";
     let mut tooltip_style = ContainerType::Standard;
 
     let mut button = button(
         Icon::File
             .to_text()
-            .vertical_alignment(Vertical::Center)
-            .horizontal_alignment(Horizontal::Center)
+            .align_y(Alignment::Center)
+            .align_x(Alignment::Center)
             .size(16.0),
     )
     .padding(0)
@@ -69,13 +68,13 @@ pub fn button_open_file(
 
     Tooltip::new(button, Text::new(tooltip_str).font(font), Position::Right)
         .gap(5)
-        .style(tooltip_style)
+        .class(tooltip_style)
 }
 
-pub fn row_open_link_tooltip(text: &'static str, font: Font) -> Row<'static, Message, StyleType> {
+pub fn row_open_link_tooltip<'a>(text: &'static str, font: Font) -> Row<'a, Message, StyleType> {
     Row::new()
-        .align_items(Alignment::Center)
+        .align_y(Alignment::Center)
         .spacing(10)
         .push(Text::new(text).font(font))
-        .push(Icon::OpenLink.to_text().size(16).style(TextType::Title))
+        .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
 }

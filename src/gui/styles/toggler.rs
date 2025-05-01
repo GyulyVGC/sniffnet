@@ -2,24 +2,23 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use iced::widget::toggler::Appearance;
 use iced::Color;
+use iced::widget::toggler::{Catalog, Status, Style};
 
-use crate::gui::styles::style_constants::BORDER_WIDTH;
 use crate::StyleType;
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Default)]
 pub enum TogglerType {
     #[default]
     Standard,
 }
 
-impl iced::widget::toggler::StyleSheet for StyleType {
-    type Style = TogglerType;
-
-    fn active(&self, _: &Self::Style, is_active: bool) -> iced::widget::toggler::Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
+impl TogglerType {
+    #[allow(clippy::unused_self)]
+    fn active(&self, style: &StyleType, is_active: bool) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
         let bg_color = if is_active {
             Color {
                 a: ext.alpha_chart_badge,
@@ -28,7 +27,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
         } else {
             ext.buttons_color
         };
-        Appearance {
+        Style {
             background: bg_color,
             background_border_width: BORDER_WIDTH,
             background_border_color: bg_color,
@@ -42,9 +41,10 @@ impl iced::widget::toggler::StyleSheet for StyleType {
         }
     }
 
-    fn hovered(&self, _: &Self::Style, is_active: bool) -> iced::widget::toggler::Appearance {
-        let colors = self.get_palette();
-        let ext = self.get_extension();
+    #[allow(clippy::unused_self)]
+    fn hovered(&self, style: &StyleType, is_active: bool) -> Style {
+        let colors = style.get_palette();
+        let ext = style.get_extension();
         let bg_color = if is_active {
             Color {
                 a: ext.alpha_chart_badge,
@@ -53,7 +53,7 @@ impl iced::widget::toggler::StyleSheet for StyleType {
         } else {
             ext.buttons_color
         };
-        Appearance {
+        Style {
             background: bg_color,
             background_border_width: BORDER_WIDTH,
             background_border_color: colors.secondary,
@@ -64,6 +64,22 @@ impl iced::widget::toggler::StyleSheet for StyleType {
             } else {
                 Color::TRANSPARENT
             },
+        }
+    }
+}
+
+impl Catalog for StyleType {
+    type Class<'a> = TogglerType;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Self::Class::default()
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
+        match status {
+            Status::Active { is_toggled } => class.active(self, is_toggled),
+            Status::Hovered { is_toggled } => class.hovered(self, is_toggled),
+            Status::Disabled => class.active(self, false),
         }
     }
 }

@@ -10,6 +10,8 @@ pub enum Protocol {
     UDP,
     /// Internet Control Message Protocol
     ICMP,
+    /// Address Resolution Protocol
+    ARP,
 }
 
 impl std::fmt::Display for Protocol {
@@ -19,7 +21,7 @@ impl std::fmt::Display for Protocol {
 }
 
 impl Protocol {
-    pub const ALL: [Protocol; 3] = [Protocol::TCP, Protocol::UDP, Protocol::ICMP];
+    pub const ALL: [Protocol; 4] = [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP];
 }
 
 #[cfg(test)]
@@ -33,15 +35,17 @@ mod tests {
                 Protocol::TCP => assert_eq!(protocol.to_string(), "TCP"),
                 Protocol::UDP => assert_eq!(protocol.to_string(), "UDP"),
                 Protocol::ICMP => assert_eq!(protocol.to_string(), "ICMP"),
+                Protocol::ARP => assert_eq!(protocol.to_string(), "ARP"),
             }
         }
     }
 
     #[test]
     fn test_all_protocols_collection() {
-        assert_eq!(Protocol::ALL.len(), 3);
+        assert_eq!(Protocol::ALL.len(), 4);
         assert_eq!(Protocol::ALL.get(0).unwrap(), &Protocol::TCP);
         assert_eq!(Protocol::ALL.get(1).unwrap(), &Protocol::UDP);
         assert_eq!(Protocol::ALL.get(2).unwrap(), &Protocol::ICMP);
+        assert_eq!(Protocol::ALL.get(3).unwrap(), &Protocol::ARP);
     }
 }
