@@ -8,6 +8,7 @@ pub enum FileInfo {
     Style,
     Database,
     Directory,
+    PcapImport,
 }
 
 impl FileInfo {
@@ -16,6 +17,7 @@ impl FileInfo {
             FileInfo::Style => "toml",
             FileInfo::Database => "mmdb",
             FileInfo::Directory => "",
+            FileInfo::PcapImport => "pcap",
         }
     }
 
@@ -24,6 +26,7 @@ impl FileInfo {
             FileInfo::Style => style_from_file_translation(language),
             FileInfo::Database => database_from_file_translation(language),
             FileInfo::Directory => select_directory_translation(language),
+            FileInfo::PcapImport => "Import pcap file",
         }
     }
 }

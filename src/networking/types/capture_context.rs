@@ -107,7 +107,7 @@ impl CaptureType {
 
     pub fn stats(&mut self) -> Result<Stat, Error> {
         match self {
-            Self::Online(o) => o.stats(),
+            Self::Online(on) => on.stats(),
             Self::Offline(off) => off.stats(),
         }
     }
@@ -170,7 +170,7 @@ impl CaptureSource {
     pub fn get_name(&self) -> String {
         match self {
             Self::Device(device) => device.name.clone(),
-            Self::File(file) => get_path_termination_string(&file.path, 15),
+            Self::File(file) => get_path_termination_string(&file.path, 17),
         }
     }
 

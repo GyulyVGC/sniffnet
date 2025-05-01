@@ -43,7 +43,7 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
+use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostDataStates;
@@ -536,6 +536,9 @@ impl Sniffer {
                 }
             }
             Message::WindowId(id) => self.id = id,
+            Message::SetPcapImport(path) => {
+                self.capture_source = CaptureSource::File(MyPcapImport::new(path));
+            }
             Message::TickInit => {}
         }
         Task::none()

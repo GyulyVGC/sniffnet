@@ -54,6 +54,13 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let font = style.get_extension().font;
 
     let col_adapter = get_col_adapter(sniffer, font);
+    let col_import_pcap = get_col_import_pcap(
+        language,
+        font,
+        &sniffer.capture_source.get_name(),
+        &sniffer.capture_source,
+    );
+    let col_capture_source = Column::new().push(col_adapter).push(col_import_pcap);
 
     let ip_active = &sniffer.filters.ip_versions;
     let col_ip_buttons = col_ip_buttons(ip_active, font, language);
@@ -110,7 +117,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     let body = Column::new().push(Space::with_height(5)).push(
         Row::new()
-            .push(col_adapter)
+            .push(col_capture_source)
             .push(Space::with_width(30))
             .push(filters_pane),
     );
@@ -365,6 +372,45 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             ),
             Direction::Vertical(ScrollbarType::properties()),
         ))
+}
+
+fn get_col_import_pcap<'a>(
+    language: Language,
+    font: Font,
+    path: &str,
+    cs: &CaptureSource,
+) -> Button<'a, Message, StyleType> {
+    let is_import_pcap_set = matches!(cs, CaptureSource::File(_));
+
+    let button_row = Row::new()
+        .align_y(Alignment::Center)
+        .push(Text::new(get_path_termination_string(path, 17)).font(font))
+        .push(button_open_file(
+            path.to_owned(),
+            FileInfo::PcapImport,
+            language,
+            font,
+            true,
+            Message::SetPcapImport,
+        ));
+
+    let content = Column::new()
+        .width(Length::Fill)
+        .align_x(Alignment::Center)
+        .spacing(5)
+        .push(Text::new("custom_style_translation(language)").font(font))
+        .push(button_row);
+
+    Button::new(content)
+        .height(75)
+        .width(380)
+        .padding(Padding::ZERO.top(10).bottom(5))
+        .class(if is_import_pcap_set {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::SetPcapImport(path.to_string()))
 }
 
 fn get_export_pcap_group(
