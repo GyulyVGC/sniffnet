@@ -25,6 +25,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::UZ => "Yangi versiya mavjud!",
         Language::PT => "Uma nova versão está disponível!",
         Language::VI => "Phiên bản mới đã sẵn sàng!",
+        Language::ID => "Versi baru tersedia!",
     }
 }
 
@@ -50,6 +51,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::UZ => "Tekshirish",
         Language::PT => "Inspecionar",
         Language::VI => "Quan sát",
+        Language::ID => "Memeriksa",
         _ => "Inspect",
     }
 }
@@ -76,6 +78,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::UZ => "Ulanish tafsilotlari",
         Language::PT => "Detalhes da conexão",
         Language::VI => "Thông tin kết nối",
+        Language::ID => "Rincian koneksi",
         _ => "Connection details",
     }
 }
@@ -102,6 +105,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::JA => "ドロップした",
         Language::UZ => "Yig'ilgan",
         Language::VI => "Mất",
+        Language::ID => "Dihapus",
         _ => "Dropped",
     }
 }
@@ -128,6 +132,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::UZ => "Ma'lumotlarni taqdim etish",
         Language::PT => "Representação dos dados",
         Language::VI => "Miêu tả dữ liệu",
+        Language::ID => "Penyajian ulang data",
         _ => "Data representation",
     }
 }
@@ -154,6 +159,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::UZ => "Tarmoq serveri",
         Language::PT => "Host da rede",
         Language::VI => "Máy chủ",
+        Language::ID => "Jaringan asal",
         _ => "Network host",
     }
 }
@@ -180,6 +186,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::UZ => "Bu erda faqat dastlabki 30 ta buyumlar ko'rsatiladi",
         Language::PT => "Apenas os 30 melhores unid são expostos aqui",
         Language::VI => "Chỉ có 30 mục gần nhất được hiển thị ở đây",
+        Language::ID => "Hanya 30 teratas yang ditampilkan disini",
         _ => "Only the top 30 items are displayed here",
     }
 }
@@ -204,6 +211,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 //         Language::FR => "Trier par",
 //         Language::JA => "ソート",
 //         Language::UZ => "Saralash turi",
+//         Language::ID => "Urut berdasarkan",
 //         _ => "Sort by",
 //     }
 // }
@@ -230,6 +238,7 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::UZ => "Mahalliy tarmoq",
         Language::PT => "Rede local",
         Language::VI => "Mạng nội bộ",
+        Language::ID => "Jaringan lokal",
         _ => "Local network",
     }
 }
@@ -256,6 +265,7 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::UZ => "Noma'lum joylashuv",
         Language::PT => "Localização desconhecida",
         Language::VI => "Không rõ địa điểm",
+        Language::ID => "Lokasi tidak diketahui",
         _ => "Unknown location",
     }
 }
@@ -282,6 +292,7 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::UZ => "Sizning tarmoq adapteringiz",
         Language::PT => "Seu adaptador de rede",
         Language::VI => "Network adapter của bạn",
+        Language::ID => "Adaptor jaringan kamu",
         _ => "Your network adapter",
     }
 }
@@ -308,6 +319,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::UZ => "Soket manzili",
         Language::PT => "Endereço da socket",
         Language::VI => "Địa chỉ socket",
+        Language::ID => "Alamat sambungan",
         _ => "Socket address",
     }
 }
@@ -334,6 +346,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::UZ => "MAC manzili",
         Language::PT => "Endereço MAC",
         Language::VI => "Địa chỉ MAC",
+        Language::ID => "Alamat MAC",
         _ => "MAC address",
     }
 }
@@ -360,6 +373,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::UZ => "Manba",
         Language::PT => "Fonte",
         Language::VI => "Nguồn",
+        Language::ID => "Asal",
         _ => "Source",
     }
 }
@@ -384,6 +398,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::JA => "送信先",
         Language::UZ => "Qabul qiluvchi",
         Language::VI => "Đích",
+        Language::ID => "Tujuan",
         _ => "Destination",
     }
 }
@@ -409,6 +424,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::UZ => "To'liq domen nomi",
         Language::PT => "Nome de domínio completo",
         Language::VI => "Tên miền đầy đủ",
+        Language::ID => "Nama domain yang memenuhi syarat",
         _ => "Fully qualified domain name",
     }
 }
@@ -435,6 +451,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::UZ => "Avtonom tizim nomi",
         Language::PT => "Entidade administrativa",
         Language::VI => "Tên Autonomous System",
+        Language::ID => "Nama System Otomatis",
         _ => "Autonomous System name",
     }
 }
@@ -461,6 +478,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::UZ => "Uzatilgan ma'lumotlar",
         Language::PT => "Dados transmitidos",
         Language::VI => "Dữ liệu được truyền",
+        Language::ID => "Data terkirim",
         _ => "Transmitted data",
     }
 }
@@ -486,6 +504,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::JA => "国",
         Language::UZ => "Davlat",
         Language::VI => "Quốc gia",
+        Language::ID => "Negara",
         _ => "Country",
     }
 }
@@ -512,6 +531,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::UZ => "Domen nomi",
         Language::PT => "Nome do domínio",
         Language::VI => "Tên miền",
+        Language::ID => "Nama Domain",
         _ => "Domain name",
     }
 }
@@ -538,6 +558,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::UZ => "Faqat sevimlilarni ko'rsatish",
         Language::PT => "Apenas mostrar os favoritos",
         Language::VI => "Chỉ hiển thị mục ưa thích",
+        Language::ID => "Hanya tunjukkan favorit",
         _ => "Only show favorites",
     }
 }
@@ -563,6 +584,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 //         Language::JA => "検索フィルター",
 //         Language::UZ => "Qidiruv filtrlari",
 //         Language::PT => "Filtros de busca",
+//         Language::ID => "Filter Pencarian",
 //         _ => "Search filters",
 //     }
 // }
@@ -589,6 +611,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::UZ => "Belgilangan qidiruv filtrlari bo'yicha hech qanday natija mavjud emas",
         Language::PT => "Nenhum resultado disponível de acordo com os filtros selecionados",
         Language::VI => "Không có kết quả nào theo các bộ lọc được chỉ định",
+        Language::ID => "Tidak ada hasil berdasarkan filter pencarian spesifik",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -620,6 +643,7 @@ pub fn showing_results_translation(
         Language::UZ => format!("Jami {total} natijadan {start}-{end} ko'rsatilyapti"),
         Language::PT => format!("Mostrando {start}-{end} de {total} resultados totais"),
         Language::VI => format!("Đang hiển thị {start}-{end} của {total} tổng số kết quả"),
+        Language::VI => format!("Menampilkan {start}-{end} dari {total} semua hasil"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -647,6 +671,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::UZ => "Rang gradientlarini qo'llang",
         Language::PT => "Aplicar gradientes de cor",
         Language::VI => "Áp dụng color gradients",
+        Language::ID => "Aplikasikan gradasi warna",
         _ => "Apply color gradients",
     }
 }
