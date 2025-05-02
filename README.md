@@ -35,6 +35,7 @@ Translated in:<br>
 </picture>
 </p>
 
+
 ## _Support Sniffnet's development_ 💖
 
 <i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
@@ -55,6 +56,7 @@ Do you want to help the project in an alternative way? You can also head to the 
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
 </p>
 
+
 ## Download
 
 |                                                                        <a href="#download"><img alt="Windows" title="Windows" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/windows.svg"/></a>                                                                         |                           <a href="#download"><img alt="macOS" title="macOS" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></a>                            |                                                                                                                          <a href="#download"><img alt="Linux (.deb)" title="Linux (.deb)" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux_deb.svg"/></a>                                                                                                                           |                                                              <a href="#download"><img alt="Linux (.rpm)" title="Linux (.rpm)" height="35px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux_rpm.svg"/></a>                                                               |
@@ -62,230 +64,11 @@ Do you want to help the project in an alternative way? You can also head to the 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[64&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)&nbsp;\|&nbsp;[32&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)&nbsp;\|&nbsp;[Apple&nbsp;silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)&nbsp;\|&nbsp;[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)&nbsp;\|&nbsp;[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)&nbsp;\|&nbsp;[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)&nbsp;\|&nbsp;[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
 Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
+Not what you're looking for? Check out [alternative installation methods](https://github.com/GyulyVGC/sniffnet/wiki/Alternative-installation-methods).
 
 > [!NOTE]
 >
 > Remember to also install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
-
-**Alternative installation methods** are reported in the following:
-
-<details>
-
-  <summary>from Crates.io</summary>
-
-Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
-In this case, the application binary can be built and installed with:
-
-```sh
-cargo install sniffnet --locked
-```
-
-</details>
-
-<details>
-
-  <summary>from Homebrew</summary>
-
-  You can install [Sniffnet Homebrew package](https://github.com/Homebrew/homebrew-core/pkgs/container/core%2Fsniffnet) with:
-
-  ```sh
-brew install sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>from Nixpkgs</summary>
-
-  You can install [Sniffnet Nix package](https://search.nixos.org/packages?channel=23.05&show=sniffnet&from=0&size=50&sort=relevance&type=packages&query=sniffnet) adding the following Nix code to your NixOS Configuration, usually located in `/etc/nixos/configuration.nix`:
-
-  ```nix
-  environment.systemPackages = [
-    pkgs.sniffnet
-  ];
-```
-
-  Alternatively, you can install it in your home using [Home Manager](https://github.com/nix-community/home-manager) with:
-
-  ```nix
-  home.packages = [
-    pkgs.sniffnet
-  ];
-```
-
-  Alternatively, you can try it in a shell with:
-
-  ```sh
-nix-shell -p sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on Arch Linux</summary>
-
-  You can install Sniffnet community package via [pacman](https://wiki.archlinux.org/title/Pacman):
-
-  ```sh
-pacman -S sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on FreeBSD</summary>
-
-You can install Sniffnet port with:
-
-  ```sh
-pkg install sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on NetBSD</summary>
-
-You can install Sniffnet from the official repositories via [pkgin](https://pkgin.net):
-
-  ```sh
-pkgin install sniffnet
-```
-
-</details>
-<details>
-
-  <summary>on Tiny Core Linux</summary>
-
-You can install Sniffnet from the official repository with:
-
-  ```
-tce-load -wi sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>Using Docker</summary>
-
-## Docker
-
-Sniffnet can be run in a Docker container. This is especially useful for quickly testing the application without installing all dependencies directly on your system.
-
-### Pull from GitHub Container Registry
-
-The easiest way to get started is by pulling the pre-built image from GitHub Container Registry:
-
-```sh
-# Pull the latest version
-docker pull ghcr.io/gyulyvgc/sniffnet:latest
-
-# Or pull a specific version
-docker pull ghcr.io/gyulyvgc/sniffnet:1.2.3  # Replace with actual version
-```
-
-### Running the Docker container
-
-To run Sniffnet in a Docker container on Linux, you need to grant the appropriate network permissions and configure display access:
-
-#### For Wayland
-
-```sh
-docker run -it \
-  --net=host \
-  -v $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY:/tmp/$WAYLAND_DISPLAY \
-  -e WAYLAND_DISPLAY=$WAYLAND_DISPLAY \
-  -e XDG_RUNTIME_DIR=/tmp \
-  -e RUST_BACKTRACE=full \
-  -e ICED_BACKEND=tiny-skia \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  ghcr.io/gyulyvgc/sniffnet:latest
-```
-
-#### For X11
-
-```sh
-docker run -it \
-  --net=host \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -e RUST_BACKTRACE=full \
-  -e ICED_BACKEND=tiny-skia \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  ghcr.io/gyulyvgc/sniffnet:latest
-```
-
-> [!NOTE]
->
-> - The `--net=host` flag is required for Sniffnet to access your network interfaces.
-> - `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` are needed for packet capture capabilities.
-> - If you experience rendering issues, the `ICED_BACKEND=tiny-skia` environment variable switches to the software renderer.
-
-### Building your own Docker image
-
-If you prefer to build the Docker image yourself:
-
-```sh
-# Clone the repository
-git clone https://github.com/GyulyVGC/sniffnet.git
-cd sniffnet
-
-# Build the Docker image
-docker build -t sniffnet .
-
-# Run with the same parameters as above, but using your local image
-docker run -it --net=host [...other parameters] sniffnet
-```
-
-### Troubleshooting Docker setup
-
-If you encounter issues:
-
-1. Make sure you have the necessary permissions to run Docker commands (or use `sudo`)
-2. For GUI issues, ensure your host display server allows connections from Docker
-3. If you're using SELinux, you might need to adjust policies or temporarily set it to permissive mode
-
-For X11, you may need to allow Docker to connect to your X server:
-
-```sh
-xhost +local:docker
-```
-
-Remember to revert this change when done:
-
-```sh
-xhost -local:docker
-```
-
-#### For ARM64/aarch64 systems (like Apple Silicon Macs or Raspberry Pi)
-
-When running on ARM64 architecture, you may encounter X11 library errors such as:
-
-- `OsError XNotSupported libraryopenerror libX11-xcb.so.1 cannot open shared object file no such file or directory`
-- `libxkbcommon-x11.so could not be loaded`
-
-To resolve these issues, mount the host system's ARM64 libraries into the container:
-
-```sh
-sudo docker run -d \
-  --net=host \
-  --cap-add=NET_ADMIN \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v $HOME/.Xauthority:/root/.Xauthority \
-  -v /lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu \
-  -e DISPLAY=$DISPLAY \
-  --name sniffnet \
-  ghcr.io/gyulyvgc/sniffnet:latest
-```
-
-</details>
 
 ## Features
 
@@ -328,7 +111,7 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 
 Most of the errors that may arise are likely due to your system missing dependencies
 required to correctly analyze a network adapter. <br>
-Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies)
+Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) 
 for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems
@@ -347,12 +130,14 @@ ICED_BACKEND=tiny-skia
 
 </details>
 
+
 ## Acknowledgements
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+
 
 ## Stay in the loop
 
