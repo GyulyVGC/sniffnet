@@ -64,112 +64,11 @@ Do you want to help the project in an alternative way? You can also head to the 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[64&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi)&nbsp;\|&nbsp;[32&#8209;bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg)&nbsp;\|&nbsp;[Apple&nbsp;silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg) | [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb)&nbsp;\|&nbsp;[arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb)&nbsp;\|&nbsp;[i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb)&nbsp;\|&nbsp;[armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm)&nbsp;\|&nbsp;[aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |
 
 Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
+Not what you're looking for? Check out [alternative installation methods](https://github.com/GyulyVGC/sniffnet/wiki/Alternative-installation-methods).
 
 > [!NOTE]
 >
 > Remember to also install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
-
-**Alternative installation methods** are reported in the following:
-
-<details>
-
-  <summary>from Crates.io</summary>
-
-Follow this method only if you have [Rust installed](https://www.rust-lang.org/tools/install) on your machine. <br>
-In this case, the application binary can be built and installed with:
-
-```sh
-cargo install sniffnet --locked
-```
-
-</details>
-
-
-<details>
-
-  <summary>from Homebrew</summary>
-
-  You can install [Sniffnet Homebrew package](https://github.com/Homebrew/homebrew-core/pkgs/container/core%2Fsniffnet) with:
-
-  ```sh
-brew install sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>from Nixpkgs</summary>
-
-  You can install [Sniffnet Nix package](https://search.nixos.org/packages?channel=23.05&show=sniffnet&from=0&size=50&sort=relevance&type=packages&query=sniffnet) adding the following Nix code to your NixOS Configuration, usually located in `/etc/nixos/configuration.nix`:
-
-  ```nix
-  environment.systemPackages = [
-    pkgs.sniffnet
-  ];
-```
-
-  Alternatively, you can install it in your home using [Home Manager](https://github.com/nix-community/home-manager) with:
-
-  ```nix
-  home.packages = [
-    pkgs.sniffnet
-  ];
-```
-
-  Alternatively, you can try it in a shell with:
-  ```sh
-nix-shell -p sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on Arch Linux</summary>
-
-  You can install Sniffnet community package via [pacman](https://wiki.archlinux.org/title/Pacman):
-
-  ```sh
-pacman -S sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on FreeBSD</summary>
-
-You can install Sniffnet port with:
-
-  ```sh
-pkg install sniffnet
-```
-
-</details>
-
-<details>
-
-  <summary>on NetBSD</summary>
-
-You can install Sniffnet from the official repositories via [pkgin](https://pkgin.net):
-
-  ```sh
-pkgin install sniffnet
-```
-
-</details>
-<details>
-
-  <summary>on Tiny Core Linux</summary>
-
-You can install Sniffnet from the official repository with:
-
-  ```
-tce-load -wi sniffnet
-```
-
-</details>
 
 ## Features
 
