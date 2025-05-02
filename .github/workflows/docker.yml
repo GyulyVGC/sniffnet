@@ -28,7 +28,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: GyulyVGC
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push
@@ -38,6 +38,6 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/386,linux/arm/v7
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/gyulyvgc/sniffnet:latest
+            ghcr.io/gyulyvgc/sniffnet:${{ env.VERSION }}
+            ghcr.io/gyulyvgc/sniffnet:${{ github.sha }}
