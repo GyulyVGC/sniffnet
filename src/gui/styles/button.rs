@@ -8,7 +8,7 @@ use iced::widget::button::{Catalog, Status, Style};
 use iced::{Background, Border, Color, Shadow, Vector};
 
 use crate::StyleType;
-use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_BUTTON_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH};
 use crate::gui::styles::types::gradient_type::{
     GradientType, get_gradient_buttons, get_gradient_hovered_buttons,
 };
@@ -81,7 +81,7 @@ impl ButtonType {
                     _ => BORDER_WIDTH,
                 },
                 color: match self {
-                    ButtonType::Alert => ALERT_RED_COLOR,
+                    ButtonType::Alert => ext.red_alert_color,
                     ButtonType::BorderedRound => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
@@ -169,7 +169,7 @@ impl ButtonType {
                     _ => BORDER_WIDTH,
                 },
                 color: match self {
-                    ButtonType::Alert => ALERT_RED_COLOR,
+                    ButtonType::Alert => ext.red_alert_color,
                     ButtonType::BorderedRound | ButtonType::NotStarred => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color

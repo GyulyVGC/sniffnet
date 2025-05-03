@@ -49,6 +49,7 @@ pub const NIGHT_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     alpha_round_borders: 0.4,
     alpha_round_containers: 0.3,
     buttons_color: BUTTONS_NIGHT,
+    red_alert_color: RED_ALERT_COLOR_NIGHTLY,
 };
 
 // day theme
@@ -88,6 +89,7 @@ pub const DAY_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     alpha_round_borders: 0.45,
     alpha_round_containers: 0.2,
     buttons_color: BUTTONS_DAY,
+    red_alert_color: RED_ALERT_COLOR_DAILY,
 };
 
 // deep sea theme
@@ -138,6 +140,7 @@ pub const DEEP_SEA_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     alpha_round_borders: 0.35,
     alpha_round_containers: 0.15,
     buttons_color: BUTTONS_DEEP_SEA,
+    red_alert_color: RED_ALERT_COLOR_NIGHTLY,
 };
 
 // mon amour theme
@@ -188,6 +191,7 @@ pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     alpha_round_borders: 0.5,
     alpha_round_containers: 0.25,
     buttons_color: BUTTONS_MON_AMOUR,
+    red_alert_color: RED_ALERT_COLOR_DAILY,
 };
 
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =
@@ -224,10 +228,16 @@ pub const CHARTS_LINE_BORDER: u32 = 1;
 pub const BORDER_ROUNDED_RADIUS: f32 = 15.0;
 pub const BORDER_BUTTON_RADIUS: f32 = 180.0;
 
-// red color for alerts
-pub const ALERT_RED_COLOR: Color = Color {
-    r: 0.8,
-    g: 0.15,
-    b: 0.15,
+// red colors for alerts
+pub const RED_ALERT_COLOR_NIGHTLY: Color = Color {
+    r: 1.0,
+    g: 0.4,
+    b: 0.4,
+    a: 1.0,
+};
+pub const RED_ALERT_COLOR_DAILY: Color = Color {
+    r: 0.701_960_8,
+    g: 0.0,
+    b: 0.0,
     a: 1.0,
 };

@@ -6,7 +6,7 @@ use iced::widget::text_input::{Catalog, Status, Style};
 use iced::{Background, Border, Color};
 
 use crate::StyleType;
-use crate::gui::styles::style_constants::{ALERT_RED_COLOR, BORDER_WIDTH};
+use crate::gui::styles::style_constants::BORDER_WIDTH;
 
 #[derive(Default)]
 pub enum TextInputType {
@@ -36,7 +36,7 @@ impl TextInputType {
                 color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => ext.buttons_color,
-                    TextInputType::Error => ALERT_RED_COLOR,
+                    TextInputType::Error => ext.red_alert_color,
                 },
             },
             icon: Color {
@@ -51,6 +51,7 @@ impl TextInputType {
 
     fn focused(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
+        let ext = style.get_extension();
         let is_nightly = style.get_extension().is_nightly;
         Style {
             background: Background::Color(colors.primary),
@@ -58,7 +59,7 @@ impl TextInputType {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match self {
-                    TextInputType::Error => ALERT_RED_COLOR,
+                    TextInputType::Error => ext.red_alert_color,
                     _ => colors.secondary,
                 },
             },
@@ -119,7 +120,7 @@ impl TextInputType {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
                 color: match self {
-                    TextInputType::Error => ALERT_RED_COLOR,
+                    TextInputType::Error => ext.red_alert_color,
                     _ => colors.secondary,
                 },
             },
@@ -155,7 +156,7 @@ impl TextInputType {
                     },
                     TextInputType::Error => Color {
                         a: ext.alpha_round_borders,
-                        ..ALERT_RED_COLOR
+                        ..ext.red_alert_color
                     },
                 },
             },
