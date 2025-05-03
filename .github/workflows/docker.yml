@@ -35,9 +35,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/386,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/gyulyvgc/sniffnet:latest
             ghcr.io/gyulyvgc/sniffnet:${{ env.VERSION }}
-            ghcr.io/gyulyvgc/sniffnet:${{ github.sha }}
