@@ -6,13 +6,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA, UZ, VN,
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA,
+    UZ, VN,
 };
 
 /// This enum defines the available languages.
-#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash, Default)]
 pub enum Language {
-    /// English (default language).
+    /// English.
+    #[default]
     EN,
     /// Italian.
     IT,
@@ -55,22 +57,19 @@ pub enum Language {
     UZ,
     /// Vietnamese
     VI,
-}
-
-impl Default for Language {
-    fn default() -> Self {
-        Self::EN
-    }
+    /// Indonesian
+    ID,
 }
 
 impl Language {
-    pub const ALL: [Language; 20] = [
+    pub const ALL: [Language; 21] = [
         Language::EN,
         Language::DE,
         Language::EL,
         Language::ES,
         Language::FI,
         Language::FR,
+        Language::ID,
         Language::IT,
         Language::JA,
         Language::KO,
@@ -110,6 +109,7 @@ impl Language {
             Language::JA => JP,
             Language::UZ => UZ,
             Language::VI => VN,
+            Language::ID => ID,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
@@ -134,6 +134,7 @@ impl Language {
                 | Language::TR
                 | Language::PT
                 | Language::UK
+                | Language::ID
         )
     }
 }
@@ -162,6 +163,7 @@ impl fmt::Display for Language {
             Language::JA => "日本語",
             Language::UZ => "O'zbekcha",
             Language::VI => "Tiếng Việt",
+            Language::ID => "Bahasa Indonesia",
         };
         write!(f, "{self:?} - {lang_str}")
     }
