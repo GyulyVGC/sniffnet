@@ -1177,7 +1177,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::ZH_TW => "封包",
         Language::RO => "pachete",
         Language::KO => "패킷",
-        Language::TR | Language::SV => "paket",
+        Language::TR | Language::SV | Language::ID => "paket",
         Language::RU => "пакетов",
         Language::PT => "pacotes",
         Language::EL => "πακέτα",
@@ -1186,7 +1186,6 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::JA => "パケット",
         Language::UZ => "paketlar",
         Language::VI => "các gói tin",
-        Language::ID => "paket",
     }
 }
 
@@ -1219,11 +1218,15 @@ pub fn packets_translation(language: Language) -> &'static str {
 
 pub fn bytes_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::ES | Language::PT | Language::EL | Language::SV | Language::VI => {
-            "bytes"
-        }
-        Language::DE => "Bytes",
-        Language::IT => "byte",
+        Language::EN
+        | Language::IT
+        | Language::ES
+        | Language::PT
+        | Language::EL
+        | Language::SV
+        | Language::VI
+        | Language::ID
+        | Language::DE => "bytes",
         Language::FR => "octets",
         Language::PL => "bajty",
         Language::UK => "байти",
@@ -1236,7 +1239,6 @@ pub fn bytes_translation(language: Language) -> &'static str {
         // Language::FA => "بایت ها",
         Language::FI => "tavua",
         Language::JA => "バイト",
-        Language::ID => "Bytes",
     }
 }
 
