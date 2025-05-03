@@ -604,7 +604,8 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
                                 {network_adapter_translation}: {adapter}\n\n\
                                 Nếu bạn đã chắc chắn kết nối với internet, hãy thử chọn network adapter khác."
         ),
-        Language::ID => format!("Tidak ada sinyal yang bisa dilihat karena adapter yang kamu pilih tidak memiliki alamat yang aktif...\n\n\
+        Language::ID => format!(
+            "Tidak ada sinyal yang bisa dilihat karena adapter yang kamu pilih tidak memiliki alamat yang aktif...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Jika kamu yakin kamu terhubung ke internet, coba untuk memilih adapter lainnya."
         ),
@@ -718,7 +719,8 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Bạn có chắc là đã kết nối với internet và đã chọn đúng network adapter?"
         ),
-        Language::ID => format!("Tidak ada sinyal yang bisa dipantau. Menunggu paket jaringan...\n\n\
+        Language::ID => format!(
+            "Tidak ada sinyal yang bisa dipantau. Menunggu paket jaringan...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Apa kamu yakin kamu terhubung ke internet, dan memilih adapter yang benar?"
         ),
@@ -831,102 +833,12 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
                                  Các gói tin đã lọc: 0\n\n\
                                  Một số gói đã bị chặn, nhưng vẫn chưa có gói tin nào được bắt theo bộ lọc bạn đã chọn..."
         ),
-        Language::ID => format!("Total paket yang dilacak: {observed}\n\n\
+        Language::ID => format!(
+            "Total paket yang dilacak: {observed}\n\n\
                                  Paket yg difilter: 0\n\n\
                                  Beberapa paket dilacak, tetapi tidak ada yg terlihat berdasarkan filter yang kamu pilih..."
         ),
     })
-}
-
-pub fn filtered_packets_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Filtered packets",
-        Language::IT => "Pacchetti filtrati",
-        Language::FR => "Paquets filtrés",
-        Language::ES => "Paquetes filtrados",
-        Language::PL => "Przefiltrowane pakiety",
-        Language::DE => "Gefilterte Pakete",
-        Language::UK => "Відфільтровані пакети",
-        Language::ZH => "目标数据包计数",
-        Language::RO => "Pachete filtrate",
-        Language::KO => "필터링된 패킷",
-        Language::TR => "Filtrelenen paketler",
-        Language::RU => "Отфильтровано пакетов",
-        Language::PT => "Pacotes filtrados",
-        Language::EL => "Φιλτραρισμένα πακέτα",
-        // Language::FA => "بسته های صاف شده",
-        Language::SV => "Filtrerade paket",
-        Language::FI => "Suodatettuja paketteja",
-        Language::JA => "フィルタリングされたパケット",
-        Language::UZ => "Filtrlangan paketlar",
-        Language::VI => "Các gói tin đã được lọc",
-        Language::ID => "Paket yang sudah disaring",
-    }
-}
-
-pub fn filtered_bytes_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Filtered bytes",
-        Language::IT => "Byte filtrati",
-        Language::FR => "Octets filtrés",
-        Language::ES | Language::PT => "Bytes filtrados",
-        Language::PL => "Przechwycone bajty",
-        Language::DE => "Gefilterte Bytes",
-        Language::UK => "Відфільтровані байти",
-        Language::ZH => "目标网络流量计数",
-        Language::RO => "Octeți filtrați",
-        Language::KO => "필터링된 바이트",
-        Language::TR => "Filtrelenen bayt",
-        Language::RU => "Отфильтровано байт",
-        Language::EL => "Φιλτραρισμένα bytes",
-        // Language::FA => "بایت های صاف شده",
-        Language::SV => "Filtrerade bytes",
-        Language::FI => "Suodatettuja tavuja",
-        Language::JA => "フィルタリングされたバイト",
-        Language::UZ => "Filtrlangan baytlar",
-        Language::VI => "Các bytes đã được lọc",
-        Language::ID => "Bytes yang sudah disaring",
-    }
-}
-
-pub fn of_total_translation(language: Language, percentage: &str) -> String {
-    match language {
-        Language::EN => format!("({percentage} of the total)"),
-        Language::IT => format!("({percentage} del totale)"),
-        Language::FR => format!("({percentage} du total)"),
-        Language::ES => format!("({percentage} del total)"),
-        Language::PL => format!("({percentage} z całości)"),
-        Language::DE => format!("({percentage} der Gesamtzahl)"),
-        Language::UK => {
-            format!("({percentage} від загальної суми)")
-        }
-        Language::ZH => {
-            format!("(占所有数据包的 {percentage})")
-        }
-        Language::RO => {
-            format!("({percentage} din total)")
-        }
-        Language::KO => {
-            format!("({percentage} 의 일부)")
-        }
-        Language::TR => format!("toplamın ({percentage})"),
-        Language::RU => {
-            format!("({percentage} от общего числа)")
-        }
-        Language::PT => {
-            format!("({percentage} do total)")
-        }
-        Language::EL => {
-            format!("({percentage} από τα συνολικά)")
-        }
-        // Language::FA => format!("({percentage} از مجموع)"),
-        Language::SV => format!("({percentage} av totalen)"),
-        Language::FI => format!("({percentage} kokonaismäärästä)"),
-        Language::JA => format!("(トータル: {percentage} )"),
-        Language::UZ => format!("(Jami: {percentage} )"),
-        Language::VI => format!("({percentage} trên tổng cộng)"),
-        Language::ID => format!("({percentage} dari total)"),
-    }
 }
 
 // pub fn filtered_packets_translation(language: Language) -> &'static str {
@@ -1278,32 +1190,6 @@ pub fn packets_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn packets_chart_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "packets per second",
-        Language::IT => "pacchetti al secondo",
-        Language::FR => "paquets par seconde",
-        Language::ES => "paquetes por segundo",
-        Language::PL => "pakiety na sekundę",
-        Language::DE => "Pakete pro Sekunde",
-        Language::UK => "пакети на секунду",
-        Language::ZH => "数据包",
-        Language::RO => "pachete pe secundă",
-        Language::KO => "초당 패킷",
-        Language::TR => "saniye başı paket",
-        Language::RU => "пакетов в секунду",
-        Language::PT => "pacotes por segundo",
-        Language::EL => "πακέτα ανά δευτερόλεπτο",
-        // Language::FA => "بسته در ثانیه",
-        Language::SV => "paket per sekund",
-        Language::FI => "pakettia sekunnissa",
-        Language::JA => "1 秒あたりのパケット数",
-        Language::UZ => "paket soniyasiga",
-        Language::VI => "gói tin trên giây",
-        Language::ID => "paket per detik",
-    }
-}
-
 // pub fn packets_chart_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "packets per second",
@@ -1351,31 +1237,6 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::FI => "tavua",
         Language::JA => "バイト",
         Language::ID => "Bytes",
-    }
-}
-
-pub fn bytes_chart_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "bytes per second",
-        Language::IT => "byte al secondo",
-        Language::FR => "octets par seconde",
-        Language::ES | Language::PT => "bytes por segundo",
-        Language::PL => "bajty na sekundę",
-        Language::DE => "Bytes pro Sekunde",
-        Language::UK => "байти на секунду",
-        Language::ZH => "网络流量",
-        Language::RO => "octeți pe secundă",
-        Language::KO => "초당 바이트",
-        Language::TR => "saniye başı bayt",
-        Language::RU => "байтов в секунду",
-        Language::EL => "bytes ανά δευτερόλεπτο",
-        // Language::FA => "بایت در ثانیه",
-        Language::SV => "bytes per sekund",
-        Language::FI => "tavua sekunnissa",
-        Language::JA => "1 秒あたりのバイト量",
-        Language::UZ => "bayt soniyasiga",
-        Language::VI => "byte trên giây",
-        Language::ID => "bytes per detik",
     }
 }
 
@@ -1610,109 +1471,6 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::UZ => "hech biri",
         Language::VI => "không có",
         Language::ID => "Tidak ada",
-    }
-}
-
-pub fn yeti_night_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Sniffnet's original dark theme",
-        Language::IT => "Il tema scuro originale di Sniffnet",
-        Language::FR => "Thème original sombre de Sniffnet",
-        Language::ES => "Tema oscuro original de Sniffnet",
-        Language::PL => "Oryginalny, ciemny motyw Sniffnet",
-        Language::DE => "Sniffnets urspüngliches, dunkles Design",
-        Language::UK => "Оригінальний, темний мотив Sniffnet",
-        Language::ZH => "Sniffnet暗黑",
-        Language::RO => "Tema întunecată originală Sniffnet",
-        Language::KO => "Sniffnet의 기본 다크테마",
-        Language::TR => "Sniffnet'in orjinal koyu teması",
-        Language::RU => "Оригинальная тёмная тема Sniffnet'а",
-        Language::PT => "Tema escuro original de Sniffnet",
-        Language::EL => "Το αυθεντικό σκούρο θέμα του Sniffnet",
-        // Language::FA => "زمینه تاریک اصلی Sniffnet",
-        Language::SV => "Sniffnets ursprungliga mörka tema",
-        Language::FI => "Sniffnetin alkuperäinen tumma teema",
-        Language::JA => "Sniffnet のオリジナル テーマ",
-        Language::UZ => "Sniffnet-ning asl qora mavzusi",
-        Language::VI => "Chủ đề tối của Sniffnet",
-        Language::ID => "Tema gelap bawaan Sniffnet",
-    }
-}
-
-pub fn yeti_day_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Sniffnet's original light theme",
-        Language::IT => "Il tema chiaro originale di Sniffnet",
-        Language::FR => "Thème original clair de Sniffnet",
-        Language::ES | Language::PT => "Tema claro original de Sniffnet",
-        Language::PL => "Oryginalny, jasny motyw Sniffnet",
-        Language::DE => "Sniffnets urspüngliches, helles Design",
-        Language::UK => "Оригінальний, світлий мотив Sniffnet",
-        Language::ZH => "Sniffnet浅色",
-        Language::RO => "Tema deschisă originală Sniffnet",
-        Language::KO => "Sniffnet의 기본 라이트테마",
-        Language::TR => "Sniffnet'in orjinal açık teması",
-        Language::RU => "Оригинальная светая тема Sniffnet'а",
-        Language::EL => "Το αυθεντικό ανοιχτόχρωμο θέμα του Sniffnet",
-        // Language::FA => "زمینه روشن اصلی Sniffnet",
-        Language::SV => "Sniffnets ursprungliga ljusa tema",
-        Language::FI => "Sniffnetin alkuperäinen vaalea teema",
-        Language::JA => "Sniffnet のオリジナル ライト テーマ",
-        Language::UZ => "Sniffnet-ning asl oq mavzusi",
-        Language::VI => "Chủ đề sáng của Sniffnet",
-        Language::ID => "Tema terang bawaan Sniffnet",
-    }
-}
-
-pub fn deep_sea_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "To dive into network traffic",
-        Language::IT => "Per immergersi nel traffico di rete",
-        Language::FR => "Pour plonger dans votre trafic réseau",
-        Language::ES => "Para sumergirse en el tráfico de la red",
-        Language::PL => "Aby zanurzyć się w ruchu sieciowym",
-        Language::DE => "Um in den Netzwerkverkehr einzutauchen",
-        Language::UK => "Проаналізувати мережевий рух",
-        Language::ZH => "潜入网络活动的海洋",
-        Language::RO => "Pentru a vă scufunda în traficul de rețea",
-        Language::KO => "네트워크 트레픽으로 바로가기",
-        Language::TR => "Ağ trafiğine dalmak",
-        Language::RU => "Для погружения в сетевой трафик",
-        Language::PT => "Para mergulhar no tráfego de rede",
-        Language::EL => "Βουτιά μέσα στην κίνηση του δικτύου",
-        // Language::FA => "شیرجه رفتن در آمد و شد شبکه",
-        Language::SV => "För att dyka ned i nätverkstrafiken",
-        Language::FI => "Sukeltaaksesi verkkoliikenteeseen",
-        Language::JA => "ネットワーク トラフィックにダイブ",
-        Language::UZ => "Tarmoq trafigiga qo'shilish uchun",
-        Language::VI => "Đắm chìm vào lưu lượng mạng",
-        Language::ID => "Untuk mendalami lalu lintas jaringan",
-    }
-}
-
-pub fn mon_amour_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Lovely theme made for dreamers",
-        Language::IT => "Tema incantevole fatto per i sognatori",
-        Language::FR => "Thème romantique fait pour les rêveurs",
-        Language::ES => "Tema encantador hecho para soñadores",
-        Language::PL => "Uroczy motyw stworzony dla marzycieli",
-        Language::DE => "Schönes Design für Träumer",
-        Language::UK => "Прекрасна тема для мрійників",
-        Language::ZH => "梦想家的主题",
-        Language::RO => "O temă minunată creată pentru visători",
-        Language::KO => "사랑스러운 몽환가들을 위한 테마",
-        Language::TR => "Hayal perestler için yapılmış güzel tema",
-        Language::RU => "Милая тема для мечтателей",
-        Language::PT => "Tema encantador feito para sonhadores",
-        Language::EL => "Φτιαγμένο για ονειροπόλους",
-        // Language::FA => "زمینه دلپذیر ساخته شده برای رویا پردازان",
-        Language::SV => "Ljuvligt tema gjort för drömmare",
-        Language::FI => "Ihana teema unelmoijille",
-        Language::JA => "ドリーマーのためのテーマ",
-        Language::UZ => "Xayolparastlar uchun chiroyli mavzu",
-        Language::VI => "Chủ đề mộng mơ cho những kẻ mơ mộng",
-        Language::ID => "Tema yang indah dibuat untuk para pemimpi",
     }
 }
 
@@ -1975,58 +1733,6 @@ pub fn overview_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn packets_threshold_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Notify me when a packets threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di pacchetti è superata",
-        Language::FR => "Me notifier lorsqu'un seuil de paquet est atteint",
-        Language::ES => "Notificarme cuando se supere un límite de paquetes",
-        Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg pakietów",
-        Language::DE => "Benachrichtige mich, wenn die Pakete eine Schwelle überschreiten",
-        Language::UK => "Повідом мене про переліміт пакетів",
-        Language::ZH => "超过设定的数据包数量阈值时通知我",
-        Language::RO => "Anunță-mă când este depășit un prag de pachete",
-        Language::KO => "패킷 임계값을 초과하면 알림",
-        Language::TR => "Paket eşiği aşıldığında beni bilgilendir",
-        Language::RU => "Уведомить, когда порог по частоте пакетов превышен",
-        Language::PT => "Notifique-me quando um limite de pacotes for excedido",
-        Language::EL => "Ειδοποίησέ με όταν το όριο τον πακέτων ξεπεραστεί",
-        // Language::FA => "به من اطلاع بده وقتی آستانه یک بسته فراتر رفت",
-        Language::SV => "Notifiera mig när en paketgräns har överstigits",
-        Language::FI => "Ilmoita minulle, kun pakettiraja on ylittynyt",
-        Language::JA => "パケット数の閾値を超過した場合に通知する",
-        Language::UZ => "Paket chegarasi oshib ketganda xabar bering",
-        Language::VI => "Báo cho tôi biết khi vượt quá ngưỡng gói tin",
-        Language::ID => "Beritahu saya ketika ambang batas paket terlampaui",
-    }
-}
-
-pub fn bytes_threshold_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Notify me when a bytes threshold is exceeded",
-        Language::IT => "Notificami quando una soglia di byte è superata",
-        Language::FR => "Me notifier lorsqu'un seuil de donnée est atteint",
-        Language::ES => "Notificarme cuando se exceda un límite de bytes",
-        Language::PL => "Powiadom mnie, gdy zostanie przekroczony próg bajtów",
-        Language::DE => "Benachrichtige mich, wenn die Bytes eine Schwelle überschreiten",
-        Language::UK => "Повідом мене про переліміт байтів",
-        Language::ZH => "超过设定的网络流量阈值时通知我",
-        Language::RO => "Anunță-mă când este depășit un prag de octeți",
-        Language::KO => "바이트 임계값을 초과하면 알림",
-        Language::TR => "Bayt eşiği aşıldığında beni bilgilendir",
-        Language::RU => "Уведомить, когда порог в байтах превышен",
-        Language::PT => "Notifique-me quando um limite de bytes for excedido",
-        Language::EL => "Ειδοποίησέ με όταν το όριο των bytes ξεπεραστεί",
-        // Language::FA => "به من اطلاع بده وقتی آستانه یک بایت فراتر رفت",
-        Language::SV => "Notifiera mig när en gräns för bytes har överstigits",
-        Language::FI => "Ilmoita minulle, kun tavuraja on ylittynyt",
-        Language::JA => "バイト量の閾値を超過した場合に通知する",
-        Language::UZ => "Bayt chegarasi oshib ketganda menga xabar bering",
-        Language::VI => "Báo cho tôi biết khi vượt quá ngưỡng bytes",
-        Language::ID => "Beritahu saya ketika ambang batas bytes terlampaui",
-    }
-}
-
 // pub fn packets_threshold_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Notify me when a packets threshold is exceeded",
@@ -2105,60 +1811,6 @@ pub fn per_second_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn specify_multiples_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "you can also specify 'K', 'M' and 'G'",
-        Language::IT => "puoi anche specificare 'K', 'M' e 'G'",
-        Language::FR => "vous pouvez également spécifier 'K', 'M' et 'G'",
-        Language::ES => "también puede especificar 'K', 'M' y 'G'",
-        Language::PL => "możesz również określić 'K', 'M' i 'G'",
-        Language::DE => "du kannst auch 'K', 'M' und 'G' verwenden",
-        Language::UK => "можеш також вибрати 'K', 'M' i 'G'",
-        Language::ZH => "您可指定 'K', 'M', 'G'",
-        Language::RO => "puteți specifica 'K', 'M', 'G'",
-        Language::KO => "지정 가능합니다 'K', 'M', 'G'",
-        Language::TR => "şunları da kullanabilirsin 'K', 'M' ve 'G'",
-        Language::RU => "Так же можно указать 'K', 'M' или 'G'",
-        Language::PT => "também pode especificar 'K', 'M' e 'G'",
-        Language::EL => "μπορείς επίσης να καθορίσεις τα 'K', 'M' και 'G'",
-        // Language::FA => "؛ شما همچنین می توانید 'M'، 'K' و 'G' را تعیین کنید",
-        Language::SV => "du kan också ange 'K', 'M' och 'G'",
-        Language::FI => "voit myös määrittää 'K', 'M' tai 'G'",
-        Language::JA => "'K', 'M', 'G' が選択可能です",
-        Language::UZ => "'K', 'M' va 'G' ni ham belgilashingiz mumkin",
-        Language::VI => "bạn cũng có thể chọn 'K', 'M' and 'G'",
-        Language::ID => "Anda juga dapat menentukan 'K', 'M' dan 'G'",
-    }
-}
-
-pub fn favorite_notification_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Notify me when new data are exchanged from my favorites",
-        Language::IT => "Notificami quando nuovi dati sono scambiati dai miei preferiti",
-        Language::FR => "Notifiez-moi lorsque des données sont échangées depuis mes favoris",
-        Language::ES => "Notificarme cuando se intercambien nuevos datos de mis favoritos",
-        Language::PL => "Powiadom mnie, gdy nowe dane z moich ulubionych zostaną wymienione",
-        Language::DE => {
-            "Benachrichtige mich, wenn neue Daten mit meinen Favoriten ausgetauscht werden"
-        }
-        Language::UK => "Повідом мене, коли буде обмін даними з моїх улюблених",
-        Language::ZH => "收藏夹内的连接有新活动时通知我",
-        Language::RO => "Anunță-mă când sunt transferate date noi de la favoritele mele",
-        Language::KO => "즐겨찾기에서 새 데이터가 교환될 때 알림",
-        Language::TR => "Favorilerimde veri akışı olduğunda beni uyar",
-        Language::RU => "Уведомить, если произошёл обмен данными в соединениях из избранного",
-        Language::PT => "Notificar-me quando novos dados forem trocados dos meus favoritos",
-        Language::EL => "Ειδοποίησέ με όταν νέα δεδομένα έχουν ανταλλαγεί από τα αγαπημένα μου",
-        // Language::FA => "به من اطلاع بده وقتی داده جدید از پسندیده های من مبادله شد",
-        Language::SV => "Notifiera mig när ny data utbyts av mina favoriter",
-        Language::FI => "Ilmoita minulle, kun suosikkini vaihtavat uusia tietoja",
-        Language::JA => "お気に入りに指定したホストに関してデータ送受信があった場合に通知する",
-        Language::UZ => "Sevimlilar ro'yhatidan yangi ma'lumotlar almashganda xabar bering",
-        Language::VI => "Báo cho tôi biết khi dữ liệu mới được trao đổi từ mục yêu thích của tôi",
-        Language::ID => "Beritahu saya ketika data baru dipertukarkan dari favorit saya",
-    }
-}
-=======
 // pub fn specify_multiples_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "you can also specify 'K', 'M' and 'G'",
@@ -2292,27 +1944,28 @@ pub fn sound_translation(language: Language) -> &'static str {
 
 pub fn bytes_exceeded_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Bytes threshold exceeded!",
-        Language::IT => "Soglia di Byte superata!",
-        Language::FR => "Seuil de donnée atteint!",
-        Language::ES => "¡Límite de bytes superado!",
-        Language::PL => "Próg bajtów przekroczony!",
-        Language::DE => "Byte-Schwellenwert überschritten!",
-        Language::UK => "Ліміт байтів перевищено!",
-        Language::ZH => "达到设定的网络流量阈值!",
-        Language::RO => "Prag de octeți depășit!",
-        Language::KO => "바이트 임계값 초과!",
-        Language::TR => "Bayt eşik değeri aşıldı!",
-        Language::RU => "Порог в байтах превышен!",
-        Language::PT => "Limite de bytes excedido!",
-        Language::EL => "Το όριο των bytes ξεπεράστηκε!",
-        // Language::FA => "آستانه بایت فراتر رفت!",
-        Language::SV => "Gräns för bytes överskriden!",
-        Language::FI => "Tavuraja ylitetty!",
-        Language::JA => "バイト量の閾値を調査しました!",
-        Language::UZ => "Bayt chegarasidan oshib ketdi!",
-        Language::VI => "Bytes đã vượt ngưỡng!",
-        Language::ID => "Ambang batas byte terlampaui!",
+        Language::EN => "Bytes threshold exceeded",
+        Language::IT => "Soglia di Byte superata",
+        Language::FR => "Seuil de donnée atteint",
+        Language::ES => "¡Límite de bytes superado",
+        Language::PL => "Próg bajtów przekroczony",
+        Language::DE => "Byte-Schwellenwert überschritten",
+        Language::UK => "Ліміт байтів перевищено",
+        Language::ZH => "达到设定的网络流量阈值",
+        Language::ZH_TW => "已超過位元組閾值",
+        Language::RO => "Prag de octeți depășit",
+        Language::KO => "바이트 임계값 초과",
+        Language::TR => "Bayt eşik değeri aşıldı",
+        Language::RU => "Порог в байтах превышен",
+        Language::PT => "Limite de bytes excedido",
+        Language::EL => "Το όριο των bytes ξεπεράστηκε",
+        // Language::FA => "آستانه بایت فراتر رفت",
+        Language::SV => "Gräns för bytes överskriden",
+        Language::FI => "Tavuraja ylitetty",
+        Language::JA => "バイト量の閾値を調査しました",
+        Language::UZ => "Bayt chegarasidan oshib ketdi",
+        Language::VI => "Bytes đã vượt ngưỡng",
+        Language::ID => "Ambang batas byte terlampaui",
     }
 }
 
@@ -2345,27 +1998,28 @@ pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> Stri
 
 pub fn packets_exceeded_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Packets threshold exceeded!",
-        Language::IT => "Soglia di pacchetti superata!",
-        Language::FR => "Le seuil de paquet a été atteint!",
-        Language::ES => "¡Se ha superado el límite de paquetes!",
-        Language::PL => "Przekroczono próg pakietów!",
-        Language::DE => "Paket-Schwellenwert überschritten!",
-        Language::UK => "Ліміт пакетів перевищено!",
-        Language::ZH => "达到设定的数据包数量阈值!",
-        Language::RO => "Prag de pachete depășit!",
-        Language::KO => "패킷 임계값 초과!",
-        Language::TR => "Paket eşik değeri aşıldı!",
-        Language::RU => "Порог по числу пакетов превышен!",
-        Language::PT => "Limite de pacotes excedido!",
-        Language::EL => "Το όριο των πακέτων ξεπεράστηκε!",
-        // Language::FA => "آستانه بسته فراتر رفت!",
-        Language::SV => "Paketgräns överskriden!",
-        Language::FI => "Pakettiraja ylitetty!",
-        Language::JA => "パケット数のしきい値を超過しました!",
-        Language::UZ => "Paket chegarasidan oshib ketdi!",
-        Language::VI => "Gói tin đã vượt ngưỡng!",
-        Language::ID => "Ambang batas paket terlampaui!",
+        Language::EN => "Packets threshold exceeded",
+        Language::IT => "Soglia di pacchetti superata",
+        Language::FR => "Le seuil de paquet a été atteint",
+        Language::ES => "¡Se ha superado el límite de paquetes",
+        Language::PL => "Przekroczono próg pakietów",
+        Language::DE => "Paket-Schwellenwert überschritten",
+        Language::UK => "Ліміт пакетів перевищено",
+        Language::ZH => "达到设定的数据包数量阈值",
+        Language::ZH_TW => "已超過封包閾值",
+        Language::RO => "Prag de pachete depășit",
+        Language::KO => "패킷 임계값 초과",
+        Language::TR => "Paket eşik değeri aşıldı",
+        Language::RU => "Порог по числу пакетов превышен",
+        Language::PT => "Limite de pacotes excedido",
+        Language::EL => "Το όριο των πακέτων ξεπεράστηκε",
+        // Language::FA => "آستانه بسته فراتر رفت",
+        Language::SV => "Paketgräns överskriden",
+        Language::FI => "Pakettiraja ylitetty",
+        Language::JA => "パケット数のしきい値を超過しました",
+        Language::UZ => "Paket chegarasidan oshib ketdi",
+        Language::VI => "Gói tin đã vượt ngưỡng",
+        Language::ID => "Ambang batas paket terlampaui",
     }
 }
 
@@ -2416,10 +2070,7 @@ pub fn packets_exceeded_value_translation(language: Language, value: u32) -> Str
         Language::JA => format!("{value} パケットの送受信が発生しました"),
         Language::UZ => format!("{value} paket uzatildi"),
         Language::VI => format!("{value} gói tin đã được trao đổi"),
-        Language::ID => match value {
-            1 => "1 paket telah dipertukarkan".to_owned(),
-            npackets => format!("{npackets} paket telah dipertukarkan"),
-        },
+        Language::ID => format!("{value} paket telah dipertukarkan"),
     }
 }
 
@@ -2436,17 +2087,17 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::ZH_TW => "我的最愛中有新的資料交換",
         Language::RO => "Date noi transferate de la favorite",
         Language::KO => "즐겨찾기에서 새 데이터 교환",
-        Language::TR => "Favorilerden yeni veri aktarıldı!",
-        Language::RU => "Новый обмен данными в избранных соедиениях!",
-        Language::PT => "Novos dados trocados dos favoritos!",
-        Language::EL => "Καινούρια δεδομένα έχουν ανταλλαγεί στα αγαπημένα!",
-        // Language::FA => "مبادله داده جدید از پسندیده ها!",
-        Language::SV => "Ny data utbytt av favoriter!",
-        Language::FI => "Uusia tietoja vaihdettu suosikeista!",
-        Language::JA => "お気に入りのホストで新しいデータ送受信が発生しました!",
-        Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi!",
-        Language::VI => "Mục ưa thích vừa có trao đổi!",
-        Language::ID => "Data baru dipertukarkan dari favorit!",
+        Language::TR => "Favorilerden yeni veri aktarıldı",
+        Language::RU => "Новый обмен данными в избранных соедиениях",
+        Language::PT => "Novos dados trocados dos favoritos",
+        Language::EL => "Καινούρια δεδομένα έχουν ανταλλαγεί στα αγαπημένα",
+        // Language::FA => "مبادله داده جدید از پسندیده ها",
+        Language::SV => "Ny data utbytt av favoriter",
+        Language::FI => "Uusia tietoja vaihdettu suosikeista",
+        Language::JA => "お気に入りのホストで新しいデータ送受信が発生しました",
+        Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi",
+        Language::VI => "Mục ưa thích vừa có trao đổi",
+        Language::ID => "Data baru dipertukarkan dari favorit",
     }
 }
 
@@ -2554,11 +2205,14 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
         Language::VI => {
             "Bạn chưa bật tính năng thông báo!\n\n\
                          au khi bật, trang này sẽ hiển thị thông báo\n\n\
-                         Hãy bật thông báo trong phần cài đặt:",
-        Language::ID => "Anda belum mengaktifkan notifikasi!\n\n\
+                         Hãy bật thông báo trong phần cài đặt:"
+        }
+        Language::ID => {
+            "Anda belum mengaktifkan notifikasi!\n\n\
                                  Setelah mengaktifkannya, halaman ini akan menampilkan log notifikasi Anda\n\n\
-                                 Anda dapat mengaktifkan notifikasi dari pengaturan:",
-        })
+                                 Anda dapat mengaktifkan notifikasi dari pengaturan:"
+        }
+    })
 }
 
 pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a, StyleType> {

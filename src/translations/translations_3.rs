@@ -309,7 +309,9 @@ pub fn unsupported_link_type_translation<'a>(
         Language::UK => {
             "Різновид зʼєднання, повʼязаний з даним адаптером, ще не підтримується Sniffnet-ом..."
         }
-        Language::ID => "Tipe koneksi yang terhubung dengan adaptor ini belum didukung oleh Sniffnet",
+        Language::ID => {
+            "Tipe koneksi yang terhubung dengan adaptor ini belum didukung oleh Sniffnet"
+        }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
