@@ -1,0 +1,16 @@
+# Ignore everything
+*
+
+# Explicitly allow files
+!src/**/*.rs
+!build.rs
+!Cargo.toml
+!Cargo.lock
+!Dockerfile
+!services.txt
+!resources/countries_flags/**/*.svg
+!resources/DB/*.mmdb
+!resources/fonts/subset/*.ttf
+!resources/logos/raw/icon.png
+!resources/packaging/windows/graphics/sniffnet.ico
+!resources/sounds/*.mp3

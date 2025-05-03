@@ -30,6 +30,11 @@ pub struct PaletteExtension {
         serialize_with = "serialize_color"
     )]
     pub buttons_color: Color,
+    #[serde(
+        deserialize_with = "deserialize_color",
+        serialize_with = "serialize_color"
+    )]
+    pub red_alert_color: Color,
 }
 
 impl Hash for PaletteExtension {
@@ -42,6 +47,7 @@ impl Hash for PaletteExtension {
             alpha_round_borders,
             alpha_round_containers,
             buttons_color,
+            red_alert_color,
         } = self;
 
         is_nightly.hash(state);
@@ -51,6 +57,7 @@ impl Hash for PaletteExtension {
         (997 * (alpha_chart_badge + alpha_round_borders + alpha_round_containers) as i32)
             .hash(state);
         color_hash(*buttons_color, state);
+        color_hash(*red_alert_color, state);
     }
 }
 
@@ -88,7 +95,9 @@ mod tests {
     use iced::Color;
     use serde_test::{Token, assert_tokens};
 
-    use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+    use crate::gui::styles::style_constants::{
+        RED_ALERT_COLOR_DAILY, SARASA_MONO, SARASA_MONO_BOLD,
+    };
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
     // Test if deserializing and serializing a PaletteExtension works.
@@ -107,13 +116,14 @@ mod tests {
                 b: 0.2,
                 a: 1.0,
             },
+            red_alert_color: RED_ALERT_COLOR_DAILY,
         };
         assert_tokens(
             &ext,
             &[
                 Token::Struct {
                     name: "PaletteExtension",
-                    len: 7,
+                    len: 8,
                 },
                 Token::Str("is_nightly"),
                 Token::Bool(false),
@@ -129,6 +139,8 @@ mod tests {
                 Token::F32(0.1778),
                 Token::Str("buttons_color"),
                 Token::Str("#996633"),
+                Token::Str("red_alert_color"),
+                Token::Str("#b30000"),
                 Token::StructEnd,
             ],
         );

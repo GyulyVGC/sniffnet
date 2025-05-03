@@ -3,7 +3,6 @@
 #![allow(clippy::module_name_repetitions)]
 
 use crate::StyleType;
-use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use crate::gui::types::message::Message;
 use iced::widget::text::{Catalog, Style};
 use iced::widget::{Column, Text};
@@ -51,6 +50,7 @@ impl TextType {
 
 pub fn highlight(style: &StyleType, element: TextType) -> Color {
     let colors = style.get_palette();
+    let ext = style.get_extension();
     let secondary = colors.secondary;
     let is_nightly = style.get_extension().is_nightly;
     match element {
@@ -74,8 +74,7 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
         }
         TextType::Incoming => colors.secondary,
         TextType::Outgoing => colors.outgoing,
-        TextType::Danger => ALERT_RED_COLOR,
-        TextType::Sponsor => Color::from_rgb(1.0, 0.3, 0.5),
+        TextType::Danger | TextType::Sponsor => ext.red_alert_color,
         TextType::Standard => colors.text_body,
         TextType::Starred => colors.starred,
     }

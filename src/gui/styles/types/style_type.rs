@@ -14,6 +14,7 @@ use crate::gui::styles::types::palette_extension::PaletteExtension;
 /// Used to specify the kind of style of the application
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Hash, PartialEq)]
 #[serde(tag = "style", content = "name")]
+#[allow(clippy::large_enum_variant)]
 pub enum StyleType {
     Night,
     Day,
@@ -205,6 +206,8 @@ mod tests {
                 Token::F32(0.12),
                 Token::Str("buttons_color"),
                 Token::Str("#484848"),
+                Token::Str("red_alert_color"),
+                Token::Str("#ff6666"),
                 Token::MapEnd,
                 Token::StructEnd,
                 Token::StructEnd,

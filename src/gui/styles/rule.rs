@@ -3,7 +3,6 @@
 #![allow(clippy::module_name_repetitions)]
 
 use crate::StyleType;
-use crate::gui::styles::style_constants::ALERT_RED_COLOR;
 use iced::Color;
 use iced::widget::rule::{Catalog, FillMode, Style};
 
@@ -27,7 +26,7 @@ impl RuleType {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
-                RuleType::Dropped => ALERT_RED_COLOR,
+                RuleType::Dropped => ext.red_alert_color,
                 RuleType::FilteredOut => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
