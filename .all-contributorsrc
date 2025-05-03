@@ -639,6 +639,15 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "nubikripto",
+      "name": "Nubi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35731885?v=4",
+      "profile": "https://nubikripto.my.id",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
