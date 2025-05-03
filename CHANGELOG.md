@@ -9,6 +9,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Show data agglomerates in _Inspect_ page table ([#684](https://github.com/GyulyVGC/sniffnet/pull/684) — fixes [#601](https://github.com/GyulyVGC/sniffnet/issues/601))
 - Added Traditional Chinese (Taiwan) translation 🇹🇼 ([#774](https://github.com/GyulyVGC/sniffnet/pull/774))
 - Added Indonesian translation 🇮🇩 ([#611](https://github.com/GyulyVGC/sniffnet/pull/611))
+- A Docker image of Sniffnet is now available ([#735](https://github.com/GyulyVGC/sniffnet/pull/735))
 - Updated some of the existing translations to v1.3: 
   - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
   - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))

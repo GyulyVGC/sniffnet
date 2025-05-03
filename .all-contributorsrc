@@ -630,6 +630,15 @@
         "design",
         "a11y"
       ]
+    },
+    {
+      "login": "domcyrus",
+      "name": "Marco Cadetg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/884083?v=4",
+      "profile": "https://github.com/domcyrus",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
