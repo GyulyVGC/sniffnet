@@ -502,16 +502,16 @@ fn col_device<'a>(
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
-    let cs_info = &cs.get_name();
+    let cs_info = cs.get_name();
     #[cfg(target_os = "windows")]
-    let cs_info = cs.get_desc().as_ref().unwrap_or(&cs.get_name());
+    let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
     Column::new()
         .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             cs.title(language),
-            cs_info,
+            &cs_info,
             font,
         ))
         .push(link_type.link_type_col(language, font))
