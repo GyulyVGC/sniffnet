@@ -98,11 +98,12 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .push(col_port_filter),
         )
         .push(Rule::horizontal(40))
-        .push(
-            Container::new(get_export_pcap_group(&sniffer.export_pcap, language, font))
-                .height(Length::Fill)
-                .align_y(Alignment::Start),
-        )
+        .push(get_export_pcap_group(
+            &sniffer.capture_source,
+            &sniffer.export_pcap,
+            language,
+            font,
+        ))
         .push(
             Container::new(button_start(
                 font,
@@ -427,11 +428,16 @@ fn get_col_import_pcap<'a>(
         .push(button)
 }
 
-fn get_export_pcap_group(
+fn get_export_pcap_group<'a>(
+    cs: &CaptureSource,
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
-) -> Container<Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
+    if matches!(cs, CaptureSource::File(_)) {
+        return Container::new(Space::with_height(Length::Fill));
+    }
+
     let enabled = export_pcap.enabled();
     let file_name = export_pcap.file_name();
     let directory = export_pcap.directory();
@@ -477,14 +483,14 @@ fn get_export_pcap_group(
                     )),
             );
         ret_val = ret_val.push(inner_col);
-        Container::new(ret_val)
-            .padding(10)
-            .width(Length::Fill)
-            .class(ContainerType::BorderedRound)
-    } else {
-        Container::new(ret_val)
-            .padding(10)
-            .width(Length::Fill)
-            .class(ContainerType::BorderedRound)
     }
+
+    Container::new(
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .class(ContainerType::BorderedRound),
+    )
+    .height(Length::Fill)
+    .align_y(Alignment::Start)
 }
