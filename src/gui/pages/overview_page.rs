@@ -24,9 +24,9 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, error_translation, incoming_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
+    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -510,7 +510,7 @@ fn col_device<'a>(
         .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
-            network_adapter_translation(language),
+            cs.title(language),
             cs_info,
             font,
         ))

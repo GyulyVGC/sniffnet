@@ -3,6 +3,9 @@ use std::sync::{Arc, Mutex};
 
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
+use crate::translations::translations::network_adapter_translation;
+use crate::translations::translations_3::file_name_translation;
+use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_path_termination_string;
 
 pub enum CaptureContext {
@@ -139,6 +142,13 @@ pub enum CaptureSource {
 }
 
 impl CaptureSource {
+    pub fn title(&self, language: Language) -> &str {
+        match self {
+            Self::Device(_) => network_adapter_translation(language),
+            Self::File(_) => file_name_translation(language),
+        }
+    }
+
     pub fn get_addresses(&self) -> Arc<Mutex<Vec<Address>>> {
         match self {
             Self::Device(device) => device.addresses.clone(),
