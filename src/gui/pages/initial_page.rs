@@ -37,6 +37,7 @@ use crate::translations::translations::{
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
+use crate::translations::translations_4::import_capture_translation;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
 use crate::utils::types::file_info::FileInfo;
@@ -57,8 +58,8 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let col_import_pcap = get_col_import_pcap(
         language,
         font,
-        &sniffer.capture_source.get_name(),
         &sniffer.capture_source,
+        &sniffer.import_pcap_path,
     );
     let col_capture_source = Column::new().push(col_adapter).push(col_import_pcap);
 
@@ -377,16 +378,16 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
 fn get_col_import_pcap<'a>(
     language: Language,
     font: Font,
-    path: &str,
     cs: &CaptureSource,
-) -> Button<'a, Message, StyleType> {
+    path: &String,
+) -> Column<'a, Message, StyleType> {
     let is_import_pcap_set = matches!(cs, CaptureSource::File(_));
 
     let button_row = Row::new()
         .align_y(Alignment::Center)
-        .push(Text::new(get_path_termination_string(path, 17)).font(font))
+        .push(Text::new(get_path_termination_string(path, 25)).font(font))
         .push(button_open_file(
-            path.to_owned(),
+            path.clone(),
             FileInfo::PcapImport,
             language,
             font,
@@ -398,19 +399,32 @@ fn get_col_import_pcap<'a>(
         .width(Length::Fill)
         .align_x(Alignment::Center)
         .spacing(5)
-        .push(Text::new("custom_style_translation(language)").font(font))
         .push(button_row);
 
-    Button::new(content)
-        .height(75)
-        .width(380)
-        .padding(Padding::ZERO.top(10).bottom(5))
-        .class(if is_import_pcap_set {
-            ButtonType::BorderedRoundSelected
-        } else {
-            ButtonType::BorderedRound
-        })
-        .on_press(Message::SetPcapImport(path.to_string()))
+    let button = Container::new(
+        Button::new(content)
+            .width(Length::Fill)
+            .padding([20, 30])
+            .class(if is_import_pcap_set {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::SetPcapImport(path.to_string())),
+    )
+    .padding(13);
+
+    Column::new()
+        .padding(10)
+        .spacing(5)
+        .width(FillPortion(4))
+        .push(
+            Text::new(import_capture_translation(language))
+                .font(font)
+                .class(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(button)
 }
 
 fn get_export_pcap_group(

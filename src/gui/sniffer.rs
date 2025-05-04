@@ -127,6 +127,8 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
+    /// Import path for PCAP file
+    pub import_pcap_path: String,
 }
 
 impl Sniffer {
@@ -172,6 +174,7 @@ impl Sniffer {
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
+            import_pcap_path: String::new(),
         }
     }
 
@@ -537,7 +540,10 @@ impl Sniffer {
             }
             Message::WindowId(id) => self.id = id,
             Message::SetPcapImport(path) => {
-                self.capture_source = CaptureSource::File(MyPcapImport::new(path));
+                if !path.is_empty() {
+                    self.import_pcap_path.clone_from(&path);
+                    self.capture_source = CaptureSource::File(MyPcapImport::new(path));
+                }
             }
             Message::TickInit => {}
         }
@@ -958,8 +964,9 @@ impl Sniffer {
         let picked = if file_info == FileInfo::Directory {
             dialog.pick_folder().await
         } else {
+            let extensions = file_info.get_extensions();
             dialog
-                .add_filter(file_info.get_extension(), &[file_info.get_extension()])
+                .add_filter(format!("{extensions:?}"), &extensions)
                 .pick_file()
                 .await
         }

@@ -147,9 +147,8 @@ impl CaptureSource {
     }
 
     pub fn set_addresses(&self, addresses: Vec<Address>) {
-        match self {
-            Self::Device(device) => *device.addresses.lock().unwrap() = addresses,
-            _ => {}
+        if let Self::Device(device) = self {
+            *device.addresses.lock().unwrap() = addresses;
         }
     }
 
@@ -170,7 +169,7 @@ impl CaptureSource {
     pub fn get_name(&self) -> String {
         match self {
             Self::Device(device) => device.name.clone(),
-            Self::File(file) => get_path_termination_string(&file.path, 17),
+            Self::File(file) => get_path_termination_string(&file.path, 14),
         }
     }
 

@@ -31,3 +31,19 @@ pub fn excluded_translation(language: Language) -> &'static str {
         _ => "Excluded",
     }
 }
+
+pub fn import_capture_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Import capture file",
+        Language::IT => "Importa file di cattura",
+        _ => "Import capture file",
+    }
+}
+
+pub fn select_capture_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Select capture file",
+        Language::IT => "Seleziona file di cattura",
+        _ => "Select capture file",
+    }
+}
