@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::Mutex;
 
-use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
@@ -267,7 +266,6 @@ pub fn modify_or_insert_in_map(
     arp_type: ArpType,
     exchanged_bytes: u128,
 ) -> InfoAddressPortPair {
-    let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
 
@@ -302,6 +300,7 @@ pub fn modify_or_insert_in_map(
     }
 
     let mut info_traffic = info_traffic_mutex.lock().unwrap();
+    let timestamp = info_traffic.latest_packet_timestamp;
 
     let new_info: InfoAddressPortPair = info_traffic
         .map
@@ -309,7 +308,7 @@ pub fn modify_or_insert_in_map(
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
-            info.final_timestamp = now;
+            info.final_timestamp = timestamp;
             if key.protocol.eq(&Protocol::ICMP) {
                 info.icmp_types
                     .entry(icmp_type)
@@ -328,8 +327,8 @@ pub fn modify_or_insert_in_map(
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
-            initial_timestamp: now,
-            final_timestamp: now,
+            initial_timestamp: timestamp,
+            final_timestamp: timestamp,
             service,
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {

@@ -647,6 +647,7 @@ impl Sniffer {
 
     fn refresh_data(&mut self) -> Task<Message> {
         let info_traffic_lock = self.info_traffic.lock().unwrap();
+        let timestamp = info_traffic_lock.latest_packet_timestamp;
         self.runtime_data.all_packets = info_traffic_lock.all_packets;
         if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
             drop(info_traffic_lock);
@@ -663,6 +664,7 @@ impl Sniffer {
             &mut self.runtime_data,
             self.configs.lock().unwrap().settings.notifications,
             &self.info_traffic.clone(),
+            timestamp,
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;

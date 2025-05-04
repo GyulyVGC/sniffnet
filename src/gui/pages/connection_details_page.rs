@@ -197,7 +197,7 @@ fn col_info<'a>(
         .push(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
-                    "{} - {}",
+                    "{} -\n{}",
                     get_formatted_timestamp(val.initial_timestamp),
                     get_formatted_timestamp(val.final_timestamp)
                 ))

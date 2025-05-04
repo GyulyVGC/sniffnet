@@ -59,6 +59,11 @@ pub fn parse_packets(
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
+                    #[allow(clippy::useless_conversion)]
+                    {
+                        info_traffic_mutex.lock().unwrap().latest_packet_timestamp =
+                            i64::from(packet.header.ts.tv_sec);
+                    }
 
                     let key_option = analyze_headers(
                         headers,
