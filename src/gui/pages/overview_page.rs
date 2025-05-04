@@ -504,7 +504,7 @@ fn col_device<'a>(
     #[cfg(not(target_os = "windows"))]
     let cs_info = &cs.get_name();
     #[cfg(target_os = "windows")]
-    let cs_info = cs.desc.as_ref().unwrap_or(&cs.name);
+    let cs_info = cs.get_desc().as_ref().unwrap_or(&cs.get_name());
 
     Column::new()
         .height(Length::Fill)
