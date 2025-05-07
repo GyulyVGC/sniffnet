@@ -843,43 +843,6 @@ impl Sniffer {
         }
     }
 
-    fn non_threshold_updated(&self, value: Notification) -> bool {
-        let notifications = self.configs.lock().unwrap().settings.notifications;
-        match value {
-            Notification::Packets(packets_notification) => {
-                notifications.packets_notification.sound != packets_notification.sound
-            }
-            Notification::Bytes(bytes_notification) => {
-                notifications.bytes_notification.sound != bytes_notification.sound
-            }
-            Notification::Favorite(favorite_notification) => {
-                notifications.favorite_notification != favorite_notification
-            }
-        }
-    }
-
-    fn update_temp_notifications(&mut self, value: Notification) {
-        // Initialize temp_thresholds if it's None
-        if self.temp_notifications.is_none() {
-            self.temp_notifications = Some(self.configs.lock().unwrap().settings.notifications);
-        }
-
-        // Update the temporary thresholds
-        if let Some(ref mut temp_notifications) = self.temp_notifications {
-            match value {
-                Notification::Packets(packets_notification) => {
-                    temp_notifications.packets_notification = packets_notification;
-                }
-                Notification::Bytes(bytes_notification) => {
-                    temp_notifications.bytes_notification = bytes_notification;
-                }
-                Notification::Favorite(favorite_notification) => {
-                    temp_notifications.favorite_notification = favorite_notification;
-                }
-            }
-        }
-    }
-
     fn update_sound(&self, notification: Notification, emit_sound: bool) {
         if self.sound_updated(notification) {
             let sound = match notification {
@@ -918,7 +881,6 @@ impl Sniffer {
                     sound,
                     self.configs.lock().unwrap().settings.notifications.volume,
                 );
->>>>>>> f20b6676 (Apply non-thresholds immediately)
             }
         }
     }
@@ -1012,7 +974,7 @@ impl Sniffer {
                 {
                     return new_threshold != old_threshold;
                 }
-                    return byte_multiple != temp_thresholds.1.byte_multiple;
+                return byte_multiple != temp_thresholds.1.byte_multiple;
             }
             Notification::Favorite(_) => (),
         }
@@ -1786,7 +1748,7 @@ mod tests {
 
         let packets_notification_adjusted_threshold_sound_off = PacketsNotification {
             threshold: Some(1122),
-            sound: Sound::Gulp,
+            sound: Sound::None,
             previous_threshold: 1122,
         };
 
@@ -1954,7 +1916,6 @@ mod tests {
                 .notifications
                 .packets_notification,
             packets_notification_sound_off_only,
->>>>>>> f20b6676 (Apply non-thresholds immediately)
         );
 
         expire_notifications_timeout(&mut sniffer);
@@ -2034,7 +1995,6 @@ mod tests {
                 .notifications
                 .bytes_notification,
             bytes_notification_sound_off_only,
->>>>>>> f20b6676 (Apply non-thresholds immediately)
         );
 
         expire_notifications_timeout(&mut sniffer);
