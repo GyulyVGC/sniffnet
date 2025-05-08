@@ -11,6 +11,8 @@ pub struct TimingEvents {
     thumbnail_enter: std::time::Instant,
     /// Instant of the last click on the thumbnail window
     thumbnail_click: std::time::Instant,
+    /// Instant of the last adjust of notifications settings thresholds
+    threshold_adjust: std::time::Instant,
 }
 
 impl TimingEvents {
@@ -18,6 +20,10 @@ impl TimingEvents {
     const TIMEOUT_COPY_IP: u64 = 1500;
     const TIMEOUT_THUMBNAIL_ENTER: u64 = 1000;
     const TIMEOUT_THUMBNAIL_CLICK: u64 = 800;
+    #[cfg(not(test))]
+    const TIMEOUT_THRESHOLD_ADJUST: u64 = 3000;
+    #[cfg(test)]
+    pub const TIMEOUT_THRESHOLD_ADJUST: u64 = 100;
 
     pub fn focus_now(&mut self) {
         self.focus = std::time::Instant::now();
@@ -53,6 +59,15 @@ impl TimingEvents {
         self.thumbnail_click.elapsed()
             < Duration::from_millis(TimingEvents::TIMEOUT_THUMBNAIL_CLICK)
     }
+
+    pub fn threshold_adjust_now(&mut self) {
+        self.threshold_adjust = std::time::Instant::now();
+    }
+
+    pub fn was_just_threshold_adjust(&mut self) -> bool {
+        self.threshold_adjust.elapsed()
+            < Duration::from_millis(TimingEvents::TIMEOUT_THRESHOLD_ADJUST)
+    }
 }
 
 impl Default for TimingEvents {
@@ -62,6 +77,7 @@ impl Default for TimingEvents {
             copy_ip: (std::time::Instant::now(), IpAddr::V4(Ipv4Addr::UNSPECIFIED)),
             thumbnail_enter: std::time::Instant::now(),
             thumbnail_click: std::time::Instant::now(),
+            threshold_adjust: std::time::Instant::now(),
         }
     }
 }
