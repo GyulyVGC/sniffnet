@@ -29,7 +29,6 @@ use crate::{InfoTraffic, location};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
-#[allow(clippy::too_many_lines)]
 pub fn parse_packets(
     current_capture_id: &Mutex<usize>,
     device: &MyDevice,

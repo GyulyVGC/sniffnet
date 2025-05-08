@@ -259,13 +259,9 @@ impl Sniffer {
         })
     }
 
-    #[allow(clippy::too_many_lines)]
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickInit => {}
-            Message::TickRun => {
-                return self.refresh_data();
-            }
+            Message::TickRun => return self.refresh_data(),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
@@ -555,6 +551,7 @@ impl Sniffer {
                 }
             }
             Message::WindowId(id) => self.id = id,
+            Message::TickInit => {}
         }
         Task::none()
     }
