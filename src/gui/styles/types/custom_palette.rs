@@ -46,6 +46,7 @@ impl CustomPalette {
 /// Built in extra styles
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "custom", content = "attributes")]
+#[allow(clippy::large_enum_variant)]
 pub enum ExtraStyles {
     DraculaDark,
     DraculaLight,

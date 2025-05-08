@@ -9,7 +9,9 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::style_constants::{NIGHT_PALETTE, SARASA_MONO, SARASA_MONO_BOLD};
+use crate::gui::styles::style_constants::{
+    NIGHT_PALETTE, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
+};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -105,6 +107,11 @@ impl Palette {
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
         let alpha_round_containers = if is_nightly { 0.12 } else { 0.24 };
         let buttons_color = self.generate_buttons_color();
+        let red_alert_color = if is_nightly {
+            RED_ALERT_COLOR_NIGHTLY
+        } else {
+            RED_ALERT_COLOR_DAILY
+        };
 
         PaletteExtension {
             is_nightly,
@@ -114,6 +121,7 @@ impl Palette {
             alpha_round_borders,
             alpha_round_containers,
             buttons_color,
+            red_alert_color,
         }
     }
 
@@ -200,7 +208,9 @@ mod tests {
     use iced::Color;
     use iced::color;
 
-    use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+    use crate::gui::styles::style_constants::{
+        RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
+    };
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
     use super::Palette;
@@ -289,7 +299,8 @@ mod tests {
                     g: 0.55,
                     b: 0.2,
                     a: 1.0
-                }
+                },
+                red_alert_color: RED_ALERT_COLOR_NIGHTLY,
             }
         )
     }
@@ -349,7 +360,8 @@ mod tests {
                     g: 0.75,
                     b: 0.0,
                     a: 1.0
-                }
+                },
+                red_alert_color: RED_ALERT_COLOR_DAILY,
             }
         )
     }

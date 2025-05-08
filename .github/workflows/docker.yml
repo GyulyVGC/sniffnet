@@ -1,0 +1,45 @@
+name: Docker
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+jobs:
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      #      - name: Extract version from Cargo.toml
+      #        id: cargo-version
+      #        run: |
+      #          VERSION=v$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
+      #          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      #          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: GyulyVGC
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/gyulyvgc/sniffnet:latest
+            ghcr.io/gyulyvgc/sniffnet:${{ github.ref_name }}
