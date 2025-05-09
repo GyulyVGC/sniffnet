@@ -7,12 +7,13 @@ use std::thread;
 use std::time::Duration;
 
 use iced::Event::{Keyboard, Window};
+use iced::futures::Stream;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, window};
+use iced::{Element, Point, Size, Subscription, Task, stream, window};
 use pcap::Device;
 use rfd::FileHandle;
 
@@ -58,6 +59,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
+use crate::secondary_threads::check_updates::set_newer_release_status;
 use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -82,7 +84,7 @@ pub struct Sniffer {
     /// Capture data updated by thread parsing packets
     pub info_traffic: Arc<Mutex<InfoTraffic>>,
     /// Reports if a newer release of the software is available on GitHub
-    pub newer_release_available: Arc<Mutex<Option<bool>>>,
+    pub newer_release_available: Option<bool>,
     /// Traffic data displayed in GUI
     pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed
@@ -130,10 +132,7 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub fn new(
-        configs: &Arc<Mutex<Configs>>,
-        newer_release_available: Arc<Mutex<Option<bool>>>,
-    ) -> Self {
+    pub fn new(configs: &Arc<Mutex<Configs>>) -> Self {
         let ConfigSettings {
             style,
             language,
@@ -146,7 +145,7 @@ impl Sniffer {
             configs: configs.clone(),
             current_capture_id: Arc::new(Mutex::new(0)),
             info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
-            newer_release_available,
+            newer_release_available: None,
             runtime_data: RunTimeData::new(),
             device,
             filters: Filters::default(),
@@ -252,6 +251,10 @@ impl Sniffer {
             Window(window::Event::CloseRequested) => Some(Message::QuitWrapper),
             _ => None,
         })
+    }
+
+    fn check_updates_stream() -> impl Stream<Item = Message> {
+        stream::channel(1, set_newer_release_status)
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -536,6 +539,7 @@ impl Sniffer {
                 }
             }
             Message::WindowId(id) => self.id = id,
+            Message::SetNewerReleaseStatus(status) => self.newer_release_available = status,
             Message::TickInit => {}
         }
         Task::none()
@@ -570,7 +574,7 @@ impl Sniffer {
             color_gradient,
             font,
             font_headers,
-            &self.newer_release_available,
+            self.newer_release_available,
         );
 
         let content: Element<Message, StyleType> =
@@ -625,6 +629,7 @@ impl Sniffer {
             self.mouse_subscription(),
             self.time_subscription(),
             Sniffer::window_subscription(),
+            Subscription::run(Sniffer::check_updates_stream),
         ])
     }
 
@@ -998,15 +1003,12 @@ mod tests {
 
     // tests using this will require the #[parallel] annotation
     fn new_sniffer() -> Sniffer {
-        Sniffer::new(
-            &Arc::new(Mutex::new(Configs::default())),
-            Arc::new(Mutex::new(None)),
-        )
+        Sniffer::new(&Arc::new(Mutex::new(Configs::default())))
     }
 
     // tests using this will require the #[serial] annotation
     fn new_sniffer_with_configs(configs: Configs) -> Sniffer {
-        Sniffer::new(&Arc::new(Mutex::new(configs)), Arc::new(Mutex::new(None)))
+        Sniffer::new(&Arc::new(Mutex::new(configs)))
     }
 
     // helpful to clean up files generated from tests

@@ -4,7 +4,7 @@
 
 use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
-use std::{panic, process, thread};
+use std::{panic, process};
 
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
@@ -34,7 +34,6 @@ use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
-use crate::secondary_threads::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 
 mod chart;
@@ -75,9 +74,6 @@ pub fn main() -> iced::Result {
     let configs1 = Arc::new(Mutex::new(configs));
     let configs2 = configs1.clone();
 
-    let newer_release_available1 = Arc::new(Mutex::new(None));
-    let newer_release_available2 = newer_release_available1.clone();
-
     // kill the main thread as soon as a secondary thread panics
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
@@ -92,13 +88,6 @@ pub fn main() -> iced::Result {
         process::exit(130);
     })
     .log_err(location!());
-
-    let _ = thread::Builder::new()
-        .name("thread_check_updates".to_string())
-        .spawn(move || {
-            set_newer_release_status(&newer_release_available2);
-        })
-        .log_err(location!());
 
     print_cli_welcome_message();
 
@@ -138,10 +127,5 @@ pub fn main() -> iced::Result {
         .subscription(Sniffer::subscription)
         .theme(Sniffer::theme)
         .scale_factor(Sniffer::scale_factor)
-        .run_with(move || {
-            (
-                Sniffer::new(&configs1, newer_release_available1),
-                boot_task_chain,
-            )
-        })
+        .run_with(move || (Sniffer::new(&configs1), boot_task_chain))
 }

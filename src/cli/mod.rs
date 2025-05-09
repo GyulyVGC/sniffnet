@@ -123,9 +123,6 @@ mod tests {
         assert_eq!(Configs::load(), Configs::default());
 
         // only needed because it will delete config files via its Drop implementation
-        Sniffer::new(
-            &Arc::new(Mutex::new(Configs::default())),
-            Arc::new(Mutex::new(Some(true))),
-        );
+        Sniffer::new(&Arc::new(Mutex::new(Configs::default())));
     }
 }

@@ -4071,7 +4071,6 @@ dependencies = [
  "base64",
  "bytes",
  "encoding_rs",
- "futures-channel",
  "futures-core",
  "futures-util",
  "h2",
@@ -4715,6 +4714,7 @@ dependencies = [
  "serde_test",
  "serial_test",
  "splines",
+ "tokio",
  "toml 0.8.22",
  "winres",
 ]

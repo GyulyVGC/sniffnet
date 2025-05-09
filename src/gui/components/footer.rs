@@ -1,7 +1,5 @@
 //! GUI bottom footer
 
-use std::sync::Mutex;
-
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
@@ -29,7 +27,7 @@ pub fn footer<'a>(
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Mutex<Option<bool>>,
+    newer_release_available: Option<bool>,
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
@@ -188,7 +186,7 @@ fn get_release_details<'a>(
     language: Language,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Mutex<Option<bool>>,
+    newer_release_available: Option<bool>,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
@@ -199,7 +197,7 @@ fn get_release_details<'a>(
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );
-    if let Some(boolean_response) = *newer_release_available.lock().unwrap() {
+    if let Some(boolean_response) = newer_release_available {
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(

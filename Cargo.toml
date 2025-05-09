@@ -55,15 +55,16 @@ phf = "0.11.3"
 phf_shared = "0.11.3"
 splines = "4.4.2"
 clap = { version = "4.5.37", features = ["derive"] }
+tokio = "1.44.2"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.15", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+reqwest = { version = "0.12.15", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.15", features = ["json", "blocking"] }
+reqwest = { version = "0.12.15", features = ["json"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
