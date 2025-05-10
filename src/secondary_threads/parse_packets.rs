@@ -44,8 +44,10 @@ pub fn parse_packets(
 
     loop {
         match cap.next_packet() {
-            Err(_) => {
-                if *current_capture_id.lock().unwrap() != capture_id {
+            Err(e) => {
+                if *current_capture_id.lock().unwrap() != capture_id
+                    || e == pcap::Error::NoMorePackets
+                {
                     return;
                 }
             }
