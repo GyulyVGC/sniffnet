@@ -1,38 +1,33 @@
-use pcap::{Active, Capture, Savefile};
+use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
+use std::sync::{Arc, Mutex};
 
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
+use crate::translations::translations::network_adapter_translation;
+use crate::translations::translations_3::file_name_translation;
+use crate::translations::types::language::Language;
+use crate::utils::formatted_strings::get_path_termination_string;
 
 pub enum CaptureContext {
     Online(Online),
     OnlineWithSavefile(OnlineWithSavefile),
+    Offline(Offline),
     Error(String),
 }
 
 impl CaptureContext {
-    pub fn new(device: &MyDevice, pcap_path: Option<&String>) -> Self {
-        let inactive = match Capture::from_device(device.to_pcap_device()) {
+    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>) -> Self {
+        let cap_type = match CaptureType::from_source(source, pcap_out_path) {
             Ok(c) => c,
             Err(e) => return Self::Error(e.to_string()),
         };
-
-        let cap_res = inactive
-            .promisc(true)
-            .snaplen(if pcap_path.is_some() {
-                i32::from(u16::MAX)
-            } else {
-                256 //limit stored packets slice dimension (to keep more in the buffer)
-            })
-            .immediate_mode(true) //parse packets ASAP!
-            .open();
-
-        let cap = match cap_res {
-            Ok(c) => c,
-            Err(e) => return Self::Error(e.to_string()),
+        let cap = match cap_type {
+            CaptureType::Online(cap) => cap,
+            CaptureType::Offline(cap) => return Self::new_offline(cap),
         };
 
-        if let Some(path) = pcap_path {
-            let savefile_res = cap.savefile(path);
+        if let Some(out_path) = pcap_out_path {
+            let savefile_res = cap.savefile(out_path);
             match savefile_res {
                 Ok(s) => Self::new_online_with_savefile(cap, s),
                 Err(e) => Self::Error(e.to_string()),
@@ -53,6 +48,10 @@ impl CaptureContext {
         })
     }
 
+    fn new_offline(cap: Capture<pcap::Offline>) -> Self {
+        Self::Offline(Offline { cap })
+    }
+
     pub fn error(&self) -> Option<&str> {
         match self {
             Self::Error(e) => Some(e),
@@ -60,20 +59,24 @@ impl CaptureContext {
         }
     }
 
-    pub fn consume(self) -> (Capture<Active>, Option<Savefile>) {
+    pub fn consume(self) -> (CaptureType, Option<Savefile>) {
         match self {
-            Self::Online(o) => (o.cap, None),
-            Self::OnlineWithSavefile(ows) => (ows.online.cap, Some(ows.savefile)),
+            Self::Online(on) => (CaptureType::Online(on.cap), None),
+            Self::OnlineWithSavefile(onws) => {
+                (CaptureType::Online(onws.online.cap), Some(onws.savefile))
+            }
+            Self::Offline(off) => (CaptureType::Offline(off.cap), None),
             Self::Error(_) => panic!(),
         }
     }
 
     pub fn my_link_type(&self) -> MyLinkType {
         match self {
-            Self::Online(o) => MyLinkType::from_pcap_link_type(o.cap.get_datalink()),
-            Self::OnlineWithSavefile(ows) => {
-                MyLinkType::from_pcap_link_type(ows.online.cap.get_datalink())
+            Self::Online(on) => MyLinkType::from_pcap_link_type(on.cap.get_datalink()),
+            Self::OnlineWithSavefile(onws) => {
+                MyLinkType::from_pcap_link_type(onws.online.cap.get_datalink())
             }
+            Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
             Self::Error(_) => MyLinkType::default(),
         }
     }
@@ -86,4 +89,120 @@ pub struct Online {
 pub struct OnlineWithSavefile {
     online: Online,
     savefile: Savefile,
+}
+
+pub struct Offline {
+    cap: Capture<pcap::Offline>,
+}
+
+pub enum CaptureType {
+    Online(Capture<Active>),
+    Offline(Capture<pcap::Offline>),
+}
+
+impl CaptureType {
+    pub fn next_packet(&mut self) -> Result<Packet, Error> {
+        match self {
+            Self::Online(on) => on.next_packet(),
+            Self::Offline(off) => off.next_packet(),
+        }
+    }
+
+    pub fn stats(&mut self) -> Result<Stat, Error> {
+        match self {
+            Self::Online(on) => on.stats(),
+            Self::Offline(off) => off.stats(),
+        }
+    }
+
+    fn from_source(source: &CaptureSource, pcap_out_path: Option<&String>) -> Result<Self, Error> {
+        match source {
+            CaptureSource::Device(device) => {
+                let inactive = Capture::from_device(device.to_pcap_device())?;
+                let cap = inactive
+                    .promisc(true)
+                    .snaplen(if pcap_out_path.is_some() {
+                        i32::from(u16::MAX)
+                    } else {
+                        256 //limit stored packets slice dimension (to keep more in the buffer)
+                    })
+                    .immediate_mode(true) //parse packets ASAP!
+                    .open()?;
+                Ok(Self::Online(cap))
+            }
+            CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum CaptureSource {
+    Device(MyDevice),
+    File(MyPcapImport),
+}
+
+impl CaptureSource {
+    pub fn title(&self, language: Language) -> &str {
+        match self {
+            Self::Device(_) => network_adapter_translation(language),
+            Self::File(_) => file_name_translation(language),
+        }
+    }
+
+    pub fn get_addresses(&self) -> Arc<Mutex<Vec<Address>>> {
+        match self {
+            Self::Device(device) => device.addresses.clone(),
+            Self::File(_) => Arc::new(Mutex::new(vec![])),
+        }
+    }
+
+    pub fn set_addresses(&self, addresses: Vec<Address>) {
+        if let Self::Device(device) = self {
+            *device.addresses.lock().unwrap() = addresses;
+        }
+    }
+
+    pub fn get_link_type(&self) -> MyLinkType {
+        match self {
+            Self::Device(device) => device.link_type,
+            Self::File(file) => file.link_type,
+        }
+    }
+
+    pub fn set_link_type(&mut self, link_type: MyLinkType) {
+        match self {
+            Self::Device(device) => device.link_type = link_type,
+            Self::File(file) => file.link_type = link_type,
+        }
+    }
+
+    pub fn get_name(&self) -> String {
+        match self {
+            Self::Device(device) => device.name.clone(),
+            Self::File(file) => get_path_termination_string(&file.path, 14),
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn get_desc(&self) -> Option<String> {
+        match self {
+            Self::Device(device) => device.desc.clone(),
+            Self::File(_) => None,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct MyPcapImport {
+    pub path: String,
+    pub link_type: MyLinkType,
+}
+
+impl MyPcapImport {
+    pub fn new(path: String) -> Self {
+        Self {
+            path,
+            link_type: MyLinkType::default(),
+        }
+    }
 }

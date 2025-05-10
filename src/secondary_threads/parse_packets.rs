@@ -14,14 +14,13 @@ use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, modify_or_insert_in_map, reverse_dns_lookup,
 };
 use crate::networking::types::arp_type::ArpType;
-use crate::networking::types::capture_context::CaptureContext;
+use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -31,7 +30,7 @@ use crate::{InfoTraffic, location};
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
     current_capture_id: &Mutex<usize>,
-    device: &MyDevice,
+    cs: &CaptureSource,
     filters: &Filters,
     info_traffic_mutex: &Arc<Mutex<InfoTraffic>>,
     mmdb_readers: &MmdbReaders,
@@ -45,8 +44,10 @@ pub fn parse_packets(
 
     loop {
         match cap.next_packet() {
-            Err(_) => {
-                if *current_capture_id.lock().unwrap() != capture_id {
+            Err(e) => {
+                if *current_capture_id.lock().unwrap() != capture_id
+                    || e == pcap::Error::NoMorePackets
+                {
                     return;
                 }
             }
@@ -60,6 +61,11 @@ pub fn parse_packets(
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
+                    #[allow(clippy::useless_conversion)]
+                    {
+                        info_traffic_mutex.lock().unwrap().latest_packet_timestamp =
+                            i64::from(packet.header.ts.tv_sec);
+                    }
 
                     let key_option = analyze_headers(
                         headers,
@@ -86,7 +92,7 @@ pub fn parse_packets(
                         new_info = modify_or_insert_in_map(
                             info_traffic_mutex,
                             &key,
-                            device,
+                            cs,
                             mac_addresses,
                             icmp_type,
                             arp_type,
@@ -136,7 +142,7 @@ pub fn parse_packets(
                                 // launch new thread to resolve host name
                                 let key2 = key;
                                 let info_traffic2 = info_traffic_mutex.clone();
-                                let device2 = device.clone();
+                                let device2 = cs.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
                                 let host_data2 = host_data.clone();
                                 let _ = thread::Builder::new()

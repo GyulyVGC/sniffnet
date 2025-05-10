@@ -126,4 +126,6 @@ pub enum Message {
     ScaleFactorShortcut(bool),
     /// Set the window ID
     WindowId(Option<window::Id>),
+    /// Set the pcap import path
+    SetPcapImport(String),
 }

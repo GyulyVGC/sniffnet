@@ -16,17 +16,17 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
-use crate::networking::types::my_device::MyDevice;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, error_translation, incoming_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
+    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -73,7 +73,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
+                body = body_no_packets(&sniffer.capture_source, font, language, &sniffer.waiting);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
@@ -133,36 +133,32 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 }
 
 fn body_no_packets<'a>(
-    device: &MyDevice,
+    cs: &CaptureSource,
     font: Font,
     language: Language,
     waiting: &str,
 ) -> Column<'a, Message, StyleType> {
-    let link_type = device.link_type;
-    let mut adapter_info = device.name.clone();
-    let _ = write!(
-        adapter_info,
-        "\n{}",
-        link_type.full_print_on_one_line(language)
-    );
+    let link_type = cs.get_link_type();
+    let mut cs_info = cs.get_name();
+    let _ = write!(cs_info, "\n{}", link_type.full_print_on_one_line(language));
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
-            unsupported_link_type_translation(language, &adapter_info)
+            unsupported_link_type_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
-    } else if device.addresses.lock().unwrap().is_empty() {
+    } else if cs.get_addresses().lock().unwrap().is_empty() {
         (
             Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &adapter_info)
+            no_addresses_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
     } else {
         (
             Icon::get_hourglass(waiting.len()).size(60),
-            waiting_translation(language, &adapter_info)
+            waiting_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
@@ -443,7 +439,7 @@ fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     } = sniffer.configs.lock().unwrap().settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.device);
+    let col_device = col_device(language, font, &sniffer.capture_source);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -502,20 +498,20 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
 fn col_device<'a>(
     language: Language,
     font: Font,
-    device: &MyDevice,
+    cs: &CaptureSource,
 ) -> Column<'a, Message, StyleType> {
-    let link_type = device.link_type;
+    let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
-    let adapter_info = &device.name;
+    let cs_info = cs.get_name();
     #[cfg(target_os = "windows")]
-    let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
+    let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
     Column::new()
         .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
-            network_adapter_translation(language),
-            adapter_info,
+            cs.title(language),
+            &cs_info,
             font,
         ))
         .push(link_type.link_type_col(language, font))
