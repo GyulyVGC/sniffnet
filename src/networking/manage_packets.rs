@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::Mutex;
 
-use chrono::Local;
 use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
@@ -13,12 +12,12 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostData;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
@@ -261,13 +260,12 @@ pub fn get_service(
 pub fn modify_or_insert_in_map(
     info_traffic_mutex: &Mutex<InfoTraffic>,
     key: &AddressPortPair,
-    my_device: &MyDevice,
+    cs: &CaptureSource,
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
 ) -> InfoAddressPortPair {
-    let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
 
@@ -277,10 +275,12 @@ pub fn modify_or_insert_in_map(
         // update device addresses
         let mut my_interface_addresses = Vec::new();
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&my_device.name) {
-                let mut my_interface_addresses_mutex = my_device.addresses.lock().unwrap();
-                my_interface_addresses_mutex.clone_from(&dev.addresses);
-                drop(my_interface_addresses_mutex);
+            if dev.name.eq(&cs.get_name()) {
+                let my_interface_addresses_mutex = cs.get_addresses();
+                my_interface_addresses_mutex
+                    .lock()
+                    .unwrap()
+                    .clone_from(&dev.addresses);
                 my_interface_addresses = dev.addresses;
                 break;
             }
@@ -300,6 +300,7 @@ pub fn modify_or_insert_in_map(
     }
 
     let mut info_traffic = info_traffic_mutex.lock().unwrap();
+    let timestamp = info_traffic.latest_packet_timestamp;
 
     let new_info: InfoAddressPortPair = info_traffic
         .map
@@ -307,7 +308,7 @@ pub fn modify_or_insert_in_map(
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
-            info.final_timestamp = now;
+            info.final_timestamp = timestamp;
             if key.protocol.eq(&Protocol::ICMP) {
                 info.icmp_types
                     .entry(icmp_type)
@@ -326,8 +327,8 @@ pub fn modify_or_insert_in_map(
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
-            initial_timestamp: now,
-            final_timestamp: now,
+            initial_timestamp: timestamp,
+            final_timestamp: timestamp,
             service,
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
@@ -360,12 +361,12 @@ pub fn reverse_dns_lookup(
     info_traffic: &Mutex<InfoTraffic>,
     key: &AddressPortPair,
     traffic_direction: TrafficDirection,
-    my_device: &MyDevice,
+    cs: &CaptureSource,
     mmdb_readers: &MmdbReaders,
     host_data: &Mutex<HostData>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
-    let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
+    let my_interface_addresses = cs.get_addresses().lock().unwrap().clone();
 
     // perform rDNS lookup
     let lookup_result = lookup_addr(&address_to_lookup);

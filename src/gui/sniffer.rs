@@ -44,7 +44,7 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::types::capture_context::CaptureContext;
+use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::host_data_states::HostDataStates;
@@ -87,8 +87,8 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Traffic data displayed in GUI
     pub runtime_data: RunTimeData,
-    /// Network adapter to be analyzed
-    pub device: MyDevice,
+    /// Network adapter to be analyzed, or PCAP file to be imported
+    pub capture_source: CaptureSource,
     /// Active filters on the observed traffic
     pub filters: Filters,
     /// Signals if a pcap error occurred
@@ -129,6 +129,8 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
+    /// Import path for PCAP file
+    pub import_pcap_path: String,
 }
 
 impl Sniffer {
@@ -147,7 +149,7 @@ impl Sniffer {
             info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
             newer_release_available: None,
             runtime_data: RunTimeData::new(),
-            device,
+            capture_source: CaptureSource::Device(device),
             filters: Filters::default(),
             pcap_error: None,
             waiting: ".".to_string(),
@@ -171,6 +173,7 @@ impl Sniffer {
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
+            import_pcap_path: String::new(),
         }
     }
 
@@ -540,6 +543,12 @@ impl Sniffer {
             }
             Message::WindowId(id) => self.id = id,
             Message::SetNewerReleaseStatus(status) => self.newer_release_available = status,
+            Message::SetPcapImport(path) => {
+                if !path.is_empty() {
+                    self.import_pcap_path.clone_from(&path);
+                    self.capture_source = CaptureSource::File(MyPcapImport::new(path));
+                }
+            }
             Message::TickInit => {}
         }
         Task::none()
@@ -643,6 +652,7 @@ impl Sniffer {
 
     fn refresh_data(&mut self) -> Task<Message> {
         let info_traffic_lock = self.info_traffic.lock().unwrap();
+        let timestamp = info_traffic_lock.latest_packet_timestamp;
         self.runtime_data.all_packets = info_traffic_lock.all_packets;
         if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
             drop(info_traffic_lock);
@@ -659,6 +669,7 @@ impl Sniffer {
             &mut self.runtime_data,
             self.configs.lock().unwrap().settings.notifications,
             &self.info_traffic.clone(),
+            timestamp,
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;
@@ -667,11 +678,13 @@ impl Sniffer {
         }
         update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
 
-        let current_device_name = self.device.name.clone();
-        // update ConfigDevice stored if different from last sniffed device
-        let last_device_name_sniffed = self.configs.lock().unwrap().device.device_name.clone();
-        if current_device_name.ne(&last_device_name_sniffed) {
-            self.configs.lock().unwrap().device.device_name = current_device_name;
+        if let CaptureSource::Device(device) = &self.capture_source {
+            let current_device_name = device.name.clone();
+            // update ConfigDevice stored if different from last sniffed device
+            let last_device_name_sniffed = self.configs.lock().unwrap().device.device_name.clone();
+            if current_device_name.ne(&last_device_name_sniffed) {
+                self.configs.lock().unwrap().device.device_name = current_device_name;
+            }
         }
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications)
@@ -706,11 +719,13 @@ impl Sniffer {
     }
 
     fn start(&mut self) {
-        let current_device_name = &*self.device.name.clone();
-        self.set_adapter(current_device_name);
-        let device = self.device.clone();
+        if matches!(&self.capture_source, CaptureSource::Device(_)) {
+            let current_device_name = &self.capture_source.get_name();
+            self.set_adapter(current_device_name);
+        }
+        let capture_source = self.capture_source.clone();
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&device, pcap_path.as_ref());
+        let capture_context = CaptureContext::new(&capture_source, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
         let info_traffic_mutex = self.info_traffic.clone();
         *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
@@ -727,13 +742,14 @@ impl Sniffer {
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
-            self.device.link_type = capture_context.my_link_type();
+            self.capture_source
+                .set_link_type(capture_context.my_link_type());
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
-                        &device,
+                        &capture_source,
                         &filters,
                         &info_traffic_mutex,
                         &mmdb_readers,
@@ -760,16 +776,14 @@ impl Sniffer {
     fn set_adapter(&mut self, name: &str) {
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&name) {
-                let mut addresses_mutex = self.device.addresses.lock().unwrap();
-                *addresses_mutex = dev.addresses;
-                drop(addresses_mutex);
-                self.device = MyDevice {
+                self.capture_source.set_addresses(dev.addresses);
+                self.capture_source = CaptureSource::Device(MyDevice {
                     name: dev.name,
                     #[cfg(target_os = "windows")]
                     desc: dev.desc,
-                    addresses: self.device.addresses.clone(),
+                    addresses: self.capture_source.get_addresses().clone(),
                     link_type: MyLinkType::default(),
-                };
+                });
                 break;
             }
         }
@@ -957,8 +971,9 @@ impl Sniffer {
         let picked = if file_info == FileInfo::Directory {
             dialog.pick_folder().await
         } else {
+            let extensions = file_info.get_extensions();
             dialog
-                .add_filter(file_info.get_extension(), &[file_info.get_extension()])
+                .add_filter(format!("{extensions:?}"), &extensions)
                 .pick_file()
                 .await
         }

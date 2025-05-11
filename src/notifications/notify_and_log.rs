@@ -1,7 +1,5 @@
 use std::sync::Mutex;
 
-use chrono::Local;
-
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
@@ -18,6 +16,7 @@ pub fn notify_and_log(
     runtime_data: &mut RunTimeData,
     notifications: Notifications,
     info_traffic: &Mutex<InfoTraffic>,
+    timestamp: i64,
 ) -> usize {
     let mut already_emitted_sound = false;
     let mut emitted_notifications = 0;
@@ -36,7 +35,7 @@ pub fn notify_and_log(
                     threshold: notifications.packets_notification.previous_threshold,
                     incoming: received_packets_entry.try_into().unwrap_or_default(),
                     outgoing: sent_packets_entry.try_into().unwrap_or_default(),
-                    timestamp: get_formatted_timestamp(Local::now()),
+                    timestamp: get_formatted_timestamp(timestamp),
                 }),
             );
             if notifications.packets_notification.sound.ne(&Sound::None) {
@@ -64,7 +63,7 @@ pub fn notify_and_log(
                     threshold: notifications.bytes_notification.previous_threshold,
                     incoming: received_bytes_entry.try_into().unwrap_or_default(),
                     outgoing: sent_bytes_entry.try_into().unwrap_or_default(),
-                    timestamp: get_formatted_timestamp(Local::now()),
+                    timestamp: get_formatted_timestamp(timestamp),
                 }),
             );
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
@@ -100,7 +99,7 @@ pub fn notify_and_log(
                     FavoriteTransmitted {
                         host,
                         data_info_host,
-                        timestamp: get_formatted_timestamp(Local::now()),
+                        timestamp: get_formatted_timestamp(timestamp),
                     },
                 ));
         }

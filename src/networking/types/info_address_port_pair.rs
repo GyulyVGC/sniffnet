@@ -3,8 +3,6 @@
 
 use std::collections::HashMap;
 
-use chrono::{DateTime, Local};
-
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::icmp_type::IcmpType;
@@ -24,9 +22,9 @@ pub struct InfoAddressPortPair {
     /// Amount of packets transmitted between the pair.
     pub transmitted_packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub initial_timestamp: DateTime<Local>,
+    pub initial_timestamp: i64,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub final_timestamp: DateTime<Local>,
+    pub final_timestamp: i64,
     /// Upper layer service carried by the associated address:port pair.
     pub service: Service,
     /// Determines if the connection is incoming or outgoing

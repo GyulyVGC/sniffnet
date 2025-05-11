@@ -128,4 +128,6 @@ pub enum Message {
     WindowId(Option<window::Id>),
     /// Set new release status
     SetNewerReleaseStatus(Option<bool>),
+    /// Set the pcap import path
+    SetPcapImport(String),
 }

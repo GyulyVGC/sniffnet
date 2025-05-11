@@ -197,7 +197,7 @@ fn col_info<'a>(
         .push(
             Row::new().spacing(5).push(Icon::Clock.to_text()).push(
                 Text::new(format!(
-                    "{} - {}",
+                    "{} -\n{}",
                     get_formatted_timestamp(val.initial_timestamp),
                     get_formatted_timestamp(val.final_timestamp)
                 ))
@@ -311,10 +311,11 @@ fn get_local_tooltip<'a>(
     } else {
         &key.address1
     };
-    let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
+    let my_interface_addresses_lock = sniffer.capture_source.get_addresses();
+    let my_interface_addresses = my_interface_addresses_lock.lock().unwrap();
     get_computer_tooltip(
-        is_my_address(local_address, my_interface_addresses),
-        is_local_connection(local_address, my_interface_addresses),
+        is_my_address(local_address, &my_interface_addresses),
+        is_local_connection(local_address, &my_interface_addresses),
         is_bogon(local_address),
         get_traffic_type(
             if address_to_lookup.eq(&key.address1) {
@@ -322,7 +323,7 @@ fn get_local_tooltip<'a>(
             } else {
                 &key.address1
             },
-            my_interface_addresses,
+            &my_interface_addresses,
             TrafficDirection::Outgoing,
         ),
         language,
