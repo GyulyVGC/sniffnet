@@ -457,7 +457,16 @@ fn get_traffic_direction(
         }
     }
 
-    if my_interface_addresses_ip.contains(source_ip) {
+    // if interface_addresses is empty, check if the IP is a bogon (useful when importing pcap files)
+    let is_local = |interface_addresses: &Vec<IpAddr>, ip: &IpAddr| -> bool {
+        if interface_addresses.is_empty() {
+            is_bogon(ip).is_some()
+        } else {
+            interface_addresses.contains(ip)
+        }
+    };
+
+    if is_local(&my_interface_addresses_ip, source_ip) {
         // source is local
         TrafficDirection::Outgoing
     } else if source_ip.ne(&IpAddr::V4(Ipv4Addr::UNSPECIFIED))
@@ -465,7 +474,7 @@ fn get_traffic_direction(
     {
         // source not local and different from 0.0.0.0 and different from ::
         TrafficDirection::Incoming
-    } else if !my_interface_addresses_ip.contains(destination_ip) {
+    } else if !is_local(&my_interface_addresses_ip, destination_ip) {
         // source is 0.0.0.0 or :: (local not yet assigned an IP) and destination is not local
         TrafficDirection::Outgoing
     } else {

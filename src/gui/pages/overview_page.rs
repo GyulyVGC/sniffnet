@@ -33,7 +33,7 @@ use crate::translations::translations_2::{
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::excluded_translation;
+use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
@@ -145,6 +145,13 @@ fn body_no_packets<'a>(
         (
             Icon::Warning.to_text().size(60),
             unsupported_link_type_translation(language, &cs_info)
+                .align_x(Alignment::Center)
+                .font(font),
+        )
+    } else if matches!(cs, CaptureSource::File(_)) {
+        (
+            Icon::get_hourglass(waiting.len()).size(60),
+            reading_from_pcap_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
