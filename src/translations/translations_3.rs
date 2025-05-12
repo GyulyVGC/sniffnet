@@ -8,9 +8,8 @@ use crate::{Language, StyleType};
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::RO => "General",
+        Language::EN | Language::RO | Language::ES => "General",
         // Language::FA => "عمومی",
-        Language::ES => "Generales",
         Language::IT => "Generali",
         Language::FR => "Général",
         Language::DE => "Allgemein",
@@ -443,6 +442,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::PT => "Exportar arquivo capturado",
         Language::UK => "Експорт файлу захоплення",
         Language::ID => "Ekspor data tangkapan",
+        Language::ES => "Exportar archivo de captura",
         _ => "Export capture file",
     }
 }
@@ -467,6 +467,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::PT => "Diretório",
         Language::UK => "Тека",
         Language::ID => "Direktori",
+        Language::ES => "Directorio",
         _ => "Directory",
     }
 }
@@ -492,6 +493,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::PT => "Selecionar diretório de destino",
         Language::UK => "Виберіть теку призначення",
         Language::ID => "Pilih direktori tujuan",
+        Language::ES => "Selecciona el directorio de destino",
         _ => "Select destination directory",
     }
 }
@@ -517,6 +519,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::PT => "Nome do arquivo",
         Language::UK => "Назва файлу",
         Language::ID => "Nama berkas",
+        Language::ES => "Nombre del archivo",
         _ => "File name",
     }
 }
@@ -539,7 +542,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::ZH_TW => "縮圖模式",
         Language::KO => "썸네일 모드",
         Language::TR => "Küçük resim modu",
-        Language::PT => "Modo miniatura",
+        Language::PT | Language::ES => "Modo miniatura",
         Language::UK => "Режим мініатюри",
         Language::ID => "Mode gambar kecil",
         _ => "Thumbnail mode",
@@ -567,6 +570,7 @@ pub fn learn_more_translation(language: Language) -> &'static str {
         Language::PT => "Quer aprender mais?",
         Language::UK => "Бажаєте дізнатись більше?",
         Language::ID => "Apakah kamu mau belajar lebih lanjut?",
+        Language::ES => "¿Quieres aprender más?",
         _ => "Do you want to learn more?",
     }
 }
