@@ -30,11 +30,17 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         style,
         language,
         color_gradient,
-        notifications,
+        mut notifications,
         ..
     } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
+
+    // Use thresholds that have not yet been applied, if available
+    if let Some((temp_packets_notifications, temp_bytes_notifications)) = sniffer.temp_thresholds {
+        notifications.packets_notification = temp_packets_notifications;
+        notifications.bytes_notification = temp_bytes_notifications;
+    }
 
     let mut content = Column::new()
         .width(Length::Fill)
