@@ -1,6 +1,7 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -45,8 +46,9 @@ use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
-use crate::networking::types::host::Host;
+use crate::networking::types::host::{Host, NewHostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
@@ -82,7 +84,9 @@ pub struct Sniffer {
     /// Capture number, incremented at every new run
     pub current_capture_id: Arc<Mutex<usize>>,
     /// Capture data updated by thread parsing packets
-    pub info_traffic: Arc<Mutex<InfoTraffic>>,
+    pub info_traffic: InfoTraffic,
+    /// Map of the resolved addresses with their full rDNS value and the corresponding host
+    pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Traffic data displayed in GUI
@@ -146,7 +150,8 @@ impl Sniffer {
         Self {
             configs: configs.clone(),
             current_capture_id: Arc::new(Mutex::new(0)),
-            info_traffic: Arc::new(Mutex::new(InfoTraffic::new())),
+            info_traffic: InfoTraffic::default(),
+            addresses_resolved: HashMap::new(),
             newer_release_available: None,
             runtime_data: RunTimeData::new(),
             capture_source: CaptureSource::Device(device),
@@ -240,7 +245,7 @@ impl Sniffer {
         if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
         } else {
-            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickRun)
+            Subscription::none()
         }
     }
 
@@ -262,7 +267,7 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickRun => return self.refresh_data(),
+            Message::TickRun(info_traffic) => return self.refresh_data(info_traffic),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
@@ -296,7 +301,7 @@ impl Sniffer {
                 self.report_sort_type = sort;
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
-            Message::Start => self.start(),
+            Message::Start => return self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.configs.lock().unwrap().settings.style = style;
@@ -370,11 +375,10 @@ impl Sniffer {
             Message::CtrlDPressed => return self.shortcut_ctrl_d(),
             Message::Search(parameters) => {
                 // update comboboxes
-                let mut host_data = self.host_data_states.data.lock().unwrap();
+                let host_data = &mut self.host_data_states.data;
                 host_data.countries.1 = self.search.country != parameters.country;
                 host_data.asns.1 = self.search.as_name != parameters.as_name;
                 host_data.domains.1 = self.search.domain != parameters.domain;
-                drop(host_data);
                 self.host_data_states.update_states(&parameters);
 
                 self.page_number = 1;
@@ -549,6 +553,7 @@ impl Sniffer {
                     self.capture_source = CaptureSource::File(MyPcapImport::new(path));
                 }
             }
+            Message::NewHost(host_msg) => self.handle_new_host(host_msg),
             Message::TickInit => {}
         }
         Task::none()
@@ -650,28 +655,26 @@ impl Sniffer {
         self.configs.lock().unwrap().settings.scale_factor
     }
 
-    fn refresh_data(&mut self) -> Task<Message> {
-        let info_traffic_lock = self.info_traffic.lock().unwrap();
-        let timestamp = info_traffic_lock.latest_packet_timestamp;
-        self.runtime_data.all_packets = info_traffic_lock.all_packets;
-        if info_traffic_lock.tot_in_packets + info_traffic_lock.tot_out_packets == 0 {
-            drop(info_traffic_lock);
+    fn refresh_data(&mut self, info_traffic: InfoTraffic) -> Task<Message> {
+        self.info_traffic.refresh(info_traffic);
+        let info_traffic = &self.info_traffic;
+        self.runtime_data.all_packets = info_traffic.all_packets;
+        if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
             return self.update(Message::Waiting);
         }
-        self.runtime_data.tot_out_packets = info_traffic_lock.tot_out_packets;
-        self.runtime_data.tot_in_packets = info_traffic_lock.tot_in_packets;
-        self.runtime_data.all_bytes = info_traffic_lock.all_bytes;
-        self.runtime_data.tot_in_bytes = info_traffic_lock.tot_in_bytes;
-        self.runtime_data.tot_out_bytes = info_traffic_lock.tot_out_bytes;
-        self.runtime_data.dropped_packets = info_traffic_lock.dropped_packets;
-        drop(info_traffic_lock);
+        // todo: remove runtime_data
+        self.runtime_data.tot_out_packets = info_traffic.tot_out_packets;
+        self.runtime_data.tot_in_packets = info_traffic.tot_in_packets;
+        self.runtime_data.all_bytes = info_traffic.all_bytes;
+        self.runtime_data.tot_in_bytes = info_traffic.tot_in_bytes;
+        self.runtime_data.tot_out_bytes = info_traffic.tot_out_bytes;
+        self.runtime_data.dropped_packets = info_traffic.dropped_packets;
         let emitted_notifications = notify_and_log(
             &mut self.runtime_data,
             self.configs.lock().unwrap().settings.notifications,
-            &self.info_traffic.clone(),
-            timestamp,
+            info_traffic,
         );
-        self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
+        self.info_traffic.favorites_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
@@ -718,7 +721,7 @@ impl Sniffer {
         child.wait().unwrap_or_default();
     }
 
-    fn start(&mut self) {
+    fn start(&mut self) -> Task<Message> {
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
             self.set_adapter(current_device_name);
@@ -727,8 +730,7 @@ impl Sniffer {
         let pcap_path = self.export_pcap.full_path();
         let capture_context = CaptureContext::new(&capture_source, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
-        let info_traffic_mutex = self.info_traffic.clone();
-        *info_traffic_mutex.lock().unwrap() = InfoTraffic::new();
+        self.info_traffic = InfoTraffic::default();
         self.runtime_data = RunTimeData::new();
         let ConfigSettings {
             style, language, ..
@@ -741,9 +743,9 @@ impl Sniffer {
             let current_capture_id = self.current_capture_id.clone();
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
-            let host_data = self.host_data_states.data.clone();
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
+            let (tx, rx) = async_channel::unbounded();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -751,14 +753,15 @@ impl Sniffer {
                         &current_capture_id,
                         &capture_source,
                         &filters,
-                        &info_traffic_mutex,
                         &mmdb_readers,
                         capture_context,
-                        &host_data,
+                        &tx,
                     );
                 })
                 .log_err(location!());
+            return Task::stream(rx);
         }
+        Task::none()
     }
 
     fn reset(&mut self) -> Task<Message> {
@@ -797,7 +800,7 @@ impl Sniffer {
     }
 
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
-        let mut info_traffic = self.info_traffic.lock().unwrap();
+        let info_traffic = &mut self.info_traffic;
         if add {
             info_traffic.favorite_hosts.insert(host.clone());
         } else {
@@ -806,7 +809,6 @@ impl Sniffer {
         if let Some(host_info) = info_traffic.hosts.get_mut(host) {
             host_info.is_favorite = add;
         }
-        drop(info_traffic);
     }
 
     fn close_settings(&mut self) {
@@ -916,9 +918,7 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
-            return if self.info_traffic.lock().unwrap().all_packets == 0
-                && self.settings_page.is_none()
-            {
+            return if self.info_traffic.all_packets == 0 && self.settings_page.is_none() {
                 self.update(Message::Reset)
             } else {
                 self.update(Message::ShowModal(MyModal::Reset))
@@ -928,9 +928,7 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init)
-            || self.info_traffic.lock().unwrap().all_packets == 0
-        {
+        if self.running_page.eq(&RunningPage::Init) || self.info_traffic.all_packets == 0 {
             self.update(Message::Quit)
         } else if self.thumbnail {
             // TODO: uncomment once issue #653 is fixed
@@ -980,6 +978,46 @@ impl Sniffer {
         .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
         picked.path().to_string_lossy().to_string()
+    }
+
+    fn handle_new_host(&mut self, host_msg: NewHostMessage) {
+        let NewHostMessage {
+            host,
+            other_data,
+            is_loopback,
+            is_local,
+            is_bogon,
+            traffic_type,
+            address_to_lookup,
+            rdns,
+        } = host_msg;
+
+        self.info_traffic
+            .hosts
+            .entry(host.clone())
+            .and_modify(|data_info_host| {
+                data_info_host.data_info += other_data;
+            })
+            .or_insert_with(|| DataInfoHost {
+                data_info: other_data,
+                is_favorite: false,
+                is_loopback,
+                is_local,
+                is_bogon,
+                traffic_type,
+            });
+
+        self.addresses_resolved
+            .insert(address_to_lookup, (rdns, host.clone()));
+
+        // update host data states including the new host
+        self.host_data_states.data.update(&host);
+
+        // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
+        // todo: check if this is the correct and only place to do this
+        if self.info_traffic.favorite_hosts.contains(&host) {
+            self.info_traffic.favorites_last_interval.insert(host);
+        }
     }
 }
 

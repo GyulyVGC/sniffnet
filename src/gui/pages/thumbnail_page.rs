@@ -1,6 +1,5 @@
 use std::cmp::min;
 use std::net::IpAddr;
-use std::sync::Mutex;
 
 use iced::widget::{Column, Container, Row, Rule, Space, Text, lazy, vertical_space};
 use iced::{Alignment, Font, Length};
@@ -40,7 +39,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .align_x(Alignment::Center);
     }
 
-    let info_traffic = sniffer.info_traffic.clone();
+    let info_traffic = &sniffer.info_traffic;
     let chart_type = sniffer.traffic_chart.chart_type;
 
     let lazy_report = lazy(filtered, move |_| {
@@ -48,9 +47,9 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             .padding([5, 0])
             .height(Length::Fill)
             .align_y(Alignment::Start)
-            .push(host_col(&info_traffic, chart_type, font))
+            .push(host_col(info_traffic, chart_type, font))
             .push(Rule::vertical(10))
-            .push(service_col(&info_traffic, chart_type, font))
+            .push(service_col(info_traffic, chart_type, font))
     });
 
     let content = Column::new()
@@ -61,7 +60,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 }
 
 fn host_col<'a>(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -103,7 +102,7 @@ fn host_col<'a>(
 }
 
 fn service_col<'a>(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {

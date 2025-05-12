@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
@@ -15,11 +13,11 @@ use crate::{InfoTraffic, RunTimeData};
 pub fn notify_and_log(
     runtime_data: &mut RunTimeData,
     notifications: Notifications,
-    info_traffic: &Mutex<InfoTraffic>,
-    timestamp: i64,
+    info_traffic: &InfoTraffic,
 ) -> usize {
     let mut already_emitted_sound = false;
     let mut emitted_notifications = 0;
+    let timestamp = info_traffic.last_packet_timestamp;
     // packets threshold
     if let Some(threshold) = notifications.packets_notification.threshold {
         let sent_packets_entry = runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev;
@@ -75,21 +73,16 @@ pub fn notify_and_log(
     }
     // from favorites
     if notifications.favorite_notification.notify_on_favorite
-        && !info_traffic
-            .lock()
-            .unwrap()
-            .favorites_last_interval
-            .is_empty()
+        && !info_traffic.favorites_last_interval.is_empty()
     {
-        let info_traffic_lock = info_traffic.lock().unwrap();
-        for host in info_traffic_lock.favorites_last_interval.clone() {
+        for host in info_traffic.favorites_last_interval.clone() {
             //log this notification
             emitted_notifications += 1;
             if runtime_data.logged_notifications.len() >= 30 {
                 runtime_data.logged_notifications.pop_back();
             }
 
-            let data_info_host = *info_traffic_lock
+            let data_info_host = *info_traffic
                 .hosts
                 .get(&host)
                 .unwrap_or(&DataInfoHost::default());
@@ -103,7 +96,6 @@ pub fn notify_and_log(
                     },
                 ));
         }
-        drop(info_traffic_lock);
         if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
             // emit sound
             play(

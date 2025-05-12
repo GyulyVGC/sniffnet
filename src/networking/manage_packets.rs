@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::{Address, Device};
 
+use crate::gui::types::message::Message;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
@@ -13,9 +14,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::host::Host;
-use crate::networking::types::host_data_states::HostData;
+use crate::networking::types::host::{Host, NewHostMessage};
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
@@ -23,9 +22,11 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::secondary_threads::parse_packets::AddressesResolutionState;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::{InfoTraffic, IpVersion, Protocol, location};
+use async_channel::Sender;
 use std::fmt::Write;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -258,7 +259,7 @@ pub fn get_service(
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
-    info_traffic_mutex: &Mutex<InfoTraffic>,
+    info_traffic: &mut InfoTraffic,
     key: &AddressPortPair,
     cs: &CaptureSource,
     mac_addresses: (Option<String>, Option<String>),
@@ -269,7 +270,8 @@ pub fn modify_or_insert_in_map(
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
 
-    if !info_traffic_mutex.lock().unwrap().map.contains_key(key) {
+    // todo: use a full map...
+    if !info_traffic.map.contains_key(key) {
         // first occurrence of key
 
         // update device addresses
@@ -299,9 +301,7 @@ pub fn modify_or_insert_in_map(
         service = get_service(key, traffic_direction, &my_interface_addresses);
     }
 
-    let mut info_traffic = info_traffic_mutex.lock().unwrap();
-    let timestamp = info_traffic.latest_packet_timestamp;
-
+    let timestamp = info_traffic.last_packet_timestamp;
     let new_info: InfoAddressPortPair = info_traffic
         .map
         .entry(*key)
@@ -344,26 +344,27 @@ pub fn modify_or_insert_in_map(
         })
         .clone();
 
-    if let Some(host_info) = info_traffic
-        .addresses_resolved
-        .get(&get_address_to_lookup(key, new_info.traffic_direction))
-        .cloned()
-    {
-        if info_traffic.favorite_hosts.contains(&host_info.1) {
-            info_traffic.favorites_last_interval.insert(host_info.1);
-        }
-    }
+    // todo!
+    // if let Some(host_info) = info_traffic
+    //     .addresses_resolved
+    //     .get(&get_address_to_lookup(key, new_info.traffic_direction))
+    //     .cloned()
+    // {
+    //     if info_traffic.favorite_hosts.contains(&host_info.1) {
+    //         info_traffic.favorites_last_interval.insert(host_info.1);
+    //     }
+    // }
 
     new_info
 }
 
 pub fn reverse_dns_lookup(
-    info_traffic: &Mutex<InfoTraffic>,
+    tx: &Sender<Message>,
+    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
     key: &AddressPortPair,
     traffic_direction: TrafficDirection,
     cs: &CaptureSource,
     mmdb_readers: &MmdbReaders,
-    host_data: &Mutex<HostData>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = cs.get_addresses().lock().unwrap().clone();
@@ -382,7 +383,7 @@ pub fn reverse_dns_lookup(
     let is_bogon = is_bogon(&address_to_lookup);
     let country = get_country(&address_to_lookup, &mmdb_readers.country);
     let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
-    let r_dns = if let Ok(result) = lookup_result {
+    let rdns = if let Ok(result) = lookup_result {
         if result.is_empty() {
             address_to_lookup.to_string()
         } else {
@@ -392,45 +393,34 @@ pub fn reverse_dns_lookup(
         address_to_lookup.to_string()
     };
     let new_host = Host {
-        domain: get_domain_from_r_dns(r_dns.clone()),
+        domain: get_domain_from_r_dns(rdns.clone()),
         asn,
         country,
     };
 
-    let mut info_traffic_lock = info_traffic.lock().unwrap();
     // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
-    let other_data = info_traffic_lock
+    let mut resolutions_lock = resolutions_state.lock().unwrap();
+    let other_data = resolutions_lock
         .addresses_waiting_resolution
         .remove(&address_to_lookup)
         .unwrap_or_default();
     // insert the newly resolved host in the collections, with the data it exchanged so far
-    info_traffic_lock
+    resolutions_lock
         .addresses_resolved
-        .insert(address_to_lookup, (r_dns, new_host.clone()));
-    info_traffic_lock
-        .hosts
-        .entry(new_host.clone())
-        .and_modify(|data_info_host| {
-            data_info_host.data_info += other_data;
-        })
-        .or_insert_with(|| DataInfoHost {
-            data_info: other_data,
-            is_favorite: false,
-            is_loopback,
-            is_local,
-            is_bogon,
-            traffic_type,
-        });
+        .insert(address_to_lookup, (rdns.clone(), new_host.clone()));
+    drop(resolutions_lock);
 
-    // update host data states including the new host
-    host_data.lock().unwrap().update(&new_host);
-
-    // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
-    if info_traffic_lock.favorite_hosts.contains(&new_host) {
-        info_traffic_lock.favorites_last_interval.insert(new_host);
-    }
-
-    drop(info_traffic_lock);
+    let msg_data = NewHostMessage {
+        host: new_host,
+        other_data,
+        is_loopback,
+        is_local,
+        is_bogon,
+        traffic_type,
+        address_to_lookup,
+        rdns,
+    };
+    let _ = tx.send_blocking(Message::NewHost(msg_data));
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)

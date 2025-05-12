@@ -11,7 +11,7 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
     pub mac_address1: Option<String>,
@@ -33,4 +33,24 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+}
+
+impl InfoAddressPortPair {
+    pub fn refresh(&mut self, other: &Self) {
+        self.transmitted_bytes += other.transmitted_bytes;
+        self.transmitted_packets += other.transmitted_packets;
+        self.final_timestamp = other.final_timestamp;
+        for (icmp_type, count) in &other.icmp_types {
+            self.icmp_types
+                .entry(*icmp_type)
+                .and_modify(|v| *v += count)
+                .or_insert(*count);
+        }
+        for (arp_type, count) in &other.arp_types {
+            self.arp_types
+                .entry(*arp_type)
+                .and_modify(|v| *v += count)
+                .or_insert(*count);
+        }
+    }
 }

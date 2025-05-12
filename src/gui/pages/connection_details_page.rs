@@ -65,22 +65,18 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
-    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    let val = info_traffic_lock
+    let info_traffic = &sniffer.info_traffic;
+    let val = info_traffic
         .map
         .get(key)
         .unwrap_or(&InfoAddressPortPair::default())
         .clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
-    let host_option = info_traffic_lock
-        .addresses_resolved
-        .get(&address_to_lookup)
-        .cloned();
-    let host_info_option = info_traffic_lock
+    let host_option = sniffer.addresses_resolved.get(&address_to_lookup).cloned();
+    let host_info_option = info_traffic
         .hosts
         .get(&host_option.clone().unwrap_or_default().1)
         .copied();
-    drop(info_traffic_lock);
 
     let header_and_content = Column::new().width(Length::Fill).push(page_header(
         font,

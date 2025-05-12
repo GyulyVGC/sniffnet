@@ -5,7 +5,8 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
-use crate::networking::types::host::Host;
+use crate::networking::types::host::{Host, NewHostMessage};
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -16,10 +17,10 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
-    /// Every 5 seconds
+    /// Every 1 second on initial page
     TickInit,
-    /// Every 1 second
-    TickRun,
+    /// Sent by the backend parsing packets
+    TickRun(InfoTraffic),
     /// Select adapter
     AdapterSelection(String),
     /// Select IP filter
@@ -130,4 +131,6 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
+    /// A new host has been resolved
+    NewHost(NewHostMessage),
 }

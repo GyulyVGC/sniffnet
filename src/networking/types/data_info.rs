@@ -11,7 +11,7 @@ use crate::report::types::sort_type::SortType;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
 // data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
-#[derive(Clone, Default, Copy)]
+#[derive(Clone, Default, Copy, Debug)]
 pub struct DataInfo {
     /// Incoming packets
     incoming_packets: u128,
