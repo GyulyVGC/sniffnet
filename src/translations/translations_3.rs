@@ -10,6 +10,7 @@ pub fn general_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::RO => "General",
         // Language::FA => "عمومی",
+        Language::ES => "Generales",
         Language::IT => "Generali",
         Language::FR => "Général",
         Language::DE => "Allgemein",
@@ -26,7 +27,6 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::PT => "Geral",
         Language::UK => "Загальні",
         Language::ID => "Umum",
-        Language::ES => "Generales",
         _ => "General",
     }
 }
