@@ -87,6 +87,8 @@ pub struct Sniffer {
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
+    /// Collection of the favorite hosts
+    pub favorite_hosts: HashSet<Host>,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Traffic data displayed in GUI
@@ -152,6 +154,7 @@ impl Sniffer {
             current_capture_id: Arc::new(Mutex::new(0)),
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
+            favorite_hosts: HashSet::new(),
             newer_release_available: None,
             runtime_data: RunTimeData::new(),
             capture_source: CaptureSource::Device(device),
@@ -656,7 +659,8 @@ impl Sniffer {
     }
 
     fn refresh_data(&mut self, info_traffic: InfoTraffic) -> Task<Message> {
-        self.info_traffic.refresh(info_traffic);
+        self.info_traffic
+            .refresh(info_traffic, &self.favorite_hosts);
         let info_traffic = &self.info_traffic;
         self.runtime_data.all_packets = info_traffic.all_packets;
         if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
@@ -802,9 +806,9 @@ impl Sniffer {
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
         let info_traffic = &mut self.info_traffic;
         if add {
-            info_traffic.favorite_hosts.insert(host.clone());
+            self.favorite_hosts.insert(host.clone());
         } else {
-            info_traffic.favorite_hosts.remove(host);
+            self.favorite_hosts.remove(host);
         }
         if let Some(host_info) = info_traffic.hosts.get_mut(host) {
             host_info.is_favorite = add;
@@ -1014,8 +1018,7 @@ impl Sniffer {
         self.host_data_states.data.update(&host);
 
         // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
-        // todo: check if this is the correct and only place to do this
-        if self.info_traffic.favorite_hosts.contains(&host) {
+        if self.favorite_hosts.contains(&host) {
             self.info_traffic.favorites_last_interval.insert(host);
         }
     }

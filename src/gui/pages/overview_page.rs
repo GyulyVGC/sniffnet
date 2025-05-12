@@ -98,7 +98,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                     move |_| lazy_col_info(sniffer),
                 );
 
-                let num_favorites = sniffer.info_traffic.favorite_hosts.len();
+                let num_favorites = sniffer.favorite_hosts.len();
                 let container_report = lazy(
                     (
                         filtered,

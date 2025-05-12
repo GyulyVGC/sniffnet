@@ -35,10 +35,6 @@ pub struct InfoTraffic {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
-
-    // todo!!!
-    /// Collection of the favorite hosts
-    pub favorite_hosts: HashSet<Host>,
     /// Collection of favorite hosts that exchanged data in the last interval
     pub favorites_last_interval: HashSet<Host>,
 }
@@ -56,7 +52,7 @@ impl InfoTraffic {
         }
     }
 
-    pub fn refresh(&mut self, other: Self) {
+    pub fn refresh(&mut self, other: Self, favorites: &HashSet<Host>) {
         self.tot_in_bytes += other.tot_in_bytes;
         self.tot_out_bytes += other.tot_out_bytes;
         self.tot_in_packets += other.tot_in_packets;
@@ -86,6 +82,12 @@ impl InfoTraffic {
                 .and_modify(|x| x.data_info += value.data_info)
                 .or_insert(value);
         }
+
+        self.favorites_last_interval = other
+            .favorites_last_interval
+            .into_iter()
+            .filter(|h| favorites.contains(h))
+            .collect();
 
         // todo: remove this
         // let mut total_packets = 0;

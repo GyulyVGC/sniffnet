@@ -149,6 +149,7 @@ impl CaptureSource {
         }
     }
 
+    // todo: don't use mutex for device addresses
     pub fn get_addresses(&self) -> Arc<Mutex<Vec<Address>>> {
         match self {
             Self::Device(device) => device.addresses.clone(),

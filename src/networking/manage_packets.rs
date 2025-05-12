@@ -266,6 +266,7 @@ pub fn modify_or_insert_in_map(
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
+    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
 ) -> InfoAddressPortPair {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -344,16 +345,16 @@ pub fn modify_or_insert_in_map(
         })
         .clone();
 
-    // todo!
-    // if let Some(host_info) = info_traffic
-    //     .addresses_resolved
-    //     .get(&get_address_to_lookup(key, new_info.traffic_direction))
-    //     .cloned()
-    // {
-    //     if info_traffic.favorite_hosts.contains(&host_info.1) {
-    //         info_traffic.favorites_last_interval.insert(host_info.1);
-    //     }
-    // }
+    // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
+    if let Some(host_info) = resolutions_state
+        .lock()
+        .unwrap()
+        .addresses_resolved
+        .get(&get_address_to_lookup(key, new_info.traffic_direction))
+        .cloned()
+    {
+        info_traffic.favorites_last_interval.insert(host_info.1);
+    }
 
     new_info
 }

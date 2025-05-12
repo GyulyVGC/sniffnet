@@ -107,6 +107,7 @@ pub fn parse_packets(
                             icmp_type,
                             arp_type,
                             exchanged_bytes,
+                            &resolutions_state,
                         );
                     }
 
