@@ -8,7 +8,7 @@ use crate::{Language, StyleType};
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::RO | Language::ES => "General",
+        Language::EN | Language::RO => "General",
         // Language::FA => "عمومی",
         Language::IT => "Generali",
         Language::FR => "Général",
@@ -26,6 +26,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::PT => "Geral",
         Language::UK => "Загальні",
         Language::ID => "Umum",
+        Language::ES => "Generales",
         _ => "General",
     }
 }
