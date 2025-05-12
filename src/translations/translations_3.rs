@@ -269,7 +269,7 @@ pub fn unsupported_link_type_translation<'a>(
         }
         // Language::FA => "نوع پیوند مرتبط با این مبدل هنوز توسط Sniffnet پشتیبانی نمی شود...",
         Language::ES => {
-            "La conexión asociada con este adaptador aún no esta implementada en Sniffnet..."
+            "La conexión asociada a este adaptador aún no está soportada por Sniffnet..."
         }
         Language::IT => {
             "Il tipo di collegamento associato a questo adattatore di rete non è ancora supportato da Sniffnet..."
