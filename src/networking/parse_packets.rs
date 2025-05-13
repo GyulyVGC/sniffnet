@@ -31,6 +31,7 @@ use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::types::timestamp::Timestamp;
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -74,8 +75,12 @@ pub fn parse_packets(
 
                     // todo!!!
                     #[allow(clippy::useless_conversion)]
-                    let this_packet_timestamp = i64::from(packet.header.ts.tv_sec);
-                    if info_traffic_msg.last_packet_timestamp != this_packet_timestamp {
+                    let secs = i64::from(packet.header.ts.tv_sec);
+                    #[allow(clippy::useless_conversion)]
+                    let usecs = i64::from(packet.header.ts.tv_usec);
+                    let this_packet_timestamp = Timestamp::new(secs, usecs);
+                    if info_traffic_msg.last_packet_timestamp.secs() != this_packet_timestamp.secs()
+                    {
                         if matches!(cs, CaptureSource::Device(_)) {
                             for dev in Device::list().log_err(location!()).unwrap_or_default() {
                                 if dev.name.eq(&cs.get_name()) {

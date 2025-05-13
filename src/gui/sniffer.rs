@@ -1302,10 +1302,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
-            HashSet::new()
-        );
+        assert_eq!(sniffer.favorite_hosts, HashSet::new());
         // remove 2
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1315,10 +1312,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
-            HashSet::new()
-        );
+        assert_eq!(sniffer.favorite_hosts, HashSet::new());
         // add 2
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1329,7 +1323,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1346,7 +1340,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1363,7 +1357,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1380,7 +1374,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1404,7 +1398,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1433,7 +1427,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1457,7 +1451,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
+            sniffer.favorite_hosts,
             HashSet::from([Host {
                 domain: "1.1".to_string(),
                 asn: Default::default(),
@@ -1473,10 +1467,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(
-            sniffer.info_traffic.lock().unwrap().favorite_hosts,
-            HashSet::new()
-        );
+        assert_eq!(sniffer.favorite_hosts, HashSet::new());
     }
 
     #[test]
@@ -1898,7 +1889,7 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = new_sniffer();
-        sniffer.runtime_data.logged_notifications =
+        sniffer.logged_notifications =
             VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
                 PacketsThresholdExceeded {
                     threshold: 0,
@@ -1911,10 +1902,10 @@ mod tests {
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.runtime_data.logged_notifications.len(), 1);
+        assert_eq!(sniffer.logged_notifications.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.runtime_data.logged_notifications.len(), 0);
+        assert_eq!(sniffer.logged_notifications.len(), 0);
     }
 
     #[test]
@@ -1956,7 +1947,7 @@ mod tests {
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer.runtime_data.tot_in_packets += 1;
+        sniffer.info_traffic.tot_in_packets += 1;
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);

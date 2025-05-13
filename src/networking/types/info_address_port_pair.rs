@@ -7,6 +7,7 @@ use crate::Service;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::types::timestamp::Timestamp;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -22,9 +23,9 @@ pub struct InfoAddressPortPair {
     /// Amount of packets transmitted between the pair.
     pub transmitted_packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub initial_timestamp: i64,
+    pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
-    pub final_timestamp: i64,
+    pub final_timestamp: Timestamp,
     /// Upper layer service carried by the associated address:port pair.
     pub service: Service,
     /// Determines if the connection is incoming or outgoing

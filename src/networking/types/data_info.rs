@@ -123,7 +123,7 @@ impl DataInfo {
             outgoing_packets,
             incoming_bytes,
             outgoing_bytes,
-            final_instant: Default::default(),
+            final_instant: Instant::now(),
         }
     }
 }

@@ -9,6 +9,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::types::timestamp::Timestamp;
 use pcap::Address;
 use std::collections::{HashMap, HashSet};
 
@@ -30,7 +31,7 @@ pub struct InfoTraffic {
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Timestamp of the latest packet
-    pub last_packet_timestamp: i64,
+    pub last_packet_timestamp: Timestamp,
     /// Total sent bytes filtered before the current time interval
     pub tot_out_bytes_prev: u128,
     /// Total received bytes filtered before the current time interval
@@ -126,7 +127,7 @@ pub struct InfoTrafficMessage {
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Timestamp of the latest packet
-    pub last_packet_timestamp: i64,
+    pub last_packet_timestamp: Timestamp,
     /// Map of the filtered traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
@@ -152,7 +153,7 @@ impl InfoTrafficMessage {
         }
     }
 
-    pub fn take(&mut self, last_packet_timestamp: i64) -> Self {
+    pub fn take(&mut self, last_packet_timestamp: Timestamp) -> Self {
         let info_traffic = InfoTrafficMessage {
             last_packet_timestamp,
             ..InfoTrafficMessage::default()
