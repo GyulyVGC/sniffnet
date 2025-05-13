@@ -178,7 +178,7 @@ fn packets_notification_log<'a>(
                 .width(250)
                 .push(
                     Row::new()
-                        .spacing(5)
+                        .spacing(8)
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
@@ -259,7 +259,7 @@ fn bytes_notification_log<'a>(
                 .width(250)
                 .push(
                     Row::new()
-                        .spacing(5)
+                        .spacing(8)
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
@@ -344,7 +344,7 @@ fn favorite_notification_log<'a>(
                 .spacing(7)
                 .push(
                     Row::new()
-                        .spacing(5)
+                        .spacing(8)
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )

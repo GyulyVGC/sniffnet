@@ -44,7 +44,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
-    horizontal_space, lazy, vertical_space,
+    horizontal_space, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding, Shrink};
 use std::fmt::Write;
@@ -67,8 +67,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
         let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
-        let dropped = sniffer.info_traffic.dropped_packets;
-        let total = observed + u128::from(dropped);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -80,7 +78,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 body =
                     body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
             }
-            (_observed, filtered) => {
+            (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
                     RunningPage::Overview,
@@ -93,24 +91,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
                 let container_chart = container_chart(sniffer, font);
 
-                let container_info = lazy(
-                    (total, style, language, sniffer.traffic_chart.chart_type),
-                    move |_| lazy_col_info(sniffer),
-                );
+                let container_info = col_info(sniffer);
 
-                let num_favorites = sniffer.favorite_hosts.len();
-                let container_report = lazy(
-                    (
-                        filtered,
-                        num_favorites,
-                        style,
-                        language,
-                        sniffer.traffic_chart.chart_type,
-                        sniffer.host_sort_type,
-                        sniffer.service_sort_type,
-                    ),
-                    move |_| lazy_row_report(sniffer),
-                );
+                let container_report = row_report(sniffer);
 
                 body = body
                     .width(Length::Fill)
@@ -232,7 +215,7 @@ fn body_pcap_error<'a>(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
@@ -440,7 +423,7 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
         )
 }
 
-fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;

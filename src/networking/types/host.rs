@@ -28,7 +28,7 @@ pub struct ThumbnailHost {
 }
 
 #[derive(Clone, Debug)]
-pub struct NewHostMessage {
+pub struct HostMessage {
     pub host: Host,
     pub other_data: DataInfo,
     pub is_loopback: bool,

@@ -10,11 +10,12 @@ use crate::gui::types::message::Message;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
+use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::host::{Host, NewHostMessage};
+use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTrafficMessage;
@@ -23,7 +24,6 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::secondary_threads::parse_packets::AddressesResolutionState;
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::{IpVersion, Protocol};
 use async_channel::Sender;
@@ -257,7 +257,7 @@ pub fn get_service(
     }
 }
 
-/// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
+/// Function to insert the source and destination of a packet into the map containing the analyzed traffic
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTrafficMessage,
     key: &AddressPortPair,
@@ -398,7 +398,7 @@ pub fn reverse_dns_lookup(
         .insert(address_to_lookup, (rdns.clone(), new_host.clone()));
     drop(resolutions_lock);
 
-    let msg_data = NewHostMessage {
+    let msg_data = HostMessage {
         host: new_host,
         other_data,
         is_loopback,

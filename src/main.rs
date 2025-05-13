@@ -44,7 +44,6 @@ mod mmdb;
 mod networking;
 mod notifications;
 mod report;
-mod secondary_threads;
 mod translations;
 mod utils;
 

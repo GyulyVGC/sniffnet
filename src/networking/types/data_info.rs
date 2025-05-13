@@ -1,17 +1,14 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use std::cmp::Ordering;
-use std::ops::AddAssign;
-
-use chrono::{DateTime, Local};
-
 use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
+use std::cmp::Ordering;
+use std::time::Instant;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
 // data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
-#[derive(Clone, Default, Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct DataInfo {
     /// Incoming packets
     incoming_packets: u128,
@@ -21,8 +18,8 @@ pub struct DataInfo {
     incoming_bytes: u128,
     /// Outgoing bytes
     outgoing_bytes: u128,
-    /// Latest time of occurrence
-    final_timestamp: DateTime<Local>,
+    /// Latest instant of occurrence
+    final_instant: Instant,
 }
 
 impl DataInfo {
@@ -58,7 +55,7 @@ impl DataInfo {
             self.incoming_packets += 1;
             self.incoming_bytes += bytes;
         }
-        self.final_timestamp = Local::now();
+        self.final_instant = Instant::now();
     }
 
     pub fn add_packets(&mut self, packets: u128, bytes: u128, traffic_direction: TrafficDirection) {
@@ -69,7 +66,6 @@ impl DataInfo {
             self.incoming_packets += packets;
             self.incoming_bytes += bytes;
         }
-        self.final_timestamp = Local::now();
     }
 
     pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
@@ -79,7 +75,7 @@ impl DataInfo {
                 outgoing_packets: 1,
                 incoming_bytes: 0,
                 outgoing_bytes: bytes,
-                final_timestamp: Local::now(),
+                final_instant: Instant::now(),
             }
         } else {
             Self {
@@ -87,9 +83,17 @@ impl DataInfo {
                 outgoing_packets: 0,
                 incoming_bytes: bytes,
                 outgoing_bytes: 0,
-                final_timestamp: Local::now(),
+                final_instant: Instant::now(),
             }
         }
+    }
+
+    pub fn refresh(&mut self, rhs: Self) {
+        self.incoming_packets += rhs.incoming_packets;
+        self.outgoing_packets += rhs.outgoing_packets;
+        self.incoming_bytes += rhs.incoming_bytes;
+        self.outgoing_bytes += rhs.outgoing_bytes;
+        self.final_instant = rhs.final_instant;
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, chart_type: ChartType) -> Ordering {
@@ -97,12 +101,12 @@ impl DataInfo {
             ChartType::Packets => match sort_type {
                 SortType::Ascending => self.tot_packets().cmp(&other.tot_packets()),
                 SortType::Descending => other.tot_packets().cmp(&self.tot_packets()),
-                SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+                SortType::Neutral => other.final_instant.cmp(&self.final_instant),
             },
             ChartType::Bytes => match sort_type {
                 SortType::Ascending => self.tot_bytes().cmp(&other.tot_bytes()),
                 SortType::Descending => other.tot_bytes().cmp(&self.tot_bytes()),
-                SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+                SortType::Neutral => other.final_instant.cmp(&self.final_instant),
             },
         }
     }
@@ -119,17 +123,19 @@ impl DataInfo {
             outgoing_packets,
             incoming_bytes,
             outgoing_bytes,
-            final_timestamp: Default::default(),
+            final_instant: Default::default(),
         }
     }
 }
 
-impl AddAssign for DataInfo {
-    fn add_assign(&mut self, rhs: Self) {
-        self.incoming_packets += rhs.incoming_packets;
-        self.outgoing_packets += rhs.outgoing_packets;
-        self.incoming_bytes += rhs.incoming_bytes;
-        self.outgoing_bytes += rhs.outgoing_bytes;
-        self.final_timestamp = Local::now();
+impl Default for DataInfo {
+    fn default() -> Self {
+        Self {
+            incoming_packets: 0,
+            outgoing_packets: 0,
+            incoming_bytes: 0,
+            outgoing_bytes: 0,
+            final_instant: Instant::now(),
+        }
     }
 }

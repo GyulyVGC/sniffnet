@@ -1,7 +1,7 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use iced::widget::{Column, Container, Row, Rule, Space, Text, lazy, vertical_space};
+use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::chart_type::ChartType;
@@ -42,19 +42,17 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let info_traffic = &sniffer.info_traffic;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let lazy_report = lazy(filtered, move |_| {
-        Row::new()
-            .padding([5, 0])
-            .height(Length::Fill)
-            .align_y(Alignment::Start)
-            .push(host_col(info_traffic, chart_type, font))
-            .push(Rule::vertical(10))
-            .push(service_col(info_traffic, chart_type, font))
-    });
+    let report = Row::new()
+        .padding([5, 0])
+        .height(Length::Fill)
+        .align_y(Alignment::Start)
+        .push(host_col(info_traffic, chart_type, font))
+        .push(Rule::vertical(10))
+        .push(service_col(info_traffic, chart_type, font));
 
     let content = Column::new()
         .push(Container::new(sniffer.traffic_chart.view()).height(Length::Fill))
-        .push(lazy_report);
+        .push(report);
 
     Container::new(content)
 }

@@ -80,7 +80,7 @@ impl InfoTraffic {
         for (key, value) in msg.services {
             self.services
                 .entry(key)
-                .and_modify(|x| *x += value)
+                .and_modify(|x| x.refresh(value))
                 .or_insert(value);
         }
 

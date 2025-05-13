@@ -1,11 +1,5 @@
 use std::net::IpAddr;
 
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
-use iced::{Alignment, Font, Length, Padding};
-
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
@@ -40,6 +34,12 @@ use crate::translations::translations_3::{
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use iced::alignment::Vertical;
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{Column, Container, Row, Text, Tooltip};
+use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
+use iced::{Alignment, Font, Length, Padding};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -184,14 +184,18 @@ fn col_info<'a>(
         .width(Length::FillPortion(2))
         .push(vertical_space())
         .push(
-            Row::new().spacing(5).push(Icon::Clock.to_text()).push(
-                Text::new(format!(
-                    "{} -\n{}",
-                    get_formatted_timestamp(val.initial_timestamp),
-                    get_formatted_timestamp(val.final_timestamp)
-                ))
-                .font(font),
-            ),
+            Row::new()
+                .spacing(8)
+                .align_y(Vertical::Center)
+                .push(Icon::Clock.to_text())
+                .push(
+                    Text::new(format!(
+                        "{}\n{}",
+                        get_formatted_timestamp(val.initial_timestamp),
+                        get_formatted_timestamp(val.final_timestamp)
+                    ))
+                    .font(font),
+                ),
         )
         .push(TextType::highlighted_subtitle_with_desc(
             protocol_translation(language),

@@ -45,10 +45,11 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
-use crate::networking::types::host::{Host, NewHostMessage};
+use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::ip_collection::AddressCollection;
@@ -62,9 +63,8 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
-use crate::secondary_threads::check_updates::set_newer_release_status;
-use crate::secondary_threads::parse_packets::parse_packets;
 use crate::translations::types::language::Language;
+use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
@@ -75,8 +75,6 @@ pub const PERIOD_TICK: u64 = 1000;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
-
-// todo: remove all lazy widgets
 
 /// Struct on which the gui is based
 ///
@@ -249,6 +247,7 @@ impl Sniffer {
         }
     }
 
+    // todo
     fn time_subscription(&self) -> Subscription<Message> {
         if self.running_page.eq(&RunningPage::Init) {
             iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
@@ -974,8 +973,8 @@ impl Sniffer {
         picked.path().to_string_lossy().to_string()
     }
 
-    fn handle_new_host(&mut self, host_msg: NewHostMessage) {
-        let NewHostMessage {
+    fn handle_new_host(&mut self, host_msg: HostMessage) {
+        let HostMessage {
             host,
             other_data,
             is_loopback,
@@ -990,7 +989,7 @@ impl Sniffer {
             .hosts
             .entry(host.clone())
             .and_modify(|data_info_host| {
-                data_info_host.data_info += other_data;
+                data_info_host.data_info.refresh(other_data);
                 data_info_host.is_loopback = is_loopback;
                 data_info_host.is_local = is_local;
                 data_info_host.is_bogon = is_bogon;

@@ -22,7 +22,7 @@ pub struct DataInfoHost {
 
 impl DataInfoHost {
     pub fn refresh(&mut self, other: &Self) {
-        self.data_info += other.data_info;
+        self.data_info.refresh(other.data_info);
         self.is_loopback = other.is_loopback;
         self.is_local = other.is_local;
         self.is_bogon = other.is_bogon;

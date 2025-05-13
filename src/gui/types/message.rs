@@ -5,7 +5,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
-use crate::networking::types::host::{Host, NewHostMessage};
+use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
@@ -132,5 +132,5 @@ pub enum Message {
     /// Set the pcap import path
     SetPcapImport(String),
     /// A new host has been resolved
-    NewHost(NewHostMessage),
+    NewHost(HostMessage),
 }

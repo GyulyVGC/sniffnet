@@ -53,9 +53,11 @@ pub fn parse_packets(
     loop {
         match cap.next_packet() {
             Err(e) => {
-                if *current_capture_id.lock().unwrap() != capture_id
-                    || e == pcap::Error::NoMorePackets
-                {
+                if e == pcap::Error::NoMorePackets {
+                    let _ = tx.send_blocking(Message::TickRun(info_traffic_msg));
+                    return;
+                }
+                if *current_capture_id.lock().unwrap() != capture_id {
                     return;
                 }
             }

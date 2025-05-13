@@ -89,7 +89,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         styles_col = styles_col.push(children);
     }
     styles_col = styles_col
-        .push(lazy((style_path.clone(), style), move |_| {
+        .push(lazy((language, style_path.clone(), style), move |_| {
             lazy_custom_style_input(language, font, &style_path, style)
         }))
         .push(Space::with_height(10));
