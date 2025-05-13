@@ -4,7 +4,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, lazy};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::widget::{
     ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
     vertical_space,
@@ -65,17 +65,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    let report = lazy(
-        (
-            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
-            style,
-            language,
-            sniffer.report_sort_type,
-            sniffer.search.clone(),
-            sniffer.page_number,
-        ),
-        move |_| lazy_report(sniffer),
-    );
+    let report = report(sniffer);
 
     let col_report = Column::new()
         .height(Length::Fill)
@@ -114,7 +104,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn lazy_report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;

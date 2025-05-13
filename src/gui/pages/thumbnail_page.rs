@@ -26,7 +26,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings { style, .. } = sniffer.configs.lock().unwrap().settings;
     let font = style.get_extension().font;
 
-    let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
+    let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
 
     if filtered == 0 {
         return Container::new(

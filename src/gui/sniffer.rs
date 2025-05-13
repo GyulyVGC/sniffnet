@@ -55,6 +55,7 @@ use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
+use crate::notifications::types::logged_notification::LoggedNotification;
 use crate::notifications::types::notifications::Notification;
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
@@ -67,7 +68,7 @@ use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, RunTimeData, StyleType, TrafficChart, location};
+use crate::{ConfigSettings, Configs, InfoTraffic, StyleType, TrafficChart, location};
 
 /// Update period (milliseconds)
 pub const PERIOD_TICK: u64 = 1000;
@@ -75,13 +76,17 @@ pub const PERIOD_TICK: u64 = 1000;
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
+// todo: remove all lazy widgets
+
 /// Struct on which the gui is based
 ///
 /// It contains gui statuses and network traffic statistics to be shared among the different threads
 pub struct Sniffer {
     /// Application's configurations: settings, window properties, name of last device sniffed
+    // todo?
     pub configs: Arc<Mutex<Configs>>,
     /// Capture number, incremented at every new run
+    // todo?
     pub current_capture_id: Arc<Mutex<usize>>,
     /// Capture data updated by thread parsing packets
     pub info_traffic: InfoTraffic,
@@ -89,10 +94,10 @@ pub struct Sniffer {
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
+    /// Log of the received notifications
+    pub logged_notifications: VecDeque<LoggedNotification>,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
-    /// Traffic data displayed in GUI
-    pub runtime_data: RunTimeData,
     /// Network adapter to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// Active filters on the observed traffic
@@ -155,8 +160,8 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
+            logged_notifications: VecDeque::new(),
             newer_release_available: None,
-            runtime_data: RunTimeData::new(),
             capture_source: CaptureSource::Device(device),
             filters: Filters::default(),
             pcap_error: None,
@@ -362,7 +367,7 @@ impl Sniffer {
                 self.configs.lock().unwrap().settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
-                self.runtime_data.logged_notifications = VecDeque::new();
+                self.logged_notifications = VecDeque::new();
                 return self.update(Message::HideModal);
             }
             Message::SwitchPage(next) => {
@@ -662,28 +667,19 @@ impl Sniffer {
         self.info_traffic
             .refresh(info_traffic, &self.favorite_hosts);
         let info_traffic = &self.info_traffic;
-        self.runtime_data.all_packets = info_traffic.all_packets;
         if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
             return self.update(Message::Waiting);
         }
-        // todo: remove runtime_data
-        self.runtime_data.tot_out_packets = info_traffic.tot_out_packets;
-        self.runtime_data.tot_in_packets = info_traffic.tot_in_packets;
-        self.runtime_data.all_bytes = info_traffic.all_bytes;
-        self.runtime_data.tot_in_bytes = info_traffic.tot_in_bytes;
-        self.runtime_data.tot_out_bytes = info_traffic.tot_out_bytes;
-        self.runtime_data.dropped_packets = info_traffic.dropped_packets;
         let emitted_notifications = notify_and_log(
-            &mut self.runtime_data,
+            &mut self.logged_notifications,
             self.configs.lock().unwrap().settings.notifications,
             info_traffic,
         );
         self.info_traffic.favorites_last_interval = HashSet::new();
-        self.runtime_data.tot_emitted_notifications += emitted_notifications;
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
-        update_charts_data(&mut self.runtime_data, &mut self.traffic_chart);
+        update_charts_data(&mut self.info_traffic, &mut self.traffic_chart);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.name.clone();
@@ -694,8 +690,7 @@ impl Sniffer {
             }
         }
         // waiting notifications
-        if self.running_page.eq(&RunningPage::Notifications)
-            && self.runtime_data.logged_notifications.is_empty()
+        if self.running_page.eq(&RunningPage::Notifications) && self.logged_notifications.is_empty()
         {
             return self.update(Message::Waiting);
         }
@@ -735,7 +730,6 @@ impl Sniffer {
         let capture_context = CaptureContext::new(&capture_source, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.info_traffic = InfoTraffic::default();
-        self.runtime_data = RunTimeData::new();
         let ConfigSettings {
             style, language, ..
         } = self.configs.lock().unwrap().settings;
@@ -876,7 +870,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.runtime_data.tot_out_packets + self.runtime_data.tot_in_packets > 0 {
+                if self.info_traffic.tot_out_packets + self.info_traffic.tot_in_packets > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()
@@ -948,7 +942,7 @@ impl Sniffer {
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Notifications)
-            && !self.runtime_data.logged_notifications.is_empty()
+            && !self.logged_notifications.is_empty()
         {
             return self.update(Message::ShowModal(MyModal::ClearAll));
         }

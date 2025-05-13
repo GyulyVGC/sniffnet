@@ -65,9 +65,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         body = body_pcap_error(error, &sniffer.waiting, language, font);
     } else {
         // NO pcap error detected
-        let observed = sniffer.runtime_data.all_packets;
-        let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
-        let dropped = sniffer.runtime_data.dropped_packets;
+        let observed = sniffer.info_traffic.all_packets;
+        let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
+        let dropped = sniffer.info_traffic.dropped_packets;
         let total = observed + u128::from(dropped);
 
         match (observed, filtered) {
@@ -568,23 +568,23 @@ fn donut_row<'a>(
 
     let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
         (
-            sniffer.runtime_data.tot_in_bytes,
-            sniffer.runtime_data.tot_out_bytes,
-            sniffer.runtime_data.all_bytes
-                - sniffer.runtime_data.tot_out_bytes
-                - sniffer.runtime_data.tot_in_bytes,
+            sniffer.info_traffic.tot_in_bytes,
+            sniffer.info_traffic.tot_out_bytes,
+            sniffer.info_traffic.all_bytes
+                - sniffer.info_traffic.tot_out_bytes
+                - sniffer.info_traffic.tot_in_bytes,
             // assume that the dropped packets have the same size as the average packet
-            u128::from(sniffer.runtime_data.dropped_packets) * sniffer.runtime_data.all_bytes
-                / sniffer.runtime_data.all_packets,
+            u128::from(sniffer.info_traffic.dropped_packets) * sniffer.info_traffic.all_bytes
+                / sniffer.info_traffic.all_packets,
         )
     } else {
         (
-            sniffer.runtime_data.tot_in_packets,
-            sniffer.runtime_data.tot_out_packets,
-            sniffer.runtime_data.all_packets
-                - sniffer.runtime_data.tot_out_packets
-                - sniffer.runtime_data.tot_in_packets,
-            u128::from(sniffer.runtime_data.dropped_packets),
+            sniffer.info_traffic.tot_in_packets,
+            sniffer.info_traffic.tot_out_packets,
+            sniffer.info_traffic.all_packets
+                - sniffer.info_traffic.tot_out_packets
+                - sniffer.info_traffic.tot_in_packets,
+            u128::from(sniffer.info_traffic.dropped_packets),
         )
     };
 

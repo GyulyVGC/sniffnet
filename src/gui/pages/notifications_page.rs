@@ -2,7 +2,7 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, lazy};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button, vertical_space};
 use iced::{Alignment, Font, Length};
 use std::fmt::Write;
@@ -58,27 +58,19 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
-        && sniffer.runtime_data.logged_notifications.is_empty()
+        && sniffer.logged_notifications.is_empty()
     {
         let body = body_no_notifications_set(font, language);
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer.runtime_data.logged_notifications.is_empty() {
+    } else if sniffer.logged_notifications.is_empty() {
         let body = body_no_notifications_received(font, language, &sniffer.waiting);
         tab_and_body = tab_and_body.push(body);
     } else {
-        let logged_notifications = lazy(
-            (
-                sniffer.runtime_data.tot_emitted_notifications,
-                sniffer.runtime_data.logged_notifications.len(),
-                language,
-                style,
-            ),
-            move |_| lazy_logged_notifications(sniffer),
-        );
+        let logged_notifications = logged_notifications(sniffer);
         let body_row = Row::new()
             .width(Length::Fill)
             .push(
-                Container::new(if sniffer.runtime_data.logged_notifications.len() < 30 {
+                Container::new(if sniffer.logged_notifications.len() < 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language)).font(font)
@@ -397,7 +389,7 @@ fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Messa
     .class(ContainerType::Tooltip)
 }
 
-fn lazy_logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.lock().unwrap().settings;
@@ -408,7 +400,7 @@ fn lazy_logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, Style
         .spacing(10)
         .align_x(Alignment::Center);
 
-    for logged_notification in &sniffer.runtime_data.logged_notifications {
+    for logged_notification in &sniffer.logged_notifications {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
                 packets_notification_log(packet_threshold_exceeded.clone(), language, font)

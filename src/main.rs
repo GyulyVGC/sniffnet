@@ -20,7 +20,6 @@ use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
-use gui::types::runtime_data::RunTimeData;
 use networking::types::byte_multiple::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;

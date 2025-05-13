@@ -29,6 +29,14 @@ pub struct InfoTraffic {
     pub dropped_packets: u32,
     /// Timestamp of the latest packet
     pub last_packet_timestamp: i64,
+    /// Total sent bytes filtered before the current time interval
+    pub tot_out_bytes_prev: u128,
+    /// Total received bytes filtered before the current time interval
+    pub tot_in_bytes_prev: u128,
+    /// Total sent packets filtered before the current time interval
+    pub tot_out_packets_prev: u128,
+    /// Total received packets filtered before the current time interval
+    pub tot_in_packets_prev: u128,
     /// Map of the filtered traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
@@ -53,6 +61,11 @@ impl InfoTraffic {
     }
 
     pub fn refresh(&mut self, other: Self, favorites: &HashSet<Host>) {
+        self.tot_out_bytes_prev = self.tot_out_bytes;
+        self.tot_in_bytes_prev = self.tot_in_bytes;
+        self.tot_out_packets_prev = self.tot_out_packets;
+        self.tot_in_packets_prev = self.tot_in_packets;
+
         self.tot_in_bytes += other.tot_in_bytes;
         self.tot_out_bytes += other.tot_out_bytes;
         self.tot_in_packets += other.tot_in_packets;

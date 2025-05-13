@@ -3,7 +3,7 @@ use std::net::IpAddr;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::widget::{Rule, Scrollable, button, horizontal_space, lazy, vertical_space};
+use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
@@ -45,14 +45,7 @@ pub fn connection_details_page(
     sniffer: &Sniffer,
     key: AddressPortPair,
 ) -> Container<Message, StyleType> {
-    Container::new(lazy(
-        (
-            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
-            sniffer.timing_events.was_just_copy_ip(&key.address1),
-            sniffer.timing_events.was_just_copy_ip(&key.address2),
-        ),
-        move |_| page_content(sniffer, &key),
-    ))
+    Container::new(page_content(sniffer, &key))
 }
 
 fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
