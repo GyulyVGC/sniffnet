@@ -1,10 +1,7 @@
 //! Module defining the `ConfigDevice` struct, which allows to save and reload
 //! the application default configuration.
 
-use std::sync::{Arc, Mutex};
-
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 #[cfg(not(test))]
 use crate::utils::error_logger::{ErrorLogger, Location};
 #[cfg(not(test))]
@@ -55,13 +52,7 @@ impl ConfigDevice {
     pub fn to_my_device(&self) -> MyDevice {
         for device in Device::list().unwrap_or_default() {
             if device.name.eq(&self.device_name) {
-                return MyDevice {
-                    name: device.name,
-                    #[cfg(target_os = "windows")]
-                    desc: device.desc,
-                    addresses: Arc::new(Mutex::new(device.addresses)),
-                    link_type: MyLinkType::default(),
-                };
+                return MyDevice::from_pcap_device(device);
             }
         }
         let standard_device = Device::lookup().unwrap_or(None).unwrap_or_else(|| Device {
@@ -70,13 +61,7 @@ impl ConfigDevice {
             addresses: vec![],
             flags: DeviceFlags::empty(),
         });
-        MyDevice {
-            name: standard_device.name,
-            #[cfg(target_os = "windows")]
-            desc: standard_device.desc,
-            addresses: Arc::new(Mutex::new(standard_device.addresses)),
-            link_type: MyLinkType::default(),
-        }
+        MyDevice::from_pcap_device(standard_device)
     }
 }
 

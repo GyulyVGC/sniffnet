@@ -19,3 +19,13 @@ pub struct DataInfoHost {
     /// Determine if the connection with this host is unicast, multicast, or broadcast
     pub traffic_type: TrafficType,
 }
+
+impl DataInfoHost {
+    pub fn refresh(&mut self, other: &Self) {
+        self.data_info += other.data_info;
+        self.is_loopback = other.is_loopback;
+        self.is_local = other.is_local;
+        self.is_bogon = other.is_bogon;
+        self.traffic_type = other.traffic_type;
+    }
+}

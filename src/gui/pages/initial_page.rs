@@ -359,7 +359,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                             .width(Length::Fill)
                             .class(
                                 if let CaptureSource::Device(device) = &sniffer.capture_source {
-                                    if name == device.name {
+                                    if &name == device.get_name() {
                                         ButtonType::BorderedRoundSelected
                                     } else {
                                         ButtonType::BorderedRound

@@ -5,13 +5,14 @@ use async_channel::Sender;
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::Packet;
+use pcap::{Device, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::gui::types::message::Message;
+use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
@@ -26,16 +27,16 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::utils::error_logger::{ErrorLogger, Location};
-use crate::{InfoTraffic, location};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
     current_capture_id: &Mutex<usize>,
-    cs: &CaptureSource,
+    mut cs: CaptureSource,
     filters: &Filters,
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
@@ -45,7 +46,7 @@ pub fn parse_packets(
     let (mut cap, mut savefile) = capture_context.consume();
 
     let capture_id = *current_capture_id.lock().unwrap();
-    let mut info_traffic = InfoTraffic::default();
+    let mut info_traffic_msg = InfoTrafficMessage::default();
 
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
 
@@ -69,11 +70,22 @@ pub fn parse_packets(
                     let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
 
+                    // todo!!!
                     #[allow(clippy::useless_conversion)]
                     let this_packet_timestamp = i64::from(packet.header.ts.tv_sec);
-                    if info_traffic.last_packet_timestamp != this_packet_timestamp {
+                    if info_traffic_msg.last_packet_timestamp != this_packet_timestamp {
+                        if matches!(cs, CaptureSource::Device(_)) {
+                            for dev in Device::list().log_err(location!()).unwrap_or_default() {
+                                if dev.name.eq(&cs.get_name()) {
+                                    cs.set_addresses(dev.addresses.clone());
+                                    info_traffic_msg.device_addresses = dev.addresses;
+                                    break;
+                                }
+                            }
+                        }
+
                         let _ = tx.send_blocking(Message::TickRun(
-                            info_traffic.take(this_packet_timestamp),
+                            info_traffic_msg.take(this_packet_timestamp),
                         ));
                     }
 
@@ -100,9 +112,9 @@ pub fn parse_packets(
                         }
                         // update the shared map
                         new_info = modify_or_insert_in_map(
-                            &mut info_traffic,
+                            &mut info_traffic_msg,
                             &key,
-                            cs,
+                            &cs,
                             mac_addresses,
                             icmp_type,
                             arp_type,
@@ -112,15 +124,15 @@ pub fn parse_packets(
                     }
 
                     //increment number of sniffed packets and bytes
-                    info_traffic.all_packets += 1;
-                    info_traffic.all_bytes += exchanged_bytes;
+                    info_traffic_msg.all_packets += 1;
+                    info_traffic_msg.all_bytes += exchanged_bytes;
                     // update dropped packets number
                     if let Ok(stats) = cap.stats() {
-                        info_traffic.dropped_packets = stats.dropped;
+                        info_traffic_msg.dropped_packets = stats.dropped;
                     }
 
                     if passed_filters {
-                        info_traffic.add_packet(exchanged_bytes, new_info.traffic_direction);
+                        info_traffic_msg.add_packet(exchanged_bytes, new_info.traffic_direction);
 
                         // check the rDNS status of this address and act accordingly
                         let address_to_lookup =
@@ -161,7 +173,7 @@ pub fn parse_packets(
                                 let key2 = key;
                                 let tx2 = tx.clone();
                                 let resolutions_state2 = resolutions_state.clone();
-                                let device2 = cs.clone();
+                                let cs2 = cs.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
                                 let _ = thread::Builder::new()
                                     .name("thread_reverse_dns_lookup".to_string())
@@ -171,7 +183,7 @@ pub fn parse_packets(
                                             &resolutions_state2,
                                             &key2,
                                             new_info.traffic_direction,
-                                            &device2,
+                                            &cs2,
                                             &mmdb_readers_2,
                                         );
                                     })
@@ -203,7 +215,7 @@ pub fn parse_packets(
                                     .unwrap_or(&(String::new(), Host::default()))
                                     .1
                                     .clone();
-                                info_traffic
+                                info_traffic_msg
                                     .hosts
                                     .entry(host)
                                     .and_modify(|data_info_host| {
@@ -214,17 +226,16 @@ pub fn parse_packets(
                                     })
                                     .or_insert_with(|| {
                                         let traffic_direction = new_info.traffic_direction;
-                                        let my_interface_addresses =
-                                            cs.get_addresses().lock().unwrap().clone();
+                                        let my_interface_addresses = cs.get_addresses();
                                         let traffic_type = get_traffic_type(
                                             &address_to_lookup,
-                                            &my_interface_addresses,
+                                            my_interface_addresses,
                                             traffic_direction,
                                         );
                                         let is_loopback = address_to_lookup.is_loopback();
                                         let is_local = is_local_connection(
                                             &address_to_lookup,
-                                            &my_interface_addresses,
+                                            my_interface_addresses,
                                         );
                                         let is_bogon = is_bogon(&address_to_lookup);
                                         DataInfoHost {
@@ -243,7 +254,7 @@ pub fn parse_packets(
                         }
 
                         //increment the packet count for the sniffed service
-                        info_traffic
+                        info_traffic_msg
                             .services
                             .entry(new_info.service)
                             .and_modify(|data_info| {

@@ -155,7 +155,7 @@ fn body_no_packets<'a>(
                 .align_x(Alignment::Center)
                 .font(font),
         )
-    } else if cs.get_addresses().lock().unwrap().is_empty() {
+    } else if cs.get_addresses().is_empty() {
         (
             Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &cs_info)

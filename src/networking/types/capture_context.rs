@@ -1,5 +1,4 @@
 use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
-use std::sync::{Arc, Mutex};
 
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -149,37 +148,36 @@ impl CaptureSource {
         }
     }
 
-    // todo: don't use mutex for device addresses
-    pub fn get_addresses(&self) -> Arc<Mutex<Vec<Address>>> {
+    pub fn get_addresses(&self) -> &Vec<Address> {
         match self {
-            Self::Device(device) => device.addresses.clone(),
-            Self::File(_) => Arc::new(Mutex::new(vec![])),
+            Self::Device(device) => device.get_addresses(),
+            Self::File(file) => &file.addresses,
         }
     }
 
-    pub fn set_addresses(&self, addresses: Vec<Address>) {
+    pub fn set_addresses(&mut self, addresses: Vec<Address>) {
         if let Self::Device(device) = self {
-            *device.addresses.lock().unwrap() = addresses;
+            device.set_addresses(addresses);
         }
     }
 
     pub fn get_link_type(&self) -> MyLinkType {
         match self {
-            Self::Device(device) => device.link_type,
+            Self::Device(device) => device.get_link_type(),
             Self::File(file) => file.link_type,
         }
     }
 
     pub fn set_link_type(&mut self, link_type: MyLinkType) {
         match self {
-            Self::Device(device) => device.link_type = link_type,
+            Self::Device(device) => device.set_link_type(link_type),
             Self::File(file) => file.link_type = link_type,
         }
     }
 
     pub fn get_name(&self) -> String {
         match self {
-            Self::Device(device) => device.name.clone(),
+            Self::Device(device) => device.get_name().clone(),
             Self::File(file) => get_path_termination_string(&file.path, 14),
         }
     }
@@ -187,7 +185,7 @@ impl CaptureSource {
     #[cfg(target_os = "windows")]
     pub fn get_desc(&self) -> Option<String> {
         match self {
-            Self::Device(device) => device.desc.clone(),
+            Self::Device(device) => device.get_desc().cloned(),
             Self::File(_) => None,
         }
     }
@@ -195,8 +193,9 @@ impl CaptureSource {
 
 #[derive(Clone)]
 pub struct MyPcapImport {
-    pub path: String,
-    pub link_type: MyLinkType,
+    path: String,
+    link_type: MyLinkType,
+    addresses: Vec<Address>, // this is always empty!
 }
 
 impl MyPcapImport {
@@ -204,6 +203,7 @@ impl MyPcapImport {
         Self {
             path,
             link_type: MyLinkType::default(),
+            addresses: vec![],
         }
     }
 }

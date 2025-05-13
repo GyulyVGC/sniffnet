@@ -50,9 +50,9 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, NewHostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
+use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotification;
@@ -275,7 +275,7 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickRun(info_traffic) => return self.refresh_data(info_traffic),
+            Message::TickRun(msg) => return self.refresh_data(msg),
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
@@ -663,9 +663,9 @@ impl Sniffer {
         self.configs.lock().unwrap().settings.scale_factor
     }
 
-    fn refresh_data(&mut self, info_traffic: InfoTraffic) -> Task<Message> {
+    fn refresh_data(&mut self, msg: InfoTrafficMessage) -> Task<Message> {
         self.info_traffic
-            .refresh(info_traffic, &self.favorite_hosts);
+            .refresh(msg, &self.favorite_hosts, &mut self.capture_source);
         let info_traffic = &self.info_traffic;
         if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
             return self.update(Message::Waiting);
@@ -682,7 +682,7 @@ impl Sniffer {
         update_charts_data(&mut self.info_traffic, &mut self.traffic_chart);
 
         if let CaptureSource::Device(device) = &self.capture_source {
-            let current_device_name = device.name.clone();
+            let current_device_name = device.get_name().clone();
             // update ConfigDevice stored if different from last sniffed device
             let last_device_name_sniffed = self.configs.lock().unwrap().device.device_name.clone();
             if current_device_name.ne(&last_device_name_sniffed) {
@@ -725,11 +725,13 @@ impl Sniffer {
             let current_device_name = &self.capture_source.get_name();
             self.set_adapter(current_device_name);
         }
-        let capture_source = self.capture_source.clone();
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&capture_source, pcap_path.as_ref());
+        let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.info_traffic = InfoTraffic::default();
+        self.addresses_resolved = HashMap::new();
+        self.favorite_hosts = HashSet::new();
+        self.logged_notifications = VecDeque::new();
         let ConfigSettings {
             style, language, ..
         } = self.configs.lock().unwrap().settings;
@@ -743,13 +745,14 @@ impl Sniffer {
             let mmdb_readers = self.mmdb_readers.clone();
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
+            let capture_source = self.capture_source.clone();
             let (tx, rx) = async_channel::unbounded();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
                         &current_capture_id,
-                        &capture_source,
+                        capture_source,
                         &filters,
                         &mmdb_readers,
                         capture_context,
@@ -777,14 +780,7 @@ impl Sniffer {
     fn set_adapter(&mut self, name: &str) {
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&name) {
-                self.capture_source.set_addresses(dev.addresses);
-                self.capture_source = CaptureSource::Device(MyDevice {
-                    name: dev.name,
-                    #[cfg(target_os = "windows")]
-                    desc: dev.desc,
-                    addresses: self.capture_source.get_addresses().clone(),
-                    link_type: MyLinkType::default(),
-                });
+                self.capture_source = CaptureSource::Device(MyDevice::from_pcap_device(dev));
                 break;
             }
         }
@@ -995,6 +991,10 @@ impl Sniffer {
             .entry(host.clone())
             .and_modify(|data_info_host| {
                 data_info_host.data_info += other_data;
+                data_info_host.is_loopback = is_loopback;
+                data_info_host.is_local = is_local;
+                data_info_host.is_bogon = is_bogon;
+                data_info_host.traffic_type = traffic_type;
             })
             .or_insert_with(|| DataInfoHost {
                 data_info: other_data,

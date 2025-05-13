@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
-use pcap::{Address, Device};
+use pcap::Address;
 
 use crate::gui::types::message::Message;
 use crate::mmdb::asn::get_asn;
@@ -17,15 +17,15 @@ use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::host::{Host, NewHostMessage};
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::secondary_threads::parse_packets::AddressesResolutionState;
-use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
-use crate::{InfoTraffic, IpVersion, Protocol, location};
+use crate::{IpVersion, Protocol};
 use async_channel::Sender;
 use std::fmt::Write;
 
@@ -259,7 +259,7 @@ pub fn get_service(
 
 /// Function to insert the source and destination of a packet into the shared map containing the analyzed traffic.
 pub fn modify_or_insert_in_map(
-    info_traffic: &mut InfoTraffic,
+    info_traffic_msg: &mut InfoTrafficMessage,
     key: &AddressPortPair,
     cs: &CaptureSource,
     mac_addresses: (Option<String>, Option<String>),
@@ -271,23 +271,10 @@ pub fn modify_or_insert_in_map(
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
 
-    // todo: use a full map...
-    if !info_traffic.map.contains_key(key) {
-        // first occurrence of key
+    if !info_traffic_msg.map.contains_key(key) {
+        // first occurrence of key (in this time interval)
 
-        // update device addresses
-        let mut my_interface_addresses = Vec::new();
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&cs.get_name()) {
-                let my_interface_addresses_mutex = cs.get_addresses();
-                my_interface_addresses_mutex
-                    .lock()
-                    .unwrap()
-                    .clone_from(&dev.addresses);
-                my_interface_addresses = dev.addresses;
-                break;
-            }
-        }
+        let my_interface_addresses = cs.get_addresses();
         // determine traffic direction
         let source_ip = &key.address1;
         let destination_ip = &key.address2;
@@ -296,14 +283,14 @@ pub fn modify_or_insert_in_map(
             destination_ip,
             key.port1,
             key.port2,
-            &my_interface_addresses,
+            my_interface_addresses,
         );
         // determine upper layer service
-        service = get_service(key, traffic_direction, &my_interface_addresses);
+        service = get_service(key, traffic_direction, my_interface_addresses);
     }
 
-    let timestamp = info_traffic.last_packet_timestamp;
-    let new_info: InfoAddressPortPair = info_traffic
+    let timestamp = info_traffic_msg.last_packet_timestamp;
+    let new_info: InfoAddressPortPair = info_traffic_msg
         .map
         .entry(*key)
         .and_modify(|info| {
@@ -353,7 +340,7 @@ pub fn modify_or_insert_in_map(
         .get(&get_address_to_lookup(key, new_info.traffic_direction))
         .cloned()
     {
-        info_traffic.favorites_last_interval.insert(host_info.1);
+        info_traffic_msg.potential_favorites.insert(host_info.1);
     }
 
     new_info
@@ -368,7 +355,7 @@ pub fn reverse_dns_lookup(
     mmdb_readers: &MmdbReaders,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
-    let my_interface_addresses = cs.get_addresses().lock().unwrap().clone();
+    let my_interface_addresses = cs.get_addresses();
 
     // perform rDNS lookup
     let lookup_result = lookup_addr(&address_to_lookup);
@@ -376,11 +363,11 @@ pub fn reverse_dns_lookup(
     // get new host info and build the new host
     let traffic_type = get_traffic_type(
         &address_to_lookup,
-        &my_interface_addresses,
+        my_interface_addresses,
         traffic_direction,
     );
     let is_loopback = address_to_lookup.is_loopback();
-    let is_local = is_local_connection(&address_to_lookup, &my_interface_addresses);
+    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
     let is_bogon = is_bogon(&address_to_lookup);
     let country = get_country(&address_to_lookup, &mmdb_readers.country);
     let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);

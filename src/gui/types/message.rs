@@ -6,7 +6,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::{Host, NewHostMessage};
-use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -20,7 +20,7 @@ pub enum Message {
     /// Every 1 second on initial page
     TickInit,
     /// Sent by the backend parsing packets
-    TickRun(InfoTraffic),
+    TickRun(InfoTrafficMessage),
     /// Select adapter
     AdapterSelection(String),
     /// Select IP filter

@@ -40,6 +40,8 @@ impl InfoAddressPortPair {
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
+        self.service = other.service;
+        self.traffic_direction = other.traffic_direction;
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types
                 .entry(*icmp_type)
