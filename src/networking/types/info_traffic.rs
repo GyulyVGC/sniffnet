@@ -41,6 +41,8 @@ pub struct InfoTraffic {
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
+    /// Timestamp of the latest packet
+    pub latest_packet_timestamp: i64,
 }
 
 impl InfoTraffic {
@@ -61,6 +63,7 @@ impl InfoTraffic {
             addresses_waiting_resolution: HashMap::new(),
             addresses_resolved: HashMap::new(),
             hosts: HashMap::new(),
+            latest_packet_timestamp: 0,
         }
     }
 
