@@ -370,7 +370,7 @@ impl Sniffer {
             }
             Message::ClearAllNotifications => {
                 self.logged_notifications = VecDeque::new();
-                return self.update(Message::HideModal);
+                self.modal = None;
             }
             Message::SwitchPage(next) => {
                 // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
@@ -411,10 +411,10 @@ impl Sniffer {
                 {
                     if increment {
                         if self.page_number < get_searched_entries(self).1.div_ceil(20) {
-                            return self.update(Message::UpdatePageNumber(increment));
+                            return Task::done(Message::UpdatePageNumber(increment));
                         }
                     } else if self.page_number > 1 {
-                        return self.update(Message::UpdatePageNumber(increment));
+                        return Task::done(Message::UpdatePageNumber(increment));
                     }
                 }
             }
@@ -442,7 +442,7 @@ impl Sniffer {
                     self.configs.lock().unwrap().window.size =
                         SizeTuple(width, height).scale_and_check(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
-                    return self.update(Message::ToggleThumbnail(true));
+                    return Task::done(Message::ToggleThumbnail(true));
                 }
             }
             Message::CustomCountryDb(db) => {
@@ -545,7 +545,7 @@ impl Sniffer {
                     && self.modal.is_none()
                     && !self.timing_events.was_just_thumbnail_enter()
                 {
-                    return self.update(Message::ToggleThumbnail(false));
+                    return Task::done(Message::ToggleThumbnail(false));
                 }
             }
             Message::ScaleFactorShortcut(increase) => {
@@ -674,7 +674,7 @@ impl Sniffer {
             .refresh(msg, &self.favorite_hosts, &mut self.capture_source);
         let info_traffic = &self.info_traffic;
         if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
-            return self.update(Message::Waiting);
+            return Task::done(Message::Waiting);
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
@@ -698,7 +698,7 @@ impl Sniffer {
         // waiting notifications
         if self.running_page.eq(&RunningPage::Notifications) && self.logged_notifications.is_empty()
         {
-            return self.update(Message::Waiting);
+            return Task::done(Message::Waiting);
         }
         // update host dropdowns
         self.host_data_states.update_states(&self.search);
@@ -904,23 +904,23 @@ impl Sniffer {
             && self.modal.is_none()
         {
             if self.filters.are_valid() {
-                return self.update(Message::Start);
+                return Task::done(Message::Start);
             }
         } else if self.modal.eq(&Some(MyModal::Reset)) {
-            return self.update(Message::Reset);
+            return Task::done(Message::Reset);
         } else if self.modal.eq(&Some(MyModal::Quit)) {
-            return self.update(Message::Quit);
+            return Task::done(Message::Quit);
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
-            return self.update(Message::ClearAllNotifications);
+            return Task::done(Message::ClearAllNotifications);
         }
         Task::none()
     }
 
     fn shortcut_esc(&mut self) -> Task<Message> {
         if self.modal.is_some() {
-            return self.update(Message::HideModal);
+            return Task::done(Message::HideModal);
         } else if self.settings_page.is_some() {
-            return self.update(Message::CloseSettings);
+            return Task::done(Message::CloseSettings);
         }
         Task::none()
     }
@@ -929,9 +929,9 @@ impl Sniffer {
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
             return if self.info_traffic.all_packets == 0 && self.settings_page.is_none() {
-                self.update(Message::Reset)
+                Task::done(Message::Reset)
             } else {
-                self.update(Message::ShowModal(MyModal::Reset))
+                Task::done(Message::ShowModal(MyModal::Reset))
             };
         }
         Task::none()
@@ -939,16 +939,16 @@ impl Sniffer {
 
     fn quit_wrapper(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Init) || self.info_traffic.all_packets == 0 {
-            self.update(Message::Quit)
+            Task::done(Message::Quit)
         } else if self.thumbnail {
             // TODO: uncomment once issue #653 is fixed
-            // self.update(Message::ToggleThumbnail(false))
-            //     .chain(self.update(Message::ShowModal(MyModal::Quit)))
-            self.update(Message::Quit)
+            // Task::done(Message::ToggleThumbnail(false))
+            //     .chain(Task::done(Message::ShowModal(MyModal::Quit)))
+            Task::done(Message::Quit)
         } else {
-            self.update(Message::HideModal)
-                .chain(self.update(Message::CloseSettings))
-                .chain(self.update(Message::ShowModal(MyModal::Quit)))
+            Task::done(Message::HideModal)
+                .chain(Task::done(Message::CloseSettings))
+                .chain(Task::done(Message::ShowModal(MyModal::Quit)))
         }
     }
 
@@ -956,7 +956,7 @@ impl Sniffer {
         if self.running_page.eq(&RunningPage::Notifications)
             && !self.logged_notifications.is_empty()
         {
-            return self.update(Message::ShowModal(MyModal::ClearAll));
+            return Task::done(Message::ShowModal(MyModal::ClearAll));
         }
         Task::none()
     }
