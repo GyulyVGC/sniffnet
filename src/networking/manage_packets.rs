@@ -333,20 +333,21 @@ pub fn modify_or_insert_in_map(
         .clone();
 
     // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
-    if let Some(host_info) = resolutions_state
+    if let Some(host) = resolutions_state
         .lock()
         .unwrap()
         .addresses_resolved
         .get(&get_address_to_lookup(key, new_info.traffic_direction))
         .cloned()
     {
-        info_traffic_msg.potential_favorites.insert(host_info.1);
+        info_traffic_msg.potential_favorites.insert(host);
     }
 
     new_info
 }
 
 pub fn reverse_dns_lookup(
+    cap_id: usize,
     tx: &Sender<Message>,
     resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
     key: &AddressPortPair,
@@ -395,7 +396,7 @@ pub fn reverse_dns_lookup(
     // insert the newly resolved host in the collections, with the data it exchanged so far
     resolutions_lock
         .addresses_resolved
-        .insert(address_to_lookup, (rdns.clone(), new_host.clone()));
+        .insert(address_to_lookup, new_host.clone());
     drop(resolutions_lock);
 
     let msg_data = HostMessage {
@@ -408,7 +409,7 @@ pub fn reverse_dns_lookup(
         address_to_lookup,
         rdns,
     };
-    let _ = tx.send_blocking(Message::NewHost(msg_data));
+    let _ = tx.send_blocking(Message::NewHost(cap_id, msg_data));
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)

@@ -19,8 +19,8 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 pub enum Message {
     /// Every 1 second on initial page
     TickInit,
-    /// Sent by the backend parsing packets
-    TickRun(InfoTrafficMessage),
+    /// Sent by the backend parsing packets; includes the capture id and new data
+    TickRun(usize, InfoTrafficMessage),
     /// Select adapter
     AdapterSelection(String),
     /// Select IP filter
@@ -131,6 +131,6 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
-    /// A new host has been resolved
-    NewHost(HostMessage),
+    /// Sent by the backend parsing packets; includes the capture id and new host data
+    NewHost(usize, HostMessage),
 }

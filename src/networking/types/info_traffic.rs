@@ -99,13 +99,6 @@ impl InfoTraffic {
             .collect();
 
         cs.set_addresses(msg.device_addresses);
-
-        // todo: remove this
-        // let mut total_packets = 0;
-        // for (_, data_info_host) in self.hosts.iter() {
-        //     total_packets += data_info_host.data_info.tot_packets();
-        // }
-        // println!("Total packets from all hosts: {}", total_packets);
     }
 }
 

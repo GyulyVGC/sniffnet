@@ -1,12 +1,6 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Duration;
-
+use async_channel::Receiver;
 use iced::Event::{Keyboard, Window};
 use iced::futures::Stream;
 use iced::keyboard::key::Named;
@@ -17,6 +11,12 @@ use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, stream, window};
 use pcap::Device;
 use rfd::FileHandle;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
 use crate::chart::manage_chart_data::update_charts_data;
 use crate::configs::types::config_window::{
@@ -78,14 +78,13 @@ pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
 /// Struct on which the gui is based
 ///
-/// It contains gui statuses and network traffic statistics to be shared among the different threads
+/// It contains gui statuses and network traffic statistics
 pub struct Sniffer {
     /// Application's configurations: settings, window properties, name of last device sniffed
     // todo?
     pub configs: Arc<Mutex<Configs>>,
-    /// Capture number, incremented at every new run
-    // todo?
-    pub current_capture_id: Arc<Mutex<usize>>,
+    /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
+    pub current_capture_rx: (usize, Option<Receiver<Message>>),
     /// Capture data updated by thread parsing packets
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -154,7 +153,7 @@ impl Sniffer {
         let device = configs.lock().unwrap().device.to_my_device();
         Self {
             configs: configs.clone(),
-            current_capture_id: Arc::new(Mutex::new(0)),
+            current_capture_rx: (0, None),
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
@@ -274,7 +273,11 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickRun(msg) => return self.refresh_data(msg),
+            Message::TickRun(cap_id, msg) => {
+                if cap_id == self.current_capture_rx.0 {
+                    return self.refresh_data(msg);
+                }
+            }
             Message::AdapterSelection(name) => self.set_adapter(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
@@ -309,7 +312,7 @@ impl Sniffer {
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => return self.start(),
-            Message::Reset => return self.reset(),
+            Message::Reset => self.reset(),
             Message::Style(style) => {
                 self.configs.lock().unwrap().settings.style = style;
                 self.traffic_chart.change_style(style);
@@ -560,7 +563,11 @@ impl Sniffer {
                     self.capture_source = CaptureSource::File(MyPcapImport::new(path));
                 }
             }
-            Message::NewHost(host_msg) => self.handle_new_host(host_msg),
+            Message::NewHost(cap_id, host_msg) => {
+                if cap_id == self.current_capture_rx.0 {
+                    self.handle_new_host(host_msg);
+                }
+            }
             Message::TickInit => {}
         }
         Task::none()
@@ -727,19 +734,11 @@ impl Sniffer {
         let pcap_path = self.export_pcap.full_path();
         let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
         self.pcap_error = capture_context.error().map(ToString::to_string);
-        self.info_traffic = InfoTraffic::default();
-        self.addresses_resolved = HashMap::new();
-        self.favorite_hosts = HashSet::new();
-        self.logged_notifications = VecDeque::new();
-        let ConfigSettings {
-            style, language, ..
-        } = self.configs.lock().unwrap().settings;
-        self.traffic_chart = TrafficChart::new(style, language);
         self.running_page = RunningPage::Overview;
 
         if capture_context.error().is_none() {
             // no pcap error
-            let current_capture_id = self.current_capture_id.clone();
+            let curr_cap_id = self.current_capture_rx.0;
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             self.capture_source
@@ -750,7 +749,7 @@ impl Sniffer {
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
                     parse_packets(
-                        &current_capture_id,
+                        curr_cap_id,
                         capture_source,
                         &filters,
                         &mmdb_readers,
@@ -759,21 +758,39 @@ impl Sniffer {
                     );
                 })
                 .log_err(location!());
+            self.current_capture_rx.1 = Some(rx.clone());
             return Task::stream(rx);
         }
         Task::none()
     }
 
-    fn reset(&mut self) -> Task<Message> {
-        self.running_page = RunningPage::Init;
-        *self.current_capture_id.lock().unwrap() += 1; //change capture id to kill previous captures
+    fn reset(&mut self) {
+        // close capture channel to kill previous captures
+        if let Some(rx) = &self.current_capture_rx.1 {
+            rx.close();
+        }
+        let ConfigSettings {
+            style, language, ..
+        } = self.configs.lock().unwrap().settings;
+        // increment capture id to ignore pending messages from previous captures
+        self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
+        self.info_traffic = InfoTraffic::default();
+        self.addresses_resolved = HashMap::new();
+        self.favorite_hosts = HashSet::new();
+        self.logged_notifications = VecDeque::new();
         self.pcap_error = None;
+        self.traffic_chart = TrafficChart::new(style, language);
         self.report_sort_type = ReportSortType::default();
+        self.host_sort_type = SortType::default();
+        self.service_sort_type = SortType::default();
+        self.modal = None;
+        self.settings_page = None;
+        self.running_page = RunningPage::Init;
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
+        self.thumbnail = false;
         self.host_data_states = HostDataStates::default();
-        self.update(Message::HideModal)
     }
 
     fn set_adapter(&mut self, name: &str) {

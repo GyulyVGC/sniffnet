@@ -26,7 +26,6 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTrafficMessage;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
@@ -36,7 +35,7 @@ use crate::utils::types::timestamp::Timestamp;
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
 pub fn parse_packets(
-    current_capture_id: &Mutex<usize>,
+    cap_id: usize,
     mut cs: CaptureSource,
     filters: &Filters,
     mmdb_readers: &MmdbReaders,
@@ -46,26 +45,22 @@ pub fn parse_packets(
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
 
-    let capture_id = *current_capture_id.lock().unwrap();
     let mut info_traffic_msg = InfoTrafficMessage::default();
-
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
 
     loop {
-        match cap.next_packet() {
+        let packet_res = cap.next_packet();
+        if tx.is_closed() {
+            return;
+        }
+        match packet_res {
             Err(e) => {
                 if e == pcap::Error::NoMorePackets {
-                    let _ = tx.send_blocking(Message::TickRun(info_traffic_msg));
-                    return;
-                }
-                if *current_capture_id.lock().unwrap() != capture_id {
+                    let _ = tx.send_blocking(Message::TickRun(cap_id, info_traffic_msg));
                     return;
                 }
             }
             Ok(packet) => {
-                if *current_capture_id.lock().unwrap() != capture_id {
-                    return;
-                }
                 if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
@@ -92,6 +87,7 @@ pub fn parse_packets(
                         }
 
                         let _ = tx.send_blocking(Message::TickRun(
+                            cap_id,
                             info_traffic_msg.take(this_packet_timestamp),
                         ));
                     }
@@ -109,8 +105,6 @@ pub fn parse_packets(
                         continue;
                     };
 
-                    let mut new_info = InfoAddressPortPair::default();
-
                     let passed_filters = filters.matches(&packet_filters_fields);
                     if passed_filters {
                         // save this packet to PCAP file
@@ -118,7 +112,7 @@ pub fn parse_packets(
                             file.write(&packet);
                         }
                         // update the shared map
-                        new_info = modify_or_insert_in_map(
+                        let new_info = modify_or_insert_in_map(
                             &mut info_traffic_msg,
                             &key,
                             &cs,
@@ -128,32 +122,19 @@ pub fn parse_packets(
                             exchanged_bytes,
                             &resolutions_state,
                         );
-                    }
 
-                    //increment number of sniffed packets and bytes
-                    info_traffic_msg.all_packets += 1;
-                    info_traffic_msg.all_bytes += exchanged_bytes;
-                    // update dropped packets number
-                    if let Ok(stats) = cap.stats() {
-                        info_traffic_msg.dropped_packets = stats.dropped;
-                    }
-
-                    if passed_filters {
                         info_traffic_msg.add_packet(exchanged_bytes, new_info.traffic_direction);
 
                         // check the rDNS status of this address and act accordingly
                         let address_to_lookup =
                             get_address_to_lookup(&key, new_info.traffic_direction);
-                        let r_dns_already_resolved = resolutions_state
-                            .lock()
-                            .unwrap()
+                        let mut r_dns_waiting_resolution = false;
+                        let mut resolutions_lock = resolutions_state.lock().unwrap();
+                        let r_dns_already_resolved = resolutions_lock
                             .addresses_resolved
                             .contains_key(&address_to_lookup);
-                        let mut r_dns_waiting_resolution = false;
                         if !r_dns_already_resolved {
-                            r_dns_waiting_resolution = resolutions_state
-                                .lock()
-                                .unwrap()
+                            r_dns_waiting_resolution = resolutions_lock
                                 .addresses_waiting_resolution
                                 .contains_key(&address_to_lookup);
                         }
@@ -164,17 +145,14 @@ pub fn parse_packets(
 
                                 // Add this address to the map of addresses waiting for a resolution
                                 // Useful to NOT perform again a rDNS lookup for this entry
-                                resolutions_state
-                                    .lock()
-                                    .unwrap()
-                                    .addresses_waiting_resolution
-                                    .insert(
-                                        address_to_lookup,
-                                        DataInfo::new_with_first_packet(
-                                            exchanged_bytes,
-                                            new_info.traffic_direction,
-                                        ),
-                                    );
+                                resolutions_lock.addresses_waiting_resolution.insert(
+                                    address_to_lookup,
+                                    DataInfo::new_with_first_packet(
+                                        exchanged_bytes,
+                                        new_info.traffic_direction,
+                                    ),
+                                );
+                                drop(resolutions_lock);
 
                                 // launch new thread to resolve host name
                                 let key2 = key;
@@ -186,6 +164,7 @@ pub fn parse_packets(
                                     .name("thread_reverse_dns_lookup".to_string())
                                     .spawn(move || {
                                         reverse_dns_lookup(
+                                            cap_id,
                                             &tx2,
                                             &resolutions_state2,
                                             &key2,
@@ -199,9 +178,7 @@ pub fn parse_packets(
                             (true, false) => {
                                 // waiting for a previously requested rDNS resolution
                                 // update the corresponding waiting address data
-                                resolutions_state
-                                    .lock()
-                                    .unwrap()
+                                resolutions_lock
                                     .addresses_waiting_resolution
                                     .entry(address_to_lookup)
                                     .and_modify(|data_info| {
@@ -210,18 +187,17 @@ pub fn parse_packets(
                                             new_info.traffic_direction,
                                         );
                                     });
+                                drop(resolutions_lock);
                             }
                             (_, true) => {
                                 // rDNS already resolved
                                 // update the corresponding host's data info
-                                let host = resolutions_state
-                                    .lock()
-                                    .unwrap()
+                                let host = resolutions_lock
                                     .addresses_resolved
                                     .get(&address_to_lookup)
-                                    .unwrap_or(&(String::new(), Host::default()))
-                                    .1
+                                    .unwrap_or(&Host::default())
                                     .clone();
+                                drop(resolutions_lock);
                                 info_traffic_msg
                                     .hosts
                                     .entry(host)
@@ -273,6 +249,14 @@ pub fn parse_packets(
                                     new_info.traffic_direction,
                                 )
                             });
+                    }
+
+                    //increment number of sniffed packets and bytes
+                    info_traffic_msg.all_packets += 1;
+                    info_traffic_msg.all_bytes += exchanged_bytes;
+                    // update dropped packets number
+                    if let Ok(stats) = cap.stats() {
+                        info_traffic_msg.dropped_packets = stats.dropped;
                     }
                 }
             }
@@ -336,6 +320,6 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
 pub struct AddressesResolutionState {
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
     pub addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
-    /// Map of the resolved addresses with their full rDNS value and the corresponding host
-    pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
+    /// Map of the resolved addresses with the corresponding host
+    pub addresses_resolved: HashMap<IpAddr, Host>,
 }
