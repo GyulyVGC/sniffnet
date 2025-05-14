@@ -273,8 +273,11 @@ impl Sniffer {
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::TickRun(cap_id, msg) => {
+            Message::TickRun(cap_id, msg, host_msgs) => {
                 if cap_id == self.current_capture_rx.0 {
+                    for host_msg in host_msgs {
+                        self.handle_new_host(host_msg);
+                    }
                     return self.refresh_data(msg);
                 }
             }
@@ -561,11 +564,6 @@ impl Sniffer {
                 if !path.is_empty() {
                     self.import_pcap_path.clone_from(&path);
                     self.capture_source = CaptureSource::File(MyPcapImport::new(path));
-                }
-            }
-            Message::NewHost(cap_id, host_msg) => {
-                if cap_id == self.current_capture_rx.0 {
-                    self.handle_new_host(host_msg);
                 }
             }
             Message::TickInit => {}

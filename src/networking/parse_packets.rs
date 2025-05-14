@@ -1,7 +1,33 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets and
 //! inserting them in the shared map.
 
+use crate::gui::types::message::Message;
+use crate::location;
+use crate::mmdb::asn::get_asn;
+use crate::mmdb::country::get_country;
+use crate::mmdb::types::mmdb_reader::MmdbReaders;
+use crate::networking::manage_packets::{
+    analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
+    modify_or_insert_in_map,
+};
+use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::filters::Filters;
+use crate::networking::types::host::{Host, HostMessage};
+use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::my_link_type::MyLinkType;
+use crate::networking::types::packet_filters_fields::PacketFiltersFields;
+use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::formatted_strings::get_domain_from_r_dns;
+use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
+use dns_lookup::lookup_addr;
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
@@ -10,27 +36,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 use std::thread;
-
-use crate::gui::types::message::Message;
-use crate::location;
-use crate::mmdb::types::mmdb_reader::MmdbReaders;
-use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
-    modify_or_insert_in_map, reverse_dns_lookup,
-};
-use crate::networking::types::arp_type::ArpType;
-use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
-use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::filters::Filters;
-use crate::networking::types::host::Host;
-use crate::networking::types::icmp_type::IcmpType;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
-use crate::networking::types::my_link_type::MyLinkType;
-use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::utils::error_logger::{ErrorLogger, Location};
-use crate::utils::types::timestamp::Timestamp;
+use std::time::Duration;
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -47,6 +53,8 @@ pub fn parse_packets(
 
     let mut info_traffic_msg = InfoTrafficMessage::default();
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
+    // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
+    let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
 
     loop {
         let packet_res = cap.next_packet();
@@ -56,7 +64,16 @@ pub fn parse_packets(
         match packet_res {
             Err(e) => {
                 if e == pcap::Error::NoMorePackets {
-                    let _ = tx.send_blocking(Message::TickRun(cap_id, info_traffic_msg));
+                    // wait until there is still some thread doing rdns
+                    while tx.sender_count() > 1 {
+                        thread::sleep(Duration::from_millis(1000));
+                    }
+                    // send one last message including packets from the last interval plus all the remaining new hosts
+                    let _ = tx.send_blocking(Message::TickRun(
+                        cap_id,
+                        info_traffic_msg,
+                        new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                    ));
                     return;
                 }
             }
@@ -89,6 +106,7 @@ pub fn parse_packets(
                         let _ = tx.send_blocking(Message::TickRun(
                             cap_id,
                             info_traffic_msg.take(this_packet_timestamp),
+                            new_hosts_to_send.lock().unwrap().drain(..).collect(),
                         ));
                     }
 
@@ -156,21 +174,22 @@ pub fn parse_packets(
 
                                 // launch new thread to resolve host name
                                 let key2 = key;
-                                let tx2 = tx.clone();
                                 let resolutions_state2 = resolutions_state.clone();
+                                let new_hosts_to_send2 = new_hosts_to_send.clone();
                                 let cs2 = cs.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
+                                let tx2 = tx.clone();
                                 let _ = thread::Builder::new()
                                     .name("thread_reverse_dns_lookup".to_string())
                                     .spawn(move || {
                                         reverse_dns_lookup(
-                                            cap_id,
-                                            &tx2,
                                             &resolutions_state2,
+                                            &new_hosts_to_send2,
                                             &key2,
                                             new_info.traffic_direction,
                                             &cs2,
                                             &mmdb_readers_2,
+                                            &tx2,
                                         );
                                     })
                                     .log_err(location!());
@@ -316,10 +335,79 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
     }
 }
 
+fn reverse_dns_lookup(
+    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
+    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
+    key: &AddressPortPair,
+    traffic_direction: TrafficDirection,
+    cs: &CaptureSource,
+    mmdb_readers: &MmdbReaders,
+    // needed to know that this thread is still running!
+    _tx: &Sender<Message>,
+) {
+    let address_to_lookup = get_address_to_lookup(key, traffic_direction);
+    let my_interface_addresses = cs.get_addresses();
+
+    // perform rDNS lookup
+    let lookup_result = lookup_addr(&address_to_lookup);
+
+    // get new host info and build the new host
+    let traffic_type = get_traffic_type(
+        &address_to_lookup,
+        my_interface_addresses,
+        traffic_direction,
+    );
+    let is_loopback = address_to_lookup.is_loopback();
+    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
+    let is_bogon = is_bogon(&address_to_lookup);
+    let country = get_country(&address_to_lookup, &mmdb_readers.country);
+    let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
+    let rdns = if let Ok(result) = lookup_result {
+        if result.is_empty() {
+            address_to_lookup.to_string()
+        } else {
+            result
+        }
+    } else {
+        address_to_lookup.to_string()
+    };
+    let new_host = Host {
+        domain: get_domain_from_r_dns(rdns.clone()),
+        asn,
+        country,
+    };
+
+    // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
+    let mut resolutions_lock = resolutions_state.lock().unwrap();
+    let other_data = resolutions_lock
+        .addresses_waiting_resolution
+        .remove(&address_to_lookup)
+        .unwrap_or_default();
+    // insert the newly resolved host in the collections, with the data it exchanged so far
+    resolutions_lock
+        .addresses_resolved
+        .insert(address_to_lookup, new_host.clone());
+    drop(resolutions_lock);
+
+    let msg_data = HostMessage {
+        host: new_host,
+        other_data,
+        is_loopback,
+        is_local,
+        is_bogon,
+        traffic_type,
+        address_to_lookup,
+        rdns,
+    };
+
+    // add the new host to the list of hosts to be sent
+    new_hosts_to_send.lock().unwrap().push(msg_data);
+}
+
 #[derive(Default)]
 pub struct AddressesResolutionState {
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
-    pub addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
+    addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
     pub addresses_resolved: HashMap<IpAddr, Host>,
 }

@@ -2,20 +2,14 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
 
-use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::Address;
 
-use crate::gui::types::message::Message;
-use crate::mmdb::asn::get_asn;
-use crate::mmdb::country::get_country;
-use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTrafficMessage;
@@ -24,9 +18,7 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::{IpVersion, Protocol};
-use async_channel::Sender;
 use std::fmt::Write;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -344,72 +336,6 @@ pub fn modify_or_insert_in_map(
     }
 
     new_info
-}
-
-pub fn reverse_dns_lookup(
-    cap_id: usize,
-    tx: &Sender<Message>,
-    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
-    key: &AddressPortPair,
-    traffic_direction: TrafficDirection,
-    cs: &CaptureSource,
-    mmdb_readers: &MmdbReaders,
-) {
-    let address_to_lookup = get_address_to_lookup(key, traffic_direction);
-    let my_interface_addresses = cs.get_addresses();
-
-    // perform rDNS lookup
-    let lookup_result = lookup_addr(&address_to_lookup);
-
-    // get new host info and build the new host
-    let traffic_type = get_traffic_type(
-        &address_to_lookup,
-        my_interface_addresses,
-        traffic_direction,
-    );
-    let is_loopback = address_to_lookup.is_loopback();
-    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
-    let is_bogon = is_bogon(&address_to_lookup);
-    let country = get_country(&address_to_lookup, &mmdb_readers.country);
-    let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
-    let rdns = if let Ok(result) = lookup_result {
-        if result.is_empty() {
-            address_to_lookup.to_string()
-        } else {
-            result
-        }
-    } else {
-        address_to_lookup.to_string()
-    };
-    let new_host = Host {
-        domain: get_domain_from_r_dns(rdns.clone()),
-        asn,
-        country,
-    };
-
-    // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
-    let mut resolutions_lock = resolutions_state.lock().unwrap();
-    let other_data = resolutions_lock
-        .addresses_waiting_resolution
-        .remove(&address_to_lookup)
-        .unwrap_or_default();
-    // insert the newly resolved host in the collections, with the data it exchanged so far
-    resolutions_lock
-        .addresses_resolved
-        .insert(address_to_lookup, new_host.clone());
-    drop(resolutions_lock);
-
-    let msg_data = HostMessage {
-        host: new_host,
-        other_data,
-        is_loopback,
-        is_local,
-        is_bogon,
-        traffic_type,
-        address_to_lookup,
-        rdns,
-    };
-    let _ = tx.send_blocking(Message::NewHost(cap_id, msg_data));
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)
