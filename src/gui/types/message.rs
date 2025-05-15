@@ -17,12 +17,10 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
-    /// Every 1 second on initial page
-    TickInit,
     /// Sent by the backend parsing packets; includes the capture id, new data, and new hosts batched data
     TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
-    /// Select adapter
-    AdapterSelection(String),
+    /// Select network device
+    DeviceSelection(String),
     /// Select IP filter
     IpVersionSelection(IpVersion, bool),
     /// Select protocol filter
@@ -51,8 +49,6 @@ pub enum Message {
     Style(StyleType),
     /// Deserialize a style from a path
     LoadStyle(String),
-    /// Manage waiting time
-    Waiting,
     /// Displays a modal
     ShowModal(MyModal),
     /// Opens the specified settings page
@@ -133,4 +129,6 @@ pub enum Message {
     SetPcapImport(String),
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
+    /// Fetch the list of network devices
+    FetchDevices,
 }

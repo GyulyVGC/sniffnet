@@ -95,8 +95,10 @@ pub struct Sniffer {
     pub logged_notifications: VecDeque<LoggedNotification>,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
-    /// Network adapter to be analyzed, or PCAP file to be imported
+    /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
+    /// List of network devices
+    pub my_devices: Vec<MyDevice>,
     /// Active filters on the observed traffic
     pub filters: Filters,
     /// Signals if a pcap error occurred
@@ -160,6 +162,7 @@ impl Sniffer {
             logged_notifications: VecDeque::new(),
             newer_release_available: None,
             capture_source: CaptureSource::Device(device),
+            my_devices: Vec::new(),
             filters: Filters::default(),
             pcap_error: None,
             waiting: ".".to_string(),
@@ -248,11 +251,7 @@ impl Sniffer {
 
     // todo
     fn time_subscription(&self) -> Subscription<Message> {
-        if self.running_page.eq(&RunningPage::Init) {
-            iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::TickInit)
-        } else {
-            Subscription::none()
-        }
+        iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::FetchDevices)
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -272,16 +271,17 @@ impl Sniffer {
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
+        self.update_waiting_dots();
         match message {
             Message::TickRun(cap_id, msg, host_msgs) => {
                 if cap_id == self.current_capture_rx.0 {
                     for host_msg in host_msgs {
                         self.handle_new_host(host_msg);
                     }
-                    return self.refresh_data(msg);
+                    self.refresh_data(msg);
                 }
             }
-            Message::AdapterSelection(name) => self.set_adapter(&name),
+            Message::DeviceSelection(name) => self.set_device(&name),
             Message::IpVersionSelection(version, insert) => {
                 if insert {
                     self.filters.ip_versions.insert(version);
@@ -335,7 +335,6 @@ impl Sniffer {
                     self.traffic_chart.change_style(style);
                 }
             }
-            Message::Waiting => self.update_waiting_dots(),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
             Message::ShowModal(modal) => {
                 if self.settings_page.is_none() && self.modal.is_none() {
@@ -573,7 +572,7 @@ impl Sniffer {
                     }
                 }
             }
-            Message::TickInit => {}
+            Message::FetchDevices => self.fetch_devices(),
         }
         Task::none()
     }
@@ -674,12 +673,11 @@ impl Sniffer {
         self.configs.lock().unwrap().settings.scale_factor
     }
 
-    fn refresh_data(&mut self, msg: InfoTrafficMessage) -> Task<Message> {
-        self.info_traffic
-            .refresh(msg, &self.favorite_hosts, &mut self.capture_source);
+    fn refresh_data(&mut self, msg: InfoTrafficMessage) {
+        self.info_traffic.refresh(msg, &self.favorite_hosts);
         let info_traffic = &self.info_traffic;
         if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
-            return Task::done(Message::Waiting);
+            return;
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
@@ -700,14 +698,8 @@ impl Sniffer {
                 self.configs.lock().unwrap().device.device_name = current_device_name;
             }
         }
-        // waiting notifications
-        if self.running_page.eq(&RunningPage::Notifications) && self.logged_notifications.is_empty()
-        {
-            return Task::done(Message::Waiting);
-        }
         // update host dropdowns
         self.host_data_states.update_states(&self.search);
-        Task::none()
     }
 
     fn open_web(web_page: &WebPage) {
@@ -734,7 +726,7 @@ impl Sniffer {
     fn start(&mut self) -> Task<Message> {
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
-            self.set_adapter(current_device_name);
+            self.set_device(current_device_name);
         }
         let pcap_path = self.export_pcap.full_path();
         let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
@@ -798,12 +790,26 @@ impl Sniffer {
         self.host_data_states = HostDataStates::default();
     }
 
-    fn set_adapter(&mut self, name: &str) {
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&name) {
-                self.capture_source = CaptureSource::Device(MyDevice::from_pcap_device(dev));
+    fn set_device(&mut self, name: &str) {
+        for my_dev in &self.my_devices {
+            if my_dev.get_name().eq(&name) {
+                self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
+        }
+    }
+
+    fn fetch_devices(&mut self) {
+        self.my_devices.clear();
+        for dev in Device::list().log_err(location!()).unwrap_or_default() {
+            if matches!(&self.capture_source, CaptureSource::Device(_))
+                && dev.name.eq(&self.capture_source.get_name())
+            {
+                // refresh active addresses
+                self.capture_source.set_addresses(dev.addresses.clone());
+            }
+            let my_dev = MyDevice::from_pcap_device(dev);
+            self.my_devices.push(my_dev);
         }
     }
 
@@ -1298,16 +1304,17 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_waiting_dots_update() {
+        // every kind of message will update dots
         let mut sniffer = new_sniffer();
 
         assert_eq!(sniffer.waiting, ".".to_string());
-        sniffer.update(Message::Waiting);
+        sniffer.update(Message::FetchDevices);
         assert_eq!(sniffer.waiting, "..".to_string());
 
-        sniffer.update(Message::Waiting);
+        sniffer.update(Message::HideModal);
         assert_eq!(sniffer.waiting, "...".to_string());
 
-        sniffer.update(Message::Waiting);
+        sniffer.update(Message::CtrlDPressed);
         assert_eq!(sniffer.waiting, ".".to_string());
     }
 

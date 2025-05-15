@@ -8,7 +8,6 @@ use crate::networking::types::my_link_type::MyLinkType;
 #[derive(Clone)]
 pub struct MyDevice {
     name: String,
-    #[cfg(target_os = "windows")]
     desc: Option<String>,
     addresses: Vec<Address>,
     link_type: MyLinkType,
@@ -32,7 +31,6 @@ impl MyDevice {
     pub fn from_pcap_device(device: Device) -> Self {
         MyDevice {
             name: device.name,
-            #[cfg(target_os = "windows")]
             desc: device.desc,
             addresses: device.addresses,
             link_type: MyLinkType::default(),
@@ -43,7 +41,6 @@ impl MyDevice {
         &self.name
     }
 
-    #[cfg(target_os = "windows")]
     pub fn get_desc(&self) -> Option<&String> {
         self.desc.as_ref()
     }

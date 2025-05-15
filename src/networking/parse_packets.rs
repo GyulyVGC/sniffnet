@@ -101,8 +101,7 @@ pub fn parse_packets(
                         if matches!(cs, CaptureSource::Device(_)) {
                             for dev in Device::list().log_err(location!()).unwrap_or_default() {
                                 if dev.name.eq(&cs.get_name()) {
-                                    cs.set_addresses(dev.addresses.clone());
-                                    info_traffic_msg.device_addresses = dev.addresses;
+                                    cs.set_addresses(dev.addresses);
                                     break;
                                 }
                             }

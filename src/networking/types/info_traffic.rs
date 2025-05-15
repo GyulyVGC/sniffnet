@@ -3,14 +3,12 @@
 
 use crate::Service;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
-use pcap::Address;
 use std::collections::{HashMap, HashSet};
 
 /// Struct containing overall traffic statistics and data.
@@ -51,12 +49,7 @@ pub struct InfoTraffic {
 }
 
 impl InfoTraffic {
-    pub fn refresh(
-        &mut self,
-        msg: InfoTrafficMessage,
-        favorites: &HashSet<Host>,
-        cs: &mut CaptureSource,
-    ) {
+    pub fn refresh(&mut self, msg: InfoTrafficMessage, favorites: &HashSet<Host>) {
         self.tot_out_bytes_prev = self.tot_out_bytes;
         self.tot_in_bytes_prev = self.tot_in_bytes;
         self.tot_out_packets_prev = self.tot_out_packets;
@@ -97,8 +90,6 @@ impl InfoTraffic {
             .into_iter()
             .filter(|h| favorites.contains(h))
             .collect();
-
-        cs.set_addresses(msg.device_addresses);
     }
 }
 
@@ -129,8 +120,6 @@ pub struct InfoTrafficMessage {
     pub hosts: HashMap<Host, DataInfoHost>,
     /// Collection of favorite hosts that exchanged data in the last interval
     pub potential_favorites: HashSet<Host>,
-    /// Device addresses
-    pub device_addresses: Vec<Address>,
 }
 
 impl InfoTrafficMessage {

@@ -10,10 +10,9 @@ use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
-    button,
+    button, center,
 };
 use iced::{Alignment, Font, Length, Padding, alignment};
-use pcap::Device;
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
@@ -38,11 +37,10 @@ use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
 use crate::translations::translations_4::import_capture_translation;
-use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType, location};
+use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -305,20 +303,20 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
     let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
 
     let mut dev_str_list = vec![];
-    for dev in Device::list().log_err(location!()).unwrap_or_default() {
+    for my_dev in &sniffer.my_devices {
         let mut dev_str = String::new();
-        let name = dev.name;
-        match dev.desc {
+        let name = my_dev.get_name();
+        match my_dev.get_desc() {
             None => {
-                dev_str.push_str(&name);
+                dev_str.push_str(name);
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
                 let _ = writeln!(dev_str, "{name}");
-                dev_str.push_str(&description);
+                dev_str.push_str(description);
             }
         }
-        let num_addresses = dev.addresses.len();
+        let num_addresses = my_dev.get_addresses().len();
         match num_addresses {
             0 => {}
             1 => {
@@ -329,7 +327,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             }
         }
 
-        for addr in dev.addresses {
+        for addr in my_dev.get_addresses() {
             let address_string = addr.addr.to_string();
             let _ = write!(dev_str, "\n   {address_string}");
         }
@@ -347,33 +345,40 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                 .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(Scrollable::with_direction(
-            dev_str_list.iter().fold(
-                Column::new().padding(13).spacing(5),
-                |scroll_adapters, adapter| {
-                    let name = adapter.0.clone();
-                    let description = adapter.1.clone();
-                    scroll_adapters.push(
-                        Button::new(Text::new(description).font(font))
-                            .padding([20, 30])
-                            .width(Length::Fill)
-                            .class(
-                                if let CaptureSource::Device(device) = &sniffer.capture_source {
-                                    if &name == device.get_name() {
-                                        ButtonType::BorderedRoundSelected
+        .push(if dev_str_list.is_empty() {
+            Into::<iced::Element<Message, StyleType>>::into(center(
+                Icon::get_hourglass(sniffer.waiting.len()).size(60),
+            ))
+        } else {
+            Scrollable::with_direction(
+                dev_str_list.iter().fold(
+                    Column::new().padding(13).spacing(5),
+                    |scroll_adapters, adapter| {
+                        let name = adapter.0.clone();
+                        let description = adapter.1.clone();
+                        scroll_adapters.push(
+                            Button::new(Text::new(description).font(font))
+                                .padding([20, 30])
+                                .width(Length::Fill)
+                                .class(
+                                    if let CaptureSource::Device(device) = &sniffer.capture_source {
+                                        if &name == device.get_name() {
+                                            ButtonType::BorderedRoundSelected
+                                        } else {
+                                            ButtonType::BorderedRound
+                                        }
                                     } else {
                                         ButtonType::BorderedRound
-                                    }
-                                } else {
-                                    ButtonType::BorderedRound
-                                },
-                            )
-                            .on_press(Message::AdapterSelection(name)),
-                    )
-                },
-            ),
-            Direction::Vertical(ScrollbarType::properties()),
-        ))
+                                    },
+                                )
+                                .on_press(Message::DeviceSelection(name)),
+                        )
+                    },
+                ),
+                Direction::Vertical(ScrollbarType::properties()),
+            )
+            .into()
+        })
 }
 
 fn get_col_import_pcap<'a>(
