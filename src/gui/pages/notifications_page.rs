@@ -37,7 +37,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         language,
         notifications,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -392,7 +392,7 @@ fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Messa
 fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(830)

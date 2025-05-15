@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 use std::process;
-use std::sync::{Arc, Mutex};
 
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
@@ -33,7 +32,7 @@ use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
-use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::error_logger::Location;
 
 mod chart;
 mod cli;
@@ -69,9 +68,6 @@ pub fn main() -> iced::Result {
     let configs = CONFIGS.clone();
     let boot_task_chain = handle_cli_args();
 
-    let configs1 = Arc::new(Mutex::new(configs));
-    let configs2 = configs1.clone();
-
     #[cfg(debug_assertions)]
     {
         // kill the main thread as soon as a secondary thread panics
@@ -83,16 +79,9 @@ pub fn main() -> iced::Result {
         }));
     }
 
-    // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
-    let _ = ctrlc::set_handler(move || {
-        configs2.lock().unwrap().clone().store();
-        process::exit(130);
-    })
-    .log_err(location!());
-
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position, .. } = configs1.lock().unwrap().window;
+    let ConfigWindow { size, position, .. } = configs.window;
 
     application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
         .settings(Settings {
@@ -128,5 +117,5 @@ pub fn main() -> iced::Result {
         .subscription(Sniffer::subscription)
         .theme(Sniffer::theme)
         .scale_factor(Sniffer::scale_factor)
-        .run_with(move || (Sniffer::new(&configs1), boot_task_chain))
+        .run_with(move || (Sniffer::new(configs), boot_task_chain))
 }

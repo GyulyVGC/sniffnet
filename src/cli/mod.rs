@@ -57,6 +57,7 @@ pub fn handle_cli_args() -> Task<Message> {
     let mut boot_task_chain = Task::batch([
         window::get_latest().map(Message::WindowId),
         Task::done(Message::FetchDevices),
+        Task::done(Message::RegisterSigintHandler),
     ]);
     if let Some(adapter) = args.adapter {
         boot_task_chain = boot_task_chain
@@ -69,8 +70,6 @@ pub fn handle_cli_args() -> Task<Message> {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Arc, Mutex};
-
     use serial_test::serial;
 
     use crate::configs::types::config_window::{PositionTuple, SizeTuple};
@@ -126,6 +125,6 @@ mod tests {
         assert_eq!(Configs::load(), Configs::default());
 
         // only needed because it will delete config files via its Drop implementation
-        Sniffer::new(&Arc::new(Mutex::new(Configs::default())));
+        Sniffer::new(Configs::default());
     }
 }

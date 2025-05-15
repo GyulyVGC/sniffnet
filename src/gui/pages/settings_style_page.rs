@@ -34,7 +34,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         color_gradient,
         style_path,
         ..
-    } = sniffer.configs.lock().unwrap().settings.clone();
+    } = sniffer.configs.settings.clone();
     let PaletteExtension {
         font, font_headers, ..
     } = style.get_extension();

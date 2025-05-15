@@ -131,4 +131,6 @@ pub enum Message {
     PendingHosts(usize, Vec<HostMessage>),
     /// Fetch the list of network devices
     FetchDevices,
+    /// Register handler for interrupts at startup
+    RegisterSigintHandler,
 }

@@ -54,7 +54,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -297,7 +297,7 @@ fn get_local_tooltip<'a>(
 ) -> Tooltip<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
 
     let local_address = if address_to_lookup.eq(&key.address1) {
         &key.address2

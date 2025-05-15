@@ -49,7 +49,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
     let col_adapter = get_col_adapter(sniffer, font);
@@ -300,7 +300,7 @@ fn button_start(
 }
 
 fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { language, .. } = sniffer.configs.settings;
 
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {

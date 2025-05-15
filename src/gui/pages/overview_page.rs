@@ -53,7 +53,7 @@ use std::fmt::Write;
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -237,7 +237,7 @@ fn row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
 fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -344,7 +344,7 @@ fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -426,7 +426,7 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
 fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
     let col_device = col_device(language, font, &sniffer.capture_source);
@@ -463,7 +463,7 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { language, .. } = sniffer.configs.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
     Container::new(

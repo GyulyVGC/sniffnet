@@ -43,7 +43,7 @@ use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, Styl
 pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -107,7 +107,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
     let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
