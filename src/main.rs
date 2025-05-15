@@ -32,7 +32,6 @@ use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
-use crate::utils::error_logger::Location;
 
 mod chart;
 mod cli;

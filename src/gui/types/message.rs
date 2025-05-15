@@ -17,6 +17,8 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
+    /// Run tasks to initialize the app
+    StartApp(Option<window::Id>),
     /// Sent by the backend parsing packets; includes the capture id, new data, and new hosts batched data
     TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
     /// Select network device
@@ -121,8 +123,6 @@ pub enum Message {
     CtrlTPressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
-    /// Set the window ID
-    WindowId(Option<window::Id>),
     /// Set new release status
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
@@ -131,6 +131,9 @@ pub enum Message {
     PendingHosts(usize, Vec<HostMessage>),
     /// Fetch the list of network devices
     FetchDevices,
-    /// Register handler for interrupts at startup
-    RegisterSigintHandler,
+}
+
+pub enum BackendTrafficMessage {
+    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
+    PendingHosts(usize, Vec<HostMessage>),
 }

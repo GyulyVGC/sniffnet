@@ -2,13 +2,12 @@
 
 use async_channel::Receiver;
 use iced::Event::{Keyboard, Window};
-use iced::futures::Stream;
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, stream, window};
+use iced::{Element, Point, Size, Subscription, Task, window};
 use pcap::Device;
 use rfd::FileHandle;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -40,6 +39,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::message::BackendTrafficMessage;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
@@ -83,7 +83,7 @@ pub struct Sniffer {
     /// Application's configurations: settings, window properties, name of last device sniffed
     pub configs: Configs,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
-    pub current_capture_rx: (usize, Option<Receiver<Message>>),
+    pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
     /// Capture data updated by thread parsing packets
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -265,13 +265,17 @@ impl Sniffer {
         })
     }
 
-    fn check_updates_stream() -> impl Stream<Item = Message> {
-        stream::channel(1, set_newer_release_status)
-    }
-
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.update_waiting_dots();
         match message {
+            Message::StartApp(id) => {
+                self.id = id;
+                return Task::batch([
+                    Task::done(Message::FetchDevices),
+                    Sniffer::register_sigint_handler(),
+                    Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+                ]);
+            }
             Message::TickRun(cap_id, msg, host_msgs) => {
                 if cap_id == self.current_capture_rx.0 {
                     for host_msg in host_msgs {
@@ -536,7 +540,6 @@ impl Sniffer {
                     self.configs.settings.scale_factor += delta;
                 }
             }
-            Message::WindowId(id) => self.id = id,
             Message::SetNewerReleaseStatus(status) => self.newer_release_available = status,
             Message::SetPcapImport(path) => {
                 if !path.is_empty() {
@@ -552,7 +555,6 @@ impl Sniffer {
                 }
             }
             Message::FetchDevices => self.fetch_devices(),
-            Message::RegisterSigintHandler => return Sniffer::register_sigint_handler(),
         }
         Task::none()
     }
@@ -641,7 +643,6 @@ impl Sniffer {
             self.mouse_subscription(),
             self.time_subscription(),
             Sniffer::window_subscription(),
-            Subscription::run(Sniffer::check_updates_stream),
         ])
     }
 
@@ -736,7 +737,14 @@ impl Sniffer {
                 })
                 .log_err(location!());
             self.current_capture_rx.1 = Some(rx.clone());
-            return Task::stream(rx);
+            return Task::run(rx, |backend_msg| match backend_msg {
+                BackendTrafficMessage::TickRun(cap_id, msg, host_msg) => {
+                    Message::TickRun(cap_id, msg, host_msg)
+                }
+                BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
+                    Message::PendingHosts(cap_id, host_msg)
+                }
+            });
         }
         Task::none()
     }

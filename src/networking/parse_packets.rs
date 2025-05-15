@@ -1,7 +1,7 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets and
 //! inserting them in the shared map.
 
-use crate::gui::types::message::Message;
+use crate::gui::types::message::BackendTrafficMessage;
 use crate::location;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
@@ -46,7 +46,7 @@ pub fn parse_packets(
     filters: &Filters,
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
-    tx: &Sender<Message>,
+    tx: &Sender<BackendTrafficMessage>,
 ) {
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
@@ -65,7 +65,7 @@ pub fn parse_packets(
             Err(e) => {
                 if e == pcap::Error::NoMorePackets {
                     // send a message including data from the last interval
-                    let _ = tx.send_blocking(Message::TickRun(
+                    let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
                         cap_id,
                         info_traffic_msg,
                         new_hosts_to_send.lock().unwrap().drain(..).collect(),
@@ -75,7 +75,7 @@ pub fn parse_packets(
                         thread::sleep(Duration::from_millis(1000));
                     }
                     // send one last message including all pending hosts
-                    let _ = tx.send_blocking(Message::PendingHosts(
+                    let _ = tx.send_blocking(BackendTrafficMessage::PendingHosts(
                         cap_id,
                         new_hosts_to_send.lock().unwrap().drain(..).collect(),
                     ));
@@ -107,7 +107,7 @@ pub fn parse_packets(
                             }
                         }
 
-                        let _ = tx.send_blocking(Message::TickRun(
+                        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
                             cap_id,
                             info_traffic_msg.take(this_packet_timestamp),
                             new_hosts_to_send.lock().unwrap().drain(..).collect(),
@@ -338,7 +338,7 @@ fn reverse_dns_lookup(
     interface_addresses: &Vec<Address>,
     mmdb_readers: &MmdbReaders,
     // needed to know that this thread is still running!
-    _tx: &Sender<Message>,
+    _tx: &Sender<BackendTrafficMessage>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
 

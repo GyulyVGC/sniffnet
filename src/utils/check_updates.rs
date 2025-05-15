@@ -1,9 +1,5 @@
-use crate::gui::types::message::Message;
-use crate::utils::error_logger::ErrorLogger;
+use crate::SNIFFNET_LOWERCASE;
 use crate::utils::formatted_strings::APP_VERSION;
-use crate::{Location, SNIFFNET_LOWERCASE, location};
-use iced::futures::SinkExt;
-use iced::futures::channel::mpsc::Sender;
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -14,12 +10,9 @@ struct AppVersion {
 
 /// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
-pub async fn set_newer_release_status(mut sender: Sender<Message>) {
+pub async fn set_newer_release_status() -> Option<bool> {
     let result = is_newer_release_available(6, 30).await;
-    let _ = sender
-        .send(Message::SetNewerReleaseStatus(result))
-        .await
-        .log_err(location!());
+    result
 }
 
 /// Checks if a newer release of Sniffnet is available on GitHub

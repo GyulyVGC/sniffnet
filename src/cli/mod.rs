@@ -54,11 +54,7 @@ pub fn handle_cli_args() -> Task<Message> {
         std::process::exit(0);
     }
 
-    let mut boot_task_chain = Task::batch([
-        window::get_latest().map(Message::WindowId),
-        Task::done(Message::FetchDevices),
-        Task::done(Message::RegisterSigintHandler),
-    ]);
+    let mut boot_task_chain = window::get_latest().map(|id| Message::StartApp(id));
     if let Some(adapter) = args.adapter {
         boot_task_chain = boot_task_chain
             .chain(Task::done(Message::DeviceSelection(adapter)))
