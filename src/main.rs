@@ -3,8 +3,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::borrow::Cow;
+use std::process;
 use std::sync::{Arc, Mutex};
-use std::{panic, process};
 
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
@@ -72,13 +72,16 @@ pub fn main() -> iced::Result {
     let configs1 = Arc::new(Mutex::new(configs));
     let configs2 = configs1.clone();
 
-    // kill the main thread as soon as a secondary thread panics
-    let orig_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic_info| {
-        // invoke the default handler and exit the process
-        orig_hook(panic_info);
-        process::exit(1);
-    }));
+    #[cfg(debug_assertions)]
+    {
+        // kill the main thread as soon as a secondary thread panics
+        let orig_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |panic_info| {
+            // invoke the default handler and exit the process
+            orig_hook(panic_info);
+            process::exit(1);
+        }));
+    }
 
     // gracefully close the app when receiving SIGINT, SIGTERM, or SIGHUP
     let _ = ctrlc::set_handler(move || {
