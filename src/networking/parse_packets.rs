@@ -31,7 +31,7 @@ use dns_lookup::lookup_addr;
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::{Device, Packet};
+use pcap::{Address, Device, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -175,7 +175,7 @@ pub fn parse_packets(
                                 let key2 = key;
                                 let resolutions_state2 = resolutions_state.clone();
                                 let new_hosts_to_send2 = new_hosts_to_send.clone();
-                                let cs2 = cs.clone();
+                                let interface_addresses = cs.get_addresses().clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
                                 let tx2 = tx.clone();
                                 let _ = thread::Builder::new()
@@ -186,7 +186,7 @@ pub fn parse_packets(
                                             &new_hosts_to_send2,
                                             &key2,
                                             traffic_direction,
-                                            &cs2,
+                                            &interface_addresses,
                                             &mmdb_readers_2,
                                             &tx2,
                                         );
@@ -331,25 +331,20 @@ fn reverse_dns_lookup(
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     key: &AddressPortPair,
     traffic_direction: TrafficDirection,
-    cs: &CaptureSource,
+    interface_addresses: &Vec<Address>,
     mmdb_readers: &MmdbReaders,
     // needed to know that this thread is still running!
     _tx: &Sender<Message>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
-    let my_interface_addresses = cs.get_addresses();
 
     // perform rDNS lookup
     let lookup_result = lookup_addr(&address_to_lookup);
 
     // get new host info and build the new host
-    let traffic_type = get_traffic_type(
-        &address_to_lookup,
-        my_interface_addresses,
-        traffic_direction,
-    );
+    let traffic_type = get_traffic_type(&address_to_lookup, interface_addresses, traffic_direction);
     let is_loopback = address_to_lookup.is_loopback();
-    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
+    let is_local = is_local_connection(&address_to_lookup, interface_addresses);
     let is_bogon = is_bogon(&address_to_lookup);
     let country = get_country(&address_to_lookup, &mmdb_readers.country);
     let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
