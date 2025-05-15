@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn fetch_latest_release_from_github() {
-        let result = is_newer_release_available(6, 2);
+        let result = is_newer_release_available(6, 2).await;
         result.expect("Latest release request from GitHub error");
     }
 }
