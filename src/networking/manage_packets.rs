@@ -260,7 +260,7 @@ pub fn modify_or_insert_in_map(
     arp_type: ArpType,
     exchanged_bytes: u128,
     resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
-) -> InfoAddressPortPair {
+) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
 
@@ -293,7 +293,7 @@ pub fn modify_or_insert_in_map(
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;
-    let new_info: InfoAddressPortPair = info_traffic_msg
+    let new_info = info_traffic_msg
         .map
         .entry(*key)
         .and_modify(|info| {
@@ -332,10 +332,9 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
-        })
-        .clone();
+        });
 
-    new_info
+    (new_info.traffic_direction, new_info.service)
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)

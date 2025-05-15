@@ -130,7 +130,7 @@ pub fn parse_packets(
                             file.write(&packet);
                         }
                         // update the shared map
-                        let new_info = modify_or_insert_in_map(
+                        let (traffic_direction, service) = modify_or_insert_in_map(
                             &mut info_traffic_msg,
                             &key,
                             &cs,
@@ -141,11 +141,10 @@ pub fn parse_packets(
                             &resolutions_state,
                         );
 
-                        info_traffic_msg.add_packet(exchanged_bytes, new_info.traffic_direction);
+                        info_traffic_msg.add_packet(exchanged_bytes, traffic_direction);
 
                         // check the rDNS status of this address and act accordingly
-                        let address_to_lookup =
-                            get_address_to_lookup(&key, new_info.traffic_direction);
+                        let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
                         let mut r_dns_waiting_resolution = false;
                         let mut resolutions_lock = resolutions_state.lock().unwrap();
                         let r_dns_already_resolved = resolutions_lock
@@ -167,7 +166,7 @@ pub fn parse_packets(
                                     address_to_lookup,
                                     DataInfo::new_with_first_packet(
                                         exchanged_bytes,
-                                        new_info.traffic_direction,
+                                        traffic_direction,
                                     ),
                                 );
                                 drop(resolutions_lock);
@@ -186,7 +185,7 @@ pub fn parse_packets(
                                             &resolutions_state2,
                                             &new_hosts_to_send2,
                                             &key2,
-                                            new_info.traffic_direction,
+                                            traffic_direction,
                                             &cs2,
                                             &mmdb_readers_2,
                                             &tx2,
@@ -201,10 +200,7 @@ pub fn parse_packets(
                                     .addresses_waiting_resolution
                                     .entry(address_to_lookup)
                                     .and_modify(|data_info| {
-                                        data_info.add_packet(
-                                            exchanged_bytes,
-                                            new_info.traffic_direction,
-                                        );
+                                        data_info.add_packet(exchanged_bytes, traffic_direction);
                                     });
                                 drop(resolutions_lock);
                             }
@@ -221,13 +217,11 @@ pub fn parse_packets(
                                     .hosts
                                     .entry(host)
                                     .and_modify(|data_info_host| {
-                                        data_info_host.data_info.add_packet(
-                                            exchanged_bytes,
-                                            new_info.traffic_direction,
-                                        );
+                                        data_info_host
+                                            .data_info
+                                            .add_packet(exchanged_bytes, traffic_direction);
                                     })
                                     .or_insert_with(|| {
-                                        let traffic_direction = new_info.traffic_direction;
                                         let my_interface_addresses = cs.get_addresses();
                                         let traffic_type = get_traffic_type(
                                             &address_to_lookup,
@@ -258,15 +252,12 @@ pub fn parse_packets(
                         //increment the packet count for the sniffed service
                         info_traffic_msg
                             .services
-                            .entry(new_info.service)
+                            .entry(service)
                             .and_modify(|data_info| {
-                                data_info.add_packet(exchanged_bytes, new_info.traffic_direction);
+                                data_info.add_packet(exchanged_bytes, traffic_direction);
                             })
                             .or_insert_with(|| {
-                                DataInfo::new_with_first_packet(
-                                    exchanged_bytes,
-                                    new_info.traffic_direction,
-                                )
+                                DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
                             });
                     }
 
