@@ -250,6 +250,7 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
+#[allow(clippy::too_many_arguments)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTrafficMessage,
     key: &AddressPortPair,
@@ -279,6 +280,16 @@ pub fn modify_or_insert_in_map(
         );
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
+        // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
+        if let Some(host) = resolutions_state
+            .lock()
+            .unwrap()
+            .addresses_resolved
+            .get(&get_address_to_lookup(key, traffic_direction))
+            .cloned()
+        {
+            info_traffic_msg.potential_favorites.insert(host);
+        }
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;
@@ -323,17 +334,6 @@ pub fn modify_or_insert_in_map(
             },
         })
         .clone();
-
-    // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
-    if let Some(host) = resolutions_state
-        .lock()
-        .unwrap()
-        .addresses_resolved
-        .get(&get_address_to_lookup(key, new_info.traffic_direction))
-        .cloned()
-    {
-        info_traffic_msg.potential_favorites.insert(host);
-    }
 
     new_info
 }
