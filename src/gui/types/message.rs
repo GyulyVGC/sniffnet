@@ -131,4 +131,6 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
+    /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
+    PendingHosts(usize, Vec<HostMessage>),
 }

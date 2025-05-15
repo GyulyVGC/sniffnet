@@ -566,6 +566,13 @@ impl Sniffer {
                     self.capture_source = CaptureSource::File(MyPcapImport::new(path));
                 }
             }
+            Message::PendingHosts(cap_id, host_msgs) => {
+                if cap_id == self.current_capture_rx.0 {
+                    for host_msg in host_msgs {
+                        self.handle_new_host(host_msg);
+                    }
+                }
+            }
             Message::TickInit => {}
         }
         Task::none()

@@ -64,14 +64,19 @@ pub fn parse_packets(
         match packet_res {
             Err(e) => {
                 if e == pcap::Error::NoMorePackets {
+                    // send a message including data from the last interval
+                    let _ = tx.send_blocking(Message::TickRun(
+                        cap_id,
+                        info_traffic_msg,
+                        new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                    ));
                     // wait until there is still some thread doing rdns
                     while tx.sender_count() > 1 {
                         thread::sleep(Duration::from_millis(1000));
                     }
-                    // send one last message including packets from the last interval plus all the remaining new hosts
-                    let _ = tx.send_blocking(Message::TickRun(
+                    // send one last message including all pending hosts
+                    let _ = tx.send_blocking(Message::PendingHosts(
                         cap_id,
-                        info_traffic_msg,
                         new_hosts_to_send.lock().unwrap().drain(..).collect(),
                     ));
                     return;
