@@ -104,7 +104,7 @@ impl TrafficChart {
     }
 
     fn x_axis_range(&self) -> Range<f32> {
-        let first_time_displayed = if self.ticks > 30 { self.ticks - 30 } else { 0 };
+        let first_time_displayed = self.ticks.saturating_sub(30);
         let tot_seconds = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
         let range = first_time_displayed as f32..tot_seconds as f32;

@@ -133,6 +133,7 @@ pub enum Message {
     FetchDevices,
 }
 
+#[allow(clippy::large_enum_variant)]
 pub enum BackendTrafficMessage {
     TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
     PendingHosts(usize, Vec<HostMessage>),

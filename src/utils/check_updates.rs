@@ -11,8 +11,7 @@ struct AppVersion {
 /// Calls a method to check if a newer release of Sniffnet is available on GitHub
 /// and updates application status accordingly
 pub async fn set_newer_release_status() -> Option<bool> {
-    let result = is_newer_release_available(6, 30).await;
-    result
+    is_newer_release_available(6, 30).await
 }
 
 /// Checks if a newer release of Sniffnet is available on GitHub

@@ -815,7 +815,7 @@ fn get_active_filters_tooltip<'a>(
 
     ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
 
-    let tooltip = Tooltip::new(
+    Tooltip::new(
         Container::new(
             Text::new("i")
                 .font(font)
@@ -830,9 +830,7 @@ fn get_active_filters_tooltip<'a>(
         ret_val,
         Position::FollowCursor,
     )
-    .class(ContainerType::Tooltip);
-
-    tooltip
+    .class(ContainerType::Tooltip)
 }
 
 fn sort_arrows<'a>(
