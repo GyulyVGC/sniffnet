@@ -93,8 +93,8 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
 mod tests {
     use super::*;
 
-    #[test]
-    fn fetch_latest_release_from_github() {
+    #[tokio::test]
+    async fn fetch_latest_release_from_github() {
         let result = is_newer_release_available(6, 2).await;
         result.expect("Latest release request from GitHub error");
     }
