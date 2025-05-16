@@ -347,7 +347,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         )
         .push(if dev_str_list.is_empty() {
             Into::<iced::Element<Message, StyleType>>::into(center(
-                Icon::get_hourglass(sniffer.waiting.len()).size(60),
+                Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
             ))
         } else {
             Scrollable::with_direction(

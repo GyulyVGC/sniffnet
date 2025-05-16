@@ -63,7 +63,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         let body = body_no_notifications_set(font, language);
         tab_and_body = tab_and_body.push(body);
     } else if sniffer.logged_notifications.is_empty() {
-        let body = body_no_notifications_received(font, language, &sniffer.waiting);
+        let body = body_no_notifications_received(font, language, &sniffer.dots_pulse.0);
         tab_and_body = tab_and_body.push(body);
     } else {
         let logged_notifications = logged_notifications(sniffer);
@@ -121,7 +121,7 @@ fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, M
 fn body_no_notifications_received(
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<Message, StyleType> {
     Column::new()
         .padding(5)
@@ -134,7 +134,7 @@ fn body_no_notifications_received(
                 .align_x(Alignment::Center)
                 .font(font),
         )
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 

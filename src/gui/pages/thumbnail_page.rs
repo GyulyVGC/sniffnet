@@ -32,7 +32,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         return Container::new(
             Column::new()
                 .push(vertical_space())
-                .push(Text::new(&sniffer.waiting).font(font).size(50))
+                .push(Text::new(&sniffer.dots_pulse.0).font(font).size(50))
                 .push(Space::with_height(Length::FillPortion(2))),
         )
         .width(Length::Fill)

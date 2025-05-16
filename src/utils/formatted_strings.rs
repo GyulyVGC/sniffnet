@@ -86,14 +86,14 @@ pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;
     print!(
         "\n\
-\t╭────────────────────────────────────────────────────────────────────╮\n\
-\t│                                                                    │\n\
-\t│                           Sniffnet {ver}                           │\n\
-\t│                                                                    │\n\
-\t│           → Website: https://sniffnet.net                          │\n\
-\t│           → GitHub:  https://github.com/GyulyVGC/sniffnet          │\n\
-\t│                                                                    │\n\
-\t╰────────────────────────────────────────────────────────────────────╯\n\n"
+╭────────────────────────────────────────────────────────────────────╮\n\
+│                                                                    │\n\
+│                           Sniffnet {ver}                           │\n\
+│                                                                    │\n\
+│           → Website: https://sniffnet.net                          │\n\
+│           → GitHub:  https://github.com/GyulyVGC/sniffnet          │\n\
+│                                                                    │\n\
+╰────────────────────────────────────────────────────────────────────╯\n\n"
     );
 }
 

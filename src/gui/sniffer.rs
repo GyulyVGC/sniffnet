@@ -102,8 +102,8 @@ pub struct Sniffer {
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
-    /// Waiting string
-    pub waiting: String,
+    /// Messages status
+    pub dots_pulse: (String, u8),
     /// Chart displayed
     pub traffic_chart: TrafficChart,
     /// Report sort type (inspect page)
@@ -164,7 +164,7 @@ impl Sniffer {
             my_devices: Vec::new(),
             filters: Filters::default(),
             pcap_error: None,
-            waiting: ".".to_string(),
+            dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language),
             report_sort_type: ReportSortType::default(),
             host_sort_type: SortType::default(),
@@ -266,12 +266,11 @@ impl Sniffer {
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
-        self.update_waiting_dots();
+        self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 4;
         match message {
             Message::StartApp(id) => {
                 self.id = id;
                 return Task::batch([
-                    Task::done(Message::FetchDevices),
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
                 ]);
@@ -589,6 +588,7 @@ impl Sniffer {
             font,
             font_headers,
             self.newer_release_available,
+            self.dots_pulse.1,
         );
 
         let content: Element<Message, StyleType> =
@@ -788,6 +788,8 @@ impl Sniffer {
     }
 
     fn fetch_devices(&mut self) {
+        // todo: here??
+        self.update_waiting_dots();
         self.my_devices.clear();
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if matches!(&self.capture_source, CaptureSource::Device(_))
@@ -802,10 +804,10 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if self.waiting.len() > 2 {
-            self.waiting = String::new();
+        if self.dots_pulse.0.len() > 2 {
+            self.dots_pulse.0 = String::new();
         }
-        self.waiting = ".".repeat(self.waiting.len() + 1);
+        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
@@ -1259,19 +1261,29 @@ mod tests {
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
-    fn test_waiting_dots_update() {
-        // every kind of message will update dots
+    fn test_dots_pulse_update() {
+        // every kind of message will the integer, but only FetchDevices will update the string
         let mut sniffer = Sniffer::new(Configs::default());
 
-        assert_eq!(sniffer.waiting, ".".to_string());
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
+
         sniffer.update(Message::FetchDevices);
-        assert_eq!(sniffer.waiting, "..".to_string());
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 1));
 
         sniffer.update(Message::HideModal);
-        assert_eq!(sniffer.waiting, "...".to_string());
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 2));
 
         sniffer.update(Message::CtrlDPressed);
-        assert_eq!(sniffer.waiting, ".".to_string());
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 3));
+
+        sniffer.update(Message::FetchDevices);
+        assert_eq!(sniffer.dots_pulse, ("...".to_string(), 0));
+
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.dots_pulse, ("...".to_string(), 1));
+
+        sniffer.update(Message::FetchDevices);
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
     }
 
     #[test]

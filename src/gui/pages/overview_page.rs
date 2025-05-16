@@ -62,7 +62,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     if let Some(error) = sniffer.pcap_error.as_ref() {
         // pcap threw an ERROR!
-        body = body_pcap_error(error, &sniffer.waiting, language, font);
+        body = body_pcap_error(error, &sniffer.dots_pulse.0, language, font);
     } else {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
@@ -71,12 +71,22 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.capture_source, font, language, &sniffer.waiting);
+                body = body_no_packets(
+                    &sniffer.capture_source,
+                    font,
+                    language,
+                    &sniffer.dots_pulse.0,
+                );
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body =
-                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
+                body = body_no_observed(
+                    &sniffer.filters,
+                    observed,
+                    font,
+                    language,
+                    &sniffer.dots_pulse.0,
+                );
             }
             (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -119,7 +129,7 @@ fn body_no_packets<'a>(
     cs: &CaptureSource,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     let mut cs_info = cs.get_name();
@@ -133,7 +143,7 @@ fn body_no_packets<'a>(
         )
     } else if matches!(cs, CaptureSource::File(_)) {
         (
-            Icon::get_hourglass(waiting.len()).size(60),
+            Icon::get_hourglass(dots.len()).size(60),
             reading_from_pcap_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
@@ -147,7 +157,7 @@ fn body_no_packets<'a>(
         )
     } else {
         (
-            Icon::get_hourglass(waiting.len()).size(60),
+            Icon::get_hourglass(dots.len()).size(60),
             waiting_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
@@ -163,7 +173,7 @@ fn body_no_packets<'a>(
         .push(icon_text)
         .push(Space::with_height(15))
         .push(nothing_to_see_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
@@ -172,7 +182,7 @@ fn body_no_observed<'a>(
     observed: u128,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
         .align_x(Alignment::Center)
@@ -188,13 +198,13 @@ fn body_no_observed<'a>(
         .push(get_active_filters_col(filters, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_pcap_error<'a>(
     pcap_error: &'a str,
-    waiting: &'a str,
+    dots: &'a str,
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -211,7 +221,7 @@ fn body_pcap_error<'a>(
         .push(Icon::Error.to_text().size(60))
         .push(Space::with_height(15))
         .push(error_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
