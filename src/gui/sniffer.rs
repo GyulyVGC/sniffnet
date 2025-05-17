@@ -263,7 +263,7 @@ impl Sniffer {
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
-        self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 4;
+        self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {
             Message::StartApp(id) => {
                 self.id = id;
@@ -1271,16 +1271,16 @@ mod tests {
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 2));
 
         sniffer.update(Message::CtrlDPressed);
-        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 3));
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
 
         sniffer.update(Message::FetchDevices);
-        assert_eq!(sniffer.dots_pulse, ("...".to_string(), 0));
-
-        sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.dots_pulse, ("...".to_string(), 1));
 
+        sniffer.update(Message::OpenLastSettings);
+        assert_eq!(sniffer.dots_pulse, ("...".to_string(), 2));
+
         sniffer.update(Message::FetchDevices);
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
     }
 
     #[test]

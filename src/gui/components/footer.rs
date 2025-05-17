@@ -38,7 +38,7 @@ pub fn footer<'a>(
         get_release_details(language, font, font_footer, newer_release_available);
 
     let heart_size = match pulse {
-        1 | 3 => 17.0,
+        1 => 17.0,
         2 => 20.0,
         _ => 14.0,
     };
