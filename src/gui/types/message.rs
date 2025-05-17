@@ -129,8 +129,8 @@ pub enum Message {
     SetPcapImport(String),
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
-    /// Fetch the list of network devices
-    FetchDevices,
+    /// Emitted every second to repeat certain tasks (such as fetching the network devices)
+    Periodic,
 }
 
 #[allow(clippy::large_enum_variant)]

@@ -245,9 +245,8 @@ impl Sniffer {
         }
     }
 
-    // todo
-    fn time_subscription(&self) -> Subscription<Message> {
-        iced::time::every(Duration::from_millis(1000)).map(|_| Message::FetchDevices)
+    fn time_subscription() -> Subscription<Message> {
+        iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -550,7 +549,10 @@ impl Sniffer {
                     }
                 }
             }
-            Message::FetchDevices => self.fetch_devices(),
+            Message::Periodic => {
+                self.update_waiting_dots();
+                self.fetch_devices();
+            }
         }
         Task::none()
     }
@@ -638,7 +640,7 @@ impl Sniffer {
         Subscription::batch([
             self.keyboard_subscription(),
             self.mouse_subscription(),
-            self.time_subscription(),
+            Sniffer::time_subscription(),
             Sniffer::window_subscription(),
         ])
     }
@@ -785,8 +787,6 @@ impl Sniffer {
     }
 
     fn fetch_devices(&mut self) {
-        // todo: here??
-        self.update_waiting_dots();
         self.my_devices.clear();
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if matches!(&self.capture_source, CaptureSource::Device(_))
@@ -1259,12 +1259,12 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_dots_pulse_update() {
-        // every kind of message will the integer, but only FetchDevices will update the string
+        // every kind of message will the integer, but only Periodic will update the string
         let mut sniffer = Sniffer::new(Configs::default());
 
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
 
-        sniffer.update(Message::FetchDevices);
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 1));
 
         sniffer.update(Message::HideModal);
@@ -1273,13 +1273,13 @@ mod tests {
         sniffer.update(Message::CtrlDPressed);
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
 
-        sniffer.update(Message::FetchDevices);
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, ("...".to_string(), 1));
 
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.dots_pulse, ("...".to_string(), 2));
 
-        sniffer.update(Message::FetchDevices);
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
     }
 

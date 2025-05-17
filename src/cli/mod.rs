@@ -56,7 +56,7 @@ pub fn handle_cli_args() -> Task<Message> {
 
     let mut boot_task_chain = window::get_latest()
         .map(Message::StartApp)
-        .chain(Task::done(Message::FetchDevices));
+        .chain(Task::done(Message::Periodic));
     if let Some(adapter) = args.adapter {
         boot_task_chain = boot_task_chain
             .chain(Task::done(Message::DeviceSelection(adapter)))
