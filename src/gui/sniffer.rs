@@ -70,9 +70,6 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Configs, InfoTraffic, StyleType, TrafficChart, location};
 
-/// Update period (milliseconds)
-pub const PERIOD_TICK: u64 = 1000;
-
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
@@ -250,7 +247,7 @@ impl Sniffer {
 
     // todo
     fn time_subscription(&self) -> Subscription<Message> {
-        iced::time::every(Duration::from_millis(PERIOD_TICK)).map(|_| Message::FetchDevices)
+        iced::time::every(Duration::from_millis(1000)).map(|_| Message::FetchDevices)
     }
 
     fn window_subscription() -> Subscription<Message> {

@@ -292,7 +292,7 @@ pub fn modify_or_insert_in_map(
         }
     }
 
-    let timestamp = info_traffic_msg.last_filtered_packet_timestamp;
+    let timestamp = info_traffic_msg.last_packet_timestamp;
     let new_info = info_traffic_msg
         .map
         .entry(*key)

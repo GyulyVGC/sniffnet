@@ -18,7 +18,7 @@ pub fn notify_and_log(
 ) -> usize {
     let mut already_emitted_sound = false;
     let mut emitted_notifications = 0;
-    let timestamp = info_traffic.last_filtered_packet_timestamp;
+    let timestamp = info_traffic.last_packet_timestamp;
     // packets threshold
     if let Some(threshold) = notifications.packets_notification.threshold {
         let sent_packets_entry = info_traffic.tot_out_packets - info_traffic.tot_out_packets_prev;

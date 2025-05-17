@@ -28,8 +28,8 @@ pub struct InfoTraffic {
     pub all_bytes: u128,
     /// Number of dropped packets
     pub dropped_packets: u32,
-    /// Timestamp of the latest filtered packet
-    pub last_filtered_packet_timestamp: Timestamp,
+    /// Timestamp of the latest parsed packet
+    pub last_packet_timestamp: Timestamp,
     /// Total sent bytes filtered before the current time interval
     pub tot_out_bytes_prev: u128,
     /// Total received bytes filtered before the current time interval
@@ -64,10 +64,10 @@ impl InfoTraffic {
         self.dropped_packets = msg.dropped_packets;
 
         // it can happen they're equal due to dis-alignments caused by the timeout in the packet capture
-        if self.last_filtered_packet_timestamp.secs() == msg.last_filtered_packet_timestamp.secs() {
-            self.last_filtered_packet_timestamp.add_one_sec();
+        if self.last_packet_timestamp.secs() == msg.last_packet_timestamp.secs() {
+            self.last_packet_timestamp.add_one_sec();
         } else {
-            self.last_filtered_packet_timestamp = msg.last_filtered_packet_timestamp;
+            self.last_packet_timestamp = msg.last_packet_timestamp;
         }
 
         for (key, value) in msg.map {
@@ -116,8 +116,8 @@ pub struct InfoTrafficMessage {
     pub all_bytes: u128,
     /// Number of dropped packets
     pub dropped_packets: u32,
-    /// Timestamp of the latest filtered packet
-    pub last_filtered_packet_timestamp: Timestamp,
+    /// Timestamp of the latest parsed packet
+    pub last_packet_timestamp: Timestamp,
     /// Map of the filtered traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
@@ -143,7 +143,7 @@ impl InfoTrafficMessage {
 
     pub fn take_but_leave_timestamp(&mut self) -> Self {
         let info_traffic = Self {
-            last_filtered_packet_timestamp: self.last_filtered_packet_timestamp,
+            last_packet_timestamp: self.last_packet_timestamp,
             ..Self::default()
         };
         std::mem::replace(self, info_traffic)
