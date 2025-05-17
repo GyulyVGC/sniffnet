@@ -7,6 +7,7 @@ use crate::translations::translations::{
     address_translation, ip_version_translation, protocol_translation,
 };
 use crate::translations::translations_3::{invalid_filters_translation, port_translation};
+use crate::utils::types::timestamp::Timestamp;
 use chrono::{Local, TimeZone};
 use std::fmt::Write;
 
@@ -82,28 +83,17 @@ pub fn get_active_filters_string(filters: &Filters, language: Language) -> Strin
 }
 
 pub fn print_cli_welcome_message() {
+    let ver = APP_VERSION;
     print!(
-        r"
-  /---------------------------------------------------------\
- |     _____           _    __    __                  _      |
- |    / ____|         (_)  / _|  / _|                | |     |
- |   | (___    _ __    _  | |_  | |_   _ __     ___  | |_    |
- |    \___ \  | '_ \  | | |  _| |  _| | '_ \   / _ \ | __|   |
- |    ____) | | | | | | | | |   | |   | | | | |  __/ | |_    |
- |   |_____/  |_| |_| |_| |_|   |_|   |_| |_|  \___|  \__|   |
- |                                                           |
- |                   ___________                             |
- |                  /___________\                            |
- |                 | ___________ |                           |
- |                 | |         | |                           |
- |                 | | v{APP_VERSION}  | |                           |
- |                 | |_________| |________________________   |
- |                 \_____________/   by Giuliano Bellini  )  |
- |                 / ''''''''''' \                       /   |
- |                / ::::::::::::: \                  =D-'    |
- |               (_________________)                         |
-  \_________________________________________________________/
-    "
+        "\n\
+╭────────────────────────────────────────────────────────────────────╮\n\
+│                                                                    │\n\
+│                           Sniffnet {ver}                           │\n\
+│                                                                    │\n\
+│           → Website: https://sniffnet.net                          │\n\
+│           → GitHub:  https://github.com/GyulyVGC/sniffnet          │\n\
+│                                                                    │\n\
+╰────────────────────────────────────────────────────────────────────╯\n\n"
     );
 }
 
@@ -174,8 +164,10 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
     }
 }
 
-pub fn get_formatted_timestamp(t: i64) -> String {
-    let date_opt = Local.timestamp_opt(t, 0).latest();
+pub fn get_formatted_timestamp(t: Timestamp) -> String {
+    let date_opt = t
+        .to_usecs()
+        .and_then(|usecs| Local.timestamp_micros(usecs).latest());
     if let Some(date) = date_opt {
         date.format("%Y/%m/%d %H:%M:%S").to_string()
     } else {

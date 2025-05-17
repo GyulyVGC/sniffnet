@@ -33,7 +33,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -63,7 +63,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
         mmdb_country,
         mmdb_asn,
         ..
-    } = sniffer.configs.lock().unwrap().settings.clone();
+    } = sniffer.configs.settings.clone();
 
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 

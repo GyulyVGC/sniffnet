@@ -1,25 +1,26 @@
 use splines::{Interpolation, Key, Spline};
 
-use crate::{RunTimeData, TrafficChart};
+use crate::TrafficChart;
+use crate::networking::types::info_traffic::InfoTraffic;
 
 /// This function is invoked every second by the application subscription
 ///
 /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
-pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut TrafficChart) {
+pub fn update_charts_data(info_traffic: &mut InfoTraffic, traffic_chart: &mut TrafficChart) {
     #[allow(clippy::cast_precision_loss)]
     let tot_seconds = traffic_chart.ticks as f32;
     traffic_chart.ticks += 1;
 
     #[allow(clippy::cast_precision_loss)]
     let out_bytes_entry =
-        -1.0 * (runtime_data.tot_out_bytes - runtime_data.tot_out_bytes_prev) as f32;
+        -1.0 * (info_traffic.tot_out_bytes - info_traffic.tot_out_bytes_prev) as f32;
     #[allow(clippy::cast_precision_loss)]
-    let in_bytes_entry = (runtime_data.tot_in_bytes - runtime_data.tot_in_bytes_prev) as f32;
+    let in_bytes_entry = (info_traffic.tot_in_bytes - info_traffic.tot_in_bytes_prev) as f32;
     #[allow(clippy::cast_precision_loss)]
     let out_packets_entry =
-        -1.0 * (runtime_data.tot_out_packets - runtime_data.tot_out_packets_prev) as f32;
+        -1.0 * (info_traffic.tot_out_packets - info_traffic.tot_out_packets_prev) as f32;
     #[allow(clippy::cast_precision_loss)]
-    let in_packets_entry = (runtime_data.tot_in_packets - runtime_data.tot_in_packets_prev) as f32;
+    let in_packets_entry = (info_traffic.tot_in_packets - info_traffic.tot_in_packets_prev) as f32;
 
     let out_bytes_key = Key::new(tot_seconds, out_bytes_entry, Interpolation::Cosine);
     let in_bytes_key = Key::new(tot_seconds, in_bytes_entry, Interpolation::Cosine);
@@ -29,22 +30,18 @@ pub fn update_charts_data(runtime_data: &mut RunTimeData, traffic_chart: &mut Tr
     // update sent bytes traffic data
     update_spline(&mut traffic_chart.out_bytes, out_bytes_key);
     traffic_chart.min_bytes = get_min(&traffic_chart.out_bytes);
-    runtime_data.tot_out_bytes_prev = runtime_data.tot_out_bytes;
 
     // update received bytes traffic data
     update_spline(&mut traffic_chart.in_bytes, in_bytes_key);
     traffic_chart.max_bytes = get_max(&traffic_chart.in_bytes);
-    runtime_data.tot_in_bytes_prev = runtime_data.tot_in_bytes;
 
     // update sent packets traffic data
     update_spline(&mut traffic_chart.out_packets, out_packets_key);
     traffic_chart.min_packets = get_min(&traffic_chart.out_packets);
-    runtime_data.tot_out_packets_prev = runtime_data.tot_out_packets;
 
     // update received packets traffic data
     update_spline(&mut traffic_chart.in_packets, in_packets_key);
     traffic_chart.max_packets = get_max(&traffic_chart.in_packets);
-    runtime_data.tot_in_packets_prev = runtime_data.tot_in_packets;
 }
 
 fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>) {
@@ -81,7 +78,7 @@ mod tests {
     use splines::{Interpolation, Key, Spline};
 
     use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
-    use crate::{ChartType, Language, RunTimeData, StyleType, TrafficChart};
+    use crate::{ChartType, InfoTraffic, Language, StyleType, TrafficChart};
 
     fn spline_from_vec(vec: Vec<(i32, i32)>) -> Spline<f32, f32> {
         Spline::from_vec(
@@ -174,7 +171,7 @@ mod tests {
             style: StyleType::default(),
             thumbnail: false,
         };
-        let mut runtime_data = RunTimeData {
+        let mut info_traffic = InfoTraffic {
             all_bytes: 0,
             all_packets: 0,
             tot_out_bytes: tot_sent + 1111,
@@ -186,23 +183,22 @@ mod tests {
             tot_in_bytes_prev: tot_received,
             tot_out_packets_prev: tot_sent,
             tot_in_packets_prev: tot_received,
-            logged_notifications: Default::default(),
-            tot_emitted_notifications: 0,
+            ..Default::default()
         };
 
         assert_eq!(get_min(&sent), -1000.0);
         assert_eq!(get_max(&received), 21000.0);
 
-        update_charts_data(&mut runtime_data, &mut traffic_chart);
+        update_charts_data(&mut info_traffic, &mut traffic_chart);
 
         assert_eq!(get_min(&traffic_chart.out_packets), -3333.0);
         assert_eq!(get_max(&traffic_chart.in_bytes), 21000.0);
 
-        // runtime_data correctly updated?
-        assert_eq!(runtime_data.tot_out_bytes_prev, tot_sent + 1111);
-        assert_eq!(runtime_data.tot_in_bytes_prev, tot_received + 2222);
-        assert_eq!(runtime_data.tot_out_packets_prev, tot_sent + 3333);
-        assert_eq!(runtime_data.tot_in_packets_prev, tot_received + 4444);
+        // prev values aren't updated here anymore: manually set them
+        info_traffic.tot_out_bytes_prev = info_traffic.tot_out_bytes;
+        info_traffic.tot_in_bytes_prev = info_traffic.tot_in_bytes;
+        info_traffic.tot_out_packets_prev = info_traffic.tot_out_packets;
+        info_traffic.tot_in_packets_prev = info_traffic.tot_in_packets;
 
         let mut sent_bytes = sent.clone();
         sent_bytes.add(Key::new(29.0, -1111.0, Interpolation::Cosine));
@@ -224,14 +220,18 @@ mod tests {
         assert_eq!(traffic_chart.out_packets.keys(), sent_packets.keys());
         assert_eq!(traffic_chart.in_bytes.keys(), received_bytes.keys());
 
-        runtime_data.tot_out_bytes += 99;
-        runtime_data.tot_in_packets += 990;
-        runtime_data.tot_in_bytes += 2;
-        update_charts_data(&mut runtime_data, &mut traffic_chart);
-        runtime_data.tot_out_bytes += 77;
-        runtime_data.tot_in_packets += 1;
-        runtime_data.tot_out_packets += 220;
-        update_charts_data(&mut runtime_data, &mut traffic_chart);
+        info_traffic.tot_out_bytes += 99;
+        info_traffic.tot_in_packets += 990;
+        info_traffic.tot_in_bytes += 2;
+        update_charts_data(&mut info_traffic, &mut traffic_chart);
+        info_traffic.tot_out_bytes_prev = info_traffic.tot_out_bytes;
+        info_traffic.tot_in_bytes_prev = info_traffic.tot_in_bytes;
+        info_traffic.tot_out_packets_prev = info_traffic.tot_out_packets;
+        info_traffic.tot_in_packets_prev = info_traffic.tot_in_packets;
+        info_traffic.tot_out_bytes += 77;
+        info_traffic.tot_in_packets += 1;
+        info_traffic.tot_out_packets += 220;
+        update_charts_data(&mut info_traffic, &mut traffic_chart);
 
         sent_bytes.remove(0);
         sent_bytes.remove(0);

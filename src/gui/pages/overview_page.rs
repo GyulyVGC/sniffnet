@@ -44,7 +44,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
-    horizontal_space, lazy, vertical_space,
+    horizontal_space, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding, Shrink};
 use std::fmt::Write;
@@ -53,34 +53,33 @@ use std::fmt::Write;
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
+    let dots = &sniffer.dots_pulse.0;
+
     if let Some(error) = sniffer.pcap_error.as_ref() {
         // pcap threw an ERROR!
-        body = body_pcap_error(error, &sniffer.waiting, language, font);
+        body = body_pcap_error(error, dots, language, font);
     } else {
         // NO pcap error detected
-        let observed = sniffer.runtime_data.all_packets;
-        let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
-        let dropped = sniffer.runtime_data.dropped_packets;
-        let total = observed + u128::from(dropped);
+        let observed = sniffer.info_traffic.all_packets;
+        let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.capture_source, font, language, &sniffer.waiting);
+                body = body_no_packets(&sniffer.capture_source, font, language, dots);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body =
-                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
+                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
             }
-            (_observed, filtered) => {
+            (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
                     RunningPage::Overview,
@@ -93,24 +92,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
                 let container_chart = container_chart(sniffer, font);
 
-                let container_info = lazy(
-                    (total, style, language, sniffer.traffic_chart.chart_type),
-                    move |_| lazy_col_info(sniffer),
-                );
+                let container_info = col_info(sniffer);
 
-                let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
-                let container_report = lazy(
-                    (
-                        filtered,
-                        num_favorites,
-                        style,
-                        language,
-                        sniffer.traffic_chart.chart_type,
-                        sniffer.host_sort_type,
-                        sniffer.service_sort_type,
-                    ),
-                    move |_| lazy_row_report(sniffer),
-                );
+                let container_report = row_report(sniffer);
 
                 body = body
                     .width(Length::Fill)
@@ -136,7 +120,7 @@ fn body_no_packets<'a>(
     cs: &CaptureSource,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     let mut cs_info = cs.get_name();
@@ -150,12 +134,12 @@ fn body_no_packets<'a>(
         )
     } else if matches!(cs, CaptureSource::File(_)) {
         (
-            Icon::get_hourglass(waiting.len()).size(60),
+            Icon::get_hourglass(dots.len()).size(60),
             reading_from_pcap_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
-    } else if cs.get_addresses().lock().unwrap().is_empty() {
+    } else if cs.get_addresses().is_empty() {
         (
             Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &cs_info)
@@ -164,7 +148,7 @@ fn body_no_packets<'a>(
         )
     } else {
         (
-            Icon::get_hourglass(waiting.len()).size(60),
+            Icon::get_hourglass(dots.len()).size(60),
             waiting_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
@@ -180,7 +164,7 @@ fn body_no_packets<'a>(
         .push(icon_text)
         .push(Space::with_height(15))
         .push(nothing_to_see_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
@@ -189,7 +173,7 @@ fn body_no_observed<'a>(
     observed: u128,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
         .align_x(Alignment::Center)
@@ -205,13 +189,13 @@ fn body_no_observed<'a>(
         .push(get_active_filters_col(filters, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_pcap_error<'a>(
     pcap_error: &'a str,
-    waiting: &'a str,
+    dots: &'a str,
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -228,11 +212,11 @@ fn body_pcap_error<'a>(
         .push(Icon::Error.to_text().size(60))
         .push(Space::with_height(15))
         .push(error_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
@@ -254,7 +238,7 @@ fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
 fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -361,7 +345,7 @@ fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -440,10 +424,10 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
         )
 }
 
-fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
     let col_device = col_device(language, font, &sniffer.capture_source);
@@ -480,7 +464,7 @@ fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { language, .. } = sniffer.configs.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
     Container::new(
@@ -568,23 +552,23 @@ fn donut_row<'a>(
 
     let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
         (
-            sniffer.runtime_data.tot_in_bytes,
-            sniffer.runtime_data.tot_out_bytes,
-            sniffer.runtime_data.all_bytes
-                - sniffer.runtime_data.tot_out_bytes
-                - sniffer.runtime_data.tot_in_bytes,
+            sniffer.info_traffic.tot_in_bytes,
+            sniffer.info_traffic.tot_out_bytes,
+            sniffer.info_traffic.all_bytes
+                - sniffer.info_traffic.tot_out_bytes
+                - sniffer.info_traffic.tot_in_bytes,
             // assume that the dropped packets have the same size as the average packet
-            u128::from(sniffer.runtime_data.dropped_packets) * sniffer.runtime_data.all_bytes
-                / sniffer.runtime_data.all_packets,
+            u128::from(sniffer.info_traffic.dropped_packets) * sniffer.info_traffic.all_bytes
+                / sniffer.info_traffic.all_packets,
         )
     } else {
         (
-            sniffer.runtime_data.tot_in_packets,
-            sniffer.runtime_data.tot_out_packets,
-            sniffer.runtime_data.all_packets
-                - sniffer.runtime_data.tot_out_packets
-                - sniffer.runtime_data.tot_in_packets,
-            u128::from(sniffer.runtime_data.dropped_packets),
+            sniffer.info_traffic.tot_in_packets,
+            sniffer.info_traffic.tot_out_packets,
+            sniffer.info_traffic.all_packets
+                - sniffer.info_traffic.tot_out_packets
+                - sniffer.info_traffic.tot_in_packets,
+            u128::from(sniffer.info_traffic.dropped_packets),
         )
     };
 
@@ -832,7 +816,7 @@ fn get_active_filters_tooltip<'a>(
 
     ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
 
-    let tooltip = Tooltip::new(
+    Tooltip::new(
         Container::new(
             Text::new("i")
                 .font(font)
@@ -847,9 +831,7 @@ fn get_active_filters_tooltip<'a>(
         ret_val,
         Position::FollowCursor,
     )
-    .class(ContainerType::Tooltip);
-
-    tooltip
+    .class(ContainerType::Tooltip)
 }
 
 fn sort_arrows<'a>(
