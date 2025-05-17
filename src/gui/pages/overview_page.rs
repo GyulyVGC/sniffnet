@@ -60,9 +60,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
+    let dots = &sniffer.dots_pulse.0;
+
     if let Some(error) = sniffer.pcap_error.as_ref() {
         // pcap threw an ERROR!
-        body = body_pcap_error(error, &sniffer.dots_pulse.0, language, font);
+        body = body_pcap_error(error, dots, language, font);
     } else {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
@@ -71,22 +73,11 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(
-                    &sniffer.capture_source,
-                    font,
-                    language,
-                    &sniffer.dots_pulse.0,
-                );
+                body = body_no_packets(&sniffer.capture_source, font, language, dots);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body = body_no_observed(
-                    &sniffer.filters,
-                    observed,
-                    font,
-                    language,
-                    &sniffer.dots_pulse.0,
-                );
+                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
             }
             (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0

@@ -39,12 +39,12 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::export_pcap::ExportPcap;
-use crate::gui::types::message::BackendTrafficMessage;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -81,7 +81,7 @@ pub struct Sniffer {
     pub configs: Configs,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
-    /// Capture data updated by thread parsing packets
+    /// Capture data
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,

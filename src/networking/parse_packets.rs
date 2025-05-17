@@ -1,7 +1,5 @@
-//! Module containing functions executed by the thread in charge of parsing sniffed packets and
-//! inserting them in the shared map.
+//! Module containing functions executed by the thread in charge of parsing sniffed packets
 
-use crate::gui::types::message::BackendTrafficMessage;
 use crate::location;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
@@ -38,8 +36,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
-/// The calling thread enters a loop in which it waits for network packets, parses them according
-/// to the user specified filters, and inserts them into the shared map variable.
+/// The calling thread enters a loop in which it waits for network packets
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
@@ -56,7 +53,7 @@ pub fn parse_packets(
     // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
     let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
 
-    // instant of the first parsed packet plus multiples of 1 second
+    // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
 
     loop {
@@ -79,9 +76,8 @@ pub fn parse_packets(
 
         match packet_res {
             Err(e) => {
-                // only happens for offline captures
                 if e == pcap::Error::NoMorePackets {
-                    // send a message including data from the last interval
+                    // send a message including data from the last interval (only happens in offline captures)
                     let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
                         cap_id,
                         info_traffic_msg,
@@ -146,7 +142,7 @@ pub fn parse_packets(
                         if let Some(file) = savefile.as_mut() {
                             file.write(&packet);
                         }
-                        // update the shared map
+                        // update the map
                         let (traffic_direction, service) = modify_or_insert_in_map(
                             &mut info_traffic_msg,
                             &key,
@@ -413,6 +409,12 @@ pub struct AddressesResolutionState {
     addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
     pub addresses_resolved: HashMap<IpAddr, Host>,
+}
+
+#[allow(clippy::large_enum_variant)]
+pub enum BackendTrafficMessage {
+    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
+    PendingHosts(usize, Vec<HostMessage>),
 }
 
 fn maybe_send_tick_run_live(

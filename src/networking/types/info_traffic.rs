@@ -124,7 +124,7 @@ pub struct InfoTrafficMessage {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
-    /// Collection of favorite hosts that exchanged data in the last interval
+    /// Collection of potentially favorite hosts that exchanged data in the last interval
     pub potential_favorites: HashSet<Host>,
 }
 

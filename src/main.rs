@@ -52,7 +52,7 @@ const WINDOW_ICON: &[u8] = include_bytes!("../resources/logos/raw/icon.png");
 
 /// Entry point of application execution
 ///
-/// It initializes shared variables and loads configuration parameters
+/// It initializes variables and loads configuration parameters
 pub fn main() -> iced::Result {
     #[cfg(all(windows, not(debug_assertions)))]
     let _gag1: gag::Redirect<std::fs::File>;
