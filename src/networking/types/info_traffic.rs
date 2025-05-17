@@ -29,7 +29,7 @@ pub struct InfoTraffic {
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Timestamp of the latest parsed packet
-    pub last_packet_timestamp: Timestamp,
+    pub last_packet_timestamp: Option<Timestamp>,
     /// Total sent bytes filtered before the current time interval
     pub tot_out_bytes_prev: u128,
     /// Total received bytes filtered before the current time interval
@@ -63,11 +63,17 @@ impl InfoTraffic {
         self.all_bytes += msg.all_bytes;
         self.dropped_packets = msg.dropped_packets;
 
-        // it can happen they're equal due to dis-alignments caused by the timeout in the packet capture
-        if self.last_packet_timestamp.secs() == msg.last_packet_timestamp.secs() {
-            self.last_packet_timestamp.add_one_sec();
-        } else {
-            self.last_packet_timestamp = msg.last_packet_timestamp;
+        if let Some(last_packet_timestamp_msg) = msg.last_packet_timestamp {
+            if let Some(last_packet_timestamp) = self.last_packet_timestamp {
+                // it can happen they're equal due to dis-alignments caused by the timeout in the packet capture
+                if last_packet_timestamp.secs() == last_packet_timestamp_msg.secs() {
+                    self.last_packet_timestamp = Some(last_packet_timestamp.add_secs(1));
+                } else {
+                    self.last_packet_timestamp = msg.last_packet_timestamp;
+                }
+            } else {
+                self.last_packet_timestamp = msg.last_packet_timestamp;
+            }
         }
 
         for (key, value) in msg.map {
@@ -117,7 +123,7 @@ pub struct InfoTrafficMessage {
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Timestamp of the latest parsed packet
-    pub last_packet_timestamp: Timestamp,
+    pub last_packet_timestamp: Option<Timestamp>,
     /// Map of the filtered traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
