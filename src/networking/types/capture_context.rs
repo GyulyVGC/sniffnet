@@ -126,6 +126,7 @@ impl CaptureType {
                         256 //limit stored packets slice dimension (to keep more in the buffer)
                     })
                     .immediate_mode(true) //parse packets ASAP!
+                    .timeout(150) // to ensure UI is updated even if no packets are captured
                     .open()?;
                 Ok(Self::Online(cap))
             }

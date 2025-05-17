@@ -18,6 +18,10 @@ impl Timestamp {
             .checked_mul(1_000_000)
             .and_then(|x| x.checked_add(self.usecs))
     }
+
+    pub fn add_one_sec(&mut self) {
+        self.secs += 1;
+    }
 }
 
 impl Ord for Timestamp {

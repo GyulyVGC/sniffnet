@@ -36,7 +36,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -56,13 +56,29 @@ pub fn parse_packets(
     // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
     let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
 
+    // instant of the first filtered packet plus multiples of 1 second
+    // todo: remove in case of offline capture??
+    let mut first_filtered_packet_ticks = None;
+
     loop {
         let packet_res = cap.next_packet();
+
         if tx.is_closed() {
             return;
         }
+
+        send_tick_run_maybe(
+            cap_id,
+            &mut info_traffic_msg,
+            &new_hosts_to_send,
+            &mut cs,
+            &mut first_filtered_packet_ticks,
+            tx,
+        );
+
         match packet_res {
             Err(e) => {
+                // only happens for offline captures
                 if e == pcap::Error::NoMorePackets {
                     // send a message including data from the last interval
                     let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
@@ -90,29 +106,15 @@ pub fn parse_packets(
                     let mut arp_type = ArpType::default();
                     let mut packet_filters_fields = PacketFiltersFields::default();
 
-                    // todo!!!
-                    #[allow(clippy::useless_conversion)]
-                    let secs = i64::from(packet.header.ts.tv_sec);
-                    #[allow(clippy::useless_conversion)]
-                    let usecs = i64::from(packet.header.ts.tv_usec);
-                    let this_packet_timestamp = Timestamp::new(secs, usecs);
-                    if info_traffic_msg.last_packet_timestamp.secs() != this_packet_timestamp.secs()
-                    {
-                        if matches!(cs, CaptureSource::Device(_)) {
-                            for dev in Device::list().log_err(location!()).unwrap_or_default() {
-                                if dev.name.eq(&cs.get_name()) {
-                                    cs.set_addresses(dev.addresses);
-                                    break;
-                                }
-                            }
-                        }
-
-                        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
-                            cap_id,
-                            info_traffic_msg.take(this_packet_timestamp),
-                            new_hosts_to_send.lock().unwrap().drain(..).collect(),
-                        ));
-                    }
+                    // todo: handle PCAP timings!
+                    // if info_traffic_msg.last_packet_timestamp.secs() != this_packet_timestamp.secs()
+                    // {
+                    //     let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+                    //         cap_id,
+                    //         info_traffic_msg.take(this_packet_timestamp),
+                    //         new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                    //     ));
+                    // }
 
                     let key_option = analyze_headers(
                         headers,
@@ -129,6 +131,16 @@ pub fn parse_packets(
 
                     let passed_filters = filters.matches(&packet_filters_fields);
                     if passed_filters {
+                        if first_filtered_packet_ticks.is_none() {
+                            first_filtered_packet_ticks = Some(Instant::now());
+                        }
+                        #[allow(clippy::useless_conversion)]
+                        let secs = i64::from(packet.header.ts.tv_sec);
+                        #[allow(clippy::useless_conversion)]
+                        let usecs = i64::from(packet.header.ts.tv_usec);
+                        info_traffic_msg.last_filtered_packet_timestamp =
+                            Timestamp::new(secs, usecs);
+
                         // save this packet to PCAP file
                         if let Some(file) = savefile.as_mut() {
                             file.write(&packet);
@@ -400,4 +412,31 @@ pub struct AddressesResolutionState {
     addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
     pub addresses_resolved: HashMap<IpAddr, Host>,
+}
+
+fn send_tick_run_maybe(
+    cap_id: usize,
+    info_traffic_msg: &mut InfoTrafficMessage,
+    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
+    cs: &mut CaptureSource,
+    first_filtered_packet_ticks: &mut Option<Instant>,
+    tx: &Sender<BackendTrafficMessage>,
+) {
+    if matches!(cs, CaptureSource::Device(_)) {
+        if first_filtered_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
+            *first_filtered_packet_ticks = first_filtered_packet_ticks
+                .and_then(|i| i.checked_add(Duration::from_millis(1000)));
+            let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+                cap_id,
+                info_traffic_msg.take_but_leave_timestamp(),
+                new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            ));
+            for dev in Device::list().log_err(location!()).unwrap_or_default() {
+                if dev.name.eq(&cs.get_name()) {
+                    cs.set_addresses(dev.addresses);
+                    break;
+                }
+            }
+        }
+    }
 }
