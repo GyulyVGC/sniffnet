@@ -67,7 +67,7 @@ pub fn parse_packets(
             return;
         }
 
-        // todo: make ts not optional?
+        // todo: make ts not optional? remove in case of live capture??
         let next_packet_timestamp = get_packet_timestamp_opt(&packet_res);
 
         send_tick_run_maybe(

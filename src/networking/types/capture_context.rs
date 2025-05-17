@@ -8,8 +8,8 @@ use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::get_path_termination_string;
 
 pub enum CaptureContext {
-    Online(Online),
-    OnlineWithSavefile(OnlineWithSavefile),
+    Live(Live),
+    LiveWithSavefile(LiveWithSavefile),
     Offline(Offline),
     Error(String),
 }
@@ -21,28 +21,28 @@ impl CaptureContext {
             Err(e) => return Self::Error(e.to_string()),
         };
         let cap = match cap_type {
-            CaptureType::Online(cap) => cap,
+            CaptureType::Live(cap) => cap,
             CaptureType::Offline(cap) => return Self::new_offline(cap),
         };
 
         if let Some(out_path) = pcap_out_path {
             let savefile_res = cap.savefile(out_path);
             match savefile_res {
-                Ok(s) => Self::new_online_with_savefile(cap, s),
+                Ok(s) => Self::new_live_with_savefile(cap, s),
                 Err(e) => Self::Error(e.to_string()),
             }
         } else {
-            Self::new_online(cap)
+            Self::new_live(cap)
         }
     }
 
-    fn new_online(cap: Capture<Active>) -> Self {
-        Self::Online(Online { cap })
+    fn new_live(cap: Capture<Active>) -> Self {
+        Self::Live(Live { cap })
     }
 
-    fn new_online_with_savefile(cap: Capture<Active>, savefile: Savefile) -> Self {
-        Self::OnlineWithSavefile(OnlineWithSavefile {
-            online: Online { cap },
+    fn new_live_with_savefile(cap: Capture<Active>, savefile: Savefile) -> Self {
+        Self::LiveWithSavefile(LiveWithSavefile {
+            live: Live { cap },
             savefile,
         })
     }
@@ -60,10 +60,8 @@ impl CaptureContext {
 
     pub fn consume(self) -> (CaptureType, Option<Savefile>) {
         match self {
-            Self::Online(on) => (CaptureType::Online(on.cap), None),
-            Self::OnlineWithSavefile(onws) => {
-                (CaptureType::Online(onws.online.cap), Some(onws.savefile))
-            }
+            Self::Live(on) => (CaptureType::Live(on.cap), None),
+            Self::LiveWithSavefile(onws) => (CaptureType::Live(onws.live.cap), Some(onws.savefile)),
             Self::Offline(off) => (CaptureType::Offline(off.cap), None),
             Self::Error(_) => panic!(),
         }
@@ -71,9 +69,9 @@ impl CaptureContext {
 
     pub fn my_link_type(&self) -> MyLinkType {
         match self {
-            Self::Online(on) => MyLinkType::from_pcap_link_type(on.cap.get_datalink()),
-            Self::OnlineWithSavefile(onws) => {
-                MyLinkType::from_pcap_link_type(onws.online.cap.get_datalink())
+            Self::Live(on) => MyLinkType::from_pcap_link_type(on.cap.get_datalink()),
+            Self::LiveWithSavefile(onws) => {
+                MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
             }
             Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
             Self::Error(_) => MyLinkType::default(),
@@ -81,12 +79,12 @@ impl CaptureContext {
     }
 }
 
-pub struct Online {
+pub struct Live {
     cap: Capture<Active>,
 }
 
-pub struct OnlineWithSavefile {
-    online: Online,
+pub struct LiveWithSavefile {
+    live: Live,
     savefile: Savefile,
 }
 
@@ -95,21 +93,21 @@ pub struct Offline {
 }
 
 pub enum CaptureType {
-    Online(Capture<Active>),
+    Live(Capture<Active>),
     Offline(Capture<pcap::Offline>),
 }
 
 impl CaptureType {
     pub fn next_packet(&mut self) -> Result<Packet, Error> {
         match self {
-            Self::Online(on) => on.next_packet(),
+            Self::Live(on) => on.next_packet(),
             Self::Offline(off) => off.next_packet(),
         }
     }
 
     pub fn stats(&mut self) -> Result<Stat, Error> {
         match self {
-            Self::Online(on) => on.stats(),
+            Self::Live(on) => on.stats(),
             Self::Offline(off) => off.stats(),
         }
     }
@@ -128,7 +126,7 @@ impl CaptureType {
                     .immediate_mode(true) //parse packets ASAP!
                     .timeout(150) // to ensure UI is updated even if no packets are captured
                     .open()?;
-                Ok(Self::Online(cap))
+                Ok(Self::Live(cap))
             }
             CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
         }
