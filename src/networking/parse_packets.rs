@@ -31,7 +31,7 @@ use dns_lookup::lookup_addr;
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::{Address, Device, Error, Packet};
+use pcap::{Address, Device, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -57,7 +57,6 @@ pub fn parse_packets(
     let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
 
     // instant of the first parsed packet plus multiples of 1 second
-    // todo: remove in case of offline capture??
     let mut first_packet_ticks = None;
 
     loop {
@@ -67,18 +66,16 @@ pub fn parse_packets(
             return;
         }
 
-        // todo: make ts not optional? remove in case of live capture??
-        let next_packet_timestamp = get_packet_timestamp_opt(&packet_res);
-
-        send_tick_run_maybe(
-            cap_id,
-            &mut info_traffic_msg,
-            &new_hosts_to_send,
-            &mut cs,
-            &mut first_packet_ticks,
-            next_packet_timestamp,
-            tx,
-        );
+        if matches!(cs, CaptureSource::Device(_)) {
+            maybe_send_tick_run_live(
+                cap_id,
+                &mut info_traffic_msg,
+                &new_hosts_to_send,
+                &mut cs,
+                &mut first_packet_ticks,
+                tx,
+            );
+        }
 
         match packet_res {
             Err(e) => {
@@ -104,15 +101,25 @@ pub fn parse_packets(
             }
             Ok(packet) => {
                 if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
-                    if first_packet_ticks.is_none() {
-                        first_packet_ticks = Some(Instant::now());
-                    }
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
                     let usecs = i64::from(packet.header.ts.tv_usec);
-                    // todo: check the two assignments of ts from packet!
-                    info_traffic_msg.last_packet_timestamp = Some(Timestamp::new(secs, usecs));
+                    let next_packet_timestamp = Timestamp::new(secs, usecs);
+
+                    if matches!(cs, CaptureSource::File(_)) {
+                        maybe_send_tick_run_offline(
+                            cap_id,
+                            &mut info_traffic_msg,
+                            &new_hosts_to_send,
+                            next_packet_timestamp,
+                            tx,
+                        );
+                    } else if first_packet_ticks.is_none() {
+                        first_packet_ticks = Some(Instant::now());
+                    }
+
+                    info_traffic_msg.last_packet_timestamp = next_packet_timestamp;
 
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
@@ -408,63 +415,51 @@ pub struct AddressesResolutionState {
     pub addresses_resolved: HashMap<IpAddr, Host>,
 }
 
-fn send_tick_run_maybe(
+fn maybe_send_tick_run_live(
     cap_id: usize,
     info_traffic_msg: &mut InfoTrafficMessage,
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     cs: &mut CaptureSource,
-    // todo: merge those two?
     first_packet_ticks: &mut Option<Instant>,
-    next_packet_timestamp: Option<Timestamp>,
     tx: &Sender<BackendTrafficMessage>,
 ) {
-    match cs {
-        CaptureSource::Device(_) => {
-            if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
-                *first_packet_ticks =
-                    first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
-                let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
-                    cap_id,
-                    info_traffic_msg.take_but_leave_timestamp(),
-                    new_hosts_to_send.lock().unwrap().drain(..).collect(),
-                ));
-                for dev in Device::list().log_err(location!()).unwrap_or_default() {
-                    if dev.name.eq(&cs.get_name()) {
-                        cs.set_addresses(dev.addresses);
-                        break;
-                    }
-                }
-            }
-        }
-        CaptureSource::File(_) => {
-            if let Some(next) = next_packet_timestamp {
-                let last_packet_timestamp =
-                    info_traffic_msg.last_packet_timestamp.unwrap_or_else(|| {
-                        info_traffic_msg.last_packet_timestamp = Some(next);
-                        next
-                    });
-                if last_packet_timestamp.secs() < next.secs() {
-                    let diff_secs = next.secs() - last_packet_timestamp.secs();
-                    for _ in 0..diff_secs {
-                        info_traffic_msg.last_packet_timestamp =
-                            Some(last_packet_timestamp.add_secs(1));
-                        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
-                            cap_id,
-                            info_traffic_msg.take_but_leave_timestamp(),
-                            new_hosts_to_send.lock().unwrap().drain(..).collect(),
-                        ));
-                    }
-                }
+    if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
+        *first_packet_ticks =
+            first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
+        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+            cap_id,
+            info_traffic_msg.take_but_leave_timestamp(),
+            new_hosts_to_send.lock().unwrap().drain(..).collect(),
+        ));
+        for dev in Device::list().log_err(location!()).unwrap_or_default() {
+            if dev.name.eq(&cs.get_name()) {
+                cs.set_addresses(dev.addresses);
+                break;
             }
         }
     }
 }
 
-fn get_packet_timestamp_opt(packet: &Result<Packet, Error>) -> Option<Timestamp> {
-    let Ok(packet) = packet else { return None };
-    #[allow(clippy::useless_conversion)]
-    let secs = i64::from(packet.header.ts.tv_sec);
-    #[allow(clippy::useless_conversion)]
-    let usecs = i64::from(packet.header.ts.tv_usec);
-    Some(Timestamp::new(secs, usecs))
+fn maybe_send_tick_run_offline(
+    cap_id: usize,
+    info_traffic_msg: &mut InfoTrafficMessage,
+    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
+    next_packet_timestamp: Timestamp,
+    tx: &Sender<BackendTrafficMessage>,
+) {
+    if info_traffic_msg.last_packet_timestamp == Timestamp::default() {
+        info_traffic_msg.last_packet_timestamp = next_packet_timestamp;
+    }
+    if info_traffic_msg.last_packet_timestamp.secs() < next_packet_timestamp.secs() {
+        let diff_secs =
+            next_packet_timestamp.secs() - info_traffic_msg.last_packet_timestamp.secs();
+        for _ in 0..diff_secs {
+            let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+                cap_id,
+                info_traffic_msg.take_but_leave_timestamp(),
+                new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            ));
+            info_traffic_msg.last_packet_timestamp.add_secs(1);
+        }
+    }
 }

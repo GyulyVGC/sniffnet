@@ -34,7 +34,7 @@ pub fn notify_and_log(
                     threshold: notifications.packets_notification.previous_threshold,
                     incoming: received_packets_entry.try_into().unwrap_or_default(),
                     outgoing: sent_packets_entry.try_into().unwrap_or_default(),
-                    timestamp: get_formatted_timestamp(timestamp.unwrap_or_default()),
+                    timestamp: get_formatted_timestamp(timestamp),
                 },
             ));
             if notifications.packets_notification.sound.ne(&Sound::None) {
@@ -62,7 +62,7 @@ pub fn notify_and_log(
                     threshold: notifications.bytes_notification.previous_threshold,
                     incoming: received_bytes_entry.try_into().unwrap_or_default(),
                     outgoing: sent_bytes_entry.try_into().unwrap_or_default(),
-                    timestamp: get_formatted_timestamp(timestamp.unwrap_or_default()),
+                    timestamp: get_formatted_timestamp(timestamp),
                 },
             ));
             if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
@@ -91,7 +91,7 @@ pub fn notify_and_log(
                 FavoriteTransmitted {
                     host,
                     data_info_host,
-                    timestamp: get_formatted_timestamp(timestamp.unwrap_or_default()),
+                    timestamp: get_formatted_timestamp(timestamp),
                 },
             ));
         }

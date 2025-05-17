@@ -19,11 +19,8 @@ impl Timestamp {
             .and_then(|x| x.checked_add(self.usecs))
     }
 
-    pub fn add_secs(self, secs: i64) -> Self {
-        Self {
-            secs: self.secs + secs,
-            usecs: self.usecs,
-        }
+    pub fn add_secs(&mut self, secs: i64) {
+        self.secs += secs;
     }
 }
 
