@@ -663,6 +663,7 @@ impl Sniffer {
             &mut self.logged_notifications,
             self.configs.settings.notifications,
             info_traffic,
+            &self.capture_source,
         );
         self.info_traffic.favorites_last_interval = HashSet::new();
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {

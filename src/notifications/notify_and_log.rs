@@ -1,4 +1,5 @@
 use crate::InfoTraffic;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
@@ -15,8 +16,9 @@ pub fn notify_and_log(
     logged_notifications: &mut VecDeque<LoggedNotification>,
     notifications: Notifications,
     info_traffic: &InfoTraffic,
+    cs: &CaptureSource,
 ) -> usize {
-    let mut already_emitted_sound = false;
+    let mut sound_to_play = Sound::None;
     let mut emitted_notifications = 0;
     let timestamp = info_traffic.last_packet_timestamp;
     // packets threshold
@@ -37,13 +39,8 @@ pub fn notify_and_log(
                     timestamp: get_formatted_timestamp(timestamp),
                 },
             ));
-            if notifications.packets_notification.sound.ne(&Sound::None) {
-                // emit sound
-                play(
-                    notifications.packets_notification.sound,
-                    notifications.volume,
-                );
-                already_emitted_sound = true;
+            if sound_to_play.eq(&Sound::None) {
+                sound_to_play = notifications.packets_notification.sound;
             }
         }
     }
@@ -65,10 +62,8 @@ pub fn notify_and_log(
                     timestamp: get_formatted_timestamp(timestamp),
                 },
             ));
-            if !already_emitted_sound && notifications.bytes_notification.sound.ne(&Sound::None) {
-                // emit sound
-                play(notifications.bytes_notification.sound, notifications.volume);
-                already_emitted_sound = true;
+            if sound_to_play.eq(&Sound::None) {
+                sound_to_play = notifications.bytes_notification.sound;
             }
         }
     }
@@ -95,13 +90,14 @@ pub fn notify_and_log(
                 },
             ));
         }
-        if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
-            // emit sound
-            play(
-                notifications.favorite_notification.sound,
-                notifications.volume,
-            );
+        if sound_to_play.eq(&Sound::None) {
+            sound_to_play = notifications.favorite_notification.sound;
         }
+    }
+
+    // don't play sound when importing data from pcap file
+    if matches!(cs, CaptureSource::Device(_)) {
+        play(sound_to_play, notifications.volume);
     }
 
     emitted_notifications
