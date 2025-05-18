@@ -50,7 +50,9 @@ pub fn handle_cli_args() -> Task<Message> {
     }
 
     if args.restore_default {
-        Configs::default().store();
+        if Configs::default().store().is_ok() {
+            println!("Restored default settings");
+        }
         std::process::exit(0);
     }
 

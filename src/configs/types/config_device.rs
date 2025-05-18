@@ -6,6 +6,7 @@ use crate::networking::types::my_device::MyDevice;
 use crate::utils::error_logger::{ErrorLogger, Location};
 #[cfg(not(test))]
 use crate::{SNIFFNET_LOWERCASE, location};
+use confy::ConfyError;
 use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
 
@@ -45,8 +46,8 @@ impl ConfigDevice {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) {
-        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
+    pub fn store(self) -> Result<(), ConfyError> {
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 
     pub fn to_my_device(&self) -> MyDevice {

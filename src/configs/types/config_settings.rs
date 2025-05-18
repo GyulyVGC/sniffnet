@@ -1,6 +1,7 @@
 //! Module defining the `ConfigSettings` struct, which allows to save and reload
 //! the application default configuration.
 
+use confy::ConfyError;
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -43,8 +44,8 @@ impl ConfigSettings {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) {
-        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
+    pub fn store(self) -> Result<(), ConfyError> {
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 }
 

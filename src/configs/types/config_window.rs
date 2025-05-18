@@ -2,6 +2,7 @@
 use crate::utils::error_logger::{ErrorLogger, Location};
 #[cfg(not(test))]
 use crate::{SNIFFNET_LOWERCASE, location};
+use confy::ConfyError;
 use iced::window::Position;
 use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
@@ -43,8 +44,8 @@ impl ConfigWindow {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) {
-        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
+    pub fn store(self) -> Result<(), ConfyError> {
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 
     pub fn thumbnail_size(factor: f64) -> SizeTuple {

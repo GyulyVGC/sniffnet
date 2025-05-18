@@ -449,7 +449,7 @@ impl Sniffer {
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
-                self.configs.clone().store();
+                let _ = self.configs.clone().store();
                 return window::close(self.id.unwrap_or_else(Id::unique));
             }
             Message::CopyIp(ip) => {
