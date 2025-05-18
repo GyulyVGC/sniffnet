@@ -129,8 +129,6 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
-    /// Temporary storage for thresholds while editing.
-    pub temp_thresholds: Option<(PacketsNotification, BytesNotification)>,
 }
 
 impl Sniffer {
@@ -176,7 +174,6 @@ impl Sniffer {
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
-            temp_thresholds: None,
         }
     }
 
@@ -346,17 +343,7 @@ impl Sniffer {
                 self.traffic_chart.change_language(language);
             }
             Message::UpdateNotificationSettings(notification, emit_sound) => {
-                // Don't update adjustments to thresholds immediately:
-                // that is, sound and toggling thresholds on/off should be applied immediately
-                // Threshold adjustments are saved in `self.temp_thresholds` and then applied
-                // after timeout, but for simplicity, this field is always updated to whatever the
-                // latest change has been.
-                self.update_sound(notification, emit_sound);
-                self.handle_toggled_threshold(notification);
-                if self.threshold_adjusted(notification) {
-                    self.timing_events.threshold_adjust_now();
-                }
-                self.update_temp_thresholds(notification);
+                self.update_notifications_settings(notification, emit_sound);
             }
             Message::ChangeVolume(volume) => {
                 play(Sound::Pop, volume);
@@ -654,27 +641,44 @@ impl Sniffer {
     /// Updates thresholds if they haven't been edited for a while
     fn update_thresholds(&mut self) {
         // Ignore if just edited
-        if let Some((packets_notification, bytes_notification)) = self.temp_thresholds {
-            if !self.timing_events.was_just_threshold_adjust() {
-                self.temp_thresholds = None;
+        if let Some(temp_thresholds) = self.timing_events.threshold_adjust_expired_take() {
+            // Apply the temporary thresholds to the actual config
+            self.configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification
+                .threshold = temp_thresholds.0.threshold;
+            self.configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .packets_notification
+                .previous_threshold = temp_thresholds.0.previous_threshold;
 
-                // Apply the temporary thresholds to the actual config
-                // For simplicity, overwrites the whole `packets_notification` and
-                // `bytes_notification` since these should be in sync except for
-                // the thresholds.
-                self.configs
-                    .lock()
-                    .unwrap()
-                    .settings
-                    .notifications
-                    .packets_notification = packets_notification;
-                self.configs
-                    .lock()
-                    .unwrap()
-                    .settings
-                    .notifications
-                    .bytes_notification = bytes_notification;
-            }
+            self.configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification
+                .threshold = temp_thresholds.1.threshold;
+            self.configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification
+                .byte_multiple = temp_thresholds.1.byte_multiple;
+            self.configs
+                .lock()
+                .unwrap()
+                .settings
+                .notifications
+                .bytes_notification
+                .previous_threshold = temp_thresholds.1.previous_threshold;
         }
     }
 
@@ -840,10 +844,51 @@ impl Sniffer {
         }
     }
 
-    fn update_sound(&self, notification: Notification, emit_sound: bool) {
-        if self.sound_updated(notification) {
-            let sound = match notification {
-                Notification::Packets(PacketsNotification { sound, .. }) => {
+    /// Don't update adjustments to thresholds immediately:
+    /// that is, sound and toggling thresholds on/off should be applied immediately
+    /// Threshold adjustments are saved in `self.timing_events.threshold_adjust` and then applied
+    /// after timeout
+    fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
+        let notifications = self.configs.lock().unwrap().settings.notifications;
+        let sound: Option<Sound> = match notification {
+            Notification::Packets(PacketsNotification {
+                threshold,
+                sound,
+                previous_threshold,
+            }) => {
+                let mut temp_thresholds = self.get_temp_thresholds();
+                // Check if adjustments have been made to thresholds
+                if temp_thresholds.0.threshold != threshold
+                    || temp_thresholds.0.previous_threshold != previous_threshold
+                {
+                    temp_thresholds.0 = PacketsNotification {
+                        threshold,
+                        sound,
+                        previous_threshold,
+                    };
+                    self.timing_events.threshold_adjust_now(temp_thresholds);
+                }
+                // If threshold is toggled, apply immediately
+                if threshold.is_some() != notifications.packets_notification.threshold.is_some() {
+                    self.configs
+                        .lock()
+                        .unwrap()
+                        .settings
+                        .notifications
+                        .packets_notification
+                        .threshold = threshold;
+                    self.configs
+                        .lock()
+                        .unwrap()
+                        .settings
+                        .notifications
+                        .packets_notification
+                        .previous_threshold = previous_threshold;
+                }
+                // If sound changed, update and return value for potential emission
+                if notifications.packets_notification.sound == sound {
+                    None
+                } else {
                     self.configs
                         .lock()
                         .unwrap()
@@ -851,9 +896,54 @@ impl Sniffer {
                         .notifications
                         .packets_notification
                         .sound = sound;
-                    sound
+                    Some(sound)
                 }
-                Notification::Bytes(BytesNotification { sound, .. }) => {
+            }
+            Notification::Bytes(BytesNotification {
+                threshold,
+                byte_multiple,
+                sound,
+                previous_threshold,
+            }) => {
+                let mut temp_thresholds = self.get_temp_thresholds();
+                if temp_thresholds.1.threshold != threshold
+                    || temp_thresholds.1.byte_multiple != byte_multiple
+                    || temp_thresholds.1.previous_threshold != previous_threshold
+                {
+                    temp_thresholds.1 = BytesNotification {
+                        threshold,
+                        byte_multiple,
+                        sound,
+                        previous_threshold,
+                    };
+                    self.timing_events.threshold_adjust_now(temp_thresholds);
+                }
+                if threshold.is_some() != notifications.bytes_notification.threshold.is_some() {
+                    self.configs
+                        .lock()
+                        .unwrap()
+                        .settings
+                        .notifications
+                        .bytes_notification
+                        .threshold = threshold;
+                    self.configs
+                        .lock()
+                        .unwrap()
+                        .settings
+                        .notifications
+                        .bytes_notification
+                        .byte_multiple = byte_multiple;
+                    self.configs
+                        .lock()
+                        .unwrap()
+                        .settings
+                        .notifications
+                        .bytes_notification
+                        .previous_threshold = previous_threshold;
+                }
+                if notifications.bytes_notification.sound == sound {
+                    None
+                } else {
                     self.configs
                         .lock()
                         .unwrap()
@@ -861,143 +951,43 @@ impl Sniffer {
                         .notifications
                         .bytes_notification
                         .sound = sound;
-                    sound
+                    Some(sound)
                 }
-                Notification::Favorite(favorite_notification) => {
+            }
+            Notification::Favorite(favorite_notification) => {
+                if notifications.favorite_notification.sound == favorite_notification.sound {
+                    None
+                } else {
                     self.configs
                         .lock()
                         .unwrap()
                         .settings
                         .notifications
                         .favorite_notification = favorite_notification;
-                    favorite_notification.sound
+                    Some(favorite_notification.sound)
                 }
-            };
+            }
+        };
+        if let Some(s) = sound {
             if emit_sound {
                 play(
-                    sound,
+                    s,
                     self.configs.lock().unwrap().settings.notifications.volume,
                 );
             }
         }
     }
 
-    /// If threshold has been toggled on/off, apply change
-    fn handle_toggled_threshold(&self, value: Notification) {
-        let notifications = self.configs.lock().unwrap().settings.notifications;
-        match value {
-            Notification::Packets(packets_notification) => {
-                // This indicates a toggle has taken place
-                if packets_notification.threshold.is_some()
-                    != notifications.packets_notification.threshold.is_some()
-                {
-                    self.configs
-                        .lock()
-                        .unwrap()
-                        .settings
-                        .notifications
-                        .packets_notification = packets_notification;
-                }
-            }
-            Notification::Bytes(bytes_notification) => {
-                if bytes_notification.threshold.is_some()
-                    != notifications.bytes_notification.threshold.is_some()
-                {
-                    self.configs
-                        .lock()
-                        .unwrap()
-                        .settings
-                        .notifications
-                        .bytes_notification = bytes_notification;
-                }
-            }
-            Notification::Favorite(favorite_notification) => {
-                // Could have a check here, but probably more convenient to just overwrite
-                self.configs
-                    .lock()
-                    .unwrap()
-                    .settings
-                    .notifications
-                    .favorite_notification = favorite_notification;
-            }
-        }
-    }
-
-    fn sound_updated(&self, value: Notification) -> bool {
-        let notifications = self.configs.lock().unwrap().settings.notifications;
-        match value {
-            Notification::Packets(packets_notification) => {
-                notifications.packets_notification.sound != packets_notification.sound
-            }
-            Notification::Bytes(bytes_notification) => {
-                notifications.bytes_notification.sound != bytes_notification.sound
-            }
-            Notification::Favorite(favorite_notification) => {
-                notifications.favorite_notification.sound != favorite_notification.sound
-            }
-        }
-    }
-
-    fn threshold_adjusted(&mut self, value: Notification) -> bool {
-        // Initialize temp_thresholds if it's None
-        let temp_thresholds = if let Some(temp_thresholds) = self.temp_thresholds {
+    /// Returns thresholds in `timing_events.threshold_adjust` or copy of current thresholds
+    fn get_temp_thresholds(&self) -> (PacketsNotification, BytesNotification) {
+        if let Some(temp_thresholds) = self.timing_events.temp_thresholds() {
             temp_thresholds
         } else {
             let notifications = self.configs.lock().unwrap().settings.notifications;
-            let temp_thresholds = (
+            (
                 notifications.packets_notification,
                 notifications.bytes_notification,
-            );
-            self.temp_thresholds = Some(temp_thresholds);
-            temp_thresholds
-        };
-
-        // Update the temporary thresholds
-        match value {
-            Notification::Packets(PacketsNotification { threshold, .. }) => {
-                if let (Some(new_threshold), Some(old_threshold)) =
-                    (threshold, temp_thresholds.0.threshold)
-                {
-                    return new_threshold != old_threshold;
-                }
-            }
-            Notification::Bytes(BytesNotification {
-                threshold,
-                byte_multiple,
-                ..
-            }) => {
-                if let (Some(new_threshold), Some(old_threshold)) =
-                    (threshold, temp_thresholds.1.threshold)
-                {
-                    return new_threshold != old_threshold;
-                }
-                return byte_multiple != temp_thresholds.1.byte_multiple;
-            }
-            Notification::Favorite(_) => (),
-        }
-        false
-    }
-
-    // Always keep `self.temp_thresholds` in sync with latest changes
-    fn update_temp_thresholds(&mut self, value: Notification) {
-        // Initialize temp_thresholds if it's None
-        if self.temp_thresholds.is_none() {
-            let notifications = self.configs.lock().unwrap().settings.notifications;
-            self.temp_thresholds = Some((
-                notifications.packets_notification,
-                notifications.bytes_notification,
-            ));
-        }
-
-        // Update the temporary thresholds
-        if let Some(ref mut temp_thresholds) = self.temp_thresholds {
-            match value {
-                Notification::Packets(packets_notification) => {
-                    temp_thresholds.0 = packets_notification;
-                }
-                Notification::Bytes(bytes_notification) => temp_thresholds.1 = bytes_notification,
-                Notification::Favorite(_) => (),
-            }
+            )
         }
     }
 
