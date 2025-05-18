@@ -104,10 +104,15 @@ impl TrafficChart {
     }
 
     fn x_axis_range(&self) -> Range<f32> {
+        // if we have only one tick, we need to add a second point to draw the area
+        if self.ticks == 1 {
+            return 0.0..0.1;
+        }
+
         let first_time_displayed = self.ticks.saturating_sub(30);
-        let tot_seconds = self.ticks - 1;
+        let last_time_displayed = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
-        let range = first_time_displayed as f32..tot_seconds as f32;
+        let range = first_time_displayed as f32..last_time_displayed as f32;
         range
     }
 
@@ -160,12 +165,17 @@ impl TrafficChart {
         direction: TrafficDirection,
     ) -> AreaSeries<DB, f32, f32> {
         let color = self.series_color(direction);
-        AreaSeries::new(
-            sample_spline(self.spline_to_plot(direction)),
-            0.0,
-            color.mix(self.style.get_extension().alpha_chart_badge.into()),
-        )
-        .border_style(ShapeStyle::from(&color).stroke_width(CHARTS_LINE_BORDER))
+        let alpha = self.style.get_extension().alpha_chart_badge;
+        let spline = self.spline_to_plot(direction);
+
+        let data = match spline.keys() {
+            // if we have only one tick, we need to add a second point to draw the area
+            [k] => vec![(0.0, k.value), (0.1, k.value)],
+            _ => sample_spline(spline),
+        };
+
+        AreaSeries::new(data, 0.0, color.mix(alpha.into()))
+            .border_style(ShapeStyle::from(&color).stroke_width(CHARTS_LINE_BORDER))
     }
 }
 
@@ -188,8 +198,11 @@ impl Chart<Message> for TrafficChart {
         let x_axis_end = x_axis_range.end;
         let y_axis_range = self.y_axis_range();
 
-        let x_labels = if self.ticks == 1 || self.thumbnail {
+        let x_labels = if self.thumbnail {
             0
+        } else if self.ticks == 1 {
+            // if we have only one tick, we need to add a second point to draw the area
+            2
         } else {
             self.ticks as usize
         };
