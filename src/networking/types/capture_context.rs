@@ -118,13 +118,14 @@ impl CaptureType {
                 let inactive = Capture::from_device(device.to_pcap_device())?;
                 let cap = inactive
                     .promisc(true)
+                    .buffer_size(2_000_000) // 2MB buffer
                     .snaplen(if pcap_out_path.is_some() {
                         i32::from(u16::MAX)
                     } else {
-                        256 //limit stored packets slice dimension (to keep more in the buffer)
+                        200 // limit stored packets slice dimension (to keep more in the buffer)
                     })
-                    .immediate_mode(true) //parse packets ASAP!
-                    .timeout(150) // to ensure UI is updated even if no packets are captured
+                    .immediate_mode(true) // parse packets ASAP
+                    .timeout(150) // ensure UI is updated even if no packets are captured
                     .open()?;
                 Ok(Self::Live(cap))
             }
