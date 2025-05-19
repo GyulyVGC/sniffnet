@@ -2,7 +2,6 @@
 use crate::utils::error_logger::{ErrorLogger, Location};
 #[cfg(not(test))]
 use crate::{SNIFFNET_LOWERCASE, location};
-use confy::ConfyError;
 use iced::window::Position;
 use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
@@ -44,7 +43,7 @@ impl ConfigWindow {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) -> Result<(), ConfyError> {
+    pub fn store(self) -> Result<(), confy::ConfyError> {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 
@@ -158,8 +157,8 @@ mod tests {
                 .unwrap_or_else(|_| ConfigWindow::default())
         }
 
-        pub fn store(self) {
-            confy::store_path(ConfigWindow::test_path(), self).unwrap_or(());
+        pub fn store(self) -> Result<(), confy::ConfyError> {
+            confy::store_path(ConfigWindow::test_path(), self)
         }
     }
 }

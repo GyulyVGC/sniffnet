@@ -1,7 +1,6 @@
 //! Module defining the `ConfigSettings` struct, which allows to save and reload
 //! the application default configuration.
 
-use confy::ConfyError;
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -44,7 +43,7 @@ impl ConfigSettings {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) -> Result<(), ConfyError> {
+    pub fn store(self) -> Result<(), confy::ConfyError> {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 }
@@ -78,8 +77,8 @@ mod tests {
                 .unwrap_or_else(|_| ConfigSettings::default())
         }
 
-        pub fn store(self) {
-            confy::store_path(ConfigSettings::test_path(), self).unwrap_or(());
+        pub fn store(self) -> Result<(), confy::ConfyError> {
+            confy::store_path(ConfigSettings::test_path(), self)
         }
     }
 }

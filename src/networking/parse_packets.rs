@@ -5,8 +5,8 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
-    modify_or_insert_in_map,
+    analyze_headers, analyze_network_header, get_address_to_lookup, get_traffic_type,
+    is_local_connection, modify_or_insert_in_map,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
@@ -18,6 +18,7 @@ use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::ip_version::IpVersion;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -30,8 +31,8 @@ use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
 use etherparse::{LaxPacketHeaders, LenSource};
 use pcap::{Address, Device, Packet};
-use std::collections::HashMap;
-use std::net::IpAddr;
+use std::collections::{HashMap, HashSet};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -464,4 +465,85 @@ fn maybe_send_tick_run_offline(
             info_traffic_msg.last_packet_timestamp.add_secs(1);
         }
     }
+}
+
+pub fn set_pcap_capture_addresses(cs: &mut CaptureSource) {
+    if matches!(cs, CaptureSource::Device(_)) {
+        return;
+    }
+    // todo: handle errors in ctx creation!
+    let ctx = CaptureContext::new(cs, None);
+    let my_link_type = ctx.my_link_type();
+    let (mut cap, _) = ctx.consume();
+
+    let mut my_addresses = HashSet::new();
+
+    loop {
+        match cap.next_packet() {
+            Err(e) => {
+                if e == pcap::Error::NoMorePackets {
+                    break;
+                }
+            }
+            Ok(packet) => {
+                if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
+                    let mut source = IpAddr::V4(Ipv4Addr::UNSPECIFIED);
+                    let mut dest = IpAddr::V4(Ipv4Addr::UNSPECIFIED);
+                    if !analyze_network_header(
+                        headers.net,
+                        &mut 0,
+                        &mut IpVersion::IPv4,
+                        &mut source,
+                        &mut dest,
+                        &mut ArpType::Unknown,
+                    ) {
+                        continue;
+                    }
+
+                    match (is_bogon(&source), is_bogon(&dest)) {
+                        (Some(_), None) => {
+                            my_addresses.insert(source);
+                        }
+                        (None, Some(_)) => {
+                            my_addresses.insert(dest);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+    }
+
+    let addresses: Vec<Address> = my_addresses
+        .into_iter()
+        .map(|addr| {
+            let netmask = if addr.is_ipv4() {
+                Some(IpAddr::V4(Ipv4Addr::from([255, 255, 255, 0])))
+            } else {
+                Some(IpAddr::V6(Ipv6Addr::from([
+                    255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0,
+                ])))
+            };
+            let mut broadcast_addr = None;
+            if let IpAddr::V4(ip_v4) = addr {
+                let broadcast_vec = [255_u8, 255, 255, 0].iter().zip(ip_v4.octets()).fold(
+                    Vec::new(),
+                    |mut acc, (n, i)| {
+                        acc.push(!n | i);
+                        acc
+                    },
+                );
+                let broadcast_res = TryInto::<[u8; 4]>::try_into(broadcast_vec);
+                broadcast_addr = broadcast_res.ok().map(IpAddr::from);
+            }
+            Address {
+                addr,
+                netmask,
+                broadcast_addr,
+                dst_addr: None,
+            }
+        })
+        .collect();
+
+    cs.set_addresses(addresses);
 }

@@ -63,6 +63,7 @@ impl CaptureContext {
             Self::Live(on) => (CaptureType::Live(on.cap), None),
             Self::LiveWithSavefile(onws) => (CaptureType::Live(onws.live.cap), Some(onws.savefile)),
             Self::Offline(off) => (CaptureType::Offline(off.cap), None),
+            // todo!!
             Self::Error(_) => panic!(),
         }
     }
@@ -156,8 +157,10 @@ impl CaptureSource {
     }
 
     pub fn set_addresses(&mut self, addresses: Vec<Address>) {
-        if let Self::Device(device) = self {
-            device.set_addresses(addresses);
+        match self {
+            Self::Device(device) => device.set_addresses(addresses),
+            // todo: we're also setting addresses for files??
+            Self::File(file) => file.addresses = addresses,
         }
     }
 
@@ -195,7 +198,7 @@ impl CaptureSource {
 pub struct MyPcapImport {
     path: String,
     link_type: MyLinkType,
-    addresses: Vec<Address>, // this is always empty!
+    addresses: Vec<Address>, // todo: this is always empty??
 }
 
 impl MyPcapImport {
