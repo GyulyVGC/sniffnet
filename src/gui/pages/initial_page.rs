@@ -304,34 +304,40 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
 
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {
-        let mut dev_str = String::new();
+        let mut title = String::new();
+        let mut subtitle = None;
         let name = my_dev.get_name();
         match my_dev.get_desc() {
             None => {
-                dev_str.push_str(name);
+                title.push_str(name);
             }
             Some(description) => {
                 #[cfg(not(target_os = "windows"))]
-                let _ = writeln!(dev_str, "{name}");
-                dev_str.push_str(description);
+                {
+                    let _ = writeln!(title, "{name}");
+                    subtitle = Some(description);
+                }
+                #[cfg(target_os = "windows")]
+                title.push_str(&description);
             }
         }
+        let mut addrs_str = String::new();
         let num_addresses = my_dev.get_addresses().len();
         match num_addresses {
             0 => {}
             1 => {
-                let _ = write!(dev_str, "\n{}:", address_translation(language));
+                let _ = write!(addrs_str, "{}:", address_translation(language));
             }
             _ => {
-                let _ = write!(dev_str, "\n{}:", addresses_translation(language));
+                let _ = write!(addrs_str, "{}:", addresses_translation(language));
             }
         }
 
         for addr in my_dev.get_addresses() {
             let address_string = addr.addr.to_string();
-            let _ = write!(dev_str, "\n   {address_string}");
+            let _ = write!(addrs_str, "\n   {address_string}");
         }
-        dev_str_list.push((name, dev_str));
+        dev_str_list.push((name, title, subtitle, addrs_str));
     }
 
     Column::new()
@@ -351,27 +357,41 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
             ))
         } else {
             Scrollable::with_direction(
-                dev_str_list.iter().fold(
+                dev_str_list.into_iter().fold(
                     Column::new().padding(13).spacing(5),
-                    |scroll_adapters, adapter| {
-                        let name = adapter.0.clone();
-                        let description = adapter.1.clone();
+                    |scroll_adapters, (name, title, subtitle, addrs)| {
+                        let addrs_text = if addrs.is_empty() {
+                            None
+                        } else {
+                            Some(Text::new(addrs).font(font))
+                        };
                         scroll_adapters.push(
-                            Button::new(Text::new(description).font(font))
-                                .padding([20, 30])
-                                .width(Length::Fill)
-                                .class(
-                                    if let CaptureSource::Device(device) = &sniffer.capture_source {
-                                        if &name == device.get_name() {
-                                            ButtonType::BorderedRoundSelected
-                                        } else {
-                                            ButtonType::BorderedRound
-                                        }
+                            Button::new(
+                                Column::new()
+                                    .spacing(5)
+                                    .push(
+                                        Text::new(title)
+                                            .font(font)
+                                            .class(TextType::Subtitle)
+                                            .size(FONT_SIZE_SUBTITLE),
+                                    )
+                                    .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
+                                    .push_maybe(addrs_text),
+                            )
+                            .padding([20, 30])
+                            .width(Length::Fill)
+                            .class(
+                                if let CaptureSource::Device(device) = &sniffer.capture_source {
+                                    if name == device.get_name() {
+                                        ButtonType::BorderedRoundSelected
                                     } else {
                                         ButtonType::BorderedRound
-                                    },
-                                )
-                                .on_press(Message::DeviceSelection(name)),
+                                    }
+                                } else {
+                                    ButtonType::BorderedRound
+                                },
+                            )
+                            .on_press(Message::DeviceSelection(name.to_string())),
                         )
                     },
                 ),
