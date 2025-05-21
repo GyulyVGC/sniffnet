@@ -49,12 +49,12 @@ serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
 toml = "0.8.22"
-ctrlc = { version = "3.4.6", features = ["termination"] }
+ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.3"
 phf = "0.11.3"
 phf_shared = "0.11.3"
 splines = "4.4.2"
-clap = { version = "4.5.37", features = ["derive"] }
+clap = { version = "4.5.38", features = ["derive"] }
 tokio = { version = "1.44.2", features = ["macros"] }
 async-channel = "2.3.1"
 
