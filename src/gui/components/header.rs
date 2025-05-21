@@ -26,7 +26,7 @@ pub fn header(sniffer: &Sniffer) -> Container<Message, StyleType> {
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
     if thumbnail {

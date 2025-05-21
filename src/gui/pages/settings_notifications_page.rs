@@ -32,7 +32,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         color_gradient,
         mut notifications,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

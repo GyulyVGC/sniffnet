@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 use etherparse::ArpOperation;
 use std::fmt::Write;
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub enum ArpType {
     Request,
     Reply,

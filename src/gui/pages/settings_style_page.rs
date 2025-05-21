@@ -34,7 +34,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         color_gradient,
         style_path,
         ..
-    } = sniffer.configs.lock().unwrap().settings.clone();
+    } = sniffer.configs.settings.clone();
     let PaletteExtension {
         font, font_headers, ..
     } = style.get_extension();
@@ -89,7 +89,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         styles_col = styles_col.push(children);
     }
     styles_col = styles_col
-        .push(lazy((style_path.clone(), style), move |_| {
+        .push(lazy((language, style_path.clone(), style), move |_| {
             lazy_custom_style_input(language, font, &style_path, style)
         }))
         .push(Space::with_height(10));

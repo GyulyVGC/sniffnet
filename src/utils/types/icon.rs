@@ -108,10 +108,9 @@ impl Icon {
 
     pub fn get_hourglass<'a>(num: usize) -> Text<'a, StyleType> {
         match num {
-            1 => Icon::Hourglass1.to_text(),
             2 => Icon::Hourglass2.to_text(),
             3 => Icon::Hourglass3.to_text(),
-            _ => Text::new(""),
+            _ => Icon::Hourglass1.to_text(),
         }
     }
 }

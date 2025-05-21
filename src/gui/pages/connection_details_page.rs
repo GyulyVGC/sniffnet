@@ -1,11 +1,5 @@
 use std::net::IpAddr;
 
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::widget::{Rule, Scrollable, button, horizontal_space, lazy, vertical_space};
-use iced::{Alignment, Font, Length, Padding};
-
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
@@ -40,19 +34,18 @@ use crate::translations::translations_3::{
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use iced::alignment::Vertical;
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{Column, Container, Row, Text, Tooltip};
+use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
+use iced::{Alignment, Font, Length, Padding};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
     key: AddressPortPair,
 ) -> Container<Message, StyleType> {
-    Container::new(lazy(
-        (
-            sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets,
-            sniffer.timing_events.was_just_copy_ip(&key.address1),
-            sniffer.timing_events.was_just_copy_ip(&key.address2),
-        ),
-        move |_| page_content(sniffer, &key),
-    ))
+    Container::new(page_content(sniffer, &key))
 }
 
 fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
@@ -61,26 +54,22 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
-    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    let val = info_traffic_lock
+    let info_traffic = &sniffer.info_traffic;
+    let val = info_traffic
         .map
         .get(key)
         .unwrap_or(&InfoAddressPortPair::default())
         .clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
-    let host_option = info_traffic_lock
-        .addresses_resolved
-        .get(&address_to_lookup)
-        .cloned();
-    let host_info_option = info_traffic_lock
+    let host_option = sniffer.addresses_resolved.get(&address_to_lookup).cloned();
+    let host_info_option = info_traffic
         .hosts
         .get(&host_option.clone().unwrap_or_default().1)
         .copied();
-    drop(info_traffic_lock);
 
     let header_and_content = Column::new().width(Length::Fill).push(page_header(
         font,
@@ -195,14 +184,18 @@ fn col_info<'a>(
         .width(Length::FillPortion(2))
         .push(vertical_space())
         .push(
-            Row::new().spacing(5).push(Icon::Clock.to_text()).push(
-                Text::new(format!(
-                    "{} - {}",
-                    get_formatted_timestamp(val.initial_timestamp),
-                    get_formatted_timestamp(val.final_timestamp)
-                ))
-                .font(font),
-            ),
+            Row::new()
+                .spacing(8)
+                .align_y(Vertical::Center)
+                .push(Icon::Clock.to_text())
+                .push(
+                    Text::new(format!(
+                        "{}\n{}",
+                        get_formatted_timestamp(val.initial_timestamp),
+                        get_formatted_timestamp(val.final_timestamp)
+                    ))
+                    .font(font),
+                ),
         )
         .push(TextType::highlighted_subtitle_with_desc(
             protocol_translation(language),
@@ -304,14 +297,14 @@ fn get_local_tooltip<'a>(
 ) -> Tooltip<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
 
     let local_address = if address_to_lookup.eq(&key.address1) {
         &key.address2
     } else {
         &key.address1
     };
-    let my_interface_addresses = &*sniffer.device.addresses.lock().unwrap();
+    let my_interface_addresses = sniffer.capture_source.get_addresses();
     get_computer_tooltip(
         is_my_address(local_address, my_interface_addresses),
         is_local_connection(local_address, my_interface_addresses),

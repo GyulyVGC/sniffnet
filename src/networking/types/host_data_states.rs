@@ -1,6 +1,5 @@
 use std::collections::BTreeSet;
 use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
 
 use iced::widget::combo_box;
 
@@ -13,14 +12,14 @@ use crate::report::types::search_parameters::SearchParameters;
 /// It also stores combobox states for the host-related filters
 #[derive(Default)]
 pub struct HostDataStates {
-    pub data: Arc<Mutex<HostData>>,
+    pub data: HostData,
     pub states: HostStates,
 }
 
 impl HostDataStates {
     pub fn update_states(&mut self, search: &SearchParameters) {
         let states = &mut self.states;
-        let mut data = self.data.lock().unwrap();
+        let data = &mut self.data;
 
         if data.domains.1 {
             states.domains = combo_box::State::with_selection(

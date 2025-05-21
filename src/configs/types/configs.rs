@@ -1,4 +1,5 @@
 use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
+use confy::ConfyError;
 
 pub static CONFIGS: std::sync::LazyLock<Configs> = std::sync::LazyLock::new(Configs::load);
 
@@ -20,9 +21,10 @@ impl Configs {
         }
     }
 
-    pub fn store(self) {
-        self.settings.store();
-        self.device.store();
-        self.window.store();
+    pub fn store(self) -> Result<(), ConfyError> {
+        self.settings.store()?;
+        self.device.store()?;
+        self.window.store()?;
+        Ok(())
     }
 }

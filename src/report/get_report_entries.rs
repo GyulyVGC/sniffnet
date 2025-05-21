@@ -1,5 +1,4 @@
 use std::cmp::min;
-use std::sync::Mutex;
 
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -17,15 +16,15 @@ pub fn get_searched_entries(
     sniffer: &Sniffer,
 ) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize, DataInfo) {
     let mut agglomerate = DataInfo::default();
-    let info_traffic_lock = sniffer.info_traffic.lock().unwrap();
-    let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic_lock
+    let info_traffic = &sniffer.info_traffic;
+    let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic
         .map
         .iter()
         .filter(|(key, value)| {
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
-            let r_dns_host = info_traffic_lock.addresses_resolved.get(address_to_lookup);
+            let r_dns_host = sniffer.addresses_resolved.get(address_to_lookup);
             let is_favorite = if let Some(e) = r_dns_host {
-                info_traffic_lock
+                info_traffic
                     .hosts
                     .get(&e.1)
                     .unwrap_or(&DataInfoHost::default())
@@ -82,12 +81,11 @@ pub fn get_searched_entries(
 }
 
 pub fn get_host_entries(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
-    let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic_lock.hosts.iter().collect();
+    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, chart_type));
 
@@ -99,12 +97,11 @@ pub fn get_host_entries(
 }
 
 pub fn get_service_entries(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {
-    let info_traffic_lock = info_traffic.lock().unwrap();
-    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic_lock
+    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
         .services
         .iter()
         .filter(|(service, _)| service != &&Service::NotApplicable)

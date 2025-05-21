@@ -1,7 +1,5 @@
 //! GUI bottom footer
 
-use std::sync::Mutex;
-
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
@@ -29,7 +27,8 @@ pub fn footer<'a>(
     color_gradient: GradientType,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Mutex<Option<bool>>,
+    newer_release_available: Option<bool>,
+    pulse: u8,
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
@@ -37,6 +36,12 @@ pub fn footer<'a>(
 
     let release_details_row =
         get_release_details(language, font, font_footer, newer_release_available);
+
+    let heart_size = match pulse {
+        1 => 17.0,
+        2 => 20.0,
+        _ => 14.0,
+    };
 
     let footer_row = Row::new()
         .spacing(10)
@@ -50,18 +55,36 @@ pub fn footer<'a>(
         .push(get_button_sponsor(font))
         .push(
             Column::new()
-                .push(
-                    rich_text![
-                        "Made with ❤ by ",
-                        span("Giuliano Bellini")
-                            .underline(true)
-                            .link(Message::OpenWebPage(WebPage::MyGitHub)),
-                    ]
-                    .size(FONT_SIZE_FOOTER)
-                    .font(font_footer),
-                )
                 .width(Length::Fill)
-                .align_x(Alignment::End),
+                .align_x(Alignment::End)
+                .push(
+                    Row::new()
+                        .height(Length::Fill)
+                        .align_y(Alignment::Center)
+                        .push(
+                            Text::new("Made with")
+                                .size(FONT_SIZE_FOOTER)
+                                .font(font_footer),
+                        )
+                        .push(
+                            Text::new("❤")
+                                .size(heart_size)
+                                .font(font_footer)
+                                .width(25)
+                                .align_x(Alignment::Center)
+                                .align_y(Alignment::Center),
+                        )
+                        .push(Text::new("by ").size(FONT_SIZE_FOOTER).font(font_footer))
+                        .push(
+                            rich_text![
+                                span("Giuliano Bellini")
+                                    .underline(true)
+                                    .link(Message::OpenWebPage(WebPage::MyGitHub)),
+                            ]
+                            .size(FONT_SIZE_FOOTER)
+                            .font(font_footer),
+                        ),
+                ),
         );
 
     Container::new(footer_row)
@@ -188,7 +211,7 @@ fn get_release_details<'a>(
     language: Language,
     font: Font,
     font_footer: Font,
-    newer_release_available: &Mutex<Option<bool>>,
+    newer_release_available: Option<bool>,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
@@ -199,7 +222,7 @@ fn get_release_details<'a>(
                 .size(FONT_SIZE_FOOTER)
                 .font(font_footer),
         );
-    if let Some(boolean_response) = *newer_release_available.lock().unwrap() {
+    if let Some(boolean_response) = newer_release_available {
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(

@@ -61,6 +61,11 @@ static TEST_NET_3: std::sync::LazyLock<Bogon> = std::sync::LazyLock::new(|| Bogo
     description: "TEST-NET-3",
 });
 
+static MULTICAST: std::sync::LazyLock<Bogon> = std::sync::LazyLock::new(|| Bogon {
+    range: AddressCollection::new("224.0.0.0-239.255.255.255").unwrap(),
+    description: "multicast",
+});
+
 static FUTURE_USE: std::sync::LazyLock<Bogon> = std::sync::LazyLock::new(|| Bogon {
     range: AddressCollection::new("240.0.0.0-255.255.255.255").unwrap(),
     description: "future use",
@@ -121,6 +126,11 @@ static SITE_LOCAL_UNICAST: std::sync::LazyLock<Bogon> = std::sync::LazyLock::new
     description: "site-local unicast",
 });
 
+static MULTICAST_V6: std::sync::LazyLock<Bogon> = std::sync::LazyLock::new(|| Bogon {
+    range: AddressCollection::new("ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff").unwrap(),
+    description: "multicast v6",
+});
+
 // all bogons
 
 static BOGONS: std::sync::LazyLock<Vec<&'static Bogon>> = std::sync::LazyLock::new(|| {
@@ -135,6 +145,7 @@ static BOGONS: std::sync::LazyLock<Vec<&'static Bogon>> = std::sync::LazyLock::n
         &NETWORK_INTERCONNECT,
         &TEST_NET_2,
         &TEST_NET_3,
+        &MULTICAST,
         &FUTURE_USE,
         &NODE_SCOPE_UNSPECIFIED,
         &NODE_SCOPE_LOOPBACK,
@@ -146,6 +157,7 @@ static BOGONS: std::sync::LazyLock<Vec<&'static Bogon>> = std::sync::LazyLock::n
         &ULA,
         &LINK_LOCAL_UNICAST,
         &SITE_LOCAL_UNICAST,
+        &MULTICAST_V6,
     ]
 });
 
@@ -261,6 +273,14 @@ mod tests {
     }
 
     #[test]
+    fn test_is_bogon_multicast() {
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("224.12.13.255").unwrap()),
+            Some("multicast")
+        );
+    }
+
+    #[test]
     fn test_is_bogon_future_use() {
         assert_eq!(
             is_bogon(&IpAddr::from_str("240.0.0.0").unwrap()),
@@ -346,6 +366,14 @@ mod tests {
         assert_eq!(
             is_bogon(&IpAddr::from_str("feea::1").unwrap()),
             Some("site-local unicast")
+        );
+    }
+
+    #[test]
+    fn test_is_bogon_multicast_v6() {
+        assert_eq!(
+            is_bogon(&IpAddr::from_str("ff02::1").unwrap()),
+            Some("multicast v6")
         );
     }
 }
