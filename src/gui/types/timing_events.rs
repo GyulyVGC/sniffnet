@@ -27,7 +27,7 @@ impl TimingEvents {
     const TIMEOUT_THUMBNAIL_ENTER: u64 = 1000;
     const TIMEOUT_THUMBNAIL_CLICK: u64 = 800;
     #[cfg(not(test))]
-    const TIMEOUT_THRESHOLD_ADJUST: u64 = 3000;
+    const TIMEOUT_THRESHOLD_ADJUST: u64 = 2000;
     #[cfg(test)]
     pub const TIMEOUT_THRESHOLD_ADJUST: u64 = 100;
 

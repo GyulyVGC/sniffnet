@@ -850,7 +850,7 @@ impl Sniffer {
     /// after timeout
     fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
         let notifications = self.configs.lock().unwrap().settings.notifications;
-        let sound: Option<Sound> = match notification {
+        let sound = match notification {
             Notification::Packets(PacketsNotification {
                 threshold,
                 sound,
@@ -885,19 +885,15 @@ impl Sniffer {
                         .packets_notification
                         .previous_threshold = previous_threshold;
                 }
-                // If sound changed, update and return value for potential emission
-                if notifications.packets_notification.sound == sound {
-                    None
-                } else {
-                    self.configs
-                        .lock()
-                        .unwrap()
-                        .settings
-                        .notifications
-                        .packets_notification
-                        .sound = sound;
-                    Some(sound)
-                }
+                // always update sound
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .packets_notification
+                    .sound = sound;
+                sound
             }
             Notification::Bytes(BytesNotification {
                 threshold,
@@ -941,40 +937,30 @@ impl Sniffer {
                         .bytes_notification
                         .previous_threshold = previous_threshold;
                 }
-                if notifications.bytes_notification.sound == sound {
-                    None
-                } else {
-                    self.configs
-                        .lock()
-                        .unwrap()
-                        .settings
-                        .notifications
-                        .bytes_notification
-                        .sound = sound;
-                    Some(sound)
-                }
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .bytes_notification
+                    .sound = sound;
+                sound
             }
             Notification::Favorite(favorite_notification) => {
-                if notifications.favorite_notification.sound == favorite_notification.sound {
-                    None
-                } else {
-                    self.configs
-                        .lock()
-                        .unwrap()
-                        .settings
-                        .notifications
-                        .favorite_notification = favorite_notification;
-                    Some(favorite_notification.sound)
-                }
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .favorite_notification = favorite_notification;
+                favorite_notification.sound
             }
         };
-        if let Some(s) = sound {
-            if emit_sound {
-                play(
-                    s,
-                    self.configs.lock().unwrap().settings.notifications.volume,
-                );
-            }
+        if emit_sound {
+            play(
+                sound,
+                self.configs.lock().unwrap().settings.notifications.volume,
+            );
         }
     }
 
