@@ -2,6 +2,8 @@ use std::net::{IpAddr, Ipv4Addr};
 use std::ops::Sub;
 use std::time::Duration;
 
+use crate::notifications::types::notifications::{BytesNotification, PacketsNotification};
+
 pub struct TimingEvents {
     /// Instant of the last window focus
     focus: std::time::Instant,
@@ -11,6 +13,12 @@ pub struct TimingEvents {
     thumbnail_enter: std::time::Instant,
     /// Instant of the last click on the thumbnail window
     thumbnail_click: std::time::Instant,
+    /// Instant of the last adjust of notifications settings thresholds and storage of these
+    /// thresholds while editing
+    threshold_adjust: (
+        std::time::Instant,
+        Option<(PacketsNotification, BytesNotification)>,
+    ),
 }
 
 impl TimingEvents {
@@ -18,6 +26,10 @@ impl TimingEvents {
     const TIMEOUT_COPY_IP: u64 = 1500;
     const TIMEOUT_THUMBNAIL_ENTER: u64 = 1000;
     const TIMEOUT_THUMBNAIL_CLICK: u64 = 800;
+    #[cfg(not(test))]
+    const TIMEOUT_THRESHOLD_ADJUST: u64 = 2000;
+    #[cfg(test)]
+    pub const TIMEOUT_THRESHOLD_ADJUST: u64 = 100;
 
     pub fn focus_now(&mut self) {
         self.focus = std::time::Instant::now();
@@ -53,6 +65,31 @@ impl TimingEvents {
         self.thumbnail_click.elapsed()
             < Duration::from_millis(TimingEvents::TIMEOUT_THUMBNAIL_CLICK)
     }
+
+    pub fn threshold_adjust_now(
+        &mut self,
+        temp_thresholds: (PacketsNotification, BytesNotification),
+    ) {
+        self.threshold_adjust.0 = std::time::Instant::now();
+        self.threshold_adjust.1 = Some(temp_thresholds);
+    }
+
+    /// If timeout has expired, take temporary thresholds
+    pub fn threshold_adjust_expired_take(
+        &mut self,
+    ) -> Option<(PacketsNotification, BytesNotification)> {
+        if self.threshold_adjust.0.elapsed()
+            > Duration::from_millis(TimingEvents::TIMEOUT_THRESHOLD_ADJUST)
+        {
+            self.threshold_adjust.1.take()
+        } else {
+            None
+        }
+    }
+
+    pub fn temp_thresholds(&self) -> Option<(PacketsNotification, BytesNotification)> {
+        self.threshold_adjust.1
+    }
 }
 
 impl Default for TimingEvents {
@@ -62,6 +99,7 @@ impl Default for TimingEvents {
             copy_ip: (std::time::Instant::now(), IpAddr::V4(Ipv4Addr::UNSPECIFIED)),
             thumbnail_enter: std::time::Instant::now(),
             thumbnail_click: std::time::Instant::now(),
+            threshold_adjust: (std::time::Instant::now(), None),
         }
     }
 }
