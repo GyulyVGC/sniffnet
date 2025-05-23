@@ -3,6 +3,8 @@
 
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::collections::HashSet;
+use std::net::IpAddr;
 
 use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
 use etherparse::err::{Layer, LenError};
@@ -25,7 +27,7 @@ use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::utils::error_logger::{ErrorLogger, Location};
-use crate::{InfoTraffic, location};
+use crate::{InfoTraffic, location, Configs};
 
 /// The calling thread enters a loop in which it waits for network packets, parses them according
 /// to the user specified filters, and inserts them into the shared map variable.
@@ -37,11 +39,20 @@ pub fn parse_packets(
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
     host_data: &Arc<Mutex<HostData>>,
+    configs: &Arc<Mutex<Configs>>,
 ) {
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
 
     let capture_id = *current_capture_id.lock().unwrap();
+    
+    // Cache the blacklist IPs to avoid locking configs mutex for every packet
+    let blacklist_ips: Option<Arc<HashSet<IpAddr>>> = configs
+        .lock()
+        .unwrap()
+        .blacklist
+        .loaded_ips
+        .clone();
 
     loop {
         match cap.next_packet() {
@@ -74,6 +85,13 @@ pub fn parse_packets(
                         continue;
                     };
 
+                    // Perform blacklist check using cached reference
+                    let connection_is_blacklisted = blacklist_ips
+                        .as_ref()
+                        .map_or(false, |ips| {
+                            ips.contains(&key.address1) || ips.contains(&key.address2)
+                        });
+
                     let mut new_info = InfoAddressPortPair::default();
 
                     let passed_filters = filters.matches(&packet_filters_fields);
@@ -91,6 +109,7 @@ pub fn parse_packets(
                             icmp_type,
                             arp_type,
                             exchanged_bytes,
+                            connection_is_blacklisted,
                         );
                     }
 
@@ -139,8 +158,12 @@ pub fn parse_packets(
                                 let device2 = device.clone();
                                 let mmdb_readers_2 = mmdb_readers.clone();
                                 let host_data2 = host_data.clone();
+                                let configs_2 = configs.clone();
                                 let _ = thread::Builder::new()
-                                    .name("thread_reverse_dns_lookup".to_string())
+                                    .name(format!(
+                                        "thread_reverse_dns_lookup_{}",
+                                        address_to_lookup
+                                    ))
                                     .spawn(move || {
                                         reverse_dns_lookup(
                                             &info_traffic2,
@@ -149,6 +172,7 @@ pub fn parse_packets(
                                             &device2,
                                             &mmdb_readers_2,
                                             &host_data2,
+                                            &configs_2,
                                         );
                                     })
                                     .log_err(location!());

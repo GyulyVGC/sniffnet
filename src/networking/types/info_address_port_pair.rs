@@ -35,4 +35,6 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+    /// Indicates if either the source or destination IP is in the blacklist
+    pub is_blacklisted: bool,
 }

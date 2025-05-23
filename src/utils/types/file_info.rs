@@ -8,6 +8,7 @@ pub enum FileInfo {
     Style,
     Database,
     Directory,
+    IpBlacklist,
 }
 
 impl FileInfo {
@@ -15,6 +16,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => "toml",
             FileInfo::Database => "mmdb",
+            FileInfo::IpBlacklist => "txt",
             FileInfo::Directory => "",
         }
     }
@@ -23,6 +25,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => style_from_file_translation(language),
             FileInfo::Database => database_from_file_translation(language),
+            FileInfo::IpBlacklist => "Import IP Blacklist",
             FileInfo::Directory => select_directory_translation(language),
         }
     }

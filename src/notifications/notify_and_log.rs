@@ -5,11 +5,47 @@ use chrono::Local;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
+    BlacklistTransmitted,
 };
 use crate::notifications::types::notifications::Notifications;
 use crate::notifications::types::sound::{Sound, play};
 use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, RunTimeData};
+use std::collections::HashSet;
+use crate::networking::types::host::Host;
+
+/// Logs host notifications (favorites or blacklisted) and returns the number emitted
+fn log_host_notifications<F>(
+    runtime_data: &mut RunTimeData,
+    hosts: &HashSet<Host>,
+    info_traffic_lock: &InfoTraffic,
+    notification_constructor: F,
+) -> usize 
+where
+    F: Fn(Host, DataInfoHost, String) -> LoggedNotification,
+{
+    let mut emitted = 0;
+    for host in hosts.clone() {
+        emitted += 1;
+        if runtime_data.logged_notifications.len() >= 30 {
+            runtime_data.logged_notifications.pop_back();
+        }
+
+        let data_info_host = *info_traffic_lock
+            .hosts
+            .get(&host)
+            .unwrap_or(&DataInfoHost::default());
+        
+        runtime_data
+            .logged_notifications
+            .push_front(notification_constructor(
+                host,
+                data_info_host,
+                get_formatted_timestamp(Local::now()),
+            ));
+    }
+    emitted
+}
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
@@ -83,32 +119,54 @@ pub fn notify_and_log(
             .is_empty()
     {
         let info_traffic_lock = info_traffic.lock().unwrap();
-        for host in info_traffic_lock.favorites_last_interval.clone() {
-            //log this notification
-            emitted_notifications += 1;
-            if runtime_data.logged_notifications.len() >= 30 {
-                runtime_data.logged_notifications.pop_back();
-            }
-
-            let data_info_host = *info_traffic_lock
-                .hosts
-                .get(&host)
-                .unwrap_or(&DataInfoHost::default());
-            runtime_data
-                .logged_notifications
-                .push_front(LoggedNotification::FavoriteTransmitted(
-                    FavoriteTransmitted {
-                        host,
-                        data_info_host,
-                        timestamp: get_formatted_timestamp(Local::now()),
-                    },
-                ));
-        }
+        emitted_notifications += log_host_notifications(
+            runtime_data,
+            &info_traffic_lock.favorites_last_interval,
+            &info_traffic_lock,
+            |host, data_info_host, timestamp| {
+                LoggedNotification::FavoriteTransmitted(FavoriteTransmitted {
+                    host,
+                    data_info_host,
+                    timestamp,
+                })
+            },
+        );
         drop(info_traffic_lock);
         if !already_emitted_sound && notifications.favorite_notification.sound.ne(&Sound::None) {
             // emit sound
             play(
                 notifications.favorite_notification.sound,
+                notifications.volume,
+            );
+            already_emitted_sound = true;
+        }
+    }
+    // from blacklist
+    if notifications.blacklist_notification.notify_on_blacklist
+        && !info_traffic
+            .lock()
+            .unwrap()
+            .blacklisted_last_interval
+            .is_empty()
+    {
+        let info_traffic_lock = info_traffic.lock().unwrap();
+        emitted_notifications += log_host_notifications(
+            runtime_data,
+            &info_traffic_lock.blacklisted_last_interval,
+            &info_traffic_lock,
+            |host, data_info_host, timestamp| {
+                LoggedNotification::BlacklistTransmitted(BlacklistTransmitted {
+                    host,
+                    data_info_host,
+                    timestamp,
+                })
+            },
+        );
+        drop(info_traffic_lock);
+        if !already_emitted_sound && notifications.blacklist_notification.sound.ne(&Sound::None) {
+            // emit sound
+            play(
+                notifications.blacklist_notification.sound,
                 notifications.volume,
             );
         }

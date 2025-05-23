@@ -126,4 +126,6 @@ pub enum Message {
     ScaleFactorShortcut(bool),
     /// Set the window ID
     WindowId(Option<window::Id>),
+    /// New message: BlacklistFileSelected
+    BlacklistFileSelected(String),
 }

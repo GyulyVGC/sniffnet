@@ -18,4 +18,7 @@ pub struct DataInfoHost {
     pub is_bogon: Option<&'static str>,
     /// Determine if the connection with this host is unicast, multicast, or broadcast
     pub traffic_type: TrafficType,
+    /// Indicates if the host's IP is in the blacklist
+    #[allow(dead_code)]
+    pub is_blacklisted: bool,
 }

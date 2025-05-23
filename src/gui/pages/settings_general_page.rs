@@ -1,9 +1,9 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
+    Column, Container, PickList, Row, Rule, Scrollable, Slider, Space, Text, Tooltip, button, vertical_space,
 };
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, alignment};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
@@ -14,7 +14,7 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
-use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
@@ -33,7 +33,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         language,
         color_gradient,
         ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.lock().unwrap().settings.clone();
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -48,7 +48,11 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         ))
         .push(get_settings_tabs(SettingsPage::General, font, language))
         .push(Space::with_height(10))
-        .push(column_all_general_setting(sniffer, font));
+        .push(
+            Scrollable::new(column_all_general_setting(sniffer, font, font_headers, color_gradient))
+            .height(Length::Fill)
+            .width(Length::Fill)
+        );
 
     Container::new(content)
         .height(400)
@@ -56,7 +60,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         .class(ContainerType::Modal)
 }
 
-fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
+fn column_all_general_setting(sniffer: &Sniffer, font: Font, font_headers: Font, _color_gradient: GradientType) -> Column<Message, StyleType> {
     let ConfigSettings {
         language,
         scale_factor,
@@ -64,6 +68,15 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
         mmdb_asn,
         ..
     } = sniffer.configs.lock().unwrap().settings.clone();
+
+    let current_blacklist_path = sniffer
+        .configs
+        .lock()
+        .unwrap()
+        .blacklist
+        .blacklist_path
+        .clone()
+        .unwrap_or_default();
 
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 
@@ -83,14 +96,26 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, 
             .push(Space::with_height(10));
     }
 
-    column = column.push(mmdb_settings(
+    column = column.push(mmdb_section_ui(
         is_editable,
         language,
         font,
+        font_headers,
         &mmdb_country,
         &mmdb_asn,
-        &sniffer.mmdb_readers,
     ));
+
+    column = column.push(Rule::horizontal(25));
+
+    column = column.push(ip_blacklist_section_ui(
+        is_editable,
+        language,
+        font,
+        font_headers,
+        &current_blacklist_path,
+    ));
+
+    column = column.push(Space::with_height(20));
 
     column
 }
@@ -240,107 +265,130 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
         .align_y(Alignment::Center)
 }
 
-fn mmdb_settings<'a>(
+fn mmdb_section_ui<'a>(
     is_editable: bool,
     language: Language,
     font: Font,
+    font_headers: Font,
     country_path: &str,
     asn_path: &str,
-    mmdb_readers: &MmdbReaders,
 ) -> Column<'a, Message, StyleType> {
     Column::new()
-        .spacing(5)
+        .spacing(10)
         .align_x(Alignment::Center)
+        .width(Length::Fixed(600.0))
         .push(
             Text::new(mmdb_files_translation(language))
-                .font(font)
+                .font(font_headers)
                 .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
+                .size(FONT_SIZE_SUBTITLE)
+                .width(Length::Fill)
+                .align_x(alignment::Horizontal::Center),
         )
-        .push(mmdb_selection_row(
-            is_editable,
+        .push(row_open_link_tooltip(
+            learn_more_translation(language),
             font,
-            Message::CustomCountryDb,
-            country_path,
-            &mmdb_readers.country,
-            country_translation(language),
-            language,
         ))
-        .push(mmdb_selection_row(
-            is_editable,
-            font,
-            Message::CustomAsnDb,
-            asn_path,
-            &mmdb_readers.asn,
-            "ASN",
-            language,
-        ))
-}
-
-fn mmdb_selection_row<'a>(
-    is_editable: bool,
-    font: Font,
-    message: fn(String) -> Message,
-    custom_path: &str,
-    mmdb_reader: &MmdbReader,
-    caption: &str,
-    language: Language,
-) -> Row<'a, Message, StyleType> {
-    let is_error = if custom_path.is_empty() {
-        false
-    } else {
-        match *mmdb_reader {
-            MmdbReader::Default(_) | MmdbReader::Empty => true,
-            MmdbReader::Custom(_) => false,
-        }
-    };
-
-    Row::new()
-        .align_y(Alignment::Center)
-        .push(Text::new(format!("{caption}: ")).font(font))
+        .push(Space::with_height(5))
         .push(
-            Text::new(get_path_termination_string(custom_path, 25))
-                .font(font)
-                .class(if is_error {
-                    TextType::Danger
-                } else {
-                    TextType::Standard
-                }),
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(10)
+                .padding([0, 20])
+                .push(
+                    Text::new(format!("{}:", country_translation(language)))
+                        .font(font)
+                        .width(Length::Fixed(80.0)),
+                )
+                .push(
+                    Text::new(get_path_termination_string(country_path, 35))
+                        .font(font)
+                        .width(Length::Fill),
+                )
+                .push(
+                    button_open_file(
+                        country_path.to_string(),
+                        FileInfo::Database,
+                        language,
+                        font,
+                        is_editable,
+                        Message::CustomCountryDb,
+                    )
+                )
         )
-        .push(if custom_path.is_empty() {
-            button_open_file(
-                custom_path.to_owned(),
-                FileInfo::Database,
-                language,
-                font,
-                is_editable,
-                message,
-            )
-        } else {
-            button_clear_mmdb(message, font, is_editable)
-        })
+        .push(Space::with_height(5))
+        .push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(10)
+                .padding([0, 20])
+                .push(
+                    Text::new("ASN:")
+                        .font(font)
+                        .width(Length::Fixed(80.0)),
+                )
+                .push(
+                    Text::new(get_path_termination_string(asn_path, 35))
+                        .font(font)
+                        .width(Length::Fill),
+                )
+                .push(
+                    button_open_file(
+                        asn_path.to_string(),
+                        FileInfo::Database,
+                        language,
+                        font,
+                        is_editable,
+                        Message::CustomAsnDb,
+                    )
+                )
+        )
 }
 
-fn button_clear_mmdb<'a>(
-    message: fn(String) -> Message,
-    font: Font,
+fn ip_blacklist_section_ui<'a>(
     is_editable: bool,
-) -> Tooltip<'a, Message, StyleType> {
-    let mut button = button(
-        Text::new("×")
-            .font(font)
-            .align_y(Alignment::Center)
-            .align_x(Alignment::Center)
-            .size(15)
-            .line_height(LineHeight::Relative(1.0)),
-    )
-    .padding(2)
-    .height(20)
-    .width(20);
-
-    if is_editable {
-        button = button.on_press(message(String::new()));
-    }
-
-    Tooltip::new(button, "", Position::Right)
+    language: Language,
+    font: Font,
+    font_headers: Font,
+    current_blacklist_path: &str,
+) -> Column<'a, Message, StyleType> {
+    Column::new()
+        .spacing(10)
+        .align_x(Alignment::Center)
+        .width(Length::Fixed(600.0))
+        .push(
+            Text::new("IP Blacklist")
+                .font(font_headers)
+                .class(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE)
+                .width(Length::Fill)
+                .align_x(alignment::Horizontal::Center),
+        )
+        .push(Space::with_height(5))
+        .push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(10)
+                .padding([0, 20])
+                .push(
+                    Text::new("txt file:")
+                        .font(font)
+                        .width(Length::Fixed(100.0)),
+                )
+                .push(
+                    Text::new(get_path_termination_string(current_blacklist_path, 35))
+                        .font(font)
+                        .width(Length::Fill),
+                )
+                .push(
+                    button_open_file(
+                        current_blacklist_path.to_string(),
+                        FileInfo::IpBlacklist,
+                        language,
+                        font,
+                        is_editable,
+                        Message::BlacklistFileSelected,
+                    )
+                )
+        )
 }

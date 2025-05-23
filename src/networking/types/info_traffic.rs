@@ -33,6 +33,8 @@ pub struct InfoTraffic {
     pub favorite_hosts: HashSet<Host>,
     /// Collection of favorite hosts that exchanged data in the last interval
     pub favorites_last_interval: HashSet<Host>,
+    /// Collection of blacklisted hosts that exchanged data in the last interval
+    pub blacklisted_last_interval: HashSet<Host>,
     /// Map of the upper layer services with their data info
     pub services: HashMap<Service, DataInfo>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
@@ -57,6 +59,7 @@ impl InfoTraffic {
             map: HashMap::new(),
             favorite_hosts: HashSet::new(),
             favorites_last_interval: HashSet::new(),
+            blacklisted_last_interval: HashSet::new(),
             services: HashMap::new(),
             addresses_waiting_resolution: HashMap::new(),
             addresses_resolved: HashMap::new(),

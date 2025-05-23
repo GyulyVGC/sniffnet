@@ -99,6 +99,7 @@ mod tests {
                     packets_notification: Default::default(),
                     bytes_notification: Default::default(),
                     favorite_notification: Default::default(),
+                    blacklist_notification: Default::default(),
                 },
                 style: StyleType::Custom(ExtraStyles::DraculaDark),
             },
@@ -110,6 +111,7 @@ mod tests {
                 size: SizeTuple(452.0, 870.0),
                 thumbnail_position: PositionTuple(20.0, 20.0),
             },
+            blacklist: Default::default(),
         };
         // we want to be sure that modified config is different from defaults
         assert_ne!(Configs::default(), modified_configs);

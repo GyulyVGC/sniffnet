@@ -292,7 +292,7 @@ impl Sniffer {
                 self.report_sort_type = sort;
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
-            Message::Start => self.start(),
+            Message::Start => self.start(&self.configs.clone()),
             Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.configs.lock().unwrap().settings.style = style;
@@ -539,6 +539,40 @@ impl Sniffer {
             }
             Message::WindowId(id) => self.id = id,
             Message::TickInit => {}
+            Message::BlacklistFileSelected(path_string) => {
+                if path_string.is_empty() {
+                    return Task::none();
+                }
+                
+                let configs = self.configs.clone();
+                return Task::perform(
+                    async move {
+                        use crate::configs::types::config_blacklist::ConfigBlacklist;
+                        let load_result = ConfigBlacklist::load_ips_from_file(&path_string);
+
+                        let mut global_configs = configs.lock().unwrap();
+                        match load_result {
+                            Ok(new_blacklist_ips) => {
+                                global_configs.blacklist.blacklist_path = Some(path_string);
+                                global_configs.blacklist.loaded_ips = Some(Arc::new(new_blacklist_ips));
+                            }
+                            Err(e) => {
+                                eprintln!(
+                                    "Error loading blacklist file {}: {}",
+                                    path_string,
+                                    e.to_string()
+                                );
+                                global_configs.blacklist.blacklist_path = None;
+                                global_configs.blacklist.loaded_ips = None;
+                            }
+                        }
+                        global_configs.blacklist.store();
+                        
+                        Message::Waiting // Return a harmless message
+                    },
+                    |_| Message::Waiting
+                );
+            }
         }
         Task::none()
     }
@@ -637,6 +671,27 @@ impl Sniffer {
     pub fn scale_factor(&self) -> f64 {
         self.configs.lock().unwrap().settings.scale_factor
     }
+    
+    #[allow(dead_code)]
+    pub fn blacklist_path(&self) -> Option<String> {
+        self.configs.lock().unwrap().blacklist.blacklist_path.clone()
+    }
+    
+    #[allow(dead_code)]
+    pub fn has_blacklist(&self) -> bool {
+        self.configs.lock().unwrap().blacklist.loaded_ips.is_some()
+    }
+    
+    #[allow(dead_code)]
+    pub fn blacklist_ip_count(&self) -> usize {
+        self.configs
+            .lock()
+            .unwrap()
+            .blacklist
+            .loaded_ips
+            .as_ref()
+            .map_or(0, |ips| ips.len())
+    }
 
     /// Updates thresholds if they haven't been edited for a while
     fn update_thresholds(&mut self) {
@@ -703,6 +758,7 @@ impl Sniffer {
             &self.info_traffic.clone(),
         );
         self.info_traffic.lock().unwrap().favorites_last_interval = HashSet::new();
+        self.info_traffic.lock().unwrap().blacklisted_last_interval = HashSet::new();
         self.runtime_data.tot_emitted_notifications += emitted_notifications;
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
@@ -747,7 +803,7 @@ impl Sniffer {
         child.wait().unwrap_or_default();
     }
 
-    fn start(&mut self) {
+    fn start(&mut self, configs: &Arc<Mutex<Configs>>) {
         let current_device_name = &*self.device.name.clone();
         self.set_adapter(current_device_name);
         let device = self.device.clone();
@@ -769,6 +825,7 @@ impl Sniffer {
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
+            let local_configs = configs.clone(); // Clone Arc for the thread
             self.device.link_type = capture_context.my_link_type();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -781,6 +838,7 @@ impl Sniffer {
                         &mmdb_readers,
                         capture_context,
                         &host_data,
+                        &local_configs, // Pass cloned Arc
                     );
                 })
                 .log_err(location!());
@@ -954,6 +1012,15 @@ impl Sniffer {
                     .notifications
                     .favorite_notification = favorite_notification;
                 favorite_notification.sound
+            }
+            Notification::Blacklist(blacklist_notification) => {
+                self.configs
+                    .lock()
+                    .unwrap()
+                    .settings
+                    .notifications
+                    .blacklist_notification = blacklist_notification;
+                blacklist_notification.sound
             }
         };
         if emit_sound {
@@ -2183,7 +2250,8 @@ mod tests {
                     volume: 60,
                     packets_notification: Default::default(),
                     bytes_notification: Default::default(),
-                    favorite_notification: Default::default()
+                    favorite_notification: Default::default(),
+                    blacklist_notification: Default::default(),
                 },
                 style: StyleType::Custom(ExtraStyles::A11yDark)
             }
@@ -2230,7 +2298,8 @@ mod tests {
                     volume: 100,
                     packets_notification: Default::default(),
                     bytes_notification: Default::default(),
-                    favorite_notification: Default::default()
+                    favorite_notification: Default::default(),
+                    blacklist_notification: Default::default(),
                 },
                 style: StyleType::Custom(ExtraStyles::DraculaDark)
             }
@@ -2478,5 +2547,54 @@ mod tests {
             ),
             "0.30".to_string()
         );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_blacklist_helper_methods() {
+        use std::sync::Arc;
+        use std::collections::HashSet;
+        use std::net::IpAddr;
+
+        let sniffer = new_sniffer();
+
+        // Test with no blacklist configured
+        assert_eq!(sniffer.blacklist_path(), None);
+        assert!(!sniffer.has_blacklist());
+        assert_eq!(sniffer.blacklist_ip_count(), 0);
+
+        // Set up a blacklist path
+        {
+            let mut configs = sniffer.configs.lock().unwrap();
+            configs.blacklist.blacklist_path = Some("/path/to/blacklist.txt".to_string());
+        }
+        assert_eq!(sniffer.blacklist_path(), Some("/path/to/blacklist.txt".to_string()));
+        assert!(!sniffer.has_blacklist()); // Still no loaded IPs
+        assert_eq!(sniffer.blacklist_ip_count(), 0);
+
+        // Set up loaded IPs
+        {
+            let mut configs = sniffer.configs.lock().unwrap();
+            let mut ips = HashSet::new();
+            ips.insert("192.168.1.1".parse::<IpAddr>().unwrap());
+            ips.insert("10.0.0.1".parse::<IpAddr>().unwrap());
+            ips.insert("2001:db8::1".parse::<IpAddr>().unwrap());
+            configs.blacklist.loaded_ips = Some(Arc::new(ips));
+        }
+
+        assert_eq!(sniffer.blacklist_path(), Some("/path/to/blacklist.txt".to_string()));
+        assert!(sniffer.has_blacklist());
+        assert_eq!(sniffer.blacklist_ip_count(), 3);
+
+        // Clear the blacklist
+        {
+            let mut configs = sniffer.configs.lock().unwrap();
+            configs.blacklist.blacklist_path = None;
+            configs.blacklist.loaded_ips = None;
+        }
+
+        assert_eq!(sniffer.blacklist_path(), None);
+        assert!(!sniffer.has_blacklist());
+        assert_eq!(sniffer.blacklist_ip_count(), 0);
     }
 }

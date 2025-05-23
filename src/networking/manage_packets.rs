@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use chrono::Local;
 use dns_lookup::lookup_addr;
@@ -28,6 +28,7 @@ use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::{InfoTraffic, IpVersion, Protocol, location};
 use std::fmt::Write;
+use crate::Configs;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -266,6 +267,7 @@ pub fn modify_or_insert_in_map(
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
+    is_blacklisted_connection: bool,
 ) -> InfoAddressPortPair {
     let now = Local::now();
     let mut traffic_direction = TrafficDirection::default();
@@ -340,6 +342,7 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
+            is_blacklisted: is_blacklisted_connection,
         })
         .clone();
 
@@ -349,7 +352,10 @@ pub fn modify_or_insert_in_map(
         .cloned()
     {
         if info_traffic.favorite_hosts.contains(&host_info.1) {
-            info_traffic.favorites_last_interval.insert(host_info.1);
+            info_traffic.favorites_last_interval.insert(host_info.1.clone());
+        }
+        if new_info.is_blacklisted {
+            info_traffic.blacklisted_last_interval.insert(host_info.1);
         }
     }
 
@@ -363,6 +369,7 @@ pub fn reverse_dns_lookup(
     my_device: &MyDevice,
     mmdb_readers: &MmdbReaders,
     host_data: &Mutex<HostData>,
+    configs: &Arc<Mutex<Configs>>,
 ) {
     let address_to_lookup = get_address_to_lookup(key, traffic_direction);
     let my_interface_addresses = my_device.addresses.lock().unwrap().clone();
@@ -402,6 +409,16 @@ pub fn reverse_dns_lookup(
         .addresses_waiting_resolution
         .remove(&address_to_lookup)
         .unwrap_or_default();
+
+    // Check if the host is blacklisted
+    let host_is_blacklisted = configs
+        .lock()
+        .unwrap()
+        .blacklist
+        .loaded_ips
+        .as_ref()
+        .map_or(false, |ips| ips.contains(&address_to_lookup));
+
     // insert the newly resolved host in the collections, with the data it exchanged so far
     info_traffic_lock
         .addresses_resolved
@@ -419,6 +436,7 @@ pub fn reverse_dns_lookup(
             is_local,
             is_bogon,
             traffic_type,
+            is_blacklisted: host_is_blacklisted,
         });
 
     // update host data states including the new host
@@ -426,7 +444,12 @@ pub fn reverse_dns_lookup(
 
     // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
     if info_traffic_lock.favorite_hosts.contains(&new_host) {
-        info_traffic_lock.favorites_last_interval.insert(new_host);
+        info_traffic_lock.favorites_last_interval.insert(new_host.clone());
+    }
+    
+    // check if the newly resolved host is blacklisted
+    if host_is_blacklisted {
+        info_traffic_lock.blacklisted_last_interval.insert(new_host);
     }
 
     drop(info_traffic_lock);

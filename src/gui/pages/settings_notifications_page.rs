@@ -14,7 +14,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
-    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+    BytesNotification, FavoriteNotification, Notification, PacketsNotification, BlacklistNotification,
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
@@ -94,6 +94,11 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                 ))
                 .push(get_favorite_notify(
                     notifications.favorite_notification,
+                    language,
+                    font,
+                ))
+                .push(get_blacklist_notify(
+                    notifications.blacklist_notification,
                     language,
                     font,
                 )),
@@ -261,6 +266,53 @@ fn get_favorite_notify<'a>(
     }
 }
 
+fn get_blacklist_notify<'a>(
+    blacklist_notification: BlacklistNotification,
+    language: Language,
+    font: Font,
+) -> Column<'a, Message, StyleType> {
+    let checkbox = Checkbox::new(
+        "Blacklisted connection detected",
+        blacklist_notification.notify_on_blacklist,
+    )
+    .on_toggle(move |toggled| {
+        Message::UpdateNotificationSettings(
+            if toggled {
+                Notification::Blacklist(BlacklistNotification::on(blacklist_notification.sound))
+            } else {
+                Notification::Blacklist(BlacklistNotification::off(blacklist_notification.sound))
+            },
+            false,
+        )
+    })
+    .size(18)
+    .font(font);
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if blacklist_notification.notify_on_blacklist {
+        let sound_row = sound_buttons(
+            Notification::Blacklist(blacklist_notification),
+            font,
+            language,
+        );
+        ret_val = ret_val.push(sound_row);
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(700)
+                .class(ContainerType::BorderedRound),
+        )
+    } else {
+        Column::new().padding(5).push(
+            Container::new(ret_val)
+                .padding(10)
+                .width(700)
+                .class(ContainerType::BorderedRound),
+        )
+    }
+}
+
 fn input_group_packets<'a>(
     packets_notification: PacketsNotification,
     font: Font,
@@ -399,6 +451,7 @@ fn sound_buttons<'a>(
         Notification::Packets(n) => n.sound,
         Notification::Bytes(n) => n.sound,
         Notification::Favorite(n) => n.sound,
+        Notification::Blacklist(n) => n.sound,
     };
 
     let mut ret_val = Row::new()
@@ -416,6 +469,9 @@ fn sound_buttons<'a>(
             Notification::Bytes(n) => Notification::Bytes(BytesNotification { sound: option, ..n }),
             Notification::Favorite(n) => {
                 Notification::Favorite(FavoriteNotification { sound: option, ..n })
+            }
+            Notification::Blacklist(n) => {
+                Notification::Blacklist(BlacklistNotification { sound: option, ..n })
             }
         };
         ret_val = ret_val.push(

@@ -12,6 +12,8 @@ use crate::translations::translations::hide_translation;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
+use crate::utils::types::web_page::WebPage;
+use crate::gui::styles::button::ButtonType;
 
 pub fn button_hide<'a>(
     message: Message,
@@ -76,5 +78,16 @@ pub fn row_open_link_tooltip<'a>(text: &'static str, font: Font) -> Row<'a, Mess
         .align_y(Alignment::Center)
         .spacing(10)
         .push(Text::new(text).font(font))
-        .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
+        .push(
+            Tooltip::new(
+                button(Icon::OpenLink.to_text().size(16).class(TextType::Title))
+                    .padding(0)
+                    .on_press(Message::OpenWebPage(WebPage::Wiki))
+                    .class(ButtonType::Neutral),
+                "Open Sniffnet Wiki",
+                Position::Right,
+            )
+            .gap(5)
+            .class(ContainerType::Tooltip),
+        )
 }

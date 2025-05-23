@@ -19,6 +19,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
+    BlacklistTransmitted,
 };
 use crate::translations::translations::{
     bytes_exceeded_translation, bytes_exceeded_value_translation, clear_all_translation,
@@ -58,6 +59,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
+        && !notifications.blacklist_notification.notify_on_blacklist
         && sniffer.runtime_data.logged_notifications.is_empty()
     {
         let body = body_no_notifications_set(font, language);
@@ -375,6 +377,76 @@ fn favorite_notification_log<'a>(
         .class(ContainerType::BorderedRound)
 }
 
+fn blacklist_notification_log<'a>(
+    logged_notification: BlacklistTransmitted,
+    language: Language,
+    font: Font,
+) -> Container<'a, Message, StyleType> {
+    let country = logged_notification.host.country;
+    let asn = &logged_notification.host.asn;
+
+    let mut domain_asn_str = logged_notification.host.domain;
+    if !asn.name.is_empty() {
+        let _ = write!(domain_asn_str, " - {}", asn.name);
+    }
+
+    let row_flag_details = Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(get_flag_tooltip(
+            country,
+            &logged_notification.data_info_host,
+            language,
+            font,
+            false,
+        ))
+        .push(Text::new(domain_asn_str).font(font));
+
+    let content = Row::new()
+        .spacing(30)
+        .align_y(Alignment::Center)
+        .height(Length::Fill)
+        .push(
+            Tooltip::new(
+                Icon::Forbidden
+                    .to_text()
+                    .size(80)
+                    .class(TextType::Danger)
+                    .line_height(LineHeight::Relative(1.0)),
+                Text::new("Blacklisted connection detected").font(font),
+                Position::FollowCursor,
+            )
+            .class(ContainerType::Tooltip),
+        )
+        .push(
+            Column::new()
+                .width(250)
+                .spacing(7)
+                .push(
+                    Row::new()
+                        .spacing(5)
+                        .push(Icon::Clock.to_text())
+                        .push(Text::new(logged_notification.timestamp).font(font)),
+                )
+                .push(
+                    Text::new("Blacklisted IP detected")
+                        .class(TextType::Danger)
+                        .font(font),
+                ),
+        )
+        .push(
+            Column::new()
+                .spacing(7)
+                .width(Length::Fill)
+                .push(row_flag_details),
+        );
+    Container::new(content)
+        .height(120)
+        .width(800)
+        .padding(10)
+        .class(ContainerType::BorderedRound)
+}
+
 fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
@@ -418,6 +490,9 @@ fn lazy_logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, Style
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
                 favorite_notification_log(favorite_transmitted.clone(), language, font)
+            }
+            LoggedNotification::BlacklistTransmitted(blacklist_transmitted) => {
+                blacklist_notification_log(blacklist_transmitted.clone(), language, font)
             }
         });
     }

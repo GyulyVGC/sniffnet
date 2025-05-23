@@ -10,6 +10,7 @@ pub struct Notifications {
     pub packets_notification: PacketsNotification,
     pub bytes_notification: BytesNotification,
     pub favorite_notification: FavoriteNotification,
+    pub blacklist_notification: BlacklistNotification,
 }
 
 impl Default for Notifications {
@@ -19,6 +20,7 @@ impl Default for Notifications {
             packets_notification: PacketsNotification::default(),
             bytes_notification: BytesNotification::default(),
             favorite_notification: FavoriteNotification::default(),
+            blacklist_notification: BlacklistNotification::default(),
         }
     }
 }
@@ -32,6 +34,8 @@ pub enum Notification {
     Bytes(BytesNotification),
     /// Favorites notification
     Favorite(FavoriteNotification),
+    /// Blacklist notification
+    Blacklist(BlacklistNotification),
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
@@ -168,6 +172,41 @@ impl FavoriteNotification {
     pub fn off(sound: Sound) -> Self {
         FavoriteNotification {
             notify_on_favorite: false,
+            sound,
+        }
+    }
+}
+
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
+pub struct BlacklistNotification {
+    /// Flag to determine if this notification is enabled
+    pub notify_on_blacklist: bool,
+    /// The sound to emit
+    pub sound: Sound,
+}
+
+impl Default for BlacklistNotification {
+    fn default() -> Self {
+        BlacklistNotification {
+            notify_on_blacklist: false,
+            sound: Sound::Gulp,
+        }
+    }
+}
+
+impl BlacklistNotification {
+    /// Constructor when the notification is in use
+    pub fn on(sound: Sound) -> Self {
+        BlacklistNotification {
+            notify_on_blacklist: true,
+            sound,
+        }
+    }
+
+    /// Constructor when the notification is not in use. Note that sound is used here for caching, although it won't actively be used.
+    pub fn off(sound: Sound) -> Self {
+        BlacklistNotification {
+            notify_on_blacklist: false,
             sound,
         }
     }

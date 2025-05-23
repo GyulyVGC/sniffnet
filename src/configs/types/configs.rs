@@ -1,4 +1,5 @@
 use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
+use crate::configs::types::config_blacklist::ConfigBlacklist;
 
 pub static CONFIGS: std::sync::LazyLock<Configs> = std::sync::LazyLock::new(Configs::load);
 
@@ -7,6 +8,7 @@ pub struct Configs {
     pub settings: ConfigSettings,
     pub device: ConfigDevice,
     pub window: ConfigWindow,
+    pub blacklist: ConfigBlacklist,
 }
 
 impl Configs {
@@ -17,6 +19,7 @@ impl Configs {
             settings: ConfigSettings::load(),
             device: ConfigDevice::load(),
             window: ConfigWindow::load(),
+            blacklist: ConfigBlacklist::load(),
         }
     }
 
@@ -24,5 +27,6 @@ impl Configs {
         self.settings.store();
         self.device.store();
         self.window.store();
+        self.blacklist.store();
     }
 }

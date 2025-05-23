@@ -9,6 +9,8 @@ pub enum LoggedNotification {
     BytesThresholdExceeded(BytesThresholdExceeded),
     /// Favorite connection exchanged data
     FavoriteTransmitted(FavoriteTransmitted),
+    /// Blacklisted connection exchanged data
+    BlacklistTransmitted(BlacklistTransmitted),
 }
 
 #[derive(Clone)]
@@ -29,6 +31,13 @@ pub struct BytesThresholdExceeded {
 
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
+    pub(crate) host: Host,
+    pub(crate) data_info_host: DataInfoHost,
+    pub(crate) timestamp: String,
+}
+
+#[derive(Clone)]
+pub struct BlacklistTransmitted {
     pub(crate) host: Host,
     pub(crate) data_info_host: DataInfoHost,
     pub(crate) timestamp: String,
