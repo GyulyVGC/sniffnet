@@ -25,7 +25,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => style_from_file_translation(language),
             FileInfo::Database => database_from_file_translation(language),
-            FileInfo::IpBlacklist => "Import IP Blacklist",
+            FileInfo::IpBlacklist => "Import IP Blacklist", // Sorry I don't know how to translate this
             FileInfo::Directory => select_directory_translation(language),
         }
     }

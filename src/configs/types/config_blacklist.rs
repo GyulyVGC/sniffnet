@@ -24,8 +24,9 @@ impl ConfigBlacklist {
     /// Load IP addresses from a blacklist file with validation and error handling.
     /// 
     /// This function reads a text file containing IP addresses (one per line) and returns
-    /// a HashSet of parsed IP addresses. The function provides the following features:
-    /// 
+    /// a HashSet of parsed IP addresses. 
+    ///
+    /// This function has: 
     /// - Support for comments (lines starting with '#')
     /// - Support for empty lines
     /// - Line-by-line error reporting for invalid IP addresses
@@ -293,4 +294,4 @@ mod tests {
         assert!(ips.contains(&"2001:db8::8a2e:370:7334".parse().unwrap()));
         assert!(ips.contains(&"fe80::1".parse().unwrap()));
     }
-} 
+}

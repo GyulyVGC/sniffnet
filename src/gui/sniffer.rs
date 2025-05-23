@@ -825,7 +825,7 @@ impl Sniffer {
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             let host_data = self.host_data_states.data.clone();
-            let local_configs = configs.clone(); // Clone Arc for the thread
+            let local_configs = configs.clone();
             self.device.link_type = capture_context.my_link_type();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -838,7 +838,7 @@ impl Sniffer {
                         &mmdb_readers,
                         capture_context,
                         &host_data,
-                        &local_configs, // Pass cloned Arc
+                        &local_configs,
                     );
                 })
                 .log_err(location!());
