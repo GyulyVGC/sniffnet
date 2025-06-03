@@ -24,9 +24,9 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, address_translation, addresses_translation, error_translation,
-    incoming_translation, no_addresses_translation, none_translation, outgoing_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
+    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -446,10 +446,7 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
                 .push(
                     Scrollable::with_direction(
                         col_device,
-                        Direction::Both {
-                            vertical: ScrollbarType::properties(),
-                            horizontal: ScrollbarType::properties(),
-                        },
+                        Direction::Horizontal(ScrollbarType::properties()),
                     )
                     .width(Length::Fill),
                 )
@@ -500,32 +497,8 @@ fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
-    let addresses = cs.get_addresses();
-    let address_title = match addresses.len() {
-        1 => address_translation(language),
-        _ => addresses_translation(language),
-    };
-    let mut address_info = String::new();
-    for address in addresses {
-        let _ = writeln!(address_info, "   {}", address.addr);
-    }
-    let address_col = if addresses.is_empty() {
-        None
-    } else {
-        Some(
-            Column::new()
-                .push(
-                    Text::new(format!("{address_title}:"))
-                        .class(TextType::Subtitle)
-                        .font(font),
-                )
-                .push(Text::new(address_info).font(font))
-                .push(Space::with_height(15)),
-        )
-    };
-
     Column::new()
-        .padding(Padding::ZERO.right(15))
+        .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
             cs.title(language),
@@ -533,7 +506,6 @@ fn col_device<'a>(
             font,
         ))
         .push(link_type.link_type_col(language, font))
-        .push_maybe(address_col)
 }
 
 fn col_data_representation<'a>(
