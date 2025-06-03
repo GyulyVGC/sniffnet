@@ -305,6 +305,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {
         let mut title = String::new();
+        #[allow(unused_mut)]
         let mut subtitle: Option<&String> = None;
         let name = my_dev.get_name();
         match my_dev.get_desc() {
@@ -318,7 +319,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
                     subtitle = Some(description);
                 }
                 #[cfg(target_os = "windows")]
-                title.push_str(&description);
+                title.push_str(description);
             }
         }
         let mut addrs_str = String::new();
