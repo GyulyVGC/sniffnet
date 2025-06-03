@@ -8,6 +8,7 @@ use pcap::Address;
 use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
@@ -95,7 +96,7 @@ fn analyze_link_header(
 /// This function analyzes the network layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
 /// Returns false if packet has to be skipped.
-pub fn analyze_network_header(
+fn analyze_network_header(
     network_header: Option<NetHeaders>,
     exchanged_bytes: &mut u128,
     network_protocol: &mut IpVersion,
@@ -360,7 +361,16 @@ fn get_traffic_direction(
         }
     }
 
-    if my_interface_addresses_ip.contains(source_ip) {
+    // if interface_addresses is empty, check if the IP is a bogon (useful when importing pcap files)
+    let is_local = |interface_addresses: &Vec<IpAddr>, ip: &IpAddr| -> bool {
+        if interface_addresses.is_empty() {
+            is_bogon(ip).is_some()
+        } else {
+            interface_addresses.contains(ip)
+        }
+    };
+
+    if is_local(&my_interface_addresses_ip, source_ip) {
         // source is local
         TrafficDirection::Outgoing
     } else if source_ip.ne(&IpAddr::V4(Ipv4Addr::UNSPECIFIED))
@@ -368,7 +378,7 @@ fn get_traffic_direction(
     {
         // source not local and different from 0.0.0.0 and different from ::
         TrafficDirection::Incoming
-    } else if !my_interface_addresses_ip.contains(destination_ip) {
+    } else if !is_local(&my_interface_addresses_ip, destination_ip) {
         // source is 0.0.0.0 or :: (local not yet assigned an IP) and destination is not local
         TrafficDirection::Outgoing
     } else {

@@ -44,8 +44,8 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::parse_packets::{BackendTrafficMessage, set_pcap_capture_addresses};
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
@@ -756,8 +756,6 @@ impl Sniffer {
             let curr_cap_id = self.current_capture_rx.0;
             let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
-            // todo: new thread? channel?
-            set_pcap_capture_addresses(&mut self.capture_source);
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
             let capture_source = self.capture_source.clone();
