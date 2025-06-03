@@ -5,7 +5,6 @@ use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_3::file_name_translation;
 use crate::translations::types::language::Language;
-use crate::utils::formatted_strings::get_path_termination_string;
 
 pub enum CaptureContext {
     Live(Live),
@@ -178,7 +177,7 @@ impl CaptureSource {
     pub fn get_name(&self) -> String {
         match self {
             Self::Device(device) => device.get_name().clone(),
-            Self::File(file) => get_path_termination_string(&file.path, 14),
+            Self::File(file) => file.path.clone(),
         }
     }
 
