@@ -305,7 +305,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {
         let mut title = String::new();
-        let mut subtitle = None;
+        let mut subtitle: Option<&String> = None;
         let name = my_dev.get_name();
         match my_dev.get_desc() {
             None => {
