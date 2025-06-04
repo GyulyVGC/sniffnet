@@ -17,7 +17,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use crate::chart::manage_chart_data::update_charts_data;
+use crate::chart::manage_chart_data::{push_offline_gap_to_splines, update_charts_data};
 use crate::configs::types::config_window::{
     ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
 };
@@ -551,6 +551,11 @@ impl Sniffer {
                     }
                 }
             }
+            Message::OfflineGap(cap_id, gap) => {
+                if cap_id == self.current_capture_rx.0 {
+                    push_offline_gap_to_splines(&mut self.traffic_chart, gap);
+                }
+            }
             Message::Periodic => {
                 self.update_waiting_dots();
                 self.fetch_devices();
@@ -783,6 +788,7 @@ impl Sniffer {
                 BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
                     Message::PendingHosts(cap_id, host_msg)
                 }
+                BackendTrafficMessage::OfflineGap(cap_id, gap) => Message::OfflineGap(cap_id, gap),
             });
         }
         Task::none()

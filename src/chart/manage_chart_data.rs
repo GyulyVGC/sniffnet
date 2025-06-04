@@ -71,6 +71,18 @@ fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>, is_live_
     spline.add(new_key);
 }
 
+pub fn push_offline_gap_to_splines(traffic_chart: &mut TrafficChart, gap: u32) {
+    for i in 0..gap {
+        let key = Key::new((traffic_chart.ticks + i) as f32, 0.0, Interpolation::Cosine);
+        traffic_chart.in_bytes.add(key);
+        traffic_chart.out_bytes.add(key);
+        traffic_chart.in_packets.add(key);
+        traffic_chart.out_packets.add(key);
+    }
+
+    traffic_chart.ticks += gap;
+}
+
 /// Finds the minimum y value to be displayed in chart.
 fn get_min(spline: &Spline<f32, f32>) -> f32 {
     let mut min = 0.0;

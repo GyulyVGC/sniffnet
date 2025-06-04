@@ -415,6 +415,7 @@ pub struct AddressesResolutionState {
 pub enum BackendTrafficMessage {
     TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
     PendingHosts(usize, Vec<HostMessage>),
+    OfflineGap(usize, u32),
 }
 
 fn maybe_send_tick_run_live(
@@ -455,13 +456,16 @@ fn maybe_send_tick_run_offline(
     if info_traffic_msg.last_packet_timestamp.secs() < next_packet_timestamp.secs() {
         let diff_secs =
             next_packet_timestamp.secs() - info_traffic_msg.last_packet_timestamp.secs();
-        for _ in 0..diff_secs {
-            let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
+            cap_id,
+            info_traffic_msg.take_but_leave_timestamp(),
+            new_hosts_to_send.lock().unwrap().drain(..).collect(),
+        ));
+        if diff_secs > 1 {
+            let _ = tx.send_blocking(BackendTrafficMessage::OfflineGap(
                 cap_id,
-                info_traffic_msg.take_but_leave_timestamp(),
-                new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                diff_secs as u32 - 1,
             ));
-            info_traffic_msg.last_packet_timestamp.add_secs(1);
         }
     }
 }

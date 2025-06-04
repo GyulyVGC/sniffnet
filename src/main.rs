@@ -3,7 +3,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::borrow::Cow;
-use std::process;
 
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
@@ -74,7 +73,7 @@ pub fn main() -> iced::Result {
         std::panic::set_hook(Box::new(move |panic_info| {
             // invoke the default handler and exit the process
             orig_hook(panic_info);
-            process::exit(1);
+            std::process::exit(1);
         }));
     }
 
