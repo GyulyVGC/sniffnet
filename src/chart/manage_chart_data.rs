@@ -7,6 +7,10 @@ use crate::networking::types::info_traffic::InfoTraffic;
 ///
 /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
 pub fn update_charts_data(info_traffic: &mut InfoTraffic, traffic_chart: &mut TrafficChart) {
+    if traffic_chart.ticks == 0 {
+        traffic_chart.first_packet_timestamp = info_traffic.last_packet_timestamp;
+    }
+
     #[allow(clippy::cast_precision_loss)]
     let tot_seconds = traffic_chart.ticks as f32;
     traffic_chart.ticks += 1;
@@ -28,24 +32,40 @@ pub fn update_charts_data(info_traffic: &mut InfoTraffic, traffic_chart: &mut Tr
     let in_packets_key = Key::new(tot_seconds, in_packets_entry, Interpolation::Cosine);
 
     // update sent bytes traffic data
-    update_spline(&mut traffic_chart.out_bytes, out_bytes_key);
+    update_spline(
+        &mut traffic_chart.out_bytes,
+        out_bytes_key,
+        traffic_chart.is_live_capture,
+    );
     traffic_chart.min_bytes = get_min(&traffic_chart.out_bytes);
 
     // update received bytes traffic data
-    update_spline(&mut traffic_chart.in_bytes, in_bytes_key);
+    update_spline(
+        &mut traffic_chart.in_bytes,
+        in_bytes_key,
+        traffic_chart.is_live_capture,
+    );
     traffic_chart.max_bytes = get_max(&traffic_chart.in_bytes);
 
     // update sent packets traffic data
-    update_spline(&mut traffic_chart.out_packets, out_packets_key);
+    update_spline(
+        &mut traffic_chart.out_packets,
+        out_packets_key,
+        traffic_chart.is_live_capture,
+    );
     traffic_chart.min_packets = get_min(&traffic_chart.out_packets);
 
     // update received packets traffic data
-    update_spline(&mut traffic_chart.in_packets, in_packets_key);
+    update_spline(
+        &mut traffic_chart.in_packets,
+        in_packets_key,
+        traffic_chart.is_live_capture,
+    );
     traffic_chart.max_packets = get_max(&traffic_chart.in_packets);
 }
 
-fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>) {
-    if spline.len() >= 30 {
+fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>, is_live_capture: bool) {
+    if is_live_capture && spline.len() >= 30 {
         spline.remove(0);
     }
     spline.add(new_key);

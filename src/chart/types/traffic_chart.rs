@@ -3,8 +3,8 @@
 use std::cmp::min;
 use std::ops::Range;
 
-use iced::Element;
-use iced::widget::Container;
+use iced::widget::{Column, Row, horizontal_space};
+use iced::{Element, Length, Padding};
 use plotters::prelude::*;
 use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
@@ -17,7 +17,8 @@ use crate::gui::types::message::Message;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::error_logger::{ErrorLogger, Location};
-use crate::utils::formatted_strings::get_formatted_num_seconds;
+use crate::utils::formatted_strings::{get_formatted_num_seconds, get_formatted_timestamp};
+use crate::utils::types::timestamp::Timestamp;
 use crate::{ByteMultiple, ChartType, Language, StyleType, location};
 
 /// Struct defining the chart to be displayed in gui run page
@@ -48,6 +49,10 @@ pub struct TrafficChart {
     pub style: StyleType,
     /// Whether the chart is for the thumbnail page
     pub thumbnail: bool,
+    /// Whether this is a live capture
+    pub is_live_capture: bool,
+    /// Timestamp of the first packet displayed in the chart
+    pub first_packet_timestamp: Timestamp,
 }
 
 impl TrafficChart {
@@ -66,11 +71,40 @@ impl TrafficChart {
             chart_type: ChartType::Bytes,
             style,
             thumbnail: false,
+            is_live_capture: true,
+            first_packet_timestamp: Timestamp::default(),
         }
     }
 
     pub fn view(&self) -> Element<Message, StyleType> {
-        Container::new(ChartWidget::new(self)).into()
+        let x_labels = if self.is_live_capture || self.thumbnail {
+            None
+        } else {
+            let font = self.style.get_extension().font;
+            let ts_1 = self.first_packet_timestamp;
+            let mut ts_2 = ts_1;
+            ts_2.add_secs(i64::from(self.ticks) - 1);
+            Some(
+                Row::new()
+                    .padding(Padding::new(8.0).bottom(15).left(55).right(25))
+                    .width(Length::Fill)
+                    .push(
+                        iced::widget::Text::new(get_formatted_timestamp(ts_1))
+                            .font(font)
+                            .size(12.5),
+                    )
+                    .push(horizontal_space())
+                    .push(
+                        iced::widget::Text::new(get_formatted_timestamp(ts_2))
+                            .font(font)
+                            .size(12.5),
+                    ),
+            )
+        };
+        Column::new()
+            .push(ChartWidget::new(self))
+            .push_maybe(x_labels)
+            .into()
     }
 
     pub fn change_kind(&mut self, kind: ChartType) {
@@ -83,6 +117,10 @@ impl TrafficChart {
 
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
+    }
+
+    pub fn change_capture_source(&mut self, is_live_capture: bool) {
+        self.is_live_capture = is_live_capture;
     }
 
     fn set_margins_and_label_areas<DB: DrawingBackend>(
@@ -98,8 +136,10 @@ impl TrafficChart {
             chart_builder
                 .margin_right(25)
                 .margin_top(6)
-                .set_label_area_size(LabelAreaPosition::Left, 55)
-                .set_label_area_size(LabelAreaPosition::Bottom, 40);
+                .set_label_area_size(LabelAreaPosition::Left, 55);
+            if self.is_live_capture {
+                chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 40);
+            }
         }
     }
 
@@ -109,7 +149,11 @@ impl TrafficChart {
             return 0.0..0.1;
         }
 
-        let first_time_displayed = self.ticks.saturating_sub(30);
+        let first_time_displayed = if self.is_live_capture {
+            self.ticks.saturating_sub(30)
+        } else {
+            0
+        };
         let last_time_displayed = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
         let range = first_time_displayed as f32..last_time_displayed as f32;
@@ -198,7 +242,7 @@ impl Chart<Message> for TrafficChart {
         let x_axis_end = x_axis_range.end;
         let y_axis_range = self.y_axis_range();
 
-        let x_labels = if self.thumbnail {
+        let x_labels = if self.thumbnail || !self.is_live_capture {
             0
         } else if self.ticks == 1 {
             // if we have only one tick, we need to add a second point to draw the area
@@ -281,6 +325,9 @@ impl Chart<Message> for TrafficChart {
 
 const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
+    if spline.len() > PTS {
+        return spline.into_iter().map(|k| (k.t, k.value)).collect();
+    }
     let mut ret_val = Vec::new();
     let len = spline.len();
     let first_x = spline

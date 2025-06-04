@@ -759,6 +759,8 @@ impl Sniffer {
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
             let capture_source = self.capture_source.clone();
+            self.traffic_chart
+                .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
