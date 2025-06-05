@@ -10,6 +10,7 @@ use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::{Interpolation, Key, Spline};
 
+use crate::chart::manage_chart_data::ChartSeries;
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
@@ -26,13 +27,13 @@ pub struct TrafficChart {
     /// Current time interval number
     pub ticks: u32,
     /// Sent bytes filtered and their time occurrence
-    pub out_bytes: Spline<f32, f32>,
+    pub out_bytes: ChartSeries,
     /// Received bytes filtered and their time occurrence
-    pub in_bytes: Spline<f32, f32>,
+    pub in_bytes: ChartSeries,
     /// Sent packets filtered and their time occurrence
-    pub out_packets: Spline<f32, f32>,
+    pub out_packets: ChartSeries,
     /// Received packets filtered and their time occurrence
-    pub in_packets: Spline<f32, f32>,
+    pub in_packets: ChartSeries,
     /// Minimum number of bytes per time interval (computed on last 30 intervals)
     pub min_bytes: f32,
     /// Maximum number of bytes per time interval (computed on last 30 intervals)
@@ -59,10 +60,10 @@ impl TrafficChart {
     pub fn new(style: StyleType, language: Language) -> Self {
         TrafficChart {
             ticks: 0,
-            out_bytes: Spline::default(),
-            in_bytes: Spline::default(),
-            out_packets: Spline::default(),
-            in_packets: Spline::default(),
+            out_bytes: ChartSeries::default(),
+            in_bytes: ChartSeries::default(),
+            out_packets: ChartSeries::default(),
+            in_packets: ChartSeries::default(),
             min_bytes: 0.0,
             max_bytes: 0.0,
             min_packets: 0.0,
@@ -176,12 +177,12 @@ impl TrafficChart {
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
         match self.chart_type {
             ChartType::Packets => match direction {
-                TrafficDirection::Incoming => &self.in_packets,
-                TrafficDirection::Outgoing => &self.out_packets,
+                TrafficDirection::Incoming => &self.in_packets.spline,
+                TrafficDirection::Outgoing => &self.out_packets.spline,
             },
             ChartType::Bytes => match direction {
-                TrafficDirection::Incoming => &self.in_bytes,
-                TrafficDirection::Outgoing => &self.out_bytes,
+                TrafficDirection::Incoming => &self.in_bytes.spline,
+                TrafficDirection::Outgoing => &self.out_bytes.spline,
             },
         }
     }

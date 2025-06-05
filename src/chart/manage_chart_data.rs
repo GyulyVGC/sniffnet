@@ -28,51 +28,64 @@ impl TrafficChart {
         let in_packets_entry =
             (info_traffic.tot_in_packets - info_traffic.tot_in_packets_prev) as f32;
 
-        let out_bytes_key = Key::new(tot_seconds, out_bytes_entry, Interpolation::Cosine);
-        let in_bytes_key = Key::new(tot_seconds, in_bytes_entry, Interpolation::Cosine);
-        let out_packets_key = Key::new(tot_seconds, out_packets_entry, Interpolation::Cosine);
-        let in_packets_key = Key::new(tot_seconds, in_packets_entry, Interpolation::Cosine);
+        let out_bytes_point = (tot_seconds, out_bytes_entry);
+        let in_bytes_point = (tot_seconds, in_bytes_entry);
+        let out_packets_point = (tot_seconds, out_packets_entry);
+        let in_packets_point = (tot_seconds, in_packets_entry);
 
         // update sent bytes traffic data
-        update_spline(&mut self.out_bytes, out_bytes_key);
+        update_series(&mut self.out_bytes, out_bytes_point, self.is_live_capture);
         self.min_bytes = get_min(&self.out_bytes);
 
         // update received bytes traffic data
-        update_spline(&mut self.in_bytes, in_bytes_key);
+        update_series(&mut self.in_bytes, in_bytes_point, self.is_live_capture);
         self.max_bytes = get_max(&self.in_bytes);
 
         // update sent packets traffic data
-        update_spline(&mut self.out_packets, out_packets_key);
+        update_series(
+            &mut self.out_packets,
+            out_packets_point,
+            self.is_live_capture,
+        );
         self.min_packets = get_min(&self.out_packets);
 
         // update received packets traffic data
-        update_spline(&mut self.in_packets, in_packets_key);
+        update_series(&mut self.in_packets, in_packets_point, self.is_live_capture);
         self.max_packets = get_max(&self.in_packets);
     }
 
     pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
         for i in 0..gap {
-            let key = Key::new((self.ticks + i) as f32, 0.0, Interpolation::Cosine);
-            update_spline(&mut self.in_bytes, key);
-            update_spline(&mut self.out_bytes, key);
-            update_spline(&mut self.in_packets, key);
-            update_spline(&mut self.out_packets, key);
+            let point = ((self.ticks + i) as f32, 0.0);
+            update_series(&mut self.in_bytes, point, self.is_live_capture);
+            update_series(&mut self.out_bytes, point, self.is_live_capture);
+            update_series(&mut self.in_packets, point, self.is_live_capture);
+            update_series(&mut self.out_packets, point, self.is_live_capture);
         }
         self.ticks += gap;
     }
 }
 
-fn update_spline(spline: &mut Spline<f32, f32>, new_key: Key<f32, f32>) {
+fn update_series(series: &mut ChartSeries, point: (f32, f32), is_live_capture: bool) {
+    // update spline
+    let spline = &mut series.spline;
+    let key = Key::new(point.0, point.1, Interpolation::Cosine);
     if spline.len() >= 30 {
         spline.remove(0);
     }
-    spline.add(new_key);
+    spline.add(key);
+
+    // update all time data
+    if !is_live_capture {
+        let all_time = &mut series.all_time;
+        all_time.push(point);
+    }
 }
 
 /// Finds the minimum y value to be displayed in chart.
-fn get_min(spline: &Spline<f32, f32>) -> f32 {
+fn get_min(serie: &ChartSeries) -> f32 {
     let mut min = 0.0;
-    for key in spline {
+    for key in &serie.spline {
         if key.value < min {
             min = key.value;
         }
@@ -81,14 +94,22 @@ fn get_min(spline: &Spline<f32, f32>) -> f32 {
 }
 
 /// Finds the maximum y value to be displayed in chart.
-fn get_max(spline: &Spline<f32, f32>) -> f32 {
+fn get_max(serie: &ChartSeries) -> f32 {
     let mut max = 0.0;
-    for key in spline {
+    for key in &serie.spline {
         if key.value > max {
             max = key.value;
         }
     }
     max
+}
+
+#[derive(Default)]
+pub struct ChartSeries {
+    /// Series to be displayed DURING live/offline capture
+    pub spline: Spline<f32, f32>,
+    /// Used to draw overall data, after the offline capture is over (not used in live captures)
+    pub all_time: Vec<(f32, f32)>,
 }
 
 #[cfg(test)]
