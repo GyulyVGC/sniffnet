@@ -118,7 +118,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .align_x(Alignment::Start);
 
     let mut scroll_report = Column::new().align_x(Alignment::Start);
-    let start_entry_num = (sniffer.page_number - 1) * 20 + 1;
+    let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 20 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
         scroll_report = scroll_report.push(

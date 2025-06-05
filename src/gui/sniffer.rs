@@ -393,26 +393,22 @@ impl Sniffer {
                 self.search = parameters;
             }
             Message::UpdatePageNumber(increment) => {
-                let new_page = if increment {
-                    self.page_number.checked_add(1)
+                if increment {
+                    if self.page_number < get_searched_entries(self).1.div_ceil(20) {
+                        self.page_number = self.page_number.checked_add(1).unwrap_or(1);
+                    }
                 } else {
-                    self.page_number.checked_sub(1)
+                    if self.page_number > 1 {
+                        self.page_number = self.page_number.checked_sub(1).unwrap_or(1);
+                    }
                 }
-                .unwrap_or(1);
-                self.page_number = new_page;
             }
             Message::ArrowPressed(increment) => {
                 if self.running_page.eq(&RunningPage::Inspect)
                     && self.settings_page.is_none()
                     && self.modal.is_none()
                 {
-                    if increment {
-                        if self.page_number < get_searched_entries(self).1.div_ceil(20) {
-                            return Task::done(Message::UpdatePageNumber(increment));
-                        }
-                    } else if self.page_number > 1 {
-                        return Task::done(Message::UpdatePageNumber(increment));
-                    }
+                    return Task::done(Message::UpdatePageNumber(increment));
                 }
             }
             Message::WindowFocused => self.timing_events.focus_now(),
