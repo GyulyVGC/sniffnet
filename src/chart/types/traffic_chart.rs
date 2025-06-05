@@ -149,11 +149,7 @@ impl TrafficChart {
             return 0.0..0.1;
         }
 
-        let first_time_displayed = if self.is_live_capture {
-            self.ticks.saturating_sub(30)
-        } else {
-            0
-        };
+        let first_time_displayed = self.ticks.saturating_sub(30);
         let last_time_displayed = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
         let range = first_time_displayed as f32..last_time_displayed as f32;
@@ -325,9 +321,6 @@ impl Chart<Message> for TrafficChart {
 
 const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
-    if spline.len() > PTS {
-        return spline.into_iter().map(|k| (k.t, k.value)).collect();
-    }
     let mut ret_val = Vec::new();
     let len = spline.len();
     let first_x = spline
@@ -335,7 +328,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
         .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
         .t;
     let last_x = spline
-        .get(len - 1)
+        .get(len.saturating_sub(1))
         .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
         .t;
     #[allow(clippy::cast_precision_loss)]

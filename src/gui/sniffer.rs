@@ -17,7 +17,6 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use crate::chart::manage_chart_data::{push_offline_gap_to_splines, update_charts_data};
 use crate::configs::types::config_window::{
     ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
 };
@@ -549,7 +548,7 @@ impl Sniffer {
             }
             Message::OfflineGap(cap_id, gap) => {
                 if cap_id == self.current_capture_rx.0 {
-                    push_offline_gap_to_splines(&mut self.traffic_chart, gap);
+                    self.traffic_chart.push_offline_gap_to_splines(gap);
                 }
             }
             Message::Periodic => {
@@ -707,7 +706,7 @@ impl Sniffer {
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
-        update_charts_data(&mut self.info_traffic, &mut self.traffic_chart);
+        self.traffic_chart.update_charts_data(&self.info_traffic);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.get_name().clone();
