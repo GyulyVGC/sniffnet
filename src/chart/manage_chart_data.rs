@@ -100,8 +100,9 @@ fn update_series(
         let all_time = &mut series.all_time;
         all_time.push(point);
 
-        // if we reached the end of the PCAP, fit all time data into spline
+        // if we reached the end of the PCAP, reduce all time data into spline
         if no_more_packets {
+            reduce_all_time_data(all_time);
             let keys = all_time
                 .iter()
                 .map(|p| Key::new(p.0, p.1, Interpolation::Cosine))
@@ -139,6 +140,21 @@ pub struct ChartSeries {
     pub spline: Spline<f32, f32>,
     /// Used to draw overall data, after the offline capture is over (not used in live captures)
     pub all_time: Vec<(f32, f32)>,
+}
+
+fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
+    // bisect data until we have less than 300 points
+    while all_time.len() > 300 {
+        let mut new_vec = Vec::new();
+        all_time.iter().enumerate().for_each(|(i, (x, y))| {
+            if i % 2 == 0 {
+                if let Some(next) = all_time.get(i + 1) {
+                    new_vec.push((*x, (y + next.1) / 2.0));
+                }
+            }
+        });
+        *all_time = new_vec;
+    }
 }
 
 #[cfg(test)]
