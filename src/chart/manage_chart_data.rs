@@ -4,10 +4,9 @@ use crate::TrafficChart;
 use crate::networking::types::info_traffic::InfoTraffic;
 
 impl TrafficChart {
-    /// This function is invoked every second by the application subscription
-    ///
-    /// It updates data (packets and bytes per second) to be displayed in the chart of gui run page
-    pub fn update_charts_data(&mut self, info_traffic: &InfoTraffic) {
+    pub fn update_charts_data(&mut self, info_traffic: &InfoTraffic, no_more_packets: bool) {
+        self.no_more_packets = no_more_packets;
+
         if self.ticks == 0 {
             self.first_packet_timestamp = info_traffic.last_packet_timestamp;
         }
@@ -34,11 +33,21 @@ impl TrafficChart {
         let in_packets_point = (tot_seconds, in_packets_entry);
 
         // update sent bytes traffic data
-        update_series(&mut self.out_bytes, out_bytes_point, self.is_live_capture);
+        update_series(
+            &mut self.out_bytes,
+            out_bytes_point,
+            self.is_live_capture,
+            no_more_packets,
+        );
         self.min_bytes = get_min(&self.out_bytes);
 
         // update received bytes traffic data
-        update_series(&mut self.in_bytes, in_bytes_point, self.is_live_capture);
+        update_series(
+            &mut self.in_bytes,
+            in_bytes_point,
+            self.is_live_capture,
+            no_more_packets,
+        );
         self.max_bytes = get_max(&self.in_bytes);
 
         // update sent packets traffic data
@@ -46,27 +55,38 @@ impl TrafficChart {
             &mut self.out_packets,
             out_packets_point,
             self.is_live_capture,
+            no_more_packets,
         );
         self.min_packets = get_min(&self.out_packets);
 
         // update received packets traffic data
-        update_series(&mut self.in_packets, in_packets_point, self.is_live_capture);
+        update_series(
+            &mut self.in_packets,
+            in_packets_point,
+            self.is_live_capture,
+            no_more_packets,
+        );
         self.max_packets = get_max(&self.in_packets);
     }
 
     pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
         for i in 0..gap {
             let point = ((self.ticks + i) as f32, 0.0);
-            update_series(&mut self.in_bytes, point, self.is_live_capture);
-            update_series(&mut self.out_bytes, point, self.is_live_capture);
-            update_series(&mut self.in_packets, point, self.is_live_capture);
-            update_series(&mut self.out_packets, point, self.is_live_capture);
+            update_series(&mut self.in_bytes, point, false, false);
+            update_series(&mut self.out_bytes, point, false, false);
+            update_series(&mut self.in_packets, point, false, false);
+            update_series(&mut self.out_packets, point, false, false);
         }
         self.ticks += gap;
     }
 }
 
-fn update_series(series: &mut ChartSeries, point: (f32, f32), is_live_capture: bool) {
+fn update_series(
+    series: &mut ChartSeries,
+    point: (f32, f32),
+    is_live_capture: bool,
+    no_more_packets: bool,
+) {
     // update spline
     let spline = &mut series.spline;
     let key = Key::new(point.0, point.1, Interpolation::Cosine);
@@ -75,10 +95,19 @@ fn update_series(series: &mut ChartSeries, point: (f32, f32), is_live_capture: b
     }
     spline.add(key);
 
-    // update all time data
+    // if offline capture, update all time data
     if !is_live_capture {
         let all_time = &mut series.all_time;
         all_time.push(point);
+
+        // if we reached the end of the PCAP, fit all time data into spline
+        if no_more_packets {
+            let keys = all_time
+                .iter()
+                .map(|p| Key::new(p.0, p.1, Interpolation::Cosine))
+                .collect();
+            *spline = Spline::from_vec(keys);
+        }
     }
 }
 

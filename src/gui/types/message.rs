@@ -19,8 +19,8 @@ use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType}
 pub enum Message {
     /// Run tasks to initialize the app
     StartApp(Option<window::Id>),
-    /// Sent by the backend parsing packets; includes the capture id, new data, and new hosts batched data
-    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
+    /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
+    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>, bool),
     /// Select network device
     DeviceSelection(String),
     /// Select IP filter

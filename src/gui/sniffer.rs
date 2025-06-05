@@ -272,12 +272,12 @@ impl Sniffer {
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
                 ]);
             }
-            Message::TickRun(cap_id, msg, host_msgs) => {
+            Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
                 if cap_id == self.current_capture_rx.0 {
                     for host_msg in host_msgs {
                         self.handle_new_host(host_msg);
                     }
-                    self.refresh_data(msg);
+                    self.refresh_data(msg, no_more_packets);
                 }
             }
             Message::DeviceSelection(name) => self.set_device(&name),
@@ -689,7 +689,7 @@ impl Sniffer {
         }
     }
 
-    fn refresh_data(&mut self, msg: InfoTrafficMessage) {
+    fn refresh_data(&mut self, msg: InfoTrafficMessage, no_more_packets: bool) {
         self.info_traffic.refresh(msg, &self.favorite_hosts);
         self.update_thresholds();
         let info_traffic = &self.info_traffic;
@@ -706,7 +706,8 @@ impl Sniffer {
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
-        self.traffic_chart.update_charts_data(&self.info_traffic);
+        self.traffic_chart
+            .update_charts_data(&self.info_traffic, no_more_packets);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.get_name().clone();
@@ -777,8 +778,8 @@ impl Sniffer {
                 .log_err(location!());
             self.current_capture_rx.1 = Some(rx.clone());
             return Task::run(rx, |backend_msg| match backend_msg {
-                BackendTrafficMessage::TickRun(cap_id, msg, host_msg) => {
-                    Message::TickRun(cap_id, msg, host_msg)
+                BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
+                    Message::TickRun(cap_id, msg, host_msg, no_more_packets)
                 }
                 BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
                     Message::PendingHosts(cap_id, host_msg)
@@ -1714,7 +1715,12 @@ mod tests {
             sniffer.info_traffic.tot_in_packets = 1;
 
             // Simulate a tick to apply the settings
-            sniffer.update(Message::TickRun(0, InfoTrafficMessage::default(), vec![]));
+            sniffer.update(Message::TickRun(
+                0,
+                InfoTrafficMessage::default(),
+                vec![],
+                false,
+            ));
         }
         let mut sniffer = Sniffer::new(Configs::default());
 

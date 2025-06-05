@@ -52,6 +52,8 @@ pub struct TrafficChart {
     pub thumbnail: bool,
     /// Whether this is a live capture
     pub is_live_capture: bool,
+    /// Whether this is a terminated offline capture
+    pub no_more_packets: bool,
     /// Timestamp of the first packet displayed in the chart
     pub first_packet_timestamp: Timestamp,
 }
@@ -73,6 +75,7 @@ impl TrafficChart {
             style,
             thumbnail: false,
             is_live_capture: true,
+            no_more_packets: false,
             first_packet_timestamp: Timestamp::default(),
         }
     }
@@ -89,11 +92,15 @@ impl TrafficChart {
                 Row::new()
                     .padding(Padding::new(8.0).bottom(15).left(55).right(25))
                     .width(Length::Fill)
-                    .push(
-                        iced::widget::Text::new(get_formatted_timestamp(ts_1))
-                            .font(font)
-                            .size(12.5),
-                    )
+                    .push_maybe(if self.no_more_packets {
+                        Some(
+                            iced::widget::Text::new(get_formatted_timestamp(ts_1))
+                                .font(font)
+                                .size(12.5),
+                        )
+                    } else {
+                        None
+                    })
                     .push(horizontal_space())
                     .push(
                         iced::widget::Text::new(get_formatted_timestamp(ts_2))
@@ -150,7 +157,11 @@ impl TrafficChart {
             return 0.0..0.1;
         }
 
-        let first_time_displayed = self.ticks.saturating_sub(30);
+        let first_time_displayed = if self.no_more_packets {
+            0
+        } else {
+            self.ticks.saturating_sub(30)
+        };
         let last_time_displayed = self.ticks - 1;
         #[allow(clippy::cast_precision_loss)]
         let range = first_time_displayed as f32..last_time_displayed as f32;

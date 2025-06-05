@@ -82,6 +82,7 @@ pub fn parse_packets(
                         cap_id,
                         info_traffic_msg,
                         new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                        true,
                     ));
                     // wait until there is still some thread doing rdns
                     while tx.sender_count() > 1 {
@@ -413,7 +414,7 @@ pub struct AddressesResolutionState {
 
 #[allow(clippy::large_enum_variant)]
 pub enum BackendTrafficMessage {
-    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>),
+    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
 }
@@ -433,6 +434,7 @@ fn maybe_send_tick_run_live(
             cap_id,
             info_traffic_msg.take_but_leave_timestamp(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            false,
         ));
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
             if dev.name.eq(&cs.get_name()) {
@@ -460,6 +462,7 @@ fn maybe_send_tick_run_offline(
             cap_id,
             info_traffic_msg.take_but_leave_timestamp(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            false,
         ));
         if diff_secs > 1 {
             let _ = tx.send_blocking(BackendTrafficMessage::OfflineGap(
