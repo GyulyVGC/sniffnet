@@ -71,6 +71,7 @@ impl TrafficChart {
 
     pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
         for i in 0..gap {
+            #[allow(clippy::cast_precision_loss)]
             let point = ((self.ticks + i) as f32, 0.0);
             update_series(&mut self.in_bytes, point, false, false);
             update_series(&mut self.out_bytes, point, false, false);

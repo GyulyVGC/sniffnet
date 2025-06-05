@@ -465,6 +465,7 @@ fn maybe_send_tick_run_offline(
             false,
         ));
         if diff_secs > 1 {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             let _ = tx.send_blocking(BackendTrafficMessage::OfflineGap(
                 cap_id,
                 diff_secs as u32 - 1,

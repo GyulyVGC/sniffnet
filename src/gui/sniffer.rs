@@ -396,10 +396,8 @@ impl Sniffer {
                     if self.page_number < get_searched_entries(self).1.div_ceil(20) {
                         self.page_number = self.page_number.checked_add(1).unwrap_or(1);
                     }
-                } else {
-                    if self.page_number > 1 {
-                        self.page_number = self.page_number.checked_sub(1).unwrap_or(1);
-                    }
+                } else if self.page_number > 1 {
+                    self.page_number = self.page_number.checked_sub(1).unwrap_or(1);
                 }
             }
             Message::ArrowPressed(increment) => {
