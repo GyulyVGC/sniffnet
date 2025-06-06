@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Import PCAP files ([#795](https://github.com/GyulyVGC/sniffnet/pull/795) — fixes [#283](https://github.com/GyulyVGC/sniffnet/issues/283))
 - Donut chart reporting overall traffic statistics ([#756](https://github.com/GyulyVGC/sniffnet/pull/756) — fixes [#687](https://github.com/GyulyVGC/sniffnet/issues/687))
 - Added support for ARP protocol ([#759](https://github.com/GyulyVGC/sniffnet/pull/759) — fixes [#680](https://github.com/GyulyVGC/sniffnet/issues/680))
 - Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
