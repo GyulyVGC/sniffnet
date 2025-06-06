@@ -44,7 +44,7 @@ plotters = { version = "0.3.7", default-features = false, features = ["area_seri
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
-confy = "0.6.1"
+confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
