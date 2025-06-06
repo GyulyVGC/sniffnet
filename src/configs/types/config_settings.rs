@@ -43,8 +43,8 @@ impl ConfigSettings {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) {
-        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
+    pub fn store(self) -> Result<(), confy::ConfyError> {
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 }
 
@@ -77,8 +77,8 @@ mod tests {
                 .unwrap_or_else(|_| ConfigSettings::default())
         }
 
-        pub fn store(self) {
-            confy::store_path(ConfigSettings::test_path(), self).unwrap_or(());
+        pub fn store(self) -> Result<(), confy::ConfyError> {
+            confy::store_path(ConfigSettings::test_path(), self)
         }
     }
 }

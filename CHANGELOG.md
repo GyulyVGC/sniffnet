@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Import PCAP files ([#795](https://github.com/GyulyVGC/sniffnet/pull/795) — fixes [#283](https://github.com/GyulyVGC/sniffnet/issues/283))
 - Donut chart reporting overall traffic statistics ([#756](https://github.com/GyulyVGC/sniffnet/pull/756) — fixes [#687](https://github.com/GyulyVGC/sniffnet/issues/687))
 - Added support for ARP protocol ([#759](https://github.com/GyulyVGC/sniffnet/pull/759) — fixes [#680](https://github.com/GyulyVGC/sniffnet/issues/680))
 - Identify and tag unassigned/reserved "bogon" IP addresses ([#678](https://github.com/GyulyVGC/sniffnet/pull/678) — fixes [#209](https://github.com/GyulyVGC/sniffnet/issues/209))
@@ -19,6 +20,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Add icon to window title bar ([#719](https://github.com/GyulyVGC/sniffnet/pull/719) — fixes [#715](https://github.com/GyulyVGC/sniffnet/issues/715))
 - Update footer buttons and links ([#755](https://github.com/GyulyVGC/sniffnet/pull/755) — fixes [#553](https://github.com/GyulyVGC/sniffnet/issues/553))
 - Handle errors to reduce the number of possible crash occurrences ([#784](https://github.com/GyulyVGC/sniffnet/pull/784))
+- Use asynchronous channels to update app state from backend ([#806](https://github.com/GyulyVGC/sniffnet/pull/806))
 - Do not apply new notification thresholds while user is typing them ([#777](https://github.com/GyulyVGC/sniffnet/pull/777) — fixes [#658](https://github.com/GyulyVGC/sniffnet/issues/658))
 - Fix _crates.io_ package for Windows ([#718](https://github.com/GyulyVGC/sniffnet/pull/718) — fixes [#681](https://github.com/GyulyVGC/sniffnet/issues/681))
 - Fix crash when inserting characters longer than one byte in the text input for byte threshold notification setting ([#747](https://github.com/GyulyVGC/sniffnet/pull/747) — fixes [#744](https://github.com/GyulyVGC/sniffnet/issues/744))
