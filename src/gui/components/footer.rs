@@ -15,7 +15,6 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::translations::translations_2::new_version_available_translation;
-use crate::translations::translations_4::share_feedback_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
@@ -48,7 +47,7 @@ pub fn footer<'a>(
         .padding([0, 20])
         .align_y(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_feedback(font, language))
+        .push(get_button_feedback(font))
         .push(get_button_wiki(font))
         .push(get_button_github(font))
         .push(get_button_news(font))
@@ -93,9 +92,9 @@ pub fn footer<'a>(
         .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_feedback<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
+fn get_button_feedback<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     let content = button(
-        Icon::Feedback
+        Icon::Roadmap
             .to_text()
             .size(15)
             .align_x(Alignment::Center)
@@ -105,11 +104,11 @@ fn get_button_feedback<'a>(font: Font, language: Language) -> Tooltip<'a, Messag
     .padding(Padding::ZERO.top(2))
     .height(30)
     .width(30)
-    .on_press(Message::OpenWebPage(WebPage::Issues));
+    .on_press(Message::OpenWebPage(WebPage::Roadmap));
 
     Tooltip::new(
         content,
-        row_open_link_tooltip(share_feedback_translation(language), font),
+        row_open_link_tooltip("Roadmap", font),
         Position::Top,
     )
     .gap(10)
@@ -130,13 +129,9 @@ fn get_button_wiki<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(35)
     .on_press(Message::OpenWebPage(WebPage::Wiki));
 
-    Tooltip::new(
-        content,
-        row_open_link_tooltip("Sniffnet Wiki", font),
-        Position::Top,
-    )
-    .gap(7.5)
-    .class(ContainerType::Tooltip)
+    Tooltip::new(content, row_open_link_tooltip("Wiki", font), Position::Top)
+        .gap(7.5)
+        .class(ContainerType::Tooltip)
 }
 
 fn get_button_github<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
@@ -174,13 +169,9 @@ fn get_button_news<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(35)
     .on_press(Message::OpenWebPage(WebPage::WebsiteNews));
 
-    Tooltip::new(
-        content,
-        row_open_link_tooltip("Sniffnet News", font),
-        Position::Top,
-    )
-    .gap(7.5)
-    .class(ContainerType::Tooltip)
+    Tooltip::new(content, row_open_link_tooltip("News", font), Position::Top)
+        .gap(7.5)
+        .class(ContainerType::Tooltip)
 }
 
 fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {

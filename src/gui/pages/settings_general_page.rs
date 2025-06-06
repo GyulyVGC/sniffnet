@@ -226,7 +226,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
                 .padding(2)
                 .height(40)
                 .width(60),
-                row_open_link_tooltip("Sniffnet Wiki", font),
+                row_open_link_tooltip("Wiki", font),
                 Position::Right,
             )
             .gap(5)
