@@ -46,7 +46,7 @@ use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
     horizontal_space, vertical_space,
 };
-use iced::{Alignment, Font, Length, Padding, Shrink};
+use iced::{Alignment, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
@@ -216,23 +216,24 @@ fn body_pcap_error<'a>(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
-    let row_report = Row::new()
-        .padding(Padding::new(10.0).top(0).bottom(5))
-        .push(col_host)
+    Row::new()
+        .spacing(10)
         .push(
-            Column::new()
-                .padding(Padding::ZERO.top(10).bottom(5))
-                .push(Rule::vertical(40)),
+            Container::new(col_host)
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
         )
-        .push(col_service);
-
-    Container::new(row_report)
-        .height(Shrink)
-        .class(ContainerType::BorderedRound)
+        .push(
+            Container::new(col_service)
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
+        )
 }
 
 fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
