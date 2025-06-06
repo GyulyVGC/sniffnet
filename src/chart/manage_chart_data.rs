@@ -135,7 +135,7 @@ fn get_max(serie: &ChartSeries) -> f32 {
     max
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ChartSeries {
     /// Series to be displayed DURING live/offline capture
     pub spline: Spline<f32, f32>,
@@ -162,7 +162,8 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::manage_chart_data::{get_max, get_min, update_charts_data};
+    use crate::chart::manage_chart_data::{ChartSeries, get_max, get_min};
+    use crate::utils::types::timestamp::Timestamp;
     use crate::{ChartType, InfoTraffic, Language, StyleType, TrafficChart};
 
     fn spline_from_vec(vec: Vec<(i32, i32)>) -> Spline<f32, f32> {
@@ -206,7 +207,11 @@ mod tests {
             (27, -1000),
             (28, -1000),
         ];
-        let sent = spline_from_vec(sent_vec);
+        let sent_spl = spline_from_vec(sent_vec);
+        let sent = ChartSeries {
+            spline: sent_spl,
+            all_time: vec![],
+        };
         let received_vec = vec![
             (0, 1000),
             (1, 21000),
@@ -238,7 +243,11 @@ mod tests {
             (27, 21000),
             (28, 21000),
         ];
-        let received = spline_from_vec(received_vec);
+        let received_spl = spline_from_vec(received_vec);
+        let received = ChartSeries {
+            spline: received_spl,
+            all_time: vec![],
+        };
         let tot_sent = 1000 * 28 + 500;
         let tot_received = 21000 * 28 + 1000;
         let mut traffic_chart = TrafficChart {
@@ -255,6 +264,9 @@ mod tests {
             chart_type: ChartType::Packets,
             style: StyleType::default(),
             thumbnail: false,
+            is_live_capture: true,
+            first_packet_timestamp: Timestamp::default(),
+            no_more_packets: false,
         };
         let mut info_traffic = InfoTraffic {
             all_bytes: 0,
@@ -274,7 +286,7 @@ mod tests {
         assert_eq!(get_min(&sent), -1000.0);
         assert_eq!(get_max(&received), 21000.0);
 
-        update_charts_data(&mut info_traffic, &mut traffic_chart);
+        traffic_chart.update_charts_data(&info_traffic, false);
 
         assert_eq!(get_min(&traffic_chart.out_packets), -3333.0);
         assert_eq!(get_max(&traffic_chart.in_bytes), 21000.0);
@@ -286,13 +298,21 @@ mod tests {
         info_traffic.tot_in_packets_prev = info_traffic.tot_in_packets;
 
         let mut sent_bytes = sent.clone();
-        sent_bytes.add(Key::new(29.0, -1111.0, Interpolation::Cosine));
+        sent_bytes
+            .spline
+            .add(Key::new(29.0, -1111.0, Interpolation::Cosine));
         let mut received_packets = received.clone();
-        received_packets.add(Key::new(29.0, 4444.0, Interpolation::Cosine));
+        received_packets
+            .spline
+            .add(Key::new(29.0, 4444.0, Interpolation::Cosine));
         let mut sent_packets = sent;
-        sent_packets.add(Key::new(29.0, -3333.0, Interpolation::Cosine));
+        sent_packets
+            .spline
+            .add(Key::new(29.0, -3333.0, Interpolation::Cosine));
         let mut received_bytes = received;
-        received_bytes.add(Key::new(29.0, 2222.0, Interpolation::Cosine));
+        received_bytes
+            .spline
+            .add(Key::new(29.0, 2222.0, Interpolation::Cosine));
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 30);
@@ -300,15 +320,27 @@ mod tests {
         assert_eq!(traffic_chart.min_packets, -3333.0);
         assert_eq!(traffic_chart.max_bytes, 21000.0);
         assert_eq!(traffic_chart.max_packets, 21000.0);
-        assert_eq!(traffic_chart.out_bytes.keys(), sent_bytes.keys());
-        assert_eq!(traffic_chart.in_packets.keys(), received_packets.keys());
-        assert_eq!(traffic_chart.out_packets.keys(), sent_packets.keys());
-        assert_eq!(traffic_chart.in_bytes.keys(), received_bytes.keys());
+        assert_eq!(
+            traffic_chart.out_bytes.spline.keys(),
+            sent_bytes.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.in_packets.spline.keys(),
+            received_packets.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.out_packets.spline.keys(),
+            sent_packets.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.in_bytes.spline.keys(),
+            received_bytes.spline.keys()
+        );
 
         info_traffic.tot_out_bytes += 99;
         info_traffic.tot_in_packets += 990;
         info_traffic.tot_in_bytes += 2;
-        update_charts_data(&mut info_traffic, &mut traffic_chart);
+        traffic_chart.update_charts_data(&info_traffic, false);
         info_traffic.tot_out_bytes_prev = info_traffic.tot_out_bytes;
         info_traffic.tot_in_bytes_prev = info_traffic.tot_in_bytes;
         info_traffic.tot_out_packets_prev = info_traffic.tot_out_packets;
@@ -316,24 +348,40 @@ mod tests {
         info_traffic.tot_out_bytes += 77;
         info_traffic.tot_in_packets += 1;
         info_traffic.tot_out_packets += 220;
-        update_charts_data(&mut info_traffic, &mut traffic_chart);
+        traffic_chart.update_charts_data(&info_traffic, false);
 
-        sent_bytes.remove(0);
-        sent_bytes.remove(0);
-        sent_bytes.add(Key::new(30.0, -99.0, Interpolation::Cosine));
-        sent_bytes.add(Key::new(31.0, -77.0, Interpolation::Cosine));
-        received_packets.remove(0);
-        received_packets.remove(0);
-        received_packets.add(Key::new(30.0, 990.0, Interpolation::Cosine));
-        received_packets.add(Key::new(31.0, 1.0, Interpolation::Cosine));
-        sent_packets.remove(0);
-        sent_packets.remove(0);
-        sent_packets.add(Key::new(30.0, 0.0, Interpolation::Cosine));
-        sent_packets.add(Key::new(31.0, -220.0, Interpolation::Cosine));
-        received_bytes.remove(0);
-        received_bytes.remove(0);
-        received_bytes.add(Key::new(30.0, 2.0, Interpolation::Cosine));
-        received_bytes.add(Key::new(31.0, 0.0, Interpolation::Cosine));
+        sent_bytes.spline.remove(0);
+        sent_bytes.spline.remove(0);
+        sent_bytes
+            .spline
+            .add(Key::new(30.0, -99.0, Interpolation::Cosine));
+        sent_bytes
+            .spline
+            .add(Key::new(31.0, -77.0, Interpolation::Cosine));
+        received_packets.spline.remove(0);
+        received_packets.spline.remove(0);
+        received_packets
+            .spline
+            .add(Key::new(30.0, 990.0, Interpolation::Cosine));
+        received_packets
+            .spline
+            .add(Key::new(31.0, 1.0, Interpolation::Cosine));
+        sent_packets.spline.remove(0);
+        sent_packets.spline.remove(0);
+        sent_packets
+            .spline
+            .add(Key::new(30.0, 0.0, Interpolation::Cosine));
+        sent_packets
+            .spline
+            .add(Key::new(31.0, -220.0, Interpolation::Cosine));
+        received_bytes.spline.remove(0);
+        received_bytes.spline.remove(0);
+        received_bytes
+            .spline
+            .add(Key::new(30.0, 2.0, Interpolation::Cosine));
+        received_bytes
+            .spline
+            .add(Key::new(31.0, 0.0, Interpolation::Cosine));
 
         // traffic_chart correctly updated?
         assert_eq!(traffic_chart.ticks, 32);
@@ -341,9 +389,21 @@ mod tests {
         assert_eq!(traffic_chart.min_packets, -3333.0);
         assert_eq!(traffic_chart.max_bytes, 21000.0);
         assert_eq!(traffic_chart.max_packets, 21000.0);
-        assert_eq!(traffic_chart.out_bytes.keys(), sent_bytes.keys());
-        assert_eq!(traffic_chart.in_packets.keys(), received_packets.keys());
-        assert_eq!(traffic_chart.out_packets.keys(), sent_packets.keys());
-        assert_eq!(traffic_chart.in_bytes.keys(), received_bytes.keys());
+        assert_eq!(
+            traffic_chart.out_bytes.spline.keys(),
+            sent_bytes.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.in_packets.spline.keys(),
+            received_packets.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.out_packets.spline.keys(),
+            sent_packets.spline.keys()
+        );
+        assert_eq!(
+            traffic_chart.in_bytes.spline.keys(),
+            received_bytes.spline.keys()
+        );
     }
 }
