@@ -69,9 +69,19 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .padding([5, 0])
         .height(Length::Fill)
         .align_y(Alignment::Start)
-        .push(host_col(info_traffic, chart_type, font))
+        .push(host_col(
+            info_traffic,
+            chart_type,
+            font,
+            sniffer.host_sort_type,
+        ))
         .push(Rule::vertical(10))
-        .push(service_col(info_traffic, chart_type, font));
+        .push(service_col(
+            info_traffic,
+            chart_type,
+            font,
+            sniffer.service_sort_type,
+        ));
 
     let content = Column::new()
         .push(charts)
@@ -85,12 +95,13 @@ fn host_col<'a>(
     info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
+    sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
         .spacing(3)
         .width(Length::FillPortion(2));
-    let hosts = get_host_entries(info_traffic, chart_type, SortType::Neutral);
+    let hosts = get_host_entries(info_traffic, chart_type, sort_type);
     let mut thumbnail_hosts = Vec::new();
 
     for (host, data_info_host) in &hosts {
@@ -127,9 +138,10 @@ fn service_col<'a>(
     info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
+    sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
-    let services = get_service_entries(info_traffic, chart_type, SortType::Neutral);
+    let services = get_service_entries(info_traffic, chart_type, sort_type);
     let n_entry = min(services.len(), MAX_ENTRIES);
     for (service, _) in services.get(..n_entry).unwrap_or_default() {
         service_col = service_col.push(
