@@ -658,6 +658,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "aguacero7",
+      "name": "Aguacero 🌧️",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72492241?v=4",
+      "profile": "https://github.com/aguacero7",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
