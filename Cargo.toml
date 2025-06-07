@@ -44,28 +44,28 @@ plotters = { version = "0.3.7", default-features = false, features = ["area_seri
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
-confy = "0.6.1"
+confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
 dns-lookup = "2.0.4"
-toml = "0.8.22"
+toml = "0.8.23"
 ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.3"
 phf = "0.11.3"
 phf_shared = "0.11.3"
-splines = "4.4.2"
-clap = { version = "4.5.38", features = ["derive"] }
-tokio = { version = "1.44.2", features = ["macros"] }
+splines = "5.0.0"
+clap = { version = "4.5.39", features = ["derive"] }
+tokio = { version = "1.45.1", features = ["macros"] }
 async-channel = "2.3.1"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.15", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.19", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.15", features = ["json"] }
+reqwest = { version = "0.12.19", features = ["json"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
