@@ -1,7 +1,5 @@
-//! Module defining the `ReportInfo` struct, useful to format the output report file and
-//! to keep track of statistics about the sniffed traffic.
-
 use crate::Service;
+use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -96,6 +94,25 @@ impl InfoTraffic {
             .into_iter()
             .filter(|h| favorites.contains(h))
             .collect();
+    }
+
+    pub fn get_thumbnail_data(&self, chart_type: ChartType) -> (u128, u128, u128, u128) {
+        if chart_type.eq(&ChartType::Bytes) {
+            (
+                self.tot_in_bytes,
+                self.tot_out_bytes,
+                self.all_bytes - self.tot_out_bytes - self.tot_in_bytes,
+                // assume that the dropped packets have the same size as the average packet
+                u128::from(self.dropped_packets) * self.all_bytes / self.all_packets,
+            )
+        } else {
+            (
+                self.tot_in_packets,
+                self.tot_out_packets,
+                self.all_packets - self.tot_out_packets - self.tot_in_packets,
+                u128::from(self.dropped_packets),
+            )
+        }
     }
 }
 

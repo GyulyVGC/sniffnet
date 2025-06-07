@@ -551,27 +551,8 @@ fn donut_row<'a>(
     let chart_type = sniffer.traffic_chart.chart_type;
     let filters = &sniffer.filters;
 
-    let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
-        (
-            sniffer.info_traffic.tot_in_bytes,
-            sniffer.info_traffic.tot_out_bytes,
-            sniffer.info_traffic.all_bytes
-                - sniffer.info_traffic.tot_out_bytes
-                - sniffer.info_traffic.tot_in_bytes,
-            // assume that the dropped packets have the same size as the average packet
-            u128::from(sniffer.info_traffic.dropped_packets) * sniffer.info_traffic.all_bytes
-                / sniffer.info_traffic.all_packets,
-        )
-    } else {
-        (
-            sniffer.info_traffic.tot_in_packets,
-            sniffer.info_traffic.tot_out_packets,
-            sniffer.info_traffic.all_packets
-                - sniffer.info_traffic.tot_out_packets
-                - sniffer.info_traffic.tot_in_packets,
-            u128::from(sniffer.info_traffic.dropped_packets),
-        )
-    };
+    let (in_data, out_data, filtered_out, dropped) =
+        sniffer.info_traffic.get_thumbnail_data(chart_type);
 
     let legend_entry_filtered = if filters.none_active() {
         None
@@ -624,6 +605,7 @@ fn donut_row<'a>(
             filtered_out,
             dropped,
             font,
+            sniffer.thumbnail,
         ))
         .push(legend_col);
 

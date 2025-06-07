@@ -5,6 +5,7 @@ use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::chart_type::ChartType;
+use crate::chart::types::donut_chart::donut_chart;
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::sniffer::Sniffer;
@@ -42,6 +43,28 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let info_traffic = &sniffer.info_traffic;
     let chart_type = sniffer.traffic_chart.chart_type;
 
+    let (in_data, out_data, filtered_out, dropped) = info_traffic.get_thumbnail_data(chart_type);
+
+    let charts = Row::new()
+        .padding(5)
+        .height(Length::Fill)
+        .align_y(Alignment::Center)
+        .push(donut_chart(
+            chart_type,
+            in_data,
+            out_data,
+            filtered_out,
+            dropped,
+            font,
+            sniffer.thumbnail,
+        ))
+        // .push(Rule::vertical(10))
+        .push(
+            Container::new(sniffer.traffic_chart.view())
+                .height(Length::Fill)
+                .width(Length::FillPortion(2)),
+        );
+
     let report = Row::new()
         .padding([5, 0])
         .height(Length::Fill)
@@ -51,7 +74,8 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         .push(service_col(info_traffic, chart_type, font));
 
     let content = Column::new()
-        .push(Container::new(sniffer.traffic_chart.view()).height(Length::Fill))
+        .push(charts)
+        // .push(Container::new(Rule::horizontal(10)).padding([0, 5]))
         .push(report);
 
     Container::new(content)
