@@ -135,6 +135,7 @@ impl Language {
                 | Language::PT
                 | Language::UK
                 | Language::ID
+                | Language::ES
         )
     }
 }
