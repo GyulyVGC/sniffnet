@@ -1,11 +1,11 @@
 use std::cmp::min;
 use std::net::IpAddr;
-use std::sync::Mutex;
 
-use iced::widget::{Column, Container, Row, Rule, Space, Text, lazy, vertical_space};
+use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::chart_type::ChartType;
+use crate::chart::types::donut_chart::donut_chart;
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::sniffer::Sniffer;
@@ -24,44 +24,65 @@ const MAX_CHARS_SERVICE: usize = 13;
 
 /// Computes the body of the thumbnail view
 pub fn thumbnail_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
-    let ConfigSettings { style, .. } = sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { style, .. } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
-    let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
+    let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
 
     if filtered == 0 {
         return Container::new(
             Column::new()
                 .push(vertical_space())
-                .push(Text::new(&sniffer.waiting).font(font).size(50))
+                .push(Text::new(&sniffer.dots_pulse.0).font(font).size(50))
                 .push(Space::with_height(Length::FillPortion(2))),
         )
         .width(Length::Fill)
         .align_x(Alignment::Center);
     }
 
-    let info_traffic = sniffer.info_traffic.clone();
+    let info_traffic = &sniffer.info_traffic;
     let chart_type = sniffer.traffic_chart.chart_type;
 
-    let lazy_report = lazy(filtered, move |_| {
-        Row::new()
-            .padding([5, 0])
-            .height(Length::Fill)
-            .align_y(Alignment::Start)
-            .push(host_col(&info_traffic, chart_type, font))
-            .push(Rule::vertical(10))
-            .push(service_col(&info_traffic, chart_type, font))
-    });
+    let (in_data, out_data, filtered_out, dropped) = info_traffic.get_thumbnail_data(chart_type);
+
+    let charts = Row::new()
+        .padding(5)
+        .height(Length::Fill)
+        .align_y(Alignment::Center)
+        .push(donut_chart(
+            chart_type,
+            in_data,
+            out_data,
+            filtered_out,
+            dropped,
+            font,
+            sniffer.thumbnail,
+        ))
+        // .push(Rule::vertical(10))
+        .push(
+            Container::new(sniffer.traffic_chart.view())
+                .height(Length::Fill)
+                .width(Length::FillPortion(2)),
+        );
+
+    let report = Row::new()
+        .padding([5, 0])
+        .height(Length::Fill)
+        .align_y(Alignment::Start)
+        .push(host_col(info_traffic, chart_type, font))
+        .push(Rule::vertical(10))
+        .push(service_col(info_traffic, chart_type, font));
 
     let content = Column::new()
-        .push(Container::new(sniffer.traffic_chart.view()).height(Length::Fill))
-        .push(lazy_report);
+        .push(charts)
+        // .push(Container::new(Rule::horizontal(10)).padding([0, 5]))
+        .push(report);
 
     Container::new(content)
 }
 
 fn host_col<'a>(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -103,7 +124,7 @@ fn host_col<'a>(
 }
 
 fn service_col<'a>(
-    info_traffic: &Mutex<InfoTraffic>,
+    info_traffic: &InfoTraffic,
     chart_type: ChartType,
     font: Font,
 ) -> Column<'a, Message, StyleType> {

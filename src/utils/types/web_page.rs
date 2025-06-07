@@ -11,8 +11,8 @@ pub enum WebPage {
     WebsiteNews,
     /// Sniffnet's website/sponsor page.
     WebsiteSponsor,
-    /// Sniffnet issues
-    Issues,
+    /// Sniffnet Roadmap
+    Roadmap,
     /// Sniffnet issue #60 on GitHub
     IssueLanguages,
     /// Sniffnet Wiki
@@ -29,7 +29,7 @@ impl WebPage {
             WebPage::WebsiteSponsor => "https://www.sniffnet.net/sponsor",
             WebPage::WebsiteDownload => "https://www.sniffnet.net/download",
             WebPage::WebsiteNews => "https://www.sniffnet.net/news",
-            WebPage::Issues => "https://github.com/GyulyVGC/sniffnet/issues",
+            WebPage::Roadmap => "https://whimsical.com/sniffnet-roadmap-Damodrdfx22V9jGnpHSCGo",
             WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",
             WebPage::Wiki => "https://github.com/GyulyVGC/sniffnet/wiki",
             WebPage::MyGitHub => "https://github.com/GyulyVGC",

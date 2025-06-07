@@ -1,12 +1,12 @@
 use crate::chart::types::chart_type::ChartType;
 use crate::gui::styles::donut::Catalog;
-use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
 use crate::networking::types::byte_multiple::ByteMultiple;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
 use iced::widget::{Canvas, canvas};
-use iced::{Font, Radians, Renderer, mouse};
+use iced::{Font, Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
@@ -16,6 +16,7 @@ pub struct DonutChart {
     filtered_out: u128,
     dropped: u128,
     font: Font,
+    thumbnail: bool,
 }
 
 impl DonutChart {
@@ -26,6 +27,7 @@ impl DonutChart {
         filtered_out: u128,
         dropped: u128,
         font: Font,
+        thumbnail: bool,
     ) -> Self {
         Self {
             chart_type,
@@ -34,6 +36,7 @@ impl DonutChart {
             filtered_out,
             dropped,
             font,
+            thumbnail,
         }
     }
 
@@ -132,7 +135,12 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
             vertical_alignment: Vertical::Center,
             horizontal_alignment: Horizontal::Center,
             color: style.text_color,
-            size: FONT_SIZE_SUBTITLE.into(),
+            size: if self.thumbnail {
+                FONT_SIZE_FOOTER
+            } else {
+                FONT_SIZE_SUBTITLE
+            }
+            .into(),
             font: self.font,
             ..Default::default()
         });
@@ -148,7 +156,13 @@ pub fn donut_chart<Message, Theme: Catalog>(
     filtered_out: u128,
     dropped: u128,
     font: Font,
+    thumbnail: bool,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
+    let size = if thumbnail {
+        Length::Fill
+    } else {
+        Length::Fixed(110.0)
+    };
     iced::widget::canvas(DonutChart::new(
         chart_type,
         incoming,
@@ -156,7 +170,8 @@ pub fn donut_chart<Message, Theme: Catalog>(
         filtered_out,
         dropped,
         font,
+        thumbnail,
     ))
-    .width(110)
-    .height(110)
+    .width(size)
+    .height(size)
 }

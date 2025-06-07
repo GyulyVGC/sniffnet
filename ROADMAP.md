@@ -1,48 +1,12 @@
 # Roadmap
 
-This file provides an overview of the direction this project is heading.
+The <a href="https://whimsical.com/Damodrdfx22V9jGnpHSCGo">Sniffnet Roadmap</a> aims to provide a visual overview of the direction the project is heading.<br>
+It includes the most relevant features implemented since Sniffnet 1.0, and other significant milestones that are planned for the future. <br>
 
-Even if I no longer have the luck of working on Sniffnet full-time (as described in [#329](https://github.com/GyulyVGC/sniffnet/discussions/329)),
-I'll try all my best to make the application grow even further by targeting the following features, improvements, and fixes. <br>
+The ultimate goal is to come up with **Sniffnet 2.0**: a feature-wise complete network monitoring-and-management tool,
+built having in mind the most requested features by its users during the years, 
+and embodying the final step of the transition from a personal toy-project to one of the most renowned network analysers available.
 
-Sections are sorted by relevance. <br>
-Elements inside a section are sorted by expected release date.
-
-## Major features
-  
-| Feature                                     | Release  | 
-|---------------------------------------------|----------|
-| IP geolocation                              | ✅ (v1.1) |
-| Custom notifications                        | ✅ (v1.1) |
-| Host names and ASN availability             | ✅ (v1.2) |
-| Full connections report in a dedicated page | ✅ (v1.2) |
-| Thumbnail mode                              | ✅ (v1.3) |
-| Extended upper layer services recognition   | ✅ (v1.3) |
-| ICMP support                                | ✅ (v1.3) |
-| PCAP file export                            | ✅ (v1.3) |
-| PCAP file import                            | ❓(TBD)   |
-| IP addresses' reputation                    | ❓(TBD)   |
-| Malicious traffic detection                 | ❓(TBD)   |
-| PIDs identification                         | ❓(TBD)   |
-| Packets' payload inspection                 | ❓(TBD)   |
-| Firewall capabilities                       | ❓(TBD)   |
-| Sniffnet agent to monitor a remote host     | ❓(TBD)   |
-| Web interface                               | ❓(TBD)   |
-
-## Other features
-  
-| Feature                                            | Release    | 
-|----------------------------------------------------|------------|
-| Settings page: notifications, style, language      | ✅ (v1.1.0) |
-| Keyboard shortcuts                                 | ✅ (v1.1.2) |
-| Notify user when new release is available          | ✅ (v1.1.3) |
-| Styles based on color gradients                    | ✅ (v1.2.2) |
-| Custom TOML themes support                         | ✅ (v1.3.0) |
-| Filter traffic by port number                      | ✅ (v1.3.0) |
-| Advanced settings: UI scale factor and MMDBs paths | ✅ (v1.3.0) |
-| Proper table structure for connections list        | ✅ (v1.3.0) |
-| Extended documentation (Wiki)                      | ✅ (v1.3.0) |
-| Support more link types                            | ✅ (v1.3.0) |
-| Filter inputs autocompletion                       | ✅ (v1.3.2) |
-| Details about unassigned IPs                       | ❓(TBD)     |
-| Additional details about each notification event   | ❓(TBD)     |
+<a href="https://whimsical.com/Damodrdfx22V9jGnpHSCGo">
+  <img src="./resources/repository/roadmap.png" width="100%" alt="Roadmap" title="Roadmap">
+</a>

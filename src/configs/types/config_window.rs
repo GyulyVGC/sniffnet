@@ -43,8 +43,8 @@ impl ConfigWindow {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) {
-        let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!());
+    pub fn store(self) -> Result<(), confy::ConfyError> {
+        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 
     pub fn thumbnail_size(factor: f64) -> SizeTuple {
@@ -157,8 +157,8 @@ mod tests {
                 .unwrap_or_else(|_| ConfigWindow::default())
         }
 
-        pub fn store(self) {
-            confy::store_path(ConfigWindow::test_path(), self).unwrap_or(());
+        pub fn store(self) -> Result<(), confy::ConfyError> {
+            confy::store_path(ConfigWindow::test_path(), self)
         }
     }
 }

@@ -16,24 +16,24 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
-use crate::networking::types::my_device::MyDevice;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, error_translation, incoming_translation,
-    network_adapter_translation, no_addresses_translation, none_translation, outgoing_translation,
-    some_observed_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
+    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
+    waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::excluded_translation;
+use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
@@ -44,43 +44,42 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
-    horizontal_space, lazy, vertical_space,
+    horizontal_space, vertical_space,
 };
-use iced::{Alignment, Font, Length, Padding, Shrink};
+use iced::{Alignment, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
+    let dots = &sniffer.dots_pulse.0;
+
     if let Some(error) = sniffer.pcap_error.as_ref() {
         // pcap threw an ERROR!
-        body = body_pcap_error(error, &sniffer.waiting, language, font);
+        body = body_pcap_error(error, dots, language, font);
     } else {
         // NO pcap error detected
-        let observed = sniffer.runtime_data.all_packets;
-        let filtered = sniffer.runtime_data.tot_out_packets + sniffer.runtime_data.tot_in_packets;
-        let dropped = sniffer.runtime_data.dropped_packets;
-        let total = observed + u128::from(dropped);
+        let observed = sniffer.info_traffic.all_packets;
+        let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
 
         match (observed, filtered) {
             (0, 0) => {
                 //no packets observed at all
-                body = body_no_packets(&sniffer.device, font, language, &sniffer.waiting);
+                body = body_no_packets(&sniffer.capture_source, font, language, dots);
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body =
-                    body_no_observed(&sniffer.filters, observed, font, language, &sniffer.waiting);
+                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
             }
-            (_observed, filtered) => {
+            (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
                 let tabs = get_pages_tabs(
                     RunningPage::Overview,
@@ -93,24 +92,9 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
                 let container_chart = container_chart(sniffer, font);
 
-                let container_info = lazy(
-                    (total, style, language, sniffer.traffic_chart.chart_type),
-                    move |_| lazy_col_info(sniffer),
-                );
+                let container_info = col_info(sniffer);
 
-                let num_favorites = sniffer.info_traffic.lock().unwrap().favorite_hosts.len();
-                let container_report = lazy(
-                    (
-                        filtered,
-                        num_favorites,
-                        style,
-                        language,
-                        sniffer.traffic_chart.chart_type,
-                        sniffer.host_sort_type,
-                        sniffer.service_sort_type,
-                    ),
-                    move |_| lazy_row_report(sniffer),
-                );
+                let container_report = row_report(sniffer);
 
                 body = body
                     .width(Length::Fill)
@@ -133,36 +117,39 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 }
 
 fn body_no_packets<'a>(
-    device: &MyDevice,
+    cs: &CaptureSource,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
-    let link_type = device.link_type;
-    let mut adapter_info = device.name.clone();
-    let _ = write!(
-        adapter_info,
-        "\n{}",
-        link_type.full_print_on_one_line(language)
-    );
+    let link_type = cs.get_link_type();
+    let mut cs_info = cs.get_name();
+    let _ = write!(cs_info, "\n{}", link_type.full_print_on_one_line(language));
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
-            unsupported_link_type_translation(language, &adapter_info)
+            unsupported_link_type_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
-    } else if device.addresses.lock().unwrap().is_empty() {
+    } else if matches!(cs, CaptureSource::File(_)) {
+        (
+            Icon::get_hourglass(dots.len()).size(60),
+            reading_from_pcap_translation(language, &cs_info)
+                .align_x(Alignment::Center)
+                .font(font),
+        )
+    } else if cs.get_addresses().is_empty() {
         (
             Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &adapter_info)
+            no_addresses_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
     } else {
         (
-            Icon::get_hourglass(waiting.len()).size(60),
-            waiting_translation(language, &adapter_info)
+            Icon::get_hourglass(dots.len()).size(60),
+            waiting_translation(language, &cs_info)
                 .align_x(Alignment::Center)
                 .font(font),
         )
@@ -177,7 +164,7 @@ fn body_no_packets<'a>(
         .push(icon_text)
         .push(Space::with_height(15))
         .push(nothing_to_see_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
@@ -186,7 +173,7 @@ fn body_no_observed<'a>(
     observed: u128,
     font: Font,
     language: Language,
-    waiting: &str,
+    dots: &str,
 ) -> Column<'a, Message, StyleType> {
     let tot_packets_text = some_observed_translation(language, observed)
         .align_x(Alignment::Center)
@@ -202,13 +189,13 @@ fn body_no_observed<'a>(
         .push(get_active_filters_col(filters, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
 fn body_pcap_error<'a>(
     pcap_error: &'a str,
-    waiting: &'a str,
+    dots: &'a str,
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
@@ -225,33 +212,34 @@ fn body_pcap_error<'a>(
         .push(Icon::Error.to_text().size(60))
         .push(Space::with_height(15))
         .push(error_text)
-        .push(Text::new(waiting.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn lazy_row_report<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
     let col_host = col_host(840.0, sniffer);
     let col_service = col_service(250.0, sniffer);
 
-    let row_report = Row::new()
-        .padding(Padding::new(10.0).top(0).bottom(5))
-        .push(col_host)
+    Row::new()
+        .spacing(10)
         .push(
-            Column::new()
-                .padding(Padding::ZERO.top(10).bottom(5))
-                .push(Rule::vertical(40)),
+            Container::new(col_host)
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
         )
-        .push(col_service);
-
-    Container::new(row_report)
-        .height(Shrink)
-        .class(ContainerType::BorderedRound)
+        .push(
+            Container::new(col_service)
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
+        )
 }
 
 fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -358,7 +346,7 @@ fn col_host<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let font = style.get_extension().font;
     let chart_type = sniffer.traffic_chart.chart_type;
 
@@ -437,13 +425,13 @@ fn col_service<'a>(width: f32, sniffer: &Sniffer) -> Column<'a, Message, StyleTy
         )
 }
 
-fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
-    } = sniffer.configs.lock().unwrap().settings;
+    } = sniffer.configs.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.device);
+    let col_device = col_device(language, font, &sniffer.capture_source);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.chart_type);
@@ -477,7 +465,7 @@ fn lazy_col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.lock().unwrap().settings;
+    let ConfigSettings { language, .. } = sniffer.configs.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
     Container::new(
@@ -502,20 +490,20 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleTyp
 fn col_device<'a>(
     language: Language,
     font: Font,
-    device: &MyDevice,
+    cs: &CaptureSource,
 ) -> Column<'a, Message, StyleType> {
-    let link_type = device.link_type;
+    let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
-    let adapter_info = &device.name;
+    let cs_info = cs.get_name();
     #[cfg(target_os = "windows")]
-    let adapter_info = device.desc.as_ref().unwrap_or(&device.name);
+    let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
     Column::new()
         .height(Length::Fill)
         .spacing(10)
         .push(TextType::highlighted_subtitle_with_desc(
-            network_adapter_translation(language),
-            adapter_info,
+            cs.title(language),
+            &cs_info,
             font,
         ))
         .push(link_type.link_type_col(language, font))
@@ -563,27 +551,8 @@ fn donut_row<'a>(
     let chart_type = sniffer.traffic_chart.chart_type;
     let filters = &sniffer.filters;
 
-    let (in_data, out_data, filtered_out, dropped) = if chart_type.eq(&ChartType::Bytes) {
-        (
-            sniffer.runtime_data.tot_in_bytes,
-            sniffer.runtime_data.tot_out_bytes,
-            sniffer.runtime_data.all_bytes
-                - sniffer.runtime_data.tot_out_bytes
-                - sniffer.runtime_data.tot_in_bytes,
-            // assume that the dropped packets have the same size as the average packet
-            u128::from(sniffer.runtime_data.dropped_packets) * sniffer.runtime_data.all_bytes
-                / sniffer.runtime_data.all_packets,
-        )
-    } else {
-        (
-            sniffer.runtime_data.tot_in_packets,
-            sniffer.runtime_data.tot_out_packets,
-            sniffer.runtime_data.all_packets
-                - sniffer.runtime_data.tot_out_packets
-                - sniffer.runtime_data.tot_in_packets,
-            u128::from(sniffer.runtime_data.dropped_packets),
-        )
-    };
+    let (in_data, out_data, filtered_out, dropped) =
+        sniffer.info_traffic.get_thumbnail_data(chart_type);
 
     let legend_entry_filtered = if filters.none_active() {
         None
@@ -636,6 +605,7 @@ fn donut_row<'a>(
             filtered_out,
             dropped,
             font,
+            sniffer.thumbnail,
         ))
         .push(legend_col);
 
@@ -829,7 +799,7 @@ fn get_active_filters_tooltip<'a>(
 
     ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
 
-    let tooltip = Tooltip::new(
+    Tooltip::new(
         Container::new(
             Text::new("i")
                 .font(font)
@@ -844,9 +814,7 @@ fn get_active_filters_tooltip<'a>(
         ret_val,
         Position::FollowCursor,
     )
-    .class(ContainerType::Tooltip);
-
-    tooltip
+    .class(ContainerType::Tooltip)
 }
 
 fn sort_arrows<'a>(
