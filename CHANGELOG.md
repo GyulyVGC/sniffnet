@@ -14,6 +14,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Updated some of the existing translations to v1.3: 
   - Portuguese ([#690](https://github.com/GyulyVGC/sniffnet/pull/690))
   - Ukrainian ([#692](https://github.com/GyulyVGC/sniffnet/pull/692))
+  - Spanish ([#805](https://github.com/GyulyVGC/sniffnet/pull/805))
 - Show more information when domain name is short ([#720](https://github.com/GyulyVGC/sniffnet/pull/720) — fixes [#696](https://github.com/GyulyVGC/sniffnet/issues/696))
 - Added new themes _A11y (Night)_ and _A11y (Day)_ based on palettes optimized for Accessibility ([#785](https://github.com/GyulyVGC/sniffnet/pull/785) — fixes [#786](https://github.com/GyulyVGC/sniffnet/issues/786))
 - Avoid directory traversal when selecting file name for PCAP exports ([#776](https://github.com/GyulyVGC/sniffnet/pull/776) — fixes [#767](https://github.com/GyulyVGC/sniffnet/issues/767))
