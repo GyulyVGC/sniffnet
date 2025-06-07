@@ -58,7 +58,7 @@ impl Sound {
 }
 
 pub fn play(sound: Sound, volume: u8) {
-    if sound.eq(&Sound::None) || volume == 0 {
+    if sound.eq(&Sound::None) || volume == 0 || cfg!(test) {
         return;
     }
     let mp3_sound = sound.mp3_sound();
