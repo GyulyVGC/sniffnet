@@ -63,7 +63,7 @@ pub fn main() -> iced::Result {
         _gag2 = gag2;
     }
 
-    let configs = CONFIGS.clone();
+    let configs = CONFIGS.clone();:
     let boot_task_chain = handle_cli_args();
 
     #[cfg(debug_assertions)]
