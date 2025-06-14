@@ -62,10 +62,10 @@ async-channel = "2.3.1"
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.19", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.20", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.19", features = ["json"] }
+reqwest = { version = "0.12.20", features = ["json"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
