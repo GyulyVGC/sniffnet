@@ -4,7 +4,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button, vertical_space};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 use std::fmt::Write;
 
 use crate::chart::types::chart_type::ChartType;
@@ -54,7 +54,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
         sniffer.unread_notifications,
     );
 
-    tab_and_body = tab_and_body.push(tabs).push(Space::with_height(15));
+    tab_and_body = tab_and_body.push(tabs);
 
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
@@ -69,6 +69,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     } else {
         let logged_notifications = logged_notifications(sniffer);
         let body_row = Row::new()
+            .padding(Padding::new(10.0).bottom(0))
             .width(Length::Fill)
             .push(
                 Container::new(if sniffer.logged_notifications.len() < 30 {
@@ -76,7 +77,6 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 } else {
                     Text::new(only_last_30_translation(language)).font(font)
                 })
-                .padding(10)
                 .width(Length::Fill)
                 .height(Length::Fill)
                 .align_x(Alignment::Center)
@@ -369,7 +369,6 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(830)
-        .padding(5)
         .spacing(10)
         .align_x(Alignment::Center);
 
