@@ -69,7 +69,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     } else {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
-        let filtered = sniffer.info_traffic.tot_out_packets + sniffer.info_traffic.tot_in_packets;
+        let filtered = sniffer.info_traffic.tot_data_info.tot_packets();
 
         match (observed, filtered) {
             (0, 0) => {

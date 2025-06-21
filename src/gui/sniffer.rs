@@ -690,7 +690,7 @@ impl Sniffer {
         self.info_traffic.refresh(msg, &self.favorite_hosts);
         self.update_thresholds();
         let info_traffic = &self.info_traffic;
-        if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
+        if info_traffic.tot_data_info.tot_packets() == 0 {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -988,7 +988,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.info_traffic.tot_out_packets + self.info_traffic.tot_in_packets > 0 {
+                if self.info_traffic.tot_data_info.tot_packets() > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()
@@ -1160,6 +1160,7 @@ mod tests {
     use crate::gui::types::timing_events::TimingEvents;
     use crate::networking::types::host::Host;
     use crate::networking::types::info_traffic::InfoTrafficMessage;
+    use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         LoggedNotification, PacketsThresholdExceeded,
     };
@@ -1696,7 +1697,10 @@ mod tests {
             ));
             // Thresholds adjustments won't be updated if `info_traffic.tot_in_packets`
             // and `info_traffic.tot_out_packets` are both `0`.
-            sniffer.info_traffic.tot_in_packets = 1;
+            sniffer
+                .info_traffic
+                .tot_data_info
+                .add_packet(0, TrafficDirection::Outgoing);
 
             // Simulate a tick to apply the settings
             sniffer.update(Message::TickRun(
@@ -1974,7 +1978,10 @@ mod tests {
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer.info_traffic.tot_in_packets += 1;
+        sniffer
+            .info_traffic
+            .tot_data_info
+            .add_packet(0, TrafficDirection::Outgoing);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);

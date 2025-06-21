@@ -154,7 +154,9 @@ pub fn parse_packets(
                             exchanged_bytes,
                         );
 
-                        info_traffic_msg.add_packet(exchanged_bytes, traffic_direction);
+                        info_traffic_msg
+                            .tot_data_info
+                            .add_packet(exchanged_bytes, traffic_direction);
 
                         // check the rDNS status of this address and act accordingly
                         let address_to_lookup = get_address_to_lookup(&key, traffic_direction);

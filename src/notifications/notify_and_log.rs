@@ -22,8 +22,10 @@ pub fn notify_and_log(
     let timestamp = info_traffic.last_packet_timestamp;
     // packets threshold
     if let Some(threshold) = notifications.packets_notification.threshold {
-        let sent_packets_entry = info_traffic.tot_out_packets - info_traffic.tot_out_packets_prev;
-        let received_packets_entry = info_traffic.tot_in_packets - info_traffic.tot_in_packets_prev;
+        let sent_packets_entry = info_traffic.tot_data_info.outgoing_packets()
+            - info_traffic.tot_data_info_prev.outgoing_packets();
+        let received_packets_entry = info_traffic.tot_data_info.incoming_packets()
+            - info_traffic.tot_data_info_prev.incoming_packets();
         if received_packets_entry + sent_packets_entry > u128::from(threshold) {
             // log this notification
             emitted_notifications += 1;
@@ -45,8 +47,10 @@ pub fn notify_and_log(
     }
     // bytes threshold
     if let Some(threshold) = notifications.bytes_notification.threshold {
-        let sent_bytes_entry = info_traffic.tot_out_bytes - info_traffic.tot_out_bytes_prev;
-        let received_bytes_entry = info_traffic.tot_in_bytes - info_traffic.tot_in_bytes_prev;
+        let sent_bytes_entry = info_traffic.tot_data_info.outgoing_bytes()
+            - info_traffic.tot_data_info_prev.outgoing_bytes();
+        let received_bytes_entry = info_traffic.tot_data_info.incoming_bytes()
+            - info_traffic.tot_data_info_prev.incoming_bytes();
         if received_bytes_entry + sent_bytes_entry > u128::from(threshold) {
             //log this notification
             emitted_notifications += 1;
