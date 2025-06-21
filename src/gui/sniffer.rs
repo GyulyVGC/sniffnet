@@ -1158,11 +1158,12 @@ mod tests {
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::message::Message;
     use crate::gui::types::timing_events::TimingEvents;
+    use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::host::Host;
     use crate::networking::types::info_traffic::InfoTrafficMessage;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
-        LoggedNotification, PacketsThresholdExceeded,
+        DataThresholdExceeded, LoggedNotification,
     };
     use crate::notifications::types::notifications::{
         BytesNotification, FavoriteNotification, Notification, Notifications, PacketsNotification,
@@ -1922,10 +1923,9 @@ mod tests {
         let mut sniffer = Sniffer::new(Configs::default());
         sniffer.logged_notifications =
             VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
-                PacketsThresholdExceeded {
+                DataThresholdExceeded {
                     threshold: 0,
-                    incoming: 0,
-                    outgoing: 0,
+                    data_info: DataInfo::default(),
                     timestamp: "".to_string(),
                 },
             )]);

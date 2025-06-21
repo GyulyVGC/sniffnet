@@ -37,11 +37,11 @@ pub enum Notification {
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 pub struct PacketsNotification {
     /// Threshold of received + sent packets; if exceeded a notification is emitted
-    pub threshold: Option<u32>,
+    pub threshold: Option<u64>,
     /// The sound to emit
     pub sound: Sound,
     /// The last used Some value for the threshold field
-    pub previous_threshold: u32,
+    pub previous_threshold: u64,
 }
 
 impl Default for PacketsNotification {

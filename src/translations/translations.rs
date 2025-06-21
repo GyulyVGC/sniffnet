@@ -1971,32 +1971,32 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> String {
-    match language {
-        Language::EN => format!("{value} have been exchanged"),
-        Language::IT => format!("{value} sono stati scambiati"),
-        Language::FR => format!("{value} ont été échangé"),
-        Language::ES => format!("{value} han sido intercambiado/s"),
-        Language::PL => format!("Wymieniono {value}"),
-        Language::DE => format!("{value} wurden ausgetauscht"),
-        Language::UK => format!("{value} було обміняно"),
-        Language::ZH => format!("已交换字节 {value}"),
-        Language::ZH_TW => format!("已交換 {value} 位元組"),
-        Language::RO => format!("au fost transferați {value}"),
-        Language::KO => format!("바이트 {value} 가 교환되었습니다"),
-        Language::TR => format!("{value} aktarıldı"),
-        Language::RU => format!("{value} обмена информацией"),
-        Language::PT => format!("Foram trocados {value}"),
-        Language::EL => format!("{value} έχουν ανταλλαγεί"),
-        // Language::FA => format!("{value} بایت مبادله شده است"),
-        Language::SV => format!("{value} har utbytts"),
-        Language::FI => format!("{value} on vaihdettu"),
-        Language::JA => format!("{value} の送受信が発生しました"),
-        Language::UZ => format!("{value} ma'lumot almashinuvi"),
-        Language::VI => format!("{value} đã được trao đổi"),
-        Language::ID => format!("{value} telah dipertukarkan"),
-    }
-}
+// pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> String {
+//     match language {
+//         Language::EN => format!("{value} have been exchanged"),
+//         Language::IT => format!("{value} sono stati scambiati"),
+//         Language::FR => format!("{value} ont été échangé"),
+//         Language::ES => format!("{value} han sido intercambiado/s"),
+//         Language::PL => format!("Wymieniono {value}"),
+//         Language::DE => format!("{value} wurden ausgetauscht"),
+//         Language::UK => format!("{value} було обміняно"),
+//         Language::ZH => format!("已交换字节 {value}"),
+//         Language::ZH_TW => format!("已交換 {value} 位元組"),
+//         Language::RO => format!("au fost transferați {value}"),
+//         Language::KO => format!("바이트 {value} 가 교환되었습니다"),
+//         Language::TR => format!("{value} aktarıldı"),
+//         Language::RU => format!("{value} обмена информацией"),
+//         Language::PT => format!("Foram trocados {value}"),
+//         Language::EL => format!("{value} έχουν ανταλλαγεί"),
+//         // Language::FA => format!("{value} بایت مبادله شده است"),
+//         Language::SV => format!("{value} har utbytts"),
+//         Language::FI => format!("{value} on vaihdettu"),
+//         Language::JA => format!("{value} の送受信が発生しました"),
+//         Language::UZ => format!("{value} ma'lumot almashinuvi"),
+//         Language::VI => format!("{value} đã được trao đổi"),
+//         Language::ID => format!("{value} telah dipertukarkan"),
+//     }
+// }
 
 pub fn packets_exceeded_translation(language: Language) -> &'static str {
     match language {
@@ -2025,56 +2025,56 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn packets_exceeded_value_translation(language: Language, value: u32) -> String {
-    match language {
-        Language::EN => match value {
-            1 => "1 packet has been exchanged".to_owned(),
-            npackets => format!("{npackets} packets have been exchanged"),
-        },
-        Language::IT => match value {
-            1 => "1 pacchetto è stato scambiato".to_owned(),
-            npackets => format!("{npackets} pacchetti sono stati scambiati"),
-        },
-        Language::FR => match value {
-            1 => "1 paquet a été échangé".to_owned(),
-            npackets => format!("{npackets} paquets ont été échangés"),
-        },
-        Language::ES => format!("{value} paquete/s han sido intercambiado/s"),
-        Language::PL => format!("Wymieniono {value} pakietów"),
-        Language::DE => match value {
-            1 => "1 Paket wurde ausgetauscht".to_owned(),
-            npackets => format!("{npackets} Pakete wurden ausgetauscht"),
-        },
-        Language::UK => format!("Обміняно {value} пакетів"),
-        Language::ZH => format!("已交换数据包 {value}"),
-        Language::ZH_TW => format!("已交換 {value} 個封包"),
-        Language::RO => format!("au fost transferate {value} pachete"),
-        Language::KO => format!("패킷 {value} 가 교환되었습니다"),
-        Language::TR => format!("{value} paket aktarıldı"),
-        Language::RU => format!("{value} пакет(ов) обмена информацией"),
-        Language::PT => match value {
-            1 => "Foi trocado 1 pacote".to_owned(),
-            npackets => format!("Foram trocados {npackets} pacotes"),
-        },
-        Language::EL => match value {
-            1 => "1 πακέτο έχει ανταλλαγεί".to_owned(),
-            npackets => format!("{npackets} πακέτα έχουν ανταλλαγεί"),
-        },
-        // Language::FA => format!("{value} بسته مبادله شده است"),
-        Language::SV => match value {
-            1 => "1 paket har utbytts".to_owned(),
-            npackets => format!("{npackets} paket har utbytts"),
-        },
-        Language::FI => match value {
-            1 => "1 paketti vaihdettu".to_owned(),
-            npackets => format!("{npackets} pakettia vaihdettu"),
-        },
-        Language::JA => format!("{value} パケットの送受信が発生しました"),
-        Language::UZ => format!("{value} paket uzatildi"),
-        Language::VI => format!("{value} gói tin đã được trao đổi"),
-        Language::ID => format!("{value} paket telah dipertukarkan"),
-    }
-}
+// pub fn packets_exceeded_value_translation(language: Language, value: u32) -> String {
+//     match language {
+//         Language::EN => match value {
+//             1 => "1 packet has been exchanged".to_owned(),
+//             npackets => format!("{npackets} packets have been exchanged"),
+//         },
+//         Language::IT => match value {
+//             1 => "1 pacchetto è stato scambiato".to_owned(),
+//             npackets => format!("{npackets} pacchetti sono stati scambiati"),
+//         },
+//         Language::FR => match value {
+//             1 => "1 paquet a été échangé".to_owned(),
+//             npackets => format!("{npackets} paquets ont été échangés"),
+//         },
+//         Language::ES => format!("{value} paquete/s han sido intercambiado/s"),
+//         Language::PL => format!("Wymieniono {value} pakietów"),
+//         Language::DE => match value {
+//             1 => "1 Paket wurde ausgetauscht".to_owned(),
+//             npackets => format!("{npackets} Pakete wurden ausgetauscht"),
+//         },
+//         Language::UK => format!("Обміняно {value} пакетів"),
+//         Language::ZH => format!("已交换数据包 {value}"),
+//         Language::ZH_TW => format!("已交換 {value} 個封包"),
+//         Language::RO => format!("au fost transferate {value} pachete"),
+//         Language::KO => format!("패킷 {value} 가 교환되었습니다"),
+//         Language::TR => format!("{value} paket aktarıldı"),
+//         Language::RU => format!("{value} пакет(ов) обмена информацией"),
+//         Language::PT => match value {
+//             1 => "Foi trocado 1 pacote".to_owned(),
+//             npackets => format!("Foram trocados {npackets} pacotes"),
+//         },
+//         Language::EL => match value {
+//             1 => "1 πακέτο έχει ανταλλαγεί".to_owned(),
+//             npackets => format!("{npackets} πακέτα έχουν ανταλλαγεί"),
+//         },
+//         // Language::FA => format!("{value} بسته مبادله شده است"),
+//         Language::SV => match value {
+//             1 => "1 paket har utbytts".to_owned(),
+//             npackets => format!("{npackets} paket har utbytts"),
+//         },
+//         Language::FI => match value {
+//             1 => "1 paketti vaihdettu".to_owned(),
+//             npackets => format!("{npackets} pakettia vaihdettu"),
+//         },
+//         Language::JA => format!("{value} パケットの送受信が発生しました"),
+//         Language::UZ => format!("{value} paket uzatildi"),
+//         Language::VI => format!("{value} gói tin đã được trao đổi"),
+//         Language::ID => format!("{value} paket telah dipertukarkan"),
+//     }
+// }
 
 pub fn favorite_transmitted_translation(language: Language) -> &'static str {
     match language {
