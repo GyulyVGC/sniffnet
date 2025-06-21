@@ -324,7 +324,7 @@ fn input_group_bytes<'a>(
         .push(
             TextInput::new(
                 "0",
-                if curr_threshold_str == "0" {
+                if curr_threshold_str.starts_with('0') {
                     ""
                 } else {
                     &curr_threshold_str
