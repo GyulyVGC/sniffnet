@@ -46,7 +46,6 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
@@ -1100,33 +1099,16 @@ impl Sniffer {
     fn handle_new_host(&mut self, host_msg: HostMessage) {
         let HostMessage {
             host,
-            other_data,
-            is_loopback,
-            is_local,
-            is_bogon,
-            traffic_type,
+            data_info_host,
             address_to_lookup,
             rdns,
         } = host_msg;
 
-        let data_info_host = DataInfoHost {
-            data_info: other_data,
-            is_favorite: false,
-            is_loopback,
-            is_local,
-            is_bogon,
-            traffic_type,
-        };
-
         self.info_traffic
             .hosts
             .entry(host.clone())
-            .and_modify(|data_info_host| {
-                data_info_host.data_info.refresh(other_data);
-                data_info_host.is_loopback = is_loopback;
-                data_info_host.is_local = is_local;
-                data_info_host.is_bogon = is_bogon;
-                data_info_host.traffic_type = traffic_type;
+            .and_modify(|d| {
+                d.refresh(&data_info_host);
             })
             .or_insert(data_info_host);
 

@@ -388,13 +388,18 @@ fn reverse_dns_lookup(
         .insert(address_to_lookup, new_host.clone());
     drop(resolutions_lock);
 
-    let msg_data = HostMessage {
-        host: new_host,
-        other_data,
-        is_loopback,
+    let data_info_host = DataInfoHost {
+        data_info: other_data,
+        is_favorite: false,
         is_local,
         is_bogon,
+        is_loopback,
         traffic_type,
+    };
+
+    let msg_data = HostMessage {
+        host: new_host,
+        data_info_host,
         address_to_lookup,
         rdns,
     };
