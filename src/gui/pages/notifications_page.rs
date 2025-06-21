@@ -162,15 +162,10 @@ fn packets_notification_log<'a>(
         .height(Length::Fill)
         .spacing(30)
         .push(
-            Tooltip::new(
-                Icon::PacketsThreshold
-                    .to_text()
-                    .size(80)
-                    .line_height(LineHeight::Relative(1.0)),
-                Text::new(packets_exceeded_translation(language)).font(font),
-                Position::FollowCursor,
-            )
-            .class(ContainerType::Tooltip),
+            Icon::PacketsThreshold
+                .to_text()
+                .size(80)
+                .line_height(LineHeight::Relative(1.0)),
         )
         .push(
             Column::new()
@@ -243,15 +238,10 @@ fn bytes_notification_log<'a>(
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .push(
-            Tooltip::new(
-                Icon::BytesThreshold
-                    .to_text()
-                    .size(80)
-                    .line_height(LineHeight::Relative(1.0)),
-                Text::new(bytes_exceeded_translation(language)).font(font),
-                Position::FollowCursor,
-            )
-            .class(ContainerType::Tooltip),
+            Icon::BytesThreshold
+                .to_text()
+                .size(80)
+                .line_height(LineHeight::Relative(1.0)),
         )
         .push(
             Column::new()
@@ -327,16 +317,11 @@ fn favorite_notification_log<'a>(
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .push(
-            Tooltip::new(
-                Icon::Star
-                    .to_text()
-                    .size(80)
-                    .class(TextType::Starred)
-                    .line_height(LineHeight::Relative(1.0)),
-                Text::new(favorite_transmitted_translation(language)).font(font),
-                Position::FollowCursor,
-            )
-            .class(ContainerType::Tooltip),
+            Icon::Star
+                .to_text()
+                .size(80)
+                .class(TextType::Starred)
+                .line_height(LineHeight::Relative(1.0)),
         )
         .push(
             Column::new()
