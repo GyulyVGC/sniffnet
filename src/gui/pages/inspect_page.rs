@@ -554,9 +554,8 @@ fn get_agglomerates_row<'a>(
 ) -> Row<'a, Message, StyleType> {
     let tot_packets = tot.tot_packets();
     let tot_bytes = tot.tot_bytes();
-    let width = ReportCol::FILTER_COLUMNS_WIDTH;
 
-    let (in_length, out_length) = get_bars_length(width, chart_type, &tot, &tot);
+    let (in_length, out_length) = get_bars_length(chart_type, &tot, &tot);
     let bars = get_bars(in_length, out_length);
 
     let bytes_col = Column::new()

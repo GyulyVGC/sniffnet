@@ -41,8 +41,6 @@ impl ReportCol {
         ReportCol::Packets,
     ];
 
-    pub(crate) const FILTER_COLUMNS_WIDTH: f32 = 4.0 * SMALL_COL_WIDTH + 2.0 * LARGE_COL_WIDTH;
-
     pub(crate) fn get_title(&self, language: Language) -> String {
         match self {
             ReportCol::SrcIp | ReportCol::DstIp => address_translation(language).to_string(),
