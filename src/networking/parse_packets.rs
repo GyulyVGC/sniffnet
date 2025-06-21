@@ -432,7 +432,7 @@ fn maybe_send_tick_run_live(
             first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
-            info_traffic_msg.take_but_leave_timestamp(),
+            info_traffic_msg.take_but_leave_something(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));
@@ -460,7 +460,7 @@ fn maybe_send_tick_run_offline(
             next_packet_timestamp.secs() - info_traffic_msg.last_packet_timestamp.secs();
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
-            info_traffic_msg.take_but_leave_timestamp(),
+            info_traffic_msg.take_but_leave_something(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));

@@ -158,9 +158,10 @@ impl InfoTrafficMessage {
         }
     }
 
-    pub fn take_but_leave_timestamp(&mut self) -> Self {
+    pub fn take_but_leave_something(&mut self) -> Self {
         let info_traffic = Self {
             last_packet_timestamp: self.last_packet_timestamp,
+            dropped_packets: self.dropped_packets,
             ..Self::default()
         };
         std::mem::replace(self, info_traffic)
