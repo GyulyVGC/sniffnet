@@ -24,6 +24,7 @@ use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     bytes_exceeded_translation, clear_all_translation, favorite_transmitted_translation,
     no_notifications_received_translation, no_notifications_set_translation,
@@ -143,6 +144,7 @@ fn body_no_notifications_received(
 
 fn packets_notification_log<'a>(
     logged_notification: DataThresholdExceeded,
+    first_entry_data_info: DataInfo,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
@@ -187,7 +189,7 @@ fn packets_notification_log<'a>(
         .push(threshold_bar(
             logged_notification.data_info,
             ChartType::Packets,
-            logged_notification.data_info,
+            first_entry_data_info,
             font,
             language,
         ));
@@ -200,6 +202,7 @@ fn packets_notification_log<'a>(
 
 fn bytes_notification_log<'a>(
     logged_notification: DataThresholdExceeded,
+    first_entry_data_info: DataInfo,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
@@ -244,7 +247,7 @@ fn bytes_notification_log<'a>(
         .push(threshold_bar(
             logged_notification.data_info,
             ChartType::Bytes,
-            logged_notification.data_info,
+            first_entry_data_info,
             font,
             language,
         ));
@@ -257,6 +260,7 @@ fn bytes_notification_log<'a>(
 
 fn favorite_notification_log<'a>(
     logged_notification: FavoriteTransmitted,
+    first_entry_data_info: DataInfo,
     chart_type: ChartType,
     language: Language,
     font: Font,
@@ -265,7 +269,7 @@ fn favorite_notification_log<'a>(
         &logged_notification.host,
         &logged_notification.data_info_host,
         chart_type,
-        logged_notification.data_info_host.data_info,
+        first_entry_data_info,
         font,
         language,
     );
@@ -339,16 +343,39 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
         .spacing(10)
         .align_x(Alignment::Center);
 
+    let first_entry_data_info = sniffer
+        .logged_notifications
+        .iter()
+        .map(LoggedNotification::data_info)
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .unwrap_or_default();
+
     for logged_notification in &sniffer.logged_notifications {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
-                packets_notification_log(packet_threshold_exceeded.clone(), language, font)
+                packets_notification_log(
+                    packet_threshold_exceeded.clone(),
+                    first_entry_data_info,
+                    language,
+                    font,
+                )
             }
             LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
-                bytes_notification_log(byte_threshold_exceeded.clone(), language, font)
+                bytes_notification_log(
+                    byte_threshold_exceeded.clone(),
+                    first_entry_data_info,
+                    language,
+                    font,
+                )
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
-                favorite_notification_log(favorite_transmitted.clone(), chart_type, language, font)
+                favorite_notification_log(
+                    favorite_transmitted.clone(),
+                    first_entry_data_info,
+                    chart_type,
+                    language,
+                    font,
+                )
             }
         });
     }

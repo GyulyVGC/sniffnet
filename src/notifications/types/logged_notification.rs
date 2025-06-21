@@ -12,6 +12,16 @@ pub enum LoggedNotification {
     FavoriteTransmitted(FavoriteTransmitted),
 }
 
+impl LoggedNotification {
+    pub fn data_info(&self) -> DataInfo {
+        match self {
+            LoggedNotification::BytesThresholdExceeded(d)
+            | LoggedNotification::PacketsThresholdExceeded(d) => d.data_info,
+            LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct DataThresholdExceeded {
     pub(crate) threshold: u64,
