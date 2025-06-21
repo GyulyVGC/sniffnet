@@ -69,15 +69,15 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     } else {
         let logged_notifications = logged_notifications(sniffer);
         let body_row = Row::new()
+            .spacing(10)
             .padding(Padding::new(10.0).bottom(0))
-            .width(Length::Fill)
             .push(
                 Container::new(if sniffer.logged_notifications.len() < 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language)).font(font)
                 })
-                .width(Length::Fill)
+                .width(150)
                 .height(Length::Fill)
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
@@ -88,7 +88,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             ))
             .push(
                 Container::new(get_button_clear_all(font, language))
-                    .width(Length::Fill)
+                    .width(150)
                     .height(Length::Fill)
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center),
@@ -205,7 +205,7 @@ fn packets_notification_log<'a>(
         );
     Container::new(content)
         .height(120)
-        .width(800)
+        .width(Length::Fill)
         .padding(10)
         .class(ContainerType::BorderedRound)
 }
@@ -283,7 +283,7 @@ fn bytes_notification_log<'a>(
         );
     Container::new(content)
         .height(120)
-        .width(800)
+        .width(Length::Fill)
         .padding(10)
         .class(ContainerType::BorderedRound)
 }
@@ -330,11 +330,11 @@ fn favorite_notification_log<'a>(
                         .font(font),
                 ),
         )
-        .push(Column::new().spacing(7).width(Length::Fill).push(host_bar));
+        .push(Column::new().spacing(7).push(host_bar));
 
     Container::new(content)
         .height(120)
-        .width(800)
+        .width(Length::Fill)
         .padding(10)
         .class(ContainerType::BorderedRound)
 }
@@ -368,7 +368,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let chart_type = sniffer.traffic_chart.chart_type;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
-        .width(830)
+        .padding(Padding::ZERO.right(15))
         .spacing(10)
         .align_x(Alignment::Center);
 
