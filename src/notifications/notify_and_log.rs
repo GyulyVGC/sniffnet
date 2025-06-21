@@ -1,6 +1,5 @@
 use crate::InfoTraffic;
 use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::notifications::types::logged_notification::{
     BytesThresholdExceeded, FavoriteTransmitted, LoggedNotification, PacketsThresholdExceeded,
 };
@@ -71,17 +70,13 @@ pub fn notify_and_log(
     if notifications.favorite_notification.notify_on_favorite
         && !info_traffic.favorites_last_interval.is_empty()
     {
-        for host in info_traffic.favorites_last_interval.clone() {
+        for (host, data_info_host) in info_traffic.favorites_last_interval.clone() {
             //log this notification
             emitted_notifications += 1;
             if logged_notifications.len() >= 30 {
                 logged_notifications.pop_back();
             }
 
-            let data_info_host = *info_traffic
-                .hosts
-                .get(&host)
-                .unwrap_or(&DataInfoHost::default());
             logged_notifications.push_front(LoggedNotification::FavoriteTransmitted(
                 FavoriteTransmitted {
                     host,

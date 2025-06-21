@@ -18,6 +18,7 @@ use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -256,50 +257,21 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
-        let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
-            chart_type,
-            &first_entry_data_info,
-            &data_info_host.data_info,
-        );
-
         let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
-        let host_bar = Column::new()
-            .spacing(1)
-            .push(
-                Row::new()
-                    .push(Text::new(host.domain.clone()).font(font))
-                    .push(
-                        Text::new(if host.asn.name.is_empty() {
-                            String::new()
-                        } else {
-                            format!(" - {}", host.asn.name)
-                        })
-                        .font(font),
-                    )
-                    .push(horizontal_space())
-                    .push(
-                        Text::new(if chart_type.eq(&ChartType::Packets) {
-                            data_info_host.data_info.tot_packets().to_string()
-                        } else {
-                            ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
-                        })
-                        .font(font),
-                    ),
-            )
-            .push(get_bars(incoming_bar_len, outgoing_bar_len));
+        let host_bar = host_bar(
+            host,
+            data_info_host,
+            chart_type,
+            first_entry_data_info,
+            font,
+            language,
+        );
 
         let content = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)
             .push(star_button)
-            .push(get_flag_tooltip(
-                host.country,
-                data_info_host,
-                language,
-                font,
-                false,
-            ))
             .push(host_bar);
 
         scroll_host = scroll_host.push(
@@ -423,6 +395,58 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .width(Length::Fill),
+        )
+}
+
+pub fn host_bar<'a>(
+    host: &Host,
+    data_info_host: &DataInfoHost,
+    chart_type: ChartType,
+    first_entry_data_info: DataInfo,
+    font: Font,
+    language: Language,
+) -> Row<'a, Message, StyleType> {
+    let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
+        chart_type,
+        &first_entry_data_info,
+        &data_info_host.data_info,
+    );
+
+    Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(get_flag_tooltip(
+            host.country,
+            data_info_host,
+            language,
+            font,
+            false,
+        ))
+        .push(
+            Column::new()
+                .spacing(1)
+                .push(
+                    Row::new()
+                        .push(Text::new(host.domain.clone()).font(font))
+                        .push(
+                            Text::new(if host.asn.name.is_empty() {
+                                String::new()
+                            } else {
+                                format!(" - {}", host.asn.name)
+                            })
+                            .font(font),
+                        )
+                        .push(horizontal_space())
+                        .push(
+                            Text::new(if chart_type.eq(&ChartType::Packets) {
+                                data_info_host.data_info.tot_packets().to_string()
+                            } else {
+                                ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
+                            })
+                            .font(font),
+                        ),
+                )
+                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
 }
 

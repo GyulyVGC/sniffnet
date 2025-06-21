@@ -1109,6 +1109,15 @@ impl Sniffer {
             rdns,
         } = host_msg;
 
+        let data_info_host = DataInfoHost {
+            data_info: other_data,
+            is_favorite: false,
+            is_loopback,
+            is_local,
+            is_bogon,
+            traffic_type,
+        };
+
         self.info_traffic
             .hosts
             .entry(host.clone())
@@ -1119,14 +1128,7 @@ impl Sniffer {
                 data_info_host.is_bogon = is_bogon;
                 data_info_host.traffic_type = traffic_type;
             })
-            .or_insert_with(|| DataInfoHost {
-                data_info: other_data,
-                is_favorite: false,
-                is_loopback,
-                is_local,
-                is_bogon,
-                traffic_type,
-            });
+            .or_insert(data_info_host);
 
         self.addresses_resolved
             .insert(address_to_lookup, (rdns, host.clone()));
@@ -1136,7 +1138,9 @@ impl Sniffer {
 
         // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
         if self.favorite_hosts.contains(&host) {
-            self.info_traffic.favorites_last_interval.insert(host);
+            self.info_traffic
+                .favorites_last_interval
+                .insert((host, data_info_host));
         }
     }
 

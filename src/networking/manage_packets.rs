@@ -1,11 +1,9 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::sync::{Arc, Mutex};
 
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::Address;
 
-use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
@@ -250,7 +248,6 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
-#[allow(clippy::too_many_arguments)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTrafficMessage,
     key: &AddressPortPair,
@@ -259,7 +256,6 @@ pub fn modify_or_insert_in_map(
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
-    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -280,16 +276,6 @@ pub fn modify_or_insert_in_map(
         );
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
-        // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
-        if let Some(host) = resolutions_state
-            .lock()
-            .unwrap()
-            .addresses_resolved
-            .get(&get_address_to_lookup(key, traffic_direction))
-            .cloned()
-        {
-            info_traffic_msg.potential_favorites.insert(host);
-        }
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;

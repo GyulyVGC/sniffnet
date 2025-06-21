@@ -43,7 +43,7 @@ pub struct InfoTraffic {
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
     /// Collection of favorite hosts that exchanged data in the last interval
-    pub favorites_last_interval: HashSet<Host>,
+    pub favorites_last_interval: HashSet<(Host, DataInfoHost)>,
 }
 
 impl InfoTraffic {
@@ -82,18 +82,19 @@ impl InfoTraffic {
                 .or_insert(value);
         }
 
+        self.favorites_last_interval = msg
+            .hosts
+            .iter()
+            .filter(|(h, _)| favorites.contains(h))
+            .map(|(h, data)| (h.clone(), *data))
+            .collect();
+
         for (key, value) in msg.hosts {
             self.hosts
                 .entry(key)
                 .and_modify(|x| x.refresh(&value))
                 .or_insert(value);
         }
-
-        self.favorites_last_interval = msg
-            .potential_favorites
-            .into_iter()
-            .filter(|h| favorites.contains(h))
-            .collect();
     }
 
     pub fn get_thumbnail_data(&self, chart_type: ChartType) -> (u128, u128, u128, u128) {
@@ -141,8 +142,6 @@ pub struct InfoTrafficMessage {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
-    /// Collection of potentially favorite hosts that exchanged data in the last interval
-    pub potential_favorites: HashSet<Host>,
 }
 
 impl InfoTrafficMessage {

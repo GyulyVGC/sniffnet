@@ -1,5 +1,5 @@
 /// Enum representing the possible traffic type (unicast, multicast or broadcast).
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum TrafficType {
     /// Unicast traffic
     Unicast,

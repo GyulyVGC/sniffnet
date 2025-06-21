@@ -152,7 +152,6 @@ pub fn parse_packets(
                             icmp_type,
                             arp_type,
                             exchanged_bytes,
-                            &resolutions_state,
                         );
 
                         info_traffic_msg.add_packet(exchanged_bytes, traffic_direction);

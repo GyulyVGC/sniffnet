@@ -7,10 +7,11 @@ use iced::widget::{Space, button, vertical_space};
 use iced::{Alignment, Font, Length};
 use std::fmt::Write;
 
-use crate::countries::country_utils::get_flag_tooltip;
+use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::pages::overview_page::host_bar;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
@@ -289,28 +290,18 @@ fn bytes_notification_log<'a>(
 
 fn favorite_notification_log<'a>(
     logged_notification: FavoriteTransmitted,
+    chart_type: ChartType,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
-    let country = logged_notification.host.country;
-    let asn = &logged_notification.host.asn;
-
-    let mut domain_asn_str = logged_notification.host.domain;
-    if !asn.name.is_empty() {
-        let _ = write!(domain_asn_str, " - {}", asn.name);
-    }
-
-    let row_flag_details = Row::new()
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(get_flag_tooltip(
-            country,
-            &logged_notification.data_info_host,
-            language,
-            font,
-            false,
-        ))
-        .push(Text::new(domain_asn_str).font(font));
+    let host_bar = host_bar(
+        &logged_notification.host,
+        &logged_notification.data_info_host,
+        chart_type,
+        logged_notification.data_info_host.data_info,
+        font,
+        language,
+    );
 
     let content = Row::new()
         .spacing(30)
@@ -339,12 +330,8 @@ fn favorite_notification_log<'a>(
                         .font(font),
                 ),
         )
-        .push(
-            Column::new()
-                .spacing(7)
-                .width(Length::Fill)
-                .push(row_flag_details),
-        );
+        .push(Column::new().spacing(7).width(Length::Fill).push(host_bar));
+
     Container::new(content)
         .height(120)
         .width(800)
@@ -378,6 +365,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
+    let chart_type = sniffer.traffic_chart.chart_type;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .width(830)
@@ -394,7 +382,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                 bytes_notification_log(byte_threshold_exceeded.clone(), language, font)
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
-                favorite_notification_log(favorite_transmitted.clone(), language, font)
+                favorite_notification_log(favorite_transmitted.clone(), chart_type, language, font)
             }
         });
     }
