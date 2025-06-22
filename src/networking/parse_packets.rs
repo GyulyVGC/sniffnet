@@ -17,7 +17,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -48,7 +48,7 @@ pub fn parse_packets(
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
 
-    let mut info_traffic_msg = InfoTrafficMessage::default();
+    let mut info_traffic_msg = InfoTraffic::default();
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
     // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
     let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
@@ -420,14 +420,14 @@ pub struct AddressesResolutionState {
 
 #[allow(clippy::large_enum_variant)]
 pub enum BackendTrafficMessage {
-    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>, bool),
+    TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
 }
 
 fn maybe_send_tick_run_live(
     cap_id: usize,
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     cs: &mut CaptureSource,
     first_packet_ticks: &mut Option<Instant>,
@@ -453,7 +453,7 @@ fn maybe_send_tick_run_live(
 
 fn maybe_send_tick_run_offline(
     cap_id: usize,
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     next_packet_timestamp: Timestamp,
     tx: &Sender<BackendTrafficMessage>,

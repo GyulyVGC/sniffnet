@@ -6,10 +6,10 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::utils::types::timestamp::Timestamp;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 /// Struct containing overall traffic statistics and data.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct InfoTraffic {
     /// Total amount of exchanged data
     pub tot_data_info: DataInfo,
@@ -27,16 +27,10 @@ pub struct InfoTraffic {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
-    /// Total amount of exchanged data before the current time interval
-    pub tot_data_info_prev: DataInfo,
-    /// Collection of favorite hosts that exchanged data in the last interval
-    pub favorites_last_interval: HashSet<(Host, DataInfoHost)>,
 }
 
 impl InfoTraffic {
-    pub fn refresh(&mut self, msg: InfoTrafficMessage, favorites: &HashSet<Host>) {
-        self.tot_data_info_prev = self.tot_data_info;
-
+    pub fn refresh(&mut self, msg: InfoTraffic) {
         self.tot_data_info.refresh(msg.tot_data_info);
 
         self.all_packets += msg.all_packets;
@@ -63,13 +57,6 @@ impl InfoTraffic {
                 .and_modify(|x| x.refresh(value))
                 .or_insert(value);
         }
-
-        self.favorites_last_interval = msg
-            .hosts
-            .iter()
-            .filter(|(h, _)| favorites.contains(h))
-            .map(|(h, data)| (h.clone(), *data))
-            .collect();
 
         for (key, value) in msg.hosts {
             self.hosts
@@ -101,30 +88,7 @@ impl InfoTraffic {
             )
         }
     }
-}
 
-/// Struct containing traffic statistics and data related to the last time interval.
-#[derive(Debug, Clone, Default)]
-pub struct InfoTrafficMessage {
-    /// Total amount of exchanged data
-    pub tot_data_info: DataInfo,
-    /// Total packets including those not filtered
-    pub all_packets: u128,
-    /// Total bytes including those not filtered
-    pub all_bytes: u128,
-    /// Number of dropped packets
-    pub dropped_packets: u32,
-    /// Timestamp of the latest parsed packet
-    pub last_packet_timestamp: Timestamp,
-    /// Map of the filtered traffic
-    pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
-    /// Map of the upper layer services with their data info
-    pub services: HashMap<Service, DataInfo>,
-    /// Map of the hosts with their data info
-    pub hosts: HashMap<Host, DataInfoHost>,
-}
-
-impl InfoTrafficMessage {
     pub fn take_but_leave_something(&mut self) -> Self {
         let info_traffic = Self {
             last_packet_timestamp: self.last_packet_timestamp,

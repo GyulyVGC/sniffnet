@@ -49,7 +49,7 @@ use crate::networking::types::capture_context::{CaptureContext, CaptureSource, M
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::port_collection::PortCollection;
@@ -68,7 +68,7 @@ use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, StyleType, TrafficChart, location};
+use crate::{ConfigSettings, Configs, StyleType, TrafficChart, location};
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -686,25 +686,23 @@ impl Sniffer {
         }
     }
 
-    fn refresh_data(&mut self, msg: InfoTrafficMessage, no_more_packets: bool) {
-        self.info_traffic.refresh(msg, &self.favorite_hosts);
-        self.update_thresholds();
-        let info_traffic = &self.info_traffic;
-        if info_traffic.tot_data_info.tot_packets() == 0 {
-            return;
-        }
+    fn refresh_data(&mut self, msg: InfoTraffic, no_more_packets: bool) {
+        self.traffic_chart.update_charts_data(&msg, no_more_packets);
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
             self.configs.settings.notifications,
-            info_traffic,
+            &msg,
+            &self.favorite_hosts,
             &self.capture_source,
         );
-        self.info_traffic.favorites_last_interval = HashSet::new();
+        self.info_traffic.refresh(msg);
+        self.update_thresholds();
+        if self.info_traffic.tot_data_info.tot_packets() == 0 {
+            return;
+        }
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
-        self.traffic_chart
-            .update_charts_data(&self.info_traffic, no_more_packets);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.get_name().clone();
@@ -1117,13 +1115,6 @@ impl Sniffer {
 
         // update host data states including the new host
         self.host_data_states.data.update(&host);
-
-        // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
-        if self.favorite_hosts.contains(&host) {
-            self.info_traffic
-                .favorites_last_interval
-                .insert((host, data_info_host));
-        }
     }
 
     fn register_sigint_handler() -> Task<Message> {
@@ -1160,7 +1151,7 @@ mod tests {
     use crate::gui::types::timing_events::TimingEvents;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::host::Host;
-    use crate::networking::types::info_traffic::InfoTrafficMessage;
+    use crate::networking::types::info_traffic::InfoTraffic;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
@@ -1704,12 +1695,7 @@ mod tests {
                 .add_packet(0, TrafficDirection::Outgoing);
 
             // Simulate a tick to apply the settings
-            sniffer.update(Message::TickRun(
-                0,
-                InfoTrafficMessage::default(),
-                vec![],
-                false,
-            ));
+            sniffer.update(Message::TickRun(0, InfoTraffic::default(), vec![], false));
         }
         let mut sniffer = Sniffer::new(Configs::default());
 
@@ -1921,14 +1907,14 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(Configs::default());
-        sniffer.logged_notifications =
-            VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
-                DataThresholdExceeded {
-                    threshold: 0,
-                    data_info: DataInfo::default(),
-                    timestamp: "".to_string(),
-                },
-            )]);
+        sniffer.logged_notifications = VecDeque::from([LoggedNotification::DataThresholdExceeded(
+            DataThresholdExceeded {
+                chart_type: ChartType::Packets,
+                threshold: 0,
+                data_info: DataInfo::default(),
+                timestamp: "".to_string(),
+            },
+        )]);
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));

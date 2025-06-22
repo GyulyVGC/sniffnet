@@ -10,7 +10,7 @@ use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
@@ -249,7 +249,7 @@ pub fn get_service(
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
 pub fn modify_or_insert_in_map(
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
     cs: &CaptureSource,
     mac_addresses: (Option<String>, Option<String>),

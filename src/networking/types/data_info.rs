@@ -96,13 +96,6 @@ impl DataInfo {
         self.final_instant = rhs.final_instant;
     }
 
-    pub fn subtract(&mut self, rhs: Self) {
-        self.incoming_packets -= rhs.incoming_packets;
-        self.outgoing_packets -= rhs.outgoing_packets;
-        self.incoming_bytes -= rhs.incoming_bytes;
-        self.outgoing_bytes -= rhs.outgoing_bytes;
-    }
-
     pub fn compare(&self, other: &Self, sort_type: SortType, chart_type: ChartType) -> Ordering {
         match chart_type {
             ChartType::Packets => match sort_type {

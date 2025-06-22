@@ -6,7 +6,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::networking::types::host::{Host, HostMessage};
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -20,7 +20,7 @@ pub enum Message {
     /// Run tasks to initialize the app
     StartApp(Option<window::Id>),
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
-    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>, bool),
+    TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Select network device
     DeviceSelection(String),
     /// Select IP filter
