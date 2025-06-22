@@ -1,4 +1,5 @@
 use crate::InfoTraffic;
+use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
@@ -30,8 +31,9 @@ pub fn notify_and_log(
             if logged_notifications.len() >= 30 {
                 logged_notifications.pop_back();
             }
-            logged_notifications.push_front(LoggedNotification::PacketsThresholdExceeded(
+            logged_notifications.push_front(LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
+                    chart_type: ChartType::Packets,
                     threshold: notifications.packets_notification.previous_threshold,
                     data_info: data_info_delta,
                     timestamp: get_formatted_timestamp(timestamp),
@@ -50,8 +52,9 @@ pub fn notify_and_log(
             if logged_notifications.len() >= 30 {
                 logged_notifications.pop_back();
             }
-            logged_notifications.push_front(LoggedNotification::BytesThresholdExceeded(
+            logged_notifications.push_front(LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
+                    chart_type: ChartType::Bytes,
                     threshold: notifications.bytes_notification.previous_threshold,
                     data_info: data_info_delta,
                     timestamp: get_formatted_timestamp(timestamp),

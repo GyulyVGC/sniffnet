@@ -1,13 +1,12 @@
+use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
 
 /// Enum representing the possible notification events.
 pub enum LoggedNotification {
-    /// Packets threshold exceeded
-    PacketsThresholdExceeded(DataThresholdExceeded),
-    /// Byte threshold exceeded
-    BytesThresholdExceeded(DataThresholdExceeded),
+    /// Data threshold exceeded
+    DataThresholdExceeded(DataThresholdExceeded),
     /// Favorite connection exchanged data
     FavoriteTransmitted(FavoriteTransmitted),
 }
@@ -15,8 +14,7 @@ pub enum LoggedNotification {
 impl LoggedNotification {
     pub fn data_info(&self) -> DataInfo {
         match self {
-            LoggedNotification::BytesThresholdExceeded(d)
-            | LoggedNotification::PacketsThresholdExceeded(d) => d.data_info,
+            LoggedNotification::DataThresholdExceeded(d) => d.data_info,
             LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info,
         }
     }
@@ -24,6 +22,7 @@ impl LoggedNotification {
 
 #[derive(Clone)]
 pub struct DataThresholdExceeded {
+    pub(crate) chart_type: ChartType,
     pub(crate) threshold: u64,
     pub(crate) data_info: DataInfo,
     pub(crate) timestamp: String,

@@ -5,7 +5,6 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, horizontal_space};
 use iced::widget::{Space, button, vertical_space};
 use iced::{Alignment, Font, Length, Padding};
-use std::fmt::Write;
 
 use crate::chart::types::chart_type::ChartType;
 use crate::countries::country_utils::get_computer_tooltip;
@@ -142,28 +141,36 @@ fn body_no_notifications_received(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn packets_notification_log<'a>(
+fn data_notification_log<'a>(
     logged_notification: DataThresholdExceeded,
     first_entry_data_info: DataInfo,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
+    let chart_type = logged_notification.chart_type;
+    let data_string = if chart_type == ChartType::Bytes {
+        ByteMultiple::formatted_string(logged_notification.threshold.into())
+    } else {
+        logged_notification.threshold.to_string()
+    };
+    let icon = if chart_type == ChartType::Bytes {
+        Icon::BytesThreshold
+    } else {
+        Icon::PacketsThreshold
+    }
+    .to_text()
+    .size(80)
+    .line_height(LineHeight::Relative(1.0));
     let threshold_str = format!(
-        "{}: {} {}",
+        "{}: {data_string} {}",
         threshold_translation(language),
-        logged_notification.threshold,
         per_second_translation(language)
     );
     let content = Row::new()
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .spacing(30)
-        .push(
-            Icon::PacketsThreshold
-                .to_text()
-                .size(80)
-                .line_height(LineHeight::Relative(1.0)),
-        )
+        .push(icon)
         .push(
             Column::new()
                 .spacing(7)
@@ -175,9 +182,13 @@ fn packets_notification_log<'a>(
                         .push(Text::new(logged_notification.timestamp).font(font)),
                 )
                 .push(
-                    Text::new(packets_exceeded_translation(language))
-                        .class(TextType::Title)
-                        .font(font),
+                    Text::new(if chart_type == ChartType::Bytes {
+                        bytes_exceeded_translation(language)
+                    } else {
+                        packets_exceeded_translation(language)
+                    })
+                    .class(TextType::Title)
+                    .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
@@ -188,65 +199,7 @@ fn packets_notification_log<'a>(
         )
         .push(threshold_bar(
             logged_notification.data_info,
-            ChartType::Packets,
-            first_entry_data_info,
-            font,
-            language,
-        ));
-    Container::new(content)
-        .height(120)
-        .width(Length::Fill)
-        .padding(10)
-        .class(ContainerType::BorderedRound)
-}
-
-fn bytes_notification_log<'a>(
-    logged_notification: DataThresholdExceeded,
-    first_entry_data_info: DataInfo,
-    language: Language,
-    font: Font,
-) -> Container<'a, Message, StyleType> {
-    let mut threshold_str = threshold_translation(language).to_string();
-    threshold_str.push_str(": ");
-    threshold_str.push_str(&ByteMultiple::formatted_string(
-        (logged_notification.threshold).into(),
-    ));
-    let _ = write!(threshold_str, " {}", per_second_translation(language));
-    let content = Row::new()
-        .spacing(30)
-        .align_y(Alignment::Center)
-        .height(Length::Fill)
-        .push(
-            Icon::BytesThreshold
-                .to_text()
-                .size(80)
-                .line_height(LineHeight::Relative(1.0)),
-        )
-        .push(
-            Column::new()
-                .spacing(7)
-                .width(250)
-                .push(
-                    Row::new()
-                        .spacing(8)
-                        .push(Icon::Clock.to_text())
-                        .push(Text::new(logged_notification.timestamp).font(font)),
-                )
-                .push(
-                    Text::new(bytes_exceeded_translation(language))
-                        .class(TextType::Title)
-                        .font(font),
-                )
-                .push(
-                    Text::new(threshold_str)
-                        .size(FONT_SIZE_FOOTER)
-                        .class(TextType::Subtitle)
-                        .font(font),
-                ),
-        )
-        .push(threshold_bar(
-            logged_notification.data_info,
-            ChartType::Bytes,
+            chart_type,
             first_entry_data_info,
             font,
             language,
@@ -352,17 +305,9 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 
     for logged_notification in &sniffer.logged_notifications {
         ret_val = ret_val.push(match logged_notification {
-            LoggedNotification::PacketsThresholdExceeded(packet_threshold_exceeded) => {
-                packets_notification_log(
-                    packet_threshold_exceeded.clone(),
-                    first_entry_data_info,
-                    language,
-                    font,
-                )
-            }
-            LoggedNotification::BytesThresholdExceeded(byte_threshold_exceeded) => {
-                bytes_notification_log(
-                    byte_threshold_exceeded.clone(),
+            LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
+                data_notification_log(
+                    data_threshold_exceeded.clone(),
                     first_entry_data_info,
                     language,
                     font,
