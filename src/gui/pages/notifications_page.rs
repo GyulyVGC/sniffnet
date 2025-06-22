@@ -7,19 +7,19 @@ use iced::widget::{Space, button, vertical_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::chart::types::chart_type::ChartType;
-use crate::countries::country_utils::get_computer_tooltip;
+use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
@@ -61,11 +61,11 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
     if notifications.packets_notification.threshold.is_none()
         && notifications.bytes_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
-        && sniffer.logged_notifications.is_empty()
+        && sniffer.logged_notifications.0.is_empty()
     {
         let body = body_no_notifications_set(font, language);
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer.logged_notifications.is_empty() {
+    } else if sniffer.logged_notifications.0.is_empty() {
         let body = body_no_notifications_received(font, language, &sniffer.dots_pulse.0);
         tab_and_body = tab_and_body.push(body);
     } else {
@@ -74,7 +74,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             .spacing(10)
             .padding(Padding::new(10.0).bottom(0))
             .push(
-                Container::new(if sniffer.logged_notifications.len() < 30 {
+                Container::new(if sniffer.logged_notifications.0.len() < 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language)).font(font)
@@ -168,7 +168,6 @@ fn data_notification_log<'a>(
     );
     let content = Row::new()
         .align_y(Alignment::Center)
-        .height(Length::Fill)
         .spacing(30)
         .push(icon)
         .push(
@@ -179,7 +178,7 @@ fn data_notification_log<'a>(
                     Row::new()
                         .spacing(8)
                         .push(Icon::Clock.to_text())
-                        .push(Text::new(logged_notification.timestamp).font(font)),
+                        .push(Text::new(logged_notification.timestamp.clone()).font(font)),
                 )
                 .push(
                     Text::new(if chart_type == ChartType::Bytes {
@@ -198,16 +197,21 @@ fn data_notification_log<'a>(
                 ),
         )
         .push(threshold_bar(
-            logged_notification.data_info,
+            &logged_notification,
             chart_type,
             first_entry_data_info,
             font,
-            language,
         ));
-    Container::new(content)
-        .height(120)
+    let content_and_extra = Column::new()
+        .push(content)
+        .push(if logged_notification.is_expanded {
+            Row::new().push(get_button_clear_all(font, language))
+        } else {
+            Row::new()
+        });
+    Container::new(content_and_extra)
         .width(Length::Fill)
-        .padding(10)
+        .padding(15)
         .class(ContainerType::BorderedRound)
 }
 
@@ -230,7 +234,6 @@ fn favorite_notification_log<'a>(
     let content = Row::new()
         .spacing(30)
         .align_y(Alignment::Center)
-        .height(Length::Fill)
         .push(
             Icon::Star
                 .to_text()
@@ -257,9 +260,8 @@ fn favorite_notification_log<'a>(
         .push(host_bar);
 
     Container::new(content)
-        .height(120)
         .width(Length::Fill)
-        .padding(10)
+        .padding(15)
         .class(ContainerType::BorderedRound)
 }
 
@@ -298,12 +300,13 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 
     let first_entry_data_info = sniffer
         .logged_notifications
+        .0
         .iter()
         .map(LoggedNotification::data_info)
         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
         .unwrap_or_default();
 
-    for logged_notification in &sniffer.logged_notifications {
+    for logged_notification in &sniffer.logged_notifications.0 {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
                 data_notification_log(
@@ -328,26 +331,22 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 }
 
 fn threshold_bar<'a>(
-    data_info: DataInfo,
+    logged_notification: &DataThresholdExceeded,
     chart_type: ChartType,
     first_entry_data_info: DataInfo,
     font: Font,
-    language: Language,
 ) -> Row<'a, Message, StyleType> {
+    let data_info = logged_notification.data_info;
+    let id = logged_notification.id;
+    let is_expanded = logged_notification.is_expanded;
+
     let (incoming_bar_len, outgoing_bar_len) =
         get_bars_length(chart_type, &first_entry_data_info, &data_info);
 
     Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(get_computer_tooltip(
-            true,
-            true,
-            None,
-            TrafficType::Unicast,
-            language,
-            font,
-        ))
+        .push(button_expand(id, is_expanded))
         .push(
             Column::new()
                 .spacing(1)
@@ -363,4 +362,29 @@ fn threshold_bar<'a>(
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
+}
+
+fn button_expand<'a>(
+    notification_id: usize,
+    is_expanded: bool,
+) -> Container<'a, Message, StyleType> {
+    let button = button(
+        if is_expanded {
+            Icon::Collapse
+        } else {
+            Icon::Expand
+        }
+        .to_text()
+        .size(25)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center),
+    )
+    .width(FLAGS_WIDTH_BIG)
+    .padding(Padding::ZERO)
+    .class(ButtonType::SortArrows)
+    .on_press(Message::ExpandNotification(notification_id, !is_expanded));
+
+    Container::new(button)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }

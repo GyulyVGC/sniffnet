@@ -15,32 +15,36 @@ use std::collections::{HashSet, VecDeque};
 ///
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
-    logged_notifications: &mut VecDeque<LoggedNotification>,
+    logged_notifications: &mut (VecDeque<LoggedNotification>, usize),
     notifications: Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &HashSet<Host>,
     cs: &CaptureSource,
 ) -> usize {
     let mut sound_to_play = Sound::None;
-    let mut emitted_notifications = 0;
+    let emitted_notifications_prev = logged_notifications.1;
     let timestamp = info_traffic_msg.last_packet_timestamp;
     let data_info = info_traffic_msg.tot_data_info;
     // packets threshold
     if let Some(threshold) = notifications.packets_notification.threshold {
         if data_info.tot_packets() > u128::from(threshold) {
             // log this notification
-            emitted_notifications += 1;
-            if logged_notifications.len() >= 30 {
-                logged_notifications.pop_back();
+            logged_notifications.1 += 1;
+            if logged_notifications.0.len() >= 30 {
+                logged_notifications.0.pop_back();
             }
-            logged_notifications.push_front(LoggedNotification::DataThresholdExceeded(
-                DataThresholdExceeded {
-                    chart_type: ChartType::Packets,
-                    threshold: notifications.packets_notification.previous_threshold,
-                    data_info,
-                    timestamp: get_formatted_timestamp(timestamp),
-                },
-            ));
+            logged_notifications
+                .0
+                .push_front(LoggedNotification::DataThresholdExceeded(
+                    DataThresholdExceeded {
+                        id: logged_notifications.1,
+                        chart_type: ChartType::Packets,
+                        threshold: notifications.packets_notification.previous_threshold,
+                        data_info,
+                        timestamp: get_formatted_timestamp(timestamp),
+                        is_expanded: false,
+                    },
+                ));
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.packets_notification.sound;
             }
@@ -50,18 +54,22 @@ pub fn notify_and_log(
     if let Some(threshold) = notifications.bytes_notification.threshold {
         if data_info.tot_bytes() > u128::from(threshold) {
             //log this notification
-            emitted_notifications += 1;
-            if logged_notifications.len() >= 30 {
-                logged_notifications.pop_back();
+            logged_notifications.1 += 1;
+            if logged_notifications.0.len() >= 30 {
+                logged_notifications.0.pop_back();
             }
-            logged_notifications.push_front(LoggedNotification::DataThresholdExceeded(
-                DataThresholdExceeded {
-                    chart_type: ChartType::Bytes,
-                    threshold: notifications.bytes_notification.previous_threshold,
-                    data_info,
-                    timestamp: get_formatted_timestamp(timestamp),
-                },
-            ));
+            logged_notifications
+                .0
+                .push_front(LoggedNotification::DataThresholdExceeded(
+                    DataThresholdExceeded {
+                        id: logged_notifications.1,
+                        chart_type: ChartType::Bytes,
+                        threshold: notifications.bytes_notification.previous_threshold,
+                        data_info,
+                        timestamp: get_formatted_timestamp(timestamp),
+                        is_expanded: false,
+                    },
+                ));
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.bytes_notification.sound;
             }
@@ -78,18 +86,21 @@ pub fn notify_and_log(
         if !favorites_last_interval.is_empty() {
             for (host, data_info_host) in favorites_last_interval {
                 //log this notification
-                emitted_notifications += 1;
-                if logged_notifications.len() >= 30 {
-                    logged_notifications.pop_back();
+                logged_notifications.1 += 1;
+                if logged_notifications.0.len() >= 30 {
+                    logged_notifications.0.pop_back();
                 }
 
-                logged_notifications.push_front(LoggedNotification::FavoriteTransmitted(
-                    FavoriteTransmitted {
-                        host,
-                        data_info_host,
-                        timestamp: get_formatted_timestamp(timestamp),
-                    },
-                ));
+                logged_notifications
+                    .0
+                    .push_front(LoggedNotification::FavoriteTransmitted(
+                        FavoriteTransmitted {
+                            id: logged_notifications.1,
+                            host,
+                            data_info_host,
+                            timestamp: get_formatted_timestamp(timestamp),
+                        },
+                    ));
             }
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.favorite_notification.sound;
@@ -102,5 +113,5 @@ pub fn notify_and_log(
         play(sound_to_play, notifications.volume);
     }
 
-    emitted_notifications
+    logged_notifications.1 - emitted_notifications_prev
 }

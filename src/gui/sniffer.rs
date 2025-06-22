@@ -87,8 +87,8 @@ pub struct Sniffer {
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
-    /// Log of the received notifications
-    pub logged_notifications: VecDeque<LoggedNotification>,
+    /// Log of the displayed notifications, with the total number of notifications for this capture
+    pub logged_notifications: (VecDeque<LoggedNotification>, usize),
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
@@ -155,7 +155,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
-            logged_notifications: VecDeque::new(),
+            logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
@@ -364,7 +364,7 @@ impl Sniffer {
                 self.configs.settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
-                self.logged_notifications = VecDeque::new();
+                self.logged_notifications.0 = VecDeque::new();
                 self.modal = None;
             }
             Message::SwitchPage(next) => {
@@ -551,6 +551,16 @@ impl Sniffer {
             Message::Periodic => {
                 self.update_waiting_dots();
                 self.fetch_devices();
+            }
+            Message::ExpandNotification(id, expand) => {
+                if let Some(n) = self
+                    .logged_notifications
+                    .0
+                    .iter_mut()
+                    .find(|n| n.id() == id)
+                {
+                    n.expand(expand);
+                }
             }
         }
         Task::none()
@@ -798,7 +808,7 @@ impl Sniffer {
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
-        self.logged_notifications = VecDeque::new();
+        self.logged_notifications = (VecDeque::new(), 0);
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language);
         self.report_sort_type = ReportSortType::default();
@@ -1058,7 +1068,7 @@ impl Sniffer {
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Notifications)
-            && !self.logged_notifications.is_empty()
+            && !self.logged_notifications.0.is_empty()
         {
             return Task::done(Message::ShowModal(MyModal::ClearAll));
         }
