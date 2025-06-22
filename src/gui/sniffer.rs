@@ -692,7 +692,6 @@ impl Sniffer {
         if self.info_traffic.tot_data_info.tot_packets() == 0 {
             return;
         }
-        self.traffic_chart.update_charts_data(&msg, no_more_packets);
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
             self.configs.settings.notifications,
@@ -700,10 +699,10 @@ impl Sniffer {
             &self.favorite_hosts,
             &self.capture_source,
         );
-
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
+        self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.get_name().clone();
