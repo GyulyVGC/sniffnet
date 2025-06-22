@@ -686,7 +686,12 @@ impl Sniffer {
         }
     }
 
-    fn refresh_data(&mut self, msg: InfoTraffic, no_more_packets: bool) {
+    fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
+        self.info_traffic.refresh(&mut msg);
+        self.update_thresholds();
+        if self.info_traffic.tot_data_info.tot_packets() == 0 {
+            return;
+        }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
@@ -695,11 +700,7 @@ impl Sniffer {
             &self.favorite_hosts,
             &self.capture_source,
         );
-        self.info_traffic.refresh(msg);
-        self.update_thresholds();
-        if self.info_traffic.tot_data_info.tot_packets() == 0 {
-            return;
-        }
+
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }

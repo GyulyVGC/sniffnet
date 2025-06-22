@@ -30,7 +30,7 @@ pub struct InfoTraffic {
 }
 
 impl InfoTraffic {
-    pub fn refresh(&mut self, msg: InfoTraffic) {
+    pub fn refresh(&mut self, msg: &mut InfoTraffic) {
         self.tot_data_info.refresh(msg.tot_data_info);
 
         self.all_packets += msg.all_packets;
@@ -39,30 +39,29 @@ impl InfoTraffic {
 
         // it can happen they're equal due to dis-alignments in the PCAP timestamp
         if self.last_packet_timestamp.secs() == msg.last_packet_timestamp.secs() {
-            self.last_packet_timestamp.add_secs(1);
-        } else {
-            self.last_packet_timestamp = msg.last_packet_timestamp;
+            msg.last_packet_timestamp.add_secs(1);
         }
+        self.last_packet_timestamp = msg.last_packet_timestamp;
 
-        for (key, value) in msg.map {
+        for (key, value) in &msg.map {
             self.map
-                .entry(key)
-                .and_modify(|x| x.refresh(&value))
-                .or_insert(value);
-        }
-
-        for (key, value) in msg.services {
-            self.services
-                .entry(key)
+                .entry(*key)
                 .and_modify(|x| x.refresh(value))
-                .or_insert(value);
+                .or_insert_with(|| value.clone());
         }
 
-        for (key, value) in msg.hosts {
+        for (key, value) in &msg.services {
+            self.services
+                .entry(*key)
+                .and_modify(|x| x.refresh(*value))
+                .or_insert(*value);
+        }
+
+        for (key, value) in &msg.hosts {
             self.hosts
-                .entry(key)
-                .and_modify(|x| x.refresh(&value))
-                .or_insert(value);
+                .entry(key.clone())
+                .and_modify(|x| x.refresh(value))
+                .or_insert(*value);
         }
     }
 
