@@ -5,7 +5,7 @@
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
-use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
+use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -21,6 +21,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
+use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -334,29 +335,11 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let (incoming_bar_len, outgoing_bar_len) =
-            get_bars_length(chart_type, &first_entry_data_info, data_info);
-
-        let content = Column::new()
-            .spacing(1)
-            .push(
-                Row::new()
-                    .push(Text::new(service.to_string()).font(font))
-                    .push(horizontal_space())
-                    .push(
-                        Text::new(if chart_type.eq(&ChartType::Packets) {
-                            data_info.tot_packets().to_string()
-                        } else {
-                            ByteMultiple::formatted_string(data_info.tot_bytes())
-                        })
-                        .font(font),
-                    ),
-            )
-            .push(get_bars(incoming_bar_len, outgoing_bar_len));
+        let content = service_bar(service, data_info, chart_type, first_entry_data_info, font);
 
         scroll_service = scroll_service.push(
             button(content)
-                .padding(Padding::new(5.0).right(15).bottom(8).left(10))
+                .padding(Padding::new(5.0).right(15).left(10))
                 .on_press(Message::Search(SearchParameters::new_service_search(
                     service,
                 )))
@@ -413,6 +396,7 @@ pub fn host_bar<'a>(
     );
 
     Row::new()
+        .height(FLAGS_HEIGHT_BIG)
         .align_y(Alignment::Center)
         .spacing(5)
         .push(get_flag_tooltip(
@@ -442,6 +426,40 @@ pub fn host_bar<'a>(
                                 data_info_host.data_info.tot_packets().to_string()
                             } else {
                                 ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
+                            })
+                            .font(font),
+                        ),
+                )
+                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+        )
+}
+
+pub fn service_bar<'a>(
+    service: &Service,
+    data_info: &DataInfo,
+    chart_type: ChartType,
+    first_entry_data_info: DataInfo,
+    font: Font,
+) -> Row<'a, Message, StyleType> {
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(chart_type, &first_entry_data_info, data_info);
+
+    Row::new()
+        .height(FLAGS_HEIGHT_BIG)
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(
+            Column::new()
+                .spacing(1)
+                .push(
+                    Row::new()
+                        .push(Text::new(service.to_string()).font(font))
+                        .push(horizontal_space())
+                        .push(
+                            Text::new(if chart_type.eq(&ChartType::Packets) {
+                                data_info.tot_packets().to_string()
+                            } else {
+                                ByteMultiple::formatted_string(data_info.tot_bytes())
                             })
                             .font(font),
                         ),
@@ -780,7 +798,7 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
             .align_y(Alignment::Center),
     )
     .padding(0)
-    .height(FLAGS_WIDTH_BIG * 0.75)
+    .height(FLAGS_HEIGHT_BIG)
     .width(FLAGS_WIDTH_BIG)
     .class(if is_favorite {
         ButtonType::Starred

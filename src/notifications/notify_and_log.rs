@@ -1,14 +1,18 @@
 use crate::InfoTraffic;
 use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::capture_context::CaptureSource;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
+use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
 use crate::notifications::types::notifications::Notifications;
 use crate::notifications::types::sound::{Sound, play};
+use crate::report::types::sort_type::SortType;
 use crate::utils::formatted_strings::get_formatted_timestamp;
+use std::cmp::min;
 use std::collections::{HashSet, VecDeque};
 
 /// Checks if one or more notifications have to be emitted and logs them.
@@ -43,6 +47,8 @@ pub fn notify_and_log(
                         data_info,
                         timestamp: get_formatted_timestamp(timestamp),
                         is_expanded: false,
+                        hosts: hosts_list(info_traffic_msg, ChartType::Packets),
+                        services: services_list(info_traffic_msg, ChartType::Packets),
                     },
                 ));
             if sound_to_play.eq(&Sound::None) {
@@ -68,6 +74,8 @@ pub fn notify_and_log(
                         data_info,
                         timestamp: get_formatted_timestamp(timestamp),
                         is_expanded: false,
+                        hosts: hosts_list(info_traffic_msg, ChartType::Bytes),
+                        services: services_list(info_traffic_msg, ChartType::Bytes),
                     },
                 ));
             if sound_to_play.eq(&Sound::None) {
@@ -114,4 +122,43 @@ pub fn notify_and_log(
     }
 
     logged_notifications.1 - emitted_notifications_prev
+}
+
+fn hosts_list(info_traffic_msg: &InfoTraffic, chart_type: ChartType) -> Vec<(Host, DataInfoHost)> {
+    let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
+        .hosts
+        .iter()
+        .map(|(h, data)| (h.clone(), *data))
+        .collect();
+    hosts.sort_by(|(_, a), (_, b)| {
+        a.data_info
+            .compare(&b.data_info, SortType::Descending, chart_type)
+    });
+    let n_entry = min(hosts.len(), 4);
+    hosts
+        .get(..n_entry)
+        .unwrap_or_default()
+        .to_owned()
+        .into_iter()
+        .collect()
+}
+
+fn services_list(
+    info_traffic_msg: &InfoTraffic,
+    chart_type: ChartType,
+) -> Vec<(Service, DataInfo)> {
+    let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
+        .services
+        .iter()
+        .filter(|(service, _)| service != &&Service::NotApplicable)
+        .map(|(s, data)| (*s, *data))
+        .collect();
+    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, chart_type));
+    let n_entry = min(services.len(), 4);
+    services
+        .get(..n_entry)
+        .unwrap_or_default()
+        .to_owned()
+        .into_iter()
+        .collect()
 }

@@ -1,25 +1,21 @@
-use iced::Length::FillPortion;
-use iced::widget::scrollable::Direction;
-use iced::widget::text::LineHeight;
-use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, horizontal_space};
-use iced::widget::{Space, button, vertical_space};
-use iced::{Alignment, Font, Length, Padding};
-
 use crate::chart::types::chart_type::ChartType;
-use crate::countries::flags_pictures::FLAGS_WIDTH_BIG;
+use crate::countries::country_utils::get_computer_tooltip;
+use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar};
+use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, service_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::host::Host;
+use crate::networking::types::service::Service;
+use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
@@ -32,6 +28,14 @@ use crate::translations::translations::{
 };
 use crate::utils::types::icon::Icon;
 use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
+use iced::Length::FillPortion;
+use iced::widget::scrollable::Direction;
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
+use iced::widget::{Column, Container, Row, Rule, Scrollable, Text, Tooltip, horizontal_space};
+use iced::widget::{Space, button, vertical_space};
+use iced::{Alignment, Font, Length, Padding};
+use std::cmp::max;
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
@@ -142,7 +146,7 @@ fn body_no_notifications_received(
 }
 
 fn data_notification_log<'a>(
-    logged_notification: DataThresholdExceeded,
+    logged_notification: &DataThresholdExceeded,
     first_entry_data_info: DataInfo,
     language: Language,
     font: Font,
@@ -197,18 +201,20 @@ fn data_notification_log<'a>(
                 ),
         )
         .push(threshold_bar(
-            &logged_notification,
+            logged_notification,
             chart_type,
             first_entry_data_info,
+            language,
             font,
         ));
     let content_and_extra = Column::new()
+        .spacing(10)
         .push(content)
-        .push(if logged_notification.is_expanded {
-            Row::new().push(get_button_clear_all(font, language))
-        } else {
-            Row::new()
-        });
+        .push(button_expand(
+            logged_notification.id,
+            logged_notification.is_expanded,
+        ))
+        .push_maybe(data_notification_extra(logged_notification, font, language));
     Container::new(content_and_extra)
         .width(Length::Fill)
         .padding(15)
@@ -216,7 +222,7 @@ fn data_notification_log<'a>(
 }
 
 fn favorite_notification_log<'a>(
-    logged_notification: FavoriteTransmitted,
+    logged_notification: &FavoriteTransmitted,
     first_entry_data_info: DataInfo,
     chart_type: ChartType,
     language: Language,
@@ -249,7 +255,7 @@ fn favorite_notification_log<'a>(
                     Row::new()
                         .spacing(8)
                         .push(Icon::Clock.to_text())
-                        .push(Text::new(logged_notification.timestamp).font(font)),
+                        .push(Text::new(logged_notification.timestamp.clone()).font(font)),
                 )
                 .push(
                     Text::new(favorite_transmitted_translation(language))
@@ -310,7 +316,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
                 data_notification_log(
-                    data_threshold_exceeded.clone(),
+                    data_threshold_exceeded,
                     first_entry_data_info,
                     language,
                     font,
@@ -318,7 +324,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
                 favorite_notification_log(
-                    favorite_transmitted.clone(),
+                    favorite_transmitted,
                     first_entry_data_info,
                     chart_type,
                     language,
@@ -334,19 +340,24 @@ fn threshold_bar<'a>(
     logged_notification: &DataThresholdExceeded,
     chart_type: ChartType,
     first_entry_data_info: DataInfo,
+    language: Language,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let data_info = logged_notification.data_info;
-    let id = logged_notification.id;
-    let is_expanded = logged_notification.is_expanded;
-
     let (incoming_bar_len, outgoing_bar_len) =
         get_bars_length(chart_type, &first_entry_data_info, &data_info);
 
     Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(button_expand(id, is_expanded))
+        .push(get_computer_tooltip(
+            true,
+            true,
+            None,
+            TrafficType::Unicast,
+            language,
+            font,
+        ))
         .push(
             Column::new()
                 .spacing(1)
@@ -370,21 +381,81 @@ fn button_expand<'a>(
 ) -> Container<'a, Message, StyleType> {
     let button = button(
         if is_expanded {
-            Icon::Collapse
+            Icon::SortAscending
         } else {
-            Icon::Expand
+            Icon::SortDescending
         }
         .to_text()
-        .size(25)
+        .size(11)
         .align_x(Alignment::Center)
         .align_y(Alignment::Center),
     )
-    .width(FLAGS_WIDTH_BIG)
-    .padding(Padding::ZERO)
-    .class(ButtonType::SortArrows)
+    .padding(Padding::ZERO.top(if is_expanded { 0 } else { 2 }))
+    .width(25)
+    .height(25)
     .on_press(Message::ExpandNotification(notification_id, !is_expanded));
 
     Container::new(button)
-        .align_x(Alignment::Center)
+        .padding(Padding::ZERO.left(395))
         .align_y(Alignment::Center)
+}
+
+fn data_notification_extra<'a>(
+    logged_notification: &DataThresholdExceeded,
+    font: Font,
+    language: Language,
+) -> Option<Row<'a, Message, StyleType>> {
+    let max_entries = max(
+        logged_notification.hosts.len(),
+        logged_notification.services.len(),
+    );
+    if !logged_notification.is_expanded || max_entries == 0 {
+        return None;
+    }
+    let spacing = 10.0;
+    #[allow(clippy::cast_precision_loss)]
+    let height = (FLAGS_HEIGHT_BIG + spacing) * max_entries as f32;
+
+    let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
+    let first_data_info_host = logged_notification
+        .hosts
+        .first()
+        .unwrap_or(&(Host::default(), DataInfoHost::default()))
+        .1
+        .data_info;
+    for (host, data_info_host) in &logged_notification.hosts {
+        let host_bar = host_bar(
+            host,
+            data_info_host,
+            logged_notification.chart_type,
+            first_data_info_host,
+            font,
+            language,
+        );
+        hosts_col = hosts_col.push(host_bar);
+    }
+
+    let mut services_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
+    let first_data_info_service = logged_notification
+        .services
+        .first()
+        .unwrap_or(&(Service::default(), DataInfo::default()))
+        .1;
+    for (service, data_info) in &logged_notification.services {
+        let service_bar = service_bar(
+            service,
+            data_info,
+            logged_notification.chart_type,
+            first_data_info_service,
+            font,
+        );
+        services_col = services_col.push(service_bar);
+    }
+
+    Some(
+        Row::new()
+            .push(hosts_col)
+            .push(Container::new(Rule::vertical(30)).height(height))
+            .push(services_col),
+    )
 }

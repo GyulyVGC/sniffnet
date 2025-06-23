@@ -1917,22 +1917,27 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(Configs::default());
-        sniffer.logged_notifications = VecDeque::from([LoggedNotification::DataThresholdExceeded(
-            DataThresholdExceeded {
-                chart_type: ChartType::Packets,
-                threshold: 0,
-                data_info: DataInfo::default(),
-                timestamp: "".to_string(),
-            },
-        )]);
+        sniffer.logged_notifications.0 =
+            VecDeque::from([LoggedNotification::DataThresholdExceeded(
+                DataThresholdExceeded {
+                    id: 1,
+                    chart_type: ChartType::Packets,
+                    threshold: 0,
+                    data_info: DataInfo::default(),
+                    timestamp: "".to_string(),
+                    services: Vec::new(),
+                    hosts: Vec::new(),
+                    is_expanded: false,
+                },
+            )]);
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.logged_notifications.len(), 1);
+        assert_eq!(sniffer.logged_notifications.0.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.logged_notifications.len(), 0);
+        assert_eq!(sniffer.logged_notifications.0.len(), 0);
     }
 
     #[test]

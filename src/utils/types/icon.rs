@@ -14,11 +14,11 @@ pub enum Icon {
     Book,
     BytesThreshold,
     Clock,
-    Collapse,
+    // Collapse,
     Copy,
     Generals,
     Error,
-    Expand,
+    // Expand,
     File,
     Forbidden,
     Funnel,
@@ -101,8 +101,8 @@ impl Icon {
             Icon::Roadmap => '?',
             Icon::News => '>',
             Icon::Update => '<',
-            Icon::Expand => 'p',
-            Icon::Collapse => 'q',
+            // Icon::Expand => 'p',
+            // Icon::Collapse => 'q',
         }
     }
 

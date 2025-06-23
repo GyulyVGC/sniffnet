@@ -2,6 +2,7 @@ use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::Host;
+use crate::networking::types::service::Service;
 
 /// Enum representing the possible notification events.
 pub enum LoggedNotification {
@@ -42,6 +43,8 @@ pub struct DataThresholdExceeded {
     pub(crate) data_info: DataInfo,
     pub(crate) timestamp: String,
     pub(crate) is_expanded: bool,
+    pub(crate) hosts: Vec<(Host, DataInfoHost)>,
+    pub(crate) services: Vec<(Service, DataInfo)>,
 }
 
 #[derive(Clone)]

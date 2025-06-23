@@ -8,14 +8,15 @@ use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
     BJ, BM, BN, BO, BOGON, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK,
     CL, CM, CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH,
-    ER, ES, ET, FI, FJ, FK, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA, GB, GD, GE, GG, GH,
-    GI, GL, GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID, IE, IL, IM, IN, IO,
-    IQ, IR, IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB, LC, LI, LK,
-    LR, LS, LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR, MS, MT, MU,
-    MULTICAST, MV, MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, PA, PE, PF,
-    PG, PH, PK, PL, PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG, SH, SI, SK,
-    SL, SM, SN, SO, SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TR, TT,
-    TV, TW, TZ, UA, UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
+    ER, ES, ET, FI, FJ, FK, FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA,
+    GB, GD, GE, GG, GH, GI, GL, GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID,
+    IE, IL, IM, IN, IO, IQ, IR, IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ,
+    LA, LB, LC, LI, LK, LR, LS, LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR,
+    MS, MT, MU, MULTICAST, MV, MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM,
+    PA, PE, PF, PG, PH, PK, PL, PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG,
+    SH, SI, SK, SL, SM, SN, SO, SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN,
+    TO, TR, TT, TV, TW, TZ, UA, UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA,
+    ZM, ZW,
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
@@ -384,7 +385,7 @@ pub fn get_computer_tooltip<'a>(
     )))
     .class(SvgType::AdaptColor)
     .width(FLAGS_WIDTH_BIG)
-    .height(FLAGS_WIDTH_BIG * 0.75);
+    .height(FLAGS_HEIGHT_BIG);
 
     let tooltip = match (is_my_address, is_local, is_bogon, traffic_type) {
         (true, _, _, _) => your_network_adapter_translation(language).to_string(),
