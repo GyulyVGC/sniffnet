@@ -201,7 +201,6 @@ fn data_notification_log<'a>(
         )
         .push(threshold_bar(
             logged_notification,
-            chart_type,
             first_entry_data_info,
             language,
             font,
@@ -336,11 +335,11 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 
 fn threshold_bar<'a>(
     logged_notification: &DataThresholdExceeded,
-    chart_type: ChartType,
     first_entry_data_info: DataInfo,
     language: Language,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
+    let chart_type = logged_notification.chart_type;
     let data_info = logged_notification.data_info;
     let (incoming_bar_len, outgoing_bar_len) =
         get_bars_length(chart_type, &first_entry_data_info, &data_info);
