@@ -556,7 +556,7 @@ fn get_agglomerates_row<'a>(
     let tot_bytes = tot.tot_bytes();
 
     let (in_length, out_length) = get_bars_length(chart_type, &tot, &tot);
-    let bars = get_bars(in_length, out_length);
+    let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let bytes_col = Column::new()
         .align_x(Alignment::Center)

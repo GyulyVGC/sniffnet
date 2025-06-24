@@ -8,7 +8,7 @@ use std::time::Instant;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
 // data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct DataInfo {
     /// Incoming packets
     incoming_packets: u128,
@@ -45,6 +45,13 @@ impl DataInfo {
 
     pub fn tot_bytes(&self) -> u128 {
         self.incoming_bytes + self.outgoing_bytes
+    }
+
+    pub fn tot_data(&self, chart_type: ChartType) -> u128 {
+        match chart_type {
+            ChartType::Packets => self.tot_packets(),
+            ChartType::Bytes => self.tot_bytes(),
+        }
     }
 
     pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {

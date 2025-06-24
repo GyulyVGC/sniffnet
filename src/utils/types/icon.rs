@@ -14,9 +14,11 @@ pub enum Icon {
     Book,
     BytesThreshold,
     Clock,
+    // Collapse,
     Copy,
     Generals,
     Error,
+    // Expand,
     File,
     Forbidden,
     Funnel,
@@ -61,7 +63,7 @@ impl Icon {
             Icon::AudioHigh => 'Z',
             Icon::AudioMute => 'Y',
             Icon::Bin => 'h',
-            Icon::BytesThreshold => 'f',
+            Icon::BytesThreshold => '[',
             Icon::Clock => '9',
             Icon::Generals => 'Q',
             Icon::Error => 'U',
@@ -79,7 +81,7 @@ impl Icon {
             Icon::Moon => 'G',
             Icon::Notification => '7',
             Icon::Overview => 'd',
-            Icon::PacketsThreshold => 'e',
+            Icon::PacketsThreshold => '\\',
             // Icon::Restore => 'k',
             Icon::Rocket => 'S',
             Icon::Settings => 'a',
@@ -99,6 +101,8 @@ impl Icon {
             Icon::Roadmap => '?',
             Icon::News => '>',
             Icon::Update => '<',
+            // Icon::Expand => 'p',
+            // Icon::Collapse => 'q',
         }
     }
 

@@ -1,6 +1,8 @@
 pub const FLAGS_WIDTH_SMALL: f32 = 20.0;
 pub const FLAGS_WIDTH_BIG: f32 = 37.5;
 
+pub const FLAGS_HEIGHT_BIG: f32 = FLAGS_WIDTH_BIG * 3.0 / 4.0;
+
 pub const AD: &[u8] = include_bytes!("../../resources/countries_flags/4x3/ad.svg");
 pub const AE: &[u8] = include_bytes!("../../resources/countries_flags/4x3/ae.svg");
 pub const AF: &[u8] = include_bytes!("../../resources/countries_flags/4x3/af.svg");

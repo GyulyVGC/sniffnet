@@ -46,19 +46,16 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotification;
-use crate::notifications::types::notifications::{
-    BytesNotification, Notification, PacketsNotification,
-};
+use crate::notifications::types::notifications::{DataNotification, Notification};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_sort_type::ReportSortType;
@@ -69,7 +66,7 @@ use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, InfoTraffic, StyleType, TrafficChart, location};
+use crate::{ConfigSettings, Configs, StyleType, TrafficChart, location};
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -88,8 +85,8 @@ pub struct Sniffer {
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
-    /// Log of the received notifications
-    pub logged_notifications: VecDeque<LoggedNotification>,
+    /// Log of the displayed notifications, with the total number of notifications for this capture
+    pub logged_notifications: (VecDeque<LoggedNotification>, usize),
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
@@ -156,7 +153,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
-            logged_notifications: VecDeque::new(),
+            logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
@@ -365,7 +362,7 @@ impl Sniffer {
                 self.configs.settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
-                self.logged_notifications = VecDeque::new();
+                self.logged_notifications.0 = VecDeque::new();
                 self.modal = None;
             }
             Message::SwitchPage(next) => {
@@ -553,6 +550,16 @@ impl Sniffer {
                 self.update_waiting_dots();
                 self.fetch_devices();
             }
+            Message::ExpandNotification(id, expand) => {
+                if let Some(n) = self
+                    .logged_notifications
+                    .0
+                    .iter_mut()
+                    .find(|n| n.id() == id)
+                {
+                    n.expand(expand);
+                }
+            }
         }
         Task::none()
     }
@@ -653,59 +660,46 @@ impl Sniffer {
         self.configs.settings.scale_factor
     }
 
-    /// Updates thresholds if they haven't been edited for a while
-    fn update_thresholds(&mut self) {
+    /// Updates threshold if they haven't been edited for a while
+    fn update_threshold(&mut self) {
         // Ignore if just edited
-        if let Some(temp_thresholds) = self.timing_events.threshold_adjust_expired_take() {
-            // Apply the temporary thresholds to the actual config
+        if let Some(temp_threshold) = self.timing_events.threshold_adjust_expired_take() {
+            // Apply the temporary threshold to the actual config
             self.configs
                 .settings
                 .notifications
-                .packets_notification
-                .threshold = temp_thresholds.0.threshold;
+                .data_notification
+                .threshold = temp_threshold.threshold;
             self.configs
                 .settings
                 .notifications
-                .packets_notification
-                .previous_threshold = temp_thresholds.0.previous_threshold;
-
+                .data_notification
+                .byte_multiple = temp_threshold.byte_multiple;
             self.configs
                 .settings
                 .notifications
-                .bytes_notification
-                .threshold = temp_thresholds.1.threshold;
-            self.configs
-                .settings
-                .notifications
-                .bytes_notification
-                .byte_multiple = temp_thresholds.1.byte_multiple;
-            self.configs
-                .settings
-                .notifications
-                .bytes_notification
-                .previous_threshold = temp_thresholds.1.previous_threshold;
+                .data_notification
+                .previous_threshold = temp_threshold.previous_threshold;
         }
     }
 
-    fn refresh_data(&mut self, msg: InfoTrafficMessage, no_more_packets: bool) {
-        self.info_traffic.refresh(msg, &self.favorite_hosts);
-        self.update_thresholds();
-        let info_traffic = &self.info_traffic;
-        if info_traffic.tot_in_packets + info_traffic.tot_out_packets == 0 {
+    fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
+        self.info_traffic.refresh(&mut msg);
+        self.update_threshold();
+        if self.info_traffic.tot_data_info.tot_packets() == 0 {
             return;
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
             self.configs.settings.notifications,
-            info_traffic,
+            &msg,
+            &self.favorite_hosts,
             &self.capture_source,
         );
-        self.info_traffic.favorites_last_interval = HashSet::new();
         if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
             self.unread_notifications += emitted_notifications;
         }
-        self.traffic_chart
-            .update_charts_data(&self.info_traffic, no_more_packets);
+        self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
         if let CaptureSource::Device(device) = &self.capture_source {
             let current_device_name = device.get_name().clone();
@@ -801,7 +795,7 @@ impl Sniffer {
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
-        self.logged_notifications = VecDeque::new();
+        self.logged_notifications = (VecDeque::new(), 0);
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language);
         self.report_sort_type = ReportSortType::default();
@@ -866,88 +860,57 @@ impl Sniffer {
         }
     }
 
-    /// Don't update adjustments to thresholds immediately:
-    /// that is, sound and toggling thresholds on/off should be applied immediately
+    /// Don't update adjustments to threshold immediately:
+    /// that is, sound and toggling threshold on/off should be applied immediately
     /// Threshold adjustments are saved in `self.timing_events.threshold_adjust` and then applied
     /// after timeout
     fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
         let notifications = self.configs.settings.notifications;
         let sound = match notification {
-            Notification::Packets(PacketsNotification {
-                threshold,
-                sound,
-                previous_threshold,
-            }) => {
-                let mut temp_thresholds = self.get_temp_thresholds();
-                // Check if adjustments have been made to thresholds
-                if temp_thresholds.0.threshold != threshold
-                    || temp_thresholds.0.previous_threshold != previous_threshold
-                {
-                    temp_thresholds.0 = PacketsNotification {
-                        threshold,
-                        sound,
-                        previous_threshold,
-                    };
-                    self.timing_events.threshold_adjust_now(temp_thresholds);
-                }
-                // If threshold is toggled, apply immediately
-                if threshold.is_some() != notifications.packets_notification.threshold.is_some() {
-                    self.configs
-                        .settings
-                        .notifications
-                        .packets_notification
-                        .threshold = threshold;
-                    self.configs
-                        .settings
-                        .notifications
-                        .packets_notification
-                        .previous_threshold = previous_threshold;
-                }
-                // always update sound
-                self.configs
-                    .settings
-                    .notifications
-                    .packets_notification
-                    .sound = sound;
-                sound
-            }
-            Notification::Bytes(BytesNotification {
+            Notification::Data(DataNotification {
+                chart_type,
                 threshold,
                 byte_multiple,
                 sound,
                 previous_threshold,
             }) => {
-                let mut temp_thresholds = self.get_temp_thresholds();
-                if temp_thresholds.1.threshold != threshold
-                    || temp_thresholds.1.byte_multiple != byte_multiple
-                    || temp_thresholds.1.previous_threshold != previous_threshold
+                let mut temp_threshold = self.get_temp_threshold();
+                if temp_threshold.threshold != threshold
+                    || temp_threshold.byte_multiple != byte_multiple
+                    || temp_threshold.previous_threshold != previous_threshold
                 {
-                    temp_thresholds.1 = BytesNotification {
+                    temp_threshold = DataNotification {
+                        chart_type,
                         threshold,
                         byte_multiple,
                         sound,
                         previous_threshold,
                     };
-                    self.timing_events.threshold_adjust_now(temp_thresholds);
+                    self.timing_events.threshold_adjust_now(temp_threshold);
                 }
-                if threshold.is_some() != notifications.bytes_notification.threshold.is_some() {
+                if threshold.is_some() != notifications.data_notification.threshold.is_some() {
                     self.configs
                         .settings
                         .notifications
-                        .bytes_notification
+                        .data_notification
                         .threshold = threshold;
                     self.configs
                         .settings
                         .notifications
-                        .bytes_notification
+                        .data_notification
                         .byte_multiple = byte_multiple;
                     self.configs
                         .settings
                         .notifications
-                        .bytes_notification
+                        .data_notification
                         .previous_threshold = previous_threshold;
                 }
-                self.configs.settings.notifications.bytes_notification.sound = sound;
+                self.configs.settings.notifications.data_notification.sound = sound;
+                self.configs
+                    .settings
+                    .notifications
+                    .data_notification
+                    .chart_type = chart_type;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -960,16 +923,13 @@ impl Sniffer {
         }
     }
 
-    /// Returns thresholds in `timing_events.threshold_adjust` or copy of current thresholds
-    fn get_temp_thresholds(&self) -> (PacketsNotification, BytesNotification) {
-        if let Some(temp_thresholds) = self.timing_events.temp_thresholds() {
-            temp_thresholds
+    /// Returns threshold in `timing_events.threshold_adjust` or copy of current threshold
+    fn get_temp_threshold(&self) -> DataNotification {
+        if let Some(temp_threshold) = self.timing_events.temp_threshold() {
+            temp_threshold
         } else {
             let notifications = self.configs.settings.notifications;
-            (
-                notifications.packets_notification,
-                notifications.bytes_notification,
-            )
+            notifications.data_notification
         }
     }
 
@@ -989,7 +949,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.info_traffic.tot_out_packets + self.info_traffic.tot_in_packets > 0 {
+                if self.info_traffic.tot_data_info.tot_packets() > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()
@@ -1061,7 +1021,7 @@ impl Sniffer {
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
         if self.running_page.eq(&RunningPage::Notifications)
-            && !self.logged_notifications.is_empty()
+            && !self.logged_notifications.0.is_empty()
         {
             return Task::done(Message::ShowModal(MyModal::ClearAll));
         }
@@ -1100,11 +1060,7 @@ impl Sniffer {
     fn handle_new_host(&mut self, host_msg: HostMessage) {
         let HostMessage {
             host,
-            other_data,
-            is_loopback,
-            is_local,
-            is_bogon,
-            traffic_type,
+            data_info_host,
             address_to_lookup,
             rdns,
         } = host_msg;
@@ -1112,32 +1068,16 @@ impl Sniffer {
         self.info_traffic
             .hosts
             .entry(host.clone())
-            .and_modify(|data_info_host| {
-                data_info_host.data_info.refresh(other_data);
-                data_info_host.is_loopback = is_loopback;
-                data_info_host.is_local = is_local;
-                data_info_host.is_bogon = is_bogon;
-                data_info_host.traffic_type = traffic_type;
+            .and_modify(|d| {
+                d.refresh(&data_info_host);
             })
-            .or_insert_with(|| DataInfoHost {
-                data_info: other_data,
-                is_favorite: false,
-                is_loopback,
-                is_local,
-                is_bogon,
-                traffic_type,
-            });
+            .or_insert(data_info_host);
 
         self.addresses_resolved
             .insert(address_to_lookup, (rdns, host.clone()));
 
         // update host data states including the new host
         self.host_data_states.data.update(&host);
-
-        // check if the newly resolved host was featured in the favorites (possible in case of already existing host)
-        if self.favorite_hosts.contains(&host) {
-            self.info_traffic.favorites_last_interval.insert(host);
-        }
     }
 
     fn register_sigint_handler() -> Task<Message> {
@@ -1172,13 +1112,15 @@ mod tests {
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::message::Message;
     use crate::gui::types::timing_events::TimingEvents;
+    use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::host::Host;
-    use crate::networking::types::info_traffic::InfoTrafficMessage;
+    use crate::networking::types::info_traffic::InfoTraffic;
+    use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
-        LoggedNotification, PacketsThresholdExceeded,
+        DataThresholdExceeded, LoggedNotification,
     };
     use crate::notifications::types::notifications::{
-        BytesNotification, FavoriteNotification, Notification, Notifications, PacketsNotification,
+        DataNotification, FavoriteNotification, Notification, Notifications,
     };
     use crate::notifications::types::sound::Sound;
     use crate::report::types::report_col::ReportCol;
@@ -1708,67 +1650,44 @@ mod tests {
             std::thread::sleep(Duration::from_millis(
                 TimingEvents::TIMEOUT_THRESHOLD_ADJUST + 5,
             ));
-            // Thresholds adjustments won't be updated if `info_traffic.tot_in_packets`
+            // Threshold adjustments won't be updated if `info_traffic.tot_in_packets`
             // and `info_traffic.tot_out_packets` are both `0`.
-            sniffer.info_traffic.tot_in_packets = 1;
+            sniffer
+                .info_traffic
+                .tot_data_info
+                .add_packet(0, TrafficDirection::Outgoing);
 
             // Simulate a tick to apply the settings
-            sniffer.update(Message::TickRun(
-                0,
-                InfoTrafficMessage::default(),
-                vec![],
-                false,
-            ));
+            sniffer.update(Message::TickRun(0, InfoTraffic::default(), vec![], false));
         }
         let mut sniffer = Sniffer::new(Configs::default());
 
-        let packets_notification_init = PacketsNotification {
-            threshold: None,
-            sound: Sound::Gulp,
-            previous_threshold: 750,
-        };
-
-        let packets_notification_toggle_on = PacketsNotification {
-            threshold: Some(750),
-            sound: Sound::Gulp,
-            previous_threshold: 750,
-        };
-
-        let packets_notification_adjusted_threshold_sound_off = PacketsNotification {
-            threshold: Some(1122),
-            sound: Sound::None,
-            previous_threshold: 1122,
-        };
-
-        // Used for comparing that sound is applied right away, but not threshold adjustment
-        let packets_notification_sound_off_only = PacketsNotification {
-            threshold: Some(750),
-            sound: Sound::None,
-            previous_threshold: 750,
-        };
-
-        let bytes_notification_init = BytesNotification {
+        let bytes_notification_init = DataNotification {
+            chart_type: ChartType::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Pop,
             previous_threshold: 800000,
         };
 
-        let bytes_notification_toggled_on = BytesNotification {
+        let bytes_notification_toggled_on = DataNotification {
+            chart_type: ChartType::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Pop,
             previous_threshold: 800_000,
         };
 
-        let bytes_notification_adjusted_threshold_sound_off = BytesNotification {
+        let bytes_notification_adjusted_threshold_sound_off = DataNotification {
+            chart_type: ChartType::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
             previous_threshold: 3,
         };
 
-        let bytes_notification_sound_off_only = BytesNotification {
+        let bytes_notification_sound_off_only = DataNotification {
+            chart_type: ChartType::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -1789,11 +1708,7 @@ mod tests {
         assert_eq!(sniffer.configs.settings.notifications.volume, 60);
         assert_eq!(sniffer.configs.settings.notifications.volume, 60);
         assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_init
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_init
         );
         assert_eq!(
@@ -1806,11 +1721,7 @@ mod tests {
 
         assert_eq!(sniffer.configs.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_init,
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_init,
         );
         assert_eq!(
@@ -1818,38 +1729,8 @@ mod tests {
             fav_notification_init,
         );
 
-        sniffer.update(Message::UpdateNotificationSettings(
-            Notification::Packets(packets_notification_toggle_on),
-            false,
-        ));
-
-        // Verify that toggling threshold is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_toggle_on,
-        );
-
-        sniffer.update(Message::UpdateNotificationSettings(
-            Notification::Packets(packets_notification_adjusted_threshold_sound_off),
-            false,
-        ));
-
-        // Verify thresholds are not applied before timeout expires,
-        // and rest is applied immediately
-        assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_sound_off_only,
-        );
-
-        expire_notifications_timeout(&mut sniffer);
-
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
-        assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_adjusted_threshold_sound_off,
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_init
         );
         assert_eq!(
@@ -1859,25 +1740,25 @@ mod tests {
 
         // Toggle on bytes notifications
         sniffer.update(Message::UpdateNotificationSettings(
-            Notification::Bytes(bytes_notification_toggled_on),
+            Notification::Data(bytes_notification_toggled_on),
             true,
         ));
 
         // Verify that toggling threshold is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_toggled_on,
         );
 
         sniffer.update(Message::UpdateNotificationSettings(
-            Notification::Bytes(bytes_notification_adjusted_threshold_sound_off),
+            Notification::Data(bytes_notification_adjusted_threshold_sound_off),
             true,
         ));
 
-        // Verify adjusted thresholds are not applied before timeout expires,
+        // Verify adjusted threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_sound_off_only,
         );
 
@@ -1885,11 +1766,7 @@ mod tests {
 
         assert_eq!(sniffer.configs.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_adjusted_threshold_sound_off
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
@@ -1903,7 +1780,7 @@ mod tests {
             true,
         ));
 
-        // Verify thresholds are not applied before timeout expires,
+        // Verify threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
             sniffer.configs.settings.notifications.favorite_notification,
@@ -1913,11 +1790,7 @@ mod tests {
         // And the rest is intact
         assert_eq!(sniffer.configs.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.packets_notification,
-            packets_notification_adjusted_threshold_sound_off
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.bytes_notification,
+            sniffer.configs.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
@@ -1930,23 +1803,27 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(Configs::default());
-        sniffer.logged_notifications =
-            VecDeque::from([LoggedNotification::PacketsThresholdExceeded(
-                PacketsThresholdExceeded {
+        sniffer.logged_notifications.0 =
+            VecDeque::from([LoggedNotification::DataThresholdExceeded(
+                DataThresholdExceeded {
+                    id: 1,
+                    chart_type: ChartType::Packets,
                     threshold: 0,
-                    incoming: 0,
-                    outgoing: 0,
+                    data_info: DataInfo::default(),
                     timestamp: "".to_string(),
+                    services: Vec::new(),
+                    hosts: Vec::new(),
+                    is_expanded: false,
                 },
             )]);
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.logged_notifications.len(), 1);
+        assert_eq!(sniffer.logged_notifications.0.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.logged_notifications.len(), 0);
+        assert_eq!(sniffer.logged_notifications.0.len(), 0);
     }
 
     #[test]
@@ -1988,7 +1865,10 @@ mod tests {
         assert_eq!(sniffer.running_page, RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer.info_traffic.tot_in_packets += 1;
+        sniffer
+            .info_traffic
+            .tot_data_info
+            .add_packet(0, TrafficDirection::Outgoing);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, None);
@@ -2032,8 +1912,7 @@ mod tests {
                 style_path: "".to_string(),
                 notifications: Notifications {
                     volume: 60,
-                    packets_notification: Default::default(),
-                    bytes_notification: Default::default(),
+                    data_notification: Default::default(),
                     favorite_notification: Default::default()
                 },
                 style: StyleType::Custom(ExtraStyles::A11yDark)
@@ -2074,8 +1953,7 @@ mod tests {
                 ),
                 notifications: Notifications {
                     volume: 100,
-                    packets_notification: Default::default(),
-                    bytes_notification: Default::default(),
+                    data_notification: Default::default(),
                     favorite_notification: Default::default()
                 },
                 style: StyleType::Custom(ExtraStyles::DraculaDark)
