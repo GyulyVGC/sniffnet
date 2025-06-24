@@ -62,8 +62,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 
     tab_and_body = tab_and_body.push(tabs);
 
-    if notifications.packets_notification.threshold.is_none()
-        && notifications.bytes_notification.threshold.is_none()
+    if notifications.data_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
         && sniffer.logged_notifications.0.is_empty()
     {
@@ -157,10 +156,10 @@ fn data_notification_log<'a>(
     } else {
         logged_notification.threshold.to_string()
     };
-    let icon = if chart_type == ChartType::Bytes {
-        Icon::BytesThreshold
-    } else {
+    let icon = if chart_type == ChartType::Packets {
         Icon::PacketsThreshold
+    } else {
+        Icon::BytesThreshold
     }
     .to_text()
     .size(80)
@@ -244,7 +243,6 @@ fn favorite_notification_log<'a>(
             Icon::Star
                 .to_text()
                 .size(80)
-                .class(TextType::Starred)
                 .line_height(LineHeight::Relative(1.0)),
         )
         .push(

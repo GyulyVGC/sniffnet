@@ -98,8 +98,7 @@ mod tests {
                 ),
                 notifications: Notifications {
                     volume: 100,
-                    packets_notification: Default::default(),
-                    bytes_notification: Default::default(),
+                    data_notification: Default::default(),
                     favorite_notification: Default::default(),
                 },
                 style: StyleType::Custom(ExtraStyles::DraculaDark),

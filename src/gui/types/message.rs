@@ -65,7 +65,7 @@ pub enum Message {
     ChangeRunningPage(RunningPage),
     /// Select language
     LanguageSelection(Language),
-    /// Set packets notification
+    /// Set notification settings
     UpdateNotificationSettings(Notification, bool),
     /// Clear all received notifications
     ClearAllNotifications,

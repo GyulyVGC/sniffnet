@@ -2,7 +2,7 @@ use std::net::{IpAddr, Ipv4Addr};
 use std::ops::Sub;
 use std::time::Duration;
 
-use crate::notifications::types::notifications::{BytesNotification, PacketsNotification};
+use crate::notifications::types::notifications::DataNotification;
 
 pub struct TimingEvents {
     /// Instant of the last window focus
@@ -13,12 +13,9 @@ pub struct TimingEvents {
     thumbnail_enter: std::time::Instant,
     /// Instant of the last click on the thumbnail window
     thumbnail_click: std::time::Instant,
-    /// Instant of the last adjust of notifications settings thresholds and storage of these
-    /// thresholds while editing
-    threshold_adjust: (
-        std::time::Instant,
-        Option<(PacketsNotification, BytesNotification)>,
-    ),
+    /// Instant of the last adjust of notifications settings threshold and storage of this
+    /// threshold while editing
+    threshold_adjust: (std::time::Instant, Option<DataNotification>),
 }
 
 impl TimingEvents {
@@ -66,18 +63,13 @@ impl TimingEvents {
             < Duration::from_millis(TimingEvents::TIMEOUT_THUMBNAIL_CLICK)
     }
 
-    pub fn threshold_adjust_now(
-        &mut self,
-        temp_thresholds: (PacketsNotification, BytesNotification),
-    ) {
+    pub fn threshold_adjust_now(&mut self, temp_threshold: DataNotification) {
         self.threshold_adjust.0 = std::time::Instant::now();
-        self.threshold_adjust.1 = Some(temp_thresholds);
+        self.threshold_adjust.1 = Some(temp_threshold);
     }
 
-    /// If timeout has expired, take temporary thresholds
-    pub fn threshold_adjust_expired_take(
-        &mut self,
-    ) -> Option<(PacketsNotification, BytesNotification)> {
+    /// If timeout has expired, take temporary threshold
+    pub fn threshold_adjust_expired_take(&mut self) -> Option<DataNotification> {
         if self.threshold_adjust.0.elapsed()
             > Duration::from_millis(TimingEvents::TIMEOUT_THRESHOLD_ADJUST)
         {
@@ -87,7 +79,7 @@ impl TimingEvents {
         }
     }
 
-    pub fn temp_thresholds(&self) -> Option<(PacketsNotification, BytesNotification)> {
+    pub fn temp_threshold(&self) -> Option<DataNotification> {
         self.threshold_adjust.1
     }
 }

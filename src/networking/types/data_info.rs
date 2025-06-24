@@ -47,6 +47,13 @@ impl DataInfo {
         self.incoming_bytes + self.outgoing_bytes
     }
 
+    pub fn tot_data(&self, chart_type: ChartType) -> u128 {
+        match chart_type {
+            ChartType::Packets => self.tot_packets(),
+            ChartType::Bytes => self.tot_bytes(),
+        }
+    }
+
     pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {
         if traffic_direction.eq(&TrafficDirection::Outgoing) {
             self.outgoing_packets += 1;

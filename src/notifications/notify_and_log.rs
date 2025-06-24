@@ -29,36 +29,10 @@ pub fn notify_and_log(
     let emitted_notifications_prev = logged_notifications.1;
     let timestamp = info_traffic_msg.last_packet_timestamp;
     let data_info = info_traffic_msg.tot_data_info;
-    // packets threshold
-    if let Some(threshold) = notifications.packets_notification.threshold {
-        if data_info.tot_packets() > u128::from(threshold) {
-            // log this notification
-            logged_notifications.1 += 1;
-            if logged_notifications.0.len() >= 30 {
-                logged_notifications.0.pop_back();
-            }
-            logged_notifications
-                .0
-                .push_front(LoggedNotification::DataThresholdExceeded(
-                    DataThresholdExceeded {
-                        id: logged_notifications.1,
-                        chart_type: ChartType::Packets,
-                        threshold: notifications.packets_notification.previous_threshold,
-                        data_info,
-                        timestamp: get_formatted_timestamp(timestamp),
-                        is_expanded: false,
-                        hosts: hosts_list(info_traffic_msg, ChartType::Packets),
-                        services: services_list(info_traffic_msg, ChartType::Packets),
-                    },
-                ));
-            if sound_to_play.eq(&Sound::None) {
-                sound_to_play = notifications.packets_notification.sound;
-            }
-        }
-    }
-    // bytes threshold
-    if let Some(threshold) = notifications.bytes_notification.threshold {
-        if data_info.tot_bytes() > u128::from(threshold) {
+    // data threshold
+    if let Some(threshold) = notifications.data_notification.threshold {
+        let chart_type = notifications.data_notification.chart_type;
+        if data_info.tot_data(chart_type) > u128::from(threshold) {
             //log this notification
             logged_notifications.1 += 1;
             if logged_notifications.0.len() >= 30 {
@@ -69,17 +43,17 @@ pub fn notify_and_log(
                 .push_front(LoggedNotification::DataThresholdExceeded(
                     DataThresholdExceeded {
                         id: logged_notifications.1,
-                        chart_type: ChartType::Bytes,
-                        threshold: notifications.bytes_notification.previous_threshold,
+                        chart_type,
+                        threshold: notifications.data_notification.previous_threshold,
                         data_info,
                         timestamp: get_formatted_timestamp(timestamp),
                         is_expanded: false,
-                        hosts: hosts_list(info_traffic_msg, ChartType::Bytes),
-                        services: services_list(info_traffic_msg, ChartType::Bytes),
+                        hosts: hosts_list(info_traffic_msg, chart_type),
+                        services: services_list(info_traffic_msg, chart_type),
                     },
                 ));
             if sound_to_play.eq(&Sound::None) {
-                sound_to_play = notifications.bytes_notification.sound;
+                sound_to_play = notifications.data_notification.sound;
             }
         }
     }

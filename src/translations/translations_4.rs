@@ -71,3 +71,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
     })
 }
+
+pub fn data_exceeded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Data threshold exceeded",
+        Language::IT => "Soglia di dati superata",
+        _ => "Data threshold exceeded",
+    }
+}

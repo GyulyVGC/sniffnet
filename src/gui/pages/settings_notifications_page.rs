@@ -1,8 +1,9 @@
 use iced::widget::scrollable::Direction;
 use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
+use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -14,14 +15,15 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::notifications::types::notifications::{
-    BytesNotification, FavoriteNotification, Notification, PacketsNotification,
+    DataNotification, FavoriteNotification, Notification,
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
-    bytes_exceeded_translation, favorite_transmitted_translation, notifications_title_translation,
-    packets_exceeded_translation, per_second_translation, settings_translation, sound_translation,
-    threshold_translation, volume_translation,
+    favorite_transmitted_translation, notifications_title_translation, per_second_translation,
+    settings_translation, sound_translation, threshold_translation, volume_translation,
 };
+use crate::translations::translations_2::data_representation_translation;
+use crate::translations::translations_4::data_exceeded_translation;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
@@ -36,18 +38,12 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
-    // Use thresholds that have not yet been applied, if available
-    if let Some((temp_packets_notifications, temp_bytes_notifications)) =
-        sniffer.timing_events.temp_thresholds()
-    {
-        notifications.packets_notification.threshold = temp_packets_notifications.threshold;
-        notifications.packets_notification.previous_threshold =
-            temp_packets_notifications.previous_threshold;
-
-        notifications.bytes_notification.threshold = temp_bytes_notifications.threshold;
-        notifications.bytes_notification.byte_multiple = temp_bytes_notifications.byte_multiple;
-        notifications.bytes_notification.previous_threshold =
-            temp_bytes_notifications.previous_threshold;
+    // Use threshold that has not yet been applied, if available
+    if let Some(temp_data_notification) = sniffer.timing_events.temp_threshold() {
+        notifications.data_notification.threshold = temp_data_notification.threshold;
+        notifications.data_notification.byte_multiple = temp_data_notification.byte_multiple;
+        notifications.data_notification.previous_threshold =
+            temp_data_notification.previous_threshold;
     }
 
     let mut content = Column::new()
@@ -82,13 +78,8 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
             Column::new()
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
-                .push(get_packets_notify(
-                    notifications.packets_notification,
-                    language,
-                    font,
-                ))
-                .push(get_bytes_notify(
-                    notifications.bytes_notification,
+                .push(get_data_notify(
+                    notifications.data_notification,
                     language,
                     font,
                 ))
@@ -108,29 +99,29 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .class(ContainerType::Modal)
 }
 
-fn get_packets_notify<'a>(
-    packets_notification: PacketsNotification,
+fn get_data_notify<'a>(
+    data_notification: DataNotification,
     language: Language,
     font: Font,
 ) -> Column<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
-        packets_exceeded_translation(language),
-        packets_notification.threshold.is_some(),
+        data_exceeded_translation(language),
+        data_notification.threshold.is_some(),
     )
     .on_toggle(move |toggled| {
         if toggled {
             Message::UpdateNotificationSettings(
-                Notification::Packets(PacketsNotification {
-                    threshold: Some(packets_notification.previous_threshold),
-                    ..packets_notification
+                Notification::Data(DataNotification {
+                    threshold: Some(data_notification.previous_threshold),
+                    ..data_notification
                 }),
                 false,
             )
         } else {
             Message::UpdateNotificationSettings(
-                Notification::Packets(PacketsNotification {
+                Notification::Data(DataNotification {
                     threshold: None,
-                    ..packets_notification
+                    ..data_notification
                 }),
                 false,
             )
@@ -139,9 +130,9 @@ fn get_packets_notify<'a>(
     .size(18)
     .font(font);
 
-    let mut ret_val = Column::new().spacing(10).push(checkbox);
+    let mut ret_val = Column::new().spacing(15).push(checkbox);
 
-    if packets_notification.threshold.is_none() {
+    if data_notification.threshold.is_none() {
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
@@ -149,62 +140,18 @@ fn get_packets_notify<'a>(
                 .class(ContainerType::BorderedRound),
         )
     } else {
-        let input_row = input_group_packets(packets_notification, font, language);
-        let sound_row = sound_buttons(Notification::Packets(packets_notification), font, language);
-        ret_val = ret_val.push(input_row).push(sound_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
-    }
-}
-
-fn get_bytes_notify<'a>(
-    bytes_notification: BytesNotification,
-    language: Language,
-    font: Font,
-) -> Column<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(
-        bytes_exceeded_translation(language),
-        bytes_notification.threshold.is_some(),
-    )
-    .on_toggle(move |toggled| {
-        if toggled {
-            Message::UpdateNotificationSettings(
-                Notification::Bytes(BytesNotification {
-                    threshold: Some(bytes_notification.previous_threshold),
-                    ..bytes_notification
-                }),
-                false,
-            )
-        } else {
-            Message::UpdateNotificationSettings(
-                Notification::Bytes(BytesNotification {
-                    threshold: None,
-                    ..bytes_notification
-                }),
-                false,
-            )
-        }
-    })
-    .size(18)
-    .font(font);
-
-    let mut ret_val = Column::new().spacing(10).push(checkbox);
-
-    if bytes_notification.threshold.is_none() {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
-    } else {
-        let input_row = input_group_bytes(bytes_notification, font, language);
-        let sound_row = sound_buttons(Notification::Bytes(bytes_notification), font, language);
-        ret_val = ret_val.push(input_row).push(sound_row);
+        let data_representation_row = row_data_representation(
+            data_notification,
+            language,
+            font,
+            data_notification.chart_type,
+        );
+        let input_row = input_group_bytes(data_notification, font, language);
+        let sound_row = sound_buttons(Notification::Data(data_notification), font, language);
+        ret_val = ret_val
+            .push(sound_row)
+            .push(data_representation_row)
+            .push(input_row);
         Column::new().padding(5).push(
             Container::new(ret_val)
                 .padding(10)
@@ -236,7 +183,7 @@ fn get_favorite_notify<'a>(
     .size(18)
     .font(font);
 
-    let mut ret_val = Column::new().spacing(10).push(checkbox);
+    let mut ret_val = Column::new().spacing(15).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
         let sound_row = sound_buttons(
@@ -261,54 +208,8 @@ fn get_favorite_notify<'a>(
     }
 }
 
-fn input_group_packets<'a>(
-    packets_notification: PacketsNotification,
-    font: Font,
-    language: Language,
-) -> Container<'a, Message, StyleType> {
-    let curr_threshold_str = &packets_notification
-        .threshold
-        .unwrap_or_default()
-        .to_string();
-    let input_row = Row::new()
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(Space::with_width(45))
-        .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
-        .push(
-            TextInput::new(
-                "0",
-                if curr_threshold_str == "0" {
-                    ""
-                } else {
-                    curr_threshold_str
-                },
-            )
-            .on_input(move |value| {
-                let packets_notification =
-                    PacketsNotification::from(&value, Some(packets_notification));
-                Message::UpdateNotificationSettings(
-                    Notification::Packets(packets_notification),
-                    false,
-                )
-            })
-            .padding([2, 5])
-            .font(font)
-            .width(100),
-        )
-        .push(
-            Text::new(per_second_translation(language))
-                .font(font)
-                .align_y(Alignment::Center)
-                .size(FONT_SIZE_FOOTER),
-        );
-    Container::new(input_row)
-        .align_x(Alignment::Center)
-        .align_y(Alignment::Center)
-}
-
 fn input_group_bytes<'a>(
-    bytes_notification: BytesNotification,
+    bytes_notification: DataNotification,
     font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
@@ -331,8 +232,8 @@ fn input_group_bytes<'a>(
                 },
             )
             .on_input(move |value| {
-                let bytes_notification = BytesNotification::from(&value, Some(bytes_notification));
-                Message::UpdateNotificationSettings(Notification::Bytes(bytes_notification), false)
+                let bytes_notification = DataNotification::from(&value, Some(bytes_notification));
+                Message::UpdateNotificationSettings(Notification::Data(bytes_notification), false)
             })
             .padding([2, 5])
             .font(font)
@@ -396,12 +297,12 @@ fn sound_buttons<'a>(
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let current_sound = match notification {
-        Notification::Packets(n) => n.sound,
-        Notification::Bytes(n) => n.sound,
+        Notification::Data(n) => n.sound,
         Notification::Favorite(n) => n.sound,
     };
 
     let mut ret_val = Row::new()
+        .width(Length::Shrink)
         .align_y(Alignment::Center)
         .spacing(5)
         .push(Space::with_width(45))
@@ -410,28 +311,29 @@ fn sound_buttons<'a>(
     for option in Sound::ALL {
         let is_active = current_sound.eq(&option);
         let message_value = match notification {
-            Notification::Packets(n) => {
-                Notification::Packets(PacketsNotification { sound: option, ..n })
-            }
-            Notification::Bytes(n) => Notification::Bytes(BytesNotification { sound: option, ..n }),
+            Notification::Data(n) => Notification::Data(DataNotification { sound: option, ..n }),
             Notification::Favorite(n) => {
                 Notification::Favorite(FavoriteNotification { sound: option, ..n })
             }
         };
         ret_val = ret_val.push(
-            Button::new(option.get_text(font))
-                .padding(0)
-                .width(80)
-                .height(25)
-                .class(if is_active {
-                    ButtonType::BorderedRoundSelected
-                } else {
-                    ButtonType::BorderedRound
-                })
-                .on_press(Message::UpdateNotificationSettings(
-                    message_value,
-                    option.ne(&Sound::None),
-                )),
+            Button::new(
+                option
+                    .get_text(font)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center),
+            )
+            .padding(Padding::ZERO.left(15).right(15))
+            .height(25)
+            .class(if is_active {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::UpdateNotificationSettings(
+                message_value,
+                option.ne(&Sound::None),
+            )),
         );
     }
     ret_val
@@ -464,4 +366,46 @@ pub fn settings_header<'a>(
     .height(40)
     .width(Length::Fill)
     .class(ContainerType::Gradient(color_gradient))
+}
+
+fn row_data_representation<'a>(
+    data_notification: DataNotification,
+    language: Language,
+    font: Font,
+    chart_type: ChartType,
+) -> Row<'a, Message, StyleType> {
+    let mut ret_val = Row::new()
+        .width(Length::Shrink)
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(Space::with_width(45))
+        .push(Text::new(format!("{}:", data_representation_translation(language))).font(font));
+
+    for option in ChartType::ALL {
+        let is_active = chart_type.eq(&option);
+        ret_val = ret_val.push(
+            Button::new(
+                Text::new(option.get_label(language).to_owned())
+                    .size(FONT_SIZE_FOOTER)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
+                    .font(font),
+            )
+            .padding(Padding::ZERO.left(15).right(15))
+            .height(25)
+            .class(if is_active {
+                ButtonType::BorderedRoundSelected
+            } else {
+                ButtonType::BorderedRound
+            })
+            .on_press(Message::UpdateNotificationSettings(
+                Notification::Data(DataNotification {
+                    chart_type: option,
+                    ..data_notification
+                }),
+                false,
+            )),
+        );
+    }
+    ret_val
 }
