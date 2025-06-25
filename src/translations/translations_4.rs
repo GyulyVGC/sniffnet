@@ -79,3 +79,38 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         _ => "Data threshold exceeded",
     }
 }
+
+#[allow(dead_code)]
+pub fn bits_exceeded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Bits threshold exceeded",
+        Language::IT => "Soglia di bit superata",
+        _ => "Bits threshold exceeded",
+    }
+}
+
+#[allow(dead_code)]
+pub fn bits_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN | Language::IT => "Bits",
+        _ => "Bits",
+    }
+}
+
+#[allow(dead_code)]
+pub fn pause_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Pause",
+        Language::IT => "Pausa",
+        _ => "Pause",
+    }
+}
+
+#[allow(dead_code)]
+pub fn resume_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Resume",
+        Language::IT => "Riprendi",
+        _ => "Resume",
+    }
+}
