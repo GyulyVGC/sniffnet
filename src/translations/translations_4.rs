@@ -16,14 +16,14 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
     }
 }
 
-// pub fn share_feedback_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Share your feedback",
-//         Language::IT => "Condividi il tuo feedback",
-//         Language::ZH_TW => "分享您的意見回饋",
-//         _ => "Share your feedback",
-//     }
-// }
+pub fn share_feedback_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Share your feedback",
+        Language::IT => "Condividi il tuo feedback",
+        Language::ZH_TW => "分享您的意見回饋",
+        _ => "Share your feedback",
+    }
+}
 
 // refers to bytes or packets excluded because of the filters
 pub fn excluded_translation(language: Language) -> &'static str {
