@@ -49,7 +49,7 @@ fn build_services_phf() {
         services_map.entry(key, &val);
         num_entries += 1;
     }
-    assert_eq!(num_entries, 12078);
+    assert_eq!(num_entries, 12084);
 
     writeln!(
         &mut output,
