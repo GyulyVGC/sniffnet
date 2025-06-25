@@ -133,7 +133,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 .width(20)
                 .class(ButtonType::Alert),
                 row_open_link_tooltip(
-                    "The selected language is not\nfully updated to version 1.3",
+                    "The selected language is not\nfully updated to version 1.4",
                     font,
                 ),
                 Position::FollowCursor,
