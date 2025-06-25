@@ -1,6 +1,7 @@
 #[cfg(windows)]
 extern crate winres;
 
+use std::borrow::Cow;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
@@ -42,11 +43,11 @@ fn build_services_phf() {
         let line = line_res.unwrap();
         let mut parts = line.split('\t');
         // we want to panic if one of the service names is invalid
-        let val = get_valid_service_fmt_const(parts.next().unwrap());
+        let val = Cow::Owned(get_valid_service_fmt_const(parts.next().unwrap()));
         // we want to panic if port is not a u16, or protocol is not TCP or UDP
         let key = get_valid_service_query(parts.next().unwrap());
         assert!(parts.next().is_none());
-        services_map.entry(key, &val);
+        services_map.entry(key, val);
         num_entries += 1;
     }
     assert_eq!(num_entries, 12084);
