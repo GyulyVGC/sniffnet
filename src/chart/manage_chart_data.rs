@@ -141,8 +141,8 @@ pub struct ChartSeries {
 }
 
 fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
-    // bisect data until we have less than 300 points
-    while all_time.len() > 300 {
+    // bisect data until we have less than 150 points
+    while all_time.len() > 150 {
         let mut new_vec = Vec::new();
         all_time.iter().enumerate().for_each(|(i, (x, y))| {
             if i % 2 == 0 {
