@@ -16,11 +16,11 @@ impl TrafficChart {
         self.ticks += 1;
 
         #[allow(clippy::cast_precision_loss)]
-        let out_bytes_entry = -1.0 * info_traffic_msg.tot_data_info.outgoing_bytes() as f32;
+        let out_bytes_entry = -(info_traffic_msg.tot_data_info.outgoing_bytes() as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_bytes_entry = info_traffic_msg.tot_data_info.incoming_bytes() as f32;
         #[allow(clippy::cast_precision_loss)]
-        let out_packets_entry = -1.0 * info_traffic_msg.tot_data_info.outgoing_packets() as f32;
+        let out_packets_entry = -(info_traffic_msg.tot_data_info.outgoing_packets() as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_packets_entry = info_traffic_msg.tot_data_info.incoming_packets() as f32;
 
