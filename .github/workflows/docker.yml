@@ -1,9 +1,9 @@
 name: Docker
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  #  push:
+  #    tags:
+  #      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
 jobs:
@@ -14,12 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      #      - name: Extract version from Cargo.toml
-      #        id: cargo-version
-      #        run: |
-      #          VERSION=v$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
-      #          echo "VERSION=$VERSION" >> $GITHUB_ENV
-      #          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Extract version from Cargo.toml
+        id: cargo-version
+        run: |
+          VERSION=v$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -42,4 +42,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/gyulyvgc/sniffnet:latest
-            ghcr.io/gyulyvgc/sniffnet:${{ github.ref_name }}
+            ghcr.io/gyulyvgc/sniffnet:${{ env.VERSION }}
+#            ghcr.io/gyulyvgc/sniffnet:${{ github.ref_name }}
