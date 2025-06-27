@@ -16,14 +16,14 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
     }
 }
 
-// pub fn share_feedback_translation(language: Language) -> &'static str {
-//     match language {
-//         Language::EN => "Share your feedback",
-//         Language::IT => "Condividi il tuo feedback",
-//         Language::ZH_TW => "分享您的意見回饋",
-//         _ => "Share your feedback",
-//     }
-// }
+pub fn share_feedback_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Share your feedback",
+        Language::IT => "Condividi il tuo feedback",
+        Language::ZH_TW => "分享您的意見回饋",
+        _ => "Share your feedback",
+    }
+}
 
 // refers to bytes or packets excluded because of the filters
 pub fn excluded_translation(language: Language) -> &'static str {
@@ -77,5 +77,40 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::EN => "Data threshold exceeded",
         Language::IT => "Soglia di dati superata",
         _ => "Data threshold exceeded",
+    }
+}
+
+#[allow(dead_code)]
+pub fn bits_exceeded_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Bits threshold exceeded",
+        Language::IT => "Soglia di bit superata",
+        _ => "Bits threshold exceeded",
+    }
+}
+
+#[allow(dead_code)]
+pub fn bits_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN | Language::IT => "Bits",
+        _ => "Bits",
+    }
+}
+
+#[allow(dead_code)]
+pub fn pause_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Pause",
+        Language::IT => "Pausa",
+        _ => "Pause",
+    }
+}
+
+#[allow(dead_code)]
+pub fn resume_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Resume",
+        Language::IT => "Riprendi",
+        _ => "Resume",
     }
 }

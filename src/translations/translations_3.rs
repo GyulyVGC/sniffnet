@@ -550,28 +550,28 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn learn_more_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Do you want to learn more?",
-        // Language::FA => "آیا می خواهید بیشتر یاد بگیرید؟",
-        Language::IT => "Vuoi saperne di più?",
-        Language::FR => "Voulez-vous en savoir davantage?",
-        Language::DE => "Mehr erfahren",
-        Language::PL => "Chcesz dowiedzieć się więcej?",
-        Language::RU => "Хотите узнать больше?",
-        Language::RO => "Vrei să înveți mai multe?",
-        Language::JA => "もっと知りたいですか？",
-        Language::UZ => "Ko'proq bilishni hohlaysizmi?",
-        Language::SV => "Vill du veta mer?",
-        Language::VI => "Bạn có muốn tìm hiểu thêm?",
-        Language::ZH => "想知道更多吗？",
-        Language::ZH_TW => "想了解更多嗎？",
-        Language::KO => "더 자세히 알고 싶으십니까?",
-        Language::TR => "Daha fazlasını öğrenmek ister misin?",
-        Language::PT => "Quer aprender mais?",
-        Language::UK => "Бажаєте дізнатись більше?",
-        Language::ID => "Apakah kamu mau belajar lebih lanjut?",
-        Language::ES => "¿Quieres aprender más?",
-        _ => "Do you want to learn more?",
-    }
-}
+// pub fn learn_more_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Do you want to learn more?",
+//         // Language::FA => "آیا می خواهید بیشتر یاد بگیرید؟",
+//         Language::IT => "Vuoi saperne di più?",
+//         Language::FR => "Voulez-vous en savoir davantage?",
+//         Language::DE => "Mehr erfahren",
+//         Language::PL => "Chcesz dowiedzieć się więcej?",
+//         Language::RU => "Хотите узнать больше?",
+//         Language::RO => "Vrei să înveți mai multe?",
+//         Language::JA => "もっと知りたいですか？",
+//         Language::UZ => "Ko'proq bilishni hohlaysizmi?",
+//         Language::SV => "Vill du veta mer?",
+//         Language::VI => "Bạn có muốn tìm hiểu thêm?",
+//         Language::ZH => "想知道更多吗？",
+//         Language::ZH_TW => "想了解更多嗎？",
+//         Language::KO => "더 자세히 알고 싶으십니까?",
+//         Language::TR => "Daha fazlasını öğrenmek ister misin?",
+//         Language::PT => "Quer aprender mais?",
+//         Language::UK => "Бажаєте дізнатись більше?",
+//         Language::ID => "Apakah kamu mau belajar lebih lanjut?",
+//         Language::ES => "¿Quieres aprender más?",
+//         _ => "Do you want to learn more?",
+//     }
+// }

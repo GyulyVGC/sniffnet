@@ -16,11 +16,11 @@ impl TrafficChart {
         self.ticks += 1;
 
         #[allow(clippy::cast_precision_loss)]
-        let out_bytes_entry = -1.0 * info_traffic_msg.tot_data_info.outgoing_bytes() as f32;
+        let out_bytes_entry = -(info_traffic_msg.tot_data_info.outgoing_bytes() as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_bytes_entry = info_traffic_msg.tot_data_info.incoming_bytes() as f32;
         #[allow(clippy::cast_precision_loss)]
-        let out_packets_entry = -1.0 * info_traffic_msg.tot_data_info.outgoing_packets() as f32;
+        let out_packets_entry = -(info_traffic_msg.tot_data_info.outgoing_packets() as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_packets_entry = info_traffic_msg.tot_data_info.incoming_packets() as f32;
 
@@ -141,8 +141,8 @@ pub struct ChartSeries {
 }
 
 fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
-    // bisect data until we have less than 300 points
-    while all_time.len() > 300 {
+    // bisect data until we have less than 150 points
+    while all_time.len() > 150 {
         let mut new_vec = Vec::new();
         all_time.iter().enumerate().for_each(|(i, (x, y))| {
             if i % 2 == 0 {
@@ -154,6 +154,58 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
         *all_time = new_vec;
     }
 }
+
+// impl TrafficChart {
+// use crate::gui::styles::types::style_type::StyleType;
+// use crate::translations::types::language::Language;
+// use std::io::Read;
+//     pub fn sample_for_screenshot() -> Self {
+//         let get_rand = |delta: f32| {
+//             let mut f = std::fs::File::open("/dev/urandom").unwrap();
+//             let mut buf = [0u8; 1];
+//             f.read_exact(&mut buf).unwrap();
+//             let x = buf[0];
+//             x as f32 / 255.0 * 2.0 * delta - delta
+//         };
+//
+//         let mut chart = TrafficChart::new(StyleType::default(), Language::default());
+//
+//         chart.ticks = 5 * 60 - 2;
+//         let x_range = chart.ticks - 30..chart.ticks;
+//
+//         let in_base = 35_000.0;
+//         let in_delta = 7_000.0;
+//         let out_base = -15_000.0;
+//         let out_delta = 3_000.0;
+//
+//         chart.in_bytes.spline = Spline::from_vec(
+//             x_range
+//                 .clone()
+//                 .map(|x| {
+//                     Key::new(
+//                         x as f32,
+//                         in_base + get_rand(in_delta),
+//                         Interpolation::Cosine,
+//                     )
+//                 })
+//                 .collect(),
+//         );
+//         chart.out_bytes.spline = Spline::from_vec(
+//             x_range
+//                 .map(|x| {
+//                     Key::new(
+//                         x as f32,
+//                         out_base + get_rand(out_delta),
+//                         Interpolation::Cosine,
+//                     )
+//                 })
+//                 .collect(),
+//         );
+//         chart.min_bytes = get_min(&chart.out_bytes);
+//         chart.max_bytes = get_max(&chart.in_bytes);
+//         chart
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

@@ -331,8 +331,8 @@ impl Chart<Message> for TrafficChart {
     }
 }
 
-const PTS: usize = 300;
 fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
+    let pts = spline.len() * 10; // 10 samples per key
     let mut ret_val = Vec::new();
     let len = spline.len();
     let first_x = spline
@@ -344,8 +344,8 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
         .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
         .t;
     #[allow(clippy::cast_precision_loss)]
-    let delta = (last_x - first_x) / (PTS as f32 - 1.0);
-    for i in 0..PTS {
+    let delta = (last_x - first_x) / (pts as f32 - 1.0);
+    for i in 0..pts {
         #[allow(clippy::cast_precision_loss)]
         let x = first_x + delta * i as f32;
         let p = spline.clamped_sample(x).unwrap_or_default();
@@ -358,7 +358,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::types::traffic_chart::{PTS, sample_spline};
+    use crate::chart::types::traffic_chart::sample_spline;
 
     #[test]
     fn test_spline_samples() {
@@ -401,14 +401,15 @@ mod tests {
 
         let eps = 0.001;
 
+        let pts = spline.len() * 10;
         let samples = sample_spline(&spline);
-        assert_eq!(samples.len(), PTS);
+        assert_eq!(samples.len(), pts);
 
         let delta = samples[1].0 - samples[0].0;
 
         assert_eq!(samples[0].0, 0.0);
         assert_eq!(samples[0].1, -500.0);
-        for i in 0..PTS - 1 {
+        for i in 0..pts - 1 {
             assert_eq!(
                 (samples[i + 1].0 * 10_000.0 - samples[i].0 * 10_000.0).round() / 10_000.0,
                 (delta * 10_000.0).round() / 10_000.0
@@ -417,7 +418,7 @@ mod tests {
             assert!(samples[i].1 >= -1000.0 - eps);
             assert!(samples[i + 1].1 < samples[i].1 + eps);
         }
-        assert_eq!(samples[PTS - 1].0, 28.0);
-        assert_eq!(samples[PTS - 1].1, -1000.0);
+        assert_eq!(samples[pts - 1].0, 28.0);
+        assert_eq!(samples[pts - 1].1, -1000.0);
     }
 }
