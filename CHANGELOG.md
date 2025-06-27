@@ -2,7 +2,7 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.4.0] - 2025-06-27
 - Import PCAP files ([#795](https://github.com/GyulyVGC/sniffnet/pull/795) — fixes [#283](https://github.com/GyulyVGC/sniffnet/issues/283))
 - Donut chart reporting overall traffic statistics ([#756](https://github.com/GyulyVGC/sniffnet/pull/756) — fixes [#687](https://github.com/GyulyVGC/sniffnet/issues/687))
 - Notifications: more details and other improvements ([#830](https://github.com/GyulyVGC/sniffnet/pull/830) — fixes [#637](https://github.com/GyulyVGC/sniffnet/issues/637))
