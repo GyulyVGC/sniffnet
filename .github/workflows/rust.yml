@@ -43,11 +43,13 @@ jobs:
 
       - name: Install Windows dependencies
         if: matrix.os == 'windows' && github.event_name != 'pull_request'
+        env:
+          NPCAP_OEM_URL: ${{ secrets.NPCAP_OEM_URL }}
         run: |
           Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
           Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
           echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
-          Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
+          Invoke-WebRequest -Uri "$env:NPCAP_OEM_URL" -OutFile C:/npcap-oem.exe
           C:/npcap-oem.exe /S
 
       - name: fmt
