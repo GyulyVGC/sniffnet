@@ -21,7 +21,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Share your feedback",
         Language::IT => "Condividi il tuo feedback",
-        Language::ZH_TW => "分享您的反馈",
+        Language::ZH => "分享您的反馈",
         Language::ZH_TW => "分享您的意見回饋",
         _ => "Share your feedback",
     }
