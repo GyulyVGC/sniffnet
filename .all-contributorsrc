@@ -667,6 +667,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "rons4",
+      "name": "Ron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43244104?v=4",
+      "profile": "https://www.signl4.com",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
