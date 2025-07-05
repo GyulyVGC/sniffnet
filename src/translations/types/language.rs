@@ -59,10 +59,12 @@ pub enum Language {
     VI,
     /// Indonesian
     ID,
+    /// Dutch
+    NL,
 }
 
 impl Language {
-    pub const ALL: [Language; 21] = [
+    pub const ALL: [Language; 22] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -84,6 +86,7 @@ impl Language {
         Language::VI,
         Language::ZH,
         Language::ZH_TW,
+        Language::NL,
     ];
 
     pub fn get_flag<'a>(self) -> Svg<'a, StyleType> {
@@ -110,6 +113,7 @@ impl Language {
             Language::UZ => UZ,
             Language::VI => VN,
             Language::ID => ID,
+            Language::NL => NL,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
@@ -144,6 +148,7 @@ impl fmt::Display for Language {
             Language::UZ => "O'zbekcha",
             Language::VI => "Tiếng Việt",
             Language::ID => "Bahasa Indonesia",
+            Landuage::NL => "Nederlands",
         };
         write!(f, "{self:?} - {lang_str}")
     }
