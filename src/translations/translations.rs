@@ -29,6 +29,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
         Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
         Language::VI => "Hãy chọn network adapter để quan sát",
         Language::ID => "Pilih Adapter Jaringan yang ingin dicek",
+        Language::NL => "Selecteer netwerkadapter om te inspecteren",
     })
 }
 
@@ -55,6 +56,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
 //         Language::JA => "アプリケーション プロトコル",
 //         Language::UZ => "Ilova protokoli",
 //         Language::ID => "Protokol Aplikasi",
+//         Language::NL => "Toepassingsprotocol",
 //     }
 // }
 
@@ -82,6 +84,7 @@ pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType>
         Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
         Language::VI => "Hãy chọn bộ lọc cho lưu lượng mạng",
         Language::ID => "Pilih filter yang ingin dipasang dilalulintas jaringan",
+        Language::NL => "Selecteer filters om toe te passen op netwerkverkeer",
     })
 }
 
@@ -105,6 +108,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::UZ => "Boshlash!",
         Language::VI => "Bắt đầu!",
         Language::ID => "Mulai!",
+        Language::NL => "Start!",
     }
 }
 
@@ -130,6 +134,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::UZ => "Manzil",
         Language::VI => "Địa chỉ",
         Language::ID => "Alamat",
+        Language::NL => "Adres",
     }
 }
 
@@ -157,6 +162,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::UZ => "Manzillar",
         Language::VI => "Danh sách địa chỉ",
         Language::ID => "Alamat",
+        Language::NL => "Adressen",
     }
 }
 
@@ -184,6 +190,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
         Language::UZ => "IP versiyasi",
         Language::VI => "Phiên bản IP",
         Language::ID => "Versi IP",
+        Language::NL => "IP versie",
     }
 }
 
@@ -209,6 +216,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
 //         Language::JA => "トランスポート プロトコル",
 //         Language::UZ => "Transport protokoli",
 //         Language::ID => "Protokol berjalan",
+//         Language::NL => "Transportprotocol",
 //     }
 // }
 
@@ -232,6 +240,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
         Language::ID => "Protokol",
+        Language::NL => "Protocol",
     }
 }
 
@@ -259,6 +268,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::UZ => "Trafik tezligi",
         Language::VI => "Lưu lượng truy cập",
         Language::ID => "Tingkat lalulintas",
+        Language::NL => "Verkeerssnelheid",
     })
 }
 
@@ -283,6 +293,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //         Language::SE => "Relevanta anslutningar:",
 //         Language::UZ => "Tegishli ulanishlar:",
 //         Language::ID => "Koneksi yang berkaitan",
+//         Language::NL => "Relevante verbindingen:",
 //     })
 // }
 
@@ -309,6 +320,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::UZ => "Sozlamalar",
         Language::VI => "Cài đặt",
         Language::ID => "Pengaturan",
+        Language::NL => "Instellingen",
     }
 }
 
@@ -334,6 +346,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::UZ => "Ha",
         Language::VI => "Chấp nhận",
         Language::ID => "Ya",
+        Language::NL => "Ja",
     })
 }
 
@@ -361,6 +374,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::UZ => "Tahlildan chiqishga ishonchingiz komilmi?",
         Language::VI => "Bạn có chắc là muốn thoát phiên phân tích này?",
         Language::ID => "Apa kamu yakin untuk berhenti analisa?",
+        Language::NL => "Weet je zeker dat je deze analyse wilt afsluiten?",
     })
 }
 
@@ -388,6 +402,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::UZ => "Tahlildan chiqish",
         Language::VI => "Thoát phiên phân tích",
         Language::ID => "Berhenti analisa",
+        Language::NL => "Analyse afsluiten",
     }
 }
 
@@ -415,6 +430,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::UZ => "Haqiqatan ham bildirishnomalarni tozalamoqchimisiz?",
         Language::VI => "Bạn có chắc là muốn xóa các thông báo?",
         Language::ID => "Apa kamu yakin untuk membersihkan notifikasi?",
+        Language::NL => "Weet je zeker dat je alle meldingen wilt wissen?",
     })
 }
 
@@ -441,6 +457,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::UZ => "Barchasini tozalash",
         Language::VI => "Xóa tất cả",
         Language::ID => "Bersihkan semua",
+        Language::NL => "Alles wissen",
     }
 }
 
@@ -468,6 +485,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::UZ => "Yashirish",
         Language::VI => "Ẩn",
         Language::ID => "Sembunyikan",
+        Language::NL => "Verbergen",
     }
 }
 
@@ -494,6 +512,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::JA => "ネットワーク アダプター",
         Language::UZ => "Tarmoq adapteri",
         Language::ID => "Adapter jaringan",
+        Language::NL => "Netwerkadapter",
     }
 }
 
@@ -608,6 +627,11 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
             "Tidak ada sinyal yang bisa dilihat karena adapter yang kamu pilih tidak memiliki alamat yang aktif...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Jika kamu yakin kamu terhubung ke internet, coba untuk memilih adapter lainnya."
+        ),
+        Language::NL => format!(
+            "Er kan geen verkeer worden waargenomen omdat de geselecteerde adapter geen actieve adressen heeft...\n\n\
+                                 {network_adapter_translation}: {adapter}\n\n\
+                                 Als je zeker weet dat je verbonden bent met het internet, probeer dan een andere adapter te kiezen."
         ),
     })
 }
@@ -724,6 +748,11 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Apa kamu yakin kamu terhubung ke internet, dan memilih adapter yang benar?"
         ),
+        Language::NL => format!(
+            "Er is nog geen verkeer waargenomen. Wachten op netwerkpakketten...\n\n\
+                                 {network_adapter_translation}: {adapter}\n\n\
+                                 Weet je zeker dat je verbonden bent met het internet en de juiste adapter hebt geselecteerd?"
+        ),
     })
 }
 
@@ -838,6 +867,11 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
                                  Paket yg difilter: 0\n\n\
                                  Beberapa paket dilacak, tetapi tidak ada yg terlihat berdasarkan filter yang kamu pilih..."
         ),
+        Language::NL => format!(
+            "Totaal aantal onderschepte pakketten: {observed}\n\n\
+                                 Gefilterde pakketten: 0\n\n\
+                                 Er zijn enkele pakketten onderschept, maar nog geen enkele is geselecteerd volgens de filters die je hebt opgegeven..."
+        ),
     })
 }
 
@@ -865,6 +899,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::UZ => "Filtrlangan paketlar",
 //         Language::VI => "Các gói tin đã được lọc",
 //         Language::ID => "Paket data tersaring",
+//         Language::NL => "Gefilterde pakketten",
 //     }
 // }
 
@@ -891,6 +926,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::UZ => "Filtrlangan baytlar",
 //         Language::VI => "Các bytes đã được lọc",
 //         Language::ID => "Bytes tersaring",
+//         Language::NL => "Gefilterde bytes",
 //     }
 // }
 
@@ -934,6 +970,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::UZ => format!("(Jami: {percentage} )"),
 //         Language::VI => format!("({percentage} trên tổng cộng)"),
 //         Language::ID => format!("({percentage} dari total)"),
+//         Language::NL => format!("({percentage} van het totaal)"),
 //     }
 // }
 
@@ -958,6 +995,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Language::SE => "Filtrerade paket per applikationsprotokoll:",
 //         Language::UZ => "Har bir dastur protokoli uchun filtrlangan paketlar:",
 //         Language::ID => "Paket data tersaring dari setiap protokol aplikasi:",
+//         Language::NL => "Gefilterde pakketten per applicatieprotocol:",
 //     })
 // }
 
@@ -1000,6 +1038,8 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //         Ulanishni sevimlilar ro'yhatiga qo'shish uchun ulanish yaqinidagi yulduzcha belgisini bosing."
 //         Language::ID => "Tidak ada yang ditampilkan untuk saatini.\n\
 //                          untuk menambah koneksi ke favorit, klik dilogo bintang dekat dengan koneksi.",
+//        Language::NL => "Niets om te laten zien op dit moment.\n\
+//                          Om een verbinding toe te voegen aan je favorieten, klik op het ster symbool naast de verbinding.",
 //     })
 // }
 
@@ -1093,6 +1133,10 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
             "Terjadi kesalahan! \n\n\
                                 {error}"
         ),
+        Language::NL => format!(
+            "Er is een fout opgetreden! \n\n\
+                                {error}"
+        ),
     })
 }
 
@@ -1118,6 +1162,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::JA => "両方",
 //         Language::UZ => "ikkalasi ham",
 //         Language::ID => "keduanya",
+//         Language::NL => "beide",
 //     }
 // }
 
@@ -1136,6 +1181,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::UZ => "Barcha protokollar",
 //         Language::UK => "Усі протоколи",
 //         Language::ID => "Semua protokol",
+//         Language::NL => "Alle protocollen",
 //     }
 // }
 
@@ -1161,6 +1207,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
 //         Language::JA => "すべて",
 //         Language::UZ => "Barchasi",
 //         Language::ID => "Semua",
+//         Language::NL => "Alle",
 //     }
 // }
 
@@ -1186,6 +1233,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::JA => "パケット",
         Language::UZ => "paketlar",
         Language::VI => "các gói tin",
+        Language::NL => "pakketten",
     }
 }
 
@@ -1213,6 +1261,7 @@ pub fn packets_translation(language: Language) -> &'static str {
 //         Language::UZ => "paket soniyasiga",
 //         Language::VI => "gói tin trên giây",
 //         Language::ID => "paket per detik",
+//         Language::NL => "pakketten per seconde",
 //     }
 // }
 
@@ -1226,6 +1275,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         | Language::SV
         | Language::VI
         | Language::ID
+        | Language::NL
         | Language::DE => "bytes",
         Language::FR => "octets",
         Language::PL => "bajty",
@@ -1265,6 +1315,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 //         Language::UZ => "bayt soniyasiga",
 //         Language::VI => "byte trên giây",
 //         Language::ID => "bytes per detik",
+//         Language::NL => "bytes per seconde",
 //     }
 // }
 
@@ -1291,6 +1342,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 //         Language::JA => "新しい順",
 //         Language::UZ => "eng so'nggi",
 //         Language::ID => "paling terakhir",
+//         Language::NL => "meest recent",
 //     }
 // }
 
@@ -1317,6 +1369,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 //         Language::JA => "パケット数の多い順",
 //         Language::UZ => "eng ko'p paketlar",
 //         Language::ID => "paket terbanyak",
+//         Language::NL => "meeste pakketten",
 //     }
 // }
 
@@ -1342,6 +1395,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 //         Language::FI => "eniten tavuja",
 //         Language::JA => "バイト量の多い順",
 //         Language::UZ => "eng ko'p bayt",
+//         Language::NL => "meeste bytes",
 //     }
 // }
 
@@ -1365,6 +1419,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 //         Language::SE => "favoriter",
 //         Language::UZ => "sevimlilar",
 //         Language::ID => "favorit",
+//         Language::NL => "favorieten",
 //     }
 // }
 
@@ -1392,6 +1447,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::UZ => "Bildirishnomalaringizni sozlang",
         Language::VI => "Tùy chỉnh thông báo của bạn",
         Language::ID => "Sesuaikan notifikasi Anda",
+        Language::NL => "Pas je meldingen aan",
     })
 }
 
@@ -1419,6 +1475,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::UZ => "Sevimli mavzuingizni tanlang",
         Language::VI => "Chọn chủ đề bạn muốn",
         Language::ID => "Pilih tema favorit Kamu",
+        Language::NL => "Kies je favoriete thema",
     })
 }
 
@@ -1446,6 +1503,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::UZ => "Faol filtrlar",
         Language::VI => "Bộ lọc đang hoạt động",
         Language::ID => "Filter aktif",
+        Language::NL => "Actieve filters",
     }
 }
 
@@ -1473,6 +1531,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::UZ => "hech biri",
         Language::VI => "không có",
         Language::ID => "Tidak ada",
+        Language::NL => "geen",
     }
 }
 
@@ -1500,6 +1559,7 @@ pub fn none_translation(language: Language) -> &'static str {
 //         Language::UZ => "Sniffnet-ning asl qora mavzusi",
 //         Language::VI => "Chủ đề tối của Sniffnet",
 //         Language::ID => "Tema gelap bawaan Sniffnet",
+//         Language::NL => "Sniffnet's originele donkere thema",
 //     }
 // }
 
@@ -1526,6 +1586,7 @@ pub fn none_translation(language: Language) -> &'static str {
 //         Language::UZ => "Sniffnet-ning asl oq mavzusi",
 //         Language::VI => "Chủ đề sáng của Sniffnet",
 //         Language::ID => "Tema terang bawaan Sniffnet",
+//         Language::NL => "Sniffnet's originele lichte thema",
 //     }
 // }
 
@@ -1553,6 +1614,7 @@ pub fn none_translation(language: Language) -> &'static str {
 //         Language::UZ => "Tarmoq trafigiga qo'shilish uchun",
 //         Language::VI => "Đắm chìm vào lưu lượng mạng",
 //         Language::ID => "Untuk mendalami lalu lintas jaringan",
+//         Language::NL => "Om in het netwerkverkeer te duiken",
 //     }
 // }
 
@@ -1580,6 +1642,7 @@ pub fn none_translation(language: Language) -> &'static str {
 //         Language::UZ => "Xayolparastlar uchun chiroyli mavzu",
 //         Language::VI => "Chủ đề mộng mơ cho những kẻ mơ mộng",
 //         Language::ID => "Tema yang indah dibuat untuk para pemimpi",
+//         Language::NL => "Liefelijk thema gemaakt voor dromers",
 //     }
 // }
 
@@ -1606,6 +1669,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::UZ => "Kiruvchi",
         Language::VI => "Đang tới",
         Language::ID => "Masuk",
+        Language::NL => "Inkomend",
     }
 }
 
@@ -1632,6 +1696,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::UZ => "Chiquvchi",
         Language::VI => "Đang hướng ra ngoài",
         Language::ID => "Keluar",
+        Language::NL => "Uitgaand",
     }
 }
 
@@ -1656,6 +1721,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::UZ => "Bildirishnomalar",
         Language::VI => "Thông báo",
         Language::ID => "Pemberitahuan",
+        Language::NL => "Notificaties",
     }
 }
 
@@ -1678,6 +1744,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::UZ => "Uslub",
         Language::VI => "Chủ đề",
         Language::ID => "Gaya",
+        Language::NL => "Stijl",
     }
 }
 
@@ -1705,6 +1772,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::UZ => "Til",
         Language::VI => "Ngôn ngữ",
         Language::ID => "Bahasa",
+        Language::NL => "Taal",
     }
 }
 
@@ -1732,6 +1800,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::UZ => "Ko'rib chiqish",
         Language::VI => "Tổng quan",
         Language::ID => "Ringkasan",
+        Language::NL => "Overzicht",
     }
 }
 
@@ -1759,6 +1828,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 //         Language::UZ => "Paket chegarasi oshib ketganda xabar bering",
 //         Language::VI => "Báo cho tôi biết khi vượt quá ngưỡng gói tin",
 //         Language::ID => "Beritahu saya ketika ambang batas paket terlampaui",
+//         Language::NL => "Geef me een melding wanneer een pakketdrempel is overschreden",
 //     }
 // }
 
@@ -1786,6 +1856,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 //         Language::UZ => "Bayt chegarasi oshib ketganda menga xabar bering",
 //         Language::VI => "Báo cho tôi biết khi vượt quá ngưỡng bytes",
 //         Language::ID => "Beritahu saya ketika ambang batas bytes terlampaui",
+//         Language::NL => "Geef me een melding wanneer een byte-drempel is overschreden",
 //     }
 // }
 
@@ -1810,6 +1881,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::UZ => "(soniyasiga)",
         Language::VI => "(trên giây)",
         Language::ID => "(per detik)",
+        Language::NL => "(per seconde)",
     }
 }
 
@@ -1837,6 +1909,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 //         Language::UZ => "'K', 'M' va 'G' ni ham belgilashingiz mumkin",
 //         Language::VI => "bạn cũng có thể chọn 'K', 'M' and 'G'",
 //         Language::ID => "Anda juga dapat menentukan 'K', 'M' dan 'G'",
+//         Language::NL => "je kunt ook 'K', 'M' en 'G' specificeren",
 //     }
 // }
 
@@ -1866,6 +1939,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 //         Language::UZ => "Sevimlilar ro'yhatidan yangi ma'lumotlar almashganda xabar bering",
 //         Language::VI => "Báo cho tôi biết khi dữ liệu mới được trao đổi từ mục yêu thích của tôi",
 //         Language::ID => "Beritahu saya ketika data baru dipertukarkan dari favorit saya",
+//         Language::NL => "Geef me een melding wanneer nieuwe gegevens worden uitgewisseld van mijn favorieten",
 //     }
 // }
 
@@ -1893,6 +1967,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::UZ => "Eshik",
         Language::VI => "Ngưỡng",
         Language::ID => "Ambang batas",
+        Language::NL => "Grens",
     }
 }
 
@@ -1916,6 +1991,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::UZ => "Ovoz balandligi",
         Language::VI => "Âm lượng",
         Language::ID => "Bunyi",
+        Language::NL => "Volume",
     }
 }
 
@@ -1941,6 +2017,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::UZ => "Ovoz",
         Language::VI => "Âm thanh",
         Language::ID => "Suara",
+        Language::NL => "Geluid",
     }
 }
 
@@ -1968,6 +2045,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::UZ => "Bayt chegarasidan oshib ketdi",
         Language::VI => "Bytes đã vượt ngưỡng",
         Language::ID => "Ambang batas byte terlampaui",
+        Language::NL => "Byte-drempel overschreden",
     }
 }
 
@@ -1995,6 +2073,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
 //         Language::UZ => format!("{value} ma'lumot almashinuvi"),
 //         Language::VI => format!("{value} đã được trao đổi"),
 //         Language::ID => format!("{value} telah dipertukarkan"),
+//         Language::NL => format!("{value} zijn uitgewisseld"),
 //     }
 // }
 
@@ -2022,6 +2101,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::UZ => "Paket chegarasidan oshib ketdi",
         Language::VI => "Gói tin đã vượt ngưỡng",
         Language::ID => "Ambang batas paket terlampaui",
+        Language::NL => "Pakketdrempel overschreden",
     }
 }
 
@@ -2073,6 +2153,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
 //         Language::UZ => format!("{value} paket uzatildi"),
 //         Language::VI => format!("{value} gói tin đã được trao đổi"),
 //         Language::ID => format!("{value} paket telah dipertukarkan"),
+//         Language::NL => format!("{value} pakketten zijn uitgewisseld"),
 //     }
 // }
 
@@ -2100,6 +2181,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::UZ => "Sevimli ulanishlar ro'yhatida yangi ma'lumotlar almashinuvi",
         Language::VI => "Mục ưa thích vừa có trao đổi",
         Language::ID => "Data baru dipertukarkan dari favorit",
+        Language::NL => "Nieuwe gegevens uitgewisseld van favorieten",
     }
 }
 
@@ -2214,6 +2296,11 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  Setelah mengaktifkannya, halaman ini akan menampilkan log notifikasi Anda\n\n\
                                  Anda dapat mengaktifkan notifikasi dari pengaturan:"
         }
+        Language::NL => {
+            "Je hebt nog geen meldingen ingeschakeld!\n\n\
+                                 Nadat je ze hebt ingeschakeld, zal deze pagina een logboek van je meldingen weergeven\n\n\
+                                 Je kunt meldingen inschakelen vanuit de instellingen:"
+        }
     })
 }
 
@@ -2307,6 +2394,10 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Tidak ada yang bisa dilihat saat ini...\n\n\
                                  Saat Anda menerima pemberitahuan, akan ditampilkan di sini"
         }
+        Language::NL => {
+            "Er is momenteel niets te zien...\n\n\
+                                 Wanneer je een melding ontvangt, wordt deze hier weergegeven"
+        }
     })
 }
 
@@ -2334,5 +2425,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::UZ => "Faqat oxirgi 30 ta bildirishnoma ko'rsatiladi",
         Language::VI => "Chỉ có 30 thông báo gần nhất được hiển thị",
         Language::ID => "Hanya 30 notifikasi terakhir yang ditampilkan",
+        Language::NL => "Alleen de laatste 30 meldingen worden weergegeven",
     }
 }
