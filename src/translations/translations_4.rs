@@ -70,7 +70,7 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
         ),
         Language::ZH => format!(
-            "从文件中读取封包...\n\n\
+            "从文件中读取数据包...\n\n\
                                 {file_name_translation}: {file}\n\n\
                                 您确定选中的文件不是空的吗?"
         ),
@@ -125,6 +125,7 @@ pub fn resume_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Resume",
         Language::IT => "Riprendi",
+        Language::ZH => "恢复",
         _ => "Resume",
     }
 }
