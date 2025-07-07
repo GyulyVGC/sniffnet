@@ -31,4 +31,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=builder /usr/src/sniffnet/target/release/sniffnet /usr/local/bin/sniffnet
 
+# Create a non-root user
+RUN groupadd -r sniffnet && useradd -r -g sniffnet sniffnet
+USER sniffnet
 ENTRYPOINT ["sniffnet"]
