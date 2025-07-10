@@ -41,6 +41,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         | Language::DE
         | Language::RO
         | Language::PT
+        | Language::NL
         | Language::SV => "Zoom",
         // Language::FA => "بزرگنمایی",
         Language::PL => "Powiększenie",
@@ -54,7 +55,6 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::TR => "Yakınlaştırma",
         Language::UK => "Масштабування",
         Language::ID => "Perbesar",
-        Language::NL => "Zoom",
         _ => "Zoom",
     }
 }
@@ -244,7 +244,7 @@ pub fn messages_translation(language: Language) -> &'static str {
 
 pub fn link_type_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Link type",
+        Language::EN | Language::NL => "Link type",
         // Language::FA => "نوع پیوند",
         Language::ES => "Tipo de conexión",
         Language::IT => "Tipo di collegamento",
@@ -264,7 +264,6 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::PT => "Tipo de conexão",
         Language::UK => "Різновид зʼєднання",
         Language::ID => "Tipe koneksi",
-        Language::NL => "Link type",
         _ => "Link type",
     }
 }

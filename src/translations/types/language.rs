@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::StyleType;
 use crate::countries::flags_pictures::{
     CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA,
-    UZ, VN,
+    UZ, VN, NL
 };
 
 /// This enum defines the available languages.
@@ -75,6 +75,7 @@ impl Language {
         Language::IT,
         Language::JA,
         Language::KO,
+        Language::NL,
         Language::PL,
         Language::PT,
         Language::RO,
@@ -86,7 +87,6 @@ impl Language {
         Language::VI,
         Language::ZH,
         Language::ZH_TW,
-        Language::NL,
     ];
 
     pub fn get_flag<'a>(self) -> Svg<'a, StyleType> {
@@ -119,7 +119,7 @@ impl Language {
     }
 
     pub fn is_up_to_date(self) -> bool {
-        matches!(self, Language::EN | Language::IT)
+        matches!(self, Language::EN | Language::IT | Language::NL)
     }
 }
 
@@ -148,7 +148,7 @@ impl fmt::Display for Language {
             Language::UZ => "O'zbekcha",
             Language::VI => "Tiếng Việt",
             Language::ID => "Bahasa Indonesia",
-            Landuage::NL => "Nederlands",
+            Language::NL => "Nederlands",
         };
         write!(f, "{self:?} - {lang_str}")
     }
