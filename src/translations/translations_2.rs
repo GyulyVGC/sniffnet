@@ -81,7 +81,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::PT => "Detalhes da conexão",
         Language::VI => "Thông tin kết nối",
         Language::ID => "Rincian koneksi",
-        Language::NL => "Verbindingsdetails", 
+        Language::NL => "Verbindingsdetails",
         _ => "Connection details",
     }
 }
@@ -667,7 +667,9 @@ pub fn showing_results_translation(
         Language::PT => format!("Mostrando {start}-{end} de {total} resultados totais"),
         Language::VI => format!("Đang hiển thị {start}-{end} của {total} tổng số kết quả"),
         Language::ID => format!("Menampilkan {start}-{end} dari {total} semua hasil"),
-        Language::NL => format!("{start}-{end} van de {total} totale resultaten worden weergegeven"),
+        Language::NL => {
+            format!("{start}-{end} van de {total} totale resultaten worden weergegeven")
+        }
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }

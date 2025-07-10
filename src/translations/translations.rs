@@ -90,7 +90,7 @@ pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType>
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::DE | Language::RO | Language::KO => "Start!",
+        Language::EN | Language::DE | Language::RO | Language::KO | Language::NL => "Start!",
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
@@ -108,7 +108,6 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::UZ => "Boshlash!",
         Language::VI => "Bắt đầu!",
         Language::ID => "Mulai!",
-        Language::NL => "Start!",
     }
 }
 
@@ -118,7 +117,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::IT => "Indirizzo",
         Language::FR | Language::DE => "Adresse",
         Language::ES => "Dirección",
-        Language::PL | Language::TR => "Adres",
+        Language::PL | Language::TR | Language::NL => "Adres",
         Language::UK => "Адреса",
         Language::ZH => "网络地址",
         Language::ZH_TW => "網路位址",
@@ -134,7 +133,6 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::UZ => "Manzil",
         Language::VI => "Địa chỉ",
         Language::ID => "Alamat",
-        Language::NL => "Adres",
     }
 }
 
@@ -145,7 +143,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::FR => "Adresses",
         Language::ES => "Direcciones",
         Language::PL => "Adresy",
-        Language::DE => "Adressen",
+        Language::DE | Language::NL => "Adressen",
         Language::UK => "Адреси",
         Language::ZH => "网络地址",
         Language::ZH_TW => "網路位址",
@@ -162,7 +160,6 @@ pub fn addresses_translation(language: Language) -> &'static str {
         Language::UZ => "Manzillar",
         Language::VI => "Danh sách địa chỉ",
         Language::ID => "Alamat",
-        Language::NL => "Adressen",
     }
 }
 
@@ -222,7 +219,7 @@ pub fn ip_version_translation(language: Language) -> &'static str {
 
 pub fn protocol_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::RO => "Protocol",
+        Language::EN | Language::RO | Language::NL => "Protocol",
         Language::IT => "Protocollo",
         Language::FR => "Protocole",
         Language::ES | Language::PT => "Protocolo",
@@ -240,7 +237,6 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
         Language::ID => "Protokol",
-        Language::NL => "Protocol",
     }
 }
 
@@ -331,7 +327,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::FR => "Oui",
         Language::ES => "Sí",
         Language::PL => "Tak",
-        Language::DE | Language::SV => "Ja",
+        Language::DE | Language::SV | Language::NL => "Ja",
         Language::UK => "Так",
         Language::ZH | Language::ZH_TW => "是",
         Language::RO => "Da",
@@ -346,7 +342,6 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::UZ => "Ha",
         Language::VI => "Chấp nhận",
         Language::ID => "Ya",
-        Language::NL => "Ja",
     })
 }
 
@@ -1973,7 +1968,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
 
 pub fn volume_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::FR | Language::PT => "Volume",
+        Language::EN | Language::IT | Language::FR | Language::PT | Language::NL => "Volume",
         Language::ES => "Volumen",
         Language::PL => "Głośność",
         Language::DE => "Lautstärke",
@@ -1991,7 +1986,6 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::UZ => "Ovoz balandligi",
         Language::VI => "Âm lượng",
         Language::ID => "Bunyi",
-        Language::NL => "Volume",
     }
 }
 

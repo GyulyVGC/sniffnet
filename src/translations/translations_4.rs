@@ -51,7 +51,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select capture file",
         Language::IT => "Seleziona file di cattura",
-        Language::NL => 
+        Language::NL => "",
         _ => "Select capture file",
     }
 }
@@ -70,10 +70,10 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
         ),
         Language::NL => format!(
-                "Pakketten lezen uit bestand...\n\n\
+            "Pakketten lezen uit bestand...\n\n\
                                  {file_name_translation}: {file}\n\n\
                                  Weet je zeker dat het geselecteerde bestand niet leeg is?"
-            ),
+        ),
         _ => format!(
             "Reading packets from file...\n\n\
                                  {file_name_translation}: {file}\n\n\

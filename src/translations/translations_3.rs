@@ -134,7 +134,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::TR => "Kişisel görünüm",
         Language::UK => "Власний стиль",
         Language::ID => "Ubah Model",
-        Language::NL => "Aangepaste stijl", 
+        Language::NL => "Aangepaste stijl",
         _ => "Custom style",
     }
 }
