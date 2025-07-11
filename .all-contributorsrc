@@ -676,6 +676,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "ADS-Fund",
+      "name": "ADS Fund",
+      "avatar_url": "https://avatars.githubusercontent.com/u/202042116?v=4",
+      "profile": "https://ads.fund",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
