@@ -51,7 +51,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select capture file",
         Language::IT => "Seleziona file di cattura",
-        Language::NL => "",
+        Language::NL => "Selecteer capture bestand",
         _ => "Select capture file",
     }
 }
