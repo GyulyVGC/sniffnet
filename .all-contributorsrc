@@ -694,6 +694,15 @@
       "contributions": [
         "design"
       ]
+    },
+    {
+      "login": "vanharen07",
+      "name": "Ylva",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91621548?v=4",
+      "profile": "https://github.com/vanharen07",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
