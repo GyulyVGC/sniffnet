@@ -158,6 +158,54 @@ jobs:
           path: artifacts/
           if-no-files-found: error
 
+  appimage:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+      options: --privileged
+    needs: deb
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: apt-get update -y && apt-get install -y git build-essential graphicsmagick-imagemagick-compat wget file desktop-file-utils libfuse2
+
+      - name: Download Debian package
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: /target/
+
+      - name: Download pkg2appimage
+        shell: bash
+        run: git clone https://github.com/AppImageCommunity/pkg2appimage.git
+
+      - name: Replace placeholder in AppImage YAML
+        shell: bash
+        run: sed -i -e 's/REPLACE_TAG/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb/g' sniffnet.yml
+
+      - name: Repackage for AppImage
+        shell: bash
+        run: |
+          cd pkg2appimage
+          ./pkg2appimage ../sniffnet.yml
+          mkdir /out
+          mv out/*.AppImage /out/Sniffnet-${{ matrix.arch }}.AppImage
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.arch }}
+          path: /out/
+          if-no-files-found: error
+
   rpm:
     runs-on: ubuntu-latest
     container:

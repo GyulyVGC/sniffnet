@@ -1,0 +1,9 @@
+app: Sniffnet
+ingredients:
+  dist: plucky
+  packages:
+    - libpcap0.8t64
+  sources:
+    - deb https://archive.ubuntu.com/ubuntu/ plucky main universe
+  debs:
+    - /target/REPLACE_TAG
