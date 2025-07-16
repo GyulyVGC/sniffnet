@@ -4734,6 +4734,7 @@ dependencies = [
  "rodio",
  "rstest",
  "rustrict",
+ "semver",
  "serde",
  "serde_test",
  "serial_test",
