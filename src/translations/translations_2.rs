@@ -54,6 +54,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::VI => "Quan sát",
         Language::ID => "Memeriksa",
         Language::NL => "Inspecteren",
+        Language::EL => "Επιθεώρηση",
         _ => "Inspect",
     }
 }
@@ -82,6 +83,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::VI => "Thông tin kết nối",
         Language::ID => "Rincian koneksi",
         Language::NL => "Verbindingsdetails",
+        Language::EL => "Λεπτομέρειες σύνδεσης",
         _ => "Connection details",
     }
 }
@@ -110,6 +112,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::VI => "Mất",
         Language::ID => "Dihapus",
         Language::NL => "Verloren",
+        Language::EL => "Απορριμμένα",
         _ => "Dropped",
     }
 }
@@ -138,6 +141,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::VI => "Miêu tả dữ liệu",
         Language::ID => "Penyajian ulang data",
         Language::NL => "Gegevensweergave",
+        Language::EL => "Αναπαράσταση δεδομένων",
         _ => "Data representation",
     }
 }
@@ -166,6 +170,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::VI => "Máy chủ",
         Language::ID => "Jaringan asal",
         Language::NL => "Netwerk host",
+        Language::EL => "Κόμβος δικτύου",
         _ => "Network host",
     }
 }
@@ -194,6 +199,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::VI => "Chỉ có 30 mục gần nhất được hiển thị ở đây",
         Language::ID => "Hanya 30 teratas yang ditampilkan disini",
         Language::NL => "Alleen de bovenste 30 items worden hier weergegeven",
+        Language::EL => "Εμφανίζονται μόνο τα κορυφαία 30 στοιχεία",
         _ => "Only the top 30 items are displayed here",
     }
 }
@@ -248,6 +254,7 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::VI => "Mạng nội bộ",
         Language::ID => "Jaringan lokal",
         Language::NL => "Lokaal netwerk",
+        Language::EL => "Τοπικό δίκτυο",
         _ => "Local network",
     }
 }
@@ -276,6 +283,7 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::VI => "Không rõ địa điểm",
         Language::ID => "Lokasi tidak diketahui",
         Language::NL => "Onbekende locatie",
+        Language::EL => "Άγνωστη τοποθεσία",
         _ => "Unknown location",
     }
 }
@@ -304,6 +312,7 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::VI => "Network adapter của bạn",
         Language::ID => "Adaptor jaringan kamu",
         Language::NL => "Uw netwerkadapter",
+        Language::EL => "Ο προσαρμογέας δικτύου σας",
         _ => "Your network adapter",
     }
 }
@@ -332,6 +341,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::VI => "Địa chỉ socket",
         Language::ID => "Alamat sambungan",
         Language::NL => "Socket adres",
+        Language::EL => "Διεύθυνση υποδοχής",
         _ => "Socket address",
     }
 }
@@ -360,6 +370,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::VI => "Địa chỉ MAC",
         Language::ID => "Alamat MAC",
         Language::NL => "MAC-adres",
+        Language::EL => "Διεύθυνση MAC",
         _ => "MAC address",
     }
 }
@@ -388,6 +399,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::VI => "Nguồn",
         Language::ID => "Asal",
         Language::NL => "Bron",
+        Language::EL => "Πηγή",
         _ => "Source",
     }
 }
@@ -414,6 +426,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::VI => "Đích",
         Language::ID => "Tujuan",
         Language::NL => "Bestemming",
+        Language::EL => "Προορισμός",
         _ => "Destination",
     }
 }
@@ -441,6 +454,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::VI => "Tên miền đầy đủ",
         Language::ID => "Nama domain yang memenuhi syarat",
         Language::NL => "Volledig gekwalificeerde domeinnaam",
+        Language::EL => "Πλήρως προσδιορισμένο όνομα τομέα",
         _ => "Fully qualified domain name",
     }
 }
@@ -469,6 +483,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::VI => "Tên Autonomous System",
         Language::ID => "Nama System Otomatis",
         Language::NL => "Naam van het autonome systeem",
+        Language::EL => "Όνομα αυτόνομου συστήματος",
         _ => "Autonomous System name",
     }
 }
@@ -497,6 +512,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::VI => "Dữ liệu được truyền",
         Language::ID => "Data terkirim",
         Language::NL => "Verzonden gegevens",
+        Language::EL => "Μεταδιδόμενα δεδομένα",
         _ => "Transmitted data",
     }
 }
@@ -524,6 +540,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::VI => "Quốc gia",
         Language::ID => "Negara",
         Language::NL => "Land",
+        Language::EL => "Χώρα",
         _ => "Country",
     }
 }
@@ -552,6 +569,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::VI => "Tên miền",
         Language::ID => "Nama Domain",
         Language::NL => "Domeinnaam",
+        Language::EL => "Όνομα τομέα",
         _ => "Domain name",
     }
 }
@@ -580,6 +598,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::VI => "Chỉ hiển thị mục ưa thích",
         Language::ID => "Hanya tunjukkan favorit",
         Language::NL => "Toon alleen favorieten",
+        Language::EL => "Εμφάνιση μόνο αγαπημένων",
         _ => "Only show favorites",
     }
 }
@@ -635,6 +654,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::VI => "Không có kết quả nào theo các bộ lọc được chỉ định",
         Language::ID => "Tidak ada hasil berdasarkan filter pencarian spesifik",
         Language::NL => "Geen resultaten beschikbaar volgens de opgegeven zoekfilters",
+        Language::EL => "Δεν υπάρχουν διαθέσιμα αποτελέσματα σύμφωνα με τα καθορισμένα φίλτρα αναζήτησης",
         _ => "No result available according to the specified search filters",
     }
 }
@@ -670,6 +690,7 @@ pub fn showing_results_translation(
         Language::NL => {
             format!("{start}-{end} van de {total} totale resultaten worden weergegeven")
         }
+        Language::EL => format!("Εμφάνιση {start}-{end} από {total} συνολικά αποτελέσματα"),
         _ => format!("Showing {start}-{end} of {total} total results"),
     }
 }
@@ -699,6 +720,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::VI => "Áp dụng color gradients",
         Language::ID => "Aplikasikan gradasi warna",
         Language::NL => "Kleurverlopen toepassen",
+        Language::EL => "Εφαρμογή χρωματικών διαβαθμίσεων",
         _ => "Apply color gradients",
     }
 }

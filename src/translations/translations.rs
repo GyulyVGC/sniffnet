@@ -21,7 +21,7 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
         Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
         Language::RU => "Выберите сетевой адаптер для инспекции",
         Language::PT => "Selecione o adaptador de rede a inspecionar",
-        Language::EL => "Επίλεξε τον προσαρμογέα δικτύου για επιθεώρηση",
+        Language::EL => "Επιλέξτε τον προσαρμογέα δικτύου για ανάλυση",
         // Language::FA => "مبدل شبکه را برای بازرسی انتخاب کنید",
         Language::SV => "Välj nätverksadapter att inspektera",
         Language::FI => "Valitse tarkasteltava verkkosovitin",
@@ -76,7 +76,7 @@ pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType>
         Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
         Language::RU => "Выберите фильтры для применения к сетевому трафику",
         Language::PT => "Selecione os filtros a serem aplicados no tráfego de rede",
-        Language::EL => "Επίλεξε τα φίλτρα για εφαρμογή στην κίνηση του δικτύου",
+        Language::EL => "Επιλέξτε τα φίλτρα που θα εφαρμοστούν στην κίνηση του δικτύου",
         // Language::FA => "صافی ها را جهت اعمال بر آمد و شد شبکه انتخاب کنید",
         Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
         Language::FI => "Valitse suodattimet verkkoliikenteelle",
@@ -361,7 +361,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::TR => "Bu analizden çıkmak istediğine emin misin?",
         Language::RU => "Вы уверены, что хотите выйти из текущего анализа?",
         Language::PT => "Tem a certeza que deseja sair desta análise?",
-        Language::EL => "Είσαι σίγουρος ότι θες να κλείσεις την ανάλυση;",
+        Language::EL => "Είστε βέβαιοι ότι θέλετε να τερματίσετε την ανάλυση;",
         // Language::FA => "آیا مطمئن هستید می خواهید از این تحلیل خارج شوید؟",
         Language::SV => "Är du säker på att du vill avsluta analysen?",
         Language::FI => "Haluatko varmasti lopettaa analyysin?",
@@ -417,7 +417,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::TR => "Bildirimleri temizlemek istediğine emin misin?",
         Language::RU => "Вы уверены, что хотите удлить все уведомления?",
         Language::PT => "Tem a certeza que deseja eliminar as notificações?",
-        Language::EL => "Είσαι σίγουρος ότι θες να κάνεις εκκαθάριση των ειδοποιήσεων;",
+        Language::EL => "Είστε βέβαιοι ότι θέλετε να εκκαθαρίσετε τις ειδοποιήσεις;",
         // Language::FA => "آیا مطمئن هستید می خواهید اعلان ها را پاک کنید؟",
         Language::SV => "Är du säker på att du vill radera notifikationerna?",
         Language::FI => "Haluatko varmasti tyhjentää ilmoitukset?",
@@ -1462,7 +1462,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::TR => "Favori temanızı seçin",
         Language::RU => "Выберите предпочительную тему",
         Language::PT => "Escolha o seu tema favorito",
-        Language::EL => "Επίλεξε το αγαπημένο σου θέμα",
+        Language::EL => "Επιλέξτε το αγαπημένο σας θέμα",
         // Language::FA => "زمینه دلخواه خود را انتخاب کنید",
         Language::SV => "Välj ditt favorittema",
         Language::FI => "Valitse suosikkiteemasi",
@@ -1787,7 +1787,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::TR => "Ön izleme",
         Language::RU => "Обзор",
         Language::PT => "Visão geral",
-        Language::EL => "επισκόπηση",
+        Language::EL => "Επισκόπηση",
         // Language::FA => "نمای کلی",
         Language::SV => "Översikt",
         Language::FI => "Yleiskatsaus",
@@ -2167,7 +2167,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::TR => "Favorilerden yeni veri aktarıldı",
         Language::RU => "Новый обмен данными в избранных соедиениях",
         Language::PT => "Novos dados trocados dos favoritos",
-        Language::EL => "Καινούρια δεδομένα έχουν ανταλλαγεί στα αγαπημένα",
+        Language::EL => "Νέα δεδομένα έχουν ανταλλαγεί στα αγαπημένα",
         // Language::FA => "مبادله داده جدید از پسندیده ها",
         Language::SV => "Ny data utbytt av favoriter",
         Language::FI => "Uusia tietoja vaihdettu suosikeista",
@@ -2253,9 +2253,9 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                 Pode ativar as notificações nas definições:"
         }
         Language::EL => {
-            "Δεν έχεις ενεργοποιήσει τις ειδοποιήσεις ακόμη!\n\n\
-                                 Αφότου τις ενεργοποιήσεις, αυτή η σελίδα θα απεικονίσει μια καταγραφή των ειδοποιήσεών σου\n\n\
-                                 Μπορείς να ενεργοποιήσεις τις ειδοποιήσεις από τις ρυθμίσεις:"
+            "Δεν έχετε ενεργοποιήσει τις ειδοποιήσεις ακόμη!\n\n\
+                                 Αφότου τις ενεργοποιήσετε, αυτή η σελίδα θα εμφανίσει ένα αρχείο καταγραφής των ειδοποιήσεών σας\n\n\
+                                 Μπορείτε να ενεργοποιήσετε τις ειδοποιήσεις από τις ρυθμίσεις:"
         }
         // Language::FA => "شما هنوز اعلان ها را فعال نکرده اید!\n\n\
         //                          پس از آنکه آن ها را فعال کنید، این صفحه یک کارنامه از اعلان های شما را نمایش خواهد داد\n\n
@@ -2357,8 +2357,8 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
                                 Quando receber uma notificação, ela será mostrada aqui"
         }
         Language::EL => {
-            "Δεν υπάρχει κάτι για απεικόνιση αυτή τη στιγμή...\n\n\
-                                 Όταν λάβεις μια ειδοποίηση, αυτή θα εμφανιστεί εδώ"
+            "Δεν υπάρχουν ειδοποιήσεις αυτή τη στιγμή...\n\n\
+                                 Όταν λάβετε μια ειδοποίηση, θα εμφανιστεί εδώ"
         }
         // Language::FA => {
         //     "در حال حاضر هیچ چیزی برای دیدن نیست...\n\n\
