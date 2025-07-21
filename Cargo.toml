@@ -37,7 +37,7 @@ strip = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "2.2.0"
+pcap = "2.3.0"
 etherparse = "0.18.0"
 chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
@@ -46,11 +46,11 @@ plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
 confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
-rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
+rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "2.0.4"
-toml = "0.9.1"
+toml = "0.9.2"
 ctrlc = { version = "3.4.7", features = ["termination"] }
-rfd = "0.15.3"
+rfd = "0.15.4"
 phf = "0.12.1"
 phf_shared = "0.12.1"
 splines = "5.0.0"
