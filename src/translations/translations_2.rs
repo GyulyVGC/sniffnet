@@ -94,7 +94,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::RU => "Потеряно",
         Language::SV => "Tappade",
         Language::FI => "Pudotetut",
-        Language::DE => "Verlorene",
+        Language::DE => "Verloren",
         Language::TR => "Düşen",
         // Language::FA => "رها شده",
         Language::ES | Language::PT => "Perdidos",
