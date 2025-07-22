@@ -667,6 +667,42 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "rons4",
+      "name": "Ron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43244104?v=4",
+      "profile": "https://www.signl4.com",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "ADS-Fund",
+      "name": "ADS Fund",
+      "avatar_url": "https://avatars.githubusercontent.com/u/202042116?v=4",
+      "profile": "https://ads.fund",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "louis-ym4",
+      "name": "louis-ym4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/200361621?v=4",
+      "profile": "https://github.com/louis-ym4",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "vanharen07",
+      "name": "Ylva",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91621548?v=4",
+      "profile": "https://github.com/vanharen07",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
