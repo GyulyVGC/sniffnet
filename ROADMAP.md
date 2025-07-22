@@ -8,5 +8,5 @@ built having in mind the most requested features by its users during the years,
 and embodying the final step of the transition from a personal toy-project to one of the most renowned network analysers available.
 
 <a href="https://whimsical.com/Damodrdfx22V9jGnpHSCGo">
-  <img src="./resources/repository/roadmap.png" width="100%" alt="Roadmap" title="Roadmap">
+  <img src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/roadmap.png" width="100%" alt="Roadmap" title="Roadmap">
 </a>

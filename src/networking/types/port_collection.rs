@@ -28,16 +28,13 @@ impl PortCollection {
             if object.contains(Self::RANGE_SEPARATOR) {
                 // port range
                 let mut subparts = object.split(Self::RANGE_SEPARATOR);
+                if subparts.clone().count() != 2 {
+                    return None;
+                }
                 let (lower_str, upper_str) =
                     (subparts.next().unwrap_or(""), subparts.next().unwrap_or(""));
-                let lower_port_res = u16::from_str(lower_str);
-                let upper_port_res = u16::from_str(upper_str);
-                let Ok(lower_port) = lower_port_res else {
-                    return None;
-                };
-                let Ok(upper_port) = upper_port_res else {
-                    return None;
-                };
+                let lower_port = u16::from_str(lower_str).ok()?;
+                let upper_port = u16::from_str(upper_str).ok()?;
                 let range = RangeInclusive::new(lower_port, upper_port);
                 if range.is_empty() {
                     return None;
@@ -45,11 +42,8 @@ impl PortCollection {
                 ranges.push(range);
             } else {
                 // individual port
-                if let Ok(port) = u16::from_str(object) {
-                    ports.push(port);
-                } else {
-                    return None;
-                }
+                let port = u16::from_str(object).ok()?;
+                ports.push(port);
             }
         }
 
@@ -158,6 +152,10 @@ mod tests {
         assert_eq!(PortCollection::new("999-1"), None);
 
         assert_eq!(PortCollection::new("1:999"), None);
+
+        assert_eq!(PortCollection::new("1-2-3"), None);
+
+        assert_eq!(PortCollection::new("1-2-"), None);
     }
 
     #[test]

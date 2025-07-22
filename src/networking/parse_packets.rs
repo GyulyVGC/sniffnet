@@ -17,7 +17,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -48,7 +48,7 @@ pub fn parse_packets(
     let my_link_type = capture_context.my_link_type();
     let (mut cap, mut savefile) = capture_context.consume();
 
-    let mut info_traffic_msg = InfoTrafficMessage::default();
+    let mut info_traffic_msg = InfoTraffic::default();
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
     // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
     let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
@@ -152,10 +152,11 @@ pub fn parse_packets(
                             icmp_type,
                             arp_type,
                             exchanged_bytes,
-                            &resolutions_state,
                         );
 
-                        info_traffic_msg.add_packet(exchanged_bytes, traffic_direction);
+                        info_traffic_msg
+                            .tot_data_info
+                            .add_packet(exchanged_bytes, traffic_direction);
 
                         // check the rDNS status of this address and act accordingly
                         let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
@@ -389,13 +390,18 @@ fn reverse_dns_lookup(
         .insert(address_to_lookup, new_host.clone());
     drop(resolutions_lock);
 
-    let msg_data = HostMessage {
-        host: new_host,
-        other_data,
-        is_loopback,
+    let data_info_host = DataInfoHost {
+        data_info: other_data,
+        is_favorite: false,
         is_local,
         is_bogon,
+        is_loopback,
         traffic_type,
+    };
+
+    let msg_data = HostMessage {
+        host: new_host,
+        data_info_host,
         address_to_lookup,
         rdns,
     };
@@ -414,14 +420,14 @@ pub struct AddressesResolutionState {
 
 #[allow(clippy::large_enum_variant)]
 pub enum BackendTrafficMessage {
-    TickRun(usize, InfoTrafficMessage, Vec<HostMessage>, bool),
+    TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
 }
 
 fn maybe_send_tick_run_live(
     cap_id: usize,
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     cs: &mut CaptureSource,
     first_packet_ticks: &mut Option<Instant>,
@@ -432,7 +438,7 @@ fn maybe_send_tick_run_live(
             first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
-            info_traffic_msg.take_but_leave_timestamp(),
+            info_traffic_msg.take_but_leave_something(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));
@@ -447,7 +453,7 @@ fn maybe_send_tick_run_live(
 
 fn maybe_send_tick_run_offline(
     cap_id: usize,
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     next_packet_timestamp: Timestamp,
     tx: &Sender<BackendTrafficMessage>,
@@ -460,7 +466,7 @@ fn maybe_send_tick_run_offline(
             next_packet_timestamp.secs() - info_traffic_msg.last_packet_timestamp.secs();
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
-            info_traffic_msg.take_but_leave_timestamp(),
+            info_traffic_msg.take_but_leave_something(),
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));

@@ -3,7 +3,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{
     Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
 };
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
@@ -18,9 +18,9 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    learn_more_translation, mmdb_files_translation, params_not_editable_translation,
-    zoom_translation,
+    mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
+use crate::translations::translations_4::share_feedback_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -133,7 +133,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 .width(20)
                 .class(ButtonType::Alert),
                 row_open_link_tooltip(
-                    "The selected language is not\nfully updated to version 1.3",
+                    "The selected language is not\nfully updated to version 1.4",
                     font,
                 ),
                 Position::FollowCursor,
@@ -206,7 +206,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
     let content = Column::new()
         .align_x(Alignment::Center)
         .push(
-            Text::new(learn_more_translation(language))
+            Text::new(share_feedback_translation(language))
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),
@@ -215,18 +215,18 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
         .push(
             Tooltip::new(
                 button(
-                    Icon::Book
+                    Icon::Feedback
                         .to_text()
                         .align_y(Alignment::Center)
                         .align_x(Alignment::Center)
-                        .size(22)
+                        .size(20)
                         .line_height(LineHeight::Relative(1.0)),
                 )
-                .on_press(Message::OpenWebPage(WebPage::Wiki))
-                .padding(2)
+                .on_press(Message::OpenWebPage(WebPage::Issues))
+                .padding(Padding::new(2.0).top(5))
                 .height(40)
                 .width(60),
-                row_open_link_tooltip("Wiki", font),
+                row_open_link_tooltip("GitHub Issues", font),
                 Position::Right,
             )
             .gap(5)

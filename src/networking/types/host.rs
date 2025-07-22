@@ -1,7 +1,6 @@
 use crate::countries::types::country::Country;
 use crate::networking::types::asn::Asn;
-use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::traffic_type::TrafficType;
+use crate::networking::types::data_info_host::DataInfoHost;
 use std::net::IpAddr;
 
 /// Struct to represent a network host
@@ -30,11 +29,7 @@ pub struct ThumbnailHost {
 #[derive(Clone, Debug)]
 pub struct HostMessage {
     pub host: Host,
-    pub other_data: DataInfo,
-    pub is_loopback: bool,
-    pub is_local: bool,
-    pub is_bogon: Option<&'static str>,
-    pub traffic_type: TrafficType,
+    pub data_info_host: DataInfoHost,
     pub address_to_lookup: IpAddr,
     pub rdns: String,
 }

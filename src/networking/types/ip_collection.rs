@@ -30,16 +30,13 @@ impl AddressCollection {
             if object.contains(Self::RANGE_SEPARATOR) {
                 // IP range
                 let mut subparts = object.split(Self::RANGE_SEPARATOR);
+                if subparts.clone().count() != 2 {
+                    return None;
+                }
                 let (lower_str, upper_str) =
                     (subparts.next().unwrap_or(""), subparts.next().unwrap_or(""));
-                let lower_ip_res = IpAddr::from_str(lower_str);
-                let upper_ip_res = IpAddr::from_str(upper_str);
-                let Ok(lower_ip) = lower_ip_res else {
-                    return None;
-                };
-                let Ok(upper_ip) = upper_ip_res else {
-                    return None;
-                };
+                let lower_ip = IpAddr::from_str(lower_str).ok()?;
+                let upper_ip = IpAddr::from_str(upper_str).ok()?;
                 let range = RangeInclusive::new(lower_ip, upper_ip);
                 if range.is_empty() || lower_ip.is_ipv4() != upper_ip.is_ipv4() {
                     return None;
@@ -47,11 +44,8 @@ impl AddressCollection {
                 ranges.push(range);
             } else {
                 // individual IP
-                if let Ok(ip) = IpAddr::from_str(object) {
-                    ips.push(ip);
-                } else {
-                    return None;
-                }
+                let ip = IpAddr::from_str(object).ok()?;
+                ips.push(ip);
             }
         }
 
@@ -249,6 +243,10 @@ mod tests {
         assert_eq!(AddressCollection::new("aa::ff-aa::ee"), None);
 
         assert_eq!(AddressCollection::new("1.1.1.1-1.1.0.1"), None);
+
+        assert_eq!(AddressCollection::new("1.1.1.1-2.2.2.2-3.3.3.3"), None);
+
+        assert_eq!(AddressCollection::new("1.1.1.1-2.2.2.2-"), None);
     }
 
     #[test]

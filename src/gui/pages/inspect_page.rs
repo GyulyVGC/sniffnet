@@ -554,10 +554,9 @@ fn get_agglomerates_row<'a>(
 ) -> Row<'a, Message, StyleType> {
     let tot_packets = tot.tot_packets();
     let tot_bytes = tot.tot_bytes();
-    let width = ReportCol::FILTER_COLUMNS_WIDTH;
 
-    let (in_length, out_length) = get_bars_length(width, chart_type, &tot, &tot);
-    let bars = get_bars(in_length, out_length);
+    let (in_length, out_length) = get_bars_length(chart_type, &tot, &tot);
+    let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let bytes_col = Column::new()
         .align_x(Alignment::Center)
@@ -640,7 +639,7 @@ mod tests {
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
         // check glyph len when adding new language...
-        assert_eq!(Language::ALL.len(), 21);
+        assert_eq!(Language::ALL.len(), 22);
         for report_col in ReportCol::ALL {
             for language in Language::ALL {
                 let (title, title_small, tooltip_val) =

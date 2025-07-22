@@ -4930,6 +4930,7 @@ f5-globalsite	2792/tcp
 f5-globalsite	2792/udp
 initlsmsad	2793/tcp
 initlsmsad	2793/udp
+urp	2794/tcp
 livestats	2795/tcp
 livestats	2795/udp
 ac-tech	2796/tcp
@@ -9185,6 +9186,7 @@ fis	5912/tcp
 fis	5912/udp
 ads-c	5913/tcp
 ads-c	5913/udp
+ipsdtls	5914/tcp
 teamviewer	5938/tcp
 indy	5963/tcp
 indy	5963/udp
@@ -9489,6 +9491,7 @@ scup-disc	6315/udp
 abb-escp	6316/tcp
 abb-escp	6316/udp
 nav-data-cmd	6317/tcp
+iona-data	6318/tcp
 repsvc	6320/tcp
 repsvc	6320/udp
 emp-server1	6321/tcp
@@ -10149,6 +10152,7 @@ dell-eql-asm	7569/tcp
 aries-kfinder	7570/tcp
 aries-kfinder	7570/udp
 coherence	7574/tcp
+wtmi-panel	7575/tcp
 sun-lm	7588/tcp
 sun-lm	7588/udp
 qaz	7597/tcp
@@ -10473,6 +10477,7 @@ pando-sec	8276/udp
 synapse-nhttp	8280/tcp
 synapse-nhttp	8280/udp
 libelle	8282/tcp
+winbox	8291/tcp
 blp3	8292/tcp
 blp3	8292/udp
 hiperscan-id	8293/tcp
@@ -11737,6 +11742,7 @@ flexlm9	27009/tcp
 flex-lm	27009/udp
 flexlm10	27010/tcp
 halflife	27015/udp
+chlenix	27016/tcp
 mongod	27017/tcp
 mongod	27018/tcp
 mongod	27019/tcp

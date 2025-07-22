@@ -1,8 +1,9 @@
 use crate::Language;
 use crate::translations::translations::{bytes_translation, packets_translation};
+use serde::{Deserialize, Serialize};
 
 /// Enum representing the possible kind of chart displayed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ChartType {
     Packets,
     Bytes,

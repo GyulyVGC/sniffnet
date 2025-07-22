@@ -4,7 +4,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::traffic_type::TrafficType;
 
 /// Host-related information.
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Hash)]
 pub struct DataInfoHost {
     /// Incoming and outgoing packets and bytes
     pub data_info: DataInfo,

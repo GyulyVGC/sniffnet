@@ -1,18 +1,16 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::sync::{Arc, Mutex};
 
 use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
 use pcap::Address;
 
-use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::info_traffic::InfoTrafficMessage;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
@@ -250,16 +248,14 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
-#[allow(clippy::too_many_arguments)]
 pub fn modify_or_insert_in_map(
-    info_traffic_msg: &mut InfoTrafficMessage,
+    info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
     cs: &CaptureSource,
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
-    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -280,16 +276,6 @@ pub fn modify_or_insert_in_map(
         );
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
-        // consider all hosts as potential favorites, then they'll be filtered in InfoTraffic::refresh
-        if let Some(host) = resolutions_state
-            .lock()
-            .unwrap()
-            .addresses_resolved
-            .get(&get_address_to_lookup(key, traffic_direction))
-            .cloned()
-        {
-            info_traffic_msg.potential_favorites.insert(host);
-        }
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;
@@ -1566,7 +1552,7 @@ mod tests {
 
     #[test]
     fn test_all_services_map_key_and_values_are_valid() {
-        assert_eq!(SERVICES.len(), 12078);
+        assert_eq!(SERVICES.len(), 12084);
         let mut distinct_services = HashSet::new();
         for (sq, s) in &SERVICES {
             // only tcp or udp
@@ -1587,7 +1573,7 @@ mod tests {
             // just to count and verify number of distinct services
             distinct_services.insert(name.to_string());
         }
-        assert_eq!(distinct_services.len(), 6450);
+        assert_eq!(distinct_services.len(), 6456);
     }
 
     #[test]
