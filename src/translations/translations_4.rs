@@ -14,6 +14,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::ZH_TW => format!("保留的網路位址 ({info})"),
         Language::NL => format!("Gereserveerd adres ({info})"),
         Language::DE => format!("Reservierte Adresse ({info})"),
+        Language::UZ => format!("Rezervlangan manzil ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -25,6 +26,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ZH_TW => "分享您的意見回饋",
         Language::NL => "Deel uw feedback",
         Language::DE => "Feedback geben",
+        Language::UZ => "Fikr-mulohazalaringizni ulashing",
         _ => "Share your feedback",
     }
 }
@@ -34,6 +36,7 @@ pub fn excluded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Excluded",
         Language::IT => "Esclusi",
+        Language::UZ => "Chiqarib tashlangan",
         Language::ZH_TW => "已排除",
         Language::NL => "Uitgesloten",
         Language::DE => "Herausgefiltert",
@@ -47,6 +50,7 @@ pub fn import_capture_translation(language: Language) -> &'static str {
         Language::IT => "Importa file di cattura",
         Language::NL => "Importeer capture bestand",
         Language::DE => "Aufzeichnungsdatei importieren",
+        Language::UZ => "Tahlil faylini import qilish",
         _ => "Import capture file",
     }
 }
@@ -57,6 +61,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
         Language::IT => "Seleziona file di cattura",
         Language::NL => "Selecteer capture bestand",
         Language::DE => "Aufzeichnungsdatei auswählen",
+        Language::UZ => "Tahlil faylini tanlang",
         _ => "Select capture file",
     }
 }
@@ -84,6 +89,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                 {file_name_translation}: {file}\n\n\
                                 Bist du sicher, dass die gewählte Datei nicht leer ist?"
         ),
+        Language::UZ => format!(
+            "Faylni o'qish...\n\n\
+                                {file_name_translation}: {file}\n\n\
+                                Fayl bo'sh emasligiga aminmisiz?"
+        ),
         _ => format!(
             "Reading packets from file...\n\n\
                                  {file_name_translation}: {file}\n\n\
@@ -98,6 +108,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::IT => "Soglia di dati superata",
         Language::NL => "Gegevenslimiet overschreden",
         Language::DE => "Datenschwelle überschritten",
+        Language::UZ => "Ma'lumotlar chegarasidan oshib ketdi",
         _ => "Data threshold exceeded",
     }
 }
@@ -109,6 +120,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::IT => "Soglia di bit superata",
         Language::NL => "Bits limiet overschreden",
         Language::DE => "Bitschwelle überschritten",
+        Language::UZ => "Bitlar chegarasidan oshib ketdi",
         _ => "Bits threshold exceeded",
     }
 }
@@ -117,6 +129,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::NL | Language::DE => "Bits",
+        Language::UZ => "Bitlar",
         _ => "Bits",
     }
 }
@@ -127,6 +140,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::EN | Language::DE => "Pause",
         Language::IT => "Pausa",
         Language::NL => "Pauzeren",
+        Language::UZ => "To'xtatish",
         _ => "Pause",
     }
 }
@@ -138,6 +152,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::IT => "Riprendi",
         Language::NL => "Hervatten",
         Language::DE => "Fortsetzen",
+        Language::UZ => "Davom ettirish",
         _ => "Resume",
     }
 }

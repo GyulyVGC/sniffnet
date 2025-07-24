@@ -77,7 +77,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::PL => "Szczegóły połączenia",
         Language::FR => "Détails de la connexion",
         Language::JA => "接続の詳細",
-        Language::UZ => "Ulanish tafsilotlari",
+        Language::UZ => "Ulanish ma'lumotlari",
         Language::PT => "Detalhes da conexão",
         Language::VI => "Thông tin kết nối",
         Language::ID => "Rincian koneksi",
