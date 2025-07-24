@@ -92,7 +92,7 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         Language::UZ => format!(
             "Faylni o'qish...\n\n\
                                 {file_name_translation}: {file}\n\n\
-                                Fayl bo'sh emasligiga aminmisiz ?"
+                                Fayl bo'sh emasligiga aminmisiz?"
         ),
         _ => format!(
             "Reading packets from file...\n\n\
