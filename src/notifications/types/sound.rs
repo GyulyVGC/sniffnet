@@ -3,7 +3,7 @@ use std::thread;
 
 use iced::Font;
 use iced::widget::Text;
-use rodio::{Decoder, OutputStream, Sink};
+use rodio::{Decoder, OutputStreamBuilder, Sink};
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
@@ -63,13 +63,13 @@ pub fn play(sound: Sound, volume: u8) {
         .name("thread_play_sound".to_string())
         .spawn(move || {
             // Get an output stream handle to the default physical sound device
-            let Ok((_stream, stream_handle)) = OutputStream::try_default().log_err(location!())
+            let Ok(mut stream_handle) =
+                OutputStreamBuilder::open_default_stream().log_err(location!())
             else {
                 return;
             };
-            let Ok(sink) = Sink::try_new(&stream_handle).log_err(location!()) else {
-                return;
-            };
+            stream_handle.log_on_drop(false);
+            let sink = Sink::connect_new(stream_handle.mixer());
             //load data
             let data = std::io::Cursor::new(mp3_sound);
             // Decode that sound file into a source
