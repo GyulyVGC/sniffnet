@@ -15,6 +15,18 @@ Translated in:<br>
 🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;14&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
+<p align="center">
+    <!-- Keep these links. Translations will automatically update with the README. -->
+    <a href="https://readme-i18n.com/de/GyulyVGC/sniffnet">Deutsch</a> | 
+    <a href="https://readme-i18n.com/es/GyulyVGC/sniffnet">Español</a> | 
+    <a href="https://readme-i18n.com/fr/GyulyVGC/sniffnet">français</a> | 
+    <a href="https://readme-i18n.com/ja/GyulyVGC/sniffnet">日本語</a> | 
+    <a href="https://readme-i18n.com/ko/GyulyVGC/sniffnet">한국어</a> | 
+    <a href="https://readme-i18n.com/pt/GyulyVGC/sniffnet">Português</a> | 
+    <a href="https://readme-i18n.com/ru/GyulyVGC/sniffnet">Русский</a> | 
+    <a href="https://readme-i18n.com/zh/GyulyVGC/sniffnet">中文</a>
+</p>
+
 <p>
 <picture>
 <img alt="" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/hr.png" width="100%"/>
