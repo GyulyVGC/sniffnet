@@ -712,6 +712,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "SignPath",
+      "name": "SignPath GmbH",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34448643?v=4",
+      "profile": "https://signpath.io",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
