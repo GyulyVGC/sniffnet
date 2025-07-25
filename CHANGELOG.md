@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Added Dutch translation 🇳🇱 ([#854](https://github.com/GyulyVGC/sniffnet/pull/854))
+- The Windows Installer is now signed with a code signing certificate provided by the [SignPath Foundation](https://signpath.org/) ([#897](https://github.com/GyulyVGC/sniffnet/pull/897) — fixes [#894](https://github.com/GyulyVGC/sniffnet/issues/894))
 - Updated some of the existing translations to v1.4: 
   - German ([#833](https://github.com/GyulyVGC/sniffnet/pull/833))
 

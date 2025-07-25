@@ -332,7 +332,7 @@ jobs:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'
           project-slug: 'sniffnet'
-          signing-policy-slug: 'test-signing'
+          signing-policy-slug: 'release-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: './artifacts'
