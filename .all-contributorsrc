@@ -721,6 +721,15 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "islameehassan",
+      "name": "islameehassan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98806155?v=4",
+      "profile": "https://github.com/islameehassan",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
