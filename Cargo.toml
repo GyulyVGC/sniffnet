@@ -38,7 +38,7 @@ strip = true
 
 [dependencies]
 pcap = "2.3.0"
-etherparse = "0.18.0"
+etherparse = "0.18.2"
 chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
@@ -48,14 +48,14 @@ confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "2.0.4"
-toml = "0.9.2"
+toml = "0.9.3"
 ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.12.1"
 phf_shared = "0.12.1"
 splines = "5.0.0"
 clap = { version = "4.5.41", features = ["derive"] }
-tokio = { version = "1.46.1", features = ["macros"] }
+tokio = { version = "1.47.0", features = ["macros"] }
 async-channel = "2.5.0"
 
 [target.'cfg(windows)'.dependencies]
@@ -71,7 +71,7 @@ reqwest = { version = "0.12.22", features = ["json"] }
 
 [dev-dependencies]
 serde_test = "1.0.177"
-rstest = "0.25.0"
+rstest = "0.26.1"
 serial_test = { version = "3.2.0", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
