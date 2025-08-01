@@ -1,0 +1,9 @@
+app: Sniffnet
+ingredients:
+  dist: bookworm
+  packages:
+    - libpcap0.8
+  sources:
+    - deb https://deb.debian.org/debian stable main
+  debs:
+    - /target/REPLACE_TAG
