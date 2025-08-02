@@ -730,6 +730,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "lionrayonnant",
+      "name": "Lion Rayonnant",
+      "avatar_url": "https://avatars.githubusercontent.com/u/106342136?v=4",
+      "profile": "https://github.com/lionrayonnant",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
