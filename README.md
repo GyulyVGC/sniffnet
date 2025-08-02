@@ -136,6 +136,8 @@ ICED_BACKEND=tiny-skia
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
+- Free code signing for Windows Installer is provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
+- [Sniffnet](https://ads.fund/token/0xadfc251f8ef00ceaeca2b5c1882dabe5db0833df) project is supported by ADS.FUND
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
 
 
