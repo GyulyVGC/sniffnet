@@ -549,6 +549,7 @@ impl Sniffer {
             Message::Periodic => {
                 self.update_waiting_dots();
                 self.fetch_devices();
+                self.update_threshold();
             }
             Message::ExpandNotification(id, expand) => {
                 if let Some(n) = self
@@ -660,7 +661,7 @@ impl Sniffer {
         self.configs.settings.scale_factor
     }
 
-    /// Updates threshold if they haven't been edited for a while
+    /// Updates threshold if it hasn't been edited for a while
     fn update_threshold(&mut self) {
         // Ignore if just edited
         if let Some(temp_threshold) = self.timing_events.threshold_adjust_expired_take() {
@@ -685,7 +686,6 @@ impl Sniffer {
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic.refresh(&mut msg);
-        self.update_threshold();
         if self.info_traffic.tot_data_info.tot_packets() == 0 {
             return;
         }
@@ -1114,7 +1114,6 @@ mod tests {
     use crate::gui::types::timing_events::TimingEvents;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::host::Host;
-    use crate::networking::types::info_traffic::InfoTraffic;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
@@ -1657,8 +1656,8 @@ mod tests {
                 .tot_data_info
                 .add_packet(0, TrafficDirection::Outgoing);
 
-            // Simulate a tick to apply the settings
-            sniffer.update(Message::TickRun(0, InfoTraffic::default(), vec![], false));
+            // Simulate an update to apply the settings
+            sniffer.update(Message::Periodic);
         }
         let mut sniffer = Sniffer::new(Configs::default());
 
