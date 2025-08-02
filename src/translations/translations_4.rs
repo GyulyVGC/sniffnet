@@ -14,6 +14,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::UK => format!("Зарезервована адреса ({info})"),
         Language::ZH => format!("预留地址 ({info})"),
         Language::ZH_TW => format!("保留的網路位址 ({info})"),
+        Language::FR => format!("Adresse réservée ({info})"),
         Language::NL => format!("Gereserveerd adres ({info})"),
         Language::DE => format!("Reservierte Adresse ({info})"),
         Language::UZ => format!("Rezervlangan manzil ({info})"),
@@ -28,6 +29,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::JA => "フィードバックを共有",
         Language::ZH => "分享您的反馈",
         Language::ZH_TW => "分享您的意見回饋",
+        Language::FR => "Partagez vos commentaires",
         Language::NL => "Deel uw feedback",
         Language::DE => "Feedback geben",
         Language::UZ => "Fikr-mulohazalaringizni ulashing",
@@ -44,6 +46,7 @@ pub fn excluded_translation(language: Language) -> &'static str {
         Language::ZH => "已被过滤",
         Language::UZ => "Chiqarib tashlangan",
         Language::ZH_TW => "已排除",
+        Language::FR => "Exclus",
         Language::NL => "Uitgesloten",
         Language::DE => "Herausgefiltert",
         _ => "Excluded",
@@ -54,6 +57,7 @@ pub fn import_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Import capture file",
         Language::IT => "Importa file di cattura",
+        Language::FR => "Importer un fichier de capture",
         Language::JA => "キャプチャファイルをインポート",
         Language::ZH => "导入捕获文件",
         Language::NL => "Importeer capture bestand",
@@ -67,6 +71,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select capture file",
         Language::IT => "Seleziona file di cattura",
+        Language::FR => "Sélectionner un fichier de capture",
         Language::JA => "キャプチャファイルを選択",
         Language::ZH => "选择捕获文件",
         Language::NL => "Selecteer capture bestand",
@@ -86,8 +91,13 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
         Language::IT => format!(
             "Lettura pacchetti da file...\n\n\
-                                {file_name_translation}: {file}\n\n\
-                                Sei sicuro che il file che hai selezionato non sia vuoto?"
+                                 {file_name_translation}: {file}\n\n\
+                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
+        ),
+        Language::FR => format!(
+            "Lecture des paquets depuis le fichier...\n\n\
+                                 {file_name_translation} : {file}\n\n\
+                                 Êtes-vous sûr que le fichier sélectionné n'est pas vide ?"
         ),
         Language::JA => format!(
             "ファイルからパケットを読み込み中...\n\n\
@@ -116,8 +126,8 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
         _ => format!(
             "Reading packets from file...\n\n\
-                                 {file_name_translation}: {file}\n\n\
-                                 Are you sure the file you selected isn't empty?"
+             {file_name_translation}: {file}\n\n\
+             Are you sure the file you selected isn't empty?"
         ),
     })
 }
@@ -126,6 +136,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data threshold exceeded",
         Language::IT => "Soglia di dati superata",
+        Language::FR => "Seuil de données dépassé",
         Language::JA => "データの閾値を超えました",
         Language::ZH => "已超出数据阈值",
         Language::NL => "Gegevenslimiet overschreden",
@@ -140,6 +151,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bits threshold exceeded",
         Language::IT => "Soglia di bit superata",
+        Language::FR => "Seuil de bits dépassé",
         Language::JA => "ビットの閾値を超えました",
         Language::ZH => "已超出比特阈值",
         Language::NL => "Bits limiet overschreden",
@@ -152,7 +164,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
 #[allow(dead_code)]
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::NL | Language::DE => "Bits",
+        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR => "Bits",
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "Bitlar",
@@ -163,7 +175,7 @@ pub fn bits_translation(language: Language) -> &'static str {
 #[allow(dead_code)]
 pub fn pause_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::DE => "Pause",
+        Language::EN | Language::DE | Language::FR => "Pause",
         Language::IT => "Pausa",
         Language::JA => "一時停止",
         Language::ZH => "暂停",
@@ -178,6 +190,7 @@ pub fn resume_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Resume",
         Language::IT => "Riprendi",
+        Language::FR => "Reprendre",
         Language::JA => "再開",
         Language::ZH => "恢复",
         Language::NL => "Hervatten",
