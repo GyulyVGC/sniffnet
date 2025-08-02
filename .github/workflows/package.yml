@@ -318,9 +318,29 @@ jobs:
           cargo wix --no-build --nocapture --target ${{ matrix.target }}
           Move-Item -Path target\wix\sniffnet*.msi -Destination .\artifacts\Sniffnet_Windows_${{ matrix.arch }}.msi
 
-      - name: Upload package artifacts
+      - name: Upload unsigned package artifacts
+        id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
           if-no-files-found: error
+
+      - name: Sign package artifacts
+        uses: signpath/github-action-submit-signing-request@v1.2
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'
+          project-slug: 'sniffnet'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: './artifacts'
+
+      - name: Upload signed package artifacts (overwrite unsigned)
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-${{ matrix.arch }}
+          path: artifacts/
+          if-no-files-found: error
+          overwrite: true

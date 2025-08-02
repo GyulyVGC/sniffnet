@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA,
-    UZ, VN,
+    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR, TW,
+    UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -59,10 +59,12 @@ pub enum Language {
     VI,
     /// Indonesian
     ID,
+    /// Dutch
+    NL,
 }
 
 impl Language {
-    pub const ALL: [Language; 21] = [
+    pub const ALL: [Language; 22] = [
         Language::EN,
         Language::DE,
         Language::EL,
@@ -73,6 +75,7 @@ impl Language {
         Language::IT,
         Language::JA,
         Language::KO,
+        Language::NL,
         Language::PL,
         Language::PT,
         Language::RO,
@@ -110,12 +113,16 @@ impl Language {
             Language::UZ => UZ,
             Language::VI => VN,
             Language::ID => ID,
+            Language::NL => NL,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
 
     pub fn is_up_to_date(self) -> bool {
-        matches!(self, Language::EN | Language::IT)
+        matches!(
+            self,
+            Language::EN | Language::IT | Language::NL | Language::DE | Language::UZ
+        )
     }
 }
 
@@ -144,6 +151,7 @@ impl fmt::Display for Language {
             Language::UZ => "O'zbekcha",
             Language::VI => "Tiếng Việt",
             Language::ID => "Bahasa Indonesia",
+            Language::NL => "Nederlands",
         };
         write!(f, "{self:?} - {lang_str}")
     }

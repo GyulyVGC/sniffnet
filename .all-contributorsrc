@@ -676,6 +676,60 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "ADS-Fund",
+      "name": "ADS Fund",
+      "avatar_url": "https://avatars.githubusercontent.com/u/202042116?v=4",
+      "profile": "https://ads.fund",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "louis-ym4",
+      "name": "louis-ym4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/200361621?v=4",
+      "profile": "https://github.com/louis-ym4",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "vanharen07",
+      "name": "Ylva",
+      "avatar_url": "https://avatars.githubusercontent.com/u/91621548?v=4",
+      "profile": "https://github.com/vanharen07",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "celtic-coder",
+      "name": "Liam OBrien",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11787866?v=4",
+      "profile": "https://github.com/celtic-coder",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "SignPath",
+      "name": "SignPath GmbH",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34448643?v=4",
+      "profile": "https://signpath.io",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "islameehassan",
+      "name": "islameehassan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98806155?v=4",
+      "profile": "https://github.com/islameehassan",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
