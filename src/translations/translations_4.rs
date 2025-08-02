@@ -91,13 +91,13 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
         Language::IT => format!(
             "Lettura pacchetti da file...\n\n\
-                                 {file_name_translation}: {file}\n\n\
-                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
+                                {file_name_translation}: {file}\n\n\
+                                Sei sicuro che il file che hai selezionato non sia vuoto?"
         ),
         Language::FR => format!(
             "Lecture des paquets depuis le fichier...\n\n\
-                                 {file_name_translation} : {file}\n\n\
-                                 Êtes-vous sûr que le fichier sélectionné n'est pas vide ?"
+                                 {file_name_translation}: {file}\n\n\
+                                 Êtes-vous sûr que le fichier sélectionné n'est pas vide?"
         ),
         Language::JA => format!(
             "ファイルからパケットを読み込み中...\n\n\
@@ -126,8 +126,8 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
         _ => format!(
             "Reading packets from file...\n\n\
-             {file_name_translation}: {file}\n\n\
-             Are you sure the file you selected isn't empty?"
+                                {file_name_translation}: {file}\n\n\
+                                Are you sure the file you selected isn't empty?"
         ),
     })
 }
