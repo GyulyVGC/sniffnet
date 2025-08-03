@@ -749,6 +749,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "AlleM43",
+      "name": "AlleM43",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16104173?v=4",
+      "profile": "https://github.com/AlleM43",
+      "contributions": [
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,
