@@ -81,14 +81,13 @@ jobs:
 
       - name: Test (release mode)
         if: matrix.os == 'macos' || matrix.os == 'ubuntu' || matrix.os == 'windows' && matrix.arch == 'amd64'
-        run: cargo test --release --verbose -- --nocapture &&
+        run: |
+          cargo test --release --verbose -- --nocapture &&
+          cargo clean
 
       - name: Install Cross
         if: matrix.os == 'ubuntu'
         run: cargo install cross --git https://github.com/cross-rs/cross
-
-      - name: Clean
-        run: cargo clean
 
       - name: Build binary (Linux)
         if: matrix.os == 'ubuntu'
