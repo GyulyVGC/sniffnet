@@ -2,7 +2,7 @@
      aria-label="Linux">
     <title>Linux</title>
     <g shape-rendering="crispEdges">
-        <rect width="90" height="28" fill="#0f1e3c"/>
+        <rect stroke-width="2px" stroke="#a0e8f8" width="90" height="28" fill="#0f1e3c"/>
     </g>
     <g fill="#a0e8f8" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
        text-rendering="geometricPrecision" font-size="10">

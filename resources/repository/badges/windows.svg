@@ -2,11 +2,11 @@
      aria-label="Windows">
     <title>Windows</title>
     <g shape-rendering="crispEdges">
-        <rect width="90" height="28" fill="#0f1e3c"/>
+        <rect stroke-width="2px" stroke="#a0e8f8" width="90" height="28" fill="#0f1e3c"/>
     </g>
     <g fill="#a0e8f8" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
        text-rendering="geometricPrecision" font-size="10">
-        <image x="7" y="6" width="16" height="16"
+        <image x="8" y="6" width="16" height="16"
                xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjYTBlOGY4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+V2luZG93czwvdGl0bGU+PHBhdGggZD0iTTAsMEgxMS4zNzdWMTEuMzcySDBaTTEyLjYyMywwSDI0VjExLjM3MkgxMi42MjNaTTAsMTIuNjIzSDExLjM3N1YyNEgwWm0xMi42MjMsMEgyNFYyNEgxMi42MjMiLz48L3N2Zz4="/>
         <text text-anchor="start" x="30" y="17.5" fill="#a0e8f8" font-weight="bold">Windows</text>
     </g>
