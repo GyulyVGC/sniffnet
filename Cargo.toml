@@ -55,7 +55,7 @@ phf = "0.12.1"
 phf_shared = "0.12.1"
 splines = "5.0.0"
 clap = { version = "4.5.42", features = ["derive"] }
-tokio = { version = "1.47.0", features = ["macros"] }
+tokio = { version = "1.47.1", features = ["macros"] }
 async-channel = "2.5.0"
 
 [target.'cfg(windows)'.dependencies]
