@@ -38,7 +38,7 @@ strip = true
 
 [dependencies]
 pcap = "2.3.0"
-etherparse = "0.18.2"
+etherparse = "0.19.0"
 chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
@@ -47,15 +47,15 @@ maxminddb = "0.26.0"
 confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
-dns-lookup = "2.0.4"
-toml = "0.9.4"
+dns-lookup = "2.1.0"
+toml = "0.9.5"
 ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.12.1"
 phf_shared = "0.12.1"
 splines = "5.0.0"
 clap = { version = "4.5.42", features = ["derive"] }
-tokio = { version = "1.47.0", features = ["macros"] }
+tokio = { version = "1.47.1", features = ["macros"] }
 async-channel = "2.5.0"
 
 [target.'cfg(windows)'.dependencies]
