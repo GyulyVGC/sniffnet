@@ -59,11 +59,33 @@ Do you want to help the project in an alternative way? You can also head to the 
 
 ## Download
 
-| _Operating System_                                                                                                                                                           | _Download links_                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| <picture><img alt="Windows" title="Windows" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/windows.svg"/></picture> | [64-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi) \| [32-bit](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| <picture><img alt="macOS" title="macOS" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></picture>       | [Intel](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg) \| [Apple silicon](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg)                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| <picture><img alt="Linux" title="Linux" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux.svg"/></picture>       | DEB: [amd64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb) \| [arm64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb) \| [i386](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb) \| [armhf](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb) <br> RPM: [x86_64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm) \| [aarch64](https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm) |
+<table>
+  <tr>
+    <td>
+      <picture><img alt="Windows" title="Windows" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/windows.svg"/></picture>
+    </td>
+    <td>
+      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi">64-bit</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi">32-bit</a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <picture><img alt="macOS" title="macOS" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></picture>
+    </td>
+    <td>
+      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg">Intel</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg">Apple silicon</a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <picture><img alt="Linux" title="Linux" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux.svg"/></picture>
+    </td>
+    <td>
+      DEB: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb">armhf</a> <br>
+      RPM: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm">x86_64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm">aarch64</a>
+    </td>
+  </tr>
+</table>
 
 Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
 Not what you're looking for? Check out [alternative installation methods](https://github.com/GyulyVGC/sniffnet/wiki/Alternative-installation-methods).
