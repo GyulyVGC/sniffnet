@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="90" height="28" role="img"
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="60" height="48" role="img"
      aria-label="Windows">
     <title>Windows</title>
     <g shape-rendering="crispEdges">
-        <rect stroke-width="2px" stroke="#a0e8f8" width="90" height="28" fill="#0f1e3c"/>
+        <rect stroke-width="2px" stroke="#a0e8f8" width="60" height="48" fill="#0f1e3c"/>
     </g>
     <g fill="#a0e8f8" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
        text-rendering="geometricPrecision" font-size="10">
-        <image x="8" y="6" width="16" height="16"
-               xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjYTBlOGY4IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+V2luZG93czwvdGl0bGU+PHBhdGggZD0iTTAsMEgxMS4zNzdWMTEuMzcySDBaTTEyLjYyMywwSDI0VjExLjM3MkgxMi42MjNaTTAsMTIuNjIzSDExLjM3N1YyNEgwWm0xMi42MjMsMEgyNFYyNEgxMi42MjMiLz48L3N2Zz4="/>
-        <text text-anchor="start" x="30" y="17.5" fill="#a0e8f8" font-weight="bold">Windows</text>
+        <image x="19" y="7" width="22" height="22"
+               xlink:href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIGZpbGw9IiNhMGU4ZjgiIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPmlvbmljb25zLXY1X2xvZ29zPC90aXRsZT48cGF0aCBkPSJNNDgwLDI2NUgyMzJWNDQ0bDI0OCwzNlYyNjVaIi8+PHBhdGggZD0iTTIxNiwyNjVIMzJWNDE1bDE4NCwyNi43VjI2NVoiLz48cGF0aCBkPSJNNDgwLDMyLDIzMiw2Ny40VjI0OUg0ODBWMzJaIi8+PHBhdGggZD0iTTIxNiw2OS43LDMyLDk2VjI0OUgyMTZWNjkuN1oiLz48L3N2Zz4="/>
+        <text text-anchor="start" x="4" y="41" fill="#a0e8f8" font-weight="bold">Windows</text>
     </g>
 </svg>
