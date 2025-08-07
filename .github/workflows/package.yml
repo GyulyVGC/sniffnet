@@ -384,7 +384,7 @@ jobs:
           if-no-files-found: error
 
       - name: Sign package artifacts
-        uses: signpath/github-action-submit-signing-request@v1.2
+        uses: signpath/github-action-submit-signing-request@v1.3
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'
