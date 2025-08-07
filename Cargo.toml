@@ -79,7 +79,7 @@ serial_test = { version = "3.2.0", default-features = false }
 [build-dependencies]
 phf_codegen = "0.12.1"
 phf_shared = "0.12.1"
-rustrict = { version = "0.7.35", default-features = false, features = ["censor"] }
+rustrict = { version = "0.7.36", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"
