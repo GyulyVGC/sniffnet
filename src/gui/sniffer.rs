@@ -565,7 +565,7 @@ impl Sniffer {
         Task::none()
     }
 
-    pub fn view(&self) -> Element<Message, StyleType> {
+    pub fn view(&self) -> Element<'_, Message, StyleType> {
         let ConfigSettings {
             style,
             language,

@@ -1038,7 +1038,7 @@ pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text
 //     })
 // }
 
-pub fn error_translation(language: Language, error: &str) -> Text<StyleType> {
+pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType> {
     Text::new(match language {
         Language::EN => format!(
             "An error occurred! \n\n\

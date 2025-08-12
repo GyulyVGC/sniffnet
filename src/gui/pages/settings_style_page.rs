@@ -27,7 +27,7 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, Sniffer, StyleType};
 
-pub fn settings_style_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style,
         language,

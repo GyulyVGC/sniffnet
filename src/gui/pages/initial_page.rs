@@ -43,7 +43,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -129,7 +129,7 @@ fn col_ip_buttons(
     active_ip_filters: &HashSet<IpVersion>,
     font: Font,
     language: Language,
-) -> Column<Message, StyleType> {
+) -> Column<'_, Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in IpVersion::ALL {
         let is_active = active_ip_filters.contains(&option);
@@ -168,7 +168,7 @@ fn col_protocol_buttons(
     active_protocol_filters: &HashSet<Protocol>,
     font: Font,
     language: Language,
-) -> Column<Message, StyleType> {
+) -> Column<'_, Message, StyleType> {
     let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
     for option in Protocol::ALL {
         let is_active = active_protocol_filters.contains(&option);
@@ -203,7 +203,11 @@ fn col_protocol_buttons(
         .push(buttons_row)
 }
 
-fn col_address_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
+fn col_address_input(
+    value: &str,
+    font: Font,
+    language: Language,
+) -> Column<'_, Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -234,7 +238,7 @@ fn col_address_input(value: &str, font: Font, language: Language) -> Column<Mess
         .push(input_row)
 }
 
-fn col_port_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
+fn col_port_input(value: &str, font: Font, language: Language) -> Column<'_, Message, StyleType> {
     let is_error = if value.is_empty() {
         false
     } else {
@@ -270,7 +274,7 @@ fn button_start(
     language: Language,
     color_gradient: GradientType,
     filters: &Filters,
-) -> Tooltip<Message, StyleType> {
+) -> Tooltip<'_, Message, StyleType> {
     let mut content = button(
         Icon::Rocket
             .to_text()
@@ -299,7 +303,7 @@ fn button_start(
         .class(ContainerType::Tooltip)
 }
 
-fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
+fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
     let ConfigSettings { language, .. } = sniffer.configs.settings;
 
     let mut dev_str_list = vec![];

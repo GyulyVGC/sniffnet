@@ -145,10 +145,10 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
     while all_time.len() > 150 {
         let mut new_vec = Vec::new();
         all_time.iter().enumerate().for_each(|(i, (x, y))| {
-            if i % 2 == 0 {
-                if let Some(next) = all_time.get(i + 1) {
-                    new_vec.push((*x, (y + next.1) / 2.0));
-                }
+            if i % 2 == 0
+                && let Some(next) = all_time.get(i + 1)
+            {
+                new_vec.push((*x, (y + next.1) / 2.0));
             }
         });
         *all_time = new_vec;

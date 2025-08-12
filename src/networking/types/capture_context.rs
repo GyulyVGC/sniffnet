@@ -97,7 +97,7 @@ pub enum CaptureType {
 }
 
 impl CaptureType {
-    pub fn next_packet(&mut self) -> Result<Packet, Error> {
+    pub fn next_packet(&mut self) -> Result<Packet<'_>, Error> {
         match self {
             Self::Live(on) => on.next_packet(),
             Self::Offline(off) => off.next_packet(),

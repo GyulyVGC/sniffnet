@@ -27,7 +27,7 @@ use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 
-pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -56,7 +56,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<Message, StyleType>
         .class(ContainerType::Modal)
 }
 
-fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
+fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
     let ConfigSettings {
         language,
         scale_factor,

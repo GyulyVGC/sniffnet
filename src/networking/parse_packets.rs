@@ -304,7 +304,7 @@ fn get_sniffable_headers<'a>(
     }
 }
 
-fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
+fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders<'_>, LaxHeaderSliceError> {
     if packet.len() <= 4 {
         return Err(LaxHeaderSliceError::Len(LenError {
             required_len: 4,

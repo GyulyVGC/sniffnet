@@ -40,7 +40,7 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
@@ -178,7 +178,7 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
-) -> Row<Message, StyleType> {
+) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
@@ -476,7 +476,7 @@ fn filter_combobox(
     combo_box_state: &combo_box::State<String>,
     search_params: SearchParameters,
     font: Font,
-) -> Container<Message, StyleType> {
+) -> Container<'_, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params).to_string();
     let is_filter_active = !filter_value.is_empty();
 

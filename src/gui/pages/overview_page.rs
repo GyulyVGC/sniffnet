@@ -52,7 +52,7 @@ use iced::{Alignment, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
@@ -507,7 +507,7 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .class(ContainerType::BorderedRound)
 }
 
-fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
+fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, StyleType> {
     let ConfigSettings { language, .. } = sniffer.configs.settings;
     let traffic_chart = &sniffer.traffic_chart;
 

@@ -80,7 +80,7 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self) -> Element<Message, StyleType> {
+    pub fn view(&self) -> Element<'_, Message, StyleType> {
         let x_labels = if self.is_live_capture || self.thumbnail {
             None
         } else {

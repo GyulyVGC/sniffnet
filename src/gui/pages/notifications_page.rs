@@ -38,7 +38,7 @@ use iced::{Alignment, Font, Length, Padding};
 use std::cmp::max;
 
 /// Computes the body of gui notifications page
-pub fn notifications_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
+pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style,
         language,
@@ -128,7 +128,7 @@ fn body_no_notifications_received(
     font: Font,
     language: Language,
     dots: &str,
-) -> Column<Message, StyleType> {
+) -> Column<'_, Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)

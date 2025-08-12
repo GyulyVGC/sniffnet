@@ -44,7 +44,7 @@ use iced::{Alignment, Font, Length, Padding};
 pub fn connection_details_page(
     sniffer: &Sniffer,
     key: AddressPortPair,
-) -> Container<Message, StyleType> {
+) -> Container<'_, Message, StyleType> {
     Container::new(page_content(sniffer, &key))
 }
 
