@@ -304,7 +304,7 @@ impl Sniffer {
                 }
                 self.filters.port_str = value;
             }
-            Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
+            Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
                 self.page_number = 1;
                 self.report_sort_type = sort;
@@ -868,7 +868,7 @@ impl Sniffer {
         let notifications = self.configs.settings.notifications;
         let sound = match notification {
             Notification::Data(DataNotification {
-                chart_type,
+                data_repr,
                 threshold,
                 byte_multiple,
                 sound,
@@ -880,7 +880,7 @@ impl Sniffer {
                     || temp_threshold.previous_threshold != previous_threshold
                 {
                     temp_threshold = DataNotification {
-                        chart_type,
+                        data_repr,
                         threshold,
                         byte_multiple,
                         sound,
@@ -910,7 +910,7 @@ impl Sniffer {
                     .settings
                     .notifications
                     .data_notification
-                    .chart_type = chart_type;
+                    .data_repr = data_repr;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -1200,13 +1200,13 @@ mod tests {
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(Configs::default());
 
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Bytes));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
+        assert_eq!(sniffer.traffic_chart.data_repr, ChartType::Bytes);
+        sniffer.update(Message::DataReprSelection(ChartType::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, ChartType::Packets);
+        sniffer.update(Message::DataReprSelection(ChartType::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, ChartType::Packets);
+        sniffer.update(Message::DataReprSelection(ChartType::Bytes));
+        assert_eq!(sniffer.traffic_chart.data_repr, ChartType::Bytes);
     }
 
     #[test]
@@ -1662,7 +1662,7 @@ mod tests {
         let mut sniffer = Sniffer::new(Configs::default());
 
         let bytes_notification_init = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: ChartType::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Pop,
@@ -1670,7 +1670,7 @@ mod tests {
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: ChartType::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Pop,
@@ -1678,7 +1678,7 @@ mod tests {
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: ChartType::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1686,7 +1686,7 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: ChartType::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -1806,7 +1806,7 @@ mod tests {
             VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    chart_type: ChartType::Packets,
+                    data_repr: ChartType::Packets,
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),

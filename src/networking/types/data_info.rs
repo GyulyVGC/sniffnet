@@ -1,6 +1,6 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use crate::chart::types::chart_type::ChartType;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use std::cmp::Ordering;
@@ -47,8 +47,8 @@ impl DataInfo {
         self.incoming_bytes + self.outgoing_bytes
     }
 
-    pub fn tot_data(&self, chart_type: ChartType) -> u128 {
-        match chart_type {
+    pub fn tot_data(&self, data_repr: DataRepr) -> u128 {
+        match data_repr {
             ChartType::Packets => self.tot_packets(),
             ChartType::Bytes => self.tot_bytes(),
         }
@@ -103,8 +103,8 @@ impl DataInfo {
         self.final_instant = rhs.final_instant;
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, chart_type: ChartType) -> Ordering {
-        match chart_type {
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        match data_repr {
             ChartType::Packets => match sort_type {
                 SortType::Ascending => self.tot_packets().cmp(&other.tot_packets()),
                 SortType::Descending => other.tot_packets().cmp(&self.tot_packets()),

@@ -9,7 +9,6 @@ use iced::advanced::graphics::image::image_rs::ImageFormat;
 use iced::window::settings::PlatformSpecific;
 use iced::{Font, Pixels, Settings, application, window};
 
-use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
 use configs::types::config_device::ConfigDevice;
@@ -18,7 +17,7 @@ use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
-use networking::types::byte_multiple::ByteMultiple;
+use networking::types::data_representation::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::protocol::Protocol;

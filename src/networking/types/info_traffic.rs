@@ -1,8 +1,8 @@
 use crate::Service;
-use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::utils::types::timestamp::Timestamp;
@@ -65,8 +65,8 @@ impl InfoTraffic {
         }
     }
 
-    pub fn get_thumbnail_data(&self, chart_type: ChartType) -> (u128, u128, u128, u128) {
-        if chart_type.eq(&ChartType::Bytes) {
+    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, u128, u128) {
+        if data_repr.eq(&ChartType::Bytes) {
             (
                 self.tot_data_info.incoming_bytes(),
                 self.tot_data_info.outgoing_bytes(),

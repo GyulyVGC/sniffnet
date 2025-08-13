@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ByteMultiple;
-use crate::chart::types::chart_type::ChartType;
+use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
@@ -34,7 +34,7 @@ pub enum Notification {
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 pub struct DataNotification {
     /// Data representation
-    pub chart_type: ChartType,
+    pub data_repr: DataRepr,
     /// Threshold of received + sent bytes; if exceeded a notification is emitted
     pub threshold: Option<u64>,
     /// B, KB, MB or GB
@@ -48,7 +48,7 @@ pub struct DataNotification {
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Pop,

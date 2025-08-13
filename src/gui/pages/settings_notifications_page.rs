@@ -3,7 +3,6 @@ use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -14,6 +13,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
     DataNotification, FavoriteNotification, Notification,
 };
@@ -144,7 +144,7 @@ fn get_data_notify<'a>(
             data_notification,
             language,
             font,
-            data_notification.chart_type,
+            data_notification.data_repr,
         );
         let input_row = input_group_bytes(data_notification, font, language);
         let sound_row = sound_buttons(Notification::Data(data_notification), font, language);
@@ -372,7 +372,7 @@ fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
     font: Font,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .width(Length::Shrink)
@@ -381,8 +381,8 @@ fn row_data_representation<'a>(
         .push(Space::with_width(45))
         .push(Text::new(format!("{}:", data_representation_translation(language))).font(font));
 
-    for option in ChartType::ALL {
-        let is_active = chart_type.eq(&option);
+    for option in DataRepr::ALL {
+        let is_active = data_repr.eq(&option);
         ret_val = ret_val.push(
             Button::new(
                 Text::new(option.get_label(language).to_owned())
@@ -400,7 +400,7 @@ fn row_data_representation<'a>(
             })
             .on_press(Message::UpdateNotificationSettings(
                 Notification::Data(DataNotification {
-                    chart_type: option,
+                    data_repr: option,
                     ..data_notification
                 }),
                 false,

@@ -19,6 +19,7 @@ use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
@@ -38,7 +39,7 @@ use crate::translations::translations_3::{service_translation, unsupported_link_
 use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
-use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{ConfigSettings, Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -245,16 +246,16 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.configs.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_host = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
+    let entries = get_host_entries(&sniffer.info_traffic, data_repr, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
@@ -263,7 +264,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         let host_bar = host_bar(
             host,
             data_info_host,
-            chart_type,
+            data_repr,
             first_entry_data_info,
             font,
             language,
@@ -322,20 +323,20 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.configs.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_service = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
+    let entries = get_service_entries(&sniffer.info_traffic, data_repr, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let content = service_bar(service, data_info, chart_type, first_entry_data_info, font);
+        let content = service_bar(service, data_info, data_repr, first_entry_data_info, font);
 
         scroll_service = scroll_service.push(
             button(content)
@@ -384,16 +385,13 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 pub fn host_bar<'a>(
     host: &Host,
     data_info_host: &DataInfoHost,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
-        chart_type,
-        &first_entry_data_info,
-        &data_info_host.data_info,
-    );
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -422,11 +420,10 @@ pub fn host_bar<'a>(
                         )
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info_host.data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
-                            })
+                            Text::new(
+                                data_repr
+                                    .formatted_string_from_data_info(&data_info_host.data_info),
+                            )
                             .font(font),
                         ),
                 )
@@ -437,12 +434,12 @@ pub fn host_bar<'a>(
 pub fn service_bar<'a>(
     service: &Service,
     data_info: &DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(chart_type, &first_entry_data_info, data_info);
+        get_bars_length(data_repr, &first_entry_data_info, data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -456,12 +453,8 @@ pub fn service_bar<'a>(
                         .push(Text::new(service.to_string()).font(font))
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info.tot_bytes())
-                            })
-                            .font(font),
+                            Text::new(data_repr.formatted_string_from_data_info(&data_info))
+                                .font(font),
                         ),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
@@ -477,7 +470,7 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_device = col_device(language, font, &sniffer.capture_source);
 
     let col_data_representation =
-        col_data_representation(language, font, sniffer.traffic_chart.chart_type);
+        col_data_representation(language, font, sniffer.traffic_chart.data_repr);
 
     let donut_row = donut_row(language, font, sniffer);
 
@@ -555,7 +548,7 @@ fn col_device<'a>(
 fn col_data_representation<'a>(
     language: Language,
     font: Font,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
@@ -564,7 +557,7 @@ fn col_data_representation<'a>(
     );
 
     for option in ChartType::ALL {
-        let is_active = chart_type.eq(&option);
+        let is_active = data_repr.eq(&option);
         ret_val = ret_val.push(
             Button::new(
                 Text::new(option.get_label(language).to_owned())
@@ -580,7 +573,7 @@ fn col_data_representation<'a>(
             } else {
                 ButtonType::BorderedRound
             })
-            .on_press(Message::ChartSelection(option)),
+            .on_press(Message::DataReprSelection(option)),
         );
     }
     ret_val
@@ -591,18 +584,18 @@ fn donut_row<'a>(
     font: Font,
     sniffer: &Sniffer,
 ) -> Container<'a, Message, StyleType> {
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let filters = &sniffer.filters;
 
     let (in_data, out_data, filtered_out, dropped) =
-        sniffer.info_traffic.get_thumbnail_data(chart_type);
+        sniffer.info_traffic.get_thumbnail_data(data_repr);
 
     let legend_entry_filtered = if filters.none_active() {
         None
     } else {
         Some(donut_legend_entry(
             filtered_out,
-            chart_type,
+            data_repr,
             RuleType::FilteredOut,
             filters,
             font,
@@ -614,7 +607,7 @@ fn donut_row<'a>(
         .spacing(5)
         .push(donut_legend_entry(
             in_data,
-            chart_type,
+            data_repr,
             RuleType::Incoming,
             filters,
             font,
@@ -622,7 +615,7 @@ fn donut_row<'a>(
         ))
         .push(donut_legend_entry(
             out_data,
-            chart_type,
+            data_repr,
             RuleType::Outgoing,
             filters,
             font,
@@ -631,7 +624,7 @@ fn donut_row<'a>(
         .push_maybe(legend_entry_filtered)
         .push(donut_legend_entry(
             dropped,
-            chart_type,
+            data_repr,
             RuleType::Dropped,
             filters,
             font,
@@ -642,7 +635,7 @@ fn donut_row<'a>(
         .align_y(Vertical::Center)
         .spacing(20)
         .push(donut_chart(
-            chart_type,
+            data_repr,
             in_data,
             out_data,
             filtered_out,
@@ -661,17 +654,13 @@ fn donut_row<'a>(
 
 fn donut_legend_entry<'a>(
     value: u128,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     rule_type: RuleType,
     filters: &Filters,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let value_text = if chart_type.eq(&ChartType::Bytes) {
-        ByteMultiple::formatted_string(value)
-    } else {
-        value.to_string()
-    };
+    let value_text = data_repr.formatted_string(value);
 
     let label = match rule_type {
         RuleType::Incoming => incoming_translation(language),
@@ -702,11 +691,11 @@ fn donut_legend_entry<'a>(
 const MIN_BARS_LENGTH: f32 = 4.0;
 
 pub fn get_bars_length(
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let (in_val, out_val, first_entry_tot_val) = match chart_type {
+    let (in_val, out_val, first_entry_tot_val) = match data_repr {
         ChartType::Packets => (
             data_info.incoming_packets(),
             data_info.outgoing_packets(),
@@ -881,7 +870,6 @@ fn sort_arrows<'a>(
 
 #[cfg(test)]
 mod tests {
-    use crate::chart::types::chart_type::ChartType;
     use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
 

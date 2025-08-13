@@ -310,7 +310,7 @@ mod tests {
             min_packets: -1000.0,
             max_packets: 21000.0,
             language: Language::default(),
-            chart_type: ChartType::Packets,
+            data_repr: ChartType::Packets,
             style: StyleType::default(),
             thumbnail: false,
             is_live_capture: true,

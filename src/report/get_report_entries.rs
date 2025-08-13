@@ -4,10 +4,11 @@ use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::sort_type::SortType;
-use crate::{ChartType, InfoTraffic, ReportSortType, Service, Sniffer};
+use crate::{InfoTraffic, ReportSortType, Service, Sniffer};
 
 /// Return the elements that satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints,
@@ -82,12 +83,12 @@ pub fn get_searched_entries(
 
 pub fn get_host_entries(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, chart_type));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -98,7 +99,7 @@ pub fn get_host_entries(
 
 pub fn get_service_entries(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {
     let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
@@ -107,7 +108,7 @@ pub fn get_service_entries(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, chart_type));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]

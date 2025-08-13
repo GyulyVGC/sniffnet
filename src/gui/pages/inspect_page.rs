@@ -11,7 +11,6 @@ use iced::widget::{
 };
 use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length};
@@ -23,8 +22,8 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::byte_multiple::ByteMultiple;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_representation::{ByteMultiple, DataRepr};
 use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -144,7 +143,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             .push(get_agglomerates_row(
                 font,
                 agglomerate,
-                sniffer.traffic_chart.chart_type,
+                sniffer.traffic_chart.data_repr,
             ))
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
@@ -550,12 +549,12 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 fn get_agglomerates_row<'a>(
     font: Font,
     tot: DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
     let tot_packets = tot.tot_packets();
     let tot_bytes = tot.tot_bytes();
 
-    let (in_length, out_length) = get_bars_length(chart_type, &tot, &tot);
+    let (in_length, out_length) = get_bars_length(data_repr, &tot, &tot);
     let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let bytes_col = Column::new()

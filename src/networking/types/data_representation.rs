@@ -1,8 +1,73 @@
-use std::fmt;
-
+use crate::networking::types::data_info::DataInfo;
+use crate::translations::translations::{
+    bytes_exceeded_translation, bytes_translation, packets_exceeded_translation,
+    packets_translation,
+};
+use crate::translations::translations_4::{bits_exceeded_translation, bits_translation};
+use crate::translations::types::language::Language;
 use serde::{Deserialize, Serialize};
 
-/// Enum representing the possible observed values of IP protocol version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum DataRepr {
+    Packets,
+    Bytes,
+    Bits,
+}
+
+impl DataRepr {
+    pub(crate) const ALL: [DataRepr; 3] = [DataRepr::Bits, DataRepr::Bytes, DataRepr::Packets];
+
+    pub fn get_label(&self, language: Language) -> &str {
+        match self {
+            DataRepr::Packets => packets_translation(language),
+            DataRepr::Bytes => bytes_translation(language),
+            DataRepr::Bits => bits_translation(language),
+        }
+    }
+
+    /// Returns a String representing a quantity of traffic (packets / bytes / bits) with the proper multiple if applicable
+    pub fn formatted_string(&self, amount: u128) -> String {
+        if self == &DataRepr::Packets {
+            return amount.to_string();
+        }
+
+        #[allow(clippy::cast_precision_loss)]
+        let mut n = amount as f32;
+
+        let byte_multiple = ByteMultiple::from_amount(amount);
+
+        #[allow(clippy::cast_precision_loss)]
+        let multiplier = byte_multiple.multiplier() as f32;
+        n /= multiplier;
+        if n > 999.0 && byte_multiple != ByteMultiple::PB {
+            // this allows representing e.g. 999_999 as 999 KB instead of 1000 KB
+            n = 999.0;
+        }
+        let precision = usize::from(byte_multiple != ByteMultiple::B && n <= 9.95);
+        format!("{n:.precision$} {}", byte_multiple.pretty_print(*self))
+            .trim()
+            .to_string()
+    }
+
+    pub fn formatted_string_from_data_info(&self, data_info: &DataInfo) -> String {
+        let amount = match self {
+            DataRepr::Packets => data_info.tot_packets(),
+            DataRepr::Bytes => data_info.tot_bytes(),
+            DataRepr::Bits => data_info.tot_bytes() * 8,
+        };
+        self.formatted_string(amount)
+    }
+
+    pub fn data_exceeded_translation(&self, language: Language) -> &str {
+        match self {
+            DataRepr::Packets => packets_exceeded_translation(language),
+            DataRepr::Bytes => bytes_exceeded_translation(language),
+            DataRepr::Bits => bits_exceeded_translation(language),
+        }
+    }
+}
+
+/// Represents a Byte or bit multiple for displaying values in a human-readable format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ByteMultiple {
     /// A Byte
@@ -19,12 +84,6 @@ pub enum ByteMultiple {
     PB,
 }
 
-impl fmt::Display for ByteMultiple {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{self:?}")
-    }
-}
-
 impl ByteMultiple {
     pub fn multiplier(self) -> u64 {
         match self {
@@ -37,7 +96,7 @@ impl ByteMultiple {
         }
     }
 
-    fn from_num_bytes(bytes: u128) -> Self {
+    fn from_amount(bytes: u128) -> Self {
         match bytes {
             x if (u128::MIN..u128::from(ByteMultiple::KB.multiplier())).contains(&x) => {
                 ByteMultiple::B
@@ -71,10 +130,14 @@ impl ByteMultiple {
     }
 
     pub fn get_char(self) -> String {
-        self.to_string()
-            .strip_suffix('B')
-            .unwrap_or_default()
-            .to_owned()
+        match self {
+            Self::B => String::new(),
+            Self::KB => "K".to_string(),
+            Self::MB => "M".to_string(),
+            Self::GB => "G".to_string(),
+            Self::TB => "T".to_string(),
+            Self::PB => "P".to_string(),
+        }
     }
 
     pub fn from_char(ch: char) -> Self {
@@ -88,22 +151,12 @@ impl ByteMultiple {
         }
     }
 
-    /// Returns a String representing a quantity of bytes with its proper multiple (B, KB, MB, GB, TB)
-    pub fn formatted_string(bytes: u128) -> String {
-        #[allow(clippy::cast_precision_loss)]
-        let mut n = bytes as f32;
-
-        let byte_multiple = ByteMultiple::from_num_bytes(bytes);
-
-        #[allow(clippy::cast_precision_loss)]
-        let multiplier = byte_multiple.multiplier() as f32;
-        n /= multiplier;
-        if n > 999.0 && byte_multiple != ByteMultiple::PB {
-            // this allows representing e.g. 999_999 as 999 KB instead of 1000 KB
-            n = 999.0;
+    pub fn pretty_print(&self, repr: DataRepr) -> String {
+        match repr {
+            DataRepr::Packets => String::new(),
+            DataRepr::Bytes => format!("{}B", self.get_char()),
+            DataRepr::Bits => format!("{}b", self.get_char()),
         }
-        let precision = usize::from(byte_multiple != ByteMultiple::B && n <= 9.95);
-        format!("{n:.precision$} {byte_multiple}")
     }
 }
 

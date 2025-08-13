@@ -15,12 +15,13 @@ use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_formatted_num_seconds, get_formatted_timestamp};
 use crate::utils::types::timestamp::Timestamp;
-use crate::{ByteMultiple, ChartType, Language, StyleType, location};
+use crate::{Language, StyleType, location};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
@@ -45,7 +46,7 @@ pub struct TrafficChart {
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
-    pub chart_type: ChartType,
+    pub data_repr: DataRepr,
     /// Style of the chart
     pub style: StyleType,
     /// Whether the chart is for the thumbnail page
@@ -71,7 +72,7 @@ impl TrafficChart {
             min_packets: 0.0,
             max_packets: 0.0,
             language,
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             style,
             thumbnail: false,
             is_live_capture: true,
@@ -115,8 +116,8 @@ impl TrafficChart {
             .into()
     }
 
-    pub fn change_kind(&mut self, kind: ChartType) {
-        self.chart_type = kind;
+    pub fn change_kind(&mut self, kind: DataRepr) {
+        self.data_repr = kind;
     }
 
     pub fn change_language(&mut self, language: Language) {
@@ -169,7 +170,7 @@ impl TrafficChart {
     }
 
     fn y_axis_range(&self) -> Range<f32> {
-        let (min, max) = match self.chart_type {
+        let (min, max) = match self.data_repr {
             ChartType::Packets => (self.min_packets, self.max_packets),
             ChartType::Bytes => (self.min_bytes, self.max_bytes),
         };
@@ -186,7 +187,7 @@ impl TrafficChart {
     }
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
-        match self.chart_type {
+        match self.data_repr {
             ChartType::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets.spline,
                 TrafficDirection::Outgoing => &self.out_packets.spline,
@@ -283,12 +284,10 @@ impl Chart<Message> for TrafficChart {
             .max_light_lines(0)
             .label_style(self.font(12.5))
             .y_labels(min(5, y_labels))
-            .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
-                &|packets| packets.abs().to_string()
-            } else {
+            .y_label_formatter(
                 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-                &|bytes| ByteMultiple::formatted_string(bytes.abs() as u128)
-            })
+                &|amount| self.data_repr.formatted_string(amount.abs() as u128),
+            )
             .x_labels(min(6, x_labels))
             .x_label_formatter(
                 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]

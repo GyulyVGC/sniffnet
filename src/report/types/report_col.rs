@@ -1,5 +1,5 @@
-use crate::ByteMultiple;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::search_parameters::FilterInputType;
 use crate::translations::translations::{
@@ -25,6 +25,7 @@ pub enum ReportCol {
     DstPort,
     Proto,
     Service,
+    Bits,
     Bytes,
     Packets,
 }
@@ -92,8 +93,9 @@ impl ReportCol {
             }
             ReportCol::Proto => key.protocol.to_string(),
             ReportCol::Service => val.service.to_string(),
-            ReportCol::Bytes => ByteMultiple::formatted_string(val.transmitted_bytes),
-            ReportCol::Packets => val.transmitted_packets.to_string(),
+            ReportCol::Bits => DataRepr::Bits.formatted_string(val.transmitted_bytes * 8),
+            ReportCol::Bytes => DataRepr::Bytes.formatted_string(val.transmitted_bytes),
+            ReportCol::Packets => DataRepr::Packets.formatted_string(val.transmitted_packets),
         }
     }
 
