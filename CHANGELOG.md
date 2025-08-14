@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Added _bits_ data representation ([#936](https://github.com/GyulyVGC/sniffnet/pull/936) — fixes [#506](https://github.com/GyulyVGC/sniffnet/issues/506))
 - An AppImage of Sniffnet is now available ([#859](https://github.com/GyulyVGC/sniffnet/pull/859) — fixes [#900](https://github.com/GyulyVGC/sniffnet/issues/900))
 - Added Dutch translation 🇳🇱 ([#854](https://github.com/GyulyVGC/sniffnet/pull/854))
 - The Windows Installer is now signed with a code signing certificate provided by the [SignPath Foundation](https://signpath.org/) ([#897](https://github.com/GyulyVGC/sniffnet/pull/897) — fixes [#894](https://github.com/GyulyVGC/sniffnet/issues/894))

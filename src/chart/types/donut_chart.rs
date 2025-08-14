@@ -1,7 +1,6 @@
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
-use crate::networking::types::byte_multiple::ByteMultiple;
+use crate::networking::types::data_representation::DataRepr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
@@ -10,7 +9,7 @@ use iced::{Font, Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
-    chart_type: ChartType,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
     filtered_out: u128,
@@ -21,7 +20,7 @@ pub struct DonutChart {
 
 impl DonutChart {
     fn new(
-        chart_type: ChartType,
+        data_repr: DataRepr,
         incoming: u128,
         outgoing: u128,
         filtered_out: u128,
@@ -30,7 +29,7 @@ impl DonutChart {
         thumbnail: bool,
     ) -> Self {
         Self {
-            chart_type,
+            data_repr,
             incoming,
             outgoing,
             filtered_out,
@@ -46,11 +45,7 @@ impl DonutChart {
 
     fn title(&self) -> String {
         let total = self.total();
-        if self.chart_type.eq(&ChartType::Bytes) {
-            ByteMultiple::formatted_string(total)
-        } else {
-            total.to_string()
-        }
+        self.data_repr.formatted_string(total)
     }
 
     fn angles(&self) -> [(Radians, Radians); 4] {
@@ -150,7 +145,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
 }
 
 pub fn donut_chart<Message, Theme: Catalog>(
-    chart_type: ChartType,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
     filtered_out: u128,
@@ -164,7 +159,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
         Length::Fixed(110.0)
     };
     iced::widget::canvas(DonutChart::new(
-        chart_type,
+        data_repr,
         incoming,
         outgoing,
         filtered_out,

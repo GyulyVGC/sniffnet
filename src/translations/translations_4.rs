@@ -146,7 +146,6 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
     }
 }
 
-#[allow(dead_code)]
 pub fn bits_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bits threshold exceeded",
@@ -161,14 +160,13 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
     }
 }
 
-#[allow(dead_code)]
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR => "Bits",
+        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR => "bits",
         Language::JA => "ビット",
         Language::ZH => "比特",
-        Language::UZ => "Bitlar",
-        _ => "Bits",
+        Language::UZ => "bitlar",
+        _ => "bits",
     }
 }
 

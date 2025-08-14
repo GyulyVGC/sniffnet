@@ -19,6 +19,7 @@ use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
@@ -38,7 +39,7 @@ use crate::translations::translations_3::{service_translation, unsupported_link_
 use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
 use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
-use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{ConfigSettings, Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -70,7 +71,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     } else {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
-        let filtered = sniffer.info_traffic.tot_data_info.tot_packets();
+        let filtered = sniffer
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::Packets);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -245,16 +249,16 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.configs.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_host = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
+    let entries = get_host_entries(&sniffer.info_traffic, data_repr, sniffer.host_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
@@ -263,7 +267,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         let host_bar = host_bar(
             host,
             data_info_host,
-            chart_type,
+            data_repr,
             first_entry_data_info,
             font,
             language,
@@ -322,20 +326,20 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.configs.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_service = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
+    let entries = get_service_entries(&sniffer.info_traffic, data_repr, sniffer.service_sort_type);
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let content = service_bar(service, data_info, chart_type, first_entry_data_info, font);
+        let content = service_bar(service, data_info, data_repr, first_entry_data_info, font);
 
         scroll_service = scroll_service.push(
             button(content)
@@ -384,16 +388,13 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 pub fn host_bar<'a>(
     host: &Host,
     data_info_host: &DataInfoHost,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
-        chart_type,
-        &first_entry_data_info,
-        &data_info_host.data_info,
-    );
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -422,11 +423,10 @@ pub fn host_bar<'a>(
                         )
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info_host.data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
-                            })
+                            Text::new(
+                                data_repr
+                                    .formatted_string(data_info_host.data_info.tot_data(data_repr)),
+                            )
                             .font(font),
                         ),
                 )
@@ -437,12 +437,12 @@ pub fn host_bar<'a>(
 pub fn service_bar<'a>(
     service: &Service,
     data_info: &DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(chart_type, &first_entry_data_info, data_info);
+        get_bars_length(data_repr, &first_entry_data_info, data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -456,12 +456,8 @@ pub fn service_bar<'a>(
                         .push(Text::new(service.to_string()).font(font))
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info.tot_bytes())
-                            })
-                            .font(font),
+                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
+                                .font(font),
                         ),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
@@ -477,7 +473,7 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let col_device = col_device(language, font, &sniffer.capture_source);
 
     let col_data_representation =
-        col_data_representation(language, font, sniffer.traffic_chart.chart_type);
+        col_data_representation(language, font, sniffer.traffic_chart.data_repr);
 
     let donut_row = donut_row(language, font, sniffer);
 
@@ -555,7 +551,7 @@ fn col_device<'a>(
 fn col_data_representation<'a>(
     language: Language,
     font: Font,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
@@ -563,26 +559,29 @@ fn col_data_representation<'a>(
             .font(font),
     );
 
-    for option in ChartType::ALL {
-        let is_active = chart_type.eq(&option);
-        ret_val = ret_val.push(
-            Button::new(
-                Text::new(option.get_label(language).to_owned())
-                    .width(Length::Fill)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
-            )
-            .width(Length::Fill)
-            .height(33)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::ChartSelection(option)),
-        );
-    }
+    let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
+        let is_active = data_repr.eq(&option);
+        Button::new(
+            Text::new(option.get_label(language).to_owned())
+                .width(Length::Fill)
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center)
+                .font(font),
+        )
+        .width(Length::Fill)
+        .height(33)
+        .class(if is_active {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::DataReprSelection(option))
+    });
+
+    ret_val = ret_val
+        .push(Row::new().spacing(5).push(bits).push(bytes))
+        .push(packets);
+
     ret_val
 }
 
@@ -591,18 +590,18 @@ fn donut_row<'a>(
     font: Font,
     sniffer: &Sniffer,
 ) -> Container<'a, Message, StyleType> {
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let filters = &sniffer.filters;
 
     let (in_data, out_data, filtered_out, dropped) =
-        sniffer.info_traffic.get_thumbnail_data(chart_type);
+        sniffer.info_traffic.get_thumbnail_data(data_repr);
 
     let legend_entry_filtered = if filters.none_active() {
         None
     } else {
         Some(donut_legend_entry(
             filtered_out,
-            chart_type,
+            data_repr,
             RuleType::FilteredOut,
             filters,
             font,
@@ -614,7 +613,7 @@ fn donut_row<'a>(
         .spacing(5)
         .push(donut_legend_entry(
             in_data,
-            chart_type,
+            data_repr,
             RuleType::Incoming,
             filters,
             font,
@@ -622,7 +621,7 @@ fn donut_row<'a>(
         ))
         .push(donut_legend_entry(
             out_data,
-            chart_type,
+            data_repr,
             RuleType::Outgoing,
             filters,
             font,
@@ -631,7 +630,7 @@ fn donut_row<'a>(
         .push_maybe(legend_entry_filtered)
         .push(donut_legend_entry(
             dropped,
-            chart_type,
+            data_repr,
             RuleType::Dropped,
             filters,
             font,
@@ -642,7 +641,7 @@ fn donut_row<'a>(
         .align_y(Vertical::Center)
         .spacing(20)
         .push(donut_chart(
-            chart_type,
+            data_repr,
             in_data,
             out_data,
             filtered_out,
@@ -661,17 +660,13 @@ fn donut_row<'a>(
 
 fn donut_legend_entry<'a>(
     value: u128,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     rule_type: RuleType,
     filters: &Filters,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let value_text = if chart_type.eq(&ChartType::Bytes) {
-        ByteMultiple::formatted_string(value)
-    } else {
-        value.to_string()
-    };
+    let value_text = data_repr.formatted_string(value);
 
     let label = match rule_type {
         RuleType::Incoming => incoming_translation(language),
@@ -702,22 +697,13 @@ fn donut_legend_entry<'a>(
 const MIN_BARS_LENGTH: f32 = 4.0;
 
 pub fn get_bars_length(
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let (in_val, out_val, first_entry_tot_val) = match chart_type {
-        ChartType::Packets => (
-            data_info.incoming_packets(),
-            data_info.outgoing_packets(),
-            first_entry.tot_packets(),
-        ),
-        ChartType::Bytes => (
-            data_info.incoming_bytes(),
-            data_info.outgoing_bytes(),
-            first_entry.tot_bytes(),
-        ),
-    };
+    let in_val = data_info.incoming_data(data_repr);
+    let out_val = data_info.outgoing_data(data_repr);
+    let first_entry_tot_val = first_entry.tot_data(data_repr);
 
     let tot_val = in_val + out_val;
     if tot_val == 0 {
@@ -881,20 +867,24 @@ fn sort_arrows<'a>(
 
 #[cfg(test)]
 mod tests {
-    use crate::chart::types::chart_type::ChartType;
     use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
 
     #[test]
     fn test_get_bars_length_simple() {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (25, 55)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            (83, 15)
+        );
+        assert_eq!(
+            get_bars_length(DataRepr::Bits, &first_entry, &data_info),
             (83, 15)
         );
     }
@@ -904,21 +894,21 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
 
         data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
     }
@@ -929,31 +919,31 @@ mod tests {
             DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
         let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
 
         data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
 
         data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
     }
@@ -964,93 +954,93 @@ mod tests {
 
         let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, 16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, 71)
         );
         data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (16, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (93, 0)
         );
 
         data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (7, 9)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (43, 50)
         );
         data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (9, 7)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (50, 43)
         );
 
         data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 14)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (7, 86)
         );
         data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (14, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (86, 7)
         );
 
         data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (11, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (71, 7)
         );
         data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 11,)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (7, 64)
         );
 
         data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (36, 36)
         );
 
         data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, 0)
         );
     }

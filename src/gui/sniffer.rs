@@ -46,6 +46,7 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
@@ -304,7 +305,7 @@ impl Sniffer {
                 }
                 self.filters.port_str = value;
             }
-            Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
+            Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
                 self.page_number = 1;
                 self.report_sort_type = sort;
@@ -686,7 +687,7 @@ impl Sniffer {
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic.refresh(&mut msg);
-        if self.info_traffic.tot_data_info.tot_packets() == 0 {
+        if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -868,7 +869,7 @@ impl Sniffer {
         let notifications = self.configs.settings.notifications;
         let sound = match notification {
             Notification::Data(DataNotification {
-                chart_type,
+                data_repr,
                 threshold,
                 byte_multiple,
                 sound,
@@ -880,7 +881,7 @@ impl Sniffer {
                     || temp_threshold.previous_threshold != previous_threshold
                 {
                     temp_threshold = DataNotification {
-                        chart_type,
+                        data_repr,
                         threshold,
                         byte_multiple,
                         sound,
@@ -910,7 +911,7 @@ impl Sniffer {
                     .settings
                     .notifications
                     .data_notification
-                    .chart_type = chart_type;
+                    .data_repr = data_repr;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -949,7 +950,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.info_traffic.tot_data_info.tot_packets() > 0 {
+                if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()
@@ -1113,6 +1114,7 @@ mod tests {
     use crate::gui::types::message::Message;
     use crate::gui::types::timing_events::TimingEvents;
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
@@ -1122,11 +1124,10 @@ mod tests {
         DataNotification, FavoriteNotification, Notification, Notifications,
     };
     use crate::notifications::types::sound::Sound;
-    use crate::report::types::report_col::ReportCol;
     use crate::report::types::sort_type::SortType;
     use crate::{
-        ByteMultiple, ChartType, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion,
-        Language, Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
+        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion, Language,
+        Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
     };
 
     // helpful to clean up files generated from tests
@@ -1200,13 +1201,15 @@ mod tests {
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(Configs::default());
 
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Bytes));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        sniffer.update(Message::DataReprSelection(DataRepr::Bytes));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bits);
     }
 
     #[test]
@@ -1215,53 +1218,31 @@ mod tests {
         let mut sniffer = Sniffer::new(Configs::default());
 
         let sort = ReportSortType {
-            byte_sort: SortType::Neutral,
-            packet_sort: SortType::Neutral,
+            data_sort: SortType::Neutral,
         };
 
         assert_eq!(sniffer.report_sort_type, sort);
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes),
-        ));
+        sniffer.update(Message::ReportSortSelection(sort.next_sort()));
         assert_eq!(
             sniffer.report_sort_type,
             ReportSortType {
-                byte_sort: SortType::Descending,
-                packet_sort: SortType::Neutral
+                data_sort: SortType::Descending,
+            }
+        );
+        sniffer.update(Message::ReportSortSelection(sort.next_sort().next_sort()));
+        assert_eq!(
+            sniffer.report_sort_type,
+            ReportSortType {
+                data_sort: SortType::Ascending,
             }
         );
         sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes),
+            sort.next_sort().next_sort().next_sort(),
         ));
         assert_eq!(
             sniffer.report_sort_type,
             ReportSortType {
-                byte_sort: SortType::Ascending,
-                packet_sort: SortType::Neutral
-            }
-        );
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Packets),
-        ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
-            }
-        );
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes),
-        ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Neutral
+                data_sort: SortType::Neutral,
             }
         );
     }
@@ -1662,7 +1643,7 @@ mod tests {
         let mut sniffer = Sniffer::new(Configs::default());
 
         let bytes_notification_init = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Pop,
@@ -1670,7 +1651,7 @@ mod tests {
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Pop,
@@ -1678,7 +1659,7 @@ mod tests {
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1686,7 +1667,7 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -1806,7 +1787,7 @@ mod tests {
             VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    chart_type: ChartType::Packets,
+                    data_repr: DataRepr::Packets,
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),

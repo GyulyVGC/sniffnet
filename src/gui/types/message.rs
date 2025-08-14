@@ -5,6 +5,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::notifications::types::notifications::Notification;
@@ -12,7 +13,7 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
+use crate::{IpVersion, Language, Protocol, ReportSortType, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -31,8 +32,8 @@ pub enum Message {
     AddressFilter(String),
     /// Changed port filter
     PortFilter(String),
-    /// Select chart type to be displayed
-    ChartSelection(ChartType),
+    /// Select data representation to use
+    DataReprSelection(DataRepr),
     /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(ReportSortType),
     /// Select host sort type to be displayed (overview page)

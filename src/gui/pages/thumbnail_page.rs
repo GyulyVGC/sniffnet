@@ -4,7 +4,6 @@ use std::net::IpAddr;
 use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
 use iced::{Alignment, Font, Length};
 
-use crate::chart::types::chart_type::ChartType;
 use crate::chart::types::donut_chart::donut_chart;
 use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
@@ -12,6 +11,7 @@ use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, ThumbnailHost};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -27,7 +27,10 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings { style, .. } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
-    let filtered = sniffer.info_traffic.tot_data_info.tot_packets();
+    let filtered = sniffer
+        .info_traffic
+        .tot_data_info
+        .tot_data(DataRepr::Packets);
 
     if filtered == 0 {
         return Container::new(
@@ -41,16 +44,16 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     }
 
     let info_traffic = &sniffer.info_traffic;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
-    let (in_data, out_data, filtered_out, dropped) = info_traffic.get_thumbnail_data(chart_type);
+    let (in_data, out_data, filtered_out, dropped) = info_traffic.get_thumbnail_data(data_repr);
 
     let charts = Row::new()
         .padding(5)
         .height(Length::Fill)
         .align_y(Alignment::Center)
         .push(donut_chart(
-            chart_type,
+            data_repr,
             in_data,
             out_data,
             filtered_out,
@@ -71,14 +74,14 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .align_y(Alignment::Start)
         .push(host_col(
             info_traffic,
-            chart_type,
+            data_repr,
             font,
             sniffer.host_sort_type,
         ))
         .push(Rule::vertical(10))
         .push(service_col(
             info_traffic,
-            chart_type,
+            data_repr,
             font,
             sniffer.service_sort_type,
         ));
@@ -93,7 +96,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
 fn host_col<'a>(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     font: Font,
     sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
@@ -101,7 +104,7 @@ fn host_col<'a>(
         .padding([0, 5])
         .spacing(3)
         .width(Length::FillPortion(2));
-    let hosts = get_host_entries(info_traffic, chart_type, sort_type);
+    let hosts = get_host_entries(info_traffic, data_repr, sort_type);
     let mut thumbnail_hosts = Vec::new();
 
     for (host, data_info_host) in &hosts {
@@ -136,12 +139,12 @@ fn host_col<'a>(
 
 fn service_col<'a>(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     font: Font,
     sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
-    let services = get_service_entries(info_traffic, chart_type, sort_type);
+    let services = get_service_entries(info_traffic, data_repr, sort_type);
     let n_entry = min(services.len(), MAX_ENTRIES);
     for (service, _) in services.get(..n_entry).unwrap_or_default() {
         service_col = service_col.push(

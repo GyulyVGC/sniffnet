@@ -1,8 +1,8 @@
 use crate::Service;
-use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::utils::types::timestamp::Timestamp;
@@ -65,27 +65,24 @@ impl InfoTraffic {
         }
     }
 
-    pub fn get_thumbnail_data(&self, chart_type: ChartType) -> (u128, u128, u128, u128) {
-        if chart_type.eq(&ChartType::Bytes) {
-            (
-                self.tot_data_info.incoming_bytes(),
-                self.tot_data_info.outgoing_bytes(),
-                self.all_bytes
-                    - self.tot_data_info.outgoing_bytes()
-                    - self.tot_data_info.incoming_bytes(),
+    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, u128, u128) {
+        let incoming = self.tot_data_info.incoming_data(data_repr);
+        let outgoing = self.tot_data_info.outgoing_data(data_repr);
+        let all = match data_repr {
+            DataRepr::Packets => self.all_packets,
+            DataRepr::Bytes => self.all_bytes,
+            DataRepr::Bits => self.all_bytes * 8,
+        };
+        let filtered = all - incoming - outgoing;
+        let dropped = match data_repr {
+            DataRepr::Packets => u128::from(self.dropped_packets),
+            DataRepr::Bytes | DataRepr::Bits => {
                 // assume that the dropped packets have the same size as the average packet
-                u128::from(self.dropped_packets) * self.all_bytes / self.all_packets,
-            )
-        } else {
-            (
-                self.tot_data_info.incoming_packets(),
-                self.tot_data_info.outgoing_packets(),
-                self.all_packets
-                    - self.tot_data_info.outgoing_packets()
-                    - self.tot_data_info.incoming_packets(),
-                u128::from(self.dropped_packets),
-            )
-        }
+                u128::from(self.dropped_packets) * all / self.all_packets
+            }
+        };
+
+        (incoming, outgoing, filtered, dropped)
     }
 
     pub fn take_but_leave_something(&mut self) -> Self {

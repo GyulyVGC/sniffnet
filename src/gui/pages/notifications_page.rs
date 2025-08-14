@@ -1,4 +1,3 @@
-use crate::chart::types::chart_type::ChartType;
 use crate::countries::country_utils::get_computer_tooltip;
 use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
@@ -13,6 +12,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::networking::types::traffic_type::TrafficType;
@@ -21,13 +21,12 @@ use crate::notifications::types::logged_notification::{
 };
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    bytes_exceeded_translation, clear_all_translation, favorite_transmitted_translation,
-    no_notifications_received_translation, no_notifications_set_translation,
-    only_last_30_translation, packets_exceeded_translation, per_second_translation,
+    clear_all_translation, favorite_transmitted_translation, no_notifications_received_translation,
+    no_notifications_set_translation, only_last_30_translation, per_second_translation,
     threshold_translation,
 };
 use crate::utils::types::icon::Icon;
-use crate::{ByteMultiple, ConfigSettings, Language, RunningPage, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
@@ -150,13 +149,9 @@ fn data_notification_log<'a>(
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
-    let chart_type = logged_notification.chart_type;
-    let data_string = if chart_type == ChartType::Bytes {
-        ByteMultiple::formatted_string(logged_notification.threshold.into())
-    } else {
-        logged_notification.threshold.to_string()
-    };
-    let icon = if chart_type == ChartType::Packets {
+    let data_repr = logged_notification.data_repr;
+    let data_string = data_repr.formatted_string(logged_notification.threshold.into());
+    let icon = if data_repr == DataRepr::Packets {
         Icon::PacketsThreshold
     } else {
         Icon::BytesThreshold
@@ -184,13 +179,9 @@ fn data_notification_log<'a>(
                         .push(Text::new(logged_notification.timestamp.clone()).font(font)),
                 )
                 .push(
-                    Text::new(if chart_type == ChartType::Bytes {
-                        bytes_exceeded_translation(language)
-                    } else {
-                        packets_exceeded_translation(language)
-                    })
-                    .class(TextType::Title)
-                    .font(font),
+                    Text::new(data_repr.data_exceeded_translation(language).to_string())
+                        .class(TextType::Title)
+                        .font(font),
                 )
                 .push(
                     Text::new(threshold_str)
@@ -222,14 +213,14 @@ fn data_notification_log<'a>(
 fn favorite_notification_log<'a>(
     logged_notification: &FavoriteTransmitted,
     first_entry_data_info: DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
     let host_bar = host_bar(
         &logged_notification.host,
         &logged_notification.data_info_host,
-        chart_type,
+        data_repr,
         first_entry_data_info,
         font,
         language,
@@ -294,7 +285,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .padding(Padding::ZERO.right(15))
@@ -306,7 +297,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
         .0
         .iter()
         .map(LoggedNotification::data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for logged_notification in &sniffer.logged_notifications.0 {
@@ -323,7 +314,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                 favorite_notification_log(
                     favorite_transmitted,
                     first_entry_data_info,
-                    chart_type,
+                    data_repr,
                     language,
                     font,
                 )
@@ -339,10 +330,10 @@ fn threshold_bar<'a>(
     language: Language,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
-    let chart_type = logged_notification.chart_type;
+    let data_repr = logged_notification.data_repr;
     let data_info = logged_notification.data_info;
     let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(chart_type, &first_entry_data_info, &data_info);
+        get_bars_length(data_repr, &first_entry_data_info, &data_info);
 
     Row::new()
         .align_y(Alignment::Center)
@@ -358,16 +349,9 @@ fn threshold_bar<'a>(
         .push(
             Column::new()
                 .spacing(1)
-                .push(
-                    Row::new().push(horizontal_space()).push(
-                        Text::new(if chart_type.eq(&ChartType::Packets) {
-                            data_info.tot_packets().to_string()
-                        } else {
-                            ByteMultiple::formatted_string(data_info.tot_bytes())
-                        })
-                        .font(font),
-                    ),
-                )
+                .push(Row::new().push(horizontal_space()).push(
+                    Text::new(data_repr.formatted_string(data_info.tot_data(data_repr))).font(font),
+                ))
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
 }
@@ -424,7 +408,7 @@ fn data_notification_extra<'a>(
         let host_bar = host_bar(
             host,
             data_info_host,
-            logged_notification.chart_type,
+            logged_notification.data_repr,
             first_data_info_host,
             font,
             language,
@@ -442,7 +426,7 @@ fn data_notification_extra<'a>(
         let service_bar = service_bar(
             service,
             data_info,
-            logged_notification.chart_type,
+            logged_notification.data_repr,
             first_data_info_service,
             font,
         );
