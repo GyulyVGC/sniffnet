@@ -628,6 +628,7 @@ fn button_clear_filter<'a>(
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::inspect_page::title_report_col_display;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::report::types::report_col::ReportCol;
     use crate::translations::types::language::Language;
 
@@ -636,78 +637,81 @@ mod tests {
         // check glyph len when adding new language...
         assert_eq!(Language::ALL.len(), 22);
         for report_col in ReportCol::ALL {
-            for language in Language::ALL {
-                let (title, title_small, tooltip_val) =
-                    title_report_col_display(&report_col, language);
-                let title_chars = title.chars().collect::<Vec<char>>();
-                let title_small_chars = title_small.chars().collect::<Vec<char>>();
-                let max_chars = report_col.get_max_chars(Some(language));
-                if tooltip_val.is_empty() {
-                    // all is entirely displayed
-                    assert!(title_chars.len() + title_small_chars.len() <= max_chars);
-                    assert_eq!(title, report_col.get_title(language));
-                    assert_eq!(title_small, report_col.get_title_direction_info(language));
-                } else {
-                    // tooltip is the full concatenation
-                    assert_eq!(
-                        tooltip_val,
-                        [
-                            report_col.get_title(language),
-                            report_col.get_title_direction_info(language)
-                        ]
-                        .concat()
-                    );
-                    if report_col.get_title_direction_info(language).len() == 0 {
-                        // displayed values have max len -1 (they include "…" that counts for 2 units)
-                        assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+            for data_repr in DataRepr::ALL {
+                for language in Language::ALL {
+                    let (title, title_small, tooltip_val) =
+                        title_report_col_display(&report_col, data_repr, language);
+                    let title_chars = title.chars().collect::<Vec<char>>();
+                    let title_small_chars = title_small.chars().collect::<Vec<char>>();
+                    let max_chars = report_col.get_max_chars(Some(language));
+                    if tooltip_val.is_empty() {
+                        // all is entirely displayed
+                        assert!(title_chars.len() + title_small_chars.len() <= max_chars);
+                        assert_eq!(title, report_col.get_title(language, data_repr));
+                        assert_eq!(title_small, report_col.get_title_direction_info(language));
                     } else {
-                        match title_chars.len() {
-                            x if x == max_chars - 4 || x == max_chars - 3 => {
-                                assert_eq!(title_small_chars.len(), 1)
-                            }
-                            _ => assert_eq!(
-                                title_chars.len() + title_small_chars.len(),
-                                max_chars - 1
-                            ),
-                        }
-                    }
-                    if title != report_col.get_title(language) {
-                        // first title part is not full, so second one is suspensions
-                        assert_eq!(title_small, "…");
-                        // check len wrt max
-                        assert!(title_chars.len() >= max_chars - 4);
-                        // first title part is max - 2 chars of full self
+                        // tooltip is the full concatenation
                         assert_eq!(
-                            title,
-                            report_col
-                                .get_title(language)
-                                .chars()
-                                .collect::<Vec<char>>()[..max_chars - 2]
-                                .iter()
-                                .collect::<String>()
+                            tooltip_val,
+                            [
+                                report_col.get_title(language, data_repr),
+                                report_col.get_title_direction_info(language)
+                            ]
+                            .concat()
                         );
-                    } else {
-                        // first part is untouched
-                        // second title part is max - title.len - 2 chars of full self, plus suspensions
-                        let mut second_part = [
-                            &report_col
-                                .get_title_direction_info(language)
-                                .chars()
-                                .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
-                                .iter()
-                                .collect::<String>(),
-                            "…",
-                        ]
-                        .concat();
-                        if second_part == String::from(" (…") || second_part == String::from(" …")
-                        {
-                            second_part = String::from("…");
+                        if report_col.get_title_direction_info(language).len() == 0 {
+                            // displayed values have max len -1 (they include "…" that counts for 2 units)
+                            assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+                        } else {
+                            match title_chars.len() {
+                                x if x == max_chars - 4 || x == max_chars - 3 => {
+                                    assert_eq!(title_small_chars.len(), 1)
+                                }
+                                _ => assert_eq!(
+                                    title_chars.len() + title_small_chars.len(),
+                                    max_chars - 1
+                                ),
+                            }
                         }
-                        assert_eq!(title_small, second_part);
-                        // second part never terminates with "(…"
-                        assert!(!title_small.ends_with("(…"));
-                        // second part never terminates with " …"
-                        assert!(!title_small.ends_with(" …"));
+                        if title != report_col.get_title(language, data_repr) {
+                            // first title part is not full, so second one is suspensions
+                            assert_eq!(title_small, "…");
+                            // check len wrt max
+                            assert!(title_chars.len() >= max_chars - 4);
+                            // first title part is max - 2 chars of full self
+                            assert_eq!(
+                                title,
+                                report_col
+                                    .get_title(language, data_repr)
+                                    .chars()
+                                    .collect::<Vec<char>>()[..max_chars - 2]
+                                    .iter()
+                                    .collect::<String>()
+                            );
+                        } else {
+                            // first part is untouched
+                            // second title part is max - title.len - 2 chars of full self, plus suspensions
+                            let mut second_part = [
+                                &report_col
+                                    .get_title_direction_info(language)
+                                    .chars()
+                                    .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
+                                    .iter()
+                                    .collect::<String>(),
+                                "…",
+                            ]
+                            .concat();
+                            if second_part == String::from(" (…")
+                                || second_part == String::from(" …")
+                            {
+                                second_part = String::from("…");
+                            }
+                            assert_eq!(title_small, second_part);
+                            // second part never terminates with "(…"
+                            assert!(!title_small.ends_with("(…"));
+                            // second part never terminates with " …"
+                            assert!(!title_small.ends_with(" …"));
+                        }
                     }
                 }
             }

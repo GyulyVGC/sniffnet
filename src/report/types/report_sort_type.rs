@@ -30,7 +30,6 @@ impl ReportSortType {
 
 #[cfg(test)]
 mod tests {
-    use crate::report::types::report_col::ReportCol;
     use crate::report::types::report_sort_type::ReportSortType;
     use crate::report::types::sort_type::SortType;
 
@@ -40,116 +39,39 @@ mod tests {
         assert_eq!(
             sort,
             ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Neutral
+                data_sort: SortType::Neutral,
             }
         );
 
-        sort = sort.next_sort(&ReportCol::Packets);
+        sort = sort.next_sort();
         assert_eq!(
             sort,
             ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
+                data_sort: SortType::Descending,
             }
         );
 
-        sort = sort.next_sort(&ReportCol::Packets);
+        sort = sort.next_sort();
         assert_eq!(
             sort,
             ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Ascending
+                data_sort: SortType::Ascending,
             }
         );
 
-        sort = sort.next_sort(&ReportCol::Packets);
+        sort = sort.next_sort();
         assert_eq!(
             sort,
             ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Neutral
+                data_sort: SortType::Neutral,
             }
         );
 
-        sort = sort.next_sort(&ReportCol::Packets);
+        sort = sort.next_sort();
         assert_eq!(
             sort,
             ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Descending,
-                packet_sort: SortType::Neutral
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Packets);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Descending,
-                packet_sort: SortType::Neutral
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Ascending,
-                packet_sort: SortType::Neutral
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Packets);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Descending,
-                packet_sort: SortType::Neutral
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Ascending,
-                packet_sort: SortType::Neutral
-            }
-        );
-
-        sort = sort.next_sort(&ReportCol::Bytes);
-        assert_eq!(
-            sort,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Neutral
+                data_sort: SortType::Descending,
             }
         );
     }

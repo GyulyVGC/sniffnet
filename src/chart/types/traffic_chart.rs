@@ -407,7 +407,7 @@ mod tests {
         let eps = 0.001;
 
         let pts = spline.len() * 10;
-        let samples = sample_spline(&spline);
+        let samples = sample_spline(&spline, 1.0);
         assert_eq!(samples.len(), pts);
 
         let delta = samples[1].0 - samples[0].0;

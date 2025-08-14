@@ -221,8 +221,9 @@ mod tests {
 
     use crate::chart::manage_chart_data::{ChartSeries, get_max, get_min};
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::utils::types::timestamp::Timestamp;
-    use crate::{ChartType, InfoTraffic, Language, StyleType, TrafficChart};
+    use crate::{InfoTraffic, Language, StyleType, TrafficChart};
 
     fn spline_from_vec(vec: Vec<(i32, i32)>) -> Spline<f32, f32> {
         Spline::from_vec(
@@ -318,7 +319,7 @@ mod tests {
             min_packets: -1000.0,
             max_packets: 21000.0,
             language: Language::default(),
-            data_repr: ChartType::Packets,
+            data_repr: DataRepr::Packets,
             style: StyleType::default(),
             thumbnail: false,
             is_live_capture: true,
