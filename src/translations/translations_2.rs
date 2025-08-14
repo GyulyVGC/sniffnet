@@ -674,7 +674,6 @@ pub fn showing_results_translation(
     }
 }
 
-#[allow(dead_code)]
 pub fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",

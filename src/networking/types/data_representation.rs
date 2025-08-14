@@ -141,7 +141,7 @@ impl ByteMultiple {
         }
     }
 
-    pub fn pretty_print(self, repr: DataRepr) -> String {
+    fn pretty_print(self, repr: DataRepr) -> String {
         match repr {
             DataRepr::Packets => String::new(),
             DataRepr::Bytes => format!("{}B", self.get_char()),
