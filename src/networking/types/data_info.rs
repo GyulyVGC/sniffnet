@@ -128,3 +128,115 @@ impl Default for DataInfo {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::types::traffic_direction::TrafficDirection;
+
+    #[test]
+    fn test_data_info() {
+        // in_packets: 0, out_packets: 0, in_bytes: 0, out_bytes: 0
+        let mut data_info_1 = DataInfo::new_with_first_packet(123, TrafficDirection::Incoming);
+        // 1, 0, 123, 0
+        data_info_1.add_packet(100, TrafficDirection::Incoming);
+        // 2, 0, 223, 0
+        data_info_1.add_packet(200, TrafficDirection::Outgoing);
+        // 2, 1, 223, 200
+        data_info_1.add_packets(11, 1200, TrafficDirection::Outgoing);
+        // 2, 12, 223, 1400
+        data_info_1.add_packets(5, 500, TrafficDirection::Incoming);
+        // 7, 12, 723, 1400
+
+        assert_eq!(data_info_1.incoming_packets, 7);
+        assert_eq!(data_info_1.outgoing_packets, 12);
+        assert_eq!(data_info_1.incoming_bytes, 723);
+        assert_eq!(data_info_1.outgoing_bytes, 1400);
+
+        assert_eq!(data_info_1.tot_data(DataRepr::Packets), 19);
+        assert_eq!(data_info_1.tot_data(DataRepr::Bytes), 2123);
+        assert_eq!(data_info_1.tot_data(DataRepr::Bits), 16984);
+
+        assert_eq!(data_info_1.incoming_data(DataRepr::Packets), 7);
+        assert_eq!(data_info_1.incoming_data(DataRepr::Bytes), 723);
+        assert_eq!(data_info_1.incoming_data(DataRepr::Bits), 5784);
+
+        assert_eq!(data_info_1.outgoing_data(DataRepr::Packets), 12);
+        assert_eq!(data_info_1.outgoing_data(DataRepr::Bytes), 1400);
+        assert_eq!(data_info_1.outgoing_data(DataRepr::Bits), 11200);
+
+        let mut data_info_2 = DataInfo::new_with_first_packet(100, TrafficDirection::Outgoing);
+        // 0, 1, 0, 100
+        data_info_2.add_packets(19, 300, TrafficDirection::Outgoing);
+        // 0, 20, 0, 400
+
+        assert_eq!(data_info_2.incoming_packets, 0);
+        assert_eq!(data_info_2.outgoing_packets, 20);
+        assert_eq!(data_info_2.incoming_bytes, 0);
+        assert_eq!(data_info_2.outgoing_bytes, 400);
+
+        assert_eq!(data_info_2.tot_data(DataRepr::Packets), 20);
+        assert_eq!(data_info_2.tot_data(DataRepr::Bytes), 400);
+        assert_eq!(data_info_2.tot_data(DataRepr::Bits), 3200);
+
+        assert_eq!(data_info_2.incoming_data(DataRepr::Packets), 0);
+        assert_eq!(data_info_2.incoming_data(DataRepr::Bytes), 0);
+        assert_eq!(data_info_2.incoming_data(DataRepr::Bits), 0);
+
+        assert_eq!(data_info_2.outgoing_data(DataRepr::Packets), 20);
+        assert_eq!(data_info_2.outgoing_data(DataRepr::Bytes), 400);
+        assert_eq!(data_info_2.outgoing_data(DataRepr::Bits), 3200);
+
+        // compare data_info_1 and data_info_2
+
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Packets),
+            Ordering::Less
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Packets),
+            Ordering::Greater
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Packets),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Bytes),
+            Ordering::Greater
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Bytes),
+            Ordering::Less
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Bytes),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Bits),
+            Ordering::Greater
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Bits),
+            Ordering::Less
+        );
+        assert_eq!(
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Bits),
+            Ordering::Greater
+        );
+
+        // refresh data_info_1 with data_info_2
+        assert!(data_info_1.final_instant < data_info_2.final_instant);
+        data_info_1.refresh(data_info_2);
+
+        // data_info_1 should now contain the sum of both data_info_1 and data_info_2
+        assert_eq!(data_info_1.incoming_packets, 7);
+        assert_eq!(data_info_1.outgoing_packets, 32);
+        assert_eq!(data_info_1.incoming_bytes, 723);
+        assert_eq!(data_info_1.outgoing_bytes, 1800);
+        assert_eq!(data_info_1.final_instant, data_info_2.final_instant);
+    }
+}
