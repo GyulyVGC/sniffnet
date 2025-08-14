@@ -71,7 +71,10 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     } else {
         // NO pcap error detected
         let observed = sniffer.info_traffic.all_packets;
-        let filtered = sniffer.info_traffic.tot_data_info.tot_packets();
+        let filtered = sniffer
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::Packets);
 
         match (observed, filtered) {
             (0, 0) => {
@@ -422,7 +425,7 @@ pub fn host_bar<'a>(
                         .push(
                             Text::new(
                                 data_repr
-                                    .formatted_string_from_data_info(&data_info_host.data_info),
+                                    .formatted_string(data_info_host.data_info.tot_data(data_repr)),
                             )
                             .font(font),
                         ),
@@ -453,7 +456,7 @@ pub fn service_bar<'a>(
                         .push(Text::new(service.to_string()).font(font))
                         .push(horizontal_space())
                         .push(
-                            Text::new(data_repr.formatted_string_from_data_info(&data_info))
+                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
                                 .font(font),
                         ),
                 )
@@ -556,26 +559,29 @@ fn col_data_representation<'a>(
             .font(font),
     );
 
-    for option in ChartType::ALL {
+    let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
         let is_active = data_repr.eq(&option);
-        ret_val = ret_val.push(
-            Button::new(
-                Text::new(option.get_label(language).to_owned())
-                    .width(Length::Fill)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
-            )
-            .width(Length::Fill)
-            .height(33)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::DataReprSelection(option)),
-        );
-    }
+        Button::new(
+            Text::new(option.get_label(language).to_owned())
+                .width(Length::Fill)
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center)
+                .font(font),
+        )
+        .width(Length::Fill)
+        .height(33)
+        .class(if is_active {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::DataReprSelection(option))
+    });
+
+    ret_val = ret_val
+        .push(Row::new().spacing(5).push(bits).push(bytes))
+        .push(packets);
+
     ret_val
 }
 
@@ -695,18 +701,9 @@ pub fn get_bars_length(
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let (in_val, out_val, first_entry_tot_val) = match data_repr {
-        ChartType::Packets => (
-            data_info.incoming_packets(),
-            data_info.outgoing_packets(),
-            first_entry.tot_packets(),
-        ),
-        ChartType::Bytes => (
-            data_info.incoming_bytes(),
-            data_info.outgoing_bytes(),
-            first_entry.tot_bytes(),
-        ),
-    };
+    let in_val = data_info.incoming_data(data_repr);
+    let out_val = data_info.outgoing_data(data_repr);
+    let first_entry_tot_val = first_entry.tot_data(data_repr);
 
     let tot_val = in_val + out_val;
     if tot_val == 0 {

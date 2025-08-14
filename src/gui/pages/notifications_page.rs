@@ -179,7 +179,7 @@ fn data_notification_log<'a>(
                         .push(Text::new(logged_notification.timestamp.clone()).font(font)),
                 )
                 .push(
-                    Text::new(data_repr.data_exceeded_translation(language))
+                    Text::new(data_repr.data_exceeded_translation(language).to_string())
                         .class(TextType::Title)
                         .font(font),
                 )
@@ -350,7 +350,7 @@ fn threshold_bar<'a>(
             Column::new()
                 .spacing(1)
                 .push(Row::new().push(horizontal_space()).push(
-                    Text::new(data_repr.formatted_string_from_data_info(&data_info)).font(font),
+                    Text::new(data_repr.formatted_string(data_info.tot_data(data_repr))).font(font),
                 ))
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )

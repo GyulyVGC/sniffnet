@@ -15,6 +15,7 @@ use crate::networking::manage_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
@@ -33,7 +34,7 @@ use crate::translations::translations_3::{
 };
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
-use crate::{ByteMultiple, ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
@@ -55,6 +56,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         color_gradient,
         ..
     } = sniffer.configs.settings;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -130,7 +132,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(key, &val, font, language);
+    let col_info = col_info(key, &val, data_repr, font, language);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 
@@ -172,6 +174,7 @@ fn page_header<'a>(
 fn col_info<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
+    data_repr: DataRepr,
     font: Font,
     language: Language,
 ) -> Column<'a, Message, StyleType> {
@@ -221,12 +224,13 @@ fn col_info<'a>(
                 incoming_translation(language).to_lowercase()
             }
         ),
-        &format!(
-            "{}\n   {} {}",
-            ByteMultiple::formatted_string(val.transmitted_bytes),
-            val.transmitted_packets,
-            packets_translation(language)
-        ),
+        &(data_repr.formatted_string(val.transmitted_data(data_repr))
+            + if data_repr == DataRepr::Packets {
+                format!(" {}", packets_translation(language))
+            } else {
+                String::new()
+            }
+            .as_ref()),
         font,
     ));
 

@@ -1,4 +1,3 @@
-use crate::networking::types::data_info::DataInfo;
 use crate::translations::translations::{
     bytes_exceeded_translation, bytes_translation, packets_exceeded_translation,
     packets_translation,
@@ -26,8 +25,8 @@ impl DataRepr {
     }
 
     /// Returns a String representing a quantity of traffic (packets / bytes / bits) with the proper multiple if applicable
-    pub fn formatted_string(&self, amount: u128) -> String {
-        if self == &DataRepr::Packets {
+    pub fn formatted_string(self, amount: u128) -> String {
+        if self == DataRepr::Packets {
             return amount.to_string();
         }
 
@@ -44,18 +43,9 @@ impl DataRepr {
             n = 999.0;
         }
         let precision = usize::from(byte_multiple != ByteMultiple::B && n <= 9.95);
-        format!("{n:.precision$} {}", byte_multiple.pretty_print(*self))
+        format!("{n:.precision$} {}", byte_multiple.pretty_print(self))
             .trim()
             .to_string()
-    }
-
-    pub fn formatted_string_from_data_info(&self, data_info: &DataInfo) -> String {
-        let amount = match self {
-            DataRepr::Packets => data_info.tot_packets(),
-            DataRepr::Bytes => data_info.tot_bytes(),
-            DataRepr::Bits => data_info.tot_bytes() * 8,
-        };
-        self.formatted_string(amount)
     }
 
     pub fn data_exceeded_translation(&self, language: Language) -> &str {
@@ -151,7 +141,7 @@ impl ByteMultiple {
         }
     }
 
-    pub fn pretty_print(&self, repr: DataRepr) -> String {
+    pub fn pretty_print(self, repr: DataRepr) -> String {
         match repr {
             DataRepr::Packets => String::new(),
             DataRepr::Bytes => format!("{}B", self.get_char()),

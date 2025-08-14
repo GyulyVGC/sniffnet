@@ -46,6 +46,7 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
@@ -686,7 +687,7 @@ impl Sniffer {
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic.refresh(&mut msg);
-        if self.info_traffic.tot_data_info.tot_packets() == 0 {
+        if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -949,7 +950,7 @@ impl Sniffer {
                 true,
             ) => {
                 // Running with no overlays
-                if self.info_traffic.tot_data_info.tot_packets() > 0 {
+                if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
                     // Running with no overlays and some packets filtered
                     self.running_page = if next {
                         self.running_page.next()

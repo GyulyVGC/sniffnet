@@ -171,8 +171,9 @@ impl TrafficChart {
 
     fn y_axis_range(&self) -> Range<f32> {
         let (min, max) = match self.data_repr {
-            ChartType::Packets => (self.min_packets, self.max_packets),
-            ChartType::Bytes => (self.min_bytes, self.max_bytes),
+            DataRepr::Packets => (self.min_packets, self.max_packets),
+            DataRepr::Bytes => (self.min_bytes, self.max_bytes),
+            DataRepr::Bits => (self.min_bytes * 8.0, self.max_bytes * 8.0),
         };
         let fs = max - min;
         let gap = fs * 0.05;
@@ -188,11 +189,11 @@ impl TrafficChart {
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
         match self.data_repr {
-            ChartType::Packets => match direction {
+            DataRepr::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets.spline,
                 TrafficDirection::Outgoing => &self.out_packets.spline,
             },
-            ChartType::Bytes => match direction {
+            DataRepr::Bytes | DataRepr::Bits => match direction {
                 TrafficDirection::Incoming => &self.in_bytes.spline,
                 TrafficDirection::Outgoing => &self.out_bytes.spline,
             },
@@ -220,11 +221,16 @@ impl TrafficChart {
         let color = self.series_color(direction);
         let alpha = self.style.get_extension().alpha_chart_badge;
         let spline = self.spline_to_plot(direction);
+        let multiplier = if self.data_repr == DataRepr::Bits {
+            8.0
+        } else {
+            1.0
+        };
 
         let data = match spline.keys() {
             // if we have only one tick, we need to add a second point to draw the area
-            [k] => vec![(0.0, k.value), (0.1, k.value)],
-            _ => sample_spline(spline),
+            [k] => vec![(0.0, k.value * multiplier), (0.1, k.value * multiplier)],
+            _ => sample_spline(spline, multiplier),
         };
 
         AreaSeries::new(data, 0.0, color.mix(alpha.into()))
@@ -330,7 +336,7 @@ impl Chart<Message> for TrafficChart {
     }
 }
 
-fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
+fn sample_spline(spline: &Spline<f32, f32>, multiplier: f32) -> Vec<(f32, f32)> {
     let pts = spline.len() * 10; // 10 samples per key
     let mut ret_val = Vec::new();
     let len = spline.len();
@@ -347,7 +353,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     for i in 0..pts {
         #[allow(clippy::cast_precision_loss)]
         let x = first_x + delta * i as f32;
-        let p = spline.clamped_sample(x).unwrap_or_default();
+        let p = spline.clamped_sample(x).unwrap_or_default() * multiplier;
         ret_val.push((x, p));
     }
     ret_val

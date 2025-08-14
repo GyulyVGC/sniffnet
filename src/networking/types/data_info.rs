@@ -23,35 +23,24 @@ pub struct DataInfo {
 }
 
 impl DataInfo {
-    pub fn incoming_packets(&self) -> u128 {
-        self.incoming_packets
+    pub fn incoming_data(&self, data_repr: DataRepr) -> u128 {
+        match data_repr {
+            DataRepr::Packets => self.incoming_packets,
+            DataRepr::Bytes => self.incoming_bytes,
+            DataRepr::Bits => self.incoming_bytes * 8,
+        }
     }
 
-    pub fn outgoing_packets(&self) -> u128 {
-        self.outgoing_packets
-    }
-
-    pub fn incoming_bytes(&self) -> u128 {
-        self.incoming_bytes
-    }
-
-    pub fn outgoing_bytes(&self) -> u128 {
-        self.outgoing_bytes
-    }
-
-    pub fn tot_packets(&self) -> u128 {
-        self.incoming_packets + self.outgoing_packets
-    }
-
-    pub fn tot_bytes(&self) -> u128 {
-        self.incoming_bytes + self.outgoing_bytes
+    pub fn outgoing_data(&self, data_repr: DataRepr) -> u128 {
+        match data_repr {
+            DataRepr::Packets => self.outgoing_packets,
+            DataRepr::Bytes => self.outgoing_bytes,
+            DataRepr::Bits => self.outgoing_bytes * 8,
+        }
     }
 
     pub fn tot_data(&self, data_repr: DataRepr) -> u128 {
-        match data_repr {
-            ChartType::Packets => self.tot_packets(),
-            ChartType::Bytes => self.tot_bytes(),
-        }
+        self.incoming_data(data_repr) + self.outgoing_data(data_repr)
     }
 
     pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {
@@ -104,17 +93,10 @@ impl DataInfo {
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
-        match data_repr {
-            ChartType::Packets => match sort_type {
-                SortType::Ascending => self.tot_packets().cmp(&other.tot_packets()),
-                SortType::Descending => other.tot_packets().cmp(&self.tot_packets()),
-                SortType::Neutral => other.final_instant.cmp(&self.final_instant),
-            },
-            ChartType::Bytes => match sort_type {
-                SortType::Ascending => self.tot_bytes().cmp(&other.tot_bytes()),
-                SortType::Descending => other.tot_bytes().cmp(&self.tot_bytes()),
-                SortType::Neutral => other.final_instant.cmp(&self.final_instant),
-            },
+        match sort_type {
+            SortType::Ascending => self.tot_data(data_repr).cmp(&other.tot_data(data_repr)),
+            SortType::Descending => other.tot_data(data_repr).cmp(&self.tot_data(data_repr)),
+            SortType::Neutral => other.final_instant.cmp(&self.final_instant),
         }
     }
 

@@ -1,12 +1,15 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
@@ -54,6 +57,26 @@ impl InfoAddressPortPair {
                 .entry(*arp_type)
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
+        }
+    }
+
+    pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
+        match data_repr {
+            DataRepr::Packets => self.transmitted_packets,
+            DataRepr::Bytes => self.transmitted_bytes,
+            DataRepr::Bits => self.transmitted_bytes * 8,
+        }
+    }
+
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        match sort_type {
+            SortType::Ascending => self
+                .transmitted_data(data_repr)
+                .cmp(&other.transmitted_data(data_repr)),
+            SortType::Descending => other
+                .transmitted_data(data_repr)
+                .cmp(&self.transmitted_data(data_repr)),
+            SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
         }
     }
 }

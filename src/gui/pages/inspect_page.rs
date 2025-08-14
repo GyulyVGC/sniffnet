@@ -23,7 +23,7 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::{ByteMultiple, DataRepr};
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -75,6 +75,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.search,
             font,
             sniffer.report_sort_type,
+            sniffer.traffic_chart.data_repr,
         ))
         .push(Space::with_height(4))
         .push(Rule::horizontal(5))
@@ -96,7 +97,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 .align_y(Alignment::Center)
                 .align_x(Alignment::Center)
                 .padding(Padding::new(7.0).top(10).bottom(3))
-                .width(1042)
+                .width(947)
                 .class(ContainerType::BorderedRound),
         );
 
@@ -107,6 +108,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
 
     let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
@@ -121,12 +123,17 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(&report_entry.0, &report_entry.1, font))
-                .padding(2)
-                .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    report_entry.0,
-                )))
-                .class(ButtonType::Neutral),
+            button(row_report_entry(
+                &report_entry.0,
+                &report_entry.1,
+                data_repr,
+                font,
+            ))
+            .padding(2)
+            .on_press(Message::ShowModal(MyModal::ConnectionDetails(
+                report_entry.0,
+            )))
+            .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -177,11 +184,12 @@ fn report_header_row(
     search_params: &SearchParameters,
     font: Font,
     sort_type: ReportSortType,
+    data_repr: DataRepr,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
-            title_report_col_display(&report_col, language);
+            title_report_col_display(&report_col, data_repr, language);
         let title_row = Row::new()
             .align_y(Alignment::End)
             .push(Text::new(title_display).font(font))
@@ -207,7 +215,9 @@ fn report_header_row(
             .width(report_col.get_width())
             .height(56)
             .push(title_tooltip);
-        if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
+        if report_col == ReportCol::Data {
+            col_header = col_header.push(sort_arrows(sort_type));
+        } else {
             col_header = col_header.push(
                 Container::new(filter_input(
                     report_col.get_filter_input_type(),
@@ -217,8 +227,6 @@ fn report_header_row(
                 .height(Length::Fill)
                 .align_y(Alignment::Center),
             );
-        } else {
-            col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
         ret_val = ret_val.push(col_header);
     }
@@ -227,10 +235,11 @@ fn report_header_row(
 
 fn title_report_col_display(
     report_col: &ReportCol,
+    data_repr: DataRepr,
     language: Language,
 ) -> (String, String, String) {
     let max_chars = report_col.get_max_chars(Some(language));
-    let title = report_col.get_title(language);
+    let title = report_col.get_title(language, data_repr);
     let title_direction_info = report_col.get_title_direction_info(language);
     let chars_title = title.chars().collect::<Vec<char>>();
     let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();
@@ -260,21 +269,16 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows<'a>(
-    active_sort_type: ReportSortType,
-    report_col: &ReportCol,
-) -> Container<'a, Message, StyleType> {
+fn sort_arrows<'a>(active_sort_type: ReportSortType) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
-                .icon(report_col)
+                .icon()
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
-        .class(active_sort_type.button_type(report_col))
-        .on_press(Message::ReportSortSelection(
-            active_sort_type.next_sort(report_col),
-        )),
+        .class(active_sort_type.button_type())
+        .on_press(Message::ReportSortSelection(active_sort_type.next_sort())),
     )
     .align_y(Alignment::Center)
     .height(Length::Fill)
@@ -283,6 +287,7 @@ fn sort_arrows<'a>(
 fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
+    data_repr: DataRepr,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
@@ -295,7 +300,7 @@ fn row_report_entry<'a>(
 
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars(None);
-        let col_value = report_col.get_value(key, val);
+        let col_value = report_col.get_value(key, val, data_repr);
         ret_val = ret_val.push(
             Container::new(
                 Text::new(if col_value.len() <= max_chars {
@@ -551,29 +556,20 @@ fn get_agglomerates_row<'a>(
     tot: DataInfo,
     data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
-    let tot_packets = tot.tot_packets();
-    let tot_bytes = tot.tot_bytes();
-
     let (in_length, out_length) = get_bars_length(data_repr, &tot, &tot);
     let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
-    let bytes_col = Column::new()
+    let data_col = Column::new()
         .align_x(Alignment::Center)
-        .width(ReportCol::Bytes.get_width())
-        .push(Text::new(ByteMultiple::formatted_string(tot_bytes)).font(font));
-
-    let packets_col = Column::new()
-        .align_x(Alignment::Center)
-        .width(ReportCol::Packets.get_width())
-        .push(Text::new(tot_packets.to_string()).font(font));
+        .width(ReportCol::Data.get_width())
+        .push(Text::new(data_repr.formatted_string(tot.tot_data(data_repr))).font(font));
 
     Row::new()
         .padding([0, 2])
         .height(40)
         .align_y(Alignment::Center)
         .push(bars)
-        .push(bytes_col)
-        .push(packets_col)
+        .push(data_col)
 }
 
 fn get_change_page_row<'a>(
