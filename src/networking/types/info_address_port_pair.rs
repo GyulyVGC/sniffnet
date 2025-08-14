@@ -80,3 +80,73 @@ impl InfoAddressPortPair {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::types::data_representation::DataRepr;
+    use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_info_address_port_pair_data() {
+        let pair1 = InfoAddressPortPair {
+            transmitted_bytes: 1000,
+            transmitted_packets: 10,
+            final_timestamp: Timestamp::new(8, 1300),
+            ..Default::default()
+        };
+        let pair2 = InfoAddressPortPair {
+            transmitted_bytes: 1100,
+            transmitted_packets: 8,
+            final_timestamp: Timestamp::new(15, 0),
+            ..Default::default()
+        };
+
+        assert_eq!(pair1.transmitted_data(DataRepr::Bytes), 1000);
+        assert_eq!(pair1.transmitted_data(DataRepr::Packets), 10);
+        assert_eq!(pair1.transmitted_data(DataRepr::Bits), 8000);
+
+        assert_eq!(pair2.transmitted_data(DataRepr::Bytes), 1100);
+        assert_eq!(pair2.transmitted_data(DataRepr::Packets), 8);
+        assert_eq!(pair2.transmitted_data(DataRepr::Bits), 8800);
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bytes),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Bytes),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bytes),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Packets),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Packets),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Packets),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bits),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Bits),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bits),
+            Ordering::Greater
+        );
+    }
+}
