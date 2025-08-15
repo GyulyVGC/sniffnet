@@ -4,15 +4,6 @@
 
 use std::fmt::Write;
 
-use iced::Length::FillPortion;
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
-    button, center,
-};
-use iced::{Alignment, Font, Length, Padding, alignment};
-
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -20,9 +11,9 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::translations::translations::{
@@ -33,10 +24,19 @@ use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
 };
 use crate::translations::translations_4::import_capture_translation;
+use crate::translations::translations_5::filter_traffic_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, StyleType};
+use iced::Length::FillPortion;
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{
+    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
+    button, center,
+};
+use iced::{Alignment, Font, Length, Padding, alignment};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -57,8 +57,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     );
     let col_capture_source = Column::new().push(col_adapter).push(col_import_pcap);
 
-    let col_bpf_filter = col_bpf_input(&sniffer.bpf_filter, font);
-
     let filters_pane = Column::new()
         .width(FillPortion(6))
         .padding(10)
@@ -69,7 +67,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 .class(TextType::Title)
                 .size(FONT_SIZE_TITLE),
         )
-        .push(col_bpf_filter)
+        .push(get_filters_group(&sniffer.filters, font, language))
         .push(Rule::horizontal(40))
         .push(get_export_pcap_group(
             &sniffer.capture_source,
@@ -93,27 +91,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     );
 
     Container::new(body).height(Length::Fill)
-}
-
-fn col_bpf_input(value: &str, font: Font) -> Column<'_, Message, StyleType> {
-    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
-        TextInput::new("Berkeley Packet Filter (BPF)", value)
-            .padding([3, 5])
-            .on_input(Message::BpfFilter)
-            .font(font)
-            .class(TextInputType::Standard),
-    );
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(7)
-        .push(
-            Text::new("Berkeley Packet Filter (BPF)")
-                .font(font)
-                .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(input_row)
 }
 
 fn button_start<'a>(
@@ -296,6 +273,50 @@ fn get_col_import_pcap<'a>(
                 .size(FONT_SIZE_TITLE),
         )
         .push(button)
+}
+
+fn get_filters_group<'a>(
+    filters: &Filters,
+    font: Font,
+    language: Language,
+) -> Container<'a, Message, StyleType> {
+    let expanded = filters.expanded();
+    let bpf = filters.bpf();
+
+    let caption = filter_traffic_translation(language);
+    let checkbox = Checkbox::new(caption, expanded)
+        .on_toggle(move |_| Message::ToggleFilters)
+        .size(18)
+        .font(font);
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if expanded {
+        let input = TextInput::new("", bpf)
+            .on_input(Message::BpfFilter)
+            .padding([2, 5])
+            .font(font);
+        let inner_col = Column::new()
+            .spacing(10)
+            .padding(Padding::ZERO.left(45))
+            .push(
+                Row::new()
+                    .align_y(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new("BPF:").font(font))
+                    .push(input),
+            );
+        ret_val = ret_val.push(inner_col);
+    }
+
+    Container::new(
+        Container::new(ret_val)
+            .padding(10)
+            .width(Length::Fill)
+            .class(ContainerType::BorderedRound),
+    )
+    .height(Length::Fill)
+    .align_y(Alignment::Start)
 }
 
 fn get_export_pcap_group<'a>(

@@ -1,10 +1,10 @@
-use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
-
+use crate::gui::types::filters::Filters;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_3::file_name_translation;
 use crate::translations::types::language::Language;
+use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
 
 pub enum CaptureContext {
     Live(Live),
@@ -14,13 +14,16 @@ pub enum CaptureContext {
 }
 
 impl CaptureContext {
-    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, bpf: &str) -> Self {
+    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
         let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
             Ok(c) => c,
             Err(e) => return Self::Error(e.to_string()),
         };
 
-        if let Err(e) = cap_type.set_bpf(bpf) {
+        // only apply BPF filter if it is active, and return an error if it fails to apply
+        if filters.is_some_filter_active()
+            && let Err(e) = cap_type.set_bpf(filters.bpf())
+        {
             return Self::Error(e.to_string());
         }
 

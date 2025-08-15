@@ -24,7 +24,9 @@ pub enum Message {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Select network device
     DeviceSelection(String),
-    /// Changed BPF filter
+    /// Toggle BPF filter checkbox
+    ToggleFilters,
+    /// Change BPF filter string
     BpfFilter(String),
     /// Select data representation to use
     DataReprSelection(DataRepr),

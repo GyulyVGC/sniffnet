@@ -38,6 +38,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
@@ -92,7 +93,7 @@ pub struct Sniffer {
     /// List of network devices
     pub my_devices: Vec<MyDevice>,
     /// BPF filter program to be applied to the capture
-    pub bpf_filter: String,
+    pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
@@ -155,7 +156,7 @@ impl Sniffer {
             newer_release_available: None,
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
-            bpf_filter: String::new(),
+            filters: Filters::default(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language),
@@ -276,8 +277,11 @@ impl Sniffer {
                 }
             }
             Message::DeviceSelection(name) => self.set_device(&name),
+            Message::ToggleFilters => {
+                self.filters.toggle();
+            }
             Message::BpfFilter(value) => {
-                self.bpf_filter = value;
+                self.filters.set_bpf(value);
             }
             Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
@@ -716,7 +720,7 @@ impl Sniffer {
         }
         let pcap_path = self.export_pcap.full_path();
         let capture_context =
-            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.bpf_filter);
+            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.filters);
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.running_page = RunningPage::Overview;
 
