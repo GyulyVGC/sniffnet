@@ -20,7 +20,6 @@ use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -37,7 +36,6 @@ use crate::translations::translations_2::{
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
 use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
-use crate::utils::formatted_strings::get_active_filters_string;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
@@ -83,7 +81,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             }
             (observed, 0) => {
                 //no packets have been filtered but some have been observed
-                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
+                body = body_no_observed(&sniffer.bpf_filter, observed, font, language, dots);
             }
             (_observed, _filtered) => {
                 //observed > filtered > 0 || observed = filtered > 0
@@ -175,7 +173,7 @@ fn body_no_packets<'a>(
 }
 
 fn body_no_observed<'a>(
-    filters: &Filters,
+    bpf: &'a str,
     observed: u128,
     font: Font,
     language: Language,
@@ -192,7 +190,7 @@ fn body_no_observed<'a>(
         .align_x(Alignment::Center)
         .push(vertical_space())
         .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(filters, language, font))
+        .push(get_active_filters_col(bpf, language, font))
         .push(Rule::horizontal(20))
         .push(tot_packets_text)
         .push(Text::new(dots.to_owned()).font(font).size(50))
@@ -464,7 +462,7 @@ pub fn service_bar<'a>(
         )
 }
 
-fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
@@ -585,25 +583,25 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn donut_row<'a>(
+fn donut_row(
     language: Language,
     font: Font,
     sniffer: &Sniffer,
-) -> Container<'a, Message, StyleType> {
+) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.traffic_chart.data_repr;
-    let filters = &sniffer.filters;
+    let bpf = &sniffer.bpf_filter;
 
     let (in_data, out_data, filtered_out, dropped) =
         sniffer.info_traffic.get_thumbnail_data(data_repr);
 
-    let legend_entry_filtered = if filters.none_active() {
+    let legend_entry_filtered = if bpf.trim().is_empty() {
         None
     } else {
         Some(donut_legend_entry(
             filtered_out,
             data_repr,
             RuleType::FilteredOut,
-            filters,
+            bpf,
             font,
             language,
         ))
@@ -615,7 +613,7 @@ fn donut_row<'a>(
             in_data,
             data_repr,
             RuleType::Incoming,
-            filters,
+            bpf,
             font,
             language,
         ))
@@ -623,7 +621,7 @@ fn donut_row<'a>(
             out_data,
             data_repr,
             RuleType::Outgoing,
-            filters,
+            bpf,
             font,
             language,
         ))
@@ -632,7 +630,7 @@ fn donut_row<'a>(
             dropped,
             data_repr,
             RuleType::Dropped,
-            filters,
+            bpf,
             font,
             language,
         ));
@@ -658,14 +656,14 @@ fn donut_row<'a>(
         .align_y(Vertical::Center)
 }
 
-fn donut_legend_entry<'a>(
+fn donut_legend_entry(
     value: u128,
     data_repr: DataRepr,
     rule_type: RuleType,
-    filters: &Filters,
+    bpf: &str,
     font: Font,
     language: Language,
-) -> Row<'a, Message, StyleType> {
+) -> Row<'_, Message, StyleType> {
     let value_text = data_repr.formatted_string(value);
 
     let label = match rule_type {
@@ -677,7 +675,7 @@ fn donut_legend_entry<'a>(
     };
 
     let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
-        Some(get_active_filters_tooltip(filters, language, font))
+        Some(get_active_filters_tooltip(bpf, language, font))
     } else {
         None
     };
@@ -794,40 +792,37 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_active_filters_col<'a>(
-    filters: &Filters,
+fn get_active_filters_col(
+    bpf: &str,
     language: Language,
     font: Font,
-) -> Column<'a, Message, StyleType> {
+) -> Column<'_, Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(active_filters_translation(language))
             .font(font)
             .class(TextType::Subtitle),
     );
 
-    if filters.none_active() {
+    if bpf.trim().is_empty() {
         ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
     } else {
-        let filters_string = get_active_filters_string(filters, language);
-        ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
+        ret_val = ret_val.push(Row::new().push(Text::new(bpf).font(font)));
     }
     ret_val
 }
 
-fn get_active_filters_tooltip<'a>(
-    filters: &Filters,
+fn get_active_filters_tooltip(
+    bpf: &str,
     language: Language,
     font: Font,
-) -> Tooltip<'a, Message, StyleType> {
-    let filters_string = get_active_filters_string(filters, language);
-
+) -> Tooltip<'_, Message, StyleType> {
     let mut ret_val = Column::new().push(
         Text::new(active_filters_translation(language))
             .font(font)
             .class(TextType::Subtitle),
     );
 
-    ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
+    ret_val = ret_val.push(Row::new().push(Text::new(bpf).font(font)));
 
     Tooltip::new(
         Container::new(

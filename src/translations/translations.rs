@@ -163,33 +163,33 @@ pub fn addresses_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn ip_version_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "IP version",
-        Language::IT => "Versione IP",
-        Language::FR => "Version IP",
-        Language::ES => "Versión IP",
-        Language::PL => "Wersja IP",
-        Language::DE => "IP Version",
-        Language::UK => "Версія IP",
-        Language::ZH => "目标IP协议版本",
-        Language::ZH_TW => "IP 版本",
-        Language::RO => "Versiune IP",
-        Language::KO => "IP 버전",
-        Language::TR => "IP versiyonu",
-        Language::RU => "Версия IP",
-        Language::PT => "Versão de IP",
-        Language::EL => "Έκδοση IP",
-        // Language::FA => "نسخهٔ IP",
-        Language::SV => "IP-version",
-        Language::FI => "IP-versio",
-        Language::JA => "IP バージョン",
-        Language::UZ => "IP versiyasi",
-        Language::VI => "Phiên bản IP",
-        Language::ID => "Versi IP",
-        Language::NL => "IP versie",
-    }
-}
+// pub fn ip_version_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "IP version",
+//         Language::IT => "Versione IP",
+//         Language::FR => "Version IP",
+//         Language::ES => "Versión IP",
+//         Language::PL => "Wersja IP",
+//         Language::DE => "IP Version",
+//         Language::UK => "Версія IP",
+//         Language::ZH => "目标IP协议版本",
+//         Language::ZH_TW => "IP 版本",
+//         Language::RO => "Versiune IP",
+//         Language::KO => "IP 버전",
+//         Language::TR => "IP versiyonu",
+//         Language::RU => "Версия IP",
+//         Language::PT => "Versão de IP",
+//         Language::EL => "Έκδοση IP",
+//         // Language::FA => "نسخهٔ IP",
+//         Language::SV => "IP-version",
+//         Language::FI => "IP-versio",
+//         Language::JA => "IP バージョン",
+//         Language::UZ => "IP versiyasi",
+//         Language::VI => "Phiên bản IP",
+//         Language::ID => "Versi IP",
+//         Language::NL => "IP versie",
+//     }
+// }
 
 // pub fn transport_protocol_translation(language: Language) -> &'static str {
 //     match language {

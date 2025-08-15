@@ -13,7 +13,7 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{IpVersion, Language, Protocol, ReportSortType, StyleType};
+use crate::{Language, ReportSortType, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -24,14 +24,8 @@ pub enum Message {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Select network device
     DeviceSelection(String),
-    /// Select IP filter
-    IpVersionSelection(IpVersion, bool),
-    /// Select protocol filter
-    ProtocolSelection(Protocol, bool),
-    /// Changed address filter
-    AddressFilter(String),
-    /// Changed port filter
-    PortFilter(String),
+    /// Changed BPF filter
+    BpfFilter(String),
     /// Select data representation to use
     DataReprSelection(DataRepr),
     /// Select report sort type to be displayed (inspect page)

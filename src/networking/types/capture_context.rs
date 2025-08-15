@@ -14,11 +14,16 @@ pub enum CaptureContext {
 }
 
 impl CaptureContext {
-    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>) -> Self {
-        let cap_type = match CaptureType::from_source(source, pcap_out_path) {
+    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, bpf: &str) -> Self {
+        let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
             Ok(c) => c,
             Err(e) => return Self::Error(e.to_string()),
         };
+
+        if let Err(e) = cap_type.set_bpf(bpf) {
+            return Self::Error(e.to_string());
+        }
+
         let cap = match cap_type {
             CaptureType::Live(cap) => cap,
             CaptureType::Offline(cap) => return Self::new_offline(cap),
@@ -129,6 +134,13 @@ impl CaptureType {
                 Ok(Self::Live(cap))
             }
             CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
+        }
+    }
+
+    fn set_bpf(&mut self, bpf: &str) -> Result<(), Error> {
+        match self {
+            Self::Live(cap) => cap.filter(bpf, true),
+            Self::Offline(cap) => cap.filter(bpf, true),
         }
     }
 }

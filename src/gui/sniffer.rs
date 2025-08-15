@@ -47,13 +47,10 @@ use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotification;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -94,8 +91,8 @@ pub struct Sniffer {
     pub capture_source: CaptureSource,
     /// List of network devices
     pub my_devices: Vec<MyDevice>,
-    /// Active filters on the observed traffic
-    pub filters: Filters,
+    /// BPF filter program to be applied to the capture
+    pub bpf_filter: String,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
@@ -158,7 +155,7 @@ impl Sniffer {
             newer_release_available: None,
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
-            filters: Filters::default(),
+            bpf_filter: String::new(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language),
@@ -279,31 +276,8 @@ impl Sniffer {
                 }
             }
             Message::DeviceSelection(name) => self.set_device(&name),
-            Message::IpVersionSelection(version, insert) => {
-                if insert {
-                    self.filters.ip_versions.insert(version);
-                } else {
-                    self.filters.ip_versions.remove(&version);
-                }
-            }
-            Message::ProtocolSelection(protocol, insert) => {
-                if insert {
-                    self.filters.protocols.insert(protocol);
-                } else {
-                    self.filters.protocols.remove(&protocol);
-                }
-            }
-            Message::AddressFilter(value) => {
-                if let Some(collection) = AddressCollection::new(&value) {
-                    self.filters.address_collection = collection;
-                }
-                self.filters.address_str = value;
-            }
-            Message::PortFilter(value) => {
-                if let Some(collection) = PortCollection::new(&value) {
-                    self.filters.port_collection = collection;
-                }
-                self.filters.port_str = value;
+            Message::BpfFilter(value) => {
+                self.bpf_filter = value;
             }
             Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
@@ -741,14 +715,14 @@ impl Sniffer {
             self.set_device(current_device_name);
         }
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
+        let capture_context =
+            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.bpf_filter);
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.running_page = RunningPage::Overview;
 
         if capture_context.error().is_none() {
             // no pcap error
             let curr_cap_id = self.current_capture_rx.0;
-            let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
@@ -762,7 +736,6 @@ impl Sniffer {
                     parse_packets(
                         curr_cap_id,
                         capture_source,
-                        &filters,
                         &mmdb_readers,
                         capture_context,
                         &tx,
@@ -971,9 +944,7 @@ impl Sniffer {
             && self.settings_page.is_none()
             && self.modal.is_none()
         {
-            if self.filters.are_valid() {
-                return Task::done(Message::Start);
-            }
+            return Task::done(Message::Start);
         } else if self.modal.eq(&Some(MyModal::Reset)) {
             return Task::done(Message::Reset);
         } else if self.modal.eq(&Some(MyModal::Quit)) {

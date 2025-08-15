@@ -15,10 +15,6 @@ impl fmt::Display for IpVersion {
     }
 }
 
-impl IpVersion {
-    pub(crate) const ALL: [IpVersion; 2] = [IpVersion::IPv4, IpVersion::IPv6];
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
