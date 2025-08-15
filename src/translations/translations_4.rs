@@ -38,20 +38,20 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 }
 
 // refers to bytes or packets excluded because of the filters
-pub fn excluded_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Excluded",
-        Language::IT => "Esclusi",
-        Language::JA => "除外",
-        Language::ZH => "已被过滤",
-        Language::UZ => "Chiqarib tashlangan",
-        Language::ZH_TW => "已排除",
-        Language::FR => "Exclus",
-        Language::NL => "Uitgesloten",
-        Language::DE => "Herausgefiltert",
-        _ => "Excluded",
-    }
-}
+// pub fn excluded_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Excluded",
+//         Language::IT => "Esclusi",
+//         Language::JA => "除外",
+//         Language::ZH => "已被过滤",
+//         Language::UZ => "Chiqarib tashlangan",
+//         Language::ZH_TW => "已排除",
+//         Language::FR => "Exclus",
+//         Language::NL => "Uitgesloten",
+//         Language::DE => "Herausgefiltert",
+//         _ => "Excluded",
+//     }
+// }
 
 pub fn import_capture_translation(language: Language) -> &'static str {
     match language {

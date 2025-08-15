@@ -46,7 +46,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let info_traffic = &sniffer.info_traffic;
     let data_repr = sniffer.traffic_chart.data_repr;
 
-    let (in_data, out_data, filtered_out, dropped) = info_traffic.get_thumbnail_data(data_repr);
+    let (in_data, out_data, dropped) = info_traffic.get_thumbnail_data(data_repr);
 
     let charts = Row::new()
         .padding(5)
@@ -56,7 +56,6 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             data_repr,
             in_data,
             out_data,
-            filtered_out,
             dropped,
             font,
             sniffer.thumbnail,

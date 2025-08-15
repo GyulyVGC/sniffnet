@@ -13,7 +13,6 @@ pub enum RuleType {
     PaletteColor(Color, u16),
     Incoming,
     Outgoing,
-    FilteredOut,
     Dropped,
 }
 
@@ -27,7 +26,6 @@ impl RuleType {
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
                 RuleType::Dropped => ext.red_alert_color,
-                RuleType::FilteredOut => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color

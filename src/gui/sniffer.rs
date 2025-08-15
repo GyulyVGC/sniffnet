@@ -967,7 +967,8 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
-            return if self.info_traffic.all_packets == 0 && self.settings_page.is_none() {
+            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+            return if tot_packets == 0 && self.settings_page.is_none() {
                 Task::done(Message::Reset)
             } else {
                 Task::done(Message::ShowModal(MyModal::Reset))
@@ -977,7 +978,8 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init) || self.info_traffic.all_packets == 0 {
+        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+        if self.running_page.eq(&RunningPage::Init) || tot_packets == 0 {
             Task::done(Message::Quit)
         } else if self.thumbnail {
             // TODO: uncomment once issue #653 is fixed

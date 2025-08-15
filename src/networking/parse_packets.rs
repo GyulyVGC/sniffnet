@@ -268,9 +268,6 @@ pub fn parse_packets(
                             DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
                         });
 
-                    //increment number of sniffed packets and bytes
-                    info_traffic_msg.all_packets += 1;
-                    info_traffic_msg.all_bytes += exchanged_bytes;
                     // update dropped packets number
                     if let Ok(stats) = cap.stats() {
                         info_traffic_msg.dropped_packets = stats.dropped;
