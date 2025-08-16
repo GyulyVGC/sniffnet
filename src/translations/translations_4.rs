@@ -53,17 +53,17 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn import_capture_translation(language: Language) -> &'static str {
+pub fn capture_file_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Import capture file",
-        Language::IT => "Importa file di cattura",
-        Language::FR => "Importer un fichier de capture",
-        Language::JA => "キャプチャファイルをインポート",
-        Language::ZH => "导入捕获文件",
-        Language::NL => "Importeer capture bestand",
-        Language::DE => "Aufzeichnungsdatei importieren",
-        Language::UZ => "Tahlil faylini import qilish",
-        _ => "Import capture file",
+        Language::EN => "Capture file",
+        Language::IT => "File di cattura",
+        Language::FR => "Fichier de capture",
+        Language::JA => "キャプチャファイル",
+        Language::ZH => "捕获文件",
+        Language::NL => "Capture bestand",
+        Language::DE => "Aufzeichnungsdatei",
+        Language::UZ => "Tahlil faylini",
+        _ => "Capture file",
     }
 }
 

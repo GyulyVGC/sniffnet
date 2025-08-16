@@ -5,33 +5,33 @@ use iced::widget::Text;
 use crate::StyleType;
 use crate::translations::types::language::Language;
 
-pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
-    Text::new(match language {
-        Language::EN => "Select network adapter to inspect",
-        Language::IT => "Seleziona la scheda di rete da ispezionare",
-        Language::FR => "Sélectionnez une carte réseau à inspecter",
-        Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
-        Language::PL => "Wybierz adapter sieciowy do inspekcji",
-        Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
-        Language::UK => "Виберіть мережевий адаптер для перевірки",
-        Language::ZH => "选择需要监控的网络适配器",
-        Language::ZH_TW => "選取要檢視的網路介面卡",
-        Language::RO => "Selectați adaptor de rețea pentru a inspecta",
-        Language::KO => "검사할 네트워크 어댑터 선택",
-        Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
-        Language::RU => "Выберите сетевой адаптер для инспекции",
-        Language::PT => "Selecione o adaptador de rede a inspecionar",
-        Language::EL => "Επίλεξε τον προσαρμογέα δικτύου για επιθεώρηση",
-        // Language::FA => "مبدل شبکه را برای بازرسی انتخاب کنید",
-        Language::SV => "Välj nätverksadapter att inspektera",
-        Language::FI => "Valitse tarkasteltava verkkosovitin",
-        Language::JA => "使用するネットワーク アダプターを選択してください",
-        Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
-        Language::VI => "Hãy chọn network adapter để quan sát",
-        Language::ID => "Pilih Adapter Jaringan yang ingin dicek",
-        Language::NL => "Selecteer netwerkadapter om te inspecteren",
-    })
-}
+// pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
+//     Text::new(match language {
+//         Language::EN => "Select network adapter to inspect",
+//         Language::IT => "Seleziona la scheda di rete da ispezionare",
+//         Language::FR => "Sélectionnez une carte réseau à inspecter",
+//         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
+//         Language::PL => "Wybierz adapter sieciowy do inspekcji",
+//         Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
+//         Language::UK => "Виберіть мережевий адаптер для перевірки",
+//         Language::ZH => "选择需要监控的网络适配器",
+//         Language::ZH_TW => "選取要檢視的網路介面卡",
+//         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
+//         Language::KO => "검사할 네트워크 어댑터 선택",
+//         Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
+//         Language::RU => "Выберите сетевой адаптер для инспекции",
+//         Language::PT => "Selecione o adaptador de rede a inspecionar",
+//         Language::EL => "Επίλεξε τον προσαρμογέα δικτύου για επιθεώρηση",
+//         // Language::FA => "مبدل شبکه را برای بازرسی انتخاب کنید",
+//         Language::SV => "Välj nätverksadapter att inspektera",
+//         Language::FI => "Valitse tarkasteltava verkkosovitin",
+//         Language::JA => "使用するネットワーク アダプターを選択してください",
+//         Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
+//         Language::VI => "Hãy chọn network adapter để quan sát",
+//         Language::ID => "Pilih Adapter Jaringan yang ingin dicek",
+//         Language::NL => "Selecteer netwerkadapter om te inspecteren",
+//     })
+// }
 
 // pub fn application_protocol_translation(language: Language) -> &'static str {
 //     match language {

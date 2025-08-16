@@ -46,7 +46,9 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+use crate::networking::types::capture_context::{
+    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+};
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
@@ -88,6 +90,8 @@ pub struct Sniffer {
     pub logged_notifications: (VecDeque<LoggedNotification>, usize),
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
+    /// Capture source picklist, to select the source of the capture
+    pub capture_source_picklist: CaptureSourcePicklist,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// List of network devices
@@ -154,6 +158,7 @@ impl Sniffer {
             favorite_hosts: HashSet::new(),
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
+            capture_source_picklist: CaptureSourcePicklist::default(),
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
             filters: Filters::default(),
@@ -277,6 +282,16 @@ impl Sniffer {
                 }
             }
             Message::DeviceSelection(name) => self.set_device(&name),
+            Message::SetCaptureSource(cs_pick) => {
+                self.capture_source_picklist = cs_pick;
+                return if cs_pick == CaptureSourcePicklist::File {
+                    Task::done(Message::SetPcapImport(self.import_pcap_path.clone()))
+                } else {
+                    Task::done(Message::DeviceSelection(
+                        self.configs.device.device_name.clone(),
+                    ))
+                };
+            }
             Message::ToggleFilters => {
                 self.filters.toggle();
             }
@@ -289,7 +304,11 @@ impl Sniffer {
                 self.report_sort_type = sort;
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
-            Message::Start => return self.start(),
+            Message::Start => {
+                if self.is_capture_source_consistent() {
+                    return self.start();
+                }
+            }
             Message::Reset => self.reset(),
             Message::Style(style) => {
                 self.configs.settings.style = style;
@@ -680,14 +699,6 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
-        if let CaptureSource::Device(device) = &self.capture_source {
-            let current_device_name = device.get_name().clone();
-            // update ConfigDevice stored if different from last sniffed device
-            let last_device_name_sniffed = self.configs.device.device_name.clone();
-            if current_device_name.ne(&last_device_name_sniffed) {
-                self.configs.device.device_name = current_device_name;
-            }
-        }
         // update host dropdowns
         self.host_data_states.update_states(&self.search);
     }
@@ -792,6 +803,7 @@ impl Sniffer {
     fn set_device(&mut self, name: &str) {
         for my_dev in &self.my_devices {
             if my_dev.get_name().eq(&name) {
+                self.configs.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
@@ -1068,6 +1080,13 @@ impl Sniffer {
         .log_err(location!());
 
         Task::run(rx, |()| Message::Quit)
+    }
+
+    pub fn is_capture_source_consistent(&self) -> bool {
+        self.capture_source_picklist == CaptureSourcePicklist::Device
+            && matches!(self.capture_source, CaptureSource::Device(_))
+            || self.capture_source_picklist == CaptureSourcePicklist::File
+                && matches!(self.capture_source, CaptureSource::File(_))
     }
 }
 

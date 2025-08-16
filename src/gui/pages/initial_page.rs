@@ -15,14 +15,14 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
-use crate::networking::types::capture_context::CaptureSource;
+use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::translations::translations::{
-    address_translation, addresses_translation, choose_adapters_translation, start_translation,
+    address_translation, addresses_translation, network_adapter_translation, start_translation,
 };
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
 };
-use crate::translations::translations_4::import_capture_translation;
+use crate::translations::translations_4::capture_file_translation;
 use crate::translations::translations_5::{filter_traffic_translation, traffic_source_translation};
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
@@ -30,10 +30,9 @@ use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, StyleType};
 use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
 use iced::widget::{
-    Button, Checkbox, Column, Container, PickList, Row, Rule, Scrollable, Space, Text, TextInput,
-    Tooltip, button, center, vertical_space,
+    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Space, Text, TextInput, button,
+    center, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding, alignment};
 
@@ -52,21 +51,27 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let col_checkboxes = Column::new()
         .spacing(10)
-        .push(Space::with_height(82))
+        .push(Space::with_height(66))
         .push(get_filters_group(&sniffer.filters, font, language))
         .push_maybe(get_export_pcap_group_maybe(
-            &sniffer.capture_source,
+            sniffer.capture_source_picklist,
             &sniffer.export_pcap,
             language,
             font,
         ));
 
+    let is_capture_source_consistent = sniffer.is_capture_source_consistent();
     let right_col = Column::new()
         .width(FillPortion(1))
         .padding(10)
         .push(col_checkboxes)
         .push(vertical_space())
-        .push(button_start(font_headers, language, color_gradient))
+        .push(button_start(
+            font_headers,
+            language,
+            color_gradient,
+            is_capture_source_consistent,
+        ))
         .push(vertical_space());
 
     let body = Column::new().push(Space::with_height(5)).push(
@@ -83,6 +88,7 @@ fn button_start<'a>(
     font_headers: Font,
     language: Language,
     color_gradient: GradientType,
+    is_capture_source_consistent: bool,
 ) -> Button<'a, Message, StyleType> {
     button(
         Text::new(start_translation(language))
@@ -95,7 +101,11 @@ fn button_start<'a>(
     .padding(15)
     .width(Length::Fill)
     .class(ButtonType::Gradient(color_gradient))
-    .on_press(Message::Start)
+    .on_press_maybe(if is_capture_source_consistent {
+        Some(Message::Start)
+    } else {
+        None
+    })
 }
 
 fn get_col_data_source(
@@ -103,33 +113,51 @@ fn get_col_data_source(
     font: Font,
     language: Language,
 ) -> Column<'_, Message, StyleType> {
+    let current_option = if sniffer.capture_source_picklist == CaptureSourcePicklist::Device {
+        network_adapter_translation(language)
+    } else {
+        capture_file_translation(language)
+    };
     let picklist = PickList::new(
-        &Language::ALL[..],
-        Some(language),
-        Message::LanguageSelection,
+        [
+            network_adapter_translation(language),
+            capture_file_translation(language),
+        ],
+        Some(current_option),
+        move |option| {
+            if option == network_adapter_translation(language) {
+                Message::SetCaptureSource(CaptureSourcePicklist::Device)
+            } else {
+                Message::SetCaptureSource(CaptureSourcePicklist::File)
+            }
+        },
     )
     .padding([2, 7])
     .font(font);
 
     let mut col = Column::new()
         .align_x(Alignment::Center)
-        .padding(10)
-        .spacing(20)
+        .padding(Padding::new(10.0).top(30))
+        .spacing(30)
         .height(Length::Fill)
         .width(FillPortion(1))
         .push(
-            Text::new(traffic_source_translation(language))
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(picklist);
+            Row::new()
+                .spacing(10)
+                .push(
+                    Text::new(traffic_source_translation(language))
+                        .font(font)
+                        .class(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(picklist),
+        );
 
-    match &sniffer.capture_source {
-        CaptureSource::Device(_) => {
+    match &sniffer.capture_source_picklist {
+        CaptureSourcePicklist::Device => {
             col = col.push(get_col_adapter(sniffer, font, language));
         }
-        CaptureSource::File(_) => {
+        CaptureSourcePicklist::File => {
             col = col.push(get_col_import_pcap(
                 language,
                 font,
@@ -261,6 +289,7 @@ fn get_col_import_pcap<'a>(
 
     let content = Column::new()
         .width(Length::Fill)
+        .align_x(alignment::Alignment::Center)
         .spacing(5)
         .push(button_row);
 
@@ -321,12 +350,12 @@ fn get_filters_group<'a>(
 }
 
 fn get_export_pcap_group_maybe<'a>(
-    cs: &CaptureSource,
+    cs_pick: CaptureSourcePicklist,
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
 ) -> Option<Container<'a, Message, StyleType>> {
-    if matches!(cs, CaptureSource::File(_)) {
+    if cs_pick == CaptureSourcePicklist::File {
         return None;
     }
 

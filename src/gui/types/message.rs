@@ -5,6 +5,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -22,6 +23,8 @@ pub enum Message {
     StartApp(Option<window::Id>),
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
+    /// Capture source selected from the picklist
+    SetCaptureSource(CaptureSourcePicklist),
     /// Select network device
     DeviceSelection(String),
     /// Toggle BPF filter checkbox

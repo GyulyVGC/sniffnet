@@ -216,7 +216,7 @@ impl ButtonType {
                     },
                 },
                 text_color: Color {
-                    a: ext.alpha_chart_badge,
+                    a: 0.5,
                     ..colors.text_headers
                 },
                 shadow: Shadow::default(),

@@ -2,7 +2,7 @@ use crate::gui::types::filters::Filters;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
-use crate::translations::translations_3::file_name_translation;
+use crate::translations::translations_4::capture_file_translation;
 use crate::translations::types::language::Language;
 use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
 
@@ -158,7 +158,7 @@ impl CaptureSource {
     pub fn title(&self, language: Language) -> &str {
         match self {
             Self::Device(_) => network_adapter_translation(language),
-            Self::File(_) => file_name_translation(language),
+            Self::File(_) => capture_file_translation(language),
         }
     }
 
@@ -220,4 +220,11 @@ impl MyPcapImport {
             addresses: vec![],
         }
     }
+}
+
+#[derive(Clone, Eq, PartialEq, Debug, Copy, Default)]
+pub enum CaptureSourcePicklist {
+    #[default]
+    Device,
+    File,
 }
