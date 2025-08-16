@@ -12,7 +12,6 @@ pub struct DonutChart {
     data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    filtered_out: u128,
     dropped: u128,
     font: Font,
     thumbnail: bool,
@@ -23,7 +22,6 @@ impl DonutChart {
         data_repr: DataRepr,
         incoming: u128,
         outgoing: u128,
-        filtered_out: u128,
         dropped: u128,
         font: Font,
         thumbnail: bool,
@@ -32,7 +30,6 @@ impl DonutChart {
             data_repr,
             incoming,
             outgoing,
-            filtered_out,
             dropped,
             font,
             thumbnail,
@@ -40,7 +37,7 @@ impl DonutChart {
     }
 
     fn total(&self) -> u128 {
-        self.incoming + self.outgoing + self.filtered_out + self.dropped
+        self.incoming + self.outgoing + self.dropped
     }
 
     fn title(&self) -> String {
@@ -48,12 +45,11 @@ impl DonutChart {
         self.data_repr.formatted_string(total)
     }
 
-    fn angles(&self) -> [(Radians, Radians); 4] {
+    fn angles(&self) -> [(Radians, Radians); 3] {
         #[allow(clippy::cast_precision_loss)]
         let mut values = [
             self.incoming as f32,
             self.outgoing as f32,
-            self.filtered_out as f32,
             self.dropped as f32,
         ];
         let total: f32 = values.iter().sum();
@@ -148,7 +144,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
     data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    filtered_out: u128,
     dropped: u128,
     font: Font,
     thumbnail: bool,
@@ -159,13 +154,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
         Length::Fixed(110.0)
     };
     iced::widget::canvas(DonutChart::new(
-        data_repr,
-        incoming,
-        outgoing,
-        filtered_out,
-        dropped,
-        font,
-        thumbnail,
+        data_repr, incoming, outgoing, dropped, font, thumbnail,
     ))
     .width(size)
     .height(size)

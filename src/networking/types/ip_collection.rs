@@ -12,9 +12,6 @@ impl AddressCollection {
     const SEPARATOR: char = ',';
     const RANGE_SEPARATOR: char = '-';
 
-    pub const PLACEHOLDER_STR: &'static str =
-        "0.0.0.0-255.255.255.255, ::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff";
-
     pub(crate) fn new(str: &str) -> Option<Self> {
         let str = str.replace(' ', "");
 

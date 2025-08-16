@@ -20,10 +20,6 @@ impl std::fmt::Display for Protocol {
     }
 }
 
-impl Protocol {
-    pub const ALL: [Protocol; 4] = [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP];
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

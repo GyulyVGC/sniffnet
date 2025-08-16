@@ -1,15 +1,8 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use crate::Language;
-use crate::networking::types::filters::Filters;
-use crate::translations::translations::{
-    address_translation, ip_version_translation, protocol_translation,
-};
-use crate::translations::translations_3::{invalid_filters_translation, port_translation};
 use crate::utils::types::timestamp::Timestamp;
 use chrono::{Local, TimeZone};
-use std::fmt::Write;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -26,61 +19,6 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 //         format!("{:.1}%", 100.0 * filtered_float / observed_float)
 //     }
 // }
-
-pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
-    let mut ret_val = format!("{}:", invalid_filters_translation(language));
-    if !filters.ip_version_valid() {
-        let _ = write!(ret_val, "\n • {}", ip_version_translation(language));
-    }
-    if !filters.protocol_valid() {
-        let _ = write!(ret_val, "\n • {}", protocol_translation(language));
-    }
-    if !filters.address_valid() {
-        let _ = write!(ret_val, "\n • {}", address_translation(language));
-    }
-    if !filters.port_valid() {
-        let _ = write!(ret_val, "\n • {}", port_translation(language));
-    }
-    ret_val
-}
-
-/// Computes the string representing the active filters
-pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
-    let mut filters_string = String::new();
-    if filters.ip_version_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            ip_version_translation(language),
-            filters.pretty_print_ip()
-        );
-    }
-    if filters.protocol_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            protocol_translation(language),
-            filters.pretty_print_protocol()
-        );
-    }
-    if filters.address_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            address_translation(language),
-            filters.address_str
-        );
-    }
-    if filters.port_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            port_translation(language),
-            filters.port_str
-        );
-    }
-    filters_string
-}
 
 pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;

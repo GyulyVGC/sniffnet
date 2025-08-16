@@ -190,31 +190,31 @@ pub fn port_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn invalid_filters_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Invalid filters",
-        // Language::FA => "صافی نامعتبر",
-        Language::ES | Language::PT => "Filtros inválidos",
-        Language::IT => "Filtri non validi",
-        Language::FR => "Filtres invalides",
-        Language::DE => "Ungültige Filter",
-        Language::PL => "Nieprawidłowe filtry",
-        Language::RU => "Неверный формат фильтров",
-        Language::RO => "Filtre invalide",
-        Language::JA => "無効なフィルター",
-        Language::UZ => "Noto'g'ri filtrlar",
-        Language::SV => "Ogiltiga filter",
-        Language::VI => "Bộ lọc không khả dụng",
-        Language::ZH => "无效的过滤器",
-        Language::ZH_TW => "無效的篩選器",
-        Language::KO => "잘못된 필터",
-        Language::TR => "Geçersiz filtreler",
-        Language::UK => "Неправильний формат фільтрів",
-        Language::ID => "Filter salah",
-        Language::NL => "Ongeldige filters",
-        _ => "Invalid filters",
-    }
-}
+// pub fn invalid_filters_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Invalid filters",
+//         // Language::FA => "صافی نامعتبر",
+//         Language::ES | Language::PT => "Filtros inválidos",
+//         Language::IT => "Filtri non validi",
+//         Language::FR => "Filtres invalides",
+//         Language::DE => "Ungültige Filter",
+//         Language::PL => "Nieprawidłowe filtry",
+//         Language::RU => "Неверный формат фильтров",
+//         Language::RO => "Filtre invalide",
+//         Language::JA => "無効なフィルター",
+//         Language::UZ => "Noto'g'ri filtrlar",
+//         Language::SV => "Ogiltiga filter",
+//         Language::VI => "Bộ lọc không khả dụng",
+//         Language::ZH => "无效的过滤器",
+//         Language::ZH_TW => "無效的篩選器",
+//         Language::KO => "잘못된 필터",
+//         Language::TR => "Geçersiz filtreler",
+//         Language::UK => "Неправильний формат фільтрів",
+//         Language::ID => "Filter salah",
+//         Language::NL => "Ongeldige filters",
+//         _ => "Invalid filters",
+//     }
+// }
 
 pub fn messages_translation(language: Language) -> &'static str {
     match language {

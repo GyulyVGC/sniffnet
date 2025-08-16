@@ -1,10 +1,10 @@
-use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
-
+use crate::gui::types::filters::Filters;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
-use crate::translations::translations_3::file_name_translation;
+use crate::translations::translations_4::capture_file_translation;
 use crate::translations::types::language::Language;
+use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
 
 pub enum CaptureContext {
     Live(Live),
@@ -14,11 +14,19 @@ pub enum CaptureContext {
 }
 
 impl CaptureContext {
-    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>) -> Self {
-        let cap_type = match CaptureType::from_source(source, pcap_out_path) {
+    pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
+        let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
             Ok(c) => c,
             Err(e) => return Self::Error(e.to_string()),
         };
+
+        // only apply BPF filter if it is active, and return an error if it fails to apply
+        if filters.is_some_filter_active()
+            && let Err(e) = cap_type.set_bpf(filters.bpf())
+        {
+            return Self::Error(e.to_string());
+        }
+
         let cap = match cap_type {
             CaptureType::Live(cap) => cap,
             CaptureType::Offline(cap) => return Self::new_offline(cap),
@@ -131,6 +139,13 @@ impl CaptureType {
             CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
         }
     }
+
+    fn set_bpf(&mut self, bpf: &str) -> Result<(), Error> {
+        match self {
+            Self::Live(cap) => cap.filter(bpf, true),
+            Self::Offline(cap) => cap.filter(bpf, true),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -143,7 +158,7 @@ impl CaptureSource {
     pub fn title(&self, language: Language) -> &str {
         match self {
             Self::Device(_) => network_adapter_translation(language),
-            Self::File(_) => file_name_translation(language),
+            Self::File(_) => capture_file_translation(language),
         }
     }
 
@@ -205,4 +220,11 @@ impl MyPcapImport {
             addresses: vec![],
         }
     }
+}
+
+#[derive(Clone, Eq, PartialEq, Debug, Copy, Default)]
+pub enum CaptureSourcePicklist {
+    #[default]
+    Device,
+    File,
 }
