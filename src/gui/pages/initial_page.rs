@@ -17,14 +17,13 @@ use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::translations::translations::{
-    address_translation, addresses_translation, choose_adapters_translation,
-    select_filters_translation, start_translation,
+    address_translation, addresses_translation, choose_adapters_translation, start_translation,
 };
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
 };
 use crate::translations::translations_4::import_capture_translation;
-use crate::translations::translations_5::filter_traffic_translation;
+use crate::translations::translations_5::{filter_traffic_translation, traffic_source_translation};
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -33,8 +32,8 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
-    button, center,
+    Button, Checkbox, Column, Container, PickList, Row, Rule, Scrollable, Space, Text, TextInput,
+    Tooltip, button, center, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding, alignment};
 
@@ -47,82 +46,107 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         ..
     } = sniffer.configs.settings;
     let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
-    let col_adapter = get_col_adapter(sniffer, font);
-    let col_import_pcap = get_col_import_pcap(
-        language,
-        font,
-        &sniffer.capture_source,
-        &sniffer.import_pcap_path,
-    );
-    let col_capture_source = Column::new().push(col_adapter).push(col_import_pcap);
+    let col_data_source = get_col_data_source(sniffer, font, language);
 
-    let filters_pane = Column::new()
-        .width(FillPortion(6))
-        .padding(10)
-        .spacing(15)
-        .push(
-            select_filters_translation(language)
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
+    let col_checkboxes = Column::new()
+        .spacing(10)
+        .push(Space::with_height(82))
         .push(get_filters_group(&sniffer.filters, font, language))
-        .push(Rule::horizontal(40))
-        .push(get_export_pcap_group(
+        .push_maybe(get_export_pcap_group_maybe(
             &sniffer.capture_source,
             &sniffer.export_pcap,
             language,
             font,
-        ))
-        .push(
-            Container::new(button_start(font, language, color_gradient))
-                .width(Length::Fill)
-                .height(Length::Fill)
-                .align_y(Alignment::Start)
-                .align_x(Alignment::Center),
-        );
+        ));
+
+    let right_col = Column::new()
+        .width(FillPortion(1))
+        .padding(10)
+        .push(col_checkboxes)
+        .push(vertical_space())
+        .push(button_start(font_headers, language, color_gradient))
+        .push(vertical_space());
 
     let body = Column::new().push(Space::with_height(5)).push(
         Row::new()
-            .push(col_capture_source)
-            .push(Space::with_width(30))
-            .push(filters_pane),
+            .push(col_data_source)
+            .push(Space::with_width(15))
+            .push(right_col),
     );
 
     Container::new(body).height(Length::Fill)
 }
 
 fn button_start<'a>(
-    font: Font,
+    font_headers: Font,
     language: Language,
     color_gradient: GradientType,
-) -> Tooltip<'a, Message, StyleType> {
-    let content = button(
-        Icon::Rocket
-            .to_text()
-            .size(25)
+) -> Button<'a, Message, StyleType> {
+    button(
+        Text::new(start_translation(language))
+            .font(font_headers)
+            .size(FONT_SIZE_TITLE)
+            .width(Length::Fill)
             .align_x(alignment::Alignment::Center)
             .align_y(alignment::Alignment::Center),
     )
-    .padding(10)
-    .height(80)
-    .width(160)
+    .padding(15)
+    .width(Length::Fill)
     .class(ButtonType::Gradient(color_gradient))
-    .on_press(Message::Start);
-
-    let tooltip = start_translation(language).to_string();
-    //tooltip.push_str(" [⏎]");
-    let position = Position::Top;
-
-    Tooltip::new(content, Text::new(tooltip).font(font), position)
-        .gap(5)
-        .class(ContainerType::Tooltip)
+    .on_press(Message::Start)
 }
 
-fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.settings;
+fn get_col_data_source(
+    sniffer: &Sniffer,
+    font: Font,
+    language: Language,
+) -> Column<'_, Message, StyleType> {
+    let picklist = PickList::new(
+        &Language::ALL[..],
+        Some(language),
+        Message::LanguageSelection,
+    )
+    .padding([2, 7])
+    .font(font);
 
+    let mut col = Column::new()
+        .align_x(Alignment::Center)
+        .padding(10)
+        .spacing(20)
+        .height(Length::Fill)
+        .width(FillPortion(1))
+        .push(
+            Text::new(traffic_source_translation(language))
+                .font(font)
+                .class(TextType::Title)
+                .size(FONT_SIZE_TITLE),
+        )
+        .push(picklist);
+
+    match &sniffer.capture_source {
+        CaptureSource::Device(_) => {
+            col = col.push(get_col_adapter(sniffer, font, language));
+        }
+        CaptureSource::File(_) => {
+            col = col.push(get_col_import_pcap(
+                language,
+                font,
+                &sniffer.capture_source,
+                &sniffer.import_pcap_path,
+            ));
+        }
+    }
+
+    col
+}
+
+fn get_col_adapter(
+    sniffer: &Sniffer,
+    font: Font,
+    language: Language,
+) -> Column<'_, Message, StyleType> {
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {
         let mut title = String::new();
@@ -163,16 +187,8 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleTy
     }
 
     Column::new()
-        .padding(10)
         .spacing(5)
         .height(Length::Fill)
-        .width(FillPortion(4))
-        .push(
-            choose_adapters_translation(language)
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
         .push(if dev_str_list.is_empty() {
             Into::<iced::Element<Message, StyleType>>::into(center(
                 Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
@@ -180,7 +196,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleTy
         } else {
             Scrollable::with_direction(
                 dev_str_list.into_iter().fold(
-                    Column::new().padding(13).spacing(5),
+                    Column::new().padding(Padding::ZERO.right(13)).spacing(5),
                     |scroll_adapters, (name, title, subtitle, addrs)| {
                         let addrs_text = if addrs.is_empty() {
                             None
@@ -245,7 +261,6 @@ fn get_col_import_pcap<'a>(
 
     let content = Column::new()
         .width(Length::Fill)
-        .align_x(Alignment::Center)
         .spacing(5)
         .push(button_row);
 
@@ -260,19 +275,9 @@ fn get_col_import_pcap<'a>(
             })
             .on_press(Message::SetPcapImport(path.to_string())),
     )
-    .padding(13);
+    .padding(Padding::ZERO.right(13));
 
-    Column::new()
-        .padding(10)
-        .spacing(5)
-        .width(FillPortion(4))
-        .push(
-            Text::new(import_capture_translation(language))
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(button)
+    Column::new().spacing(5).push(button)
 }
 
 fn get_filters_group<'a>(
@@ -298,7 +303,7 @@ fn get_filters_group<'a>(
             .font(font);
         let inner_col = Column::new()
             .spacing(10)
-            .padding(Padding::ZERO.left(45))
+            .padding(Padding::ZERO.left(26))
             .push(
                 Row::new()
                     .align_y(Alignment::Center)
@@ -309,24 +314,20 @@ fn get_filters_group<'a>(
         ret_val = ret_val.push(inner_col);
     }
 
-    Container::new(
-        Container::new(ret_val)
-            .padding(10)
-            .width(Length::Fill)
-            .class(ContainerType::BorderedRound),
-    )
-    .height(Length::Fill)
-    .align_y(Alignment::Start)
+    Container::new(ret_val)
+        .padding(15)
+        .width(Length::Fill)
+        .class(ContainerType::BorderedRound)
 }
 
-fn get_export_pcap_group<'a>(
+fn get_export_pcap_group_maybe<'a>(
     cs: &CaptureSource,
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
-) -> Container<'a, Message, StyleType> {
+) -> Option<Container<'a, Message, StyleType>> {
     if matches!(cs, CaptureSource::File(_)) {
-        return Container::new(Space::with_height(Length::Fill));
+        return None;
     }
 
     let enabled = export_pcap.enabled();
@@ -344,7 +345,7 @@ fn get_export_pcap_group<'a>(
     if enabled {
         let inner_col = Column::new()
             .spacing(10)
-            .padding(Padding::ZERO.left(45))
+            .padding(Padding::ZERO.left(26))
             .push(
                 Row::new()
                     .align_y(Alignment::Center)
@@ -354,8 +355,7 @@ fn get_export_pcap_group<'a>(
                         TextInput::new(ExportPcap::DEFAULT_FILE_NAME, file_name)
                             .on_input(Message::OutputPcapFile)
                             .padding([2, 5])
-                            .font(font)
-                            .width(200),
+                            .font(font),
                     ),
             )
             .push(
@@ -376,12 +376,10 @@ fn get_export_pcap_group<'a>(
         ret_val = ret_val.push(inner_col);
     }
 
-    Container::new(
+    Some(
         Container::new(ret_val)
-            .padding(10)
+            .padding(15)
             .width(Length::Fill)
             .class(ContainerType::BorderedRound),
     )
-    .height(Length::Fill)
-    .align_y(Alignment::Start)
 }

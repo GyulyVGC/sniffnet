@@ -71,11 +71,14 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
+        .padding(5)
+        .spacing(10)
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
+                .spacing(10)
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
                 .push(get_data_notify(
@@ -103,7 +106,7 @@ fn get_data_notify<'a>(
     data_notification: DataNotification,
     language: Language,
     font: Font,
-) -> Column<'a, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         data_exceeded_translation(language),
         data_notification.threshold.is_some(),
@@ -133,12 +136,10 @@ fn get_data_notify<'a>(
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
     if data_notification.threshold.is_none() {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     } else {
         let data_representation_row = row_data_representation(
             data_notification,
@@ -152,12 +153,11 @@ fn get_data_notify<'a>(
             .push(sound_row)
             .push(data_representation_row)
             .push(input_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     }
 }
 
@@ -165,7 +165,7 @@ fn get_favorite_notify<'a>(
     favorite_notification: FavoriteNotification,
     language: Language,
     font: Font,
-) -> Column<'a, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         favorite_transmitted_translation(language),
         favorite_notification.notify_on_favorite,
@@ -192,19 +192,15 @@ fn get_favorite_notify<'a>(
             language,
         );
         ret_val = ret_val.push(sound_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     } else {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     }
 }
 
@@ -220,7 +216,7 @@ fn input_group_bytes<'a>(
     let input_row = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
@@ -305,7 +301,7 @@ fn sound_buttons<'a>(
         .width(Length::Shrink)
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
 
     for option in Sound::ALL {
@@ -378,7 +374,7 @@ fn row_data_representation<'a>(
         .width(Length::Shrink)
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", data_representation_translation(language))).font(font));
 
     for option in DataRepr::ALL {
