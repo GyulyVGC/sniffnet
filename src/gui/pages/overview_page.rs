@@ -22,7 +22,6 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
@@ -48,7 +47,7 @@ use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
     horizontal_space, vertical_space,
 };
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Element, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
@@ -504,10 +503,14 @@ fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
-    let filters_desc = if filters.is_some_filter_active() {
-        filters.bpf()
+    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
+        Row::new()
+            .spacing(10)
+            .push(Text::new("BPF"))
+            .push(get_info_tooltip(filters.bpf().to_string(), font))
+            .into()
     } else {
-        none_translation(language)
+        Text::new(none_translation(language)).font(font).into()
     };
 
     Column::new()
@@ -524,14 +527,25 @@ fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {}", &cs_info)).font(font))
-                        .push(get_link_type_tooltip(link_type, language, font)),
+                        .push(get_info_tooltip(
+                            link_type.full_print_on_one_line(language),
+                            font,
+                        )),
                 ),
         )
-        .push(TextType::highlighted_subtitle_with_desc(
-            active_filters_translation(language),
-            filters_desc,
-            font,
-        ))
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", active_filters_translation(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .push(Text::new("   ".to_string()).font(font))
+                        .push(filters_desc),
+                ),
+        )
 }
 
 fn col_data_representation<'a>(
@@ -751,11 +765,7 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_link_type_tooltip<'a>(
-    link_type: MyLinkType,
-    language: Language,
-    font: Font,
-) -> Tooltip<'a, Message, StyleType> {
+fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Container::new(
             Text::new("i")
@@ -768,7 +778,7 @@ fn get_link_type_tooltip<'a>(
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        Text::new(link_type.full_print_on_one_line(language)).font(font),
+        Text::new(info_str).font(font),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
