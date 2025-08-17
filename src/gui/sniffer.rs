@@ -1122,8 +1122,8 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{
-        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion, Language,
-        Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
+        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, Language,
+        ReportSortType, RunningPage, Sniffer, StyleType,
     };
 
     // helpful to clean up files generated from tests
@@ -1147,49 +1147,6 @@ mod tests {
                 remove_file(ConfigWindow::test_path()).unwrap();
             }
         }
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_ip_version() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4, false));
-        assert_eq!(
-            sniffer.filters.ip_versions,
-            HashSet::from([IpVersion::IPv6])
-        );
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, false));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::new());
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_protocol() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::TCP, Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ARP]));
-        sniffer.update(Message::ProtocolSelection(Protocol::ARP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::new());
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::UDP]));
     }
 
     #[test]

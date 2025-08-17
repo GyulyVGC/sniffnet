@@ -14,25 +14,3 @@ impl fmt::Display for IpVersion {
         write!(f, "{self:?}")
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_ip_version_display() {
-        for version in IpVersion::ALL {
-            match version {
-                IpVersion::IPv4 => assert_eq!(version.to_string(), "IPv4"),
-                IpVersion::IPv6 => assert_eq!(version.to_string(), "IPv6"),
-            }
-        }
-    }
-
-    #[test]
-    fn test_all_ip_versions_collection() {
-        assert_eq!(IpVersion::ALL.len(), 2);
-        assert_eq!(IpVersion::ALL.get(0).unwrap(), &IpVersion::IPv4);
-        assert_eq!(IpVersion::ALL.get(1).unwrap(), &IpVersion::IPv6);
-    }
-}

@@ -1500,7 +1500,7 @@ mod tests {
 
     #[test]
     fn test_get_service_not_applicable() {
-        for p in Protocol::ALL {
+        for p in [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [(None, Some(443)), (None, None), (Some(443), None)] {
                     let key = AddressPortPair::new(

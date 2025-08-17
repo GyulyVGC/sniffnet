@@ -327,8 +327,6 @@ mod tests {
             no_more_packets: false,
         };
         let mut info_traffic = InfoTraffic {
-            all_bytes: 0,
-            all_packets: 0,
             tot_data_info,
             dropped_packets: 0,
             ..Default::default()
