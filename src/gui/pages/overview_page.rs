@@ -506,7 +506,7 @@ fn col_device<'a>(
     let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
         Row::new()
             .spacing(10)
-            .push(Text::new("BPF"))
+            .push(Text::new("BPF").font(font))
             .push(get_info_tooltip(filters.bpf().to_string(), font))
             .into()
     } else {
