@@ -12,22 +12,24 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
-    outgoing_translation, traffic_rate_translation, waiting_translation,
+    none_translation, outgoing_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
@@ -74,7 +76,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
         if tot_packets == 0 {
             // no packets observed at all
-            // TODO: add info about the capture filters (if any) in the method called below
             body = body_no_packets(&sniffer.capture_source, font, language, dots);
         } else {
             // some packets are there!
@@ -112,7 +113,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-// TODO: add info about active filters if any
 fn body_no_packets<'a>(
     cs: &CaptureSource,
     font: Font,
@@ -436,7 +436,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     } = sniffer.configs.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.capture_source);
+    let col_device = col_device(language, font, &sniffer.capture_source, &sniffer.filters);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.data_repr);
@@ -496,6 +496,7 @@ fn col_device<'a>(
     language: Language,
     font: Font,
     cs: &CaptureSource,
+    filters: &'a Filters,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -503,15 +504,34 @@ fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
+    let filters_desc = if filters.is_some_filter_active() {
+        filters.bpf()
+    } else {
+        none_translation(language)
+    };
+
     Column::new()
         .height(Length::Fill)
         .spacing(10)
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", cs.title(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .spacing(10)
+                        .push(Text::new(format!("   {}", &cs_info)).font(font))
+                        .push(get_link_type_tooltip(link_type, language, font)),
+                ),
+        )
         .push(TextType::highlighted_subtitle_with_desc(
-            cs.title(language),
-            &cs_info,
+            active_filters_translation(language),
+            filters_desc,
             font,
         ))
-        .push(link_type.link_type_col(language, font))
 }
 
 fn col_data_representation<'a>(
@@ -731,25 +751,16 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_active_filters_tooltip(
-    bpf: &str,
+fn get_link_type_tooltip<'a>(
+    link_type: MyLinkType,
     language: Language,
     font: Font,
-) -> Tooltip<'_, Message, StyleType> {
-    let mut ret_val = Column::new().push(
-        Text::new(active_filters_translation(language))
-            .font(font)
-            .class(TextType::Subtitle),
-    );
-
-    ret_val = ret_val.push(Row::new().push(Text::new(bpf).font(font)));
-
+) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Container::new(
-            Icon::Funnel
-                .to_text()
+            Text::new("i")
+                .size(FONT_SIZE_FOOTER)
                 .font(font)
-                .size(15)
                 .line_height(LineHeight::Relative(1.0)),
         )
         .align_x(Alignment::Center)
@@ -757,7 +768,7 @@ fn get_active_filters_tooltip(
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        ret_val,
+        Text::new(link_type.full_print_on_one_line(language)).font(font),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)

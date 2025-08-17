@@ -51,7 +51,6 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let col_checkboxes = Column::new()
         .spacing(10)
-        .push(Space::with_height(66))
         .push(get_filters_group(&sniffer.filters, font, language))
         .push_maybe(get_export_pcap_group_maybe(
             sniffer.capture_source_picklist,
@@ -64,6 +63,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let right_col = Column::new()
         .width(FillPortion(1))
         .padding(10)
+        .push(Space::with_height(76))
         .push(col_checkboxes)
         .push(vertical_space())
         .push(button_start(
@@ -98,7 +98,7 @@ fn button_start<'a>(
             .align_x(alignment::Alignment::Center)
             .align_y(alignment::Alignment::Center),
     )
-    .padding(15)
+    .padding(20)
     .width(Length::Fill)
     .class(ButtonType::Gradient(color_gradient))
     .on_press_maybe(if is_capture_source_consistent {

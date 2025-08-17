@@ -60,33 +60,33 @@ use crate::translations::types::language::Language;
 //     }
 // }
 
-pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType> {
-    Text::new(match language {
-        Language::EN => "Select filters to be applied on network traffic",
-        Language::IT => "Seleziona i filtri da applicare al traffico di rete",
-        Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
-        Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
-        Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
-        Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
-        Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
-        Language::ZH => "选择需要监控的目标",
-        Language::ZH_TW => "選取要套用於網路流量的篩選器",
-        Language::RO => "Selectați filtre pentru traficul de rețea",
-        Language::KO => "네트워크 트레픽에 적용할 필터 선택",
-        Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
-        Language::RU => "Выберите фильтры для применения к сетевому трафику",
-        Language::PT => "Selecione os filtros a serem aplicados no tráfego de rede",
-        Language::EL => "Επίλεξε τα φίλτρα για εφαρμογή στην κίνηση του δικτύου",
-        // Language::FA => "صافی ها را جهت اعمال بر آمد و شد شبکه انتخاب کنید",
-        Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
-        Language::FI => "Valitse suodattimet verkkoliikenteelle",
-        Language::JA => "トラフィックに適用するフィルターを選択してください",
-        Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
-        Language::VI => "Hãy chọn bộ lọc cho lưu lượng mạng",
-        Language::ID => "Pilih filter yang ingin dipasang dilalulintas jaringan",
-        Language::NL => "Selecteer filters om toe te passen op netwerkverkeer",
-    })
-}
+// pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType> {
+//     Text::new(match language {
+//         Language::EN => "Select filters to be applied on network traffic",
+//         Language::IT => "Seleziona i filtri da applicare al traffico di rete",
+//         Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
+//         Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
+//         Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
+//         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
+//         Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
+//         Language::ZH => "选择需要监控的目标",
+//         Language::ZH_TW => "選取要套用於網路流量的篩選器",
+//         Language::RO => "Selectați filtre pentru traficul de rețea",
+//         Language::KO => "네트워크 트레픽에 적용할 필터 선택",
+//         Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
+//         Language::RU => "Выберите фильтры для применения к сетевому трафику",
+//         Language::PT => "Selecione os filtros a serem aplicados no tráfego de rede",
+//         Language::EL => "Επίλεξε τα φίλτρα για εφαρμογή στην κίνηση του δικτύου",
+//         // Language::FA => "صافی ها را جهت اعمال بر آمد و شد شبکه انتخاب کنید",
+//         Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
+//         Language::FI => "Valitse suodattimet verkkoliikenteelle",
+//         Language::JA => "トラフィックに適用するフィルターを選択してください",
+//         Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
+//         Language::VI => "Hãy chọn bộ lọc cho lưu lượng mạng",
+//         Language::ID => "Pilih filter yang ingin dipasang dilalulintas jaringan",
+//         Language::NL => "Selecteer filters om toe te passen op netwerkverkeer",
+//     })
+// }
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {

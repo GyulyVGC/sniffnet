@@ -64,7 +64,9 @@ impl ButtonType {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
-                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::BorderedRound
+                    | ButtonType::BorderedRoundSelected
+                    | ButtonType::Gradient(_) => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -154,7 +156,9 @@ impl ButtonType {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
-                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::BorderedRound
+                    | ButtonType::BorderedRoundSelected
+                    | ButtonType::Gradient(_) => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -208,7 +212,7 @@ impl ButtonType {
                     _ => Background::Color(ext.buttons_color),
                 }),
                 border: Border {
-                    radius: BORDER_BUTTON_RADIUS.into(),
+                    radius: 12.0.into(),
                     width: BORDER_WIDTH,
                     color: Color {
                         a: ext.alpha_chart_badge,
