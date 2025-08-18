@@ -27,13 +27,13 @@ use crate::{Language, StyleType, location};
 pub struct TrafficChart {
     /// Current time interval number
     pub ticks: u32,
-    /// Sent bytes filtered and their time occurrence
+    /// Sent bytes and their time occurrence
     pub out_bytes: ChartSeries,
-    /// Received bytes filtered and their time occurrence
+    /// Received bytes and their time occurrence
     pub in_bytes: ChartSeries,
-    /// Sent packets filtered and their time occurrence
+    /// Sent packets and their time occurrence
     pub out_packets: ChartSeries,
-    /// Received packets filtered and their time occurrence
+    /// Received packets and their time occurrence
     pub in_packets: ChartSeries,
     /// Minimum number of bytes per time interval (computed on last 30 intervals)
     pub min_bytes: f32,

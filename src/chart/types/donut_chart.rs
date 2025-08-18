@@ -96,12 +96,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
         let radius = (frame.width().min(frame.height()) / 2.0) * 0.9;
 
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
-        let colors = [
-            style.incoming,
-            style.outgoing,
-            style.filtered_out,
-            style.dropped,
-        ];
+        let colors = [style.incoming, style.outgoing, style.dropped];
 
         for ((start_angle, end_angle), color) in self.angles().into_iter().zip(colors) {
             let path = canvas::Path::new(|builder| {

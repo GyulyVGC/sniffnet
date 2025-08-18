@@ -27,12 +27,12 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings { style, .. } = sniffer.configs.settings;
     let font = style.get_extension().font;
 
-    let filtered = sniffer
+    let tot_packets = sniffer
         .info_traffic
         .tot_data_info
         .tot_data(DataRepr::Packets);
 
-    if filtered == 0 {
+    if tot_packets == 0 {
         return Container::new(
             Column::new()
                 .push(vertical_space())

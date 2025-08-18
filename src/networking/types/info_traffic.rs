@@ -17,7 +17,7 @@ pub struct InfoTraffic {
     pub dropped_packets: u32,
     /// Timestamp of the latest parsed packet
     pub last_packet_timestamp: Timestamp,
-    /// Map of the filtered traffic
+    /// Map of the traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
     pub services: HashMap<Service, DataInfo>,

@@ -25,7 +25,7 @@ impl RuleType {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
                 RuleType::PaletteColor(color, _) => *color,
-                RuleType::Dropped => ext.red_alert_color,
+                RuleType::Dropped => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color

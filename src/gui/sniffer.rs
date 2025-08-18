@@ -940,7 +940,7 @@ impl Sniffer {
             ) => {
                 // Running with no overlays
                 if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
-                    // Running with no overlays and some packets filtered
+                    // Running with no overlays and some packets
                     self.running_page = if next {
                         self.running_page.next()
                     } else {

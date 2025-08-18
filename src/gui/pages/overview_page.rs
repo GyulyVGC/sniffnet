@@ -1,7 +1,7 @@
 //! Module defining the run page of the application.
 //!
 //! It contains elements to display traffic statistics: chart, detailed connections data
-//! and overall statistics about the filtered traffic.
+//! and overall statistics about the traffic.
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
