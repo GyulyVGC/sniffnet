@@ -5,6 +5,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -13,7 +14,7 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{IpVersion, Language, Protocol, ReportSortType, StyleType};
+use crate::{Language, ReportSortType, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -22,16 +23,14 @@ pub enum Message {
     StartApp(Option<window::Id>),
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
+    /// Capture source selected from the picklist
+    SetCaptureSource(CaptureSourcePicklist),
     /// Select network device
     DeviceSelection(String),
-    /// Select IP filter
-    IpVersionSelection(IpVersion, bool),
-    /// Select protocol filter
-    ProtocolSelection(Protocol, bool),
-    /// Changed address filter
-    AddressFilter(String),
-    /// Changed port filter
-    PortFilter(String),
+    /// Toggle BPF filter checkbox
+    ToggleFilters,
+    /// Change BPF filter string
+    BpfFilter(String),
     /// Select data representation to use
     DataReprSelection(DataRepr),
     /// Select report sort type to be displayed (inspect page)

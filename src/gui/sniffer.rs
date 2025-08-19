@@ -38,6 +38,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
@@ -45,15 +46,14 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+use crate::networking::types::capture_context::{
+    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+};
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::ip_collection::AddressCollection;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::port_collection::PortCollection;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotification;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -90,11 +90,13 @@ pub struct Sniffer {
     pub logged_notifications: (VecDeque<LoggedNotification>, usize),
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
+    /// Capture source picklist, to select the source of the capture
+    pub capture_source_picklist: CaptureSourcePicklist,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// List of network devices
     pub my_devices: Vec<MyDevice>,
-    /// Active filters on the observed traffic
+    /// BPF filter program to be applied to the capture
     pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
@@ -156,6 +158,7 @@ impl Sniffer {
             favorite_hosts: HashSet::new(),
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
+            capture_source_picklist: CaptureSourcePicklist::default(),
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
             filters: Filters::default(),
@@ -279,31 +282,21 @@ impl Sniffer {
                 }
             }
             Message::DeviceSelection(name) => self.set_device(&name),
-            Message::IpVersionSelection(version, insert) => {
-                if insert {
-                    self.filters.ip_versions.insert(version);
+            Message::SetCaptureSource(cs_pick) => {
+                self.capture_source_picklist = cs_pick;
+                return if cs_pick == CaptureSourcePicklist::File {
+                    Task::done(Message::SetPcapImport(self.import_pcap_path.clone()))
                 } else {
-                    self.filters.ip_versions.remove(&version);
-                }
+                    Task::done(Message::DeviceSelection(
+                        self.configs.device.device_name.clone(),
+                    ))
+                };
             }
-            Message::ProtocolSelection(protocol, insert) => {
-                if insert {
-                    self.filters.protocols.insert(protocol);
-                } else {
-                    self.filters.protocols.remove(&protocol);
-                }
+            Message::ToggleFilters => {
+                self.filters.toggle();
             }
-            Message::AddressFilter(value) => {
-                if let Some(collection) = AddressCollection::new(&value) {
-                    self.filters.address_collection = collection;
-                }
-                self.filters.address_str = value;
-            }
-            Message::PortFilter(value) => {
-                if let Some(collection) = PortCollection::new(&value) {
-                    self.filters.port_collection = collection;
-                }
-                self.filters.port_str = value;
+            Message::BpfFilter(value) => {
+                self.filters.set_bpf(value);
             }
             Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
@@ -311,7 +304,11 @@ impl Sniffer {
                 self.report_sort_type = sort;
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
-            Message::Start => return self.start(),
+            Message::Start => {
+                if self.is_capture_source_consistent() {
+                    return self.start();
+                }
+            }
             Message::Reset => self.reset(),
             Message::Style(style) => {
                 self.configs.settings.style = style;
@@ -702,14 +699,6 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
-        if let CaptureSource::Device(device) = &self.capture_source {
-            let current_device_name = device.get_name().clone();
-            // update ConfigDevice stored if different from last sniffed device
-            let last_device_name_sniffed = self.configs.device.device_name.clone();
-            if current_device_name.ne(&last_device_name_sniffed) {
-                self.configs.device.device_name = current_device_name;
-            }
-        }
         // update host dropdowns
         self.host_data_states.update_states(&self.search);
     }
@@ -741,14 +730,14 @@ impl Sniffer {
             self.set_device(current_device_name);
         }
         let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
+        let capture_context =
+            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.filters);
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.running_page = RunningPage::Overview;
 
         if capture_context.error().is_none() {
             // no pcap error
             let curr_cap_id = self.current_capture_rx.0;
-            let filters = self.filters.clone();
             let mmdb_readers = self.mmdb_readers.clone();
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
@@ -762,7 +751,6 @@ impl Sniffer {
                     parse_packets(
                         curr_cap_id,
                         capture_source,
-                        &filters,
                         &mmdb_readers,
                         capture_context,
                         &tx,
@@ -815,6 +803,7 @@ impl Sniffer {
     fn set_device(&mut self, name: &str) {
         for my_dev in &self.my_devices {
             if my_dev.get_name().eq(&name) {
+                self.configs.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
@@ -951,7 +940,7 @@ impl Sniffer {
             ) => {
                 // Running with no overlays
                 if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
-                    // Running with no overlays and some packets filtered
+                    // Running with no overlays and some packets
                     self.running_page = if next {
                         self.running_page.next()
                     } else {
@@ -971,9 +960,7 @@ impl Sniffer {
             && self.settings_page.is_none()
             && self.modal.is_none()
         {
-            if self.filters.are_valid() {
-                return Task::done(Message::Start);
-            }
+            return Task::done(Message::Start);
         } else if self.modal.eq(&Some(MyModal::Reset)) {
             return Task::done(Message::Reset);
         } else if self.modal.eq(&Some(MyModal::Quit)) {
@@ -996,7 +983,8 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.ne(&RunningPage::Init) {
-            return if self.info_traffic.all_packets == 0 && self.settings_page.is_none() {
+            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+            return if tot_packets == 0 && self.settings_page.is_none() {
                 Task::done(Message::Reset)
             } else {
                 Task::done(Message::ShowModal(MyModal::Reset))
@@ -1006,7 +994,8 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init) || self.info_traffic.all_packets == 0 {
+        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+        if self.running_page.eq(&RunningPage::Init) || tot_packets == 0 {
             Task::done(Message::Quit)
         } else if self.thumbnail {
             // TODO: uncomment once issue #653 is fixed
@@ -1092,6 +1081,13 @@ impl Sniffer {
 
         Task::run(rx, |()| Message::Quit)
     }
+
+    pub fn is_capture_source_consistent(&self) -> bool {
+        self.capture_source_picklist == CaptureSourcePicklist::Device
+            && matches!(self.capture_source, CaptureSource::Device(_))
+            || self.capture_source_picklist == CaptureSourcePicklist::File
+                && matches!(self.capture_source, CaptureSource::File(_))
+    }
 }
 
 #[cfg(test)]
@@ -1126,8 +1122,8 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{
-        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion, Language,
-        Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
+        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, Language,
+        ReportSortType, RunningPage, Sniffer, StyleType,
     };
 
     // helpful to clean up files generated from tests
@@ -1151,49 +1147,6 @@ mod tests {
                 remove_file(ConfigWindow::test_path()).unwrap();
             }
         }
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_ip_version() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4, false));
-        assert_eq!(
-            sniffer.filters.ip_versions,
-            HashSet::from([IpVersion::IPv6])
-        );
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, false));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::new());
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_protocol() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::TCP, Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ARP]));
-        sniffer.update(Message::ProtocolSelection(Protocol::ARP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::new());
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::UDP]));
     }
 
     #[test]

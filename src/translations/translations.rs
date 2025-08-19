@@ -5,33 +5,33 @@ use iced::widget::Text;
 use crate::StyleType;
 use crate::translations::types::language::Language;
 
-pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
-    Text::new(match language {
-        Language::EN => "Select network adapter to inspect",
-        Language::IT => "Seleziona la scheda di rete da ispezionare",
-        Language::FR => "Sélectionnez une carte réseau à inspecter",
-        Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
-        Language::PL => "Wybierz adapter sieciowy do inspekcji",
-        Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
-        Language::UK => "Виберіть мережевий адаптер для перевірки",
-        Language::ZH => "选择需要监控的网络适配器",
-        Language::ZH_TW => "選取要檢視的網路介面卡",
-        Language::RO => "Selectați adaptor de rețea pentru a inspecta",
-        Language::KO => "검사할 네트워크 어댑터 선택",
-        Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
-        Language::RU => "Выберите сетевой адаптер для инспекции",
-        Language::PT => "Selecione o adaptador de rede a inspecionar",
-        Language::EL => "Επίλεξε τον προσαρμογέα δικτύου για επιθεώρηση",
-        // Language::FA => "مبدل شبکه را برای بازرسی انتخاب کنید",
-        Language::SV => "Välj nätverksadapter att inspektera",
-        Language::FI => "Valitse tarkasteltava verkkosovitin",
-        Language::JA => "使用するネットワーク アダプターを選択してください",
-        Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
-        Language::VI => "Hãy chọn network adapter để quan sát",
-        Language::ID => "Pilih Adapter Jaringan yang ingin dicek",
-        Language::NL => "Selecteer netwerkadapter om te inspecteren",
-    })
-}
+// pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
+//     Text::new(match language {
+//         Language::EN => "Select network adapter to inspect",
+//         Language::IT => "Seleziona la scheda di rete da ispezionare",
+//         Language::FR => "Sélectionnez une carte réseau à inspecter",
+//         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
+//         Language::PL => "Wybierz adapter sieciowy do inspekcji",
+//         Language::DE => "Wähle einen Netzwerkadapter zum überwachen aus",
+//         Language::UK => "Виберіть мережевий адаптер для перевірки",
+//         Language::ZH => "选择需要监控的网络适配器",
+//         Language::ZH_TW => "選取要檢視的網路介面卡",
+//         Language::RO => "Selectați adaptor de rețea pentru a inspecta",
+//         Language::KO => "검사할 네트워크 어댑터 선택",
+//         Language::TR => "İncelemek için bir ağ adaptörü seçiniz",
+//         Language::RU => "Выберите сетевой адаптер для инспекции",
+//         Language::PT => "Selecione o adaptador de rede a inspecionar",
+//         Language::EL => "Επίλεξε τον προσαρμογέα δικτύου για επιθεώρηση",
+//         // Language::FA => "مبدل شبکه را برای بازرسی انتخاب کنید",
+//         Language::SV => "Välj nätverksadapter att inspektera",
+//         Language::FI => "Valitse tarkasteltava verkkosovitin",
+//         Language::JA => "使用するネットワーク アダプターを選択してください",
+//         Language::UZ => "Tekshirish uchun tarmoq adapterini tanlang",
+//         Language::VI => "Hãy chọn network adapter để quan sát",
+//         Language::ID => "Pilih Adapter Jaringan yang ingin dicek",
+//         Language::NL => "Selecteer netwerkadapter om te inspecteren",
+//     })
+// }
 
 // pub fn application_protocol_translation(language: Language) -> &'static str {
 //     match language {
@@ -60,33 +60,33 @@ pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType
 //     }
 // }
 
-pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType> {
-    Text::new(match language {
-        Language::EN => "Select filters to be applied on network traffic",
-        Language::IT => "Seleziona i filtri da applicare al traffico di rete",
-        Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
-        Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
-        Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
-        Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
-        Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
-        Language::ZH => "选择需要监控的目标",
-        Language::ZH_TW => "選取要套用於網路流量的篩選器",
-        Language::RO => "Selectați filtre pentru traficul de rețea",
-        Language::KO => "네트워크 트레픽에 적용할 필터 선택",
-        Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
-        Language::RU => "Выберите фильтры для применения к сетевому трафику",
-        Language::PT => "Selecione os filtros a serem aplicados no tráfego de rede",
-        Language::EL => "Επίλεξε τα φίλτρα για εφαρμογή στην κίνηση του δικτύου",
-        // Language::FA => "صافی ها را جهت اعمال بر آمد و شد شبکه انتخاب کنید",
-        Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
-        Language::FI => "Valitse suodattimet verkkoliikenteelle",
-        Language::JA => "トラフィックに適用するフィルターを選択してください",
-        Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
-        Language::VI => "Hãy chọn bộ lọc cho lưu lượng mạng",
-        Language::ID => "Pilih filter yang ingin dipasang dilalulintas jaringan",
-        Language::NL => "Selecteer filters om toe te passen op netwerkverkeer",
-    })
-}
+// pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType> {
+//     Text::new(match language {
+//         Language::EN => "Select filters to be applied on network traffic",
+//         Language::IT => "Seleziona i filtri da applicare al traffico di rete",
+//         Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
+//         Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
+//         Language::PL => "Wybierz filtry, które mają być zastosowane na ruchu sieciowym",
+//         Language::DE => "Wähle die Filter, die auf den Netzwerkverkehr angewendet werden sollen",
+//         Language::UK => "Виберіть фільтри, які мають бути застосовані до мережевого руху",
+//         Language::ZH => "选择需要监控的目标",
+//         Language::ZH_TW => "選取要套用於網路流量的篩選器",
+//         Language::RO => "Selectați filtre pentru traficul de rețea",
+//         Language::KO => "네트워크 트레픽에 적용할 필터 선택",
+//         Language::TR => "Ağ trafiğine uygulanacak filtreleri seçiniz",
+//         Language::RU => "Выберите фильтры для применения к сетевому трафику",
+//         Language::PT => "Selecione os filtros a serem aplicados no tráfego de rede",
+//         Language::EL => "Επίλεξε τα φίλτρα για εφαρμογή στην κίνηση του δικτύου",
+//         // Language::FA => "صافی ها را جهت اعمال بر آمد و شد شبکه انتخاب کنید",
+//         Language::SV => "Välj filtren som ska appliceras på nätverkstrafiken",
+//         Language::FI => "Valitse suodattimet verkkoliikenteelle",
+//         Language::JA => "トラフィックに適用するフィルターを選択してください",
+//         Language::UZ => "Tarmoq trafigiga qo'llaniladigan filtrlarni tanlang",
+//         Language::VI => "Hãy chọn bộ lọc cho lưu lượng mạng",
+//         Language::ID => "Pilih filter yang ingin dipasang dilalulintas jaringan",
+//         Language::NL => "Selecteer filters om toe te passen op netwerkverkeer",
+//     })
+// }
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
@@ -163,33 +163,33 @@ pub fn addresses_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn ip_version_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "IP version",
-        Language::IT => "Versione IP",
-        Language::FR => "Version IP",
-        Language::ES => "Versión IP",
-        Language::PL => "Wersja IP",
-        Language::DE => "IP Version",
-        Language::UK => "Версія IP",
-        Language::ZH => "目标IP协议版本",
-        Language::ZH_TW => "IP 版本",
-        Language::RO => "Versiune IP",
-        Language::KO => "IP 버전",
-        Language::TR => "IP versiyonu",
-        Language::RU => "Версия IP",
-        Language::PT => "Versão de IP",
-        Language::EL => "Έκδοση IP",
-        // Language::FA => "نسخهٔ IP",
-        Language::SV => "IP-version",
-        Language::FI => "IP-versio",
-        Language::JA => "IP バージョン",
-        Language::UZ => "IP versiyasi",
-        Language::VI => "Phiên bản IP",
-        Language::ID => "Versi IP",
-        Language::NL => "IP versie",
-    }
-}
+// pub fn ip_version_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "IP version",
+//         Language::IT => "Versione IP",
+//         Language::FR => "Version IP",
+//         Language::ES => "Versión IP",
+//         Language::PL => "Wersja IP",
+//         Language::DE => "IP Version",
+//         Language::UK => "Версія IP",
+//         Language::ZH => "目标IP协议版本",
+//         Language::ZH_TW => "IP 版本",
+//         Language::RO => "Versiune IP",
+//         Language::KO => "IP 버전",
+//         Language::TR => "IP versiyonu",
+//         Language::RU => "Версия IP",
+//         Language::PT => "Versão de IP",
+//         Language::EL => "Έκδοση IP",
+//         // Language::FA => "نسخهٔ IP",
+//         Language::SV => "IP-version",
+//         Language::FI => "IP-versio",
+//         Language::JA => "IP バージョン",
+//         Language::UZ => "IP versiyasi",
+//         Language::VI => "Phiên bản IP",
+//         Language::ID => "Versi IP",
+//         Language::NL => "IP versie",
+//     }
+// }
 
 // pub fn transport_protocol_translation(language: Language) -> &'static str {
 //     match language {
@@ -751,124 +751,124 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
     })
 }
 
-#[allow(clippy::too_many_lines)]
-pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text<'a, StyleType> {
-    Text::new(match language {
-        Language::EN => format!(
-            "Total intercepted packets: {observed}\n\n\
-                                 Filtered packets: 0\n\n\
-                                 Some packets have been intercepted, but still none has been selected according to the filters you specified..."
-        ),
-        Language::IT => format!(
-            "Totale pacchetti intercettati: {observed}\n\n\
-                                 Pacchetti filtrati: 0\n\n\
-                                 Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati..."
-        ),
-        Language::FR => format!(
-            "Total des paquets interceptés: {observed}\n\n\
-                                 Paquets filtrés: 0\n\n\
-                                 Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés..."
-        ),
-        Language::ES => format!(
-            "Total de paquetes interceptados: {observed}\n\n\
-                                 Paquetes filtrados: 0\n\n\
-                                 Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados..."
-        ),
-        Language::PL => format!(
-            "Suma przechwyconych pakietów: {observed}\n\n\
-                                 Przefiltrowane pakiety: 0\n\n\
-                                 Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."
-        ),
-        Language::DE => format!(
-            "Anzahl der empfangenen Pakete: {observed}\n\n\
-                                 Gefilterte Pakete: 0\n\n\
-                                 Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."
-        ),
-        Language::UK => format!(
-            "Сума перехоплених пакетів: {observed}\n\n\
-                                 Відфільтровані пакети: 0\n\n\
-                                 Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."
-        ),
-        Language::ZH => format!(
-            "监测到的数据包总数: {observed}\n\n\
-                                 目标数据包总数: 0\n\n\
-                                 当前已监测到一些数据包, 但其中并未包含您的目标数据包......"
-        ),
-        Language::ZH_TW => format!(
-            "攔截到的封包總數： {observed}\n\n\
-                                 已篩選封包： 0\n\n\
-                                 已攔截到部分封包，但尚未有任何封包符合您指定的篩選條件..."
-        ),
-        Language::RO => format!(
-            "Total pachete interceptate: {observed}\n\n\
-                                Pachete filtrate: 0\n\n\
-                                Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat..."
-        ),
-        Language::KO => format!(
-            "감지한 총 패킷: {observed}\n\n\
-                                필터링된 패킷: 0\n\n\
-                                일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다..."
-        ),
-        Language::TR => format!(
-            "Toplam yakalanan paketler: {observed}\n\n\
-                                 Filterelenen paketler: 0\n\n\
-                                 Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi..."
-        ),
-        Language::RU => format!(
-            "Всего пакетов перехвачено: {observed}\n\n\
-                                 Фильтровано пакетов: 0\n\n\
-                                 Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам..."
-        ),
-        Language::PT => format!(
-            "Total de pacotes interceptados: {observed}\n\n\
-                                Pacotes filtrados: 0\n\n\
-                                Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados..."
-        ),
-        Language::EL => format!(
-            "Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
-                                 Φιλτραρισμένα πακέτα: 0\n\n\
-                                 Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες..."
-        ),
-        // Language::FA => format!("مجموع بسته های رهگیری شده: {observed}\n\n\
-        //                         بسته های صاف شده: 0\n\n\
-        //                         شماری از بسته ها رهگیری شده اند، ولی هنوز هیچ کدام بر اساس صافی تعیین شده شما انتخاب نشده اند..."),
-        Language::SV => format!(
-            "Antal fångade paket: {observed}\n\n\
-                                 Filtrerade paket: 0\n\n\
-                                 Några paket har fångats, men än har inget valts enligt de angivna filtren ..."
-        ),
-        Language::FI => format!(
-            "Siepattuja paketteja yhteensä: {observed}\n\n\
-                                 Suodatettuja paketteja: 0\n\n\
-                                 Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan..."
-        ),
-        Language::JA => format!(
-            "取得したパケット数: {observed}\n\n\
-                                 フィルター後のパケット数: 0\n\n\
-                                 パケットは取得できていますが、設定されたフィルタリングにより表示されません..."
-        ),
-        Language::UZ => format!(
-            "Jami ushlangan paketlar: {observed}\n\n\
-            Filtrlangan paketlar: 0\n\n\
-            Tarmoq paketlari ushlandi, lekin ularning hech biri belgilangan filtrlarga mos kelmadi..."
-        ),
-        Language::VI => format!(
-            "Tổng số gói tin bị chặn: {observed}\n\n\
-                                 Các gói tin đã lọc: 0\n\n\
-                                 Một số gói đã bị chặn, nhưng vẫn chưa có gói tin nào được bắt theo bộ lọc bạn đã chọn..."
-        ),
-        Language::ID => format!(
-            "Total paket yang dilacak: {observed}\n\n\
-                                 Paket yg difilter: 0\n\n\
-                                 Beberapa paket dilacak, tetapi tidak ada yg terlihat berdasarkan filter yang kamu pilih..."
-        ),
-        Language::NL => format!(
-            "Totaal aantal onderschepte pakketten: {observed}\n\n\
-                                 Gefilterde pakketten: 0\n\n\
-                                 Er zijn enkele pakketten onderschept, maar nog geen enkele is geselecteerd volgens de filters die je hebt opgegeven..."
-        ),
-    })
-}
+// #[allow(clippy::too_many_lines)]
+// pub fn some_observed_translation<'a>(language: Language, observed: u128) -> Text<'a, StyleType> {
+//     Text::new(match language {
+//         Language::EN => format!(
+//             "Total intercepted packets: {observed}\n\n\
+//                                  Filtered packets: 0\n\n\
+//                                  Some packets have been intercepted, but still none has been selected according to the filters you specified..."
+//         ),
+//         Language::IT => format!(
+//             "Totale pacchetti intercettati: {observed}\n\n\
+//                                  Pacchetti filtrati: 0\n\n\
+//                                  Alcuni pacchetti sono stati intercettati, ma ancora nessuno è stato selezionato secondo i filtri specificati..."
+//         ),
+//         Language::FR => format!(
+//             "Total des paquets interceptés: {observed}\n\n\
+//                                  Paquets filtrés: 0\n\n\
+//                                  Certains paquets ont été interceptés, mais aucun ne satisfait les critères des filtres sélectionnés..."
+//         ),
+//         Language::ES => format!(
+//             "Total de paquetes interceptados: {observed}\n\n\
+//                                  Paquetes filtrados: 0\n\n\
+//                                  Se interceptaron algunos paquetes, pero ninguno de ellos cumplía los criterios de los filtros seleccionados..."
+//         ),
+//         Language::PL => format!(
+//             "Suma przechwyconych pakietów: {observed}\n\n\
+//                                  Przefiltrowane pakiety: 0\n\n\
+//                                  Niektóre pakiety zostały przechwycone, ale żaden nie został wybrany zgodnie z wskazanymi filtrami..."
+//         ),
+//         Language::DE => format!(
+//             "Anzahl der empfangenen Pakete: {observed}\n\n\
+//                                  Gefilterte Pakete: 0\n\n\
+//                                  Ein Paar Pakete wurden empfangen, aber es entsprechen noch keine den gewählten Filtern..."
+//         ),
+//         Language::UK => format!(
+//             "Сума перехоплених пакетів: {observed}\n\n\
+//                                  Відфільтровані пакети: 0\n\n\
+//                                  Деякі пакети були перехоплені, але жоден з них не був вибраний відповідно до вказаних фільтрів..."
+//         ),
+//         Language::ZH => format!(
+//             "监测到的数据包总数: {observed}\n\n\
+//                                  目标数据包总数: 0\n\n\
+//                                  当前已监测到一些数据包, 但其中并未包含您的目标数据包......"
+//         ),
+//         Language::ZH_TW => format!(
+//             "攔截到的封包總數： {observed}\n\n\
+//                                  已篩選封包： 0\n\n\
+//                                  已攔截到部分封包，但尚未有任何封包符合您指定的篩選條件..."
+//         ),
+//         Language::RO => format!(
+//             "Total pachete interceptate: {observed}\n\n\
+//                                 Pachete filtrate: 0\n\n\
+//                                 Unele pachete au fost interceptate, dar încă niciunul nu a fost selectat conform filtrelor pe care le-ați specificat..."
+//         ),
+//         Language::KO => format!(
+//             "감지한 총 패킷: {observed}\n\n\
+//                                 필터링된 패킷: 0\n\n\
+//                                 일부 패킷이 감지되었지만, 지정한 필터에 따라 선택되지 않았습니다..."
+//         ),
+//         Language::TR => format!(
+//             "Toplam yakalanan paketler: {observed}\n\n\
+//                                  Filterelenen paketler: 0\n\n\
+//                                  Bazı paketler yakalandı, fakat belirttiğiniz filtrelere göre hiç biri seçilmedi..."
+//         ),
+//         Language::RU => format!(
+//             "Всего пакетов перехвачено: {observed}\n\n\
+//                                  Фильтровано пакетов: 0\n\n\
+//                                  Сетевые пакеты были перехвачены, но ни один из них не соответствует заданным фильтрам..."
+//         ),
+//         Language::PT => format!(
+//             "Total de pacotes interceptados: {observed}\n\n\
+//                                 Pacotes filtrados: 0\n\n\
+//                                 Alguns pacotes foram interceptados, mas nenhum deles foi selecionado de acordo com os filtros especificados..."
+//         ),
+//         Language::EL => format!(
+//             "Συνολικά αναχαιτισμένα πακέτα: {observed}\n\n\
+//                                  Φιλτραρισμένα πακέτα: 0\n\n\
+//                                  Κάποια από τα πακέτα έχουν αναχαιτιστεί, αλλά κανένα ακόμη δεν έχει επιλεγεί σύμφωνα με τα φίλτρα που επέλεξες..."
+//         ),
+//         // Language::FA => format!("مجموع بسته های رهگیری شده: {observed}\n\n\
+//         //                         بسته های صاف شده: 0\n\n\
+//         //                         شماری از بسته ها رهگیری شده اند، ولی هنوز هیچ کدام بر اساس صافی تعیین شده شما انتخاب نشده اند..."),
+//         Language::SV => format!(
+//             "Antal fångade paket: {observed}\n\n\
+//                                  Filtrerade paket: 0\n\n\
+//                                  Några paket har fångats, men än har inget valts enligt de angivna filtren ..."
+//         ),
+//         Language::FI => format!(
+//             "Siepattuja paketteja yhteensä: {observed}\n\n\
+//                                  Suodatettuja paketteja: 0\n\n\
+//                                  Joitakin paketteja on siepattu, mutta yhtäkään ei ole valittu määrittämiesi suodattimien mukaan..."
+//         ),
+//         Language::JA => format!(
+//             "取得したパケット数: {observed}\n\n\
+//                                  フィルター後のパケット数: 0\n\n\
+//                                  パケットは取得できていますが、設定されたフィルタリングにより表示されません..."
+//         ),
+//         Language::UZ => format!(
+//             "Jami ushlangan paketlar: {observed}\n\n\
+//             Filtrlangan paketlar: 0\n\n\
+//             Tarmoq paketlari ushlandi, lekin ularning hech biri belgilangan filtrlarga mos kelmadi..."
+//         ),
+//         Language::VI => format!(
+//             "Tổng số gói tin bị chặn: {observed}\n\n\
+//                                  Các gói tin đã lọc: 0\n\n\
+//                                  Một số gói đã bị chặn, nhưng vẫn chưa có gói tin nào được bắt theo bộ lọc bạn đã chọn..."
+//         ),
+//         Language::ID => format!(
+//             "Total paket yang dilacak: {observed}\n\n\
+//                                  Paket yg difilter: 0\n\n\
+//                                  Beberapa paket dilacak, tetapi tidak ada yg terlihat berdasarkan filter yang kamu pilih..."
+//         ),
+//         Language::NL => format!(
+//             "Totaal aantal onderschepte pakketten: {observed}\n\n\
+//                                  Gefilterde pakketten: 0\n\n\
+//                                  Er zijn enkele pakketten onderschept, maar nog geen enkele is geselecteerd volgens de filters die je hebt opgegeven..."
+//         ),
+//     })
+// }
 
 // pub fn filtered_packets_translation(language: Language) -> &'static str {
 //     match language {

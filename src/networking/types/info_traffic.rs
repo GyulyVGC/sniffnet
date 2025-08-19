@@ -13,15 +13,11 @@ use std::collections::HashMap;
 pub struct InfoTraffic {
     /// Total amount of exchanged data
     pub tot_data_info: DataInfo,
-    /// Total packets including those not filtered
-    pub all_packets: u128,
-    /// Total bytes including those not filtered
-    pub all_bytes: u128,
     /// Number of dropped packets
     pub dropped_packets: u32,
     /// Timestamp of the latest parsed packet
     pub last_packet_timestamp: Timestamp,
-    /// Map of the filtered traffic
+    /// Map of the traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
     pub services: HashMap<Service, DataInfo>,
@@ -33,8 +29,6 @@ impl InfoTraffic {
     pub fn refresh(&mut self, msg: &mut InfoTraffic) {
         self.tot_data_info.refresh(msg.tot_data_info);
 
-        self.all_packets += msg.all_packets;
-        self.all_bytes += msg.all_bytes;
         self.dropped_packets = msg.dropped_packets;
 
         // it can happen they're equal due to dis-alignments in the PCAP timestamp
@@ -65,24 +59,20 @@ impl InfoTraffic {
         }
     }
 
-    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, u128, u128) {
+    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, u128) {
         let incoming = self.tot_data_info.incoming_data(data_repr);
         let outgoing = self.tot_data_info.outgoing_data(data_repr);
-        let all = match data_repr {
-            DataRepr::Packets => self.all_packets,
-            DataRepr::Bytes => self.all_bytes,
-            DataRepr::Bits => self.all_bytes * 8,
-        };
-        let filtered = all - incoming - outgoing;
+        let all = incoming + outgoing;
+        let all_packets = self.tot_data_info.tot_data(DataRepr::Packets);
         let dropped = match data_repr {
             DataRepr::Packets => u128::from(self.dropped_packets),
             DataRepr::Bytes | DataRepr::Bits => {
                 // assume that the dropped packets have the same size as the average packet
-                u128::from(self.dropped_packets) * all / self.all_packets
+                u128::from(self.dropped_packets) * all / all_packets
             }
         };
 
-        (incoming, outgoing, filtered, dropped)
+        (incoming, outgoing, dropped)
     }
 
     pub fn take_but_leave_something(&mut self) -> Self {

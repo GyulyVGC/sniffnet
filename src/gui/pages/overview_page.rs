@@ -1,7 +1,7 @@
 //! Module defining the run page of the application.
 //!
 //! It contains elements to display traffic statistics: chart, detailed connections data
-//! and overall statistics about the filtered traffic.
+//! and overall statistics about the traffic.
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
@@ -12,15 +12,15 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -28,16 +28,14 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
-    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    none_translation, outgoing_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
-use crate::utils::formatted_strings::get_active_filters_string;
+use crate::translations::translations_4::reading_from_pcap_translation;
 use crate::utils::types::icon::Icon;
 use crate::{ConfigSettings, Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
@@ -49,7 +47,7 @@ use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
     horizontal_space, vertical_space,
 };
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Element, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
@@ -70,52 +68,44 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         body = body_pcap_error(error, dots, language, font);
     } else {
         // NO pcap error detected
-        let observed = sniffer.info_traffic.all_packets;
-        let filtered = sniffer
+        let tot_packets = sniffer
             .info_traffic
             .tot_data_info
             .tot_data(DataRepr::Packets);
 
-        match (observed, filtered) {
-            (0, 0) => {
-                //no packets observed at all
-                body = body_no_packets(&sniffer.capture_source, font, language, dots);
-            }
-            (observed, 0) => {
-                //no packets have been filtered but some have been observed
-                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
-            }
-            (_observed, _filtered) => {
-                //observed > filtered > 0 || observed = filtered > 0
-                let tabs = get_pages_tabs(
-                    RunningPage::Overview,
-                    font,
-                    font_headers,
-                    language,
-                    sniffer.unread_notifications,
-                );
-                tab_and_body = tab_and_body.push(tabs);
+        if tot_packets == 0 {
+            // no packets observed at all
+            body = body_no_packets(&sniffer.capture_source, font, language, dots);
+        } else {
+            // some packets are there!
+            let tabs = get_pages_tabs(
+                RunningPage::Overview,
+                font,
+                font_headers,
+                language,
+                sniffer.unread_notifications,
+            );
+            tab_and_body = tab_and_body.push(tabs);
 
-                let container_chart = container_chart(sniffer, font);
+            let container_chart = container_chart(sniffer, font);
 
-                let container_info = col_info(sniffer);
+            let container_info = col_info(sniffer);
 
-                let container_report = row_report(sniffer);
+            let container_report = row_report(sniffer);
 
-                body = body
-                    .width(Length::Fill)
-                    .padding(10)
-                    .spacing(10)
-                    .align_x(Alignment::Center)
-                    .push(
-                        Row::new()
-                            .height(280)
-                            .spacing(10)
-                            .push(container_info)
-                            .push(container_chart),
-                    )
-                    .push(container_report);
-            }
+            body = body
+                .width(Length::Fill)
+                .padding(10)
+                .spacing(10)
+                .align_x(Alignment::Center)
+                .push(
+                    Row::new()
+                        .height(280)
+                        .spacing(10)
+                        .push(container_info)
+                        .push(container_chart),
+                )
+                .push(container_report);
         }
     }
 
@@ -170,31 +160,6 @@ fn body_no_packets<'a>(
         .push(icon_text)
         .push(Space::with_height(15))
         .push(nothing_to_see_text)
-        .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
-}
-
-fn body_no_observed<'a>(
-    filters: &Filters,
-    observed: u128,
-    font: Font,
-    language: Language,
-    dots: &str,
-) -> Column<'a, Message, StyleType> {
-    let tot_packets_text = some_observed_translation(language, observed)
-        .align_x(Alignment::Center)
-        .font(font);
-
-    Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_x(Alignment::Center)
-        .push(vertical_space())
-        .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(filters, language, font))
-        .push(Rule::horizontal(20))
-        .push(tot_packets_text)
         .push(Text::new(dots.to_owned()).font(font).size(50))
         .push(Space::with_height(FillPortion(2)))
 }
@@ -464,13 +429,13 @@ pub fn service_bar<'a>(
         )
 }
 
-fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
+fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let ConfigSettings {
         style, language, ..
     } = sniffer.configs.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.capture_source);
+    let col_device = col_device(language, font, &sniffer.capture_source, &sniffer.filters);
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.data_repr);
@@ -530,6 +495,7 @@ fn col_device<'a>(
     language: Language,
     font: Font,
     cs: &CaptureSource,
+    filters: &'a Filters,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -537,15 +503,49 @@ fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
+    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
+        Row::new()
+            .spacing(10)
+            .push(Text::new("BPF").font(font))
+            .push(get_info_tooltip(filters.bpf().to_string(), font))
+            .into()
+    } else {
+        Text::new(none_translation(language)).font(font).into()
+    };
+
     Column::new()
         .height(Length::Fill)
         .spacing(10)
-        .push(TextType::highlighted_subtitle_with_desc(
-            cs.title(language),
-            &cs_info,
-            font,
-        ))
-        .push(link_type.link_type_col(language, font))
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", cs.title(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .spacing(10)
+                        .push(Text::new(format!("   {}", &cs_info)).font(font))
+                        .push(get_info_tooltip(
+                            link_type.full_print_on_one_line(language),
+                            font,
+                        )),
+                ),
+        )
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", active_filters_translation(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .push(Text::new("   ".to_string()).font(font))
+                        .push(filters_desc),
+                ),
+        )
 }
 
 fn col_data_representation<'a>(
@@ -585,29 +585,14 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn donut_row<'a>(
+fn donut_row(
     language: Language,
     font: Font,
     sniffer: &Sniffer,
-) -> Container<'a, Message, StyleType> {
+) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.traffic_chart.data_repr;
-    let filters = &sniffer.filters;
 
-    let (in_data, out_data, filtered_out, dropped) =
-        sniffer.info_traffic.get_thumbnail_data(data_repr);
-
-    let legend_entry_filtered = if filters.none_active() {
-        None
-    } else {
-        Some(donut_legend_entry(
-            filtered_out,
-            data_repr,
-            RuleType::FilteredOut,
-            filters,
-            font,
-            language,
-        ))
-    };
+    let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
 
     let legend_col = Column::new()
         .spacing(5)
@@ -615,7 +600,6 @@ fn donut_row<'a>(
             in_data,
             data_repr,
             RuleType::Incoming,
-            filters,
             font,
             language,
         ))
@@ -623,16 +607,13 @@ fn donut_row<'a>(
             out_data,
             data_repr,
             RuleType::Outgoing,
-            filters,
             font,
             language,
         ))
-        .push_maybe(legend_entry_filtered)
         .push(donut_legend_entry(
             dropped,
             data_repr,
             RuleType::Dropped,
-            filters,
             font,
             language,
         ));
@@ -644,7 +625,6 @@ fn donut_row<'a>(
             data_repr,
             in_data,
             out_data,
-            filtered_out,
             dropped,
             font,
             sniffer.thumbnail,
@@ -662,7 +642,6 @@ fn donut_legend_entry<'a>(
     value: u128,
     data_repr: DataRepr,
     rule_type: RuleType,
-    filters: &Filters,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
@@ -671,15 +650,8 @@ fn donut_legend_entry<'a>(
     let label = match rule_type {
         RuleType::Incoming => incoming_translation(language),
         RuleType::Outgoing => outgoing_translation(language),
-        RuleType::FilteredOut => excluded_translation(language),
         RuleType::Dropped => dropped_translation(language),
         _ => "",
-    };
-
-    let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
-        Some(get_active_filters_tooltip(filters, language, font))
-    } else {
-        None
     };
 
     Row::new()
@@ -691,7 +663,6 @@ fn donut_legend_entry<'a>(
                 .push(Rule::horizontal(1).class(rule_type)),
         )
         .push(Text::new(format!("{label}: {value_text}")).font(font))
-        .push_maybe(tooltip)
 }
 
 const MIN_BARS_LENGTH: f32 = 4.0;
@@ -794,46 +765,12 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_active_filters_col<'a>(
-    filters: &Filters,
-    language: Language,
-    font: Font,
-) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().push(
-        Text::new(active_filters_translation(language))
-            .font(font)
-            .class(TextType::Subtitle),
-    );
-
-    if filters.none_active() {
-        ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
-    } else {
-        let filters_string = get_active_filters_string(filters, language);
-        ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
-    }
-    ret_val
-}
-
-fn get_active_filters_tooltip<'a>(
-    filters: &Filters,
-    language: Language,
-    font: Font,
-) -> Tooltip<'a, Message, StyleType> {
-    let filters_string = get_active_filters_string(filters, language);
-
-    let mut ret_val = Column::new().push(
-        Text::new(active_filters_translation(language))
-            .font(font)
-            .class(TextType::Subtitle),
-    );
-
-    ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
-
+fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Container::new(
             Text::new("i")
+                .size(FONT_SIZE_FOOTER)
                 .font(font)
-                .size(15)
                 .line_height(LineHeight::Relative(1.0)),
         )
         .align_x(Alignment::Center)
@@ -841,7 +778,7 @@ fn get_active_filters_tooltip<'a>(
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        ret_val,
+        Text::new(info_str).font(font),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
