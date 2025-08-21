@@ -1,6 +1,3 @@
-//! Module defining the `ConfigSettings` struct, which allows to save and reload
-//! the application default configuration.
-
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -12,7 +9,7 @@ use crate::{Language, StyleType};
 use crate::{SNIFFNET_LOWERCASE, location};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct ConfigSettings {
+pub struct Settings {
     pub color_gradient: GradientType,
     pub language: Language,
     pub scale_factor: f64,
@@ -24,21 +21,17 @@ pub struct ConfigSettings {
     pub style: StyleType,
 }
 
-impl ConfigSettings {
+impl Settings {
     const FILE_NAME: &'static str = "settings";
 
     #[cfg(not(test))]
     pub fn load() -> Self {
-        if let Ok(settings) = confy::load::<ConfigSettings>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
+        if let Ok(settings) = confy::load::<Settings>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             settings
         } else {
-            let _ = confy::store(
-                SNIFFNET_LOWERCASE,
-                Self::FILE_NAME,
-                ConfigSettings::default(),
-            )
-            .log_err(location!());
-            ConfigSettings::default()
+            let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, Settings::default())
+                .log_err(location!());
+            Settings::default()
         }
     }
 
@@ -48,9 +41,9 @@ impl ConfigSettings {
     }
 }
 
-impl Default for ConfigSettings {
+impl Default for Settings {
     fn default() -> Self {
-        ConfigSettings {
+        Settings {
             color_gradient: GradientType::default(),
             language: Language::default(),
             scale_factor: 1.0,
@@ -65,20 +58,20 @@ impl Default for ConfigSettings {
 
 #[cfg(test)]
 mod tests {
-    use crate::ConfigSettings;
+    use crate::Settings;
 
-    impl ConfigSettings {
+    impl Settings {
         pub fn test_path() -> String {
             format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), Self::FILE_NAME)
         }
 
         pub fn load() -> Self {
-            confy::load_path::<ConfigSettings>(ConfigSettings::test_path())
-                .unwrap_or_else(|_| ConfigSettings::default())
+            confy::load_path::<Settings>(Settings::test_path())
+                .unwrap_or_else(|_| Settings::default())
         }
 
         pub fn store(self) -> Result<(), confy::ConfyError> {
-            confy::store_path(ConfigSettings::test_path(), self)
+            confy::store_path(Settings::test_path(), self)
         }
     }
 }

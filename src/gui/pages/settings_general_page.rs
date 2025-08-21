@@ -14,6 +14,7 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
@@ -25,15 +26,15 @@ use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -57,13 +58,13 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
 }
 
 fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         language,
         scale_factor,
         mmdb_country,
         mmdb_asn,
         ..
-    } = sniffer.configs.settings.clone();
+    } = sniffer.conf.settings.clone();
 
     let is_editable = sniffer.running_page.eq(&RunningPage::Init);
 

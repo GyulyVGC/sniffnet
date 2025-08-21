@@ -17,9 +17,6 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use crate::configs::types::config_window::{
-    ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
-};
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
@@ -37,9 +34,12 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
-use crate::gui::types::export_pcap::ExportPcap;
-use crate::gui::types::filters::Filters;
+use crate::gui::types::conf::Conf;
+use crate::gui::types::config_window::{
+    ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
+};
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
@@ -59,25 +59,23 @@ use crate::notifications::types::logged_notification::LoggedNotification;
 use crate::notifications::types::notifications::{DataNotification, Notification};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
-use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
-use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
 use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ConfigSettings, Configs, StyleType, TrafficChart, location};
+use crate::{StyleType, TrafficChart, location};
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
-/// Struct on which the gui is based
+/// Struct on which the GUI is based
 ///
-/// It contains gui statuses and network traffic statistics
+/// It carries statuses, network traffic statistics, and more
 pub struct Sniffer {
-    /// Application's configurations: settings, window properties, name of last device sniffed
-    pub configs: Configs,
+    /// Parameters that are persistent across runs
+    pub conf: Conf,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
     /// Capture data
@@ -90,32 +88,21 @@ pub struct Sniffer {
     pub logged_notifications: (VecDeque<LoggedNotification>, usize),
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
-    /// Capture source picklist, to select the source of the capture
-    pub capture_source_picklist: CaptureSourcePicklist,
     /// Network device to be analyzed, or PCAP file to be imported
+    /// TODO: Conf???
     pub capture_source: CaptureSource,
     /// List of network devices
     pub my_devices: Vec<MyDevice>,
-    /// BPF filter program to be applied to the capture
-    pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Chart displayed
     pub traffic_chart: TrafficChart,
-    /// Report sort type (inspect page)
-    pub report_sort_type: ReportSortType,
-    /// Host sort type (overview page)
-    pub host_sort_type: SortType,
-    /// Service sort type (overview page)
-    pub service_sort_type: SortType,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
     pub settings_page: Option<SettingsPage>,
-    /// Remembers the last opened setting page
-    pub last_opened_setting: SettingsPage,
     /// Defines the current running page
     pub running_page: RunningPage,
     /// Number of unread notifications
@@ -128,49 +115,39 @@ pub struct Sniffer {
     pub mmdb_readers: MmdbReaders,
     /// Time-related events
     pub timing_events: TimingEvents,
-    /// Information about PCAP file export
-    pub export_pcap: ExportPcap,
     /// Whether thumbnail mode is currently active
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
-    /// Import path for PCAP file
-    pub import_pcap_path: String,
 }
 
 impl Sniffer {
-    pub fn new(configs: Configs) -> Self {
-        let ConfigSettings {
+    pub fn new(conf: Conf) -> Self {
+        let Settings {
             style,
             language,
             mmdb_country,
             mmdb_asn,
             ..
-        } = configs.settings.clone();
-        let device = configs.device.to_my_device();
+        } = conf.settings.clone();
+        let device = conf.device.to_my_device();
         Self {
-            configs,
+            conf,
             current_capture_rx: (0, None),
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
-            capture_source_picklist: CaptureSourcePicklist::default(),
             capture_source: CaptureSource::Device(device),
             my_devices: Vec::new(),
-            filters: Filters::default(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language),
-            report_sort_type: ReportSortType::default(),
-            host_sort_type: SortType::default(),
-            service_sort_type: SortType::default(),
             modal: None,
             settings_page: None,
-            last_opened_setting: SettingsPage::Notifications,
             running_page: RunningPage::Init,
             unread_notifications: 0,
             search: SearchParameters::default(),
@@ -180,11 +157,9 @@ impl Sniffer {
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
             timing_events: TimingEvents::default(),
-            export_pcap: ExportPcap::default(),
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
-            import_pcap_path: String::new(),
         }
     }
 
@@ -283,25 +258,25 @@ impl Sniffer {
             }
             Message::DeviceSelection(name) => self.set_device(&name),
             Message::SetCaptureSource(cs_pick) => {
-                self.capture_source_picklist = cs_pick;
+                self.conf.capture_source_picklist = cs_pick;
                 return if cs_pick == CaptureSourcePicklist::File {
-                    Task::done(Message::SetPcapImport(self.import_pcap_path.clone()))
+                    Task::done(Message::SetPcapImport(self.conf.import_pcap_path.clone()))
                 } else {
                     Task::done(Message::DeviceSelection(
-                        self.configs.device.device_name.clone(),
+                        self.conf.device.device_name.clone(),
                     ))
                 };
             }
             Message::ToggleFilters => {
-                self.filters.toggle();
+                self.conf.filters.toggle();
             }
             Message::BpfFilter(value) => {
-                self.filters.set_bpf(value);
+                self.conf.filters.set_bpf(value);
             }
             Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
             Message::ReportSortSelection(sort) => {
                 self.page_number = 1;
-                self.report_sort_type = sort;
+                self.conf.report_sort_type = sort;
             }
             Message::OpenWebPage(web_page) => Self::open_web(&web_page),
             Message::Start => {
@@ -311,16 +286,16 @@ impl Sniffer {
             }
             Message::Reset => self.reset(),
             Message::Style(style) => {
-                self.configs.settings.style = style;
+                self.conf.settings.style = style;
                 self.traffic_chart.change_style(style);
             }
             Message::LoadStyle(path) => {
-                self.configs.settings.style_path.clone_from(&path);
+                self.conf.settings.style_path.clone_from(&path);
                 if let Ok(palette) = Palette::from_file(path) {
                     let style = StyleType::Custom(ExtraStyles::CustomToml(
                         CustomPalette::from_palette(palette),
                     ));
-                    self.configs.settings.style = style;
+                    self.conf.settings.style = style;
                     self.traffic_chart.change_style(style);
                 }
             }
@@ -338,7 +313,7 @@ impl Sniffer {
             }
             Message::OpenLastSettings => {
                 if self.modal.is_none() && self.settings_page.is_none() {
-                    self.settings_page = Some(self.last_opened_setting);
+                    self.settings_page = Some(self.conf.last_opened_setting);
                 }
             }
             Message::CloseSettings => self.close_settings(),
@@ -349,7 +324,7 @@ impl Sniffer {
                 }
             }
             Message::LanguageSelection(language) => {
-                self.configs.settings.language = language;
+                self.conf.settings.language = language;
                 self.traffic_chart.change_language(language);
             }
             Message::UpdateNotificationSettings(notification, emit_sound) => {
@@ -357,7 +332,7 @@ impl Sniffer {
             }
             Message::ChangeVolume(volume) => {
                 play(Sound::Pop, volume);
-                self.configs.settings.notifications.volume = volume;
+                self.conf.settings.notifications.volume = volume;
             }
             Message::ClearAllNotifications => {
                 self.logged_notifications.0 = VecDeque::new();
@@ -405,41 +380,40 @@ impl Sniffer {
             }
             Message::WindowFocused => self.timing_events.focus_now(),
             Message::GradientsSelection(gradient_type) => {
-                self.configs.settings.color_gradient = gradient_type;
+                self.conf.settings.color_gradient = gradient_type;
             }
             Message::ChangeScaleFactor(slider_val) => {
                 let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
-                self.configs.settings.scale_factor = scale_factor_str.parse().unwrap_or(1.0);
+                self.conf.settings.scale_factor = scale_factor_str.parse().unwrap_or(1.0);
             }
             Message::WindowMoved(x, y) => {
-                let scale_factor = self.configs.settings.scale_factor;
+                let scale_factor = self.conf.settings.scale_factor;
                 let scaled = PositionTuple(x, y).scale_and_check(scale_factor);
                 if self.thumbnail {
-                    self.configs.window.thumbnail_position = scaled;
+                    self.conf.window.thumbnail_position = scaled;
                 } else {
-                    self.configs.window.position = scaled;
+                    self.conf.window.position = scaled;
                 }
             }
             Message::WindowResized(width, height) => {
                 if !self.thumbnail {
-                    let scale_factor = self.configs.settings.scale_factor;
-                    self.configs.window.size =
-                        SizeTuple(width, height).scale_and_check(scale_factor);
+                    let scale_factor = self.conf.settings.scale_factor;
+                    self.conf.window.size = SizeTuple(width, height).scale_and_check(scale_factor);
                 } else if !self.timing_events.was_just_thumbnail_enter() {
                     return Task::done(Message::ToggleThumbnail(true));
                 }
             }
             Message::CustomCountryDb(db) => {
-                self.configs.settings.mmdb_country.clone_from(&db);
+                self.conf.settings.mmdb_country.clone_from(&db);
                 self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
             }
             Message::CustomAsnDb(db) => {
-                self.configs.settings.mmdb_asn.clone_from(&db);
+                self.conf.settings.mmdb_asn.clone_from(&db);
                 self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
-                let _ = self.configs.clone().store();
+                let _ = self.conf.clone().store();
                 return window::close(self.id.unwrap_or_else(Id::unique));
             }
             Message::CopyIp(ip) => {
@@ -448,24 +422,24 @@ impl Sniffer {
             }
             Message::OpenFile(old_file, file_info, consumer_message) => {
                 return Task::perform(
-                    Self::open_file(old_file, file_info, self.configs.settings.language),
+                    Self::open_file(old_file, file_info, self.conf.settings.language),
                     consumer_message,
                 );
             }
             Message::HostSortSelection(sort_type) => {
-                self.host_sort_type = sort_type;
+                self.conf.host_sort_type = sort_type;
             }
             Message::ServiceSortSelection(sort_type) => {
-                self.service_sort_type = sort_type;
+                self.conf.service_sort_type = sort_type;
             }
             Message::ToggleExportPcap => {
-                self.export_pcap.toggle();
+                self.conf.export_pcap.toggle();
             }
             Message::OutputPcapDir(path) => {
-                self.export_pcap.set_directory(path);
+                self.conf.export_pcap.set_directory(path);
             }
             Message::OutputPcapFile(name) => {
-                self.export_pcap.set_file_name(&name);
+                self.conf.export_pcap.set_file_name(&name);
             }
             Message::ToggleThumbnail(triggered_by_resize) => {
                 let window_id = self.id.unwrap_or_else(Id::unique);
@@ -474,9 +448,9 @@ impl Sniffer {
                 self.traffic_chart.thumbnail = self.thumbnail;
 
                 return if self.thumbnail {
-                    let scale_factor = self.configs.settings.scale_factor;
+                    let scale_factor = self.conf.settings.scale_factor;
                     let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
-                    let position = self.configs.window.thumbnail_position;
+                    let position = self.conf.window.thumbnail_position;
                     self.timing_events.thumbnail_enter_now();
                     Task::batch([
                         window::maximize(window_id, false),
@@ -494,8 +468,8 @@ impl Sniffer {
                         window::change_level(window_id, Level::Normal),
                     ];
                     if !triggered_by_resize {
-                        let size = self.configs.window.size.to_size();
-                        let position = self.configs.window.position.to_point();
+                        let size = self.conf.window.size.to_size();
+                        let position = self.conf.window.position.to_point();
                         commands.push(window::move_to(window_id, position));
                         commands.push(window::resize(window_id, size));
                     }
@@ -519,16 +493,16 @@ impl Sniffer {
                 }
             }
             Message::ScaleFactorShortcut(increase) => {
-                let scale_factor = self.configs.settings.scale_factor;
+                let scale_factor = self.conf.settings.scale_factor;
                 if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
                     let delta = if increase { 0.1 } else { -0.1 };
-                    self.configs.settings.scale_factor += delta;
+                    self.conf.settings.scale_factor += delta;
                 }
             }
             Message::SetNewerReleaseStatus(status) => self.newer_release_available = status,
             Message::SetPcapImport(path) => {
                 if !path.is_empty() {
-                    self.import_pcap_path.clone_from(&path);
+                    self.conf.import_pcap_path.clone_from(&path);
                     self.capture_source = CaptureSource::File(MyPcapImport::new(path));
                 }
             }
@@ -564,12 +538,12 @@ impl Sniffer {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        let ConfigSettings {
+        let Settings {
             style,
             language,
             color_gradient,
             ..
-        } = self.configs.settings;
+        } = self.conf.settings;
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
@@ -652,11 +626,11 @@ impl Sniffer {
     }
 
     pub fn theme(&self) -> StyleType {
-        self.configs.settings.style
+        self.conf.settings.style
     }
 
     pub fn scale_factor(&self) -> f64 {
-        self.configs.settings.scale_factor
+        self.conf.settings.scale_factor
     }
 
     /// Updates threshold if it hasn't been edited for a while
@@ -664,17 +638,13 @@ impl Sniffer {
         // Ignore if just edited
         if let Some(temp_threshold) = self.timing_events.threshold_adjust_expired_take() {
             // Apply the temporary threshold to the actual config
-            self.configs
-                .settings
-                .notifications
-                .data_notification
-                .threshold = temp_threshold.threshold;
-            self.configs
+            self.conf.settings.notifications.data_notification.threshold = temp_threshold.threshold;
+            self.conf
                 .settings
                 .notifications
                 .data_notification
                 .byte_multiple = temp_threshold.byte_multiple;
-            self.configs
+            self.conf
                 .settings
                 .notifications
                 .data_notification
@@ -689,7 +659,7 @@ impl Sniffer {
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
-            self.configs.settings.notifications,
+            self.conf.settings.notifications,
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
@@ -729,9 +699,9 @@ impl Sniffer {
             let current_device_name = &self.capture_source.get_name();
             self.set_device(current_device_name);
         }
-        let pcap_path = self.export_pcap.full_path();
+        let pcap_path = self.conf.export_pcap.full_path();
         let capture_context =
-            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.filters);
+            CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
         self.pcap_error = capture_context.error().map(ToString::to_string);
         self.running_page = RunningPage::Overview;
 
@@ -776,9 +746,9 @@ impl Sniffer {
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
         }
-        let ConfigSettings {
+        let Settings {
             style, language, ..
-        } = self.configs.settings;
+        } = self.conf.settings;
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
@@ -787,9 +757,6 @@ impl Sniffer {
         self.logged_notifications = (VecDeque::new(), 0);
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language);
-        self.report_sort_type = ReportSortType::default();
-        self.host_sort_type = SortType::default();
-        self.service_sort_type = SortType::default();
         self.modal = None;
         self.settings_page = None;
         self.running_page = RunningPage::Init;
@@ -803,7 +770,7 @@ impl Sniffer {
     fn set_device(&mut self, name: &str) {
         for my_dev in &self.my_devices {
             if my_dev.get_name().eq(&name) {
-                self.configs.device.device_name = name.to_string();
+                self.conf.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
@@ -845,7 +812,7 @@ impl Sniffer {
 
     fn close_settings(&mut self) {
         if let Some(page) = self.settings_page {
-            self.last_opened_setting = page;
+            self.conf.last_opened_setting = page;
             self.settings_page = None;
         }
     }
@@ -855,7 +822,7 @@ impl Sniffer {
     /// Threshold adjustments are saved in `self.timing_events.threshold_adjust` and then applied
     /// after timeout
     fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
-        let notifications = self.configs.settings.notifications;
+        let notifications = self.conf.settings.notifications;
         let sound = match notification {
             Notification::Data(DataNotification {
                 data_repr,
@@ -879,37 +846,29 @@ impl Sniffer {
                     self.timing_events.threshold_adjust_now(temp_threshold);
                 }
                 if threshold.is_some() != notifications.data_notification.threshold.is_some() {
-                    self.configs
-                        .settings
-                        .notifications
-                        .data_notification
-                        .threshold = threshold;
-                    self.configs
+                    self.conf.settings.notifications.data_notification.threshold = threshold;
+                    self.conf
                         .settings
                         .notifications
                         .data_notification
                         .byte_multiple = byte_multiple;
-                    self.configs
+                    self.conf
                         .settings
                         .notifications
                         .data_notification
                         .previous_threshold = previous_threshold;
                 }
-                self.configs.settings.notifications.data_notification.sound = sound;
-                self.configs
-                    .settings
-                    .notifications
-                    .data_notification
-                    .data_repr = data_repr;
+                self.conf.settings.notifications.data_notification.sound = sound;
+                self.conf.settings.notifications.data_notification.data_repr = data_repr;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
-                self.configs.settings.notifications.favorite_notification = favorite_notification;
+                self.conf.settings.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
             }
         };
         if emit_sound {
-            play(sound, self.configs.settings.notifications.volume);
+            play(sound, self.conf.settings.notifications.volume);
         }
     }
 
@@ -918,7 +877,7 @@ impl Sniffer {
         if let Some(temp_threshold) = self.timing_events.temp_threshold() {
             temp_threshold
         } else {
-            let notifications = self.configs.settings.notifications;
+            let notifications = self.conf.settings.notifications;
             notifications.data_notification
         }
     }
@@ -1083,9 +1042,9 @@ impl Sniffer {
     }
 
     pub fn is_capture_source_consistent(&self) -> bool {
-        self.capture_source_picklist == CaptureSourcePicklist::Device
+        self.conf.capture_source_picklist == CaptureSourcePicklist::Device
             && matches!(self.capture_source, CaptureSource::Device(_))
-            || self.capture_source_picklist == CaptureSourcePicklist::File
+            || self.conf.capture_source_picklist == CaptureSourcePicklist::File
                 && matches!(self.capture_source, CaptureSource::File(_))
     }
 }
@@ -1122,17 +1081,17 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{
-        ByteMultiple, ConfigDevice, ConfigSettings, ConfigWindow, Configs, Language,
-        ReportSortType, RunningPage, Sniffer, StyleType,
+        ByteMultiple, ConfigDevice, ConfigWindow, Configs, Language, ReportSortType, RunningPage,
+        Settings, Sniffer, StyleType,
     };
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
         fn drop(&mut self) {
-            let settings_path_str = ConfigSettings::test_path();
+            let settings_path_str = Settings::test_path();
             let settings_path = Path::new(&settings_path_str);
             if settings_path.exists() {
-                remove_file(ConfigSettings::test_path()).unwrap();
+                remove_file(Settings::test_path()).unwrap();
             }
 
             let device_path_str = ConfigDevice::test_path();
@@ -1823,7 +1782,7 @@ mod tests {
     #[test]
     #[serial] // needed to not collide with other tests generating configs files
     fn test_config_settings() {
-        let path_string = ConfigSettings::test_path();
+        let path_string = Settings::test_path();
         let path = Path::new(&path_string);
 
         assert!(!path.exists());
@@ -1836,7 +1795,7 @@ mod tests {
         let settings_start = sniffer.configs.settings.clone();
         assert_eq!(
             settings_start,
-            ConfigSettings {
+            Settings {
                 color_gradient: GradientType::None,
                 language: Language::EN,
                 scale_factor: 1.0,
@@ -1874,7 +1833,7 @@ mod tests {
         let settings_end = Sniffer::new(Configs::load()).configs.settings.clone();
         assert_eq!(
             settings_end,
-            ConfigSettings {
+            Settings {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
                 scale_factor: 1.0,

@@ -11,8 +11,6 @@ use iced::{Font, Pixels, Settings, application, window};
 
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
-use configs::types::config_device::ConfigDevice;
-use configs::types::config_settings::ConfigSettings;
 use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
@@ -26,10 +24,10 @@ use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
-use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
 use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
 mod chart;
 mod cli;

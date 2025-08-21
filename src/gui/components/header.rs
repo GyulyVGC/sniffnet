@@ -5,7 +5,6 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Font, Length};
 
-use crate::configs::types::config_settings::ConfigSettings;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -14,6 +13,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
 use crate::utils::types::icon::Icon;
@@ -21,12 +21,12 @@ use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 
 pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
 
     if thumbnail {
@@ -41,7 +41,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         );
     }
 
-    let last_opened_setting = sniffer.last_opened_setting;
+    let last_opened_setting = sniffer.conf.last_opened_setting;
     let is_running = sniffer.running_page.ne(&RunningPage::Init);
 
     let logo = Icon::Sniffnet

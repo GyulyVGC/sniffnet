@@ -21,6 +21,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
@@ -36,13 +37,13 @@ use crate::translations::translations_2::{
 };
 use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
+use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -74,7 +75,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             language,
             &sniffer.search,
             font,
-            sniffer.report_sort_type,
+            sniffer.conf.report_sort_type,
             sniffer.traffic_chart.data_repr,
         ))
         .push(Space::with_height(4))
@@ -105,9 +106,9 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 }
 
 fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
 

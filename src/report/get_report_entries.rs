@@ -50,7 +50,7 @@ pub fn get_searched_entries(
     all_results.sort_by(|&(_, a), &(_, b)| {
         a.compare(
             b,
-            sniffer.report_sort_type.data_sort,
+            sniffer.conf.report_sort_type.data_sort,
             sniffer.traffic_chart.data_repr,
         )
     });

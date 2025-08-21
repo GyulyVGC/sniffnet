@@ -76,7 +76,7 @@ mod tests {
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::notifications::types::notifications::Notifications;
-    use crate::{ConfigDevice, ConfigSettings, ConfigWindow, Language, Sniffer, StyleType};
+    use crate::{ConfigDevice, ConfigWindow, Language, Settings, Sniffer, StyleType};
 
     use super::*;
 
@@ -86,7 +86,7 @@ mod tests {
         // initial configs stored are the default ones
         assert_eq!(Configs::load(), Configs::default());
         let modified_configs = Configs {
-            settings: ConfigSettings {
+            settings: Settings {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
                 scale_factor: 0.65,

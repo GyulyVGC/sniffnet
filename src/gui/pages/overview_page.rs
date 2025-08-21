@@ -17,6 +17,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -37,7 +38,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
 use crate::translations::translations_4::reading_from_pcap_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, RunningPage, StyleType};
+use crate::{Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -52,9 +53,9 @@ use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -210,16 +211,20 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
 }
 
 fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_host = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, data_repr, sniffer.host_sort_type);
+    let entries = get_host_entries(
+        &sniffer.info_traffic,
+        data_repr,
+        sniffer.conf.host_sort_type,
+    );
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
@@ -273,7 +278,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 )
                 .push(horizontal_space())
                 .push(sort_arrows(
-                    sniffer.host_sort_type,
+                    sniffer.conf.host_sort_type,
                     Message::HostSortSelection,
                 )),
         )
@@ -287,16 +292,20 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 }
 
 fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_service = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, data_repr, sniffer.service_sort_type);
+    let entries = get_service_entries(
+        &sniffer.info_traffic,
+        data_repr,
+        sniffer.conf.service_sort_type,
+    );
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
@@ -337,7 +346,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 )
                 .push(horizontal_space())
                 .push(sort_arrows(
-                    sniffer.service_sort_type,
+                    sniffer.conf.service_sort_type,
                     Message::ServiceSortSelection,
                 )),
         )
@@ -430,12 +439,17 @@ pub fn service_bar<'a>(
 }
 
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.capture_source, &sniffer.filters);
+    let col_device = col_device(
+        language,
+        font,
+        &sniffer.capture_source,
+        &sniffer.conf.filters,
+    );
 
     let col_data_representation =
         col_data_representation(language, font, sniffer.traffic_chart.data_repr);
@@ -469,7 +483,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 }
 
 fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.settings;
+    let Settings { language, .. } = sniffer.conf.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
     Container::new(

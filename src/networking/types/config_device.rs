@@ -1,6 +1,3 @@
-//! Module defining the `ConfigDevice` struct, which allows to save and reload
-//! the application default configuration.
-
 use crate::networking::types::my_device::MyDevice;
 #[cfg(not(test))]
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -67,7 +64,7 @@ impl ConfigDevice {
 
 #[cfg(test)]
 mod tests {
-    use crate::ConfigDevice;
+    use crate::networking::types::config_device::ConfigDevice;
 
     impl ConfigDevice {
         pub fn test_path() -> String {

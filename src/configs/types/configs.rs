@@ -1,11 +1,13 @@
-use crate::{ConfigDevice, ConfigSettings, ConfigWindow};
+use crate::ConfigWindow;
+use crate::gui::types::settings::Settings;
+use crate::networking::types::config_device::ConfigDevice;
 use confy::ConfyError;
 
 pub static CONFIGS: std::sync::LazyLock<Configs> = std::sync::LazyLock::new(Configs::load);
 
 #[derive(Default, Clone, PartialEq, Debug)]
 pub struct Configs {
-    pub settings: ConfigSettings,
+    pub settings: Settings,
     pub device: ConfigDevice,
     pub window: ConfigWindow,
 }
@@ -15,7 +17,7 @@ impl Configs {
     /// use `CONFIGS` instead to access the initial instance
     pub fn load() -> Self {
         Configs {
-            settings: ConfigSettings::load(),
+            settings: Settings::load(),
             device: ConfigDevice::load(),
             window: ConfigWindow::load(),
         }
