@@ -24,14 +24,13 @@ use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
-use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::types::conf::CONF;
 use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
 mod chart;
 mod cli;
-mod configs;
 mod countries;
 mod gui;
 mod mmdb;
@@ -60,7 +59,7 @@ pub fn main() -> iced::Result {
         _gag2 = gag2;
     }
 
-    let configs = CONFIGS.clone();
+    let conf = CONF.clone();
     let boot_task_chain = handle_cli_args();
 
     #[cfg(debug_assertions)]
@@ -76,7 +75,7 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position, .. } = configs.window;
+    let ConfigWindow { size, position, .. } = conf.window;
 
     application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
         .settings(Settings {
@@ -112,5 +111,5 @@ pub fn main() -> iced::Result {
         .subscription(Sniffer::subscription)
         .theme(Sniffer::theme)
         .scale_factor(Sniffer::scale_factor)
-        .run_with(move || (Sniffer::new(configs), boot_task_chain))
+        .run_with(move || (Sniffer::new(conf), boot_task_chain))
 }

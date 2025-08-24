@@ -89,7 +89,6 @@ pub struct Sniffer {
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
-    /// TODO: Conf???
     pub capture_source: CaptureSource,
     /// List of network devices
     pub my_devices: Vec<MyDevice>,
@@ -132,7 +131,7 @@ impl Sniffer {
             mmdb_asn,
             ..
         } = conf.settings.clone();
-        let device = conf.device.to_my_device();
+        let capture_source = CaptureSource::from_conf(&conf);
         Self {
             conf,
             current_capture_rx: (0, None),
@@ -141,7 +140,7 @@ impl Sniffer {
             favorite_hosts: HashSet::new(),
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
-            capture_source: CaptureSource::Device(device),
+            capture_source,
             my_devices: Vec::new(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),

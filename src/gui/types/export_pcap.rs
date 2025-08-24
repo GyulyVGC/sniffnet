@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ExportPcap {
     enabled: bool,
     file_name: String,

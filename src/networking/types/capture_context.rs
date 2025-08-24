@@ -1,3 +1,4 @@
+use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -5,6 +6,7 @@ use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_4::capture_file_translation;
 use crate::translations::types::language::Language;
 use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
+use serde::{Deserialize, Serialize};
 
 pub enum CaptureContext {
     Live(Live),
@@ -155,6 +157,19 @@ pub enum CaptureSource {
 }
 
 impl CaptureSource {
+    pub fn from_conf(conf: &Conf) -> Self {
+        match conf.capture_source_picklist {
+            CaptureSourcePicklist::Device => {
+                let device = conf.device.to_my_device();
+                Self::Device(device)
+            }
+            CaptureSourcePicklist::File => {
+                let path = conf.import_pcap_path.clone();
+                Self::File(MyPcapImport::new(path))
+            }
+        }
+    }
+
     pub fn title(&self, language: Language) -> &str {
         match self {
             Self::Device(_) => network_adapter_translation(language),
@@ -222,7 +237,7 @@ impl MyPcapImport {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Copy, Default)]
+#[derive(Clone, Eq, PartialEq, Debug, Copy, Default, Serialize, Deserialize)]
 pub enum CaptureSourcePicklist {
     #[default]
     Device,

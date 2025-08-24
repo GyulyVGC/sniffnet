@@ -1,7 +1,3 @@
-#[cfg(not(test))]
-use crate::utils::error_logger::{ErrorLogger, Location};
-#[cfg(not(test))]
-use crate::{SNIFFNET_LOWERCASE, location};
 use iced::window::Position;
 use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
@@ -29,23 +25,6 @@ impl ConfigWindow {
 
     const MIN_SIZE_X: f32 = 100.0;
     const MIN_SIZE_Y: f32 = 100.0;
-
-    const FILE_NAME: &'static str = "window";
-    #[cfg(not(test))]
-    pub fn load() -> Self {
-        if let Ok(window) = confy::load::<ConfigWindow>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
-            window
-        } else {
-            let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, ConfigWindow::default())
-                .log_err(location!());
-            ConfigWindow::default()
-        }
-    }
-
-    #[cfg(not(test))]
-    pub fn store(self) -> Result<(), confy::ConfyError> {
-        confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
-    }
 
     pub fn thumbnail_size(factor: f64) -> SizeTuple {
         Self::THUMBNAIL_SIZE.scale_and_check(factor)
@@ -140,25 +119,5 @@ impl ScaleAndCheck for PositionTuple {
             y = ConfigWindow::MAX_POS_Y;
         }
         PositionTuple(x, y)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::ConfigWindow;
-
-    impl ConfigWindow {
-        pub fn test_path() -> String {
-            format!("{}/{}.toml", env!("CARGO_MANIFEST_DIR"), Self::FILE_NAME)
-        }
-
-        pub fn load() -> Self {
-            confy::load_path::<ConfigWindow>(ConfigWindow::test_path())
-                .unwrap_or_else(|_| ConfigWindow::default())
-        }
-
-        pub fn store(self) -> Result<(), confy::ConfyError> {
-            confy::store_path(ConfigWindow::test_path(), self)
-        }
     }
 }

@@ -1,13 +1,13 @@
 use std::fmt::Debug;
 
-use iced::widget::Text;
-
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::report::types::sort_type::SortType;
+use iced::widget::Text;
+use serde::{Deserialize, Serialize};
 
 /// Struct representing the possible kinds of sort for displayed relevant connections.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub struct ReportSortType {
     pub data_sort: SortType,
 }

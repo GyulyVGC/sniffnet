@@ -1,11 +1,9 @@
-use clap::Parser;
-use iced::{Task, window};
-
-use crate::CONFIGS;
-use crate::Configs;
 use crate::SNIFFNET_LOWERCASE;
+use crate::gui::types::conf::{CONF, Conf};
 use crate::gui::types::message::Message;
 use crate::utils::formatted_strings::APP_VERSION;
+use clap::Parser;
+use iced::{Task, window};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -16,7 +14,7 @@ use crate::utils::formatted_strings::APP_VERSION;
 )]
 struct Args {
     /// Start sniffing packets from the supplied network adapter
-    #[arg(short, long, value_name = "NAME", default_missing_value = CONFIGS.device.device_name.as_str(), num_args = 0..=1)]
+    #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
     #[cfg(all(windows, not(debug_assertions)))]
     /// Show the logs (stdout and stderr) of the most recent application run
@@ -50,7 +48,7 @@ pub fn handle_cli_args() -> Task<Message> {
     }
 
     if args.restore_default {
-        if Configs::default().store().is_ok() {
+        if Conf::default().store().is_ok() {
             println!("Restored default settings");
         }
         std::process::exit(0);
