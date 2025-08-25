@@ -52,7 +52,7 @@ toml = "0.9.5"
 ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.12.1"
-phf_shared = "0.12.1"
+phf_shared = "0.13.1"
 splines = "5.0.0"
 clap = { version = "4.5.44", features = ["derive"] }
 tokio = { version = "1.47.1", features = ["macros"] }
@@ -78,7 +78,7 @@ serial_test = { version = "3.2.0", default-features = false }
 
 [build-dependencies]
 phf_codegen = "0.12.1"
-phf_shared = "0.12.1"
+phf_shared = "0.13.1"
 rustrict = { version = "0.7.36", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
