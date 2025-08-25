@@ -77,7 +77,7 @@ serial_test = { version = "3.2.0", default-features = false }
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
-phf_codegen = "0.12.1"
+phf_codegen = "0.13.1"
 phf_shared = "0.12.1"
 rustrict = { version = "0.7.36", default-features = false, features = ["censor"] }
 
