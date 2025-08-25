@@ -47,7 +47,7 @@ maxminddb = "0.26.0"
 confy = "1.0.0"
 serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
-dns-lookup = "2.1.0"
+dns-lookup = "3.0.0"
 toml = "0.9.5"
 ctrlc = { version = "3.4.7", features = ["termination"] }
 rfd = "0.15.4"
