@@ -70,20 +70,26 @@ pub fn handle_cli_args() -> Task<Message> {
 mod tests {
     use serial_test::serial;
 
-    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
+    use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::filters::Filters;
+    use crate::gui::types::settings::Settings;
+    use crate::networking::types::capture_context::CaptureSourcePicklist;
+    use crate::networking::types::config_device::ConfigDevice;
     use crate::notifications::types::notifications::Notifications;
-    use crate::{ConfigDevice, ConfigWindow, Language, Settings, Sniffer, StyleType};
-
-    use super::*;
+    use crate::report::types::sort_type::SortType;
+    use crate::{ConfigWindow, Language, Sniffer, StyleType};
 
     #[test]
     #[serial]
     fn test_restore_default_configs() {
         // initial configs stored are the default ones
-        assert_eq!(Configs::load(), Configs::default());
-        let modified_configs = Configs {
+        assert_eq!(Conf::load(), Conf::default());
+        let modified_conf = Conf {
             settings: Settings {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
@@ -109,19 +115,34 @@ mod tests {
                 size: SizeTuple(452.0, 870.0),
                 thumbnail_position: PositionTuple(20.0, 20.0),
             },
+            capture_source_picklist: CaptureSourcePicklist::File,
+            report_sort_type: SortType::Ascending,
+            host_sort_type: SortType::Descending,
+            service_sort_type: SortType::Neutral,
+            filters: Filters {
+                bpf: "tcp".to_string(),
+                expanded: true,
+            },
+            import_pcap_path: "whole_day.pcapng".to_string(),
+            export_pcap: ExportPcap {
+                enabled: true,
+                file_name: "sniffnet.pcap".to_string(),
+                directory: "home".to_string(),
+            },
+            last_opened_setting: SettingsPage::General,
         };
         // we want to be sure that modified config is different from defaults
-        assert_ne!(Configs::default(), modified_configs);
+        assert_ne!(Conf::default(), modified_conf);
         //store modified configs
-        modified_configs.clone().store().unwrap();
+        modified_conf.clone().store().unwrap();
         // assert they've been stored
-        assert_eq!(Configs::load(), modified_configs);
+        assert_eq!(Conf::load(), modified_conf);
         // restore defaults
-        Configs::default().store().unwrap();
+        Conf::default().store().unwrap();
         // assert that defaults are stored
-        assert_eq!(Configs::load(), Configs::default());
+        assert_eq!(Conf::load(), Conf::default());
 
         // only needed because it will delete config files via its Drop implementation
-        Sniffer::new(Configs::default());
+        Sniffer::new(Conf::default());
     }
 }

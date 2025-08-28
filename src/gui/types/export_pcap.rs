@@ -3,9 +3,9 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ExportPcap {
-    enabled: bool,
-    file_name: String,
-    directory: String,
+    pub(crate) enabled: bool,
+    pub(crate) file_name: String,
+    pub(crate) directory: String,
 }
 
 impl ExportPcap {

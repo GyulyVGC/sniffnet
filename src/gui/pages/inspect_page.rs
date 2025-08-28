@@ -31,13 +31,14 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
-use crate::{Language, ReportSortType, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -184,7 +185,7 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     font: Font,
-    sort_type: ReportSortType,
+    sort_type: SortType,
     data_repr: DataRepr,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
@@ -270,7 +271,7 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows<'a>(active_sort_type: ReportSortType) -> Container<'a, Message, StyleType> {
+fn sort_arrows<'a>(active_sort_type: SortType) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type

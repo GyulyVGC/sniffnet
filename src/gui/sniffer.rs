@@ -308,6 +308,7 @@ impl Sniffer {
             Message::OpenSettings(settings_page) => {
                 if self.modal.is_none() {
                     self.settings_page = Some(settings_page);
+                    self.conf.last_opened_setting = settings_page;
                 }
             }
             Message::OpenLastSettings => {
@@ -810,10 +811,7 @@ impl Sniffer {
     }
 
     fn close_settings(&mut self) {
-        if let Some(page) = self.settings_page {
-            self.conf.last_opened_setting = page;
-            self.settings_page = None;
-        }
+        self.settings_page = None;
     }
 
     /// Don't update adjustments to threshold immediately:
@@ -885,11 +883,13 @@ impl Sniffer {
         match (self.running_page, self.settings_page, self.modal.is_none()) {
             (_, Some(current_setting), true) => {
                 // Settings opened
-                if next {
-                    self.settings_page = Some(current_setting.next());
+                let new_setting = if next {
+                    current_setting.next()
                 } else {
-                    self.settings_page = Some(current_setting.previous());
-                }
+                    current_setting.previous()
+                };
+                self.settings_page = Some(new_setting);
+                self.conf.last_opened_setting = new_setting;
             }
             (
                 RunningPage::Inspect | RunningPage::Notifications | RunningPage::Overview,
@@ -1059,14 +1059,20 @@ mod tests {
 
     use serial_test::{parallel, serial};
 
-    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
+    use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
+    use crate::gui::types::settings::Settings;
     use crate::gui::types::timing_events::TimingEvents;
+    use crate::networking::types::capture_context::CaptureSourcePicklist;
+    use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
@@ -1079,30 +1085,15 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
-    use crate::{
-        ByteMultiple, ConfigDevice, ConfigWindow, Configs, Language, ReportSortType, RunningPage,
-        Settings, Sniffer, StyleType,
-    };
+    use crate::{ByteMultiple, ConfigWindow, Language, RunningPage, Sniffer, StyleType};
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
         fn drop(&mut self) {
-            let settings_path_str = Settings::test_path();
-            let settings_path = Path::new(&settings_path_str);
-            if settings_path.exists() {
-                remove_file(Settings::test_path()).unwrap();
-            }
-
-            let device_path_str = ConfigDevice::test_path();
-            let device_path = Path::new(&device_path_str);
-            if device_path.exists() {
-                remove_file(ConfigDevice::test_path()).unwrap();
-            }
-
-            let window_path_str = ConfigWindow::test_path();
-            let window_path = Path::new(&window_path_str);
-            if window_path.exists() {
-                remove_file(ConfigWindow::test_path()).unwrap();
+            let conf_path_str = Conf::test_path();
+            let conf_path = Path::new(&conf_path_str);
+            if conf_path.exists() {
+                remove_file(Conf::test_path()).unwrap();
             }
         }
     }
@@ -1110,7 +1101,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_chart_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
         sniffer.update(Message::DataReprSelection(DataRepr::Packets));
@@ -1126,104 +1117,87 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_report_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        let sort = ReportSortType {
-            data_sort: SortType::Neutral,
-        };
+        let sort = SortType::Neutral;
 
-        assert_eq!(sniffer.report_sort_type, sort);
+        assert_eq!(sniffer.conf.report_sort_type, sort);
         sniffer.update(Message::ReportSortSelection(sort.next_sort()));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                data_sort: SortType::Descending,
-            }
-        );
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Descending);
         sniffer.update(Message::ReportSortSelection(sort.next_sort().next_sort()));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                data_sort: SortType::Ascending,
-            }
-        );
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Ascending);
         sniffer.update(Message::ReportSortSelection(
             sort.next_sort().next_sort().next_sort(),
         ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                data_sort: SortType::Neutral,
-            }
-        );
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_host_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let mut sort = SortType::Neutral;
 
-        assert_eq!(sniffer.host_sort_type, sort);
+        assert_eq!(sniffer.conf.host_sort_type, sort);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Descending);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Descending);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Ascending);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Ascending);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Neutral);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_service_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let mut sort = SortType::Neutral;
 
-        assert_eq!(sniffer.service_sort_type, sort);
+        assert_eq!(sniffer.conf.service_sort_type, sort);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Descending);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Descending);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Ascending);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Ascending);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Neutral);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_style() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         sniffer.update(Message::Style(StyleType::MonAmour));
-        assert_eq!(sniffer.configs.settings.style, StyleType::MonAmour);
+        assert_eq!(sniffer.conf.settings.style, StyleType::MonAmour);
         sniffer.update(Message::Style(StyleType::Day));
-        assert_eq!(sniffer.configs.settings.style, StyleType::Day);
+        assert_eq!(sniffer.conf.settings.style, StyleType::Day);
         sniffer.update(Message::Style(StyleType::Night));
-        assert_eq!(sniffer.configs.settings.style, StyleType::Night);
+        assert_eq!(sniffer.conf.settings.style, StyleType::Night);
         sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.configs.settings.style, StyleType::DeepSea);
+        assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
         sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.configs.settings.style, StyleType::DeepSea);
+        assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_dots_pulse_update() {
         // every kind of message will the integer, but only Periodic will update the string
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
 
@@ -1249,7 +1223,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_modify_favorite_connections() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         // remove 1
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1430,16 +1404,22 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_show_and_hide_modal_and_settings() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         // open settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         // switch settings page
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);
@@ -1451,17 +1431,17 @@ mod tests {
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // close settings
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // reopen settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // switch settings page
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);
@@ -1470,66 +1450,66 @@ mod tests {
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // open clear all modal
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening settings with clear all modal opened
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening quit modal with clear all modal opened
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // close clear all modal
         sniffer.update(Message::HideModal);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // open quit modal
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening settings with clear all modal opened
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening clear all modal with quit modal opened
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // close quit modal
         sniffer.update(Message::HideModal);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_language() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.configs.settings.language, Language::EN);
+        assert_eq!(sniffer.conf.settings.language, Language::EN);
         assert_eq!(sniffer.traffic_chart.language, Language::EN);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.configs.settings.language, Language::IT);
+        assert_eq!(sniffer.conf.settings.language, Language::IT);
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.configs.settings.language, Language::IT);
+        assert_eq!(sniffer.conf.settings.language, Language::IT);
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        assert_eq!(sniffer.configs.settings.language, Language::ZH);
+        assert_eq!(sniffer.conf.settings.language, Language::ZH);
         assert_eq!(sniffer.traffic_chart.language, Language::ZH);
     }
 
@@ -1551,7 +1531,7 @@ mod tests {
             // Simulate an update to apply the settings
             sniffer.update(Message::Periodic);
         }
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let bytes_notification_init = DataNotification {
             data_repr: DataRepr::Bytes,
@@ -1596,36 +1576,36 @@ mod tests {
         };
 
         // initial default state
-        assert_eq!(sniffer.configs.settings.notifications.volume, 60);
-        assert_eq!(sniffer.configs.settings.notifications.volume, 60);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 60);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 60);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init
         );
 
         // change volume
         sniffer.update(Message::ChangeVolume(95));
 
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init,
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
 
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init
         );
 
@@ -1637,7 +1617,7 @@ mod tests {
 
         // Verify that toggling threshold is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_toggled_on,
         );
 
@@ -1649,19 +1629,19 @@ mod tests {
         // Verify adjusted threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_sound_off_only,
         );
 
         expire_notifications_timeout(&mut sniffer);
 
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
 
@@ -1674,18 +1654,18 @@ mod tests {
         // Verify threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new,
         );
 
         // And the rest is intact
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new
         );
     }
@@ -1693,7 +1673,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         sniffer.logged_notifications.0 =
             VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
@@ -1720,7 +1700,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_switch_running_and_settings_pages() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         // initial status
         assert_eq!(sniffer.settings_page, None);
@@ -1729,18 +1709,31 @@ mod tests {
         // nothing changes
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, None);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Init);
         // switch settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(false));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.running_page, RunningPage::Init);
         sniffer.update(Message::CloseSettings);
@@ -1767,9 +1760,14 @@ mod tests {
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, RunningPage::Inspect);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // focus the window and try to switch => nothing changes
         sniffer.update(Message::WindowFocused);
@@ -1780,37 +1778,21 @@ mod tests {
 
     #[test]
     #[serial] // needed to not collide with other tests generating configs files
-    fn test_config_settings() {
-        let path_string = Settings::test_path();
+    fn test_conf() {
+        let path_string = Conf::test_path();
         let path = Path::new(&path_string);
 
         assert!(!path.exists());
 
-        let mut sniffer = Sniffer::new(Configs::load());
+        let mut sniffer = Sniffer::new(Conf::load());
 
         assert!(path.exists());
 
         // check that the current settings are the default ones
-        let settings_start = sniffer.configs.settings.clone();
-        assert_eq!(
-            settings_start,
-            Settings {
-                color_gradient: GradientType::None,
-                language: Language::EN,
-                scale_factor: 1.0,
-                mmdb_country: "".to_string(),
-                mmdb_asn: "".to_string(),
-                style_path: "".to_string(),
-                notifications: Notifications {
-                    volume: 60,
-                    data_notification: Default::default(),
-                    favorite_notification: Default::default()
-                },
-                style: StyleType::Custom(ExtraStyles::A11yDark)
-            }
-        );
+        let conf_start = sniffer.conf.clone();
+        assert_eq!(conf_start, Conf::default(),);
 
-        // change some configs by sending messages
+        // change some conf by sending messages
         sniffer.update(Message::GradientsSelection(GradientType::Wild));
         sniffer.update(Message::LanguageSelection(Language::ZH));
         sniffer.update(Message::ChangeScaleFactor(0.0));
@@ -1822,64 +1804,21 @@ mod tests {
         )));
         sniffer.update(Message::Style(StyleType::Custom(ExtraStyles::DraculaDark)));
         sniffer.update(Message::ChangeVolume(100));
-
-        // quit the app by sending a CloseRequested message
-        sniffer.update(Message::Quit);
-
-        assert!(path.exists());
-
-        // check that updated configs are inherited by a new sniffer instance
-        let settings_end = Sniffer::new(Configs::load()).configs.settings.clone();
-        assert_eq!(
-            settings_end,
-            Settings {
-                color_gradient: GradientType::Wild,
-                language: Language::ZH,
-                scale_factor: 1.0,
-                mmdb_country: "countrymmdb".to_string(),
-                mmdb_asn: "asnmmdb".to_string(),
-                style_path: format!(
-                    "{}/resources/themes/catppuccin.toml",
-                    env!("CARGO_MANIFEST_DIR")
-                ),
-                notifications: Notifications {
-                    volume: 100,
-                    data_notification: Default::default(),
-                    favorite_notification: Default::default()
-                },
-                style: StyleType::Custom(ExtraStyles::DraculaDark)
-            }
-        );
-    }
-
-    #[test]
-    #[serial] // needed to not collide with other tests generating configs files
-    fn test_config_window() {
-        let path_string = ConfigWindow::test_path();
-        let path = Path::new(&path_string);
-
-        assert!(!path.exists());
-
-        let mut sniffer = Sniffer::new(Configs::load());
-
-        assert!(path.exists());
-
-        // check that the current window properties are the default ones
-        let window_start = sniffer.configs.window;
-        assert_eq!(
-            window_start,
-            ConfigWindow {
-                position: PositionTuple(0.0, 0.0),
-                size: SizeTuple(1190.0, 670.0),
-                thumbnail_position: PositionTuple(0.0, 0.0),
-            }
-        );
-
-        // change window properties by sending messages
         sniffer.update(Message::WindowMoved(-10.0, 555.0));
         sniffer.update(Message::WindowResized(1000.0, 999.0));
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(40.0, 40.0));
+        sniffer.update(Message::SetCaptureSource(CaptureSourcePicklist::File));
+        sniffer.update(Message::ToggleFilters);
+        sniffer.update(Message::BpfFilter("tcp or udp".to_string()));
+        sniffer.update(Message::ReportSortSelection(SortType::Ascending));
+        sniffer.update(Message::HostSortSelection(SortType::Descending));
+        sniffer.update(Message::ServiceSortSelection(SortType::Descending));
+        sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
+        sniffer.update(Message::ToggleExportPcap);
+        sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
+        sniffer.update(Message::OutputPcapDir("/".to_string()));
+        sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::Quit);
@@ -1887,13 +1826,48 @@ mod tests {
         assert!(path.exists());
 
         // check that updated configs are inherited by a new sniffer instance
-        let window_end = Sniffer::new(Configs::load()).configs.window.clone();
+        let conf_end = Sniffer::new(Conf::load()).conf.clone();
         assert_eq!(
-            window_end,
-            ConfigWindow {
-                position: PositionTuple(-10.0, 555.0),
-                size: SizeTuple(1000.0, 999.0),
-                thumbnail_position: PositionTuple(40.0, 40.0),
+            conf_end,
+            Conf {
+                settings: Settings {
+                    color_gradient: GradientType::Wild,
+                    language: Language::ZH,
+                    scale_factor: 1.0,
+                    mmdb_country: "countrymmdb".to_string(),
+                    mmdb_asn: "asnmmdb".to_string(),
+                    style_path: format!(
+                        "{}/resources/themes/catppuccin.toml",
+                        env!("CARGO_MANIFEST_DIR")
+                    ),
+                    notifications: Notifications {
+                        volume: 100,
+                        data_notification: Default::default(),
+                        favorite_notification: Default::default()
+                    },
+                    style: StyleType::Custom(ExtraStyles::DraculaDark),
+                },
+                window: ConfigWindow {
+                    position: PositionTuple(-10.0, 555.0),
+                    size: SizeTuple(1000.0, 999.0),
+                    thumbnail_position: PositionTuple(40.0, 40.0),
+                },
+                device: ConfigDevice::default(),
+                capture_source_picklist: CaptureSourcePicklist::File,
+                filters: Filters {
+                    expanded: true,
+                    bpf: "tcp or udp".to_string(),
+                },
+                report_sort_type: SortType::Ascending,
+                host_sort_type: SortType::Descending,
+                service_sort_type: SortType::Descending,
+                last_opened_setting: SettingsPage::Appearance,
+                export_pcap: ExportPcap {
+                    enabled: true,
+                    file_name: "test.cap".to_string(),
+                    directory: "/".to_string()
+                },
+                import_pcap_path: "/test.pcap".to_string(),
             }
         );
     }
@@ -1901,95 +1875,95 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_window_resized() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
-        let factor = sniffer.configs.settings.scale_factor;
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.0);
-        assert_eq!(sniffer.configs.window.size, SizeTuple(1190.0, 670.0));
+        assert_eq!(sniffer.conf.window.size, SizeTuple(1190.0, 670.0));
         assert_eq!(
             ConfigWindow::thumbnail_size(factor),
             SizeTuple(360.0, 222.0)
         );
 
         sniffer.update(Message::WindowResized(850.0, 600.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.size, SizeTuple(850.0, 600.0));
 
         sniffer.update(Message::ChangeScaleFactor(0.369));
-        let factor = sniffer.configs.settings.scale_factor;
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.5);
         assert_eq!(
             ConfigWindow::thumbnail_size(factor),
             SizeTuple(540.0, 333.0)
         );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(1500.0, 1200.0));
+        assert_eq!(sniffer.conf.window.size, SizeTuple(1500.0, 1200.0));
 
         sniffer.update(Message::ChangeScaleFactor(-0.631));
-        let factor = sniffer.configs.settings.scale_factor;
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 0.5);
         assert_eq!(
             ConfigWindow::thumbnail_size(factor),
             SizeTuple(180.0, 111.0)
         );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(500.0, 400.0));
+        assert_eq!(sniffer.conf.window.size, SizeTuple(500.0, 400.0));
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_window_moved() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
-        assert_eq!(sniffer.configs.window.position, PositionTuple(0.0, 0.0));
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
+        assert_eq!(sniffer.conf.window.position, PositionTuple(0.0, 0.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(0.0, 0.0)
         );
 
         sniffer.update(Message::WindowMoved(850.0, 600.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(0.0, 0.0)
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(400.0, 600.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(400.0, 600.0)
         );
 
         sniffer.update(Message::ChangeScaleFactor(0.369));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.5);
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.5);
         sniffer.update(Message::WindowMoved(20.0, 40.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(30.0, 60.0)
         );
         sniffer.thumbnail = false;
         sniffer.update(Message::WindowMoved(-20.0, 300.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(-30.0, 450.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(-30.0, 450.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(30.0, 60.0)
         );
 
         sniffer.update(Message::ChangeScaleFactor(-0.631));
-        assert_eq!(sniffer.configs.settings.scale_factor, 0.5);
+        assert_eq!(sniffer.conf.settings.scale_factor, 0.5);
         sniffer.update(Message::WindowMoved(500.0, -100.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(250.0, -50.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(30.0, 60.0)
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(-2.0, -34.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position, PositionTuple(250.0, -50.0));
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
+            sniffer.conf.window.thumbnail_position,
             PositionTuple(-1.0, -17.0)
         );
     }
@@ -1997,7 +1971,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_toggle_thumbnail() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
         assert!(!sniffer.traffic_chart.thumbnail);
 
@@ -2024,21 +1998,21 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_scale_factor_shortcut() {
-        let mut sniffer = Sniffer::new(Configs::default());
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
+        let mut sniffer = Sniffer::new(Conf::default());
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
 
         sniffer.update(Message::ScaleFactorShortcut(true));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.1);
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.1);
         sniffer.update(Message::ScaleFactorShortcut(false));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
         sniffer.update(Message::ScaleFactorShortcut(false));
-        assert_eq!(sniffer.configs.settings.scale_factor, 0.9);
+        assert_eq!(sniffer.conf.settings.scale_factor, 0.9);
 
         for _ in 0..100 {
             sniffer.update(Message::ScaleFactorShortcut(true));
         }
         assert_eq!(
-            format!("{:.2}", sniffer.configs.settings.scale_factor),
+            format!("{:.2}", sniffer.conf.settings.scale_factor),
             "3.00".to_string()
         );
 
@@ -2046,7 +2020,7 @@ mod tests {
             sniffer.update(Message::ScaleFactorShortcut(false));
         }
         assert_eq!(
-            format!("{:.2}", sniffer.configs.settings.scale_factor),
+            format!("{:.2}", sniffer.conf.settings.scale_factor),
             "0.30".to_string()
         );
     }

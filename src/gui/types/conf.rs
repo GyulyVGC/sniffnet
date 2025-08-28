@@ -5,10 +5,12 @@ use crate::gui::types::filters::Filters;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
-use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::sort_type::SortType;
+#[cfg(not(test))]
 use crate::utils::error_logger::{ErrorLogger, Location};
+#[cfg(not(test))]
 use crate::{SNIFFNET_LOWERCASE, location};
+#[cfg(not(test))]
 use confy::ConfyError;
 use serde::{Deserialize, Serialize};
 
@@ -27,7 +29,7 @@ pub struct Conf {
     /// BPF filter program to be applied to the capture
     pub filters: Filters,
     /// Report sort type (inspect page)
-    pub report_sort_type: ReportSortType,
+    pub report_sort_type: SortType,
     /// Host sort type (overview page)
     pub host_sort_type: SortType,
     /// Service sort type (overview page)
@@ -64,7 +66,6 @@ impl Conf {
 
 #[cfg(test)]
 mod tests {
-    use crate::Settings;
     use crate::gui::types::conf::Conf;
 
     impl Conf {
@@ -73,12 +74,11 @@ mod tests {
         }
 
         pub fn load() -> Self {
-            confy::load_path::<Settings>(Settings::test_path())
-                .unwrap_or_else(|_| Settings::default())
+            confy::load_path::<Conf>(Conf::test_path()).unwrap_or_else(|_| Conf::default())
         }
 
         pub fn store(self) -> Result<(), confy::ConfyError> {
-            confy::store_path(Settings::test_path(), self)
+            confy::store_path(Conf::test_path(), self)
         }
     }
 }

@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
-use iced::{Font, Pixels, Settings, application, window};
+use iced::{Font, Pixels, application, window};
 
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
@@ -20,7 +20,6 @@ use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::protocol::Protocol;
 use networking::types::service::Service;
-use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
@@ -78,7 +77,7 @@ pub fn main() -> iced::Result {
     let ConfigWindow { size, position, .. } = conf.window;
 
     application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
-        .settings(Settings {
+        .settings(iced::Settings {
             // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
             id: Some(String::from(SNIFFNET_LOWERCASE)),
             fonts: vec![
