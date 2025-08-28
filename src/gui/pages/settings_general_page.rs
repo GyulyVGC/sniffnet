@@ -26,7 +26,7 @@ use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
-use crate::{Language, RunningPage, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
@@ -66,7 +66,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
         ..
     } = sniffer.conf.settings.clone();
 
-    let is_editable = sniffer.running_page.eq(&RunningPage::Init);
+    let is_editable = sniffer.running_page.is_none();
 
     let mut column = Column::new()
         .align_x(Alignment::Center)

@@ -1,3 +1,4 @@
+use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::config_window::ConfigWindow;
 use crate::gui::types::export_pcap::ExportPcap;
@@ -36,6 +37,8 @@ pub struct Conf {
     pub service_sort_type: SortType,
     /// Remembers the last opened setting page
     pub last_opened_setting: SettingsPage,
+    /// Remembers the last opened running page
+    pub last_opened_page: RunningPage,
     /// Information about PCAP file export
     pub export_pcap: ExportPcap,
     /// Import path for PCAP file

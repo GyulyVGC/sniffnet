@@ -1,5 +1,6 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
+use crate::gui::pages::overview_page::waiting_page;
 use async_channel::Receiver;
 use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;
@@ -102,8 +103,8 @@ pub struct Sniffer {
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
     pub settings_page: Option<SettingsPage>,
-    /// Defines the current running page
-    pub running_page: RunningPage,
+    /// Defines the current running page; None if initial page
+    pub running_page: Option<RunningPage>,
     /// Number of unread notifications
     pub unread_notifications: usize,
     /// Search parameters of inspect page
@@ -147,7 +148,7 @@ impl Sniffer {
             traffic_chart: TrafficChart::new(style, language),
             modal: None,
             settings_page: None,
-            running_page: RunningPage::Init,
+            running_page: None,
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
@@ -318,7 +319,8 @@ impl Sniffer {
             }
             Message::CloseSettings => self.close_settings(),
             Message::ChangeRunningPage(running_page) => {
-                self.running_page = running_page;
+                self.running_page = Some(running_page);
+                self.conf.last_opened_page = running_page;
                 if running_page.eq(&RunningPage::Notifications) {
                     self.unread_notifications = 0;
                 }
@@ -358,7 +360,8 @@ impl Sniffer {
                 self.host_data_states.update_states(&parameters);
 
                 self.page_number = 1;
-                self.running_page = RunningPage::Inspect;
+                self.running_page = Some(RunningPage::Inspect);
+                self.conf.last_opened_page = RunningPage::Inspect;
                 self.search = parameters;
             }
             Message::UpdatePageNumber(increment) => {
@@ -371,7 +374,9 @@ impl Sniffer {
                 }
             }
             Message::ArrowPressed(increment) => {
-                if self.running_page.eq(&RunningPage::Inspect)
+                if self
+                    .running_page
+                    .is_some_and(|p| p.eq(&RunningPage::Inspect))
                     && self.settings_page.is_none()
                     && self.modal.is_none()
                 {
@@ -460,7 +465,10 @@ impl Sniffer {
                         window::change_level(window_id, Level::AlwaysOnTop),
                     ])
                 } else {
-                    if self.running_page.eq(&RunningPage::Notifications) {
+                    if self
+                        .running_page
+                        .is_some_and(|p| p.eq(&RunningPage::Notifications))
+                    {
                         self.unread_notifications = 0;
                     }
                     let mut commands = vec![
@@ -484,7 +492,7 @@ impl Sniffer {
                 }
             }
             Message::CtrlTPressed => {
-                if self.running_page.ne(&RunningPage::Init)
+                if self.running_page.is_some()
                     && self.settings_page.is_none()
                     && self.modal.is_none()
                     && !self.timing_events.was_just_thumbnail_enter()
@@ -553,10 +561,18 @@ impl Sniffer {
             thumbnail_page(self)
         } else {
             match self.running_page {
-                RunningPage::Init => initial_page(self),
-                RunningPage::Overview => overview_page(self),
-                RunningPage::Inspect => inspect_page(self),
-                RunningPage::Notifications => notifications_page(self),
+                None => initial_page(self),
+                Some(running_page) => {
+                    if let Some(waiting_page) = waiting_page(self) {
+                        waiting_page
+                    } else {
+                        match running_page {
+                            RunningPage::Overview => overview_page(self),
+                            RunningPage::Inspect => inspect_page(self),
+                            RunningPage::Notifications => notifications_page(self),
+                        }
+                    }
+                }
             }
         };
 
@@ -664,7 +680,11 @@ impl Sniffer {
             &self.favorite_hosts,
             &self.capture_source,
         );
-        if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
+        if self.thumbnail
+            || self
+                .running_page
+                .is_some_and(|p| p.ne(&RunningPage::Notifications))
+        {
             self.unread_notifications += emitted_notifications;
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
@@ -703,7 +723,7 @@ impl Sniffer {
         let capture_context =
             CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
         self.pcap_error = capture_context.error().map(ToString::to_string);
-        self.running_page = RunningPage::Overview;
+        self.running_page = Some(self.conf.last_opened_page);
 
         if capture_context.error().is_none() {
             // no pcap error
@@ -759,7 +779,7 @@ impl Sniffer {
         self.traffic_chart = TrafficChart::new(style, language);
         self.modal = None;
         self.settings_page = None;
-        self.running_page = RunningPage::Init;
+        self.running_page = None;
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
@@ -891,20 +911,21 @@ impl Sniffer {
                 self.settings_page = Some(new_setting);
                 self.conf.last_opened_setting = new_setting;
             }
-            (
-                RunningPage::Inspect | RunningPage::Notifications | RunningPage::Overview,
-                None,
-                true,
-            ) => {
+            (Some(current_page), None, true) => {
                 // Running with no overlays
                 if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
                     // Running with no overlays and some packets
-                    self.running_page = if next {
-                        self.running_page.next()
+                    let new_page = if next {
+                        current_page.next()
                     } else {
-                        self.running_page.previous()
+                        current_page.previous()
                     };
-                    if self.running_page.eq(&RunningPage::Notifications) {
+                    self.running_page = Some(new_page);
+                    self.conf.last_opened_page = new_page;
+                    if self
+                        .running_page
+                        .is_some_and(|p| p.eq(&RunningPage::Notifications))
+                    {
                         self.unread_notifications = 0;
                     }
                 }
@@ -914,10 +935,7 @@ impl Sniffer {
     }
 
     fn shortcut_return(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init)
-            && self.settings_page.is_none()
-            && self.modal.is_none()
-        {
+        if self.running_page.is_none() && self.settings_page.is_none() && self.modal.is_none() {
             return Task::done(Message::Start);
         } else if self.modal.eq(&Some(MyModal::Reset)) {
             return Task::done(Message::Reset);
@@ -940,7 +958,7 @@ impl Sniffer {
 
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
-        if self.running_page.ne(&RunningPage::Init) {
+        if self.running_page.is_some() {
             let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
             return if tot_packets == 0 && self.settings_page.is_none() {
                 Task::done(Message::Reset)
@@ -953,7 +971,7 @@ impl Sniffer {
 
     fn quit_wrapper(&mut self) -> Task<Message> {
         let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
-        if self.running_page.eq(&RunningPage::Init) || tot_packets == 0 {
+        if self.running_page.is_none() || tot_packets == 0 {
             Task::done(Message::Quit)
         } else if self.thumbnail {
             // TODO: uncomment once issue #653 is fixed
@@ -968,7 +986,9 @@ impl Sniffer {
     }
 
     fn shortcut_ctrl_d(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Notifications)
+        if self
+            .running_page
+            .is_some_and(|p| p.eq(&RunningPage::Notifications))
             && !self.logged_notifications.0.is_empty()
         {
             return Task::done(Message::ShowModal(MyModal::ClearAll));
@@ -1705,7 +1725,7 @@ mod tests {
         // initial status
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // nothing changes
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, None);
@@ -1714,7 +1734,7 @@ mod tests {
             SettingsPage::Notifications
         );
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // switch settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
@@ -1722,12 +1742,12 @@ mod tests {
             sniffer.conf.last_opened_setting,
             SettingsPage::Notifications
         );
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::SwitchPage(false));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
         assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(
@@ -1735,18 +1755,18 @@ mod tests {
             SettingsPage::Notifications
         );
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // change state to running
-        sniffer.running_page = RunningPage::Overview;
+        sniffer.running_page = Some(RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         // switch with closed setting and no packets received => nothing changes
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
         sniffer
@@ -1754,25 +1774,25 @@ mod tests {
             .tot_data_info
             .add_packet(0, TrafficDirection::Outgoing);
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, None);
         // switch with opened settings => change settings
         sniffer.update(Message::OpenLastSettings);
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
         assert_eq!(
             sniffer.conf.last_opened_setting,
             SettingsPage::Notifications
         );
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
         assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // focus the window and try to switch => nothing changes
         sniffer.update(Message::WindowFocused);
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
     }
 
@@ -1819,6 +1839,7 @@ mod tests {
         sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
         sniffer.update(Message::OutputPcapDir("/".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
+        sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::Quit);
@@ -1862,6 +1883,7 @@ mod tests {
                 host_sort_type: SortType::Descending,
                 service_sort_type: SortType::Descending,
                 last_opened_setting: SettingsPage::Appearance,
+                last_opened_page: RunningPage::Notifications,
                 export_pcap: ExportPcap {
                     enabled: true,
                     file_name: "test.cap".to_string(),

@@ -70,6 +70,7 @@ pub fn handle_cli_args() -> Task<Message> {
 mod tests {
     use serial_test::serial;
 
+    use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
@@ -130,6 +131,7 @@ mod tests {
                 directory: "home".to_string(),
             },
             last_opened_setting: SettingsPage::General,
+            last_opened_page: RunningPage::Inspect,
         };
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);

@@ -6,7 +6,6 @@ use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_spac
 use iced::{Alignment, Font, Length};
 
 use crate::gui::components::tab::notifications_badge;
-use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -42,7 +41,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     }
 
     let last_opened_setting = sniffer.conf.last_opened_setting;
-    let is_running = sniffer.running_page.ne(&RunningPage::Init);
+    let is_running = sniffer.running_page.is_some();
 
     let logo = Icon::Sniffnet
         .to_text()

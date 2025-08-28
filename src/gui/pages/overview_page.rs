@@ -62,55 +62,63 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
-    let dots = &sniffer.dots_pulse.0;
+    // some packets are there!
+    let tabs = get_pages_tabs(
+        RunningPage::Overview,
+        font,
+        font_headers,
+        language,
+        sniffer.unread_notifications,
+    );
+    tab_and_body = tab_and_body.push(tabs);
 
-    if let Some(error) = sniffer.pcap_error.as_ref() {
-        // pcap threw an ERROR!
-        body = body_pcap_error(error, dots, language, font);
-    } else {
-        // NO pcap error detected
-        let tot_packets = sniffer
-            .info_traffic
-            .tot_data_info
-            .tot_data(DataRepr::Packets);
+    let container_chart = container_chart(sniffer, font);
 
-        if tot_packets == 0 {
-            // no packets observed at all
-            body = body_no_packets(&sniffer.capture_source, font, language, dots);
-        } else {
-            // some packets are there!
-            let tabs = get_pages_tabs(
-                RunningPage::Overview,
-                font,
-                font_headers,
-                language,
-                sniffer.unread_notifications,
-            );
-            tab_and_body = tab_and_body.push(tabs);
+    let container_info = col_info(sniffer);
 
-            let container_chart = container_chart(sniffer, font);
+    let container_report = row_report(sniffer);
 
-            let container_info = col_info(sniffer);
-
-            let container_report = row_report(sniffer);
-
-            body = body
-                .width(Length::Fill)
-                .padding(10)
+    body = body
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_x(Alignment::Center)
+        .push(
+            Row::new()
+                .height(280)
                 .spacing(10)
-                .align_x(Alignment::Center)
-                .push(
-                    Row::new()
-                        .height(280)
-                        .spacing(10)
-                        .push(container_info)
-                        .push(container_chart),
-                )
-                .push(container_report);
-        }
-    }
+                .push(container_info)
+                .push(container_chart),
+        )
+        .push(container_report);
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
+}
+
+pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
+    let Settings {
+        style, language, ..
+    } = sniffer.conf.settings;
+    let font = style.get_extension().font;
+
+    let dots = &sniffer.dots_pulse.0;
+
+    let tot_packets = sniffer
+        .info_traffic
+        .tot_data_info
+        .tot_data(DataRepr::Packets);
+
+    let body = if let Some(error) = sniffer.pcap_error.as_ref() {
+        // pcap threw an ERROR!
+        body_pcap_error(error, dots, language, font)
+    } else if tot_packets == 0 {
+        // no packets observed at all
+        body_no_packets(&sniffer.capture_source, font, language, dots)
+    } else {
+        return None;
+    };
+
+    Some(Container::new(Column::new().push(body)).height(Length::Fill))
 }
 
 fn body_no_packets<'a>(
