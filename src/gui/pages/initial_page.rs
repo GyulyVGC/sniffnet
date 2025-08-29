@@ -15,6 +15,7 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::translations::translations::{
     address_translation, addresses_translation, network_adapter_translation, start_translation,
@@ -27,7 +28,7 @@ use crate::translations::translations_5::{filter_traffic_translation, traffic_so
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, StyleType};
+use crate::{Language, StyleType};
 use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::{
@@ -38,12 +39,12 @@ use iced::{Alignment, Font, Length, Padding, alignment};
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -51,10 +52,10 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let col_checkboxes = Column::new()
         .spacing(10)
-        .push(get_filters_group(&sniffer.filters, font, language))
+        .push(get_filters_group(&sniffer.conf.filters, font, language))
         .push_maybe(get_export_pcap_group_maybe(
-            sniffer.capture_source_picklist,
-            &sniffer.export_pcap,
+            sniffer.conf.capture_source_picklist,
+            &sniffer.conf.export_pcap,
             language,
             font,
         ));
@@ -113,7 +114,7 @@ fn get_col_data_source(
     font: Font,
     language: Language,
 ) -> Column<'_, Message, StyleType> {
-    let current_option = if sniffer.capture_source_picklist == CaptureSourcePicklist::Device {
+    let current_option = if sniffer.conf.capture_source_picklist == CaptureSourcePicklist::Device {
         network_adapter_translation(language)
     } else {
         capture_file_translation(language)
@@ -153,7 +154,7 @@ fn get_col_data_source(
                 .push(picklist),
         );
 
-    match &sniffer.capture_source_picklist {
+    match &sniffer.conf.capture_source_picklist {
         CaptureSourcePicklist::Device => {
             col = col.push(get_col_adapter(sniffer, font, language));
         }
@@ -162,7 +163,7 @@ fn get_col_data_source(
                 language,
                 font,
                 &sniffer.capture_source,
-                &sniffer.import_pcap_path,
+                &sniffer.conf.import_pcap_path,
             ));
         }
     }

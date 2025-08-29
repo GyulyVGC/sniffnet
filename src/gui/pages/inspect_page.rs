@@ -21,6 +21,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
@@ -30,19 +31,20 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -74,7 +76,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             language,
             &sniffer.search,
             font,
-            sniffer.report_sort_type,
+            sniffer.conf.report_sort_type,
             sniffer.traffic_chart.data_repr,
         ))
         .push(Space::with_height(4))
@@ -105,9 +107,9 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 }
 
 fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
 
@@ -183,7 +185,7 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     font: Font,
-    sort_type: ReportSortType,
+    sort_type: SortType,
     data_repr: DataRepr,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
@@ -269,7 +271,7 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows<'a>(active_sort_type: ReportSortType) -> Container<'a, Message, StyleType> {
+fn sort_arrows<'a>(active_sort_type: SortType) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type

@@ -19,22 +19,23 @@ use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::translations::translations::appearance_title_translation;
 use crate::translations::translations_2::color_gradients_translation;
 use crate::translations::translations_3::custom_style_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         style_path,
         ..
-    } = sniffer.configs.settings.clone();
+    } = sniffer.conf.settings.clone();
     let PaletteExtension {
         font, font_headers, ..
     } = style.get_extension();

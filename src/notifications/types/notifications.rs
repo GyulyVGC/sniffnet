@@ -6,6 +6,7 @@ use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
 #[derive(Clone, Serialize, Deserialize, Copy, PartialEq, Debug)]
+#[serde(default)]
 pub struct Notifications {
     pub volume: u8,
     pub data_notification: DataNotification,
@@ -32,6 +33,7 @@ pub enum Notification {
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
+#[serde(default)]
 pub struct DataNotification {
     /// Data representation
     pub data_repr: DataRepr,
@@ -101,6 +103,7 @@ impl DataNotification {
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
+#[serde(default)]
 pub struct FavoriteNotification {
     /// Flag to determine if this notification is enabled
     pub notify_on_favorite: bool,

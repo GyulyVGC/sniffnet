@@ -1,7 +1,10 @@
-#[derive(Default)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug, Default)]
+#[serde(default)]
 pub struct Filters {
-    expanded: bool,
-    bpf: String,
+    pub(crate) expanded: bool,
+    pub(crate) bpf: String,
 }
 
 impl Filters {

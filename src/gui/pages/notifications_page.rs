@@ -10,6 +10,7 @@ use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
@@ -26,7 +27,7 @@ use crate::translations::translations::{
     threshold_translation,
 };
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
@@ -38,12 +39,12 @@ use std::cmp::max;
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         notifications,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -282,9 +283,9 @@ fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Messa
 }
 
 fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()

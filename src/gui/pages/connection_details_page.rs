@@ -8,6 +8,7 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
@@ -34,7 +35,7 @@ use crate::translations::translations_3::{
 };
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Protocol, Sniffer, StyleType};
+use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
@@ -50,12 +51,12 @@ pub fn connection_details_page(
 }
 
 fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
@@ -299,9 +300,9 @@ fn get_local_tooltip<'a>(
     address_to_lookup: &IpAddr,
     key: &AddressPortPair,
 ) -> Tooltip<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
 
     let local_address = if address_to_lookup.eq(&key.address1) {
         &key.address2

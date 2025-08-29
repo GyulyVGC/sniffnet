@@ -5,12 +5,12 @@ use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::donut_chart::donut_chart;
-use crate::configs::types::config_settings::ConfigSettings;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, ThumbnailHost};
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -24,7 +24,7 @@ const MAX_CHARS_SERVICE: usize = 13;
 
 /// Computes the body of the thumbnail view
 pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let ConfigSettings { style, .. } = sniffer.configs.settings;
+    let Settings { style, .. } = sniffer.conf.settings;
     let font = style.get_extension().font;
 
     let tot_packets = sniffer
@@ -75,14 +75,14 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             info_traffic,
             data_repr,
             font,
-            sniffer.host_sort_type,
+            sniffer.conf.host_sort_type,
         ))
         .push(Rule::vertical(10))
         .push(service_col(
             info_traffic,
             data_repr,
             font,
-            sniffer.service_sort_type,
+            sniffer.conf.service_sort_type,
         ));
 
     let content = Column::new()

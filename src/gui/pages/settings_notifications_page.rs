@@ -13,6 +13,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
     DataNotification, FavoriteNotification, Notification,
@@ -25,16 +26,16 @@ use crate::translations::translations::{
 use crate::translations::translations_2::data_representation_translation;
 use crate::translations::translations_4::data_exceeded_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         mut notifications,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

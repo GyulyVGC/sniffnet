@@ -3,6 +3,7 @@ pub mod arp_type;
 pub mod asn;
 pub mod bogon;
 pub mod capture_context;
+pub mod config_device;
 pub mod data_info;
 pub mod data_info_host;
 pub mod data_representation;

@@ -14,7 +14,7 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{Language, ReportSortType, StyleType};
+use crate::{Language, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -34,7 +34,7 @@ pub enum Message {
     /// Select data representation to use
     DataReprSelection(DataRepr),
     /// Select report sort type to be displayed (inspect page)
-    ReportSortSelection(ReportSortType),
+    ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)
     HostSortSelection(SortType),
     /// Select service sort type to be displayed (overview page)
