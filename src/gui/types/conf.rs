@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
 pub static CONF: std::sync::LazyLock<Conf> = std::sync::LazyLock::new(Conf::load);
 
 #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Debug)]
+#[serde(default)]
 pub struct Conf {
     /// Parameters from settings pages
     pub settings: Settings,
@@ -55,8 +56,7 @@ impl Conf {
         if let Ok(conf) = confy::load::<Conf>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             conf
         } else {
-            let _ = confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, Conf::default())
-                .log_err(location!());
+            let _ = Conf::default().store();
             Conf::default()
         }
     }

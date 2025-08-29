@@ -5,6 +5,7 @@ use crate::notifications::types::notifications::Notifications;
 use crate::{Language, StyleType};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[serde(default)]
 pub struct Settings {
     pub color_gradient: GradientType,
     pub language: Language,

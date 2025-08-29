@@ -8,6 +8,7 @@ pub struct PositionTuple(pub f32, pub f32);
 pub struct SizeTuple(pub f32, pub f32);
 
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
+#[serde(default)]
 pub struct ConfigWindow {
     pub position: PositionTuple,
     pub size: SizeTuple,

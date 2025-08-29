@@ -3,6 +3,7 @@ use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[serde(default)]
 pub struct ConfigDevice {
     pub device_name: String,
 }

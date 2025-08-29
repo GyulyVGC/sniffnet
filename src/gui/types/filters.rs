@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug, Default)]
+#[serde(default)]
 pub struct Filters {
     pub(crate) expanded: bool,
     pub(crate) bpf: String,
