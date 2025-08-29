@@ -1,6 +1,7 @@
 use crate::SNIFFNET_LOWERCASE;
 use crate::gui::types::conf::{CONF, Conf};
 use crate::gui::types::message::Message;
+use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::utils::formatted_strings::APP_VERSION;
 use clap::Parser;
 use iced::{Task, window};
@@ -58,7 +59,12 @@ pub fn handle_cli_args() -> Task<Message> {
         .map(Message::StartApp)
         .chain(Task::done(Message::Periodic));
     if let Some(adapter) = args.adapter {
+        // TODO: check if this works once #653 is fixed
+        // currently the link type and device name aren't displayed properly when starting from CLI
         boot_task_chain = boot_task_chain
+            .chain(Task::done(Message::SetCaptureSource(
+                CaptureSourcePicklist::Device,
+            )))
             .chain(Task::done(Message::DeviceSelection(adapter)))
             .chain(Task::done(Message::Start));
     }
