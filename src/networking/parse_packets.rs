@@ -25,9 +25,7 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
-use etherparse::err::{Layer, LenError};
-use etherparse::{LaxPacketHeaders, LenSource};
+use etherparse::LaxPacketHeaders;
 use pcap::{Address, Device, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -95,7 +93,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
+                if let Some(headers) = get_sniffable_headers(&packet, my_link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -281,27 +279,22 @@ pub fn parse_packets(
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     my_link_type: MyLinkType,
-) -> Result<LaxPacketHeaders<'a>, LaxHeaderSliceError> {
+) -> Option<LaxPacketHeaders<'a>> {
     match my_link_type {
         MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
-            LaxPacketHeaders::from_ethernet(packet).map_err(LaxHeaderSliceError::Len)
+            LaxPacketHeaders::from_ethernet(packet).ok()
         }
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
-            LaxPacketHeaders::from_ip(packet)
+            LaxPacketHeaders::from_ip(packet).ok()
         }
+        MyLinkType::LinuxSll(_) => LaxPacketHeaders::from_linux_sll(packet).ok(),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
 
-fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders<'_>, LaxHeaderSliceError> {
+fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     if packet.len() <= 4 {
-        return Err(LaxHeaderSliceError::Len(LenError {
-            required_len: 4,
-            len: packet.len(),
-            len_source: LenSource::Slice,
-            layer: Layer::Ethernet2Header,
-            layer_start_offset: 0,
-        }));
+        return None;
     }
 
     let is_valid_af_inet = {
@@ -322,11 +315,9 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders<'_>, LaxHeaderSliceError>
     };
 
     if is_valid_af_inet {
-        LaxPacketHeaders::from_ip(&packet[4..])
+        LaxPacketHeaders::from_ip(&packet[4..]).ok()
     } else {
-        Err(LaxHeaderSliceError::Content(
-            HeaderError::UnsupportedIpVersion { version_number: 0 },
-        ))
+        None
     }
 }
 
