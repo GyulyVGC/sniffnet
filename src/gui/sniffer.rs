@@ -731,6 +731,7 @@ impl Sniffer {
             let mmdb_readers = self.mmdb_readers.clone();
             self.capture_source
                 .set_link_type(capture_context.my_link_type());
+            self.capture_source.set_addresses();
             let capture_source = self.capture_source.clone();
             self.traffic_chart
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
