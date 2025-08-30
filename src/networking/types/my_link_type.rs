@@ -1,11 +1,7 @@
-use iced::Font;
-use iced::widget::Column;
 use pcap::Linktype;
 
-use crate::gui::styles::text::TextType;
-use crate::gui::types::message::Message;
+use crate::Language;
 use crate::translations::translations_3::link_type_translation;
-use crate::{Language, StyleType};
 
 /// Currently supported link types
 #[derive(Copy, Clone, Default)]
@@ -55,34 +51,6 @@ impl MyLinkType {
                 )
             }
             Self::NotYetAssigned => String::new(),
-        }
-    }
-
-    pub fn link_type_col<'a>(
-        self,
-        language: Language,
-        font: Font,
-    ) -> Column<'a, Message, StyleType> {
-        match self {
-            Self::Null(l)
-            | Self::Ethernet(l)
-            | Self::RawIp(l)
-            | Self::Loop(l)
-            | Self::IPv4(l)
-            | Self::IPv6(l)
-            | Self::Unsupported(l) => {
-                let link_info = format!(
-                    "{} ({})",
-                    l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                    l.get_description().unwrap_or_else(|_| String::new())
-                );
-                TextType::highlighted_subtitle_with_desc(
-                    link_type_translation(language),
-                    &link_info,
-                    font,
-                )
-            }
-            Self::NotYetAssigned => Column::new().height(0),
         }
     }
 }

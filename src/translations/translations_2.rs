@@ -78,7 +78,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::PL => "Szczegóły połączenia",
         Language::FR => "Détails de la connexion",
         Language::JA => "接続の詳細",
-        Language::UZ => "Ulanish tafsilotlari",
+        Language::UZ => "Ulanish ma'lumotlari",
         Language::PT => "Detalhes da conexão",
         Language::VI => "Thông tin kết nối",
         Language::ID => "Rincian koneksi",
@@ -96,7 +96,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::RU => "Потеряно",
         Language::SV => "Tappade",
         Language::FI => "Pudotetut",
-        Language::DE => "Verlorene",
+        Language::DE => "Verloren",
         Language::TR => "Düşen",
         // Language::FA => "رها شده",
         Language::ES | Language::PT => "Perdidos",
@@ -695,7 +695,6 @@ pub fn showing_results_translation(
     }
 }
 
-#[allow(dead_code)]
 pub fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",

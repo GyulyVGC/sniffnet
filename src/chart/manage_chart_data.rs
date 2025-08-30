@@ -1,7 +1,7 @@
-use splines::{Interpolation, Key, Spline};
-
 use crate::TrafficChart;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_traffic::InfoTraffic;
+use splines::{Interpolation, Key, Spline};
 
 impl TrafficChart {
     pub fn update_charts_data(&mut self, info_traffic_msg: &InfoTraffic, no_more_packets: bool) {
@@ -16,13 +16,21 @@ impl TrafficChart {
         self.ticks += 1;
 
         #[allow(clippy::cast_precision_loss)]
-        let out_bytes_entry = -(info_traffic_msg.tot_data_info.outgoing_bytes() as f32);
+        let out_bytes_entry = -(info_traffic_msg
+            .tot_data_info
+            .outgoing_data(DataRepr::Bytes) as f32);
         #[allow(clippy::cast_precision_loss)]
-        let in_bytes_entry = info_traffic_msg.tot_data_info.incoming_bytes() as f32;
+        let in_bytes_entry = info_traffic_msg
+            .tot_data_info
+            .incoming_data(DataRepr::Bytes) as f32;
         #[allow(clippy::cast_precision_loss)]
-        let out_packets_entry = -(info_traffic_msg.tot_data_info.outgoing_packets() as f32);
+        let out_packets_entry = -(info_traffic_msg
+            .tot_data_info
+            .outgoing_data(DataRepr::Packets) as f32);
         #[allow(clippy::cast_precision_loss)]
-        let in_packets_entry = info_traffic_msg.tot_data_info.incoming_packets() as f32;
+        let in_packets_entry = info_traffic_msg
+            .tot_data_info
+            .incoming_data(DataRepr::Packets) as f32;
 
         let out_bytes_point = (tot_seconds, out_bytes_entry);
         let in_bytes_point = (tot_seconds, in_bytes_entry);
@@ -145,10 +153,10 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
     while all_time.len() > 150 {
         let mut new_vec = Vec::new();
         all_time.iter().enumerate().for_each(|(i, (x, y))| {
-            if i % 2 == 0 {
-                if let Some(next) = all_time.get(i + 1) {
-                    new_vec.push((*x, (y + next.1) / 2.0));
-                }
+            if i % 2 == 0
+                && let Some(next) = all_time.get(i + 1)
+            {
+                new_vec.push((*x, (y + next.1) / 2.0));
             }
         });
         *all_time = new_vec;
@@ -213,8 +221,9 @@ mod tests {
 
     use crate::chart::manage_chart_data::{ChartSeries, get_max, get_min};
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::utils::types::timestamp::Timestamp;
-    use crate::{ChartType, InfoTraffic, Language, StyleType, TrafficChart};
+    use crate::{InfoTraffic, Language, StyleType, TrafficChart};
 
     fn spline_from_vec(vec: Vec<(i32, i32)>) -> Spline<f32, f32> {
         Spline::from_vec(
@@ -310,7 +319,7 @@ mod tests {
             min_packets: -1000.0,
             max_packets: 21000.0,
             language: Language::default(),
-            chart_type: ChartType::Packets,
+            data_repr: DataRepr::Packets,
             style: StyleType::default(),
             thumbnail: false,
             is_live_capture: true,
@@ -318,8 +327,6 @@ mod tests {
             no_more_packets: false,
         };
         let mut info_traffic = InfoTraffic {
-            all_bytes: 0,
-            all_packets: 0,
             tot_data_info,
             dropped_packets: 0,
             ..Default::default()

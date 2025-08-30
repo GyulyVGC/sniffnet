@@ -601,7 +601,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/171437458?v=4",
       "profile": "https://github.com/shu-kitamura",
       "contributions": [
-        "code"
+        "code",
+        "translation"
       ]
     },
     {
@@ -702,6 +703,60 @@
       "profile": "https://github.com/vanharen07",
       "contributions": [
         "translation"
+      ]
+    },
+    {
+      "login": "celtic-coder",
+      "name": "Liam OBrien",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11787866?v=4",
+      "profile": "https://github.com/celtic-coder",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "SignPath",
+      "name": "SignPath GmbH",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34448643?v=4",
+      "profile": "https://signpath.io",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "islameehassan",
+      "name": "islameehassan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98806155?v=4",
+      "profile": "https://github.com/islameehassan",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "lionrayonnant",
+      "name": "Lion Rayonnant",
+      "avatar_url": "https://avatars.githubusercontent.com/u/106342136?v=4",
+      "profile": "https://github.com/lionrayonnant",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "18601673727",
+      "name": "18601673727",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3302620?v=4",
+      "profile": "https://github.com/18601673727",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "AlleM43",
+      "name": "AlleM43",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16104173?v=4",
+      "profile": "https://github.com/AlleM43",
+      "contributions": [
+        "platform"
       ]
     }
   ],

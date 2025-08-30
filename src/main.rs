@@ -7,34 +7,29 @@ use std::borrow::Cow;
 use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
-use iced::{Font, Pixels, Settings, application, window};
+use iced::{Font, Pixels, application, window};
 
-use chart::types::chart_type::ChartType;
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
-use configs::types::config_device::ConfigDevice;
-use configs::types::config_settings::ConfigSettings;
 use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
-use networking::types::byte_multiple::ByteMultiple;
+use networking::types::data_representation::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::ip_version::IpVersion;
 use networking::types::protocol::Protocol;
 use networking::types::service::Service;
-use report::types::report_sort_type::ReportSortType;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
-use crate::configs::types::config_window::{ConfigWindow, ToPosition, ToSize};
-use crate::configs::types::configs::{CONFIGS, Configs};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::types::conf::CONF;
+use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
 mod chart;
 mod cli;
-mod configs;
 mod countries;
 mod gui;
 mod mmdb;
@@ -63,7 +58,7 @@ pub fn main() -> iced::Result {
         _gag2 = gag2;
     }
 
-    let configs = CONFIGS.clone();
+    let conf = CONF.clone();
     let boot_task_chain = handle_cli_args();
 
     #[cfg(debug_assertions)]
@@ -79,10 +74,10 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position, .. } = configs.window;
+    let ConfigWindow { size, position, .. } = conf.window;
 
     application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
-        .settings(Settings {
+        .settings(iced::Settings {
             // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
             id: Some(String::from(SNIFFNET_LOWERCASE)),
             fonts: vec![
@@ -115,5 +110,5 @@ pub fn main() -> iced::Result {
         .subscription(Sniffer::subscription)
         .theme(Sniffer::theme)
         .scale_factor(Sniffer::scale_factor)
-        .run_with(move || (Sniffer::new(configs), boot_task_chain))
+        .run_with(move || (Sniffer::new(conf), boot_task_chain))
 }

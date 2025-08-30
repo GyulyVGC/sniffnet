@@ -3,7 +3,6 @@ use iced::widget::{Button, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -14,6 +13,8 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
+use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
     DataNotification, FavoriteNotification, Notification,
 };
@@ -25,16 +26,16 @@ use crate::translations::translations::{
 use crate::translations::translations_2::data_representation_translation;
 use crate::translations::translations_4::data_exceeded_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style,
         language,
         color_gradient,
         mut notifications,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -71,11 +72,14 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
+        .padding(5)
+        .spacing(10)
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
+                .spacing(10)
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
                 .push(get_data_notify(
@@ -103,7 +107,7 @@ fn get_data_notify<'a>(
     data_notification: DataNotification,
     language: Language,
     font: Font,
-) -> Column<'a, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         data_exceeded_translation(language),
         data_notification.threshold.is_some(),
@@ -133,18 +137,16 @@ fn get_data_notify<'a>(
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
     if data_notification.threshold.is_none() {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     } else {
         let data_representation_row = row_data_representation(
             data_notification,
             language,
             font,
-            data_notification.chart_type,
+            data_notification.data_repr,
         );
         let input_row = input_group_bytes(data_notification, font, language);
         let sound_row = sound_buttons(Notification::Data(data_notification), font, language);
@@ -152,12 +154,11 @@ fn get_data_notify<'a>(
             .push(sound_row)
             .push(data_representation_row)
             .push(input_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     }
 }
 
@@ -165,7 +166,7 @@ fn get_favorite_notify<'a>(
     favorite_notification: FavoriteNotification,
     language: Language,
     font: Font,
-) -> Column<'a, Message, StyleType> {
+) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         favorite_transmitted_translation(language),
         favorite_notification.notify_on_favorite,
@@ -192,19 +193,15 @@ fn get_favorite_notify<'a>(
             language,
         );
         ret_val = ret_val.push(sound_row);
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     } else {
-        Column::new().padding(5).push(
-            Container::new(ret_val)
-                .padding(10)
-                .width(700)
-                .class(ContainerType::BorderedRound),
-        )
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
     }
 }
 
@@ -220,7 +217,7 @@ fn input_group_bytes<'a>(
     let input_row = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
         .push(
             TextInput::new(
@@ -305,7 +302,7 @@ fn sound_buttons<'a>(
         .width(Length::Shrink)
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", sound_translation(language))).font(font));
 
     for option in Sound::ALL {
@@ -372,17 +369,17 @@ fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
     font: Font,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .width(Length::Shrink)
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(Space::with_width(45))
+        .padding(Padding::ZERO.left(26))
         .push(Text::new(format!("{}:", data_representation_translation(language))).font(font));
 
-    for option in ChartType::ALL {
-        let is_active = chart_type.eq(&option);
+    for option in DataRepr::ALL {
+        let is_active = data_repr.eq(&option);
         ret_val = ret_val.push(
             Button::new(
                 Text::new(option.get_label(language).to_owned())
@@ -400,7 +397,7 @@ fn row_data_representation<'a>(
             })
             .on_press(Message::UpdateNotificationSettings(
                 Notification::Data(DataNotification {
-                    chart_type: option,
+                    data_repr: option,
                     ..data_notification
                 }),
                 false,

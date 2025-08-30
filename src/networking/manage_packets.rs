@@ -337,14 +337,15 @@ fn get_traffic_direction(
         .collect();
 
     // first let's handle TCP and UDP loopback
-    if source_ip.is_loopback() && destination_ip.is_loopback() {
-        if let (Some(sport), Some(dport)) = (source_port, dest_port) {
-            return if sport > dport {
-                TrafficDirection::Outgoing
-            } else {
-                TrafficDirection::Incoming
-            };
-        }
+    if source_ip.is_loopback()
+        && destination_ip.is_loopback()
+        && let (Some(sport), Some(dport)) = (source_port, dest_port)
+    {
+        return if sport > dport {
+            TrafficDirection::Outgoing
+        } else {
+            TrafficDirection::Incoming
+        };
     }
 
     // if interface_addresses is empty, check if the IP is a bogon (useful when importing pcap files)
@@ -1499,7 +1500,7 @@ mod tests {
 
     #[test]
     fn test_get_service_not_applicable() {
-        for p in Protocol::ALL {
+        for p in [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [(None, Some(443)), (None, None), (Some(443), None)] {
                     let key = AddressPortPair::new(

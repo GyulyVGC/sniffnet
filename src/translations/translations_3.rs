@@ -101,7 +101,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::RU => "Следующие параметры не могут быть изменены во время анализа трафика",
         Language::RO => "Următorii parametri nu sunt modificabili în timpul analizei",
         Language::JA => "以下のパラメーターは分析中は変更できません",
-        Language::UZ => "Tahlil vaqtida quydagi parametrlarni o'zgartirib bo'lmaydi",
+        Language::UZ => "Tahlil vaqtida quyidagi parametrlarni o'zgartirib bo'lmaydi",
         Language::SV => "Följande parametrar kan inte ändras under analysen",
         Language::VI => "Các tham số sau không thể bị thay đổi khi đang phân tích",
         Language::ZH => "以下参数在分析过程中不能修改",
@@ -197,32 +197,32 @@ pub fn port_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn invalid_filters_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Invalid filters",
-        // Language::FA => "صافی نامعتبر",
-        Language::ES | Language::PT => "Filtros inválidos",
-        Language::IT => "Filtri non validi",
-        Language::FR => "Filtres invalides",
-        Language::DE => "Ungültige Filter",
-        Language::PL => "Nieprawidłowe filtry",
-        Language::RU => "Неверный формат фильтров",
-        Language::RO => "Filtre invalide",
-        Language::JA => "無効なフィルター",
-        Language::UZ => "Noto'g'ri filterlar",
-        Language::SV => "Ogiltiga filter",
-        Language::VI => "Bộ lọc không khả dụng",
-        Language::ZH => "无效的过滤器",
-        Language::ZH_TW => "無效的篩選器",
-        Language::KO => "잘못된 필터",
-        Language::TR => "Geçersiz filtreler",
-        Language::UK => "Неправильний формат фільтрів",
-        Language::ID => "Filter salah",
-        Language::NL => "Ongeldige filters",
-        Language::EL => "Μη έγκυρα φίλτρα",
-        _ => "Invalid filters",
-    }
-}
+// pub fn invalid_filters_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Invalid filters",
+//         // Language::FA => "صافی نامعتبر",
+//         Language::ES | Language::PT => "Filtros inválidos",
+//         Language::IT => "Filtri non validi",
+//         Language::FR => "Filtres invalides",
+//         Language::DE => "Ungültige Filter",
+//         Language::PL => "Nieprawidłowe filtry",
+//         Language::RU => "Неверный формат фильтров",
+//         Language::RO => "Filtre invalide",
+//         Language::JA => "無効なフィルター",
+//         Language::UZ => "Noto'g'ri filterlar",
+//         Language::SV => "Ogiltiga filter",
+//         Language::VI => "Bộ lọc không khả dụng",
+//         Language::ZH => "无效的过滤器",
+//         Language::ZH_TW => "無效的篩選器",
+//         Language::KO => "잘못된 필터",
+//         Language::TR => "Geçersiz filtreler",
+//         Language::UK => "Неправильний формат фільтрів",
+//         Language::ID => "Filter salah",
+//         Language::NL => "Ongeldige filters",
+//         Language::EL => "Μη έγκυρα φίλτρα",
+//         _ => "Invalid filters",
+//     }
+// }
 
 pub fn messages_translation(language: Language) -> &'static str {
     match language {
@@ -414,7 +414,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::RU => "Фильтр по сетевому хосту",
         Language::RO => "Filtrează după host-ul de rețea",
         Language::JA => "ネットワーク ホストでフィルター",
-        Language::UZ => "Tarmoq host bo'yicha filterlash",
+        Language::UZ => "Tarmoq xosti bo'yicha filtrlash",
         Language::SV => "Filtrera efter nätverksvärd",
         Language::VI => "Lọc bởi máy chủ mạng",
         Language::ZH => "按网络主机筛选",
@@ -466,7 +466,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::RU => "Экспорт файла захвата",
         Language::RO => "Export fișier captură",
         Language::JA => "キャプチャ ファイルをエクスポート",
-        Language::UZ => "Cap faylni export qilish",
+        Language::UZ => "Cap faylni eksport qilish",
         Language::SV => "Exportera inspelningsfil",
         Language::VI => "Xuất tập tin đã bắt",
         Language::ZH => "导出捕获文件",
@@ -577,7 +577,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::RU => "Режим миниатюры",
         Language::RO => "Mod thumbnail",
         Language::JA => "サムネイル モード",
-        Language::UZ => "Eskiz rejim",
+        Language::UZ => "Kichik rasm rejimi",
         Language::SV => "Miniatyrläge",
         Language::VI => "Chế độ thu nhỏ",
         Language::ZH => "缩略图模式",
