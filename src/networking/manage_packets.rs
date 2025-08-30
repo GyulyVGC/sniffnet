@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
+use etherparse::{
+    ArpHardwareId, EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader,
+};
 use pcap::Address;
 
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -81,13 +83,28 @@ fn analyze_link_header(
     mac_address2: &mut Option<String>,
     exchanged_bytes: &mut u128,
 ) {
-    if let Some(LinkHeader::Ethernet2(header)) = link_header {
-        *exchanged_bytes += 14;
-        *mac_address1 = Some(mac_from_dec_to_hex(header.source));
-        *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
-    } else {
-        *mac_address1 = None;
-        *mac_address2 = None;
+    match link_header {
+        Some(LinkHeader::Ethernet2(header)) => {
+            *exchanged_bytes += 14;
+            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
+            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
+        }
+        Some(LinkHeader::LinuxSll(header)) => {
+            *exchanged_bytes += 16;
+            *mac_address1 = if header.sender_address_valid_length == 6
+                && header.arp_hrd_type == ArpHardwareId::ETHERNET
+                && let Ok(sender) = header.sender_address[0..6].try_into()
+            {
+                Some(mac_from_dec_to_hex(sender))
+            } else {
+                None
+            };
+            *mac_address2 = None;
+        }
+        None => {
+            *mac_address1 = None;
+            *mac_address2 = None;
+        }
     }
 }
 
@@ -151,7 +168,7 @@ fn analyze_network_header(
             *arp_type = ArpType::from_etherparse(arp_packet.operation);
             true
         }
-        _ => false,
+        None => false,
     }
 }
 
@@ -192,7 +209,7 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
-        _ => false,
+        None => false,
     }
 }
 
