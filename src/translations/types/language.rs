@@ -129,6 +129,7 @@ impl Language {
                 | Language::ZH
                 | Language::JA
                 | Language::FR
+                | Language::EL
         )
     }
 }
