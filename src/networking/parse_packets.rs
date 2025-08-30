@@ -26,7 +26,7 @@ use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
 use etherparse::LaxPacketHeaders;
-use pcap::{Address, Device, Packet};
+use pcap::{Address, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -422,12 +422,7 @@ fn maybe_send_tick_run_live(
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&cs.get_name()) {
-                cs.set_addresses(dev.addresses);
-                break;
-            }
-        }
+        cs.set_addresses();
     }
 }
 

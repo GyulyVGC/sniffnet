@@ -1,11 +1,13 @@
 use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
+use crate::location;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_4::capture_file_translation;
 use crate::translations::types::language::Language;
-use pcap::{Active, Address, Capture, Error, Packet, Savefile, Stat};
+use crate::utils::error_logger::{ErrorLogger, Location};
+use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
 
 pub enum CaptureContext {
@@ -184,9 +186,18 @@ impl CaptureSource {
         }
     }
 
-    pub fn set_addresses(&mut self, addresses: Vec<Address>) {
-        if let Self::Device(device) = self {
-            device.set_addresses(addresses);
+    pub fn set_addresses(&mut self) {
+        if let Self::Device(my_device) = self {
+            let mut addresses = Vec::new();
+            for dev in Device::list().log_err(location!()).unwrap_or_default() {
+                if matches!(my_device.get_link_type(), MyLinkType::LinuxSll(_)) {
+                    addresses.extend(dev.addresses);
+                } else if dev.name.eq(my_device.get_name()) {
+                    addresses.extend(dev.addresses);
+                    break;
+                }
+            }
+            my_device.set_addresses(addresses);
         }
     }
 

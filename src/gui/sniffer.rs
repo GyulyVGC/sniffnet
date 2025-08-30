@@ -799,13 +799,8 @@ impl Sniffer {
 
     fn fetch_devices(&mut self) {
         self.my_devices.clear();
+        self.capture_source.set_addresses();
         for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if matches!(&self.capture_source, CaptureSource::Device(_))
-                && dev.name.eq(&self.capture_source.get_name())
-            {
-                // refresh active addresses
-                self.capture_source.set_addresses(dev.addresses.clone());
-            }
             let my_dev = MyDevice::from_pcap_device(dev);
             self.my_devices.push(my_dev);
         }
