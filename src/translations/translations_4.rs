@@ -18,6 +18,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::NL => format!("Gereserveerd adres ({info})"),
         Language::DE => format!("Reservierte Adresse ({info})"),
         Language::UZ => format!("Rezervlangan manzil ({info})"),
+        Language::EL => format!("Δεσμευμένη διεύθυνση ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -33,6 +34,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::NL => "Deel uw feedback",
         Language::DE => "Feedback geben",
         Language::UZ => "Fikr-mulohazalaringizni ulashing",
+        Language::EL => "Μοιραστείτε τα σχόλιά σας",
         _ => "Share your feedback",
     }
 }
@@ -49,6 +51,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::FR => "Exclus",
 //         Language::NL => "Uitgesloten",
 //         Language::DE => "Herausgefiltert",
+//         Language::EL => "Εξαιρούμενα",
 //         _ => "Excluded",
 //     }
 // }
@@ -63,6 +66,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::NL => "Capture bestand",
         Language::DE => "Aufzeichnungsdatei",
         Language::UZ => "Tahlil faylini",
+        Language::EL => "Αρχείου καταγραφής",
         _ => "Capture file",
     }
 }
@@ -77,6 +81,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
         Language::NL => "Selecteer capture bestand",
         Language::DE => "Aufzeichnungsdatei auswählen",
         Language::UZ => "Tahlil faylini tanlang",
+        Language::EL => "Επιλογή αρχείου καταγραφής",
         _ => "Select capture file",
     }
 }
@@ -124,6 +129,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                 {file_name_translation}: {file}\n\n\
                                 Fayl bo'sh emasligiga aminmisiz?"
         ),
+        Language::EL => format!(
+            "Ανάγνωση πακέτων από αρχείο...\n\n\
+                                 {file_name_translation}: {file}\n\n\
+                                 Είστε βέβαιοι ότι το επιλεγμένο αρχείο δεν είναι κενό;"
+        ),
         _ => format!(
             "Reading packets from file...\n\n\
                                 {file_name_translation}: {file}\n\n\
@@ -142,6 +152,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::NL => "Gegevenslimiet overschreden",
         Language::DE => "Datenschwelle überschritten",
         Language::UZ => "Ma'lumotlar chegarasidan oshib ketdi",
+        Language::EL => "Υπέρβαση ορίου δεδομένων",
         _ => "Data threshold exceeded",
     }
 }
@@ -156,6 +167,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::NL => "Bits limiet overschreden",
         Language::DE => "Bitschwelle überschritten",
         Language::UZ => "Bitlar chegarasidan oshib ketdi",
+        Language::EL => "Υπέρβαση ορίου δυφίων",
         _ => "Bits threshold exceeded",
     }
 }
@@ -166,6 +178,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
+        Language::EL => "Δυφία",
         _ => "bits",
     }
 }
@@ -179,6 +192,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::ZH => "暂停",
         Language::NL => "Pauzeren",
         Language::UZ => "To'xtatish",
+        Language::EL => "Παύση",
         _ => "Pause",
     }
 }
@@ -194,6 +208,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::NL => "Hervatten",
         Language::DE => "Fortsetzen",
         Language::UZ => "Davom ettirish",
+        Language::EL => "Συνέχεια",
         _ => "Resume",
     }
 }
