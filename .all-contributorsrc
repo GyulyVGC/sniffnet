@@ -758,6 +758,15 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "aris1009",
+      "name": "Aris Konstantoulas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25184469?v=4",
+      "profile": "https://github.com/aris1009",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
