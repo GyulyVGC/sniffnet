@@ -1,4 +1,4 @@
-#![allow(clippy::match_same_arms)]
+#![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
 
 use iced::widget::Text;
 
@@ -112,7 +112,9 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::UK => "Наступні параметри не можна змінювати під час аналізу трафіку",
         Language::ID => "Parameter berikut tidak bisa diubah saat dianalisa",
         Language::NL => "De volgende parameters kunnen niet worden aangepast tijdens de analyse",
-        Language::EL => "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης",
+        Language::EL => {
+            "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης"
+        }
         _ => "The following parameters can't be modified during the analysis",
     }
 }
