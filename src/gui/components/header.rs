@@ -3,7 +3,7 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Container, Row, Space, Text, Tooltip, button, horizontal_space};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Element, Font, Length};
 
 use crate::gui::components::shared::get_release_details;
 use crate::gui::components::tab::notifications_badge;
@@ -54,47 +54,66 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .line_height(LineHeight::Relative(0.7))
         .size(logo_size);
 
+    let left_content: Element<Message, StyleType> = if is_running {
+        get_button_reset(font, language, compact_view).into()
+    } else {
+        Space::with_width(10).into()
+    };
+
+    let central_content: Element<Message, StyleType> = {
+        let mut row = Row::new().push(logo).spacing(10).align_y(Alignment::Center);
+        if is_running {
+            row = row.push(get_button_minimize(font, language, false));
+        }
+        row.into()
+    };
+
+    let right_content: Element<Message, StyleType> = {
+        let mut row = Row::new().spacing(10);
+        if compact_view {
+            row = row.push(get_release_details(
+                language,
+                font,
+                font_update_notification,
+                sniffer.newer_release_available,
+            ));
+        }
+        row.push(get_button_settings(
+            font,
+            language,
+            last_opened_setting,
+            compact_view,
+        ))
+        .into()
+    };
+
     Container::new(
         Row::new()
-            .padding([0, 20])
-            .align_y(Alignment::Center)
-            .push(if is_running {
-                Container::new(get_button_reset(font, language, compact_view))
-            } else {
-                Container::new(Space::with_width(60))
-            })
-            .push(horizontal_space())
-            .push(Container::new(Space::with_width(40)))
-            .push(Space::with_width(20))
-            .push(logo)
-            .push(Space::with_width(20))
-            .push(if is_running {
-                Container::new(get_button_minimize(font, language, false))
-            } else {
-                Container::new(Space::with_width(0))
-            })
-            .push(horizontal_space())
-            .push(if compact_view {
-                Container::new(
-                    Row::new()
-                        .push(get_release_details(
-                            language,
-                            font,
-                            font_update_notification,
-                            sniffer.newer_release_available,
-                        ))
-                        .push(Space::with_width(20)),
-                )
-            } else {
-                Container::new(Space::with_width(0))
-            })
-            .push(get_button_settings(
-                font,
-                language,
-                last_opened_setting,
-                compact_view,
-            )),
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .push(
+                Container::new(left_content)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .align_x(Alignment::Start)
+                    .align_y(Alignment::Center),
+            )
+            .push(
+                Container::new(central_content)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center),
+            )
+            .push(
+                Container::new(right_content)
+                    .width(Length::Fill)
+                    .height(Length::Fill)
+                    .align_x(Alignment::End)
+                    .align_y(Alignment::Center),
+            ),
     )
+    .padding([0, 20])
     .height(container_height)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
