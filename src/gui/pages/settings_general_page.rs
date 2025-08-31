@@ -1,8 +1,8 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Checkbox, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button,
-    vertical_space,
+    Checkbox, Column, Container, PickList, Row, Rule, Slider, Space, Text, Toggler, Tooltip,
+    button, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding};
 
@@ -43,6 +43,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
     let content = Column::new()
         .align_x(Alignment::Center)
         .width(Length::Fill)
+        .spacing(10)
         .push(settings_header(
             font,
             font_headers,
@@ -50,7 +51,6 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
             language,
         ))
         .push(get_settings_tabs(SettingsPage::General, font, language))
-        .push(Space::with_height(10))
         .push(column_all_general_setting(sniffer, font));
 
     Container::new(content)
@@ -87,14 +87,22 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
             .push(Space::with_height(10));
     }
 
-    column = column.push(mmdb_settings(
-        is_editable,
-        language,
-        font,
-        &mmdb_country,
-        &mmdb_asn,
-        &sniffer.mmdb_readers,
-    ));
+    column = column.push(
+        Row::new()
+            .width(Length::Fill)
+            .align_y(Alignment::Center)
+            .spacing(10)
+            .push(mmdb_settings(
+                is_editable,
+                language,
+                font,
+                &mmdb_country,
+                &mmdb_asn,
+                &sniffer.mmdb_readers,
+            ))
+            .push(Rule::vertical(25))
+            .push(need_help(language, font)),
+    );
 
     column
 }
@@ -113,8 +121,6 @@ fn ui_settings<'a>(
         .push(scale_factor_slider(language, font, scale_factor))
         .push(Rule::vertical(25))
         .push(toggle_compact_view_column(language, font, compact_view))
-        .push(Rule::vertical(25))
-        .push(need_help(language, font))
 }
 
 fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
@@ -214,10 +220,12 @@ fn toggle_compact_view_column<'a>(
     font: Font,
     is_compact_view: bool,
 ) -> Container<'a, Message, StyleType> {
-    let toggler_cta = Checkbox::new("", is_compact_view)
-        .font(font)
+    let toggler_cta = Toggler::new(is_compact_view)
         .on_toggle(Message::ToggleCompactView)
-        .size(18);
+        .width(Length::Shrink)
+        .spacing(5)
+        .size(23)
+        .font(font);
 
     let toggler_label = Text::new(toggle_compact_mode_translation(language))
         .class(TextType::Subtitle)
@@ -283,6 +291,7 @@ fn mmdb_settings<'a>(
     mmdb_readers: &MmdbReaders,
 ) -> Column<'a, Message, StyleType> {
     Column::new()
+        .width(Length::Fill)
         .spacing(5)
         .align_x(Alignment::Center)
         .push(
@@ -291,6 +300,7 @@ fn mmdb_settings<'a>(
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
+        .push(vertical_space())
         .push(mmdb_selection_row(
             is_editable,
             font,
@@ -309,6 +319,7 @@ fn mmdb_settings<'a>(
             "ASN",
             language,
         ))
+        .push(vertical_space())
 }
 
 fn mmdb_selection_row<'a>(
