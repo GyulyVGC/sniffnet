@@ -61,6 +61,34 @@ pub fn zoom_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn toggle_compact_mode_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Compact View Mode",
+        // Language::FA => "حالت نمای فشرده",
+        Language::ES => "Modo de vista compacta",
+        Language::IT => "Modalità vista compatta",
+        Language::FR => "Mode d’affichage compact",
+        Language::DE => "Kompaktansicht",
+        Language::PL => "Tryb widoku kompaktowego",
+        Language::RU => "Режим компактного просмотра",
+        Language::RO => "Mod de vizualizare compactă",
+        Language::JA => "コンパクト表示モード",
+        Language::UZ => "Ixcham ko‘rish rejimi",
+        Language::SV => "Kompakt vy-läge",
+        Language::VI => "Chế độ xem gọn",
+        Language::ZH => "紧凑视图模式",
+        Language::ZH_TW => "緊湊檢視模式",
+        Language::KO => "컴팩트 보기 모드",
+        Language::TR => "Kompakt görünüm modu",
+        Language::PT => "Modo de visualização compacta",
+        Language::UK => "Режим компактного перегляду",
+        Language::ID => "Mode tampilan ringkas",
+        Language::NL => "Compacte weergavemodus",
+        Language::EL => "Λειτουργία συμπαγούς προβολής",
+        _ => "Compact View Mode",
+    }
+}
+
 pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",

@@ -1,7 +1,8 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
+    Checkbox, Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button,
+    vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding};
 
@@ -19,7 +20,8 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    mmdb_files_translation, params_not_editable_translation, zoom_translation,
+    mmdb_files_translation, params_not_editable_translation, toggle_compact_mode_translation,
+    zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
@@ -59,6 +61,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
 
 fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
     let Settings {
+        compact_view,
         language,
         scale_factor,
         mmdb_country,
@@ -71,7 +74,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     let mut column = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
-        .push(row_language_scale_factor(language, font, scale_factor))
+        .push(ui_settings(language, font, scale_factor, compact_view))
         .push(Rule::horizontal(25));
 
     if !is_editable {
@@ -96,10 +99,11 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     column
 }
 
-fn row_language_scale_factor<'a>(
+fn ui_settings<'a>(
     language: Language,
     font: Font,
     scale_factor: f64,
+    compact_view: bool,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
@@ -107,6 +111,8 @@ fn row_language_scale_factor<'a>(
         .push(language_picklist(language, font))
         .push(Rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
+        .push(Rule::vertical(25))
+        .push(toggle_compact_view_column(language, font, compact_view))
         .push(Rule::vertical(25))
         .push(need_help(language, font))
 }
@@ -201,6 +207,33 @@ fn scale_factor_slider<'a>(
     .width(Length::Fill)
     .align_x(Alignment::Center)
     .align_y(Alignment::Center)
+}
+
+fn toggle_compact_view_column<'a>(
+    language: Language,
+    font: Font,
+    is_compact_view: bool,
+) -> Container<'a, Message, StyleType> {
+    let toggler_cta = Checkbox::new("", is_compact_view)
+        .font(font)
+        .on_toggle(Message::ToggleCompactView)
+        .size(18);
+
+    let toggler_label = Text::new(toggle_compact_mode_translation(language))
+        .class(TextType::Subtitle)
+        .size(FONT_SIZE_SUBTITLE)
+        .font(font);
+
+    let content = Column::new()
+        .push(toggler_label)
+        .push(vertical_space())
+        .push(toggler_cta)
+        .push(vertical_space())
+        .align_x(Alignment::Center);
+    Container::new(content)
+        .width(Length::Fill)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
 }
 
 fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {

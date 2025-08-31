@@ -2,9 +2,10 @@
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
+use iced::widget::{Button, Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Font, Length};
 
+use crate::gui::components::shared::get_release_details;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;
@@ -24,9 +25,11 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         style,
         language,
         color_gradient,
+        compact_view,
         ..
     } = sniffer.conf.settings;
     let font = style.get_extension().font;
+    let font_update_notification = style.get_extension().font_headers;
 
     if thumbnail {
         let font_headers = style.get_extension().font_headers;
@@ -42,20 +45,21 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let last_opened_setting = sniffer.conf.last_opened_setting;
     let is_running = sniffer.running_page.is_some();
+    let (logo_size, container_height) = if compact_view { (51, 45) } else { (80, 70) };
 
     let logo = Icon::Sniffnet
         .to_text()
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .line_height(LineHeight::Relative(0.7))
-        .size(80);
+        .size(logo_size);
 
     Container::new(
         Row::new()
             .padding([0, 20])
             .align_y(Alignment::Center)
             .push(if is_running {
-                Container::new(get_button_reset(font, language))
+                Container::new(get_button_reset(font, language, compact_view))
             } else {
                 Container::new(Space::with_width(60))
             })
@@ -67,28 +71,56 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             .push(if is_running {
                 Container::new(get_button_minimize(font, language, false))
             } else {
-                Container::new(Space::with_width(40))
+                Container::new(Space::with_width(0))
             })
             .push(horizontal_space())
-            .push(get_button_settings(font, language, last_opened_setting)),
+            .push(if compact_view {
+                Container::new(
+                    Row::new()
+                        .push(get_release_details(
+                            language,
+                            font,
+                            font_update_notification,
+                            sniffer.newer_release_available,
+                        ))
+                        .push(Space::with_width(20)),
+                )
+            } else {
+                Container::new(Space::with_width(0))
+            })
+            .push(get_button_settings(
+                font,
+                language,
+                last_opened_setting,
+                compact_view,
+            )),
     )
-    .height(70)
+    .height(container_height)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
-    let content = button(
+fn get_button_reset<'a>(
+    font: Font,
+    language: Language,
+    is_compact: bool,
+) -> Tooltip<'a, Message, StyleType> {
+    let button_factory = if is_compact {
+        button_compact::<Message>
+    } else {
+        button_default
+    };
+
+    let padding = if is_compact { 6 } else { 10 };
+
+    let content = button_factory(
         Icon::ArrowBack
             .to_text()
-            .size(20)
             .align_x(Alignment::Center)
             .align_y(Alignment::Center)
             .line_height(LineHeight::Relative(1.0)),
     )
-    .padding(10)
-    .height(40)
-    .width(60)
+    .padding(padding)
     .on_press(Message::ResetButtonPressed);
 
     Tooltip::new(
@@ -104,17 +136,19 @@ pub fn get_button_settings<'a>(
     font: Font,
     language: Language,
     open_overlay: SettingsPage,
+    is_compact: bool,
 ) -> Tooltip<'a, Message, StyleType> {
-    let content = button(
+    let button_factory = if is_compact {
+        button_compact::<Message>
+    } else {
+        button_default
+    };
+    let content = button_factory(
         Icon::Settings
             .to_text()
-            .size(20)
             .align_x(Alignment::Center)
             .align_y(Alignment::Center),
     )
-    .padding(0)
-    .height(40)
-    .width(60)
     .on_press(Message::OpenSettings(open_overlay));
 
     Tooltip::new(
@@ -196,4 +230,12 @@ fn thumbnail_header<'a>(
     .height(30)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
+}
+
+fn button_default<'a, Message>(content: Text<'a, StyleType>) -> Button<'a, Message, StyleType> {
+    button(content.size(20)).padding(0).height(40).width(60)
+}
+
+fn button_compact<'a, Message>(content: Text<'a, StyleType>) -> Button<'a, Message, StyleType> {
+    button(content.size(13)).padding(0).height(26).width(39)
 }
