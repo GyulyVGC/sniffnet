@@ -25,7 +25,7 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::LaxPacketHeaders;
+use etherparse::{EtherType, LaxPacketHeaders};
 use pcap::{Address, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -287,7 +287,7 @@ fn get_sniffable_headers<'a>(
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
             LaxPacketHeaders::from_ip(packet).ok()
         }
-        MyLinkType::LinuxSll(_) => LaxPacketHeaders::from_linux_sll(packet).ok(),
+        MyLinkType::LinuxSll(_) => from_linux_sll(packet),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
@@ -319,6 +319,20 @@ fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     } else {
         None
     }
+}
+
+fn from_linux_sll(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
+    if packet.len() <= 16 {
+        return None;
+    }
+
+    let protocol_type = u16::from_be_bytes([packet[14], packet[15]]);
+    let payload = &packet[16..];
+
+    Some(LaxPacketHeaders::from_ether_type(
+        EtherType(protocol_type),
+        payload,
+    ))
 }
 
 fn reverse_dns_lookup(
