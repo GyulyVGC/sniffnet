@@ -23,7 +23,6 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
@@ -145,7 +144,7 @@ fn body_no_packets<'a>(
                 .align_x(Alignment::Center)
                 .font(font),
         )
-    } else if cs.get_addresses().is_empty() && !matches!(link_type, MyLinkType::LinuxSll(_)) {
+    } else if cs.get_addresses().is_empty() {
         (
             Icon::Warning.to_text().size(60),
             no_addresses_translation(language, &cs_info)
