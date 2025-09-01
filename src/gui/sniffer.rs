@@ -484,8 +484,8 @@ impl Sniffer {
                     Task::batch(commands)
                 };
             }
-            Message::ToggleCompactView(is_checked) => {
-                self.conf.settings.compact_view = is_checked;
+            Message::ToggleFocusMode(is_checked) => {
+                self.conf.settings.focus_mode = is_checked;
             }
             Message::Drag => {
                 let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
@@ -581,7 +581,7 @@ impl Sniffer {
 
         let mut content: Column<Message, StyleType> = Column::new().push(header).push(body);
 
-        if self.conf.settings.compact_view == false {
+        if !self.conf.settings.focus_mode {
             let footer = footer(
                 self.thumbnail,
                 language,
@@ -1843,7 +1843,7 @@ mod tests {
         sniffer.update(Message::ServiceSortSelection(SortType::Descending));
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
-        sniffer.update(Message::ToggleCompactView(true));
+        sniffer.update(Message::ToggleFocusMode(true));
         sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
         sniffer.update(Message::OutputPcapDir("/".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
@@ -1861,7 +1861,7 @@ mod tests {
             Conf {
                 settings: Settings {
                     color_gradient: GradientType::Wild,
-                    compact_view: true,
+                    focus_mode: true,
                     language: Language::ZH,
                     scale_factor: 1.0,
                     mmdb_country: "countrymmdb".to_string(),

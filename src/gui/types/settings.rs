@@ -8,7 +8,7 @@ use crate::{Language, StyleType};
 #[serde(default)]
 pub struct Settings {
     pub color_gradient: GradientType,
-    pub compact_view: bool,
+    pub focus_mode: bool,
     pub language: Language,
     pub scale_factor: f64,
     pub mmdb_country: String,
@@ -23,7 +23,7 @@ impl Default for Settings {
     fn default() -> Self {
         Settings {
             color_gradient: GradientType::default(),
-            compact_view: false,
+            focus_mode: false,
             language: Language::default(),
             scale_factor: 1.0,
             mmdb_country: String::new(),

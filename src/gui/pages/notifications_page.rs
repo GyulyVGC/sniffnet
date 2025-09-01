@@ -120,7 +120,7 @@ fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, M
             font,
             language,
             SettingsPage::Notifications,
-            false,
+            None,
         ))
         .push(Space::with_height(FillPortion(2)))
 }

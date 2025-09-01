@@ -112,7 +112,7 @@ pub enum Message {
     /// Toggle export pcap file
     ToggleExportPcap,
     /// Compact view hides the header and shows a smaller header
-    ToggleCompactView(bool),
+    ToggleFocusMode(bool),
     /// The output PCAP directory has been updated
     OutputPcapDir(String),
     /// The output PCAP file name has been updated
