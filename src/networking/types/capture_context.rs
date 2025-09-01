@@ -190,7 +190,10 @@ impl CaptureSource {
         if let Self::Device(my_device) = self {
             let mut addresses = Vec::new();
             for dev in Device::list().log_err(location!()).unwrap_or_default() {
-                if matches!(my_device.get_link_type(), MyLinkType::LinuxSll(_)) {
+                if matches!(
+                    my_device.get_link_type(),
+                    MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
+                ) {
                     addresses.extend(dev.addresses);
                 } else if dev.name.eq(my_device.get_name()) {
                     addresses.extend(dev.addresses);

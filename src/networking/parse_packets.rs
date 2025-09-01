@@ -287,7 +287,8 @@ fn get_sniffable_headers<'a>(
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
             LaxPacketHeaders::from_ip(packet).ok()
         }
-        MyLinkType::LinuxSll(_) => from_linux_sll(packet),
+        MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
+        MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
@@ -321,13 +322,18 @@ fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     }
 }
 
-fn from_linux_sll(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
-    if packet.len() <= 16 {
+fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
+    let header_len = if is_v1 { 16 } else { 20 };
+    if packet.len() <= header_len {
         return None;
     }
 
-    let protocol_type = u16::from_be_bytes([packet[14], packet[15]]);
-    let payload = &packet[16..];
+    let protocol_type = u16::from_be_bytes(if is_v1 {
+        [packet[14], packet[15]]
+    } else {
+        [packet[0], packet[1]]
+    });
+    let payload = &packet[header_len..];
 
     Some(LaxPacketHeaders::from_ether_type(
         EtherType(protocol_type),

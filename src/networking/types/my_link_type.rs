@@ -13,6 +13,7 @@ pub enum MyLinkType {
     IPv4(Linktype),
     IPv6(Linktype),
     LinuxSll(Linktype),
+    LinuxSll2(Linktype),
     Unsupported(Linktype),
     #[default]
     NotYetAssigned,
@@ -32,7 +33,7 @@ impl MyLinkType {
             Linktype::IPV4 => Self::IPv4(link_type),
             Linktype::IPV6 => Self::IPv6(link_type),
             Linktype::LINUX_SLL => Self::LinuxSll(link_type),
-            // TODO: also add Linktype::LINUX_SLL2 (???)
+            Linktype::LINUX_SLL2 => Self::LinuxSll2(link_type),
             _ => Self::Unsupported(link_type),
         }
     }
@@ -46,6 +47,7 @@ impl MyLinkType {
             | Self::IPv4(l)
             | Self::IPv6(l)
             | Self::LinuxSll(l)
+            | Self::LinuxSll2(l)
             | Self::Unsupported(l) => {
                 format!(
                     "{}: {} ({})",
