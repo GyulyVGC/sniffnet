@@ -25,10 +25,8 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
-use etherparse::err::{Layer, LenError};
-use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::{Address, Device, Packet};
+use etherparse::{EtherType, LaxPacketHeaders};
+use pcap::{Address, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -95,7 +93,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
+                if let Some(headers) = get_sniffable_headers(&packet, my_link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -281,27 +279,23 @@ pub fn parse_packets(
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     my_link_type: MyLinkType,
-) -> Result<LaxPacketHeaders<'a>, LaxHeaderSliceError> {
+) -> Option<LaxPacketHeaders<'a>> {
     match my_link_type {
         MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
-            LaxPacketHeaders::from_ethernet(packet).map_err(LaxHeaderSliceError::Len)
+            LaxPacketHeaders::from_ethernet(packet).ok()
         }
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
-            LaxPacketHeaders::from_ip(packet)
+            LaxPacketHeaders::from_ip(packet).ok()
         }
+        MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
+        MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
 
-fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders<'_>, LaxHeaderSliceError> {
+fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     if packet.len() <= 4 {
-        return Err(LaxHeaderSliceError::Len(LenError {
-            required_len: 4,
-            len: packet.len(),
-            len_source: LenSource::Slice,
-            layer: Layer::Ethernet2Header,
-            layer_start_offset: 0,
-        }));
+        return None;
     }
 
     let is_valid_af_inet = {
@@ -322,12 +316,29 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders<'_>, LaxHeaderSliceError>
     };
 
     if is_valid_af_inet {
-        LaxPacketHeaders::from_ip(&packet[4..])
+        LaxPacketHeaders::from_ip(&packet[4..]).ok()
     } else {
-        Err(LaxHeaderSliceError::Content(
-            HeaderError::UnsupportedIpVersion { version_number: 0 },
-        ))
+        None
     }
+}
+
+fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
+    let header_len = if is_v1 { 16 } else { 20 };
+    if packet.len() <= header_len {
+        return None;
+    }
+
+    let protocol_type = u16::from_be_bytes(if is_v1 {
+        [packet[14], packet[15]]
+    } else {
+        [packet[0], packet[1]]
+    });
+    let payload = &packet[header_len..];
+
+    Some(LaxPacketHeaders::from_ether_type(
+        EtherType(protocol_type),
+        payload,
+    ))
 }
 
 fn reverse_dns_lookup(
@@ -431,12 +442,7 @@ fn maybe_send_tick_run_live(
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&cs.get_name()) {
-                cs.set_addresses(dev.addresses);
-                break;
-            }
-        }
+        cs.set_addresses();
     }
 }
 
