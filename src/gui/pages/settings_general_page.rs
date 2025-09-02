@@ -20,10 +20,10 @@ use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
-    mmdb_files_translation, params_not_editable_translation, toggle_focus_mode_translation,
-    zoom_translation,
+    mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
+use crate::translations::translations_5::toggle_focus_mode_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;

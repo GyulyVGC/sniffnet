@@ -19,3 +19,10 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         _ => "Traffic source",
     }
 }
+
+pub fn toggle_focus_mode_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Focus Mode",
+        _ => "Focus Mode",
+    }
+}

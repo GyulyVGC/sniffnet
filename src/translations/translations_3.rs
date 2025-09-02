@@ -61,34 +61,6 @@ pub fn zoom_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn toggle_focus_mode_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Focus View Mode",
-        // Language::FA => "حالت نمای متمرکز",
-        Language::ES => "Modo de vista enfocada",
-        Language::IT => "Modalità vista focalizzata",
-        Language::FR => "Mode d’affichage focalisé",
-        Language::DE => "Fokusansicht",
-        Language::PL => "Tryb widoku skupionego",
-        Language::RU => "Режим фокусированного просмотра",
-        Language::RO => "Mod de vizualizare focalizată",
-        Language::JA => "フォーカス表示モード",
-        Language::UZ => "Diqqatli ko‘rish rejimi",
-        Language::SV => "Fokusvy-läge",
-        Language::VI => "Chế độ xem tập trung",
-        Language::ZH => "专注视图模式",
-        Language::ZH_TW => "專注檢視模式",
-        Language::KO => "포커스 보기 모드",
-        Language::TR => "Odak görünüm modu",
-        Language::PT => "Modo de visualização focada",
-        Language::UK => "Режим фокусованого перегляду",
-        Language::ID => "Mode tampilan fokus",
-        Language::NL => "Focusweergavemodus",
-        Language::EL => "Λειτουργία εστιασμένης προβολής",
-        _ => "Focus View Mode",
-    }
-}
-
 pub fn mmdb_files_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Database files",
